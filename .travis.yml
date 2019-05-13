@@ -2,21 +2,16 @@ language: R
 cache:
 packages: true
 directories:
-  - _book
-
-addons:
-  apt:
-  packages:
-  - libxml2-dev
+  - inst/examples/_book
 
 before_install:
   - nvm install stable
   - npm install netlify-cli -g
 
-script:
-  - Rscript -e 'bookdown::render_book("index.Rmd")'
-
 deploy:
   provider: script
-  script: netlify deploy -s $NETLIFY_SITE_ID -t $NETLIFY_ACCESS_TOKEN --prod --dir _book
+  before_script: cd inst/examples
+  script:
+    - Rscript -e 'bookdown::render_book("index.Rmd")'
+    - netlify deploy -s $NETLIFY_SITE_ID -t $NETLIFY_ACCESS_TOKEN --prod --dir _book
   skip_cleanup: true
