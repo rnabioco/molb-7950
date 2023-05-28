@@ -1,0 +1,344 @@
+---
+title: "R Bootcamp - class 2"
+author: "Sujatha Jagannathan"
+---
+
+## Learning Objectives for the R Bootcamp
+
+.pull-left\[ \* .large\[Follow best coding practices\] \* .large\[Know the fundamentals of R programming\] \* .large\[Become familiar with "tidyverse" suite of packages\] \* tidyr: "Tidy" a messy dataset \<-- *Class 2* \* dplyr: Transform data to derive new information \* ggplot2: Visualize and communicate results \* .large\[Practice reproducible analysis\]\]
+
+.pull-right\[![](img/tidy1.png)\] .pull-right\[Source: R for Data Science by Hadley Wickham\] ---
+
+## Rigor & Reproducibility
+
+.large\[For the purposes of this R bootcamp, the best R&R tool we have at our disposal is using Rmarkdown documents. \]
+
+------------------------------------------------------------------------
+
+## Today's class outline
+
+.large\[ \* Introduce *tidyr* \* Review basic functions of *tidyr* \* pivot_wider \* pivot_longer \* separate \* unite \* handling missing values \* (if time permits) Regular expressions (regex) \* Homework instructions\] ---
+
+## What is tidy data?
+
+.large\[ \> "Tidy datasets are all alike but every messy dataset is messy in its own way." \>\
+\> --- Hadley Wickham\]
+
+<br/> <br/>
+
+.center\[![](img/tidydata.png)\]
+
+<br/> .pull-left\[Source: Rstudio cheatsheets\] ---
+
+## Data import - readr
+
+```{r, echo = FALSE, out.width= '90%'}
+knitr::include_graphics("img/readr.png")
+```
+
+<br/> <br/> .pull-left\[Source: Rstudio cheatsheets\]
+
+------------------------------------------------------------------------
+
+## (*A brief aside*) Data import - readr
+
+![](img/readr-args.png) <br/> <br/> <br/>
+
+.pull-left\[Source: Rstudio cheatsheets\]
+
+------------------------------------------------------------------------
+
+## Data sets - .red\[Exercise #1\]
+
+.large\[ \* In this class, we will use the datasets that come with the tidyr package to explore all the functions provided by tidyr. \* `table1`, `table2`, `table3`, `table4a`, `table4b`, and `table5` all display the number of TB cases documented by the World Health Organization in Afghanistan, Brazil, and China between 1999 and 2000. \* The data is a subset of the data contained in the World Health Organization Global Tuberculosis Report. \* The data contains values associated with four variables (country, year, cases, and population), but each table organizes the values in a different layout.\] ---
+
+## Getting familiar with the data
+
+.large\[ R provides many functions to examine features of a data object
+
+-   `class()` - what kind of object is it (high-level)?
+-   `str()` - what is the structure of the object?
+-   `typeof()` - what is the object's data type (low-level)?
+-   `length()` - how long is it? What about two dimensional objects?
+-   `attributes()` - does it have any metadata?
+-   `is_tibble()` - use is.? to confirm data type \] ---
+
+## Getting familiar with the data - .red\[Exercise #2\]
+
+.large\[ R provides many functions to examine features of a data object
+
+``` {show-code}
+  class()
+  str()
+  typeof() 
+  length()
+  attributes()
+  is_tibble()
+```
+
+Note: a `tibble` can be coerced into a data.frame using `as.data.frame(tbl)` \]
+
+------------------------------------------------------------------------
+
+## Getting familiar with the data
+
+.large\[ Some of the useful Data Frame Functions are as follows:\
+- `head()` - shows first 6 rows\
+- `tail()` - shows last 6 rows\
+- `dim()` - returns the dimensions of data frame (i.e. number of rows and number of columns)\
+- `nrow()` - number of rows\
+- `ncol()` - number of columns\
+- `names()` or `colnames()` - both show the names attribute for a data frame\
+- `sapply(dataframe, class)` - shows the class of each column in the data frame\
+- `glimpse()`\]
+
+------------------------------------------------------------------------
+
+## Getting familiar with the data - .red\[Exercise #3\]
+
+.large\[
+
+``` {show-code}
+  head()
+  tail()  
+  dim() 
+  nrow()
+  ncol()
+  names()
+  sapply(dataframe, class)
+  glimpse()
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## Summary - .red\[Exercise #4\]
+
+.large\[ A generic function used to produce result summaries of the results of various model fitting functions.
+
+```{r, eval=FALSE}
+summary(table1)
+summary(table1$cases)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## Table - .red\[Exercise #5\]
+
+.large\[ Uses the cross-classifying factors to build a contingency table of the counts at each combination of factor levels.
+
+```{r,  eval=FALSE}
+table(table1$country)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## Tidying data
+
+.large\[ The four verbs to keep in mind for reshaping data with `tidyr` are:\
+- `pivot_wider`\
+- `pivot_longer`\
+- `separate`\
+- `unite`\
+\]
+
+------------------------------------------------------------------------
+
+## pivot_wider - syntax
+
+.large\[ pivot_wider() "widens" data, increasing the number of columns and decreasing the number of rows.
+
+``` {show-code}
+pivot_wider(
+  data,
+  names_from = name,
+  values_from = value,
+  ...
+)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## pivot_wider - .red\[Exercise #6\]
+
+.large\[
+
+``` {show-code}
+pivot_wider(table2, 
+            names_from = key, 
+            values_from = value)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## pivot_longer - Syntax
+
+.large\[ pivot_longer() "lengthens" data, increasing the number of rows and decreasing the number of columns.
+
+``` {show-code}
+pivot_longer(
+  data,
+  cols,
+  names_to = "name",
+  values_to = "value",
+  ...
+)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## pivot_longer - .red\[Exercise #7\]
+
+.large\[
+
+``` {show-code}
+pivot_longer(table4, 2:3, "year", "cases")
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## unite - Syntax
+
+.large\[ unite() combines multiple columns into a single column.
+
+``` {show-code}
+unite(data, 
+      col, 
+      ..., #select columns to unite
+      sep = "_", 
+      remove = TRUE, #default is set to TRUE
+      na.rm = FALSE) #default is set to FALSE
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## unite - .red\[Exercise #8\]
+
+.large\[
+
+``` {show-code}
+unite(table6, "new", century, year, sep = "")
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## separate - Syntax
+
+.large\[ Given either a regular expression or a vector of character positions, separate() turns a single character column into multiple columns.
+
+``` {show-code}
+separate(
+  data,
+  col,
+  into,
+  sep = "[^[:alnum:]]+", #any sequence of non-alphanumeric values
+  remove = TRUE,
+  convert = FALSE,
+  extra = "warn",
+  fill = "warn",
+  ...
+)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## separate - .red\[Exercise #9\]
+
+.large\[
+
+``` {show-code}
+separate(table3, 
+         rate, 
+         into = c("cases", "population"), 
+         sep = "/")
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## separate_rows - Syntax
+
+.large\[ Given either a regular expression or a vector of character positions, separate() turns a single character column into multiple rows.
+
+``` {show-code}
+separate_rows(
+  data, 
+  ..., 
+  sep = "[^[:alnum:].]+", 
+  convert = FALSE)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## separate_rows - .red\[Exercise #10\]
+
+.large\[
+
+``` {show-code}
+separate_rows(
+  table3, 
+  rate, 
+  sep = "/")
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## Handling missing values
+
+```{r, echo = FALSE, out.width= '150%'}
+knitr::include_graphics("img/missing-values.png")
+```
+
+<br/> <br/> <br/> .pull-left\[Source: Rstudio cheatsheets\]
+
+------------------------------------------------------------------------
+
+## Regular expressions
+
+```{r, echo = FALSE, out.width= '80%'}
+knitr::include_graphics("img/regex.png")
+```
+
+Useful website: [Regexr](https://regexr.com/) <br/> <br/> Note: *stringr* is an entire package focused on working with character strings. I highly recommend checking it out!
+
+## .pull-left\[Source: Rstudio cheatsheets\]
+
+## Problem Set and Grading Rubric
+
+.large\[ \* Today's problem set assignment will allow you to practice the tidyr tools we learned in class today. \* There is a total of 5 exercises, each with 2 points for a total of 10 points. \* Link to [grading rubric](https://molb7950.netlify.app/policies/).\]
+
+------------------------------------------------------------------------
+
+## Acknowledgements
+
+.large\[ The material for this class was heavily borrowed from: \* Data Science with R by Garrett Grolemund: https://garrettgman.github.io/tidying/ \* R for data science by Hadley Wickham: https://r4ds.had.co.nz/index.html\]
+
+------------------------------------------------------------------------
+
+## Further Reading & Resources
+
+.large\[ \* R for data science https://r4ds.had.co.nz/index.html \* Advanced R by Hadley Wickam https://adv-r.hadley.nz/ \* Data Science with R by Garrett Grolemund https://garrettgman.github.io/tidying/\]

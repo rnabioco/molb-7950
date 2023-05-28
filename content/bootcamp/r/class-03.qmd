@@ -1,0 +1,366 @@
+---
+title: "R Bootcamp - class 3"
+author: "Sujatha Jagannathan"
+---
+
+## Learning Objectives for the R Bootcamp
+
+.pull-left\[ \* .large\[Follow best coding practices\] \* .large\[Know the fundamentals of R programming\] \* .large\[Become familiar with "tidyverse" suite of packages\] \* tidyr: "Tidy" a messy dataset \* dplyr: Transform data to derive new information \<-- *Class 3* \* ggplot2: Visualize and communicate results \* .large\[Practice reproducible analysis\]\]
+
+.pull-right\[![](img/tidy1.png)\] .pull-right\[Source: R for Data Science by Hadley Wickham\] ---
+
+## Rigor & Reproducibility
+
+.large\[For the purposes of this R bootcamp, the best R&R tool we have at our disposal is using Rmarkdown documents. \]
+
+------------------------------------------------------------------------
+
+## Today's class outline
+
+.large\[ \* Introduce *dplyr* \* Review basic functions of *dplyr* \* core dplyr verbs: `select`, `filter`, `arrange`, `mutate`, and `summarise` \* modify scope of verbs using: `group_by` \* pipe: `%>%` \* Combining tables with dplyr: join functions, binding columns/rows, etc. \* ... and many others! `rename`, `count`, `add_row`, `add_column`, `distinct`, `sample_n`, `sample_frac`, `slice`, `pull` \* Homework instructions\] ---
+
+## Today's dataset
+
+.large\[
+
+``` {show-code}
+* In this class, we will use the datasets that come with the `nycflights13` package to explore all the functions provided by tidyr. 
+* `nycflights13::flights` data frame contains data about all 336,776 flights that departed from New York City in 2013 from the US Bureau of Transportation Statistics
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## Getting familiar with the data - .red\[Exercise #1\]
+
+.large\[
+
+```{r, eval=FALSE}
+  flights  
+  head(flights)
+  glimpse(flights)
+  View(flights) # this opens up the table in an excel like fashion
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## dplyr package
+
+.large\[
+
+-   `dplyr` is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges:
+
+    `arrange()` changes the ordering of the rows. `filter()` picks cases based on their values. `select()` picks variables based on their names. `mutate()` adds new variables that are functions of existing variables `summarise()` reduces multiple values down to a single summary.
+
+These all combine naturally with `group_by()` which allows you to perform any operation "by group".
+
+Source: https://dplyr.tidyverse.org/ \]
+
+------------------------------------------------------------------------
+
+## `arrange`, `filter`, and `select`
+
+.large\[ - When do you use it? - `arrange` to order rows by values of one or more columns. - `filter` to extract rows that meet a logical criteria. - `select` to count the number of rows in which a value occurs within a column\]
+
+------------------------------------------------------------------------
+
+## `arrange`
+
+.large\[ - `arrange()` to order rows by values of a column or columns (low to high). `desc()` orders high to low.
+
+-   Syntax
+
+``` {shw-code}
+arrange(data = ..., <colname>)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## `arrange` - .red\[Exercise #2\]
+
+.large\[
+
+``` {show-code}
+arrange(flights, year, month, day)
+arrange(flights, desc(dep_delay))
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## `filter`
+
+.large\[ - `filter()` chooses rows/cases where conditions are true.
+
+-   Syntax
+
+```         
+filter(data = ..., <condition>)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## `filter` - .red\[Exercise #3\]
+
+.large\[
+
+``` {show-code}
+filter(flights, month == 1)
+filter(flights, month == 1, day == 1)
+filter(flights, month == 11 | month == 12)
+filter(flights, !(month == 11 | month == 12))
+nov_dec <- filter(flights, month %in% c(11, 12))
+```
+
+Note: Most frequently used comparison operators are: \>, \>=, \<, \<=, != (not equal), and == (equal). \]
+
+------------------------------------------------------------------------
+
+## `select`
+
+.large\[ - `select` extracts one or more columns from a table - `select_if()` to extract all columns of a particular type
+
+-   Syntax:
+
+``` {show-code}
+select(data = ..., <colname>)  
+select_if(data = ..., <condition>)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## `select` - .red\[Exercise #4\]
+
+.large\[
+
+``` {show-code}
+select(flights, year, month, day)
+select(flights, year:day)
+select(flights, -(year:day))
+select(flights, ends_with("time"))
+select(flights, time_hour, air_time, everything())
+
+select_if(flights, is.character)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## `mutate`
+
+.large\[ - `mutate()` to compute new columns
+
+-   Syntax
+
+``` {show-code}
+mutate(data = ..., <newcolname> =  funs(<oldcolname>))
+mutate(data = ..., <colname>, funs(x))
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## `mutate` - .red\[Exercise #5\]
+
+.large\[
+
+``` {show-code}
+mutate(flights_sml, speed = distance / air_time * 60)
+
+mutate(flights_sml,
+  gain = dep_delay - arr_delay,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## `summarise`
+
+.large\[ - `summarise()` reduces multiple values down to a single summary.
+
+-   Syntax
+
+``` {show-code}
+summarise(data = ..., <colname>)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## `summarise` - .red\[Exercise #6\]
+
+.large\[
+
+``` {show-code}
+summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## `group_by`
+
+.large\[ \* summarise() is not terribly useful unless we pair it with group_by(). \* `group_by` reate a grouped copy of a table. \* This changes the unit of analysis from the complete dataset to individual groups. \* Then, when you use the dplyr verbs on a grouped data frame they'll be automatically applied "by group".
+
+-   Syntax
+
+``` {show-code}
+group_by(data = ..., <colname>)
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## `group_by` and `summarize` - .red\[Exercise #7\]
+
+.large\[
+
+``` {show-code}
+by_day <- group_by(flights, year, month, day)
+summarise(by_day, delay = mean(dep_delay, na.rm = TRUE))
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## The Pipe `%>%` - .red\[Exercise #8\]
+
+.large\[ \* The pipe combines multiple operations in a sequential order to create a pipeline of transformations
+
+``` {show-code}
+delays <- flights %>% 
+  group_by(dest) %>% 
+  summarise(
+    count = n(),
+    dist = mean(distance, na.rm = TRUE),
+    delay = mean(arr_delay, na.rm = TRUE)
+  ) %>% 
+  filter(count > 20, dest != "HNL")
+```
+
+\]
+
+------------------------------------------------------------------------
+
+## Join functions
+
+-   Combine variables (i.e. columns)
+    -   `bind_cols()`
+    -   `left_join()`
+    -   `right_join()`
+    -   `inner_join()`
+    -   `full_join()`
+-   Combine cases (i.e. rows)
+    -   `bind_rows()`
+    -   `intersect()`
+    -   `setdiff()`
+    -   `union()`
+
+------------------------------------------------------------------------
+
+## Combine variables and cases - pasting tables together
+
+-   `bind_cols()` to paste tables beside each other
+
+-   `bind_rows()` to paste tables below each other as they are.
+
+-   Syntax:
+
+```         
+bind_cols(data1, data2)
+bind_rows(data1, data2)
+```
+
+------------------------------------------------------------------------
+
+## Combine variables - joining tables by a variable
+
+-   `left_join()` to join matching values from the right dataset to the left dataset
+
+-   Syntax:
+
+```         
+left_join(data1, data2)
+left_join(data1, data2, by = ...)
+left_join(data1, data2, by = c("col1" = "col2"))
+```
+
+-   Examples:\
+
+```         
+```
+
+------------------------------------------------------------------------
+
+## Other dplyr verbs
+
+## `rename`
+
+-   `rename()` renames the variables in a table. Keeps all columns. `select()` can also do this, but with some caveats.
+
+-   Syntax
+
+```         
+rename(data = ..., <colname>)
+```
+
+-   Examples:
+
+```         
+rename(data_transcript_level, data_type = type)
+select(data_transcript_level, data_type = type)
+select(data_transcript_level, data_type = type, everything())
+```
+
+## `count`
+
+-   `count()` counts number of rows in each group defined by the specified variable.
+
+-   Syntax
+
+```         
+count(data = ..., <colname>)
+```
+
+-   Examples:
+
+```         
+count(data_transcript_level, hgnc_symbol)
+count(data_transcript_level, replicate)
+```
+
+## Problem Set and Grading Rubric
+
+.large\[ \* Today's problem set assignment will allow you to practice the tidyr tools we learned in class today. \* There is a total of 5 exercises, each with 2 points for a total of 10 points. \* Link to [grading rubric](https://molb7950.netlify.app/policies/).\]
+
+------------------------------------------------------------------------
+
+## Acknowledgements
+
+.large\[ The material for this class was heavily borrowed from: \* R for data science by Hadley Wickham: https://r4ds.had.co.nz/index.html\]
+
+------------------------------------------------------------------------
+
+## Further Reading & Resources
+
+.large\[ \* R for data science https://r4ds.had.co.nz/index.html \* Advanced R by Hadley Wickam https://adv-r.hadley.nz/ \* Data Science with R by Garrett Grolemund https://garrettgman.github.io/tidying/\]
