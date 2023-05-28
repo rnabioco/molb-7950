@@ -1,0 +1,364 @@
+---
+title: "Bootcamp: grep & awk"
+author: "Jay Hesselberth"
+output:
+  
+---
+
+```{r run-setup---dont-delete, child = "slide-setup.Rmd"}
+```
+
+layout: true
+
+<div class="my-footer">
+  <span>
+  Hesselberth | Bootcamp: Class 3 | <a href="https://molb7950.netlify.app/">MOLB 7950 website</a>
+  </span>
+</div> 
+
+---
+
+## Required: Contact Info 
+
+Greetings experimentalist humans `r emo::ji("wave")`
+
+<i class="fa fa-envelope"></i> &nbsp; [email@address.edu](mailto:email@address.edu) <br>
+
+---
+
+## Learning Objectives
+
+* Define three characteristics of DNA sequencing that drive error rate
+* Define false disovery rate
+* Define precision and recall
+* Compare precision and accuracy
+
+---
+
+## Rigor & Reproducibility
+
+Include a dedicated slide for R&R issues to be considered in the lecture.
+
+Keep this slide in a conspicuous location and don't change the title so that
+we can collate if needed.
+
+---
+
+## Problem Set and Grading Rubric
+
+Include a dedicate slide describing problem set assignment with a link
+to the [grading rubric](https://molb7950.netlify.app/policies/).
+
+Mention whether this problem set will be graded by peers or instructors/TAs.
+
+--- 
+
+## grep and awk
+
+1.  Review
+2.  remember BED format (chr, start, end)
+3.  learn grep and awk basics to filter and manipulate text
+
+---
+
+## grep
+
+Use `grep` to identify lines in a file that match a specified pattern.
+
+To find any instance of *chr5* in the data/lamina.bed file
+
+**Note**: results in these slides are limited to 3 lines.
+
+```{bash, output.lines=3}
+# grep [pattern] [filename]
+grep chr5 data/lamina.bed
+```
+
+To find all lines that start with a number sign:
+
+```{bash, output.lines=3}
+# The caret (^) matches the beginning of the line
+# FYI dollar sign ($) matches the end
+grep '^#' data/lamina.bed
+```
+
+---
+
+## grep
+
+To find any line that *does not* start with "chr":
+
+```{bash, output.lines=3}
+# the -v flag inverts the match (grep "not" [pattern])
+grep -v '^chr' data/lamina.bed
+```
+
+Beware of using `grep` to find patterns that might be partial matches:
+
+```{bash, output.lines=3}
+# this will match chr1, chr10, chr11 etc.
+grep chr1 data/lamina.bed | cut -f1 | uniq
+```
+
+---
+
+## grep
+
+You can find exact matches that are split on words with the `-w` flag:
+
+```{bash}
+# this will only match chr1
+grep -w chr1 data/lamina.bed | cut -f1 | uniq
+```
+
+Beware of using `grep` to search for numbers:
+
+```{bash, output.lines=3}
+# finds all strings that match `100`
+grep 100 data/lamina.bed
+```
+
+```{bash, output.lines=3}
+# better, but doesn't look at numeric value
+# grep -w 100 data/lamina.bed
+```
+
+--- 
+
+## Exercises
+
+1.  use `grep` to identify lines in `data/lamina.bed` where the second field (start) begins with `100`.
+2.  use `grep` to identify lines in `data/lamina.bed` where the third field (end) ends with 99 .
+3.  use `grep` with its `-w` flag to count the number of `chr1` records in `data/lamina.bed`.
+4.  use `grep` to count how many fastq records are in `data/t_R1.fastq.gz` file (fastq records begin with an `@`).
+5.  use `grep` to count the number of fastq records in `data/SP1.fq`.
+
+---
+
+## awk
+
+<http://en.wikipedia.org/wiki/AWK>
+
+`awk` is an interpreted **programming language** designed for text
+processing and typically used as a data extraction and reporting tool.
+It is a standard feature of most Unix-like operating systems.
+
+Named after authors **A**ho, **W**einberger, **K**ernighan
+
+**This is programming**
+
+---
+
+## awk principles
+
+1. awk operates on each line of a text file
+1. in an awk program, `$1` is an alias for the 1st column, `$2` for the 2nd, etc.
+1. awk can filter lines by a pattern
+
+### program structure
+
+- **BEGIN** runs before the program starts
+- **END** runs after the program runs through all lines in the file
+- **PATTERN** and **ACTIONS** check and execute on each line.
+
+```bash
+awk 'BEGIN {} (PATTERN) { ACTIONS } END {}' some.file.txt
+```
+
+---
+
+## awk BEGIN
+
+You can use **BEGIN** without a file. We just do one thing then exit:
+
+```{bash}
+awk 'BEGIN { print 12 * 12 }'
+```
+
+Same with **END**:
+
+```{bash, eval=FALSE}
+# this won't run in Rmarkdown as it expects ctrl+d
+awk 'END { print 12 * 13 }'
+```
+
+---
+
+## awk filtering
+
+A simple and powerful use of awk is lines that match a pattern or meet
+set of criteria. Here, we match (and implicitly print) only lines where
+the first column is chr12:
+
+```{bash, output.lines=3}
+awk '($1 == "chr12")' data/lamina.bed
+```
+
+We can also filter on start position using `&&` which means `and`:
+
+```{bash, output.lines=3}
+awk '($1 == "chr12" && $2 < 9599990)' data/lamina.bed
+```
+
+`=` and `==` are not the same thing, and are frequently mixed up.
+
+`=` is the assignment operator, whereas `==` and `!=` test for equality and inequality.
+
+---
+
+## awk program structure
+
+```{bash, output.lines=3}
+awk '($1 == "chr12" && $2 < 9599990)' data/lamina.bed
+```
+
+- need quotes when checking as a character "chr12".
+- no quotes when checking as a number (9599990).
+- no commas (e.g., 9,599,990) in numbers
+
+---
+
+### In-class exercise
+
+we will do the first of these together.
+
+1.  how many regions (lines) in `data/lamina.bed` have a start less than 1,234,567 on any chromosome?
+2.  how many regions in `data/lamina.bed` have a start less than 1,234,567 on chromosome 8?
+3.  how many regions (lines) in `data/lamina.bed` have a start between 50,000 and 951,000
+4.  how many regions in `data/lamina.bed` overlap the interval **chr12:5,000,000-6,000,000** ?
+
+The last question is not trivial and understanding it will be useful
+
+---
+
+## awk program structure (actions)
+
+print total bases covered on chromosome 13:
+
+```{bash, output.lines=3}
+# note we need continuation characters here (`\`)
+awk '($1 == "chr13") \
+  { coverage = coverage + $3 - $2 } \
+  END { print coverage }' data/lamina.bed
+```
+
+the entire awk program must be wrapped in quotes. Nearly always best to use
+
+    single quotes (`'`) on the outside.
+
+**coverage** is a variable that stores values; we don`t use a `$` to access it like we do in bash or for the `$1` columns
+
+---
+
+## in-class exercise
+
+below is how we find coverage for chr13.
+
+```{bash, output.lines=3}
+awk '($1 == "chr13") { coverage += $3 - $2 } \
+  END { print coverage }' data/lamina.bed
+```
+
+how can we find the total coverage for all chromosomes **except** 13?
+
+---
+
+## awk continued
+
+The `$0` variable contains the entire line.
+
+multiple patterns
+
+```{bash, output.lines=3}
+awk '$3 >= 5000 { print $0"\tGREATER" } \
+     $3  < 5000   { print $0"\tLESS" }' \
+     data/states.tab
+```
+
+remember we can simply filter to the lines `> 5000` with:
+
+```{bash, output.lines=3}
+awk '$3 >= 5000' data/states.tab
+```
+
+---
+
+## awk special variables
+
+1. we know *\$1*, *\$2*, \... for the column numbers
+2. NR is a special variable that holds the line number
+3. NF is a special variable that holds the number of fields in the line
+4. FS and OFS are the (F)ield and (O)output (F)ield (S)eparators i.e. the delimiters (default is any space character)
+
+## using awk to count lines with NR
+
+```{bash, output.lines=3}
+wc -l data/lamina.bed
+
+awk 'END { print NR }' data/lamina.bed
+```
+
+---
+
+## using FS and OFS
+
+Let`s convert `data/lamina.bed` to comma-delimited but only for chr12
+
+remember FS is the input separator and OFS is the output delimiter
+
+```{bash, output.lines=3}
+awk 'BEGIN {FS="\t"; OFS=","} ($1 == "chr12") \
+  { print $1, $2, $3 }' data/lamina.bed
+```
+
+---
+
+## awk regular expressions
+
+we won`t cover these in detail, but you can match on *regular expressions*.
+
+The following finds lines containing chr2 (chr2, chr20, chr21) in the first column:
+
+```{bash, output.lines=3}
+awk '$1 ~ /chr2/' data/lamina.bed
+```
+
+Often we can get by without *regular expressions* but they are
+extremely powerful and available in nearly all programming languages.
+
+---
+
+## advanced awk
+
+You can do a lot more with awk, here are several resources:
+
+- <http://www.hcs.harvard.edu/~dholland/computers/awk.html>
+- <http://www.catonmat.net/download/awk.cheat.sheet.pdf>
+
+## awk review
+
+* `$1`, `$2`, `$3`, etc
+* default sep is space (" "). adjust sep with: `OFS="t"; FS=","`
+* `$0` is the entire line
+
+```{awk, eval=FALSE}
+BEGIN {} 
+(match) { coverage += $3 - $2 } 
+END { print coverage }
+```
+
+* `NR` is line number; `NF` is number of fields
+* `BEGIN {} filter { action } END {}`
+
+---
+
+## Exercises
+
+1.  use NR to print each line of `data/lamina.bed` *preceded* by it's line number
+1.  use NF to see how many columns are in each row of `data/states.tab`
+1.  are there any regions in `lamina.bed` with start > end?
+1.  what is the total coverage \[sum of (end - start)\] of regions on chr13 in [lamina.bed]?
+1.  what is the mean value (4th column) on chromome 3 of [lamina.bed]
+1.  print out only the header and the entry for colorado in [states.tab]
+1.  what is the (single-number) sum of all the incomes for [states.tab] with illiteracy rate less than 0.1? greater than 2?
+1.  use NR to filter out the header from [lamina.bed] (hint: what is NR for the header?)

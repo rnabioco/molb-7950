@@ -1,0 +1,886 @@
+---
+title: "Bootcamp Class 1: <br/> UNIX command-line tools"
+author: "Jay Hesselberth"
+output:
+  xaringan::moon_reader:
+    css: ["xaringan-themer.css", "slides.css"]
+    # logo: img/icon.png
+    lib_dir: libs
+    nature:
+      ratio: "16:9"
+      highlightStyle: github 
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+## Learning Objectives
+
+* Understand UNIX paths and manipulate files and directories
+* Use common UNIX tools for reading and writing files.
+* Use the pipe to string UNIX commands together.
+* Use file compression/decompression tools.
+* Use `grep` and `awk` to search and parse text files and data.
+
+---
+
+## Rigor & Reproducibility
+
+The UNIX shell provides a robust set of simple tools that enable you
+to manipulate and analyze even the largest files.
+
+Many tools have been developed for analyzing flat text (CVS, TSV) files and
+more specific, biological data formats (e.g., DNA sequencing data).
+
+The tools are easily combined together via piping and redirects, and analysis
+can be automated via shell scripts.
+
+### UNIX Philosophy
+
+The Unix philosophy works well for bioinformatics:
+
+- Make each program do one thing well.
+- Make every program a filter.
+- Store data in flat text files.
+- Small is beautiful.
+
+---
+
+---
+
+## Workspace setup 
+
+We need to set up your RStudio Cloud window to be able to work on exercises.
+
+You should set up your viewer to with two panes open:
+
+> 1. On the **left** you should have an editor with `exercises.Rmd` open.
+> 2. On the **right**, you should have a **Terminal** open.
+
+You may need to adjust `Tools > Global Options > Appearance` to achieve this layout.
+
+In addition, open Slack to the MOLB 7950 workspace.
+---
+
+## Navigating In the Terminal
+
+When you start the terminal, you will be in your home directory. In UNIX, this is represented as `~` and also as `$HOME`.
+
+We will often show commands preceded with a `$` as you see in your terminal.
+
+Try this in the terminal:
+
+```bash
+# pwd is "print working directory"
+$ pwd
+```
+
+--
+
+Change to another directory:
+
+```bash
+# cd is "change directory"
+$ cd /tmp/
+# go back to where you were 
+$ cd -
+```
+
+Notice your prompt changes when you move into other directories.
+
+---
+
+## Navigating In the Terminal
+
+See what's in that directory:
+
+```bash
+$ ls
+```
+
+Show more information:
+
+```bash
+$ ls -lh
+```
+
+The `-lh` part are "options" for the `ls` command.
+
+These can also be separated like:
+
+```bash
+$ ls -l -h
+```
+
+---
+
+## Getting Help In The Terminal
+
+You can find out the arguments that `ls` accepts:
+
+```bash
+$ man ls
+```
+
+and use spacebar to go through the pages (Ctrl-b goes backward). `man`
+is short for \"manual\" and can be used on most of the commands that we
+will learn.
+
+In other linux software, it is common to get help by using:
+
+```bash
+$ <program> -h
+```
+
+or:
+
+```bash
+$ <program> --help
+```
+
+Which of these works for `ls`?
+
+---
+
+## Exercises 
+
+```{r, echo = FALSE}
+countdown(minutes = 5, top = 0)
+```
+
+**Open `exercises.Rmd` and answer in the first code chunk.**
+
+* Use `man ls` to find out how to list files so that the most recently
+  modified files are listed last.
+* Use the `man` command to determine what `head` does.
+* Use `head` on the file `data/lamina.bed`.
+* Use `tail` to see the end of `data/lamina.bed`.
+* By default, head and tail show 10 lines. How can you see 13 lines?
+* Use the `man` command to determine what `wc` does.
+* use `wc` to determine how many **lines** are in `lamina.bed`.
+* use `wc` to determine how many **words** are in `lamina.bed`.
+
+--
+
+## Answers
+
+```bash
+$ ls -t
+$ head data/lamina.bed
+$ tail data/lamina.bed
+$ head -n 13 data/lamina.bed
+$ wc -l data/lamina.bed
+$ wc -w data/lamina.bed
+```
+
+---
+
+## Less (is More)
+
+To view a large file, use less:
+
+```bash
+$ less data/lamina.bed
+```
+
+You can forward-search in the file using "/".
+
+You can backward-search in the file using "?".
+
+You can see info about the file (including number of lines) using
+Ctrl+g.
+
+You can exit `less` using "q".
+
+---
+
+## Tab-Completion
+
+The `bash` shell has several built-in utilities for expediting typing.
+
+Type the following where \[TAB\] means the Tab key on the keyboard:
+
+```bash
+$ cd /usr/[TAB]
+```
+
+Then hit tab. And:
+
+```bash
+$ ls /usr/l[TAB]
+```
+
+This will work for any file path and for any programs:
+
+```bash
+$ hea[TAB]
+```
+
+--
+
+What happens if you do:
+
+```bash
+$ he[TAB][TAB] 
+```
+
+or:
+
+```bash
+$ heaaa[TAB][TAB] 
+```
+
+---
+
+## Directory Shortcuts
+
+We have already used the `cd` command to change directories. And we have
+used the `~` shortcut for home.
+
+```bash
+$ cd ~ 
+$ ls ~
+```
+
+We can also move to or see what is in the parent directory with:
+
+```bash
+$ ls ..
+$ cd ..
+```
+
+Or 3 directories up with:
+
+```bash
+$ ls ../../..
+$ cd ../../..
+```
+
+---
+
+## Directory Shortcuts
+
+To explicitly see the current directory:
+
+```bash
+$ ls ./
+```
+
+We can go 2 directories up with:
+
+```bash
+$ cd ../../
+```
+
+Here, we can remember that \".\" is the current directory and .. is one
+directory up. What does this do:
+
+```bash
+$ ls ./*
+```
+
+you can go to the last (i.e., most recent) directory with:
+
+```bash
+$ cd -
+```
+
+and switch back and forth by using that repeatedly.
+
+---
+
+## Make and remove directories
+
+```bash
+$ mkdir ~/tmp # OK
+
+$ mkdir ~/tmp/foo/bar # ERROR
+
+$ mkdir -p ~/tmp/foo/bar # OK
+```
+
+What does `-p` do?
+
+Remove directories:
+
+```bash
+$ rm ~/tmp/foo # ERROR
+
+$ rm -r ~/tmp/foo/bar # OK
+```
+
+What does `-r` do?
+
+> **Be very careful with `rm -r` and `rm -rf`. You can accidentally remove entire directories that you didn't intend to.**
+
+> **`rm` is forever.**
+
+---
+
+## Moving and copying files
+
+Move files around:
+
+```bash
+$ touch /tmp/tempfile
+$ mv /tmp/tempfile ~
+$ ls -lhtr ~/
+```
+
+Copy files:
+
+```bash
+cp data/lamina.bed /tmp
+cp -r data /tmp
+```
+
+What does the `-r` option to `cp` do?
+
+---
+
+## In-class excercises
+
+1.  make a directory called `/tmp/moveable`
+2.  move that directory to `~`
+3.  copy that directory to `/tmp/subdir/`
+
+---
+
+## echo
+
+`echo` means "print":
+
+```bash
+$ echo "hello world"
+```
+
+and you can use it to see **bash** variables:
+
+```bash
+$ echo $HOME
+
+$ echo $HISTFILE
+```
+
+---
+
+## Variables
+
+We will start covering programming in the next classes, but variables
+are a key component of programming.
+
+You can do:
+
+```bash
+# define a variable called "important"
+$ important=lamina.bed
+
+# "dereference" (refer to) the variable with a dollah-bill sign
+$ ls -lh $important
+
+$ echo $important
+```
+
+---
+
+## Other commands
+
+excercise:
+
+use `man` to determine the function of:
+
+- `wget`
+- `uniq`
+
+How many records are present for each chromosome in
+`lamina.bed` (assume it is sorted by chromosome)?
+
+---
+
+## Pipes
+
+Since linux is made of small utilities, we often want to chain them
+together. The idea is that each program takes data, modifies it, and sends it to the next
+via the pipe (a `|` character).
+
+For example, see can see lines 5-10 of a file with:
+
+```bash
+$ head data/lamina.bed | tail -n 5
+```
+
+---
+
+## More piping
+
+Pipes can be used in lengthy expressions, so we use `\` as a line-continuation character.
+
+Instead of (all one line):
+
+```bash
+cut -f2 data/lamina.bed | sort | uniq | head -n5 
+```
+
+do this:
+
+```bash
+# find the 5 smallest start coordinates
+cut -f2 data/lamina.bed \
+  | sort \
+  | uniq \
+  | head -n5
+```
+
+---
+
+## Redirection: STDIN and STDOUT
+
+You can use `<` and `>` to specify input and output to programs.
+
+```bash
+# creates a new file called "field2.tab"
+cut -f2 data/lamina.bed > field2.tab
+```
+
+---
+
+## File compression utilities
+
+Data are commonly stored in tab-separated or comma-separated value formats
+(TSV and CSV), often compressed with gzip (suffix ".gz").
+
+```bash
+# note the file size
+$ ls -l data/lamina.bed
+
+$ gzip data/lamina.bed
+
+# note the file size now
+$ ls -l data/lamina.bed.gz
+```
+
+Avoid decompressing gzip-ed files as they can be (very) large. Instead, stream
+their contents:
+
+```bash
+$ zcat data/lamina.bed.gz | cut -f2,3
+```
+
+(now restore the original lamina.bed file)
+
+```bash
+$ gunzip data/lamina.bed.gz 
+```
+
+---
+
+## Bioinformatics file formats
+
+### BED (Browser-Extensible Data)
+
+Tab-delimited, 1-based, half-open.
+
+```
+chr22 1000 5000 cloneA 960 + 1000 5000 0 2 567,488, 0,3512
+chr22 2000 6000 cloneB 900 - 2000 6000 0 2 433,399, 0,3601
+```
+
+https://genome.ucsc.edu/FAQ/FAQformat.html#format1
+
+--
+
+### bedGraph
+
+```
+chr19 49302000 49302300 -1.0
+chr19 49302300 49302600 -0.75
+chr19 49302600 49302900 -0.50
+chr19 49302900 49303200 -0.25
+```
+
+https://genome.ucsc.edu/goldenPath/help/bedgraph.html
+
+---
+
+## Bioinformatics file formats
+
+### FASTQ (FASTA with qualities)
+
+FASTA record
+
+```
+>SEQ_ID_1
+GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT
+ACGTATCGTACGTAGCTGATCGTAGTAGTCAGTGCTAGTCGATCGTAGTCATCGATGCAT
+>SEQ_ID_2
+CGACTGATCGTACGTACTTACGTCTCGTAGCTGACTGTCAGCTATCGTAGCTGCTAGTCG
+```
+
+FASTQ records have 4 lines:
+
+```
+@SEQ_ID
+GATTTGGGGTTCAAAGCAGTATCGATCAAATAGTAAATCCATTTGTTCAACTCACAGTTT
++
+!''*((((***+))%%%++)(%%%%).1***-+*''))**55CCF>>>>>>CCCCCCC65
+```
+
+https://en.wikipedia.org/wiki/FASTQ_format
+
+---
+
+## cut, sort, and uniq
+
+The UNIX utilities `cut`, `sort`, and `uniq` enable rapid
+text file exploration.
+
+```bash
+# how many unique chromosomes?
+cut -f1 data/lamina.bed | uniq | wc -l
+
+# largest start coordinate on any chrom?
+cut -f2 data/lamina.bed | sort -rn | head -n1
+```
+
+---
+
+## Exercises
+
+```{r, echo = FALSE}
+countdown(minutes = 5, top = 0)
+```
+
+All of these use `data/lamina.bed`:
+
+1. Use `cut` to extract the second and third columns.
+2. Use `cut` and `sort` to find the smallest start coordinate (column 2)
+3. Use `cut`, `sort`, and `uniq` to find the number of unique chromosomes
+4. Use `cut`, `sort`, and `uniq` to count the number of intervals on each
+chromosome (hint: use `uniq -c`)
+
+---
+
+## grep
+
+Use `grep` to identify lines in a file that match a specified pattern.
+
+To find any instance of *chr5* in the data/lamina.bed file
+
+**Note**: results in these slides are limited to 3 lines.
+
+```{bash, output.lines=3}
+# grep [pattern] [filename]
+grep chr5 data/lamina.bed
+```
+
+To find all lines that start with a number sign:
+
+```{bash, output.lines=3}
+# The caret (^) matches the beginning of the line
+# FYI dollar sign ($) matches the end
+grep '^#' data/lamina.bed
+```
+
+---
+
+## grep
+
+To find any line that *does not* start with "chr":
+
+```{bash, output.lines=3}
+# the -v option inverts the match (grep "not" [pattern])
+grep -v '^chr' data/lamina.bed
+```
+
+Beware of using `grep` to find patterns that might be partial matches:
+
+```{bash, output.lines=3}
+# this will match chr1, chr10, chr11 etc.
+grep chr1 data/lamina.bed | cut -f1 | uniq
+```
+
+---
+
+## grep
+
+You can find exact matches that are split on words with the `-w` flag:
+
+```{bash}
+# this will only match chr1
+grep -w chr1 data/lamina.bed | cut -f1 | uniq
+```
+
+Beware of using `grep` to search for numbers:
+
+```{bash, output.lines=3}
+# finds all strings that match `100`
+grep 100 data/lamina.bed
+```
+
+```{bash, output.lines=3}
+# better, but doesn't look at numeric value
+# grep -w 100 data/lamina.bed
+```
+
+---
+
+## Exercises
+
+```{r, echo = FALSE}
+countdown(minutes = 5, top = 0)
+```
+
+1.  use `grep` to identify lines in `data/lamina.bed` where the second field (start) begins with `100`.
+2.  use `grep` to identify lines in `data/lamina.bed` where the third field (end) ends with 99 .
+3.  use `grep` with its `-w` flag to count the number of `chr1` records in `data/lamina.bed`.
+4.  use `grep` to count how many fastq records are in `data/t_R1.fastq.gz` file (fastq records begin with an `@`).
+5.  use `grep` to count the number of fastq records in `data/SP1.fq`.
+
+--
+
+## Answers
+
+```
+$ cut -f2 data/lamina.bed | grep "^100"
+$ cut -f3 data/lamina.bed | grep "^99"
+$ grep -w "^chr1$" data/lamina.bed
+$ zcat data/t_R1.fastq.gz | grep -c "^@"
+$ grep -c "^@" data/SP1.fq
+```
+
+---
+
+## awk
+
+<http://en.wikipedia.org/wiki/AWK>
+
+`awk` is an interpreted **programming language** designed for text
+processing and typically used as a data extraction and reporting tool.
+It is a standard feature of most Unix-like operating systems.
+
+Named after authors **A**ho, **W**einberger, **K**ernighan
+
+**This is programming**
+
+---
+
+## awk principles
+
+1. awk operates on each line of a text file
+1. in an awk program, `$1` is an alias for the 1st column, `$2` for the 2nd, etc.
+1. awk can filter lines by a pattern
+
+### program structure
+
+- **BEGIN** runs before the program starts
+- **END** runs after the program runs through all lines in the file
+- **PATTERN** and **ACTIONS** check and execute on each line.
+
+```bash
+awk 'BEGIN {} (PATTERN) { ACTIONS } END {}' some.file.txt
+```
+
+---
+
+## awk BEGIN
+
+You can use **BEGIN** without a file. We just do one thing then exit:
+
+```{bash}
+awk 'BEGIN { print 12 * 12 }'
+```
+
+Same with **END**:
+
+```{bash, eval=FALSE}
+# this won't run in Rmarkdown as it expects ctrl+d
+awk 'END { print 12 * 13 }'
+```
+
+---
+
+## awk filtering
+
+A simple and powerful use of awk is lines that match a pattern or meet
+set of criteria. Here, we match (and implicitly print) only lines where
+the first column is chr12:
+
+```{bash, output.lines=3}
+awk '($1 == "chr12")' data/lamina.bed
+```
+
+We can also filter on start position using `&&` which means `and`:
+
+```{bash, output.lines=3}
+awk '($1 == "chr12" && $2 < 9599990)' data/lamina.bed
+```
+
+`=` and `==` are not the same thing, and are frequently mixed up.
+
+`=` is the assignment operator, whereas `==` and `!=` test for equality and inequality.
+
+---
+
+## awk program structure
+
+```{bash, output.lines=3}
+awk '($1 == "chr12" && $2 < 9599990)' data/lamina.bed
+```
+
+- need quotes when checking as a character "chr12".
+- no quotes when checking as a number (9599990).
+- no commas (e.g., 9,599,990) in numbers
+
+---
+
+## In-class exercise
+
+Se will do the first of these together.
+
+1.  how many regions (lines) in `data/lamina.bed` have a start less than 1,234,567 on any chromosome?
+2.  how many regions in `data/lamina.bed` have a start less than 1,234,567 on chromosome 8?
+3.  how many regions (lines) in `data/lamina.bed` have a start between 50,000 and 951,000
+4.  how many regions in `data/lamina.bed` overlap the interval **chr12:5,000,000-6,000,000** ?
+
+---
+
+## awk program structure (actions)
+
+print total bases covered on chromosome 13:
+
+```{bash, output.lines=3}
+# note we need continuation characters here (`\`)
+awk '($1 == "chr13") \
+  { coverage = coverage + $3 - $2 } \
+  END { print coverage }' data/lamina.bed
+```
+
+the entire awk program must be wrapped in quotes. Nearly always best to use single quotes (`'`) on the outside.
+
+**coverage** is a variable that stores values; we don't use a `$` to access it like we do in bash or for the `$1` columns
+
+---
+
+## In-class exercise
+
+below is how we find coverage for chr13.
+
+```{bash, output.lines=3}
+awk '($1 == "chr13") { coverage += $3 - $2 } \
+  END { print coverage }' data/lamina.bed
+```
+
+how can we find the total coverage for all chromosomes **except** 13?
+
+---
+
+## awk continued
+
+The `$0` variable contains the entire line.
+
+multiple patterns
+
+```{bash, output.lines=3}
+awk '$3 >= 5000 { print $0"\tGREATER" } \
+     $3 <  5000 { print $0"\tLESS" }' \
+     data/states.tab
+```
+
+remember we can simply filter to the lines `> 5000` with:
+
+```{bash, output.lines=3}
+awk '$3 >= 5000' data/states.tab
+```
+
+---
+
+## awk special variables
+
+1. we know *\$1*, *\$2*, \... for the column numbers
+2. NR is a special variable that holds the line number
+3. NF is a special variable that holds the number of fields in the line
+4. FS and OFS are the (F)ield and (O)output (F)ield (S)eparators i.e. the delimiters (default is any space character)
+
+--
+
+## using awk to count lines with NR
+
+```{bash, output.lines=3}
+wc -l data/lamina.bed
+
+awk 'END { print NR }' data/lamina.bed
+```
+
+---
+
+## using FS and OFS
+
+Let's convert `data/lamina.bed` to comma-delimited but only for `chr12`.
+
+remember FS is the input separator and OFS is the output delimiter
+
+```{bash, output.lines=3}
+awk 'BEGIN {FS="\t"; OFS=","} ($1 == "chr12") \
+  { print $1, $2, $3 }' data/lamina.bed
+```
+
+---
+
+## awk regular expressions
+
+we won't cover these in detail, but you can match on *regular expressions*.
+
+The following finds lines containing chr2 (chr2, chr20, chr21) in the first column:
+
+```{bash, output.lines=3}
+awk '$1 ~ /chr2/' data/lamina.bed
+```
+
+Often we can get by without *regular expressions* but they are
+extremely powerful and available in nearly all programming languages.
+
+---
+
+## awk review
+
+* `$1`, `$2`, `$3`, etc
+* default sep is space (" "). adjust sep with: `OFS="\t"; FS=","`
+* `$0` is the entire line
+
+```{awk, eval=FALSE}
+BEGIN {} 
+(match) { coverage += $3 - $2 } 
+END { print coverage }
+```
+
+* `NR` is line number; `NF` is number of fields
+* `BEGIN {} filter { action } END {}`
+
+---
+
+## Exercises
+
+```{r, echo = FALSE}
+countdown(minutes = 5, top = 0)
+```
+
+1.  use `NR` to print each line of `data/lamina.bed` *preceded* by it's line number
+1.  use `NF` to see how many columns are in each row of `data/states.tab`
+1.  are there any regions in `lamina.bed` with start > end?
+1.  what is the total coverage (sum of `end - start`) of regions on chr13 in `lamina.bed`?
+1.  what is the mean value (4th column) on chromosome 3 of `data/lamina.bed`
+1.  print out only the header and the entry for Colorado in `data/states.tab`
+1.  what is the (single-number) sum of all the incomes for `data/states.tab` with illiteracy rate less than 0.1? greater than 2?
+1.  use NR to filter out the header from `data/lamina.bed` (hint: what is NR for the header?)
+
+---
+
+## Problem Set & Grading 
+
+Your problem set is available in MOLB 7950 workspace as `bootcamp-week-1-problem-set-1`.
+
+You can start the assignment anytime and it's due Tues Aug 18 at 12:00 pm.
+
+Instructors and TAs will grade this problem set and provide feed back by Wed at
+12 pm.
+
+---
