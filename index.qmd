@@ -17,35 +17,37 @@ format:
 #| message: false
 #| warning: false
 library(tidyverse)
-library(yaml)
+library(googlesheets4)
 library(glue)
 library(gt)
 library(emo)
 
-where <- 'AHSB 2201'
-when  <- '9:00-10:30am'
+room <- 'AHSB 2201'
+time <- '9:00-10:30am'
 
-sched_lst <- yaml::read_yaml('schedule.yaml')
+ss <- 'https://docs.google.com/spreadsheets/d/1MSu1YZdKk7LK9-m7EjzoMWggwlsEJ7dC1aiax85uvrE/edit#gid=1069962431'
 
-no_empty <- function(x) x[x == '' | is.null(x)] <- NA 
 
-sched_tbl <-
-  tibble(
-    class      = 1:length(sched_lst),
-    date       = map_chr(sched_lst, "date") |> ymd(),
-    block      = map_chr(sched_lst, "block"),
-    title      = map_chr(sched_lst, "title"),
-    instructor = map_chr(sched_lst, "instructor"),
-    ps         = map_chr(sched_lst, "ps"),
-    ps_key     = map_chr(sched_lst, "ps_key") 
+sched_tbl <- read_sheet(ss, sheet = 'Syllabus') |>
+  mutate(
+    class      = row_number(),
+    date       = ymd(date)
   ) |>
   arrange(date) |>
   mutate(
     class = str_pad(class, 2, 'left', '0'),
-    title = map(title, gt::md),
     week = isoweek(date),
     week = week - min(week) + 1,
     week = str_c('Week ', week),
+    problem_set = as.character(problem_set)
+  ) |>
+  mutate(
+    across(
+      c(topic, instructor, title, problem_set),
+      ~ replace_na(.x, '-')
+    )
+  ) |>
+  mutate(
     # page links
     page_dir = str_c('content', block, glue('class-{class}.html'), sep = '/'),
     page_link   = glue('[{emo::ji("page")}]({page_dir})'), 
@@ -64,7 +66,7 @@ gt(
   ) |>
   tab_header(
     title = md("**MOLB 7950 - Fall 2023 Schedule**"),
-    subtitle = glue("Classes held in-person in {where}, {when}")
+    subtitle = glue("Classes held in-person in {room}, {time}")
   ) |>
   fmt_date(
     columns = date,
@@ -77,13 +79,15 @@ gt(
     class = md("**Class**"),
     date = md("**Date**"),
     block = md("**Block**"),
+    topic = md("**Topic**"),
     title = md("**Title**"),
     instructor = md("**Instructor**"),
+    problem_set = md("**Problem Set**"),
     page_link = md("**Page**"),
     slides_link = md("**Slides**")
   ) |>
   tab_spanner(
-    label = "Links",
+    label = md("**Links**"),
     columns = ends_with('_link')
   ) |>
   opt_table_font(
@@ -97,6 +101,12 @@ gt(
   ) |>
   tab_options(
     table.width = pct(100)
-  )
+  ) |>
+  tab_style(
+    style = list(
+      cell_fill("grey90")
+      ),
+    locations = cells_row_groups()
+  ) |>
+  opt_row_striping()
 ```
-
