@@ -17,18 +17,15 @@ format:
 #| message: false
 #| warning: false
 library(tidyverse)
-library(googlesheets4)
 library(glue)
 library(gt)
 library(emo)
+library(here)
 
 room <- 'AHSB 2201'
 time <- '9:00-10:30am'
 
-ss <- 'https://docs.google.com/spreadsheets/d/1MSu1YZdKk7LK9-m7EjzoMWggwlsEJ7dC1aiax85uvrE/edit#gid=1069962431'
-
-
-sched_tbl <- read_sheet(ss, sheet = 'Syllabus') |>
+sched_tbl <- read_tsv(here('data/syllabus.tsv')) |>
   mutate(
     class      = row_number(),
     date       = ymd(date)
