@@ -22,11 +22,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 \^All data is simulated
 
-Matt: "Here is some microscopy data. What insight can you find in it? (Yes it is not RNA and I want you to use R not python. No, my account has not been hacked.)"
+Matt: "Here is some microscopy data. What insight can you find in it?
+(Yes it is not RNA and I want you to use R not python. No, my account
+has not been hacked.)"
 
 You: "What is in the data file?"
 
-Matt: "I measured the radius of gyration (I made up this quantity for cells) and the largest length for a bunch of cells from different cell types."
+Matt: "I measured the radius of gyration (I made up this quantity for
+cells) and the largest length for a bunch of cells from different cell
+types."
 
 You get a brand new dataset. You are seeing it for the first time.
 
@@ -53,7 +57,9 @@ Cell_Type - self explanatory
 nrow(data)
 ```
 
-How do you get a feel for 400 datapoints? You cannot see trends or get "insights" directly looking at the raw data at this scale. So you need to "summarise the data" to get "Estimates of Location"
+How do you get a feel for 400 datapoints? You cannot see trends or get
+"insights" directly looking at the raw data at this scale. So you need
+to "summarise the data" to get "Estimates of Location"
 
 ```{r echo=TRUE}
 summary(data)
@@ -74,9 +80,13 @@ print(c(a,b))
 (a+b)/2
 ```
 
-A more general definition of median is that it is 0.5 quantile (or 50th percentile).
+A more general definition of median is that it is 0.5 quantile (or 50th
+percentile).
 
-So then first quartile ("1st Qu.") would be 0.25 quantile or 25th percentile, third quartile ("3rd Qu.") would be 0.75 quantile or 75th percentile. For 400 observations, where will the first and third quartile would be around? We can use quantile function to find out:
+So then first quartile ("1st Qu.") would be 0.25 quantile or 25th
+percentile, third quartile ("3rd Qu.") would be 0.75 quantile or 75th
+percentile. For 400 observations, where will the first and third
+quartile would be around? We can use quantile function to find out:
 
 ```{r}
 quantile(seq(1,400),0.25)
@@ -90,13 +100,15 @@ quantile(data$Cell_Rg,0.25)
 quantile(data$Cell_Rg,0.75)
 ```
 
-Mean is the average: sum of all observations divided by the number of observations
+Mean is the average: sum of all observations divided by the number of
+observations
 
 ```{r}
 sum(data$Cell_Rg)/nrow(data)
 ```
 
-But this is the mean of all observations. Let us find the mean for each cell type
+But this is the mean of all observations. Let us find the mean for each
+cell type
 
 ```{r, results='hide', message=FALSE, warning=FALSE}
 library(tidyverse)
@@ -124,7 +136,8 @@ mESC has the smallest length and neuron/muscle have really long lengths.
 
 (according to the mean...)
 
-Mean could be skewed due to outliers. Median is a better measure in presence of outliers. If we repeat the above analysis with medians:
+Mean could be skewed due to outliers. Median is a better measure in
+presence of outliers. If we repeat the above analysis with medians:
 
 Sorted by median Rg:
 
@@ -142,9 +155,12 @@ data %>% group_by(Cell_Type) %>%
          arrange(median_len)
 ```
 
-Hmm, mESC seems to have changed the most. Having extreme values skew the mean is more representative of real data you will come across.
+Hmm, mESC seems to have changed the most. Having extreme values skew the
+mean is more representative of real data you will come across.
 
-This big difference between mean and median is suspicious for mESC. So we need to see how the Rg of mESC is distributed. Histogram bins the data to give us a discretized distribution:
+This big difference between mean and median is suspicious for mESC. So
+we need to see how the Rg of mESC is distributed. Histogram bins the
+data to give us a discretized distribution:
 
 ```{r}
 #get mESC Rg:
@@ -160,9 +176,12 @@ hist(mesc_rg,breaks=50,freq=FALSE,xlim=c(0,20))
 lines(density(mesc_rg),xlim=c(0,20),lwd=3,col="blue")
 ```
 
-So obviously, there is an outlier population that is skewing the mean, but the median is not as affected by the outliers.
+So obviously, there is an outlier population that is skewing the mean,
+but the median is not as affected by the outliers.
 
-This distribution is also telling us that the trend in mean or median doesn't account for the "spread" of the data. To compare how spread out the data is across the four cell types, we can use boxplots:
+This distribution is also telling us that the trend in mean or median
+doesn't account for the "spread" of the data. To compare how spread out
+the data is across the four cell types, we can use boxplots:
 
 ```{r}
 library(ggplot2)
@@ -171,7 +190,8 @@ geom_boxplot(aes(x=Cell_Type,y=Cell_Rg),notch = T) +
 theme_bw()
 ```
 
-So the variability and two sided distribution is hidden by boxplots, violin plots help with that
+So the variability and two sided distribution is hidden by boxplots,
+violin plots help with that
 
 ```{r}
 ggplot(data) + 
@@ -180,15 +200,21 @@ geom_boxplot(aes(x=Cell_Type,y=Cell_Rg),width=0.05) +
 theme_bw()
 ```
 
-With these exploratory analyses, we can hypothesize that muscle has higher Rg than fibroblasts and neurons. mESC has a complex distribution that needs further experiments, so we won't analyze that cell type further.
+With these exploratory analyses, we can hypothesize that muscle has
+higher Rg than fibroblasts and neurons. mESC has a complex distribution
+that needs further experiments, so we won't analyze that cell type
+further.
 
 ## How significant are differences between muscle cells and fibroblasts?
 
-We want to ultimately answer the question: Does a given cell type have a different size than others?
+We want to ultimately answer the question: Does a given cell type have a
+different size than others?
 
 Using statistical concepts, we can answer this question in many ways:
 
-1.  We can make an assumption of the underlying probability distribution - this gives us powerful tools to ask how different the size of two cell types are.
+1.  We can make an assumption of the underlying probability
+    distribution - this gives us powerful tools to ask how different the
+    size of two cell types are.
 2.  We could use resampling (class 2)
 3.  We could use non-parametric statistical tests (class 2)
 
@@ -201,16 +227,21 @@ muscle_rg <- data[data$Cell_Type=="Muscle",]$Cell_Rg
 muscle_rg_hist <- hist(muscle_rg,breaks=30,freq=F,xlim=c(0,12))
 ```
 
-A probability density function (pdf) is associated with continuous random variable.
+A probability density function (pdf) is associated with continuous
+random variable.
 
 1.  A pdf is greater than or equal to zero at all values of x
 2.  A pdf **integrates** to 1
 
-A normal distribution is an example of a pdf that occurs commonly in the world around us.
+A normal distribution is an example of a pdf that occurs commonly in the
+world around us.
 
-We can use the normal distribution as an example to understand how to use pdfs.
+We can use the normal distribution as an example to understand how to
+use pdfs.
 
-Let us assume that the muscle cell Rg is normally distributed with an average of 7 micron and a standard deviation of 1 micron. The ideal distribution would look like this:
+Let us assume that the muscle cell Rg is normally distributed with an
+average of 7 micron and a standard deviation of 1 micron. The ideal
+distribution would look like this:
 
 ```{r}
 #Use seq to create a range of numbers
@@ -220,7 +251,8 @@ dist_cell_size_muscle <- dnorm(cell_size_list,mean=7,sd=1)
 plot(cell_size_list,dist_cell_size_muscle,type='l')
 ```
 
-Let us say you fit a normal distribution to your muscle cell Rg data, this is how it might look:
+Let us say you fit a normal distribution to your muscle cell Rg data,
+this is how it might look:
 
 ```{r}
 plot(muscle_rg_hist$mids,muscle_rg_hist$density,xlim=c(0,12),ylim=c(0,0.5))
@@ -229,17 +261,22 @@ lines(cell_size_list,dist_cell_size_muscle,col='red',xlim=c(0,12),ylim=c(0,0.5))
 
 #### Goodness of fit
 
-How do we see how good a fit this is? We will not go through rigorous measures of goodness of fit in this class, but we will do a quick visual check on how good a fit is using Q-Q plot.
+How do we see how good a fit this is? We will not go through rigorous
+measures of goodness of fit in this class, but we will do a quick visual
+check on how good a fit is using Q-Q plot.
 
-Q-Q plot compares the quantiles of two distributions. In our case, we have the observed distribution and the theoretical distribution.
+Q-Q plot compares the quantiles of two distributions. In our case, we
+have the observed distribution and the theoretical distribution.
 
-To generate quantiles of our theoretical distribution, we will use qnorm:
+To generate quantiles of our theoretical distribution, we will use
+qnorm:
 
 ```{r}
 theoretical_muscle <- qnorm(ppoints(100),mean=7,sd=1)
 ```
 
-Here is how the theoretical and observed numbers are distributed. We are going to plot the "quintile" on y axis and the Rg on x axis:
+Here is how the theoretical and observed numbers are distributed. We are
+going to plot the "quintile" on y axis and the Rg on x axis:
 
 ```{r}
 plot(y=ppoints(100),x=theoretical_muscle,xlim=c(4,10), type='l')
@@ -253,17 +290,22 @@ qqplot(muscle_rg,theoretical_muscle)
 abline(a = 0, b = 1, col = "blue")
 ```
 
-If the points fall close to the diagonal, the two distributions are similar.
+If the points fall close to the diagonal, the two distributions are
+similar.
 
-Points either falling below or above the line at the edges indicate that the tails of the distribution don't agree.
+Points either falling below or above the line at the edges indicate that
+the tails of the distribution don't agree.
 
 #### Important note:
 
-The two distributions being compared should be scaled to be similar. Here I generated the values of the normal distribution at the same position as that of the observed distribution.
+The two distributions being compared should be scaled to be similar.
+Here I generated the values of the normal distribution at the same
+position as that of the observed distribution.
 
 #### We will next repeat this analysis for fibroblasts:
 
-Similarly for fibbroblasts, a normal distribution could explain the underlying distribution of Rg.
+Similarly for fibbroblasts, a normal distribution could explain the
+underlying distribution of Rg.
 
 First the histogram of observed values:
 
