@@ -1,178 +1,109 @@
 ---
 title: "MOLB 7950: Informatics for Molecular Biology"
+format:
+  html:
+    theme:
+      light: [cosmo, style/quarto-main.scss]
+      dark: [cosmo, style/dark.scss, style/quarto-main.scss]
+    mainfont: "Atkinson Hyperlegible"
+    code-copy: true
+    code-overflow: wrap
+    toc: true
 ---
 
-lessons:
+```{r}
+#| label: render_schedule_table
+#| echo: false
+#| message: false
+#| warning: false
+library(tidyverse)
+library(glue)
+library(gt)
+library(emo)
+library(here)
 
-  - title: "**Week 01: Bootcamp**"
-  - date: "Mon, Aug 29"
-    title: "Course overview / RStudio Cloud"
-    instructor: "Hesselberth"
-  - date: "Tues, Aug 30"
-    title: "Bootcamp: Shell"
-    instructor: "Hesselberth"
-  - date: "Wed, Aug 31"
-    title: "Bootcamp: Command line tools"
-    instructor: "Hesselberth"
-  - date: "Thurs, Sept 1"
-    title: "Bootcamp: Command line tools"
-    instructor: "Hesselberth"
-  - date: "Fri, Sept 2"
-    title: "Bootcamp: Python"
-    instructor: "Ramachandran"
+room <- 'AHSB 2201'
+time <- '9:00-10:30am'
 
-  - title: "**Week 02: Bootcamp**"
-  - date: "Mon, Sept 5"
-    title: "**No Class: Labor Day**"
-  - date: "Tues, Sept 6"
-    title: "Bootcamp: Python"
-    instructor: "Taliaferro"
-  - date: "Wed, Sept 7"
-    title: "Bootcamp: Python"
-    instructor: "Taliaferro"
-  - date: "Thurs, Sept 8"
-    title: "Bootcamp: Python"
-    instructor: "Taliaferro"
-  - date: "Fri, Sept 9"
-    title: "Bootcamp: Python"
-    instructor: "Taliaferro"
+sched_tbl <- read_tsv(here('data/syllabus.tsv')) |>
+  mutate(
+    class      = row_number(),
+    date       = ymd(date)
+  ) |>
+  arrange(date) |>
+  mutate(
+    class = str_pad(class, 2, 'left', '0'),
+    week = isoweek(date),
+    week = week - min(week) + 1,
+    week = str_c('Week ', week),
+    problem_set = as.character(problem_set)
+  ) |>
+  mutate(
+    across(
+      c(topic, instructor, title, problem_set),
+      ~ replace_na(.x, '-')
+    )
+  ) |>
+  mutate(
+    # page links
+    page_dir = str_c('content', block, glue('class-{class}.html'), sep = '/'),
+    page_link   = glue('[{emo::ji("page")}]({page_dir})'), 
+    page_link   = map(page_link, gt::md),
+    # slides links
+    slides_dir = str_c('content', block, glue('class-{class}.slides.html'), sep = '/'),
+    slides_link   = glue('[{emo::ji("page")}]({slides_dir})'), 
+    slides_link   = map(slides_link, gt::md),
+  ) |>
+  select(-ends_with('_dir'))
 
-  - title: "**Week 03: Bootcamp**"
-  - date: "Mon, Sept 12"
-    title: "Bootcamp: R"
-    instructor: "Hesselberth"
-  - date: "Tues, Sept 13"
-    title: "Bootcamp: R"
-    instructor: "Hesselberth"
-  - date: "Wed, Sept 14"
-    title: "Bootcamp: R"
-    instructor: "Hesselberth"
-  - date: "Thurs, Sept 15"
-    title: "Bootcamp: R"
-    instructor: "Hesselberth"
-  - date: "Fri, Sept 16"
-    title: "Bootcamp: R"
-    instructor: "Hesselberth"
-
-  - title: "**Week 04: Bootcamp**"
-  - date: "Mon, Sept 19"
-    title: "Bootcamp: Statistical Concepts"
-    instructor: "Ramachandran"
-  - date: "Tues, Sept 20"
-    title: "Bootcamp: Statistical Concepts"
-    instructor: "Ramachandran"
-  - date: "Wed, Sept 21"
-    title: "Bootcamp: Statistical Concepts"
-    instructor: "Mukherjee"
-  - date: "Thus, Sept 22"
-    title: "Bootcamp: Statistical Concepts"
-    instructor: "Mukherjee"
-  - date: "Fri, Sept 23"
-    title: "Bootcamp: Statistical Concepts"
-    instructor: "Mukherjee"
-
-  - title: "**Week 05: DNA Block**"
-  - date: "Mon, Sept 26"
-    title: "ChIP-seq"
-    instructor: "Ramachandran"
-  - date: "Wed, Sept 28"
-    title: "ChIP-seq"
-    instructor: "Ramachandran"
-  - date: "Fri, Sept 30"
-    title: "Genome Sequencing: Short read"
-    instructor: "Hesselberth"
-
-  - title: "**Week 06: DNA Block**"
-  - date: "Mon, Oct 3"
-    title: "Genome Sequencing: Long read"
-    instructor: "Hesselberth"
-  - date: "Wed, Oct 5"
-    title: "Chromatin accessibility"
-    instructor: "Ramachandran"
-  - date: "Fri, Oct 7"
-    title: "Chromatin accessibility (CSDV retreat)"
-    instructor: "Ramachandran"
-
-  - title: "**Week 07: DNA Block**"
-  - date: "Mon, Oct 10"
-    title: "DNA Block Review"
-    instructor: "Hesselberth/Ramachandran"
-  - date: "Wed, Oct 12"
-    title: "RNA-seq Basics"
-    instructor: "Mukherjee"
-  - date: "Fri, Oct 14"
-    title: "Differential Gene Expression"
-    instructor: "Taliaferro"
-    slides: "rna-block/RNAseq_QC_slides.html"
-
-  - title: "**Week 08: RNA Block**"
-  - date: "Mon, Oct 17"
-    title: "Differential Gene Expression"
-    slides: "rna-block/RNAseq_DE_slides.html"
-    instructor: "Taliaferro"
-  - date: "Wed, Oct 19"
-    title: "Alternative Splicing"
-    slides: "rna-block/AS_slides_2022.html"
-    instructor: "Taliaferro"
-  - date: "Fri, Oct 21"
-    title: "**No Class — MOLB RETREAT**"
-
-  - title: "**Week 09: RNA Block**"
-  - date: "Mon, Oct 24"
-    title: "RNA binding protein-RNA interactions"
-    instructor: "Mukherjee"
-  - date: "Wed, Oct 26"
-    title: "RNA binding protein-RNA interactions"
-    instructor: "Mukherjee"
-  - date: "Fri, Oct 28"
-    title: "Single-cell mRNA sequencing"
-    instructor: "Riemondy"
-
-  - title: "**Week 10: RNA Block**"
-  - date: "Mon, Oct 31"
-    title: "Single-cell mRNA sequencing"
-    instructor: "Riemondy"
-  - date: "Wed, Nov 2"
-    title: "Tutorial: Recreating analysis of published RNA-seq data sets"
-    instructor: "Riemondy"
-  - date: "Fri, Nov 4"
-    title: "Block RNA Review — Discuss Final Projects"
-    instructor: "Mukherjee/Taliaferro/Riemondy"
-
-  - title: "**Week 11: Protein Block**"
-  - date: "Mon, Nov 7"
-    title: "Protein identification and sequence databases"
-    instructor: "Hesselberth"
-  - date: "Wed, Nov 9"
-    title: "Quantitative mass spectrometry and analysis"
-    instructor: "Hesselberth"
-  - date: "Fri, Nov 11"
-    title: "Protein Sequence and Domain Analysis"
-    instructor: "Hesselberth"
-
-  - title: "**Week 12: Protein Block**"
-  - date: "Mon, Nov 14"
-    title: "Multiple Sequence Alignments"
-    instructor: "Hesselberth"
-  - date: "Wed, Nov 16"
-    title: "Tutorial: Visualizing and manipulating three-dimensional structures"
-    instructor: "Lo"
-  - date: "Fri, Nov 18"
-    title: "Block Protein Review"
-    instructor: "Hesselberth/Lo"
-
-  - title: "**Week 13: Holiday week**"
-  - date: "Mon, Nov 21"
-    title: "**No Class — Holiday**"
-  - date: "Wed, Nov 23"
-    title: "**No Class — Holiday**"
-  - date: "Fri, Nov 25"
-    title: "**No Class — Holiday**"
-
-  - title: "**Week 14: Final projects**"
-  - date: "Mon, Nov 28"
-    title: "Student Presentations"
-  - date: "Wed, Nov 30"
-    title: "Student Presentations"
-  - date: "Fri, Dec 2"
-    title: "Student Presentations"
+gt(
+  sched_tbl,
+  groupname_col = 'week',
+  rowname_col = 'class'
+  ) |>
+  tab_header(
+    title = md("**MOLB 7950 - Fall 2023 Schedule**"),
+    subtitle = glue("Classes held in-person in {room}, {time}")
+  ) |>
+  fmt_date(
+    columns = date,
+    date_style = "wd_m_day_year"
+  ) |>
+  cols_align(
+    align = 'center'
+    ) |>
+  cols_label(
+    class = md("**Class**"),
+    date = md("**Date**"),
+    block = md("**Block**"),
+    topic = md("**Topic**"),
+    title = md("**Title**"),
+    instructor = md("**Instructor**"),
+    problem_set = md("**Problem Set**"),
+    page_link = md("**Page**"),
+    slides_link = md("**Slides**")
+  ) |>
+  tab_spanner(
+    label = md("**Links**"),
+    columns = ends_with('_link')
+  ) |>
+  opt_table_font(
+    font = google_font('Atkinson Hyperlegible')
+  ) |>
+  tab_style(
+    style = list(
+      cell_text(align = "center")
+    ),
+    locations = cells_row_groups()
+  ) |>
+  tab_options(
+    table.width = pct(100)
+  ) |>
+  tab_style(
+    style = list(
+      cell_fill("grey90")
+      ),
+    locations = cells_row_groups()
+  ) |>
+  opt_row_striping()
+```

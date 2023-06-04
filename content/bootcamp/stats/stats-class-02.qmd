@@ -13,7 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Class Objectives
 
-1.  Understand how to determine if two samples come from different distributions
+1.  Understand how to determine if two samples come from different
+    distributions
     a.  Using theoretical distributions
     b.  Using resampling/bootstrap
     c.  Using non-parametric tests
@@ -57,16 +58,23 @@ plot(fib_rg_hist$mids, fib_rg_hist$density, xlim = c(0, 12), ylim = c(0, 0.5))
 lines(cell_size_list, dist_cell_size_fib, col = "red", xlim = c(0, 12), ylim = c(0, 0.5))
 ```
 
-We are confident that Rg is sampled from Normal distributions, so we can take advantage of knowing exact details of the theoretical distributions. We could work out the math using formulae, or we could sample the distribution to get an intuitive feel.
+We are confident that Rg is sampled from Normal distributions, so we can
+take advantage of knowing exact details of the theoretical
+distributions. We could work out the math using formulae, or we could
+sample the distribution to get an intuitive feel.
 
-The question we are asking is: Is the Rg of muscle different from Rg of fibroblasts?
+The question we are asking is: Is the Rg of muscle different from Rg of
+fibroblasts?
 
 We now know that the Rg is sampled from normal distribution as follows:
 
 1.  Muscle - mean = 7, sd = 1
 2.  Fibroblasts - mean = 5, sd = 1
 
-The advantage of having a theoretical distribution is that we can calculate exact differences. We will use 10,000 points sampled from each distribution to illustrate this. Let us generate 10,000 points from these distributions:
+The advantage of having a theoretical distribution is that we can
+calculate exact differences. We will use 10,000 points sampled from each
+distribution to illustrate this. Let us generate 10,000 points from
+these distributions:
 
 ```{r}
 theoretical_fib <- rnorm(10000, mean = 5, sd = 1)
@@ -87,20 +95,24 @@ hist(diff_cell_Rg, breaks = 100, freq = F)
 
 The difference is also a Normal distribution!
 
-The mean of this distribution is simply difference in mean of the starting distributions: 7-5 = 2. The sd is the square root of sum of squares of the sd of the starting distributions:
+The mean of this distribution is simply difference in mean of the
+starting distributions: 7-5 = 2. The sd is the square root of sum of
+squares of the sd of the starting distributions:
 
 ```{r}
 sqrt(1^2 + 1^2)
 ```
 
-Let us see if this is the case, by overlaying the theoretical normal distribution over the histogram of differences:
+Let us see if this is the case, by overlaying the theoretical normal
+distribution over the histogram of differences:
 
 ```{r}
 hist(diff_cell_Rg, breaks = 100, freq = F, xlim = c(-3, 10))
 lines(x = seq(-3, 10, 0.1), y = dnorm(seq(-3, 10, 0.1), m = 2, sd = 1.414), lwd = 3, col = "red", xlim = c(-3, 10))
 ```
 
-The probability that muscle has larger Rg than fibroblasts is the probability that the difference is \> 0.
+The probability that muscle has larger Rg than fibroblasts is the
+probability that the difference is \> 0.
 
 We can use the theoritical distribution to figure this out:
 
@@ -110,7 +122,8 @@ pnorm(0, mean = 2, sd = 1.414, lower.tail = F)
 
 So 92% of muscle cells will have bigger Rg than fibroblasts.
 
-Now, here again are the theeoretical distributions of the two cell types:
+Now, here again are the theeoretical distributions of the two cell
+types:
 
 ```{r}
 plot(cell_size_list, dist_cell_size_muscle, col = "red", xlim = c(0, 12), ylim = c(0, 0.5), type = "l")
@@ -119,39 +132,51 @@ abline(v = 7, col = "red")
 abline(v = 5, col = "blue")
 ```
 
-To ask if muscle has significantly higher Rg, you could ask, what is the probability of seeing an Rg in fibroblasts that this higher than mean Rg of muscle:
+To ask if muscle has significantly higher Rg, you could ask, what is the
+probability of seeing an Rg in fibroblasts that this higher than mean Rg
+of muscle:
 
 ```{r}
 pnorm(7, mean = 5, sd = 1, lower.tail = F)
 ```
 
-2.2% of fibroblasts have Rg greater than or equal to the mean Rg of muscle.
+2.2% of fibroblasts have Rg greater than or equal to the mean Rg of
+muscle.
 
 (Is this the p-value?)
 
-Below we will go through two methods to determine the statistical significance, or p-value of this comparison.
+Below we will go through two methods to determine the statistical
+significance, or p-value of this comparison.
 
 ## Bootstrapping
 
-To get statistical significance, we ask: "what is the probability of the observed measure occuring in a null distribution?"
+To get statistical significance, we ask: "what is the probability of the
+observed measure occuring in a null distribution?"
 
-We could either use a theoretical null distribution or create our own using existing data.
+We could either use a theoretical null distribution or create our own
+using existing data.
 
-What if we didn't know the underlying distribution of the data or we didn't care? Biological systems are complex and many times, the standard theoretical distributions will not capture the observed distribution.
+What if we didn't know the underlying distribution of the data or we
+didn't care? Biological systems are complex and many times, the standard
+theoretical distributions will not capture the observed distribution.
 
-With increasing number of data points and increasing computing power, we don't need to rely on theoretical distributions.
+With increasing number of data points and increasing computing power, we
+don't need to rely on theoretical distributions.
 
-We can create our own multiverse (a.k.a the null distribution) with resampling/bootstrapping.
+We can create our own multiverse (a.k.a the null distribution) with
+resampling/bootstrapping.
 
 Here are the steps involved in bootstrapping:
 
-1.  We will aggregate our observations into a new vector. This is the starting point of creating our multiverse.
+1.  We will aggregate our observations into a new vector. This is the
+    starting point of creating our multiverse.
 
 ```{r}
 all_obs <- c(muscle_rg, fib_rg)
 ```
 
-2.  When we sample 100 observations from "all_obs" randomly, we create a new Rg dataset sampled from the combined data:
+2.  When we sample 100 observations from "all_obs" randomly, we create a
+    new Rg dataset sampled from the combined data:
 
 ```{r}
 tmp_muscle_rg <- sample(all_obs, 100, replace = T)
@@ -167,14 +192,20 @@ tmp_muscle_rg <- all_obs[idx_a]
 tmp_fib_rg <- all_obs[idx_b]
 ```
 
-3.  We then calculate the difference in mean of the two sampled datasets. Here, we just performed an experiment where we sampled two sets of Rg from a single distribution and calculated the differences in mean between the two sets.
+3.  We then calculate the difference in mean of the two sampled
+    datasets. Here, we just performed an experiment where we sampled two
+    sets of Rg from a single distribution and calculated the differences
+    in mean between the two sets.
 
 ```{r}
 tmp_diff <- mean(tmp_muscle_rg) - mean(tmp_fib_rg)
 tmp_diff
 ```
 
-4.  We repeat this many times (here let us do 1000 repetitions) to get the null distribution of the differences in mean. The null distribution assumes that the Rg for muscle and fibroblasts were drawn from the same distribution:
+4.  We repeat this many times (here let us do 1000 repetitions) to get
+    the null distribution of the differences in mean. The null
+    distribution assumes that the Rg for muscle and fibroblasts were
+    drawn from the same distribution:
 
 ```{r}
 # initialize a vector with 0s
@@ -190,24 +221,30 @@ for (i in 1:1000) {
 }
 ```
 
-Let us see the distribution of the mean difference of random sampling of Rg with the observed difference in red:
+Let us see the distribution of the mean difference of random sampling of
+Rg with the observed difference in red:
 
 ```{r}
 hist(bs_mean_diff, freq = F, xlim = c(-3, 3))
 abline(v = mean(muscle_rg) - mean(fib_rg), col = "red", lwd = 3, xlim = c(-3, 3))
 ```
 
-The observed difference is way higher than anything we saw in 1000 samples from the comobined Rg's.
+The observed difference is way higher than anything we saw in 1000
+samples from the comobined Rg's.
 
-How often do we see a mean difference in sampling that is higher than observed?
+How often do we see a mean difference in sampling that is higher than
+observed?
 
 ```{r}
 mean(bs_mean_diff > (mean(muscle_rg) - mean(fib_rg)))
 ```
 
-Never! So the difference in mean Rg we observe between muscle and fibroblasts is highly statistically significant. In other words, p=0
+Never! So the difference in mean Rg we observe between muscle and
+fibroblasts is highly statistically significant. In other words, p=0
 
-Bootstrapping requires no assumptions and can be applied to any dataset succesfully to determine if the same measure from two samples are significantly different.
+Bootstrapping requires no assumptions and can be applied to any dataset
+succesfully to determine if the same measure from two samples are
+significantly different.
 
 Let us do the same compaarison between fibroblasts and neurons:
 
@@ -232,13 +269,22 @@ abline(v = mean(neuron_rg) - mean(fib_rg), col = "red", lwd = 3, xlim = c(-1, 1)
 mean(bs_mean_diff < (mean(neuron_rg) - mean(fib_rg)))
 ```
 
-Here, the probability of the difference in mean observed in the null distribution is 0.0824, higher than accepted level of significance (0.05).
+Here, the probability of the difference in mean observed in the null
+distribution is 0.0824, higher than accepted level of significance
+(0.05).
 
 ## Non-parametric tests
 
-Another way to ask if the two samples are drawn from different distributions is to use non parametric statistical tests that have inbuilt null distributions. The two that will be useful in a wide range of scenarios are Kolmogrov Smirnov test and Wilcoxon test, both of which are easy to implement in R.
+Another way to ask if the two samples are drawn from different
+distributions is to use non parametric statistical tests that have
+inbuilt null distributions. The two that will be useful in a wide range
+of scenarios are Kolmogrov Smirnov test and Wilcoxon test, both of which
+are easy to implement in R.
 
-The "p.value" variable gives the probability that the two samples were drawn from the same underlying distribution. Hence, if p.value is less than 0.05 (or a more stringent cutoff), it means the two samples are significantly different.
+The "p.value" variable gives the probability that the two samples were
+drawn from the same underlying distribution. Hence, if p.value is less
+than 0.05 (or a more stringent cutoff), it means the two samples are
+significantly different.
 
 KS test:
 
@@ -256,27 +302,38 @@ wilcox.test(neuron_rg, fib_rg)
 
 ## Overlaps
 
-We come across the question of overlaps quite a bit in biological datasets.
+We come across the question of overlaps quite a bit in biological
+datasets.
 
-A typical question would be: "Does my list of upregulated genes overlap with \[my favorite\] category of genes?"
+A typical question would be: "Does my list of upregulated genes overlap
+with \[my favorite\] category of genes?"
 
-(Or the dreaded Reviewer comment "You should do a GO analysis" which means you have to add a supplementary figure no one cares about.)
+(Or the dreaded Reviewer comment "You should do a GO analysis" which
+means you have to add a supplementary figure no one cares about.)
 
-Let us take an experiment where you measured change in gene expression and categorized each gene as either "Upregulaated" or "Not_Upregulated".
+Let us take an experiment where you measured change in gene expression
+and categorized each gene as either "Upregulaated" or "Not_Upregulated".
 
-You hypothesize that your intervention affects cell cycle genes, so you get a list of cell cycle genes from a database and categorize each gene in your gene list as either cell cycle gene or not.
+You hypothesize that your intervention affects cell cycle genes, so you
+get a list of cell cycle genes from a database and categorize each gene
+in your gene list as either cell cycle gene or not.
 
-If the two categories have nothing to do with each other, then they co-occur just by chance. They would be "independent" of each other and we can calculate the joint probability for such a scenario as follows:
+If the two categories have nothing to do with each other, then they
+co-occur just by chance. They would be "independent" of each other and
+we can calculate the joint probability for such a scenario as follows:
 
 If Cell_Cycle and Upregulation are independent:
 
 P(Cell_Cycle $\bigcap$ Upregulation) = P(Cell_Cycle)\*P(Upregulation)
 
-We now have an observed probability of intetrsection from your experiment. So we can determine the ratio of observed over expected:
+We now have an observed probability of intetrsection from your
+experiment. So we can determine the ratio of observed over expected:
 
-P(Cell_Cycle $\bigcap$ Upregulation) / ( P(Cell_Cycle)\*P(Upregulation) )
+P(Cell_Cycle $\bigcap$ Upregulation) / ( P(Cell_Cycle)\*P(Upregulation)
+)
 
-More the ratio greater than 1, more significant the intersection between the two categories.
+More the ratio greater than 1, more significant the intersection between
+the two categories.
 
 Let us look at such an experiment:
 
@@ -311,7 +368,9 @@ noquote(paste0("Observed/Expected = ", excess))
 
 Is this statistically significant?
 
-We will use the Fisher exact test\* to get the significance of this observation, or what is the probability of observing this overlap from two randomly distributed variables.
+We will use the Fisher exact test\* to get the significance of this
+observation, or what is the probability of observing this overlap from
+two randomly distributed variables.
 
 \*(chi squared test and hypergeometric test can also be used)
 
@@ -353,7 +412,9 @@ for (i in 1:1000) {
 }
 ```
 
-We have generated a distribution of number of genes that would have overlapping cell cycle category and upregulation category by chance. Now let us compare the distribution with what we observe:
+We have generated a distribution of number of genes that would have
+overlapping cell cycle category and upregulation category by chance. Now
+let us compare the distribution with what we observe:
 
 ```{r}
 hist(overlap_ct, freq = F, xlim = c(0, 12), breaks = 10)
