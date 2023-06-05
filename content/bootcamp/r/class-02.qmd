@@ -13,34 +13,35 @@ author: "Sujatha Jagannathan"
 -   ggplot2: Visualize and communicate results
 -   Practice reproducible analysis
 
-.pull-right\[![](img/tidy1.png)\] .pull-right\[Source: R for Data
-Science by Hadley Wickham\] ---
+\[![](img/tidy1.png)\]\[Source: R for Data Science by Hadley Wickham\]
 
 ## Rigor & Reproducibility
 
-.large\[For the purposes of this R bootcamp, the best R&R tool we have
-at our disposal is using Rmarkdown documents. \]
+For the purposes of this R bootcamp, the best R&R tool we have at our
+disposal is using Rmarkdown documents.
 
 ------------------------------------------------------------------------
 
 ## Today's class outline
 
-.large\[ \* Introduce *tidyr* \* Review basic functions of *tidyr* \*
-pivot_wider \* pivot_longer \* separate \* unite \* handling missing
-values \* (if time permits) Regular expressions (regex) \* Homework
-instructions\] ---
+-   Introduce *tidyr*
+-   Review basic functions of *tidyr*
+-   pivot_wider
+-   pivot_longer
+-   separate
+-   unite
+-   handling missing values
+-   (if time permits) Regular expressions (regex)
+-   Homework instructions
 
 ## What is tidy data?
 
-.large\[ \> "Tidy datasets are all alike but every messy dataset is
-messy in its own way." \>\
-\> --- Hadley Wickham\]
+> "Tidy datasets are all alike but every messy dataset is messy in its
+> own way." --- Hadley Wickham
 
-<br/> <br/>
+\[![](img/tidydata.png)\]
 
-.center\[![](img/tidydata.png)\]
-
-<br/> .pull-left\[Source: Rstudio cheatsheets\] ---
+\[Source: Rstudio cheatsheets\]
 
 ## Data import - readr
 
@@ -48,33 +49,35 @@ messy in its own way." \>\
 knitr::include_graphics("img/readr.png")
 ```
 
-<br/> <br/> .pull-left\[Source: Rstudio cheatsheets\]
+\[Source: Rstudio cheatsheets\]
 
 ------------------------------------------------------------------------
 
 ## (*A brief aside*) Data import - readr
 
-![](img/readr-args.png) <br/> <br/> <br/>
+![](img/readr-args.png)
 
-.pull-left\[Source: Rstudio cheatsheets\]
+\[Source: Rstudio cheatsheets\]
 
 ------------------------------------------------------------------------
 
 ## Data sets - .red\[Exercise #1\]
 
-.large\[ \* In this class, we will use the datasets that come with the
-tidyr package to explore all the functions provided by tidyr. \*
-`table1`, `table2`, `table3`, `table4a`, `table4b`, and `table5` all
-display the number of TB cases documented by the World Health
-Organization in Afghanistan, Brazil, and China between 1999 and 2000. \*
-The data is a subset of the data contained in the World Health
-Organization Global Tuberculosis Report. \* The data contains values
-associated with four variables (country, year, cases, and population),
-but each table organizes the values in a different layout.\] ---
+-   In this class, we will use the datasets that come with the tidyr
+    package to explore all the functions provided by tidyr.
+-   `table1`, `table2`, `table3`, `table4a`, `table4b`, and `table5` all
+    display the number of TB cases documented by the World Health
+    Organization in Afghanistan, Brazil, and China between 1999 and
+    2000. 
+-   The data is a subset of the data contained in the World Health
+    Organization Global Tuberculosis Report.
+-   The data contains values associated with four variables (country,
+    year, cases, and population), but each table organizes the values in
+    a different layout.
 
 ## Getting familiar with the data
 
-.large\[ R provides many functions to examine features of a data object
+R provides many functions to examine features of a data object
 
 -   `class()` - what kind of object is it (high-level)?
 -   `str()` - what is the structure of the object?
@@ -85,44 +88,37 @@ but each table organizes the values in a different layout.\] ---
 
 ## Getting familiar with the data - .red\[Exercise #2\]
 
-.large\[ R provides many functions to examine features of a data object
+R provides many functions to examine features of a data object
 
-``` {show-code}
-  class()
-  str()
-  typeof() 
-  length()
-  attributes()
-  is_tibble()
+``` r
+class()
+str()
+typeof() 
+length()
+attributes()
+is_tibble()
 ```
 
 Note: a `tibble` can be coerced into a data.frame using
-`as.data.frame(tbl)` \]
+`as.data.frame(tbl)`
 
 ------------------------------------------------------------------------
 
 ## Getting familiar with the data
 
-.large\[ Some of the useful Data Frame Functions are as follows:\
-- `head()` - shows first 6 rows\
-- `tail()` - shows last 6 rows\
-- `dim()` - returns the dimensions of data frame (i.e. number of rows
-and number of columns)\
-- `nrow()` - number of rows\
-- `ncol()` - number of columns\
-- `names()` or `colnames()` - both show the names attribute for a data
-frame\
-- `sapply(dataframe, class)` - shows the class of each column in the
-data frame\
-- `glimpse()`\]
+Some of the useful Data Frame Functions are as follows: - `head()` shows
+first 6 rows - `tail()` shows last 6 rows - `dim()` - returns the
+dimensions of data frame (i.e. number of rows and number of columns) -
+`nrow()` - number of rows - `ncol()` - number of columns - `names()` or
+`colnames()` - both show the names attribute for a data frame -
+`sapply(dataframe, class)` - shows the class of each column in the data
+frame - `glimpse()`
 
 ------------------------------------------------------------------------
 
 ## Getting familiar with the data - .red\[Exercise #3\]
 
-.large\[
-
-``` {show-code}
+``` r
   head()
   tail()  
   dim() 
@@ -132,10 +128,6 @@ data frame\
   sapply(dataframe, class)
   glimpse()
 ```
-
-\]
-
-------------------------------------------------------------------------
 
 ## Summary - .red\[Exercise #4\]
 
@@ -147,20 +139,14 @@ summary(table1)
 summary(table1$cases)
 ```
 
-\]
-
-------------------------------------------------------------------------
-
 ## Table - .red\[Exercise #5\]
 
-.large\[ Uses the cross-classifying factors to build a contingency table
-of the counts at each combination of factor levels.
+Uses the cross-classifying factors to build a contingency table of the
+counts at each combination of factor levels.
 
 ```{r,  eval=FALSE}
 table(table1$country)
 ```
-
-\]
 
 ## Tidying data
 
@@ -197,10 +183,10 @@ pivot_wider(
 
 ## pivot_longer - Syntax
 
-.large\[ pivot_longer() "lengthens" data, increasing the number of rows
-and decreasing the number of columns.
+pivot_longer() "lengthens" data, increasing the number of rows and
+decreasing the number of columns.
 
-``` {show-code}
+``` r
 pivot_longer(
   data,
   cols,
@@ -210,58 +196,40 @@ pivot_longer(
 )
 ```
 
-\]
-
-------------------------------------------------------------------------
-
 ## pivot_longer - .red\[Exercise #7\]
 
-.large\[
-
-``` {show-code}
+```{r}
 pivot_longer(table4, 2:3, "year", "cases")
 ```
 
-\]
-
-------------------------------------------------------------------------
-
 ## unite - Syntax
 
-.large\[ unite() combines multiple columns into a single column.
+unite() combines multiple columns into a single column.
 
-``` {show-code}
-unite(data, 
-      col, 
-      ..., #select columns to unite
-      sep = "_", 
-      remove = TRUE, #default is set to TRUE
-      na.rm = FALSE) #default is set to FALSE
+``` r
+unite(
+  data, 
+  col, 
+  ..., #select columns to unite
+  sep = "_", 
+  remove = TRUE, #default is set to TRUE
+  na.rm = FALSE) #default is set to FALSE
 ```
 
 \]
-
-------------------------------------------------------------------------
 
 ## unite - .red\[Exercise #8\]
 
-.large\[
-
-``` {show-code}
+```{r}
 unite(table6, "new", century, year, sep = "")
 ```
 
-\]
-
-------------------------------------------------------------------------
-
 ## separate - Syntax
 
-.large\[ Given either a regular expression or a vector of character
-positions, separate() turns a single character column into multiple
-columns.
+Given either a regular expression or a vector of character positions,
+separate() turns a single character column into multiple columns.
 
-``` {show-code}
+``` r
 separate(
   data,
   col,
@@ -275,13 +243,7 @@ separate(
 )
 ```
 
-\]
-
-------------------------------------------------------------------------
-
 ## separate - .red\[Exercise #9\]
-
-.large\[
 
 ``` {show-code}
 separate(table3, 
@@ -290,17 +252,12 @@ separate(table3,
          sep = "/")
 ```
 
-\]
-
-------------------------------------------------------------------------
-
 ## separate_rows - Syntax
 
-.large\[ Given either a regular expression or a vector of character
-positions, separate() turns a single character column into multiple
-rows.
+vector of character positions, separate() turns a single character
+column into multiple rows.
 
-``` {show-code}
+``` r
 separate_rows(
   data, 
   ..., 
@@ -310,22 +267,14 @@ separate_rows(
 
 \]
 
-------------------------------------------------------------------------
-
 ## separate_rows - .red\[Exercise #10\]
 
-.large\[
-
-``` {show-code}
+```{r}
 separate_rows(
   table3, 
   rate, 
   sep = "/")
 ```
-
-\]
-
-------------------------------------------------------------------------
 
 ## Handling missing values
 
@@ -333,7 +282,7 @@ separate_rows(
 knitr::include_graphics("img/missing-values.png")
 ```
 
-<br/> <br/> <br/> .pull-left\[Source: Rstudio cheatsheets\]
+\[Source: Rstudio cheatsheets\]
 
 ------------------------------------------------------------------------
 
@@ -343,32 +292,33 @@ knitr::include_graphics("img/missing-values.png")
 knitr::include_graphics("img/regex.png")
 ```
 
-Useful website: [Regexr](https://regexr.com/) <br/> <br/> Note:
-*stringr* is an entire package focused on working with character
+Useful website: [Regexr](https://regexr.com/)
+
+Note: *stringr* is an entire package focused on working with character
 strings. I highly recommend checking it out!
 
-## .pull-left\[Source: Rstudio cheatsheets\]
+\[Source: Rstudio cheatsheets\]
 
 ## Problem Set and Grading Rubric
 
-.large\[ \* Today's problem set assignment will allow you to practice
-the tidyr tools we learned in class today. \* There is a total of 5
-exercises, each with 2 points for a total of 10 points. \* Link to
-[grading rubric](https://molb7950.netlify.app/policies/).\]
-
-------------------------------------------------------------------------
+-   Today's problem set assignment will allow you to practice the tidyr
+    tools we learned in class today.
+-   There is a total of 5 exercises, each with 2 points for a total of
+    10 points.
+-   Link to [grading rubric](content/course-info/problem-sets).
 
 ## Acknowledgements
 
-.large\[ The material for this class was heavily borrowed from: \* Data
-Science with R by Garrett Grolemund:
-https://garrettgman.github.io/tidying/ \* R for data science by Hadley
-Wickham: https://r4ds.had.co.nz/index.html\]
+The material for this class was heavily borrowed from:
 
-------------------------------------------------------------------------
+-   Data Science with R by Garrett Grolemund:
+    https://garrettgman.github.io/tidying/
+-   R for data science by Hadley Wickham:
+    https://r4ds.had.co.nz/index.html
 
 ## Further Reading & Resources
 
-.large\[ \* R for data science https://r4ds.had.co.nz/index.html \*
-Advanced R by Hadley Wickam https://adv-r.hadley.nz/ \* Data Science
-with R by Garrett Grolemund https://garrettgman.github.io/tidying/\]
+-   R for data science https://r4ds.had.co.nz/index.html
+-   Advanced R by Hadley Wickam https://adv-r.hadley.nz/
+-   Data Science with R by Garrett Grolemund
+    https://garrettgman.github.io/tidying/
