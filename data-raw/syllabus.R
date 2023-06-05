@@ -1,5 +1,6 @@
 library(googlesheets4)
 library(here)
+library(readr)
 
 # contact jay if you need access to the class sheet below
 ss <- 'https://docs.google.com/spreadsheets/d/1MSu1YZdKk7LK9-m7EjzoMWggwlsEJ7dC1aiax85uvrE/edit#gid=1069962431'
