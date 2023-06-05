@@ -534,7 +534,7 @@ H1: 0.025</p>
 <span id="cb2-36"><a href="#cb2-36"></a></span>
 <span id="cb2-37"><a href="#cb2-37"></a><span class="fu">plot_grid</span>(p_none, p_bon, p_BH, p_FDR, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">nrow =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img data-src="stats-class-05_files/figure-html/unnamed-chunk-1-1.png" width="960"></p>
+<p><img data-src="stats-class-05_files/figure-revealjs/unnamed-chunk-1-1.png" width="960"></p>
 </div>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> rna_long, <span class="fu">aes</span>(<span class="at">x =</span> value, <span class="at">color =</span> type)) <span class="sc">+</span></span>
 <span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">stat_ecdf</span>() <span class="sc">+</span></span>
@@ -542,7 +542,7 @@ H1: 0.025</p>
 <span id="cb3-4"><a href="#cb3-4"></a>  <span class="fu">xlab</span>(<span class="st">"p-values"</span>) <span class="sc">+</span></span>
 <span id="cb3-5"><a href="#cb3-5"></a>  <span class="fu">ylab</span>(<span class="st">"cumulative fraction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img data-src="stats-class-05_files/figure-html/unnamed-chunk-1-2.png" width="960"></p>
+<p><img data-src="stats-class-05_files/figure-revealjs/unnamed-chunk-1-2.png" width="960"></p>
 </div>
 </div>
 </section></section>
@@ -1033,6 +1033,44 @@ H1: 0.025</p>
         ]
       });
     </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
       const toggleBodyColorMode = (bsSheetEl) => {
