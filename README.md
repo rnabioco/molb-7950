@@ -5,6 +5,13 @@ Materials for "MOLB 7950: Informatics for Molecular Biology".
 
 See <https://rnabioco.github.io/molb-7950> for the class page.
 
+## Installing local packages
+
+After cloning this repository, run `renv::restore()`, which will install 
+project packages locally.
+
+If you add new libraries to your content, run `renv::snapshot()` and be sure to commit the `renv.lock` file.
+
 ## Syllabus updates
 
 1.  Edit the "Syllabus" sheet on the [Google
