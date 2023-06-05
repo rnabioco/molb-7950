@@ -1,0 +1,431 @@
+---
+title: "Exercises-03"
+author: "Sujatha Jagannathan"
+date: "8/26/2020"
+output: html_document
+---
+
+```{r include=FALSE}
+library(tidyverse)
+library(knitr)
+```
+
+### Contact Info 
+Suja Jagannathan [sujatha.jagannathan@cuanschutz.edu](mailto:sujatha.jagannathan@cuanschutz.edu)
+
+### Office Hours
+Use https://calendly.com/molb7950 to schedule a time with a TA.
+
+<br/>
+
+### Learning Objectives for the R Bootcamp
+
+* Follow best coding practices (*class 1*)
+* Know the fundamentals of R programming (*class 1*)
+* Become familiar with "tidyverse" suite of packages
+    * tidyr: "Tidy" a messy dataset (*class 2*)
+    * dplyr: Transform data to derive new information (*class 3*)
+    * ggplot2: Visualize and communicate results (*class 4*)
+* Practice reproducible analysis using Rmarkdown (Rigor & Reproducibility) (*classes 1-5*)
+
+### Today's class outline - *class 3*
+
+* Introduce _dplyr_ & today's datasets (Exercise 1)
+* Review basic functions of _dplyr_
+    * core dplyr verbs: 
+        - `arrange` (Exercise 2)
+        - `filter` (Exercise 3)
+        - `select` (Exercise 4)
+        - `mutate` (Exercise 5)
+        - `summarise` (Exercise 6)
+    * modify scope of verbs using: `group_by` (Exercise 7)
+    * pipe: `%>%` (Exercise 5)
+    * Combining tables with dplyr: join functions, binding columns/rows, etc. (Exercise 8)
+    * ... and many others! `rename`, `count`, `add_row`, `add_column`, `distinct`, `sample_n`, `sample_frac`, `slice`, `pull` (Exercise 9)
+* Homework instructions
+
+------------------------------------------------------------------------------------------------------------
+
+### dplyr
+
+* _dplyr_ is a tidyverse package which provides a set of tools for efficiently manipulating datasets in R. 
+* Implemented in C++ and extremely fast even with large datasets. 
+* Follows the tidyverse grammar and philosophy; human-readable and intuitive
+* Different _dplyr_ verbs can be strung together using pipes `%>%`
+
+### Today's datasets
+
+* In this class, we will use one of the datasets that come with the `dplyr` package to explore all the functions provided by dplyr.  
+* `dplyr::starwars` data frame contains data about 87 characters from Starwars
+* `dplyr::band_members`, `dplyr::band_instruments`, `dplyr::band_instruments2` describe band members and instruments of the Beatles and Rolling Stones
+
+### Getting familiar with the data - Exercise 1
+
+```{r eval=FALSE}
+# dplyr::starwars
+  head(starwars)
+  starwars  
+  glimpse(starwars)
+  View(starwars)
+
+# dplyr::band_members 
+  band_members 
+  band_instruments
+  band_instruments2
+```
+
+---
+
+### dplyr package
+
+* `dplyr` is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges:
+  - `arrange()` changes the ordering of the rows.
+  - `filter()` picks cases based on their values.
+  - `select()` picks variables based on their names.
+  - `mutate()` adds new variables that are functions of existing variables
+  - `summarise()` reduces multiple values down to a single summary.
+  
+These all combine naturally with `group_by()` which allows you to perform any operation “by group”. 
+
+Pipes `%>%` allows different functions to be used together to create a workflow. `x %>% f(y)` turns into `f(x, y)`
+
+Source: https://dplyr.tidyverse.org/
+
+---
+
+### arrange - Syntax
+
+- `arrange()` to order rows by values of a column or columns (low to high). `desc()` orders high to low. 
+
+```{shw-code}
+arrange(data = ..., <colname>)
+```
+
+### arrange - Exercise 2
+
+```{r eval=FALSE}
+arrange(starwars, height) # default is to arrange in ascending order
+arrange(starwars, desc(height)) # arrange in descending order
+arrange(starwars, height, mass) # arrange by multiple columns
+```
+
+---
+
+### filter - Syntax
+
+- `filter()` chooses rows/cases where conditions are true.
+
+```{show-code}
+filter(data = ..., <condition>)
+```
+
+### filter - Exercise 3
+
+```{r eval=FALSE}
+filter(starwars, skin_color == "light")
+filter(starwars, height < 150)
+filter(starwars, mass > mean(mass, na.rm = TRUE))
+
+filter(starwars, is.na(hair_color))
+View(filter(starwars, is.na(hair_color))) # if you want to look at the filtered data in a table without creating a new table
+```
+
+* Most frequently used comparison operators are: >, <, >=, <=, == (equal), != (not equal), is.na(), !is.na(), and %in% (contained in a list). 
+
+```{r eval=FALSE}
+filter(starwars, skin_color %in% c("light", "fair", "pale")) # using %in%
+
+# can also store as a named vector and use %in% with the vector
+color <- c("light", "fair", "pale")
+filter(starwars, skin_color %in% color) # using %in%
+```
+
+* Conditions can be combined using & (and), | (or). 
+```{r eval=FALSE}
+filter(starwars, skin_color == "light" | eye_color == "brown") # using or
+filter(starwars, skin_color == "light" & eye_color == "brown") # using and
+```
+
+---
+
+### select - Syntax
+
+- `select` extracts one or more columns from a table 
+- `select_if()` to extract all columns of a particular type
+
+```{show-code}
+select(data = ..., <colname>)  
+select_if(data = ..., <condition>)
+```
+
+### select - Exercise 4
+
+```{r eval=FALSE}
+select(starwars, hair_color)
+select(starwars, -hair_color) # can also use not `!hair_color`
+select(starwars, hair_color, skin_color, eye_color)
+select(starwars, hair_color:eye_color) # select using x:y columns
+select(starwars, !(hair_color:eye_color)) # reverse selection using the not `!` operator
+select(starwars, ends_with("color")) # select by specific conditions are met by column names: starts_with, ends_with, contains... 
+
+select_if(starwars, is.numeric) # select_if to return all columns with numeric values
+```
+
+---
+
+### mutate - Syntax
+
+- `mutate()` to compute new columns
+
+Mutate has a LOT of variants. 
+<br/>
+```{r, echo = FALSE, out.width= '60%'}
+knitr::include_graphics("img/mutate.png")
+```
+<br/>
+Source: Rstudio cheatsheets
+<br/>
+```{show-code}
+mutate(data = ..., <newcolname> =  funs(<oldcolname>))
+mutate(data = ..., <colname>, funs(x))
+
+# using pipes! %>%
+data %>% mutate(<colname>, funs(x)) # this is useful when you need to use multiple functions to act sequentially on a dataframe. Input becomes obvious by leading with it. 
+```
+
+### mutate (& pipe %>%)- Exercise 5
+
+```{r eval=FALSE}
+# create a new column to display height in meters
+starwars %>% mutate(height_m = height / 100) # using pipe to feed data into the function
+
+# using the pipe to feed data into multiple functions sequentially
+starwars %>%
+  mutate(height_m = height / 100) %>% # this columns is always appended to the end of the table, by default
+  select(name, height_m, height, everything()) # using select to rearrange columns
+
+# mutate allows you to refer to columns that you’ve just created
+starwars %>%
+  mutate(height_m = height / 100,
+         BMI = mass / (height_m^2)) %>%
+  select(name, BMI, everything())
+
+# output needs to be saved into a new dataframe since dplyr does not "change" the original dataframe
+starwars_bmi <- starwars %>%
+                      mutate(height_m = height / 100,
+                             BMI = mass / (height_m^2)) %>%
+                      select(name, BMI, everything())
+
+# using if_else clauses with mutate
+starwars_height <- starwars %>%
+                      mutate(tall_short = if_else(
+                                            condition = height > 160, 
+                                            true = "tall", 
+                                            false = "short")) %>%
+                      select(name, tall_short, everything())
+```
+
+Why use pipes? So you don't have to create too many intermediate files! However, note that intermediate files _can_ be useful in the context of troubleshooting a pipeline. 
+
+
+### rowwise operations (if time permits)
+
+* dplyr (& tidyverse in general) is very easy to perform vectorized operations column-wise, and not so easy with row-wise operations. 
+* the function _rowwise()_ offers a solution to this
+* Let's look at an example:
+
+```{r eval=FALSE}
+# let's input data (same one used in yesterday's problem set)
+data <- read_csv(file = "data/data_transcript_exp_subset.csv")
+
+# calculate mean for each time point using mutate in a rowwise fashion!
+data_mean <- data %>% rowwise() %>% mutate(mean_0h = mean(c(rna_0h_rep1, rna_0h_rep2, rna_0h_rep3)), 
+                                           mean_14h = mean(c(rna_14h_rep1, rna_14h_rep2, rna_14h_rep3)))
+```
+More information here: https://dplyr.tidyverse.org/articles/rowwise.html
+
+---
+
+<br/>
+
+### Questions? 
+
+<br/>
+
+------------------------------------------------------------------------------------------------------------
+
+### summarise - Syntax
+
+- `summarise()` reduces multiple values down to a single summary.
+
+<br/>
+```{r, echo = FALSE, out.width= '60%'}
+knitr::include_graphics("img/summarise.png")
+```
+<br/>
+
+```{show-code}
+summarise(data = ..., <newcolname> =  funs(<oldcolname>))
+summarise_at(data = ..., vars(<cols), funs())
+
+```
+
+### summarise - Exercise 6
+
+```{r eval=FALSE}
+starwars %>% summarise(mean_height = mean(height, na.rm = TRUE))
+starwars %>% summarise_if(is.numeric, mean, na.rm = TRUE)
+starwars %>% summarise_at(vars(height:mass), mean, na.rm = TRUE)
+```
+
+* summarise() on its own is not terribly useful. But it becomes powerful when paired with group_by(). 
+
+---
+
+### group_by - Syntax
+
+* `group_by` reate a grouped copy of a table. 
+* This changes the unit of analysis from the complete dataset to individual groups. 
+* Then, when you use the dplyr verbs on a grouped data frame they’ll be automatically applied “by group”. 
+
+```{show-code}
+group_by(data = ..., <colname>)
+```
+
+### group_by + summarize - Exercise 7
+
+```{r eval=FALSE}
+starwars %>%
+  group_by(species)
+
+starwars %>%
+  group_by(species) %>% # group by species
+  summarise(
+    height = mean(height, na.rm = TRUE)
+  )
+
+starwars %>%
+  group_by(species, gender) %>% # group by multiple variables
+  summarise(
+    height = mean(height, na.rm = TRUE),
+    mass = mean(mass, na.rm = TRUE) # calculate multiple summaries
+  )
+```
+
+---
+
+<br/>
+
+### Questions? 
+
+<br/>
+
+------------------------------------------------------------------------------------------------------------
+
+### Combining tables
+
+- Combine variables (i.e. columns)
+    + `bind_cols()`
+    + `left_join()`
+    + `right_join()`
+    + `inner_join()`
+    + `full_join()`
+    
+- Combine cases (i.e. rows)
+    + `bind_rows()`
+    + `intersect()`
+    + `setdiff()`
+    + `union()`
+
+```{r, echo = FALSE, out.width= '100%'}
+knitr::include_graphics("img/combining-tables.png")
+```
+<br/>
+Source: Rstudio cheatsheets
+
+---
+
+### Combine variables and cases - pasting tables together - Syntax
+
+- `bind_cols()` to paste tables beside each other
+- `bind_rows()` to paste tables below each other as they are. 
+
+```{show-code}
+bind_cols(data1, data2) # should have same number of rows
+bind_rows(data1, data2) # should have same number of columns
+```
+
+### Combine variables - joining tables by a variable - Syntax
+
+- `left_join()` to join matching values from the right dataset to the left dataset
+- `right_join()` to join matching values from the left dataset to the right dataset
+- `inner_join()` to only join matching values present in both datasets
+- `full_join()` to join all values in both datasets
+
+```{show-code}
+left_join(data1, data2)
+left_join(data1, data2, by = ...) # if multiple columns match
+left_join(data1, data2, by = c("col1" = "col2")) # if the columns names that match are different
+```
+
+### Combine variables - joining tables by a variable - Exercise 8
+```{r eval=FALSE}
+band_members %>% left_join(band_instruments)
+band_members %>% right_join(band_instruments)
+band_members %>% inner_join(band_instruments)
+band_members %>% full_join(band_instruments) 
+band_members %>% full_join(band_instruments2) # this won't work
+band_members %>% full_join(band_instruments2, by = c("name" = "artist"))
+```
+
+* Joining tables is something you will do a LOT in genomic analyses.   
+* Things to watch out for are to:
+    - explicitly say which variable to join by
+    - making sure there aren't subtle difference between what you think of as "common" variables 
+    - eg. Paul vs. Paul M; ENST79286869869 vs ENST79286869869.12
+
+---
+
+### Other dplyr verbs
+
+There are many other dplyr verbs: `rename`, `count`, `add_row`, `add_column`, `distinct`, `sample_n`, `sample_frac`, `slice`, `pull`
+
+Check out the dplyr cheatsheet to learn more! 
+
+### rename - Syntax
+
+- `rename()` renames the variables in a table. Keeps all columns. `select()` can also do this, but with some caveats. 
+
+```{show-code}
+rename(data = ..., <colname>)
+```
+
+### rename - Exercise 9
+```{r eval=FALSE}
+band_instruments2
+
+rename(band_instruments2, name = artist)
+
+select(band_instruments2, name = artist) # select drops the rest of the columns
+select(band_instruments2, name = artist, everything()) # this fixes it, but one extra thing to remember
+```
+
+------------------------------------------------------------------------------------------------------------
+
+### Problem Set and Grading Rubric
+
+* Today's problem set assignment will allow you to practice the tidyr tools we learned in class today. 
+* There is a total of 4 exercises, each with 5 points for a total of 20 points. 
+* Grading rubric listed at the beginning of the problem set.
+
+### Acknowledgements
+
+The material for this class was heavily borrowed from: 
+* dplyr vignette: https://dplyr.tidyverse.org/index.html
+* R for data science by Hadley Wickham: https://r4ds.had.co.nz/index.html
+
+### Further Reading & Resources 
+
+* R for data science https://r4ds.had.co.nz/index.html
+* Advanced R by Hadley Wickam https://adv-r.hadley.nz/
+* Data Science with R by Garrett Grolemund https://garrettgman.github.io/tidying/

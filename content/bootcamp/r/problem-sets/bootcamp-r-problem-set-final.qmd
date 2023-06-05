@@ -1,0 +1,137 @@
+---
+title: "bootcamp-r-problem-set-final"
+author: "Insert your name here"
+date: "8/27/2020"
+output: html_document
+---
+
+### Problem Set
+
+Each problem below is worth different points, depending on the number of steps involved and the difficulty of the problem.
+
+Use the data files in the `data/` directory to answer the questions.
+
+For this problem set, you are allowed to help each other, but you are not allowed to post correct answers in slack.
+
+**The problem set is due 12pm on Aug 31.**
+
+### Grading rubric
+
+- Everything is good: full points
+- Partially correct answer: depends on how many steps are correct
+- Reasonable attempt: half points
+
+#### Question 1 - Load packages and import data **2 points**
+
+1) Load packages tidyverse, knitr, ggthemes, cowplot, viridis, ggridges.  
+2) Import datasets: `data/data_rna_protein.csv`, `data/rp_genes.csv`, & `data/target_genes.csv`
+
+Here is some information about the datasets for context:
+   a) `data_rna_protein.csv`: This is a combined dataset from an RNAseq and SILAC proteomics experiment, where a transcription factor (TF) was differentially expressed and the fold change in RNA and protein calculated between TF-expressing and non-expressing cells.   
+   b) `rp_genes`: This contains ribosomal genes, which we will use as a group of "housekeeping" genes as control.   
+   c) `target_genes`: This contains genes which are direct transcriptional targets of the transcription factor we study.   
+```{r, q1}
+
+
+
+```
+
+<br/>
+
+#### Question 2 - Data exploration & wrangling **8 points**
+
+Using the imported dataset `data_rna_protein`, carry out the following:  
+
+1) Print all column names and glimpse the data  
+2) Select only the following columns: `geneid`, `iDUX4_logFC`, `iDUX4_fdr`, `hl.ratio`, and `pval`
+3) Rename them as follows: rna_FC = iDUX4_logFC, rna_pval = iDUX4_fdr, protein_FC = hl.ratio, protein_pval = pval  
+4) Mutate all the numeric values to only have 4 decimals (Hint: We did not cover this in class. Time to exercise your Google skills! "how to reduce decimal points in an R dataframe")  
+5) Drop all rows with `NA` values in them  
+6) Remove duplicate rows  
+7) Arrange the table in the descending order of rna_FC first, and then protein_FC  
+8) Conduct steps 2-7 by piping the output of one step to another (i.e a single workflow & remember to comment). Save the output of this workflow into a new object called `data`  
+```{r, q2}
+
+
+              
+```
+
+<br/>
+
+#### Question 3 - Data transformation **6 points**
+
+Using the output from the above question, `data`, do the following:
+
+Create a new column called `gene_status` (Hint: using `mutate`) by looking up each geneid in `data` in the lists `rp_genes` and `target_genes` and setting the `gene_status` to be "rp_gene" if a gene is found in that list, or "target_gene" if it is found in that list, and if not, calling it "other". Save the output of this workflow into a new object called `data_genestatus`  
+
+This problem carries 6 points because it is tricky. If you run into issues, think about the following:  
+1) This requires the use of a *nested* `if_else` function in combination with the `%in%` logic we covered in class.   
+2) What kind of data object does `%in%` work on? When you imported `rp_genes` and `target_genes`, what data structure did they have? How can you make them play nice with `%in%`?  
+3) We only covered a single if_else clause in class. Use google to see examples of nesting multiple if_else clauses. And mind your parantheses!   
+
+```{r, q3}
+
+
+
+```
+
+<br/>
+
+#### Question 4 - How well do the overall `rna_FC` and `protein_FC` values correlate in this experiment? **5 points**
+
+Using the output from the above question, `data_genestatus`, do the following:  
+1) Create a scatter plot (via ggplot) of `rna_FC` vs `protein_FC` - observe how the points scatter  
+2) Add a line to the plot that would indicate perfect 1:1 correlation (Note: this is obviously an unrealistic expectation for any experiment).   
+3) Add geom_smooth (method = 'lm', and formula = y~x) -- look up these options so you know what you are doing -- Observe how the x=y line deviates from your geom_smooth line.   
+4) Calculate the spearman correlation coefficient (Hint: This uses a base R math function called `cor` - Use help() or Google to learn more and how to specify method as `spearman`)  
+5) Using all of the information from above, comment on the correlation between `rna_FC` and `protein_FC`.   
+
+```{r, q4}
+
+
+
+```
+
+<br/> 
+
+#### Question 5 - How does the RNA and protein foldchange differ for the genes under the different categories of "housekeeping", "target" and "other"? **6 points**
+
+Using `data_genestatus`, do the following:  
+1) Drop th columns `rna_pval` and `protein_pval`. Make the table long such that both rna_FC and protein_FC values go in a single column (called `foldchange`), and create a new column called `molecule` that contains the information about whether the `foldchange` is for `rna` or `protein`. Clean up the `molecule` column by separating out the "_FC" and dropping it (look up `extra = "drop"` option of `separate`). (Bonus: You can use the `stringr` package to remove "_FC". You could try that if you want for a bonus point!)  
+- Let's call the dataframe you just created `data_genestatus_long`  
+2) Group the cases in `data_genestatus_long` by `molecule` and `genestatus` & summarise the `foldchange` values using `mean`  
+4) Using ggridges, create a stacked density plot where `x = foldchange` and `y = genestatus`, `fill = genestatus` and facet_wrap the plots by `molecule`  
+5) Using ggplot, create a box-and-whisker plot with `genestatus` on x-axis, `foldchange` on Y-axis, fill by `genestatus` and facet_wrap'ed by `molecule`  
+6) Based on the information you gleaned from #1 and #2, comment on what the results imply. Remember: `rna_FC` is the log2 RNA fold change and `protein_FC` is the log2 protein fold change between cells that express our transcription factor of interest versus not.  
+
+
+```{r, q5}
+
+
+
+```
+
+<br/>
+
+#### Question 6 - Create a multi-panel, publication-quality figure **3 points**
+
+This figure will be a composite of the scatter plot you made for Q4 (panel A), the ridge plot you made in Q5 (panel B), and the box-and-whisker plot you made, also in Q5 (panel C).  
+1) Remake all three plots with:    
+    A) a new theme (you can pick or create your favorite theme using one of the ggthemes styles as a basis)   
+    B) Add informative labels, titles, and legends   
+Save these new plots as ggplot objects `panelA`, `panelB`, and `panelC`
+2) Combine these panels into a single-column figure using `plot_grid`   
+3) Save this plot in your `img` folder.   
+
+Bonus: Make this figure aesthetically pleasing in terms of aspect ratio, position of legends, relative text size, etc. Each of these requires you to go down a rabbit hole, but you will learn from doing so. No points for doing this - just for fun!   
+
+```{r, q6}
+
+
+
+```
+
+**** the end **** 
+
+<br/>
+
