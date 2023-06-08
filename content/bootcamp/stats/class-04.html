@@ -340,7 +340,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#references-and-resources" id="toc-references-and-resources" class="nav-link" data-scroll-target="#references-and-resources">References and resources</a></li>
   </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action">Report an issue</a></p></div></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="class-04.slides.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -523,31 +523,69 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># we are reading the data directly from the internet</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>biochem <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>()</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># simplify names a bit more</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(biochem) <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">"biochem_"</span>, <span class="at">replacement =</span> <span class="st">""</span>, <span class="fu">colnames</span>(biochem))</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># we are going to simplify this a bit and only keep some columns</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">colnames</span>(biochem)[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">6</span>,<span class="dv">9</span>,<span class="dv">14</span>,<span class="dv">15</span>,<span class="dv">24</span><span class="sc">:</span><span class="dv">28</span>)]</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>biochem <span class="ot">&lt;-</span> biochem[,keep]</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># get weights for each individual mouse</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># careful: did not come with column names</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>weight <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight"</span>, <span class="at">col_names =</span> F, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># add column names</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(weight) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"subject_name"</span>,<span class="st">"weight"</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co"># add weight to biochem table and get rid of NAs</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>biochem <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(biochem, weight, <span class="at">by=</span><span class="st">"subject_name"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># explore the data a bit</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># colnames(biochem)</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co"># str(biochem)</span></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co"># View(biochem)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00C4&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00D6&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00DC&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00E4&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00F6&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00FC&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00DF&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00C6&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00E6&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00D8&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00F8&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00C5&gt;' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in FUN(X[[i]], ...): unable to translate '&lt;U+00E5&gt;' to native encoding</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># simplify names a bit more</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(biochem) <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">"biochem_"</span>, <span class="at">replacement =</span> <span class="st">""</span>, <span class="fu">colnames</span>(biochem))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># we are going to simplify this a bit and only keep some columns</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">colnames</span>(biochem)[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">6</span>,<span class="dv">9</span>,<span class="dv">14</span>,<span class="dv">15</span>,<span class="dv">24</span><span class="sc">:</span><span class="dv">28</span>)]</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>biochem <span class="ot">&lt;-</span> biochem[,keep]</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># get weights for each individual mouse</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># careful: did not come with column names</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>weight <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight"</span>, <span class="at">col_names =</span> F, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="co"># add column names</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(weight) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"subject_name"</span>,<span class="st">"weight"</span>)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co"># add weight to biochem table and get rid of NAs</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>biochem <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(biochem, weight, <span class="at">by=</span><span class="st">"subject_name"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="co"># explore the data a bit</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="co"># colnames(biochem)</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co"># str(biochem)</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="co"># View(biochem)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 </section>
@@ -576,52 +614,52 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="relationship-between-mouse-weight-and-cholesterol" class="level2">
 <h2 class="anchored" data-anchor-id="relationship-between-mouse-weight-and-cholesterol">Relationship between mouse weight and cholesterol</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fitting a line weight vs intercept (mean weight)</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fit_W <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> , <span class="at">data =</span> biochem)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># augment data to add fit/residuals</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>biochem_W <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_W, <span class="at">data =</span> biochem)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#plot data</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>p_wch <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> biochem, <span class="fu">aes</span>(<span class="at">y =</span> weight, <span class="at">x =</span> tot_cholesterol)) <span class="sc">+</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span>.<span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span>lm, <span class="at">col =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>() <span class="sc">+</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>p_WvInt_res <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> biochem_W, <span class="fu">aes</span>(<span class="at">x =</span> tot_cholesterol, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> biochem_W<span class="sc">$</span>.fitted, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">size=</span>.<span class="dv">5</span>) <span class="sc">+</span> <span class="co"># plot linear model fit</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span>.<span class="dv">5</span>, <span class="fu">aes</span>(<span class="at">color =</span> .resid)) <span class="sc">+</span> <span class="co"># plot height as points and color code by the value of the residual</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">mid =</span> <span class="st">"black"</span>, <span class="at">high =</span> <span class="st">"yellow"</span>) <span class="sc">+</span> <span class="co"># color code for plotting residuals</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">xend =</span> tot_cholesterol, <span class="at">yend =</span> .fitted), <span class="at">alpha =</span> .<span class="dv">25</span>) <span class="sc">+</span> <span class="co"># plot line representing residuals</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fitting a line weight vs intercept (mean weight)</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>fit_W <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> , <span class="at">data =</span> biochem)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># augment data to add fit/residuals</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>biochem_W <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_W, <span class="at">data =</span> biochem)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#plot data</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>p_wch <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> biochem, <span class="fu">aes</span>(<span class="at">y =</span> weight, <span class="at">x =</span> tot_cholesterol)) <span class="sc">+</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span>.<span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span>lm, <span class="at">col =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>() <span class="sc">+</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>p_WvInt_res <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> biochem_W, <span class="fu">aes</span>(<span class="at">x =</span> tot_cholesterol, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> biochem_W<span class="sc">$</span>.fitted, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">size=</span>.<span class="dv">5</span>) <span class="sc">+</span> <span class="co"># plot linear model fit</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span>.<span class="dv">5</span>, <span class="fu">aes</span>(<span class="at">color =</span> .resid)) <span class="sc">+</span> <span class="co"># plot height as points and color code by the value of the residual</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">mid =</span> <span class="st">"black"</span>, <span class="at">high =</span> <span class="st">"yellow"</span>) <span class="sc">+</span> <span class="co"># color code for plotting residuals</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">xend =</span> tot_cholesterol, <span class="at">yend =</span> .fitted), <span class="at">alpha =</span> .<span class="dv">25</span>) <span class="sc">+</span> <span class="co"># plot line representing residuals</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-ℹ Please use `linewidth` instead.</code></pre>
+i Please use `linewidth` instead.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fitting a line weight vs icholesterol</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>fit_WvC <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">data =</span> biochem,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> tot_cholesterol)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># augment data to add fit/residuals</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>biochem_WvC <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_WvC, <span class="at">data =</span> biochem)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># plot data</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>p_WvC_res <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> biochem_WvC, <span class="fu">aes</span>(<span class="at">x =</span> tot_cholesterol, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span>.<span class="dv">5</span>, <span class="fu">aes</span>(<span class="at">color =</span> .resid)) <span class="sc">+</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span>lm, <span class="at">col =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">mid =</span> <span class="st">"black"</span>, <span class="at">high =</span> <span class="st">"yellow"</span>) <span class="sc">+</span> <span class="co"># color code</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">xend =</span> tot_cholesterol, <span class="at">yend =</span> .fitted), <span class="at">alpha =</span> .<span class="dv">1</span>) <span class="sc">+</span> <span class="co"># plot line representing residuals</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>biochem_WvC_rsq <span class="ot">&lt;-</span> fit_WvC <span class="sc">%&gt;%</span> <span class="fu">glance</span>() <span class="sc">%&gt;%</span> <span class="fu">pull</span>(r.squared)</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>biochem_WvC_pval <span class="ot">&lt;-</span> fit_WvC <span class="sc">%&gt;%</span> <span class="fu">glance</span>() <span class="sc">%&gt;%</span> <span class="fu">pull</span>(p.value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fitting a line weight vs icholesterol</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>fit_WvC <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">data =</span> biochem,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> tot_cholesterol)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co"># augment data to add fit/residuals</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>biochem_WvC <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_WvC, <span class="at">data =</span> biochem)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co"># plot data</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>p_WvC_res <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> biochem_WvC, <span class="fu">aes</span>(<span class="at">x =</span> tot_cholesterol, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span>.<span class="dv">5</span>, <span class="fu">aes</span>(<span class="at">color =</span> .resid)) <span class="sc">+</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span>lm, <span class="at">col =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">mid =</span> <span class="st">"black"</span>, <span class="at">high =</span> <span class="st">"yellow"</span>) <span class="sc">+</span> <span class="co"># color code</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">xend =</span> tot_cholesterol, <span class="at">yend =</span> .fitted), <span class="at">alpha =</span> .<span class="dv">1</span>) <span class="sc">+</span> <span class="co"># plot line representing residuals</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>biochem_WvC_rsq <span class="ot">&lt;-</span> fit_WvC <span class="sc">%&gt;%</span> <span class="fu">glance</span>() <span class="sc">%&gt;%</span> <span class="fu">pull</span>(r.squared)</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>biochem_WvC_pval <span class="ot">&lt;-</span> fit_WvC <span class="sc">%&gt;%</span> <span class="fu">glance</span>() <span class="sc">%&gt;%</span> <span class="fu">pull</span>(p.value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(p_WvInt_res, p_WvC_res, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"weight by intercept"</span>,<span class="st">"weight by cholesterol"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(p_WvInt_res, p_WvC_res, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"weight by intercept"</span>,<span class="st">"weight by cholesterol"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
 </div>
@@ -684,10 +722,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="class-exercise-1"><strong>Class exercise 1</strong>:</h3>
 <p>Which of these are valid ways to calculate <span class="math inline">\(SS_{mean}\)</span> from <code>biochem_W</code>?</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A. sum((biochem_W$weight - biochem_W$.fitted)^2)  </span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># B. sum((biochem_W$weight - biochem_W$.resid)^2)    </span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># C. sum(biochem_W$.resid^2)  </span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># D. sum((biochem_W$weight - mean(biochem_W$weight))^2)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A. sum((biochem_W$weight - biochem_W$.fitted)^2)  </span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co"># B. sum((biochem_W$weight - biochem_W$.resid)^2)    </span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># C. sum(biochem_W$.resid^2)  </span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co"># D. sum((biochem_W$weight - mean(biochem_W$weight))^2)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 </section>
@@ -697,19 +735,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="compare-ss_fit-vs-ss_fit-weight-by-gender" class="level3">
 <h3 class="anchored" data-anchor-id="compare-ss_fit-vs-ss_fit-weight-by-gender">Compare <span class="math inline">\(SS_{fit}\)</span> vs <span class="math inline">\(SS_{fit}\)</span> weight by gender</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fitting a line weight vs intercept + gender</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>fit_WvG <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> gender , <span class="at">data =</span> biochem)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># augment (i.e. add fitted and residual values)</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>biochem_WvG <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_WvG, <span class="at">data =</span> biochem)</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># plot of data with mean and colored by residuals</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>p_WvG_res <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(biochem_WvG, <span class="fu">aes</span>(<span class="at">x =</span> gender, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(), <span class="fu">aes</span>(<span class="at">color =</span> .resid)) <span class="sc">+</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">mid =</span> <span class="st">"black"</span>, <span class="at">high =</span> <span class="st">"yellow"</span>) <span class="sc">+</span> <span class="co"># color code for plotting residuals</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span>.<span class="dv">5</span>, <span class="at">xend=</span><span class="fl">1.5</span>, <span class="at">y=</span>fit_WvG<span class="sc">$</span>coefficients[<span class="dv">1</span>], <span class="at">yend=</span>fit_WvG<span class="sc">$</span>coefficients[<span class="dv">1</span>]), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">1.5</span>, <span class="at">xend=</span><span class="fl">2.5</span>, <span class="at">y=</span><span class="fu">sum</span>(fit_WvG<span class="sc">$</span>coefficients)), <span class="at">yend=</span><span class="fu">sum</span>(fit_WvG<span class="sc">$</span>coefficients), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fitting a line weight vs intercept + gender</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>fit_WvG <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> gender , <span class="at">data =</span> biochem)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># augment (i.e. add fitted and residual values)</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>biochem_WvG <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_WvG, <span class="at">data =</span> biochem)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co"># plot of data with mean and colored by residuals</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>p_WvG_res <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(biochem_WvG, <span class="fu">aes</span>(<span class="at">x =</span> gender, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(), <span class="fu">aes</span>(<span class="at">color =</span> .resid)) <span class="sc">+</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">mid =</span> <span class="st">"black"</span>, <span class="at">high =</span> <span class="st">"yellow"</span>) <span class="sc">+</span> <span class="co"># color code for plotting residuals</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span>.<span class="dv">5</span>, <span class="at">xend=</span><span class="fl">1.5</span>, <span class="at">y=</span>fit_WvG<span class="sc">$</span>coefficients[<span class="dv">1</span>], <span class="at">yend=</span>fit_WvG<span class="sc">$</span>coefficients[<span class="dv">1</span>]), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">1.5</span>, <span class="at">xend=</span><span class="fl">2.5</span>, <span class="at">y=</span><span class="fu">sum</span>(fit_WvG<span class="sc">$</span>coefficients)), <span class="at">yend=</span><span class="fu">sum</span>(fit_WvG<span class="sc">$</span>coefficients), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
@@ -733,13 +771,13 @@ For the weight by gender model (left) we fit <strong>2</strong> lines (i.e.&nbsp
 <p>Since we don’t want to calculate any of this by hand, the framework needs to be flexible such that a computer can execute for different flavors of comparison (cont y vs cont x, cont y vs 2 or more categorical x, …).</p>
 <p>Let’s break this down and focus on just a few players.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>p_exc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>p_exc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="class-04_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="768"></p>
 </div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(data = biochem_WvG, aes(.resid, color=gender)) +</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_density() + </span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_minimal()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(data = biochem_WvG, aes(.resid, color=gender)) +</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_density() + </span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_minimal()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Remember that:<br>
 <span class="math inline">\(weight\)</span> is <span class="math inline">\(y\)</span><br>
@@ -759,8 +797,8 @@ For the weight by gender model (left) we fit <strong>2</strong> lines (i.e.&nbsp
 <div class="cell">
 <div class="cell-output-display">
 
-<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-78b17bc0e008089db174" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-78b17bc0e008089db174">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4"],["A048054885","A067109771","A048274362","A066822351"],[24,25.5,13.4,13.2],["F","F","M","M"],[18.07586980920314,18.07586980920314,22.40594837261504,22.40594837261504],[5.924130190796859,7.424130190796859,-9.005948372615036,-9.205948372615037]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>subject_name<\/th>\n      <th>weight<\/th>\n      <th>gender<\/th>\n      <th>.fitted<\/th>\n      <th>.resid<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-d26f4c23278b2d84cc17" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-d26f4c23278b2d84cc17">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4"],["A048054885","A067109771","A048274362","A066822351"],[24,25.5,13.4,13.2],["F","F","M","M"],[18.07586980920313,18.07586980920313,22.40594837261509,22.40594837261509],[5.924130190796866,7.424130190796866,-9.005948372615093,-9.205948372615094]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>subject_name<\/th>\n      <th>weight<\/th>\n      <th>gender<\/th>\n      <th>.fitted<\/th>\n      <th>.resid<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":[2,4,5]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <hr>
@@ -791,12 +829,12 @@ For the weight by gender model (left) we fit <strong>2</strong> lines (i.e.&nbsp
 <p><span class="math inline">\(SS_{fit} = \sum_{i=1}^{n} (data - line)^2\)</span></p>
 <p>Which of these are valid ways to calculate <span class="math inline">\(SS_{fit}\)</span> from <code>biochem_WvG</code>?</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A. sum(biochem_WvG$.resid^2)  </span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># B. sum((biochem_WvG$weight - biochem_WvG$.resid)^2)    </span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># C. sum((biochem_WvG$weight - biochem_WvG$.fitted)^2)  </span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># D. sum((biochem_WvG$weight - mean(biochem_WvG$weight))^2)</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>p_WvG_res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A. sum(biochem_WvG$.resid^2)  </span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="co"># B. sum((biochem_WvG$weight - biochem_WvG$.resid)^2)    </span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co"># C. sum((biochem_WvG$weight - biochem_WvG$.fitted)^2)  </span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># D. sum((biochem_WvG$weight - mean(biochem_WvG$weight))^2)</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>p_WvG_res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="class-04_files/figure-html/exercise 2-1.png" class="img-fluid" width="672"></p>
 </div>
@@ -814,29 +852,29 @@ For the weight by gender model (left) we fit <strong>2</strong> lines (i.e.&nbsp
 <section id="sanity-check" class="level2">
 <h2 class="anchored" data-anchor-id="sanity-check">4. Sanity check</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sum of squares of the residuals for the simple model</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>ss.mean <span class="ot">&lt;-</span> <span class="fu">sum</span>(biochem_W<span class="sc">$</span>.resid<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># sum of squares of the residuals for the complex model</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>ss.fit <span class="ot">&lt;-</span> <span class="fu">sum</span>(biochem_WvG<span class="sc">$</span>.resid<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="do">#### COEFFICIENTS NEEL</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co"># number of paramters in simple model</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>pmean <span class="ot">&lt;-</span> <span class="dv">1</span> </span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co"># number of paramters in complex model</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>pfit <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co"># F-value</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>biochem_WvG_F <span class="ot">&lt;-</span> ((ss.mean <span class="sc">-</span> ss.fit) <span class="sc">/</span> (pfit <span class="sc">-</span> <span class="dv">1</span>)) <span class="sc">/</span> </span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  (ss.fit <span class="sc">/</span> (<span class="fu">nrow</span>(biochem_WvG) <span class="sc">-</span> pfit))</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>biochem_WvG_F </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sum of squares of the residuals for the simple model</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>ss.mean <span class="ot">&lt;-</span> <span class="fu">sum</span>(biochem_W<span class="sc">$</span>.resid<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># sum of squares of the residuals for the complex model</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>ss.fit <span class="ot">&lt;-</span> <span class="fu">sum</span>(biochem_WvG<span class="sc">$</span>.resid<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="do">#### COEFFICIENTS NEEL</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co"># number of paramters in simple model</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>pmean <span class="ot">&lt;-</span> <span class="dv">1</span> </span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="co"># number of paramters in complex model</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>pfit <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="co"># F-value</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>biochem_WvG_F <span class="ot">&lt;-</span> ((ss.mean <span class="sc">-</span> ss.fit) <span class="sc">/</span> (pfit <span class="sc">-</span> <span class="dv">1</span>)) <span class="sc">/</span> </span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>  (ss.fit <span class="sc">/</span> (<span class="fu">nrow</span>(biochem_WvG) <span class="sc">-</span> pfit))</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>biochem_WvG_F </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1296.507</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glance</span>(fit_WvG) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(statistic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glance</span>(fit_WvG) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(statistic)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   value 
 1296.507 </code></pre>
@@ -845,29 +883,29 @@ For the weight by gender model (left) we fit <strong>2</strong> lines (i.e.&nbsp
 <hr>
 <p>Let’s take a look at the statistic and p-values:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fit_WvG_stats <span class="ot">&lt;-</span> <span class="fu">tidy</span>(fit_WvG) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(term<span class="sc">==</span><span class="st">"genderM"</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(statistic, p.value)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># to run a t.test in R we need numeric vectors for each of our groups of interest</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>male_weight_t <span class="ot">&lt;-</span> biochem_WvG <span class="sc">%&gt;%</span> <span class="fu">filter</span>(gender<span class="sc">==</span><span class="st">"M"</span>) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(weight)</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>female_weight_t <span class="ot">&lt;-</span> biochem_WvG <span class="sc">%&gt;%</span> <span class="fu">filter</span>(gender<span class="sc">==</span><span class="st">"F"</span>) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(weight)</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>trad_t <span class="ot">&lt;-</span> <span class="fu">t.test</span>(male_weight_t, female_weight_t, <span class="at">var.equal =</span> T)</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>trad_WvG_stats <span class="ot">&lt;-</span> <span class="fu">tidy</span>(trad_t) <span class="sc">%&gt;%</span> <span class="fu">select</span>(statistic, p.value)</span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>fit_WvG_stats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>fit_WvG_stats <span class="ot">&lt;-</span> <span class="fu">tidy</span>(fit_WvG) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(term<span class="sc">==</span><span class="st">"genderM"</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(statistic, p.value)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co"># to run a t.test in R we need numeric vectors for each of our groups of interest</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>male_weight_t <span class="ot">&lt;-</span> biochem_WvG <span class="sc">%&gt;%</span> <span class="fu">filter</span>(gender<span class="sc">==</span><span class="st">"M"</span>) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(weight)</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>female_weight_t <span class="ot">&lt;-</span> biochem_WvG <span class="sc">%&gt;%</span> <span class="fu">filter</span>(gender<span class="sc">==</span><span class="st">"F"</span>) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(weight)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>trad_t <span class="ot">&lt;-</span> <span class="fu">t.test</span>(male_weight_t, female_weight_t, <span class="at">var.equal =</span> T)</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>trad_WvG_stats <span class="ot">&lt;-</span> <span class="fu">tidy</span>(trad_t) <span class="sc">%&gt;%</span> <span class="fu">select</span>(statistic, p.value)</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>fit_WvG_stats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 2
+<pre><code># A tibble: 1 x 2
   statistic   p.value
       &lt;dbl&gt;     &lt;dbl&gt;
 1      36.0 9.25e-214</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>trad_WvG_stats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>trad_WvG_stats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 2
+<pre><code># A tibble: 1 x 2
   statistic   p.value
       &lt;dbl&gt;     &lt;dbl&gt;
 1      36.0 9.25e-214</code></pre>
@@ -882,41 +920,41 @@ For the weight by gender model (left) we fit <strong>2</strong> lines (i.e.&nbsp
 <h2 class="anchored" data-anchor-id="one-way-anova">One-way ANOVA</h2>
 <p>Let’s compare the <span class="math inline">\(weight\)</span> by <span class="math inline">\(family\)</span>, but only for a few selected families.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># biochem %&gt;% </span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(family) %&gt;%</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   count(family) %&gt;% </span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrage(-n) %&gt;%</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   View()</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>bigfams <span class="ot">&lt;-</span> biochem <span class="sc">%&gt;%</span> </span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(family) <span class="sc">%&gt;%</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(family) <span class="sc">%&gt;%</span></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n<span class="sc">&gt;</span><span class="dv">10</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(family)</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>biochem_bigfams <span class="ot">&lt;-</span> biochem <span class="sc">%&gt;%</span></span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(family <span class="sc">%in%</span> bigfams)</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="co"># i have pre-selected some families to compare</span></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>myfams <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"B1.5:E1.4(4) B1.5:A1.4(5)"</span>,</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="st">"F1.3:A1.2(3) F1.3:E2.2(3)"</span>,</span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="st">"A1.3:D1.2(3) A1.3:H1.2(3)"</span>,</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="st">"D5.4:G2.3(4) D5.4:C4.3(4)"</span>)</span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="co"># only keep the familys in myfams</span></span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>fam_data <span class="ot">&lt;-</span> biochem_bigfams <span class="sc">%&gt;%</span></span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(family <span class="sc">%in%</span> myfams) <span class="sc">%&gt;%</span></span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">droplevels</span>() </span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a><span class="co"># simplify family names and make factor</span></span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>fam_data<span class="sc">$</span>family <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">..*"</span>, </span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>                        <span class="at">replacement =</span> <span class="st">""</span>,</span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>                        <span class="at">x =</span> fam_data<span class="sc">$</span>family) <span class="sc">%&gt;%</span></span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>  as.factor</span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a><span class="co"># make B1 the reference (most similar to overall mean)</span></span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>fam_data<span class="sc">$</span>family <span class="ot">&lt;-</span> <span class="fu">relevel</span>(<span class="at">x =</span> fam_data<span class="sc">$</span>family, <span class="at">ref =</span> <span class="st">"B1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># biochem %&gt;% </span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(family) %&gt;%</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   count(family) %&gt;% </span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrage(-n) %&gt;%</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   View()</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>bigfams <span class="ot">&lt;-</span> biochem <span class="sc">%&gt;%</span> </span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(family) <span class="sc">%&gt;%</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(family) <span class="sc">%&gt;%</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n<span class="sc">&gt;</span><span class="dv">10</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(family)</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>biochem_bigfams <span class="ot">&lt;-</span> biochem <span class="sc">%&gt;%</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(family <span class="sc">%in%</span> bigfams)</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a><span class="co"># i have pre-selected some families to compare</span></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>myfams <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"B1.5:E1.4(4) B1.5:A1.4(5)"</span>,</span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a><span class="st">"F1.3:A1.2(3) F1.3:E2.2(3)"</span>,</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a><span class="st">"A1.3:D1.2(3) A1.3:H1.2(3)"</span>,</span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a><span class="st">"D5.4:G2.3(4) D5.4:C4.3(4)"</span>)</span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a><span class="co"># only keep the familys in myfams</span></span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>fam_data <span class="ot">&lt;-</span> biochem_bigfams <span class="sc">%&gt;%</span></span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(family <span class="sc">%in%</span> myfams) <span class="sc">%&gt;%</span></span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">droplevels</span>() </span>
+<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a><span class="co"># simplify family names and make factor</span></span>
+<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>fam_data<span class="sc">$</span>family <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">..*"</span>, </span>
+<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>                        <span class="at">replacement =</span> <span class="st">""</span>,</span>
+<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>                        <span class="at">x =</span> fam_data<span class="sc">$</span>family) <span class="sc">%&gt;%</span></span>
+<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>  as.factor</span>
+<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a><span class="co"># make B1 the reference (most similar to overall mean)</span></span>
+<span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a>fam_data<span class="sc">$</span>family <span class="ot">&lt;-</span> <span class="fu">relevel</span>(<span class="at">x =</span> fam_data<span class="sc">$</span>family, <span class="at">ref =</span> <span class="st">"B1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Model: <span class="math inline">\(y_{i} = \beta_0 \cdot 1+ \beta_1 \cdot x_{i}\)</span></p>
 <p>Null Hypothesis: <span class="math inline">\(\mathcal{H}_0: \beta_1 = 0\)</span></p>
@@ -927,44 +965,44 @@ For the weight by gender model (left) we fit <strong>2</strong> lines (i.e.&nbsp
 <p>Below is an example depicting 6 observations with 2 from each of 3 families:</p>
 <p><span class="math inline">\(\begin{bmatrix} y_{1} \\ y_{2} \\ y_{3} \\y_{4} \\y_{5} \\y_{5} \end{bmatrix} = \begin{bmatrix} 1 &amp; 0 &amp; 0 \\ 1 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 \\ 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 1 \\ 0 &amp; 0 &amp; 1 \\ \end{bmatrix} \cdot \begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix} + \begin{bmatrix} e_{1} \\ e_{2} \\ e_{3} \\e_{4} \\e_{5} \\e_{6} \end{bmatrix}\)</span></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fitting a line weight vs intercept + family</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>fit_WvFam <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> family, <span class="at">data =</span> fam_data)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co"># augment (i.e. add fitted and residual values)</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>biochem_WvFam <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_WvFam, fam_data)</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>mean_B1 <span class="ot">&lt;-</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">1</span>]</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>mean_A1 <span class="ot">&lt;-</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">2</span>]</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>mean_D5 <span class="ot">&lt;-</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">3</span>]</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>mean_F1 <span class="ot">&lt;-</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">4</span>]</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="co"># plot of data with mean and colored by residuals</span></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>p_WvFam_res <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(biochem_WvFam, <span class="fu">aes</span>(<span class="at">x =</span> family, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(), <span class="fu">aes</span>(<span class="at">color =</span> .resid)) <span class="sc">+</span></span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span>.<span class="dv">5</span>, <span class="at">xend=</span><span class="fl">1.5</span>, <span class="at">y=</span>mean_B1, <span class="at">yend=</span>mean_B1), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">1.5</span>, <span class="at">xend=</span><span class="fl">2.5</span>, <span class="at">y=</span>mean_A1, <span class="at">yend=</span>mean_A1), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">2.5</span>, <span class="at">xend=</span><span class="fl">3.5</span>, <span class="at">y=</span>mean_D5, <span class="at">yend=</span>mean_D5), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">3.5</span>, <span class="at">xend=</span><span class="fl">4.5</span>, <span class="at">y=</span>mean_F1, <span class="at">yend=</span>mean_F1), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span>.<span class="dv">5</span>, <span class="at">xend=</span><span class="fl">4.5</span>, <span class="at">y=</span><span class="fu">mean</span>(weight), <span class="at">yend=</span><span class="fu">mean</span>(weight)), <span class="at">color=</span><span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">mid =</span> <span class="st">"black"</span>, <span class="at">high =</span> <span class="st">"yellow"</span>) <span class="sc">+</span> <span class="co"># color code for plotting residuals</span></span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()  </span>
-<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>p_WvFam_res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fitting a line weight vs intercept + family</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>fit_WvFam <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> family, <span class="at">data =</span> fam_data)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="co"># augment (i.e. add fitted and residual values)</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>biochem_WvFam <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_WvFam, fam_data)</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>mean_B1 <span class="ot">&lt;-</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">1</span>]</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>mean_A1 <span class="ot">&lt;-</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">2</span>]</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>mean_D5 <span class="ot">&lt;-</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">3</span>]</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>mean_F1 <span class="ot">&lt;-</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span> fit_WvFam<span class="sc">$</span>coefficients[<span class="dv">4</span>]</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="co"># plot of data with mean and colored by residuals</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>p_WvFam_res <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(biochem_WvFam, <span class="fu">aes</span>(<span class="at">x =</span> family, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(), <span class="fu">aes</span>(<span class="at">color =</span> .resid)) <span class="sc">+</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span>.<span class="dv">5</span>, <span class="at">xend=</span><span class="fl">1.5</span>, <span class="at">y=</span>mean_B1, <span class="at">yend=</span>mean_B1), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">1.5</span>, <span class="at">xend=</span><span class="fl">2.5</span>, <span class="at">y=</span>mean_A1, <span class="at">yend=</span>mean_A1), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">2.5</span>, <span class="at">xend=</span><span class="fl">3.5</span>, <span class="at">y=</span>mean_D5, <span class="at">yend=</span>mean_D5), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">3.5</span>, <span class="at">xend=</span><span class="fl">4.5</span>, <span class="at">y=</span>mean_F1, <span class="at">yend=</span>mean_F1), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span>.<span class="dv">5</span>, <span class="at">xend=</span><span class="fl">4.5</span>, <span class="at">y=</span><span class="fu">mean</span>(weight), <span class="at">yend=</span><span class="fu">mean</span>(weight)), <span class="at">color=</span><span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">mid =</span> <span class="st">"black"</span>, <span class="at">high =</span> <span class="st">"yellow"</span>) <span class="sc">+</span> <span class="co"># color code for plotting residuals</span></span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()  </span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>p_WvFam_res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="class-04_files/figure-html/fit weight to families-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <hr>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>anova_WvFam <span class="ot">&lt;-</span> <span class="fu">aov</span>(<span class="at">formula =</span> weight <span class="sc">~</span> family, <span class="at">data =</span> fam_data)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># are the coefficients the same?</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="fu">bind_cols</span>(<span class="fu">tidy</span>(fit_WvFam) <span class="sc">%&gt;%</span> <span class="fu">select</span>(term,estimate),</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">ANOVA_coef=</span>anova_WvFam<span class="sc">$</span>coefficients</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>          )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>anova_WvFam <span class="ot">&lt;-</span> <span class="fu">aov</span>(<span class="at">formula =</span> weight <span class="sc">~</span> family, <span class="at">data =</span> fam_data)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co"># are the coefficients the same?</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="fu">bind_cols</span>(<span class="fu">tidy</span>(fit_WvFam) <span class="sc">%&gt;%</span> <span class="fu">select</span>(term,estimate),</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">ANOVA_coef=</span>anova_WvFam<span class="sc">$</span>coefficients</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>          )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 × 3
+<pre><code># A tibble: 4 x 3
   term        estimate ANOVA_coef
   &lt;chr&gt;          &lt;dbl&gt;      &lt;dbl&gt;
 1 (Intercept)   18.1       18.1  
@@ -972,16 +1010,16 @@ For the weight by gender model (left) we fit <strong>2</strong> lines (i.e.&nbsp
 3 familyD5       5.86       5.86 
 4 familyF1      -0.682     -0.682</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glance</span>(fit_WvFam) <span class="sc">%&gt;%</span> <span class="fu">select</span>(p.value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glance</span>(fit_WvFam) <span class="sc">%&gt;%</span> <span class="fu">select</span>(p.value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 1
+<pre><code># A tibble: 1 x 1
    p.value
      &lt;dbl&gt;
 1 7.62e-13</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(anova_WvFam) <span class="sc">%&gt;%</span> <span class="fu">select</span>(p.value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(anova_WvFam) <span class="sc">%&gt;%</span> <span class="fu">select</span>(p.value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2 × 1
+<pre><code># A tibble: 2 x 1
     p.value
       &lt;dbl&gt;
 1  7.62e-13
@@ -1035,33 +1073,33 @@ For the weight by gender model (left) we fit <strong>2</strong> lines (i.e.&nbsp
 <h2 class="anchored" data-anchor-id="ancova-analysis-of-covariance">ANCOVA, Analysis of Covariance</h2>
 <p>ANOVA with more than one independent variable. In this case, what is the impact of mouse age on mouse weight for males vs females.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># more info here https://towardsdatascience.com/doing-and-reporting-your-first-anova-and-ancova-in-r-1d820940f2ef</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>p_WvA_gender <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> biochem, <span class="fu">aes</span>(<span class="at">y =</span> weight, <span class="at">x =</span> age, <span class="at">color=</span>gender)) <span class="sc">+</span></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span>.<span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span>lm) <span class="sc">+</span></span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>p_WvA_gender</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># more info here https://towardsdatascience.com/doing-and-reporting-your-first-anova-and-ancova-in-r-1d820940f2ef</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>p_WvA_gender <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> biochem, <span class="fu">aes</span>(<span class="at">y =</span> weight, <span class="at">x =</span> age, <span class="at">color=</span>gender)) <span class="sc">+</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span>.<span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span>lm) <span class="sc">+</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>p_WvA_gender</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
 </div>
 <div class="cell-output-display">
 <p><img src="class-04_files/figure-html/ANCOVA-1.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>WvA_gender <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> age <span class="sc">+</span> gender, <span class="at">data =</span> biochem)</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>WvA_gender <span class="sc">%&gt;%</span> <span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>WvA_gender <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> age <span class="sc">+</span> gender, <span class="at">data =</span> biochem)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>WvA_gender <span class="sc">%&gt;%</span> <span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 12
+<pre><code># A tibble: 1 x 12
   r.squared adj.r.squared sigma statistic   p.value    df logLik   AIC   BIC
       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 1     0.475         0.475  2.42      805. 8.37e-250     2 -4100. 8209. 8231.
-# ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+# i 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aov</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> age <span class="sc">+</span> gender, <span class="at">data =</span> biochem) <span class="sc">%&gt;%</span> <span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aov</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> age <span class="sc">+</span> gender, <span class="at">data =</span> biochem) <span class="sc">%&gt;%</span> <span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 6
+<pre><code># A tibble: 1 x 6
   logLik   AIC   BIC deviance  nobs r.squared
    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;     &lt;dbl&gt;
 1 -4100. 8209. 8231.   10402.  1782     0.475</code></pre>
@@ -1073,8 +1111,8 @@ For the weight by gender model (left) we fit <strong>2</strong> lines (i.e.&nbsp
 <h1>References and resources</h1>
 <p>I have borrowed heavily from, directly taken, and/or highly recommend the following fantastic resources:</p>
 <ol type="1">
-<li><a href="https://lindeloev.github.io/tests-as-linear/">Common statistical tests are linear models</a> from Jonas Kristoffer Lindeløv<br>
-</li>
+<li><a href="https://lindeloev.github.io/tests-as-linear/">Common statistical tests are linear models</a> from Jonas Kristoffer Lindel<c3><b8>v<br>
+</b8></c3></li>
 <li><a href="https://www.youtube.com/channel/UCtYLUTtgS3k1Fg4y5tAhLbw">Statquest</a></li>
 <li><a href="https://www.rapidtables.com/math/symbols/Statistical_Symbols.html">Stats gobbledygook</a></li>
 <li><a href="http://www.sthda.com/english/articles/39-regression-model-diagnostics/161-linear-regression-assumptions-and-diagnostics-in-r-essentials/">Linear Regression Assumptions and Diagnostics in R: Essentials</a><br>
