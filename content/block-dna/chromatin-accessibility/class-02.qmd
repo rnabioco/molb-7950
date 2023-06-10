@@ -1,0 +1,229 @@
+---
+title: "Acc_Class2"
+author: "Srinivas Ramachandran"
+date: "10/07/2022"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(engine.opts = list(bash= "-l"))
+library(reticulate)
+use_python('/cloud/project/mambaforge/bin/python', required = TRUE)
+```
+
+```{r eval=FALSE, include=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("rtracklayer")
+BiocManager::install("Gviz")
+```
+
+```{bash}
+which python
+```
+
+## Call peaks on ATAC-seq data
+
+We will use MACS2 to call peaks on ATAC-seq data. By now, you should be familiar how this works. Similar to CUT&RUN, we will use only fragments less than 120 bp from the ATAC-seq experiment as they represent TF binding. Here, the advantage is that we are mapping all TFs with a single experiment.
+
+### We will filter for reads less than 120 bp and put the reads in a new 3-column BED file
+
+1. 3-column BED file with the format Chr, start, end. Here each line represents one sequenced fragment. This is the BED format that MACS2 requires as input.
+2. Since 4th column of our starting BED file has fragment lenghts, we will use that information to filter for fragments less than 120 bp. We will use awk. In awk, `$4` is the variable that contains the values from 4th column of a file. So, `$4 <=120` selects for those lines that represent fragments less than 120 bp.
+3. Since bed files are separated by tabs, we will set the output field separator (`OFS`) as tab (`\t`). This ensures that when awk prints multiple variables, they will be separated by tabs.
+
+```{bash}
+awk 'BEGIN {OFS="\t"} {if($4<=120){print $1,$2,$3}}' data_acc/yeast_atac_chrII.bed > data_acc/yeast_atac_chrII_lt120.bed
+```
+
+### Run MACS2
+
+We will use minimal command line options for MACS2.
+
+1. We will set our ATAC-seq dataset with fragments less than 120 bp as the `-t` file ("treatment"). We are not using controls. If we had done ATAC-seq on naked DNA (purified yeast genomic DNA) side-by-side with ATAC-seq on the yeast nuclei, we will use that dataset as the control.
+2. We are using a 3-column BED file where each line represents a single fragment sequenced in paired-end mode. So we set the file format (`-f`) as BEDPE.
+3. The effective genome size is going to be the size of chromosome II of the yeast genome. So we set `-g` as 813184 based on UCSC information on chromosome sizes of yeast genome (version sacCer3): https://hgdownload.cse.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.chrom.sizes
+4. We set the output director as `data_acc/peaks` using the `--outdir`
+
+```{bash}
+macs2 callpeak -t data_acc/yeast_atac_chrII_lt120.bed -f BEDPE -g 813184 --outdir data_acc/peaks
+```
+
+## Visualize the peaks using Gviz
+
+When we call the peaks, we get following files:
+
+1. An `xls` file that contains all details about the peak
+2. A BED file with positions of peak summits - the highest point inside a peak - a single bp
+3. If there are wide and narrowpeaks (wide peaks will be called usually for domains of chromatin modifications), the narrow peak information would be in the narrowPeak file. Since ATAC-seq peaks are usually not very wide, the information in narrowPeak is redundant.
+
+To ask if peaks were called properly, we will visualize the ATAC-seq data and the peak positions as tracks in a genome browser. To do this within RStudio, we will use Gviz.
+
+```{r}
+library(Gviz)
+library(rtracklayer)
+```
+
+
+### First we will load the annotation track
+
+To know where the genes are, we will load a UCSC table. UCSC tables have annotations of genomic features. We are choosing the table with info on Ensembl genes, which is called ensGene.
+
+1. The `genome` version is sacCer3
+2. The `track` is the UCSC table, ensGene
+3. The `chromosome` is chrII as that is the chromosome we are analyzing
+4. The `start` and `end` are for our purposes, the start and end of the whole chromosome. If you are working with a human chromsome and you want info on a smaller region, you would adjust start and end accordingly.
+5. `trackType` tells Gviz what information is in the track. `GeneRegionTrack` means it has info on start and ends of genes and other genic features.
+
+```{r}
+yeast_genome <- UcscTrack(genome ="sacCer3",track = "ensGene",chromosome ="chrII",start=1, end=813184,trackType = "GeneRegionTrack",gene ="name",rstarts = "exonStarts",rends = "exonEnds",symbol = "name2", transcript = "name",strand = "strand" )
+```
+
+For reading in the peaks into Gviz, we will first import the bed file as a GRanges object using `import.bed` in rtracklayer.
+
+```{r}
+summit_bed <- import.bed("data_acc/peaks/NA_summits.bed")
+```
+
+```{r}
+summit_bed
+```
+
+```{r}
+trk_smt_bed <- AnnotationTrack(summit_bed,chromosome = 'chrII',start=1, end=813184, name='Peaks')
+```
+
+
+Load other data files:
+
+```{r}
+mnase_nuc <- import.bw("data_acc/yeast_mnase_134_160.bw",as="GRanges") 
+mnase_nuc_trk <- DataTrack(mnase_nuc,name='MNase_nuc') 
+mnase_tf <- import.bw("data_acc/yeast_mnase_lt50.bw",as="GRanges") 
+atac_short <- import.bw("data_acc/yeast_atac_lt120.bw",as="GRanges") 
+atac_long <- import.bw("data_acc/yeast_atac_gt120.bw",as="GRanges") 
+mnase_tf_trk <- DataTrack(mnase_tf,name='MNase_TF') 
+atac_short_trk <- DataTrack(atac_short,name='ATAC_Short') 
+atac_long_trk <- DataTrack(atac_long,name='ATAC_Long') 
+```
+
+
+We will then plot the peaks and the datasets side-by-side.
+
+What observations can you make based on location of the peaks?
+
+chrII:268521..285320
+
+```{r}
+plotTracks(c(yeast_genome,trk_smt_bed,atac_short_trk,mnase_nuc_trk),from=268521, to=285320,chromosome = "chrII",type='h',transcriptAnnotation="gene",shape="arrow")
+```
+
+## How wide are the peaks?
+
+We can find out how wide the ATAC-seq peaks are as defined by MACS2. First we will read in the xls file, which has all the information about each peak. We will ignore all lines that start with "#" symbol using `comment.char` option in `read.csv`.
+
+```{r}
+peak_info <- read.csv(file='data_acc/peaks/NA_peaks.xls',sep='\t',comment.char = '#')
+head(peak_info)
+```
+
+We will then make a histogram of "length" column, which is the width of the peak. 
+
+What can you conclude from this distribution?
+
+```{r}
+hist(peak_info$length,breaks=100,xlim=c(0,500))
+```
+## Check the outlier
+
+What is happening in that really wide peak? Let us take a look to confirm that MACS2 data makes sense.
+
+```{r}
+plotTracks(c(yeast_genome,trk_smt_bed,mnase_nuc_trk,mnase_tf_trk,atac_long_trk,atac_short_trk),from=552000, to=558000,chromosome = "chrII",type='h',transcriptAnnotation="gene",shape="arrow")
+```
+
+## Find out which TFs might be binding at ATAC-seq peaks
+
+We will first look at only sequences +/-50 bp of the MACS2 summits. We will generate a bed file that covers this region from MACS2 summit file:
+
+```{r}
+summit_dat <- read.csv(file = 'data_acc/peaks/NA_summits.bed',sep='\t',header=F)
+summit_dat$V2 <- summit_dat$V2-50
+summit_dat$V3 <- summit_dat$V3+50
+write.table(summit_dat,file='data_acc/atac_peaks.bed',sep='\t',row.names = F,col.names = F,quote = F)
+```
+
+```{bash}
+awk 'BEGIN {OFS="\t"} {print $1,$2-50,$2+50,$4}' data_acc/peaks/NA_summits.bed > data_acc/atac_peaks.bed
+```
+
+```{bash}
+head data_acc/atac_peaks.bed
+```
+
+We will then extract the sequences for each peak using `bedtools getfasta`
+
+```{bash}
+bedtools getfasta -fi data_acc/chrII.fa -bed data_acc/atac_peaks.bed -fo data_acc/atac_peaks.fa -name
+```
+
+```{bash}
+head data_acc/atac_peaks.fa
+```
+
+We will now scan these sequences for known motifs of yeast transcription factors. We obtained a meme format file from Swiss Regulon database. 
+
+We will include the parameter `--parse-genomic-coord` in FIMO, so the output will contain the genomic location of the motifs, which we can easily use for our future analyses.
+
+```{bash}
+fimo --parse-genomic-coord --max-strand --bgfile motif-file -oc data_acc/Motif_scan data_acc/SwissRegulon_s_cer.meme data_acc/atac_peaks.fa > data_acc/FIMO.out 2> data_acc/FIMO.err
+```
+
+To visualize the results from FIMO on the genome, we will convert each motif identification into a BED entry. 
+
+1. We read in the FIMO output into a dataframe.
+2. We rearrange the columns of FIMO dataframe to resemble a BED file.
+3. We create a BED file.
+
+
+```{r}
+fimo_output <- read.csv(file='data_acc/Motif_scan/fimo.txt',sep='\t')
+head(fimo_output)
+write.table(fimo_output[,c(2,3,4,1,6,5)],file='data_acc/atac_motifs.bed',sep='\t',row.names = F,col.names = F,quote = F)
+```
+
+## Visualize the motifs adjacent to ATAC-seq data and peaks
+
+Now, we will import the BED file with motifs as a `track` in Gviz. 
+1. We will convert the BED file into a GRanges object using `import.bed`
+2. We will load the GRanges object as a `track`. We will say it is a GeneRegionTrack because it is annotating the motifs (similar to annotating genes).
+
+
+```{r}
+motif_bed <- import.bed("data_acc/atac_motifs.bed",genome="sacCer3")
+motif_bed
+trk_motif_bed <- GeneRegionTrack(motif_bed,chromosome = 'chrII',start=1, end=813184, name='MOTIFS',trackType = "GeneRegionTrack",symbol = motif_bed$name,genome='sacCer3')
+trk_motif_bed
+```
+
+We will then visualize the track alongwith other tracks using `plotTracks`.
+
+```{r}
+plotTracks(c(yeast_genome,trk_smt_bed,trk_motif_bed,atac_short_trk,mnase_nuc_trk),from=273274, to=277876,chromosome = "chrII",type='h',transcriptAnnotation="symbol",shape="arrow")
+```
+
+What is happening inside of YBR019C?
+
+
+## All motif occurences on chrII
+
+For homework, I did the following:
+
+```{bash}
+fimo --parse-genomic-coord --max-strand --bgfile motif-file -oc data_acc/Motif_scan_Reb1 data_acc/Reb1.meme data_acc/chrII.fa > data_acc/FIMO_Reb1.out 2> data_acc/FIMO_Reb1.err
+```
+
