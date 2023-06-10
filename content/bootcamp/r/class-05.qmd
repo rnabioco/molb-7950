@@ -1,0 +1,99 @@
+---
+title: "Exercises-05"
+author: "Sujatha Jagannathan"
+date: "8/28/2020"
+---
+
+```{r include=FALSE}
+library(tidyverse)
+library(knitr)
+library(ggthemes) # pretty plotting themes
+library(cowplot) # to make panels of plots
+library(viridis) # nice colors!
+library(ggridges) # for ridge plot
+```
+
+### R bootcamp review
+
+* tidyr - nothing requested
+
+* dplyr
+  - group_by - examples below
+  
+```{r}
+# import data
+data_transcript_exp_tidy <- read_csv("data/data_transcript_exp_tidy.csv")
+# save to have smaller name
+data <- data_transcript_exp_tidy
+# examples of grouping by differently - type these into the console to see the difference
+group_by(data, type)
+group_by(data, replicate)
+group_by(data, time)
+group_by(data, ensembl_transcript_id)
+
+# example of how group_by affects the way summarise works
+data %>% summarise(count = mean(count, na.rm = TRUE))
+group_by(data, time) %>% summarise(count = mean(count, na.rm = TRUE))
+group_by(data, ensembl_transcript_id) %>% summarise(count = mean(count, na.rm = TRUE))
+group_by(data, ensembl_transcript_id, time) %>% summarise(count = mean(count, na.rm = TRUE))
+```
+  - functions to use within mutate - google is your friend
+  - manipulation of cols & rows - use cheatsheets
+  
+* ggplot
+  
+  - aesthetic mapping: [Ref](https://ggplot2.tidyverse.org/reference/aes.html)
+  
+```{r, aesthetic_mapping}
+# specifying colors of plots
+diamonds_subset <- diamonds %>% sample_n(size = 1000)
+
+# scatter plot with color by cut - aesthetics specified in the main "mapping" 
+ggplot(data = diamonds_subset, 
+       mapping = aes(x = carat, y = price, color = cut)) + 
+       geom_point() 
+
+# scatter plot with color by cut - aesthetics specified in the geom "mapping" 
+ggplot(data = diamonds_subset, 
+       mapping = aes(x = carat, y = price)) + 
+       geom_point(aes(color = cut)) 
+
+# color specified in the main mapping will apply universally to all geoms 
+ggplot(data = diamonds_subset, 
+       mapping = aes(x = carat, y = price, color = cut)) + 
+       geom_point() +
+       geom_smooth()
+
+# color specified in the geom mapping only applies to that layer
+ggplot(diamonds_subset, mapping = aes(x = carat, y = price)) + 
+       geom_point(aes(color = cut)) +
+       geom_smooth()
+```
+
+  - piping data into ggplot - example below
+
+```{r, piping_data}
+diamonds_subset %>% ggplot(mapping = aes(x = carat, y = price)) + 
+       geom_point(aes(color = cut)) +
+       geom_smooth()
+```
+
+  - more applied examples - plenty to come in the rest of the course
+
+  - specifying colors of plots: [tutorial](http://www.sthda.com/english/wiki/ggplot2-colors-how-to-change-colors-automatically-and-manually)
+
+```{r single-color}
+  # coloring by a single color - more information in the tutorial above
+ggplot(data = diamonds_subset, 
+       mapping = aes(x = carat, y = price)) + 
+       geom_point(color = "red") +
+       geom_smooth()
+```
+  
+* other
+  - log10 - `?log10`
+  - How to use Help pages: help(<function>)
+  - required vs. optional arguments: this is possible to distinguish if you have a well-documented function. If not, trial-an-error is how it goes. 
+  - Use of commas with multiple vars: Depends on the function. Look at the exact syntax required for specific functions on the cheatsheet to know what to use: col1, col2, col3, vs col1:col3, etc
+  - Metacharacters "." etc.: Refer to cheatsheet on Regex + stringr
+
