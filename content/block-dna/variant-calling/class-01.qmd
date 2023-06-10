@@ -1,0 +1,402 @@
+---
+title: "Genome sequencing 1 - theory"
+author: "Your name here"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(cowplot)
+```
+
+# Variant Calling --- theory
+
+## Reading
+
+-   [VCF format](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3137218/)
+-   [Framework for variation discovery](https://www.nature.com/articles/ng.806)
+
+------------------------------------------------------------------------
+
+## Learning objectives
+
+1.  Learn to think about allele sampling as a binomial process
+2.  Understand the implications of the binomial process for variant detection
+3.  Learn to think about sequencing coverage as a Poisson distribution
+4.  Understand the implications of the Poisson distribution on experimental design and cost.
+
+## Allele sampling and the binomial distribution
+
+Allele sampling can be modeled as a coin flipping exercise.
+
+With fair coin, the $P(heads)$ = 0.5 and $P(tails)$ = 0.5.
+
+With fair genome sequencing of heterozygous C/T position, P(C) = 0.5 and P(T) = 0.5
+
+The probability of `k` successes in `n` trials is given by the probability mass function:
+
+$$ Pr(X=k) = {{n}\choose{k}} p^k(1-p)^{n-k} $$
+
+Using this, we can ask: what is the probability of seeing $k = 1$ tails in $n = 3$ flips of a fair coin with $P(tail)$ = 0.5?
+
+```{r}
+choose(3, 1) * 0.5**1 * (1 - 0.5)**(3-1)
+
+# or . . .
+dbinom(x = 1, size = 3, prob = 0.5)
+```
+
+## Simulating sequencing outcomes
+
+Let's say we sequence my genome to 30x coverage, i.e. each site is covered by a mean of 30 reads.
+
+Each read is a random sample from millions of double-stranded DNA fragments. After read alignment, is every site going to be covered by 30 reads?
+
+**No!** Some sites have 17 reads aligned, some have 35. And this randomness is the problem we're trying to address.
+
+We model the alleles at each site as a binomial random variable that can hold one of two values. Think heads and tails of a coin, or reference and alternative alleles at a site.
+
+We can use `rbinom()` to look at the distribution of outcomes.
+
+-   `n`: number of people tossing coins, or sites in the genome
+-   `size`: number of times you looked at the coin, or looked at a site with a sequencing read, i.e. the sequencing coverage
+-   `prob`: probability of success (i.e., probability of tails with a fair coin)
+
+```{r}
+n <- 30
+size <- 5
+prob <- 0.5
+
+barplot(table(rbinom(n, size, prob)))
+```
+
+### Coin tossing exercise
+
+**Ready your coin!**
+
+We're going to play a game.
+
+Imagine you are all different sites in the genome. Your true identity (your genotype) is hidden. We are going to discover your true identity by flipping a coin.
+
+For each set of coin flips, record the number of alternative alleles (tails) you see.
+
+For those of you that are HETEROZYGOUS, we will learn your identity ONLY after 50% of your flips are alternative alleles (3 at toss6, 6 at toss12, 16 at toss32)
+
+Enter the number of times you see tails after flipping 6, 12, and 32 times on this spreadsheet:
+
+<https://docs.google.com/spreadsheets/d/149q8wg6ctodnjZxnDj1SWUIw_Bjgvf9T0iVAvud0dVI/edit?usp=sharing>
+
+#### BUT WAIT I FORGOT MY COIN
+
+```{r i_forgot_my_coin}
+sample(c('REF', 'ALT'), 1)
+```
+
+## Comparing theory with real data
+
+```{r plot_fxn}
+plot_tosses <- function(x) {
+  # returns a plot 
+  ggplot(fct_count(as.factor(x)), aes(f, n)) +
+    geom_col() +
+    labs(
+      x = "Number of tails (alternative alleles)",
+      y = "count"
+    ) +
+    theme_minimal_grid()
+}
+```
+
+What is the distribution of tails (alternate alleles) we expect to see after 6 tosses?
+
+```{r}
+# theory
+n <- 30
+size <- 5
+prob <- 0.5
+
+# plot of counts
+x <- rbinom(n, size, prob)
+plot_tosses(x)
+
+# real data 
+```
+
+What is the distribution of tails (alternate alleles) we expect to see after 12 tosses?
+
+```{r}
+# theory
+# theory
+n <- 30
+size <- 15
+prob <- 0.5
+
+# plot of counts
+x <- rbinom(n, size, prob)
+plot_tosses(x)
+
+# real data
+```
+
+What is the distribution of tails (alternate alleles) we expect to see after 32 tosses?
+
+```{r}
+# theory
+
+# real data
+```
+
+### Assumptions
+
+The binomial makes two assumptions:
+
+1.  The probability of success is the same in each trial (i.e. coin flip).
+2.  The trials are independent and do not affect each others' outcome.
+
+When might these assumptions be violated by real genome sequencing data?
+
+**Examine the heterozygous alignment slide**
+
+## Reproducibility with seeds (short aside)
+
+In the chunks above, each time we run `rbinom()` we get a different random sample. We can make this sample reproducible by setting a seed just before each random call:
+
+```{r seed}
+# not reproducible
+x <- rbinom(10, 30, 0.5)
+y <- rbinom(10, 30, 0.5)
+
+all(x == y)
+
+# reproducible
+set.seed(1)
+x <- rbinom(10, 30, 0.5)
+set.seed(1)
+y <- rbinom(10, 30, 0.5)
+
+all(x == y)
+```
+
+What happens if you change the seed value above? I.e. Compare the values produced after `set.seed(1)` and `set.seed(42)`.
+
+The setting of seeds is a valuable tool if you want to generate a completely reproducible pipeline for others to run.
+
+For example, the process of generating two-dimensional UMAP (or t-SNE) projection is a random process. You can recover the same projection each time by setting a seed at the appropriate step.
+
+## Excercises
+
+1.  What is the probability of seeing 10 or more tails in 20 flips of a fair coin? \[*0.5880985*\]
+
+```{r}
+sum(dbinom(10:20, 20, 0.5))
+```
+
+2.  What is the probability of seeing 10 or fewer alternative alleles at 17-fold coverage, assuming equal allele probabilities? \[*0.833847*\]
+
+```{r}
+sum(dbinom(0:10, 17, 0.5))
+```
+
+3.  Generate a random sample of 100 numbers **unif**ormly distributed between 0 and 1. Now generate two more identical samples. Use `all()` to confirm whether the samples are identical .
+
+```{r}
+runif(100)
+
+set.seed(1)
+x <- runif(100)
+
+set.seed(1)
+y <- runif(100)
+
+all(x == y)
+```
+
+4.  Thought experiment: You create a new organism with an expanded genetic code containing a third base-pair (i.e, A:T, G:C, X:Y) that follows Chargaff's rule. Does this expanded code change how you might approach sequencing its genome? What if the ploidy of this organism was larger, say 45N (like *Tetrahymena*)?
+
+## Sequencing Coverage
+
+From binomial theory, we learned we need a certain level of coverage to generate reliable variant calls, due to the randomness of sampling alleles at a site using sequencing.
+
+We also learned that reads are not distributed randomly in a genome. Coverage is itself a distribution, and we typically discuss it's mean. I.e. 30-fold coverage means *on average* each base is sequenced 30 times.
+
+How do we estimate the numbers of times a base is expected to be sequenced given a certain level of coverage?
+
+This theory comes from [Lander and Waterman](https://pubmed.ncbi.nlm.nih.gov/3294162/), who made two assumptions about sequencing:
+
+1.  Reads will be distributed randomly across the genome.
+2.  The ability to detect overlaps (alignments) doesn't vary between reads
+
+They concluded that read coverage is modeled by the Poisson distribution.
+
+The Poisson probability function is:
+
+$$ P(Y = y) = \frac{{ e^{ - C } C ^ y }} {{ y!}} $$ where:
+
+1.  **`y` is the number of times a base is read.** It is the exact number of times a base is sequenced.
+2.  **`C` is the mean coverage** (lambda in the traditional Poisson sense). It's the mean number of aligned reads covering a site.
+
+The formula above gives the probability of a base being sequenced a certain number of times.
+
+For example, what is the probability of a base being sequenced *3 times or less* at at mean coverage of 10?
+
+```{r}
+y <- 0:3 
+C <- 10
+
+sum(dpois(y, C))
+# or ...
+ppois(3, C)
+```
+
+### Excercises
+
+What if we're trying to characterize heterozygous alleles in a human genome at differing levels of coverage?
+
+1.  How many variants are in an average human genome? \[Answer *4285714*\]
+
+```{r}
+# size (bp) of the haploid human genome
+G <- 3e9
+# chance of seeing a common variant in a random person. comes from e.g.
+# https://www.nature.com/articles/nature15393
+p_var <- 1/700
+
+# calculate number of variants
+n_var <- G * p_var
+n_var
+```
+
+2.  How many of these variants have zero coverage (i.e., no reads covering those sites) after sequencing to mean coverage of 5, 15, 30-fold? \[Answer *28876.92, 1.61, 4.01041e-07*\].
+
+```{r}
+ppois(0, 5) * n_var
+ppois(0, 15) * n_var
+ppois(0, 30) * n_var
+```
+
+### A simple formula for coverage
+
+This theory boils down to a general equation, the Lander/Waterman equation, for computing the coverage you have given a certain level of sequencing:
+
+$$ C = LN / G $$
+
+where:
+
+-   `C` is coverage. I.e., the mean number of times each base is covered by a read.
+-   `G` is the haploid genome length. E.g., 3e9 for the human genome.
+-   `L` is the read length. On Illumina, typically 300 bp.
+-   `N` is the number of reads.
+
+Let's use this equation to calculate the coverage for a few different genomes, given fixed read number and length.
+
+```{r}
+G_yeast <- 12e6
+G_human <- 3e9
+
+L <- 300
+N <- 20e6
+
+C_yeast <- (L * N) / G_yeast
+C_human <- (L * N) / G_human
+```
+
+Obviously those parameters provide a powerful approach for yeast genetics, but much less so for human genetics.
+
+### Cost of a human genome sequencing experiment
+
+On an Illumina Novaseq 6000, each 300 bp read costs about `r 30e4 / 10e9` USD.
+
+How much would it cost to sequence a single human at 30X coverage? Does that number surprise you?
+
+```{r hg_cost, eval = FALSE}
+# how many reads do we need?
+# note that each read is 300 bp (150 bp from each end of a fragment)
+n <- (30 * 3e9) / 300
+
+# how much does each read cost?
+cost <- 3e4 / 10e9
+
+n * cost
+```
+
+## Sequencing error rate
+
+Error rate of sequencing can have a big impact on variant interpretation.
+
+Illumina error rates are relatively low, ONT rates are relatively high. We'll look at this by pulling quality scores from a 1,000 reads from the Illumina and ONT platforms.
+
+First, read data from the FASTQ files. This is not rectangular data, so we'll use Python.
+
+```{python}
+import gzip
+from collections import Counter
+
+def qual_counts(fq_gz):
+  quals = Counter()
+  nl = 0
+  with gzip.open(fq_gz, 'rb') as fq:
+    for line in fq:
+      if nl % 4 == 3:
+        quals.update(line.strip())
+      nl += 1
+  return quals      
+
+illumina_quals = qual_counts('data/illumina.fastq.gz')
+ont_quals = qual_counts('data/ont.fastq.gz')
+
+fh = open('quals.tsv', 'w')
+for qual, count in illumina_quals.items():
+  print(qual, count, 'illumina', file=fh, sep='\t')
+for qual, count in ont_quals.items():
+  print(qual, count, 'ont', file=fh, sep='\t')
+fh.close()
+```
+
+The counts are in TSV format now, back to R (phew).
+
+```{r}
+tab <- read_tsv('quals.tsv', col_names = c('qual','count','type'))
+ggplot(tab, aes(qual, count, fill = type, alpha = 0.2)) + 
+  geom_col() +
+  labs(
+    title = 'Quality score comparison Illumina and ONT reads',
+    subtitle = 'Thoughts?'
+  ) +
+  theme_minimal_grid() +
+  scale_fill_brewer(palette = 'Set1')
+```
+
+## Excercises
+
+1.  Why don't we just sequence everybody to, like, 1000-fold coverage, and not worry about binomial sampling theory?
+
+    Determine the number of reads needed to sequence the human genome to 1000X coverage given the data below.
+
+```{r}
+# standard Illumina read length
+L <- 300
+# size (bp) of haploid human genome
+G <- 3e9
+
+# Use the Lander-Waterman equation to solve for read number:
+
+```
+
+Now figure out how much this experiment would cost.
+
+```{r}
+# How much would this cost?
+usd_per_bp <- 30e4 / 10e9
+```
+
+How might you dramatically reduce the cost of this experiment, but retain much of the useful information acquired from the genome? I.e., how would you "zoom in" to informative portions of the genome?
+
+2.  Thought experiment: The organism you're studying happens to be tetraploid (like salmon). You want to use genome sequencing to identify variants in an individual. How does this change the way you think about allele sampling and coverage?
+
+3.  Thought experiment: How does this theory impact your thinking in designing an experiment where coverage variation along the genome is the **signal** (e.g., chromatin immunoprecipitation + sequencing).
+
+    Given what you learned about read coverage sampling, what statistical models do you think "peak calling" algorithms use?
+
+## Resources
+
+The slides and content around the theory of variant sampling were borrowed from Aaron Quinlan's [Applied Computational Genomics course](https://github.com/quinlan-lab/applied-computational-genomics).
