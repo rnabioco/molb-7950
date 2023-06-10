@@ -1,0 +1,226 @@
+---
+title: "ChIP Class 2"
+author: "Srinivas Ramachandran"
+date: "9/28/2022"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Calling peaks
+
+## We will use Macs2 to call peaks on the CUT&RUN data. We need the following for calling peaks with MACS2:
+
+1. Since we have data from a paired-end experiment, we need a 3-column bed file where each line is a sequenced fragment. We know that our Trl protections correspond to fragments less than 120 bp. So we will extract these fragments and print it in a 3 column bed file that Macs2 likes:
+
+```{bash}
+awk 'BEGIN {OFS="\t"} {if($4<=120){print $1,$2,$3}}' data/class2/Trl_CR_subset_uniq.bed > data/class2/Trl_CR_subset_uniq_lt120.bed
+```
+
+2. Next, MACS2 needs the effective genome size for its calculations. Since we are working with a subset of a single chromosome, the "effective genome size" will be much shorter than Drosophila genome. (In case of whole genome data, you can give the genome version for MACS2 to automatically set the effective genome size). We will just use the wig file to see the top and bottom values with a bit of shell scripting:
+
+```{bash}
+#Effective genome size
+lower=`sort -k2,2g data/class2/Trl_CR_subset_uniq_lt120.bed | head -n 1 | awk '{print $2}'`
+higher=`sort -k3,3gr data/class2/Trl_CR_subset_uniq_lt120.bed | head -n 1 | awk '{print $3}'`
+size=`echo "$higher $lower" | awk '{print ($1-$2)}'`
+echo $size $higher $lower
+```
+
+## Next, we will run macs2 to identify peaks using the "callpeak" function. 
+
+1. -f tells MACS2 the type of data we are inputting. BEDPE tells it we have a bed file created after a paired-end sequencing run.
+
+2. -g tells the effective genome size
+
+
+``` bash
+macs2 callpeak -t data/class2/Trl_CR_subset_uniq_lt120.bed -f BEDPE -g 6130720 --outdir data/class2/peaks
+```
+
+## Let's look at the peak files
+
+```{bash}
+ls data/class2/peaks
+```
+The "xls" file has all the peak calling info.
+The "narrowPeak" file has the whole peak.
+The "summits" file has the position within each peak with highest signal.
+
+We will use the summits file for further analysis, but let us look through each file in the terminal, starting with the NA_peaks.xls.
+
+Then, let us see how many peaks there are:
+```{bash}
+wc -l data/class2/peaks/NA_summits.bed
+```
+
+
+## Are the peaks in the right region? Let us try a raw plot.
+
+In normal practice, you would load the wig file (read density) and the bed file (peak positions) in a genome browser and see if peak calls make sense. Let us use Gviz like last class.
+
+```{r}
+library('rtracklayer')
+library('Gviz')
+```
+
+Let us convert the wig files to bigwigs:
+
+```{r}
+dm3 <- SeqinfoForUCSCGenome('dm3')
+wigToBigWig('data/class2/Trl_CR_lt_120.wig',seqinfo = dm3,dest = 'data/class2/Trl_CR_lt_120.bw')
+wigToBigWig('data/class2/Trl_CR_gt_120.wig',seqinfo = dm3,dest = 'data/class2/Trl_CR_gt_120.bw')
+```
+
+Let us load bigwigs as GRanges:
+
+```{r}
+lt120 <- import.bw("data/class2/Trl_CR_lt_120.bw",as="GRanges")
+gt120 <- import.bw("data/class2/Trl_CR_gt_120.bw",as="GRanges")
+lt120
+```
+
+Next step is to make tracks for GViz:
+
+```{r}
+lt120_trk <- DataTrack(lt120,name='lt120')
+gt120_trk <- DataTrack(gt120,name='gt120')
+```
+
+Now let us make a track for the peaks:
+
+```{r}
+peaks <- import.bed('data/class2/peaks/NA_summits.bed')
+peak_trk <- DataTrack(peaks, name='macs2_peaks')
+```
+
+Ok, let us visualize the data!
+
+```{r}
+plotTracks(c(peak_trk,lt120_trk),from=12592213, to=18722934,chromosome = "chr2L",type='h')
+```
+
+This is too dense. May be let us see in different increments:
+
+```{r}
+low_val <- 12592210
+lower_cutoff <- low_val+120000
+upper_cutoff <- low_val+130000
+plotTracks(c(peak_trk,lt120_trk,gt120_trk),from=lower_cutoff, to=upper_cutoff,chromosome = "chr2L",type='h')
+```
+
+Here is another snapshot:
+
+```{r}
+low_val <- 12592210
+low_val <- 12592210
+lower_cutoff <- low_val+2000000
+upper_cutoff <- low_val+3000000
+plotTracks(c(peak_trk,lt120_trk),from=lower_cutoff, to=upper_cutoff,chromosome = "chr2L",type='h')
+
+```
+## Reconsider peak cutoffs
+
+Ok, seems like MACS2 is calling very small bumps as peaks because of the low background of CUT&RUN. So, we need to increase the stringency of peak calling. We will play with the FDR cutoff - lower the FDR cutoff, more stringent the peak calling.
+
+
+```{bash}
+macs2 callpeak -t data/class2/Trl_CR_subset_uniq_lt120.bed -f BEDPE -g 6130720 --outdir data/class2/peaks -q 0.000000005
+```
+
+## How many peaks are there now?
+
+```{bash}
+#head data/class2/peaks/NA_summits.bed
+wc -l data/class2/peaks/NA_summits.bed
+#head data/class2/peaks/NA_peaks.narrowPeak
+#head data/class2/peaks/NA_peaks.xls
+```
+
+```{r}
+peaks <- import.bed('data/class2/peaks/NA_summits.bed')
+peak_trk <- DataTrack(peaks, name='macs2_peaks')
+```
+
+Ok, let us visualize the data!
+
+```{r}
+plotTracks(c(peak_trk,lt120_trk),from=12592213, to=18722934,chromosome = "chr2L",type='h')
+```
+
+This is too dense. May be let us see in different increments:
+
+```{r}
+low_val <- 12592210
+lower_cutoff <- low_val+120000
+upper_cutoff <- low_val+130000
+plotTracks(c(peak_trk,lt120_trk),from=lower_cutoff, to=upper_cutoff,chromosome = "chr2L",type='h')
+```
+
+Here is another snapshot:
+
+```{r}
+low_val <- 12592210
+low_val <- 12592210
+lower_cutoff <- low_val+2000000
+upper_cutoff <- low_val+3000000
+plotTracks(c(peak_trk,lt120_trk),from=lower_cutoff, to=upper_cutoff,chromosome = "chr2L",type='h')
+
+```
+
+## Heatmaps and plots
+
+So now, since we seemed to have identified good peaks in the data, it will be nice to line up the peaks in a heatmap and also make a "meta plot" across the peaks. We will use deeptools to do this. For deeptools, we need bigwigs as input.
+
+We will use computeMatrix command from deeptools to make a matrix from the wig file and the peak bed file - I will explain this operation graphically.
+
+For computeMatrix, we use the following parameters:
+
+1. reference-point - this means we are making a matrix off of a reference point. In our case, the reference point is the CUT&RUN peak, so we use the parameter "center"
+2. -a and -b set the distance upstream and downstream of the reference point
+3. regionsFileName is the parameter for the peak bed file
+4. outfileName sets the name for the binary matrix file created by computeMatrix
+
+Once we have the matrix, we will plot a heatmap and the meta plot using plotHeatmap. plotHeatmap takes in the binary matrix file created in the previous step.
+
+```{bash}
+computeMatrix reference-point --referencePoint center -a 2000 -b 2000 \
+-S  data/class2/Trl_CR_gt_120.bw  data/class2/Trl_CR_lt_120.bw \
+--regionsFileName data/class2/peaks/NA_summits.bed \
+--outFileName data/class2/summits.mat --missingDataAsZero
+
+plotHeatmap -m data/class2/summits.mat -o data/class2/summits.png --colorList white,darkred
+```
+
+
+```{r echo=FALSE, fig.cap="Summits", out.width = '50%'}
+knitr::include_graphics("data/class2/summits.png")
+```
+
+Ok, that looks good. Can we see how other datasets map at Trl peaks? It is known that the H3K27me3 modification is associated with silent chromatin and H3K27ac modification is associated with active chromatin. We can ask how these two modifications map relative to Trl peaks to get an idea of the chromatin neighborhood of Trl binding sites. It is very easy to add these with deeptools:
+
+```{bash}
+computeMatrix reference-point --referencePoint center -a 2000 -b 2000 \
+-S data/class2/Trl_CR_lt_120.bw data/class2/sub.H3K27ac.bw data/class2/sub.H3K27me3.bw \
+--regionsFileName data/class2/peaks/NA_summits.bed \
+--outFileName data/class2/summits_2.mat --missingDataAsZero
+```
+
+
+```{bash}
+plotHeatmap -m data/class2/summits_2.mat -o data/class2/summits_2.png \
+--colorList 'white,red' '#e5f5f9,#2ca25f' '#efedf5,#756bb1' \
+--zMin 0 400 0 --zMax 18000 1000 100
+
+
+#plotHeatmap -m data/class2/summits.mat -o data/class2/summits.png \
+#--colorList 'white,red' '#e5f5f9,#2ca25f' '#efedf5,#756bb1' \
+#--zMin 0 400 0 --zMax 18000 1000 100 \
+#--yMin 0 400 0 --yMax 18000 1000 100
+```
+
+
+```{r echo=FALSE, fig.cap="Summits", out.width = '50%'}
+knitr::include_graphics("data/class2/summits_2.png")
+```
