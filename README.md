@@ -1,16 +1,15 @@
 # molb-7950
 
-
-Materials for "MOLB 7950: Informatics for Molecular Biology".
-
-See <https://rnabioco.github.io/molb-7950> for the class page.
+Materials for "MOLB 7950: Informatics and Statistics for Molecular Biology".
 
 ## Installing local packages
 
-After cloning this repository, run `renv::restore()`, which will install 
-project packages locally.
+After cloning this repository, set `RENV_CONFIG_PAK_ENABLED = TRUE` in the user's `.Renviron` file to use pak
+installation, which is a lot faster ([issue](https://github.com/rstudio/renv/issues/1210)).
 
-If you add new libraries to your content, run `renv::snapshot()` and be sure to commit the `renv.lock` file.
+Then, run `renv::activate()` and `renv::restore()`, which will install  project packages locally.
+
+If you add new libraries to your content, run `renv::snapshot()`, follow instructions to `renv::install()` if needed, and then be sure to commit the `renv.lock` file.
 
 ## Syllabus updates
 
