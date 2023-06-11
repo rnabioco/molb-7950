@@ -23,45 +23,45 @@ library(gt)
 library(emo)
 library(here)
 
-room <- 'AHSB 2201'
-time <- '9:00-10:30am'
+room <- "AHSB 2201"
+time <- "9:00-10:30am"
 
-sched_tbl <- read_tsv(here('data/syllabus.tsv')) |>
+sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
   mutate(
     class      = row_number(),
     date       = ymd(date)
   ) |>
   arrange(date) |>
   mutate(
-    class = str_pad(class, 2, 'left', '0'),
+    class = str_pad(class, 2, "left", "0"),
     week = isoweek(date),
     week = week - min(week) + 1,
-    week = str_c('Week ', week),
+    week = str_c("Week ", week),
     problem_set = as.character(problem_set)
   ) |>
   mutate(
     across(
       c(block, topic, instructor, title, problem_set),
-      ~ replace_na(.x, '-')
+      ~ replace_na(.x, "-")
     )
   ) |>
   mutate(
     # page links
-    page_dir = str_c('content', block, glue('class-{class}.html'), sep = '/'),
-    page_link   = glue('[{emo::ji("page")}]({page_dir})'), 
-    page_link   = map(page_link, gt::md),
+    page_dir = str_c("content", block, glue("class-{class}.html"), sep = "/"),
+    page_link = glue('[{emo::ji("page")}]({page_dir})'),
+    page_link = map(page_link, gt::md),
     # slides links
-    slides_dir = str_c('content', block, glue('class-{class}.slides.html'), sep = '/'),
-    slides_link   = glue('[{emo::ji("page")}]({slides_dir})'), 
-    slides_link   = map(slides_link, gt::md),
+    slides_dir = str_c("content", block, glue("class-{class}.slides.html"), sep = "/"),
+    slides_link = glue('[{emo::ji("page")}]({slides_dir})'),
+    slides_link = map(slides_link, gt::md),
   ) |>
-  select(-ends_with('_dir'))
+  select(-ends_with("_dir"))
 
 gt(
   sched_tbl,
-  groupname_col = 'week',
-  rowname_col = 'class'
-  ) |>
+  groupname_col = "week",
+  rowname_col = "class"
+) |>
   tab_header(
     title = md("**MOLB 7950 - Fall 2023 Schedule**"),
     subtitle = glue("Classes held in-person in {room}, {time}")
@@ -71,8 +71,8 @@ gt(
     date_style = "wd_m_day_year"
   ) |>
   cols_align(
-    align = 'center'
-    ) |>
+    align = "center"
+  ) |>
   cols_label(
     class = md("**Class**"),
     date = md("**Date**"),
@@ -86,10 +86,10 @@ gt(
   ) |>
   tab_spanner(
     label = md("**Links**"),
-    columns = ends_with('_link')
+    columns = ends_with("_link")
   ) |>
   opt_table_font(
-    font = google_font('Atkinson Hyperlegible')
+    font = google_font("Atkinson Hyperlegible")
   ) |>
   tab_style(
     style = list(
@@ -104,7 +104,7 @@ gt(
   tab_style(
     style = list(
       cell_fill("grey90")
-      ),
+    ),
     locations = cells_row_groups()
   ) |>
   opt_row_striping()

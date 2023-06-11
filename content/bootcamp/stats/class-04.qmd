@@ -21,8 +21,7 @@ library(ggthemes)
 library(cowplot)
 library(DT)
 
-signed_rank = function(x) sign(x) * rank(abs(x))
-
+signed_rank <- function(x) sign(x) * rank(abs(x))
 ```
 
 ------------------------------------------------------------------------
@@ -223,10 +222,8 @@ corresponding parametric tests**.
 Non-Parametric](https://statisticsbyjim.com/hypothesis-testing/nonparametric-parametric-tests/)
 
 ```{r, echo=FALSE}
-tibble("Info" = c("better descriptor","# of samples (N)"), "Parametric" = c("mean","many"),"Non-Parametric" = c("median  ","few")) %>%
+tibble("Info" = c("better descriptor", "# of samples (N)"), "Parametric" = c("mean", "many"), "Non-Parametric" = c("median  ", "few")) %>%
   kable()
-
-  
 ```
 
 ------------------------------------------------------------------------
@@ -248,18 +245,18 @@ biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.tx
 colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
 
 # we are going to simplify this a bit and only keep some columns
-keep <- colnames(biochem)[c(1,6,9,14,15,24:28)]
-biochem <- biochem[,keep]
+keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
+biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
 weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
 
 # add column names
-colnames(weight) <- c("subject_name","weight")
+colnames(weight) <- c("subject_name", "weight")
 
 # add weight to biochem table and get rid of NAs
-biochem <- inner_join(biochem, weight, by="subject_name") %>%
+biochem <- inner_join(biochem, weight, by = "subject_name") %>%
   na.omit()
 
 
@@ -267,7 +264,6 @@ biochem <- inner_join(biochem, weight, by="subject_name") %>%
 # colnames(biochem)
 # str(biochem)
 # View(biochem)
-
 ```
 
 ------------------------------------------------------------------------
@@ -308,55 +304,56 @@ $\mathcal{H}_1:$ mouse $cholesterol$ does explain $weight$
 ## Relationship between mouse weight and cholesterol
 
 ```{r review, message=FALSE}
-
 # fitting a line weight vs intercept (mean weight)
-fit_W <- lm(formula = weight ~ 1 , data = biochem)
+fit_W <- lm(formula = weight ~ 1, data = biochem)
 
 # augment data to add fit/residuals
 biochem_W <- augment(fit_W, data = biochem)
 
-#plot data
+# plot data
 p_wch <- ggplot(data = biochem, aes(y = weight, x = tot_cholesterol)) +
-  geom_point(size=.5) +
-  geom_smooth(method=lm, col = "red") +
+  geom_point(size = .5) +
+  geom_smooth(method = lm, col = "red") +
   scale_color_manual() +
   theme_minimal()
 
 p_WvInt_res <- ggplot(data = biochem_W, aes(x = tot_cholesterol, y = weight)) +
-  geom_hline(yintercept = biochem_W$.fitted, col = "red", size=.5) + # plot linear model fit
-  geom_point(size=.5, aes(color = .resid)) + # plot height as points and color code by the value of the residual
+  geom_hline(yintercept = biochem_W$.fitted, col = "red", size = .5) + # plot linear model fit
+  geom_point(size = .5, aes(color = .resid)) + # plot height as points and color code by the value of the residual
   scale_color_gradient2(low = "blue", mid = "black", high = "yellow") + # color code for plotting residuals
   geom_segment(aes(xend = tot_cholesterol, yend = .fitted), alpha = .25) + # plot line representing residuals
   theme_minimal()
 
 # fitting a line weight vs icholesterol
-fit_WvC <- lm(data = biochem,
-              formula = weight ~ 1 + tot_cholesterol)
+fit_WvC <- lm(
+  data = biochem,
+  formula = weight ~ 1 + tot_cholesterol
+)
 
 # augment data to add fit/residuals
 biochem_WvC <- augment(fit_WvC, data = biochem)
 
 # plot data
 p_WvC_res <- ggplot(data = biochem_WvC, aes(x = tot_cholesterol, y = weight)) +
-  geom_point(size=.5, aes(color = .resid)) +
-  geom_smooth(method=lm, col = "red") +
+  geom_point(size = .5, aes(color = .resid)) +
+  geom_smooth(method = lm, col = "red") +
   scale_color_gradient2(low = "blue", mid = "black", high = "yellow") + # color code
   geom_segment(aes(xend = tot_cholesterol, yend = .fitted), alpha = .1) + # plot line representing residuals
   theme_minimal()
 
 
 
-biochem_WvC_rsq <- fit_WvC %>% glance() %>% pull(r.squared)
+biochem_WvC_rsq <- fit_WvC %>%
+  glance() %>%
+  pull(r.squared)
 
-biochem_WvC_pval <- fit_WvC %>% glance() %>% pull(p.value)
-
-
+biochem_WvC_pval <- fit_WvC %>%
+  glance() %>%
+  pull(p.value)
 ```
 
 ```{r review plot, fig.width=10}
-
-plot_grid(p_WvInt_res, p_WvC_res, ncol = 2, labels = c("weight by intercept","weight by cholesterol"))
-
+plot_grid(p_WvInt_res, p_WvC_res, ncol = 2, labels = c("weight by intercept", "weight by cholesterol"))
 ```
 
 ------------------------------------------------------------------------
@@ -398,23 +395,21 @@ Gosset](https://medium.com/value-stream-design/the-curious-tale-of-william-sealy
 We will compare mouse $weight$ by $gender$.
 
 ```{r, echo=FALSE, fig.width=10}
-
 # plot weight by gender
 p_wg <- ggplot(biochem, aes(x = gender, y = weight)) +
-  geom_jitter(size=1) +
+  geom_jitter(size = 1) +
   geom_hline(yintercept = mean(biochem$weight), color = "red") +
   theme_minimal()
 
 
-# plot weight by gender with mean weight and mean weight by gender  
+# plot weight by gender with mean weight and mean weight by gender
 p_wg2 <- ggplot(biochem, aes(x = gender, y = weight)) +
-  geom_jitter(size=1) +
+  geom_jitter(size = 1) +
   geom_hline(yintercept = mean(biochem$weight), color = "red") +
- stat_summary(fun = "mean", geom = "point",  fill = "blue", shape = 23, size=3) +
+  stat_summary(fun = "mean", geom = "point", fill = "blue", shape = 23, size = 3) +
   theme_minimal()
 
-plot_grid(p_wg, p_wg2, ncol = 2, labels = c("weight vs cholesterol","weight by gender"), scale = c(1,1))
-
+plot_grid(p_wg, p_wg2, ncol = 2, labels = c("weight vs cholesterol", "weight by gender"), scale = c(1, 1))
 ```
 
 ------------------------------------------------------------------------
@@ -444,7 +439,7 @@ We will explore this in more detail soon.
 
 ```{r, echo=FALSE}
 # fitting a line weight vs intercept (mean weight)
-fit_W <- lm(formula = weight ~ 1 , data = biochem)
+fit_W <- lm(formula = weight ~ 1, data = biochem)
 
 # augment (i.e. add fitted and residual values)
 biochem_W <- augment(fit_W, data = biochem)
@@ -453,9 +448,8 @@ biochem_W <- augment(fit_W, data = biochem)
 p_W_res <- ggplot(biochem_W, aes(x = gender, y = weight)) +
   geom_point(position = position_jitter(), aes(color = .resid)) +
   scale_color_gradient2(low = "blue", mid = "black", high = "yellow") + # color code for plotting residuals
-    geom_hline(yintercept = mean(biochem_W$weight), color = "red") +
+  geom_hline(yintercept = mean(biochem_W$weight), color = "red") +
   theme_minimal()
-  
 ```
 
 $SS_{mean}$ --- sum of squares around the overall mean of $y$
@@ -477,12 +471,10 @@ $e = y_{i} - \widehat{y}$
 Which of these are valid ways to calculate $SS_{mean}$ from `biochem_W`?
 
 ```{r  exercise 1}
-
-# A. sum((biochem_W$weight - biochem_W$.fitted)^2)  
-# B. sum((biochem_W$weight - biochem_W$.resid)^2)    
-# C. sum(biochem_W$.resid^2)  
+# A. sum((biochem_W$weight - biochem_W$.fitted)^2)
+# B. sum((biochem_W$weight - biochem_W$.resid)^2)
+# C. sum(biochem_W$.resid^2)
 # D. sum((biochem_W$weight - mean(biochem_W$weight))^2)
-
 ```
 
 ------------------------------------------------------------------------
@@ -492,9 +484,8 @@ Which of these are valid ways to calculate $SS_{mean}$ from `biochem_W`?
 ### Compare $SS_{fit}$ vs $SS_{fit}$ weight by gender
 
 ```{r}
-
 # fitting a line weight vs intercept + gender
-fit_WvG <- lm(formula = weight ~ 1 + gender , data = biochem)
+fit_WvG <- lm(formula = weight ~ 1 + gender, data = biochem)
 
 # augment (i.e. add fitted and residual values)
 biochem_WvG <- augment(fit_WvG, data = biochem)
@@ -503,18 +494,13 @@ biochem_WvG <- augment(fit_WvG, data = biochem)
 p_WvG_res <- ggplot(biochem_WvG, aes(x = gender, y = weight)) +
   geom_point(position = position_jitter(), aes(color = .resid)) +
   scale_color_gradient2(low = "blue", mid = "black", high = "yellow") + # color code for plotting residuals
-  geom_segment(aes(x=.5, xend=1.5, y=fit_WvG$coefficients[1], yend=fit_WvG$coefficients[1]), color="red") +
-    geom_segment(aes(x=1.5, xend=2.5, y=sum(fit_WvG$coefficients)), yend=sum(fit_WvG$coefficients), color="red") +
+  geom_segment(aes(x = .5, xend = 1.5, y = fit_WvG$coefficients[1], yend = fit_WvG$coefficients[1]), color = "red") +
+  geom_segment(aes(x = 1.5, xend = 2.5, y = sum(fit_WvG$coefficients)), yend = sum(fit_WvG$coefficients), color = "red") +
   theme_minimal()
-
-
 ```
 
 ```{r, fig.width=10, echo=FALSE}
-
-plot_grid(p_W_res, p_WvG_res, ncol = 2, labels = c("weight by intercept","weight by gender"), scale = c(1,1))
-
-
+plot_grid(p_W_res, p_WvG_res, ncol = 2, labels = c("weight by intercept", "weight by gender"), scale = c(1, 1))
 ```
 
 ### NOTE: We are fitting 2 lines to the data
@@ -530,26 +516,32 @@ Check the residuals!
 ```{r, echo=F}
 # View(biochem_WvG)
 
-biochem_WvG$exceptions  <- if_else(condition = biochem_WvG$subject_name %in% c("A048054885","A067109771","A066822351","A048274362"),
-                                   true =biochem_WvG$subject_name,
-                                   false = "")
+biochem_WvG$exceptions <- if_else(condition = biochem_WvG$subject_name %in% c("A048054885", "A067109771", "A066822351", "A048274362"),
+  true = biochem_WvG$subject_name,
+  false = ""
+)
 
 
 p_exc <- ggplot(biochem_WvG, aes(x = gender, y = weight, label = exceptions)) +
   geom_point(position = position_jitter(), aes(color = .resid)) +
   geom_label_repel() +
-  geom_segment(aes(x=.5, xend=1.5, y=fit_WvG$coefficients[1], yend=fit_WvG$coefficients[1]), color="red") +
-    geom_segment(aes(x=1.5, xend=2.5, y=sum(fit_WvG$coefficients)), yend=sum(fit_WvG$coefficients), color="red") +
+  geom_segment(aes(x = .5, xend = 1.5, y = fit_WvG$coefficients[1], yend = fit_WvG$coefficients[1]), color = "red") +
+  geom_segment(aes(x = 1.5, xend = 2.5, y = sum(fit_WvG$coefficients)), yend = sum(fit_WvG$coefficients), color = "red") +
   geom_point(position = position_jitter(), aes(color = .resid)) +
   scale_color_gradient2(low = "blue", mid = "black", high = "yellow") + # color code for plotting residuals
   # guides(color = FALSE) + # no legend for color code
   theme_minimal()
 
 
-M_avg <- biochem_WvG %>% filter(gender=="M") %>% summarise(avg_weight=mean(weight)) %>%  pull(avg_weight)
+M_avg <- biochem_WvG %>%
+  filter(gender == "M") %>%
+  summarise(avg_weight = mean(weight)) %>%
+  pull(avg_weight)
 
-F_avg <- biochem_WvG %>% filter(gender=="F") %>% summarise(avg_weight=mean(weight)) %>%  pull(avg_weight)
-
+F_avg <- biochem_WvG %>%
+  filter(gender == "F") %>%
+  summarise(avg_weight = mean(weight)) %>%
+  pull(avg_weight)
 ```
 
 ### *Matrices Interlude Begin*
@@ -568,9 +560,8 @@ p_exc
 
 
 # ggplot(data = biochem_WvG, aes(.resid, color=gender)) +
-#   geom_density() + 
+#   geom_density() +
 #   theme_minimal()
-
 ```
 
 Remember that:\
@@ -597,13 +588,11 @@ $y_{62}= 0 \cdot F_{avg} + 1 \cdot M_{avg} + residual_{62}$
 ------------------------------------------------------------------------
 
 ```{r, echo=FALSE}
-
-biochem_WvG %>% 
-  filter(subject_name %in% c("A048054885","A067109771","A066822351","A048274362")) %>%
+biochem_WvG %>%
+  filter(subject_name %in% c("A048054885", "A067109771", "A066822351", "A048274362")) %>%
   select(subject_name, weight, gender, .fitted, .resid) %>%
   arrange(gender) %>%
   datatable()
-
 ```
 
 ------------------------------------------------------------------------
@@ -651,9 +640,9 @@ Which of these are valid ways to calculate $SS_{fit}$ from
 `biochem_WvG`?
 
 ```{r exercise 2}
-# A. sum(biochem_WvG$.resid^2)  
-# B. sum((biochem_WvG$weight - biochem_WvG$.resid)^2)    
-# C. sum((biochem_WvG$weight - biochem_WvG$.fitted)^2)  
+# A. sum(biochem_WvG$.resid^2)
+# B. sum((biochem_WvG$weight - biochem_WvG$.resid)^2)
+# C. sum((biochem_WvG$weight - biochem_WvG$.fitted)^2)
 # D. sum((biochem_WvG$weight - mean(biochem_WvG$weight))^2)
 
 p_WvG_res
@@ -682,19 +671,18 @@ ss.fit <- sum(biochem_WvG$.resid^2)
 #### COEFFICIENTS NEEL
 
 # number of paramters in simple model
-pmean <- 1 
+pmean <- 1
 
 # number of paramters in complex model
 pfit <- 2
 
 # F-value
-biochem_WvG_F <- ((ss.mean - ss.fit) / (pfit - 1)) / 
+biochem_WvG_F <- ((ss.mean - ss.fit) / (pfit - 1)) /
   (ss.fit / (nrow(biochem_WvG) - pfit))
 
-biochem_WvG_F 
+biochem_WvG_F
 
 glance(fit_WvG) %>% pull(statistic)
-
 ```
 
 ------------------------------------------------------------------------
@@ -702,14 +690,19 @@ glance(fit_WvG) %>% pull(statistic)
 Let's take a look at the statistic and p-values:
 
 ```{r lm t sanity}
-
-fit_WvG_stats <- tidy(fit_WvG) %>% filter(term=="genderM") %>% select(statistic, p.value)
+fit_WvG_stats <- tidy(fit_WvG) %>%
+  filter(term == "genderM") %>%
+  select(statistic, p.value)
 
 
 # to run a t.test in R we need numeric vectors for each of our groups of interest
-male_weight_t <- biochem_WvG %>% filter(gender=="M") %>% pull(weight)
-  
-female_weight_t <- biochem_WvG %>% filter(gender=="F") %>% pull(weight)
+male_weight_t <- biochem_WvG %>%
+  filter(gender == "M") %>%
+  pull(weight)
+
+female_weight_t <- biochem_WvG %>%
+  filter(gender == "F") %>%
+  pull(weight)
 
 
 trad_t <- t.test(male_weight_t, female_weight_t, var.equal = T)
@@ -730,38 +723,41 @@ Let's compare the $weight$ by $family$, but only for a few selected
 families.
 
 ```{r prep fam data}
-
-# biochem %>% 
+# biochem %>%
 #   group_by(family) %>%
-#   count(family) %>% 
+#   count(family) %>%
 #   arrage(-n) %>%
 #   View()
 
-bigfams <- biochem %>% 
+bigfams <- biochem %>%
   group_by(family) %>%
   count(family) %>%
-  filter(n>10) %>%
+  filter(n > 10) %>%
   pull(family)
-  
+
 biochem_bigfams <- biochem %>%
   filter(family %in% bigfams)
 
 # i have pre-selected some families to compare
-myfams <- c("B1.5:E1.4(4) B1.5:A1.4(5)",
-"F1.3:A1.2(3) F1.3:E2.2(3)",
-"A1.3:D1.2(3) A1.3:H1.2(3)",
-"D5.4:G2.3(4) D5.4:C4.3(4)")
+myfams <- c(
+  "B1.5:E1.4(4) B1.5:A1.4(5)",
+  "F1.3:A1.2(3) F1.3:E2.2(3)",
+  "A1.3:D1.2(3) A1.3:H1.2(3)",
+  "D5.4:G2.3(4) D5.4:C4.3(4)"
+)
 
 # only keep the familys in myfams
 fam_data <- biochem_bigfams %>%
   filter(family %in% myfams) %>%
-  droplevels() 
+  droplevels()
 
 # simplify family names and make factor
-fam_data$family <- gsub(pattern = "\\..*", 
-                        replacement = "",
-                        x = fam_data$family) %>%
-  as.factor
+fam_data$family <- gsub(
+  pattern = "\\..*",
+  replacement = "",
+  x = fam_data$family
+) %>%
+  as.factor()
 
 
 # make B1 the reference (most similar to overall mean)
@@ -787,7 +783,6 @@ families:
 $\begin{bmatrix} y_{1} \\ y_{2} \\ y_{3} \\y_{4} \\y_{5} \\y_{5} \end{bmatrix} = \begin{bmatrix} 1 & 0 & 0 \\ 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 0 & 1 \\ \end{bmatrix} \cdot \begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix} + \begin{bmatrix} e_{1} \\ e_{2} \\ e_{3} \\e_{4} \\e_{5} \\e_{6} \end{bmatrix}$
 
 ```{r fit weight to families}
-
 # fitting a line weight vs intercept + family
 fit_WvFam <- lm(formula = weight ~ family, data = fam_data)
 
@@ -803,13 +798,13 @@ mean_F1 <- fit_WvFam$coefficients[1] + fit_WvFam$coefficients[4]
 # plot of data with mean and colored by residuals
 p_WvFam_res <- ggplot(biochem_WvFam, aes(x = family, y = weight)) +
   geom_point(position = position_jitter(), aes(color = .resid)) +
-  geom_segment(aes(x=.5, xend=1.5, y=mean_B1, yend=mean_B1), color="red") +
-  geom_segment(aes(x=1.5, xend=2.5, y=mean_A1, yend=mean_A1), color="red") +
-  geom_segment(aes(x=2.5, xend=3.5, y=mean_D5, yend=mean_D5), color="red") +
-  geom_segment(aes(x=3.5, xend=4.5, y=mean_F1, yend=mean_F1), color="red") +
-  geom_segment(aes(x=.5, xend=4.5, y=mean(weight), yend=mean(weight)), color="black") +
+  geom_segment(aes(x = .5, xend = 1.5, y = mean_B1, yend = mean_B1), color = "red") +
+  geom_segment(aes(x = 1.5, xend = 2.5, y = mean_A1, yend = mean_A1), color = "red") +
+  geom_segment(aes(x = 2.5, xend = 3.5, y = mean_D5, yend = mean_D5), color = "red") +
+  geom_segment(aes(x = 3.5, xend = 4.5, y = mean_F1, yend = mean_F1), color = "red") +
+  geom_segment(aes(x = .5, xend = 4.5, y = mean(weight), yend = mean(weight)), color = "black") +
   scale_color_gradient2(low = "blue", mid = "black", high = "yellow") + # color code for plotting residuals
-  theme_minimal()  
+  theme_minimal()
 
 p_WvFam_res
 ```
@@ -817,17 +812,15 @@ p_WvFam_res
 ------------------------------------------------------------------------
 
 ```{r lm anova sanity check}
-
 anova_WvFam <- aov(formula = weight ~ family, data = fam_data)
 
 # are the coefficients the same?
-bind_cols(tidy(fit_WvFam) %>% select(term,estimate),
-          ANOVA_coef=anova_WvFam$coefficients
-          )
+bind_cols(tidy(fit_WvFam) %>% select(term, estimate),
+  ANOVA_coef = anova_WvFam$coefficients
+)
 
 glance(fit_WvFam) %>% select(p.value)
 tidy(anova_WvFam) %>% select(p.value)
-
 ```
 
 ------------------------------------------------------------------------
@@ -835,14 +828,12 @@ tidy(anova_WvFam) %>% select(p.value)
 ### **Class exercise 3**:
 
 ```{r, echo=FALSE, message=FALSE, fig.width=10}
-
-
 p_compare_fits <- plot_grid(
-  
-  p_WvC_res + theme(legend.position="none"),
-  p_WvG_res + theme(legend.position="none"),
-  p_WvFam_res + theme(legend.position="none"),
-  align = 'vh',
+
+  p_WvC_res + theme(legend.position = "none"),
+  p_WvG_res + theme(legend.position = "none"),
+  p_WvFam_res + theme(legend.position = "none"),
+  align = "vh",
   labels = c("fit cholesterol", "fit gender", "fit family"),
   hjust = -1,
   nrow = 1
@@ -854,11 +845,12 @@ p_compare_fits
 What are the $p_{mean}$ and $p_{fit}$ for the models above?
 
 ```{r, echo=F}
-tibble("Parameter" = c("$p_{mean}$","$p_{fit}$"),
-       "fit cholesterol" = c("?","?"),
-       "fit gender" = c("?","?"),
-       "fit family" = c("?","?")
-       )  %>% 
+tibble(
+  "Parameter" = c("$p_{mean}$", "$p_{fit}$"),
+  "fit cholesterol" = c("?", "?"),
+  "fit gender" = c("?", "?"),
+  "fit family" = c("?", "?")
+) %>%
   kable()
 ```
 
@@ -874,9 +866,9 @@ impact of mouse age on mouse weight for males vs females.
 ```{r ANCOVA}
 # more info here https://towardsdatascience.com/doing-and-reporting-your-first-anova-and-ancova-in-r-1d820940f2ef
 
-p_WvA_gender <- ggplot(data = biochem, aes(y = weight, x = age, color=gender)) +
-  geom_point(size=.5) +
-  geom_smooth(method=lm) +
+p_WvA_gender <- ggplot(data = biochem, aes(y = weight, x = age, color = gender)) +
+  geom_point(size = .5) +
+  geom_smooth(method = lm) +
   theme_minimal()
 
 p_WvA_gender
@@ -886,8 +878,6 @@ WvA_gender <- lm(formula = weight ~ 1 + age + gender, data = biochem)
 WvA_gender %>% glance()
 
 aov(formula = weight ~ 1 + age + gender, data = biochem) %>% glance()
-
-
 ```
 
 # References and resources

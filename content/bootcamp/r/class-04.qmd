@@ -60,10 +60,10 @@ ggplot2 is based on the "grammar of graphics", the idea that you can build every
 
 ### Getting familiar with the data - Exercise 1
 ```{r}
-  # help("diamonds")
-  head(diamonds)
-  glimpse(diamonds)
-  # View(diamonds)
+# help("diamonds")
+head(diamonds)
+glimpse(diamonds)
+# View(diamonds)
 ```
 
 ### The basic syntax of `ggplot()`  
@@ -98,25 +98,33 @@ knitr::include_graphics("img/ggplot-aesthetics.png")
 ggplot(data = diamonds) # specify which dataframe to use - no plot yet
 
 #  specify the coordinate system
-ggplot(data = diamonds, 
-       mapping = aes(x = carat, y = price)) # data to map onto x and y axes
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, y = price)
+) # data to map onto x and y axes
 
 # specify geometry
-ggplot(data = diamonds, 
-       mapping = aes(x = carat, y = price)) + 
-       geom_point() # `geom` is 'geom_point()'
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, y = price)
+) +
+  geom_point() # `geom` is 'geom_point()'
 ######### Note: the position of `+` is important ##########
 ```
 
 ```{r fig.height=3, fig.width=5}
 # map aesthetics to other variables
-ggplot(data = diamonds, 
-       mapping = aes(x = carat, y = price, color = cut, size = carat)) + 
-       geom_point() 
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, y = price, color = cut, size = carat)
+) +
+  geom_point()
 
-ggplot(data = diamonds, 
-       mapping = aes(x = carat, y = price, color = cut, size = carat)) + 
-       geom_point(alpha = 0.2) # adjusting transparency of points
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, y = price, color = cut, size = carat)
+) +
+  geom_point(alpha = 0.2) # adjusting transparency of points
 ```
 
 ### Looking under the hood of ggplot (Exercise 3)
@@ -125,22 +133,30 @@ ggplot(data = diamonds,
 p1 <- ggplot(data = diamonds) # specify which dataframe to use - no plot yet
 
 #  specify the coordinate system
-p2 <- ggplot(data = diamonds, 
-       mapping = aes(x = carat, y = price)) # data to map onto x and y axes
+p2 <- ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, y = price)
+) # data to map onto x and y axes
 
 # specify geometry
-p3 <- ggplot(data = diamonds, 
-       mapping = aes(x = carat, y = price)) + 
-       geom_point() # `geom` is 'geom_boxplot()'
+p3 <- ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, y = price)
+) +
+  geom_point() # `geom` is 'geom_boxplot()'
 
 # map aesthetics to other variables
-p4 <- ggplot(data = diamonds, 
-       mapping = aes(x = carat, y = price, color = cut, size = carat)) + 
-       geom_point() # `geom` is 'geom_boxplot()'
+p4 <- ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, y = price, color = cut, size = carat)
+) +
+  geom_point() # `geom` is 'geom_boxplot()'
 
-p5 <- ggplot(data = diamonds, 
-       mapping = aes(x = carat, y = price, color = cut, size = carat)) + 
-       geom_point(alpha = 0.2) # `geom` is 'geom_boxplot()'
+p5 <- ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, y = price, color = cut, size = carat)
+) +
+  geom_point(alpha = 0.2) # `geom` is 'geom_boxplot()'
 
 typeof(p1)
 names(p1)
@@ -154,9 +170,11 @@ summary(p5)
 
 ### ggplot is overkill for simple plots, but powerfully simple in making complex plots
 ```{r fig.height=3, fig.width=5}
-ggplot(data = diamonds, 
-       mapping = aes(x = carat)) +  
-       geom_histogram() # histogram
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat)
+) +
+  geom_histogram() # histogram
 ```
 
 ```{r fig.height=4, fig.width=5}
@@ -186,35 +204,47 @@ knitr::include_graphics("img/ggplot-1variable.png")
 
 ```{r fig.height=3, fig.width=5}
 # bar plot
-ggplot(data = diamonds, 
-       mapping = aes(x = cut)) +  
-       geom_bar() # bar
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut)
+) +
+  geom_bar() # bar
 
-ggplot(data = diamonds,
-       mapping = aes(x = cut, fill = clarity)) + 
-       geom_bar()
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, fill = clarity)
+) +
+  geom_bar()
 
 # density plot
-ggplot(data = diamonds, 
-       mapping = aes(x = carat)) +  
-       geom_density() # density
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat)
+) +
+  geom_density() # density
 
 # color the density plot
-ggplot(data = diamonds, 
-       mapping = aes(x = carat)) + 
-       geom_density(fill = "tomato1") 
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat)
+) +
+  geom_density(fill = "tomato1")
 
 # plot subsets by mapping `fill` to `cut`
-ggplot(data = diamonds, 
-       mapping = aes(x = carat, fill = cut)) + 
-       geom_density(alpha = 0.8)
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, fill = cut)
+) +
+  geom_density(alpha = 0.8)
 ```
 
 ```{r fig.height=5, fig.width=7}
 # use ggridges to plot subsets in a staggered fashion!
-ggplot(data = diamonds,
-       mapping = aes(carat, y = cut, fill = cut)) + 
-       geom_density_ridges() # function from the ggridges package, NOT ggplot2
+ggplot(
+  data = diamonds,
+  mapping = aes(carat, y = cut, fill = cut)
+) +
+  geom_density_ridges() # function from the ggridges package, NOT ggplot2
 ```
 
 ### Geom functions for two variables
@@ -233,30 +263,40 @@ knitr::include_graphics("img/ggplot-geom-dx-cy.png")
 
 ```{r fig.height=3, fig.width=5}
 # column plot
-ggplot(data = diamonds, 
-       mapping = aes(x = cut, y = price)) +  
-       geom_col()
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, y = price)
+) +
+  geom_col()
 
-options(scipen=10000) # disables scientific notation - only have to type once for the whole Rmd
-ggplot(data = diamonds, 
-       mapping = aes(x = cut, y = price)) +  
-       geom_col()
+options(scipen = 10000) # disables scientific notation - only have to type once for the whole Rmd
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, y = price)
+) +
+  geom_col()
 
 # box plot
-ggplot(data = diamonds, 
-       mapping = aes(x = cut, y = price)) +  
-       geom_boxplot()
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, y = price)
+) +
+  geom_boxplot()
 ```
 
 ```{r fig.height=3, fig.width=7}
 # box plot with fill color by cut
-ggplot(data = diamonds,
-  mapping = aes(x = cut, y = price, fill = cut)) + 
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, y = price, fill = cut)
+) +
   geom_boxplot()
 
 # violin plot with fill color by cut
-ggplot(data = diamonds,
-  mapping = aes(x = cut, y = price, fill = cut)) + 
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, y = price, fill = cut)
+) +
   geom_violin()
 ```
 
@@ -271,27 +311,34 @@ knitr::include_graphics("img/ggplot-geom-cx-cy.png")
 diamonds_subset <- diamonds %>% sample_n(size = 1000)
 
 # scatter plot
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-       geom_point() 
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point()
 
 # geom_smooth
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-       geom_smooth() 
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_smooth()
 
 # combining geoms - 1
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-       geom_point() + 
-       geom_smooth() 
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point() +
+  geom_smooth()
 
 # combining geoms - 2
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-       geom_point() + 
-       geom_rug() 
-
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point() +
+  geom_rug()
 ```
 
 ### continuous bivariate - Exercise 7
@@ -302,13 +349,17 @@ knitr::include_graphics("img/ggplot-geom-cont-bivar.png")
 
 ```{r fig.height=3, fig.width=3}
 # scatter plot
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price)) + 
-       geom_point() 
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price)
+) +
+  geom_point()
 
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price)) + 
-       geom_hex() 
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price)
+) +
+  geom_hex()
 ```
 
 ### Geom functions for three variables - Exercise 8
@@ -319,9 +370,11 @@ knitr::include_graphics("img/ggplot-geom-3variables.png")
 
 One example with geom_tile()
 ```{r}
-ggplot(data = diamonds,
-  mapping = aes(x = cut, y = carat, fill = price)) + 
-  geom_tile(colour = "white") + 
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, y = carat, fill = price)
+) +
+  geom_tile(colour = "white") +
   scale_fill_gradientn(colors = c("red", "white", "blue"))
 ```
 
@@ -334,12 +387,15 @@ knitr::include_graphics("img/ggplot-shapes.png")
 ```
 
 ```{r fig.height=3, fig.width=4}
-ggplot(data = diamonds_subset, 
-    mapping = aes(x = carat, y = price)) + 
-    geom_point(aes(fill = cut, size = depth), 
-               alpha = 0.8, 
-               shape = 24, 
-               color = "white") 
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price)
+) +
+  geom_point(aes(fill = cut, size = depth),
+    alpha = 0.8,
+    shape = 24,
+    color = "white"
+  )
 ```
 
 Note that aesthetics can also be defined within geoms
@@ -353,13 +409,17 @@ knitr::include_graphics("img/ggplot-position.png")
 ```
 
 ```{r fig.height=3, fig.width=5}
-ggplot(data = diamonds,
-       mapping = aes(x = cut, fill = clarity)) + 
-       geom_bar()
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, fill = clarity)
+) +
+  geom_bar()
 
-ggplot(data = diamonds,
-       mapping = aes(x = cut, fill = clarity)) + 
-       geom_bar(position = "dodge")
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, fill = clarity)
+) +
+  geom_bar(position = "dodge")
 ```
 
 Jitter can be used to avoid over-plotting along with geom_point. 
@@ -380,12 +440,16 @@ ggplot(diamonds_subset, aes(carat, price)) +
 
 ```{r fig.height=3, fig.width=5}
 # coord_flip
-ggplot(data = diamonds,
-  mapping = aes(x = cut)) +
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut)
+) +
   geom_bar() # bar
 
-ggplot(data = diamonds,
-  mapping = aes(x = cut)) +
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut)
+) +
   geom_bar() +
   coord_flip()
 ```
@@ -394,13 +458,13 @@ ggplot(data = diamonds,
 # scales
 ggplot(diamonds_subset, aes(carat, price)) +
   geom_point() +
-  scale_x_log10() 
+  scale_x_log10()
 ```
 
 Brief aside: ggplot can also handle on-the-fly data transformations like below. 
 ```{r fig.height=3, fig.width=3}
 # log transformed carat and USD converted to CAD
-ggplot(diamonds_subset, aes(log10(carat), price*1.32)) + 
+ggplot(diamonds_subset, aes(log10(carat), price * 1.32)) +
   geom_point()
 ```
 
@@ -408,11 +472,11 @@ ggplot(diamonds_subset, aes(log10(carat), price*1.32)) +
 
 One might often want to change the limits of x or y axes to zoom in. There are multiple ways to do this. 
 ```{r fig.height=3, fig.width=3}
-ggplot(diamonds_subset, aes(carat, price)) + 
+ggplot(diamonds_subset, aes(carat, price)) +
   geom_point(alpha = 0.5) +
   coord_cartesian(xlim = c(0, 2), ylim = c(0, 5000))
 
-ggplot(diamonds_subset, aes(carat, price)) + 
+ggplot(diamonds_subset, aes(carat, price)) +
   geom_point(alpha = 0.5) +
   xlim(0, 2) +
   ylim(0, 5000)
@@ -429,23 +493,29 @@ knitr::include_graphics("img/ggplot-facet.png")
 
 ```{r fig.height=3, fig.width=7}
 # density plot for data subsets
-ggplot(data = diamonds, 
-       mapping = aes(x = carat, fill = cut)) + 
-       geom_density(alpha = 0.8)
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, fill = cut)
+) +
+  geom_density(alpha = 0.8)
 ```
 
 ```{r fig.height=2, fig.width=7}
 # density plot with facets
-ggplot(data = diamonds, 
-       mapping = aes(x = log(price), fill = cut)) + 
-       geom_density(color = "black") + 
-       facet_wrap(~ cut, nrow = 1) 
+ggplot(
+  data = diamonds,
+  mapping = aes(x = log(price), fill = cut)
+) +
+  geom_density(color = "black") +
+  facet_wrap(~cut, nrow = 1)
 
 # scatter plot with facets
-ggplot(data = diamonds, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-  geom_point(alpha = .05) + 
-  facet_wrap(~ cut, nrow = 1)
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point(alpha = .05) +
+  facet_wrap(~cut, nrow = 1)
 ```
 
 ### Themes - Exercise 14
@@ -458,50 +528,65 @@ knitr::include_graphics("img/ggplot-themes.png")
 
 ```{r fig.height=3, fig.width=4}
 # default theme
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-       geom_point(alpha = 0.8)
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point(alpha = 0.8)
 
 # theme black & white
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-       geom_point(alpha = 0.8) + 
-       theme_bw()
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point(alpha = 0.8) +
+  theme_bw()
 
 # theme few
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-       geom_point(alpha = 0.8) + 
-       theme_few()
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point(alpha = 0.8) +
+  theme_few()
 ```
 
 ```{r fig.height=3, fig.width=6}
 # theme wsj
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-       geom_point(alpha = 0.8) + 
-       theme_wsj()
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point(alpha = 0.8) +
+  theme_wsj()
 
 # theme economist
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-       geom_point(alpha = 0.8) + 
-       theme_economist()
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point(alpha = 0.8) +
+  theme_economist()
 ```
 
 You can also customize pre-existing themes
 ```{r fig.height=3, fig.width=3}
-mytheme <- theme_minimal(base_size = 15) + 
-                theme(aspect.ratio = 1, 
-                      panel.background = 
-                          element_rect(
-                              colour = "black", 
-                              size=1))
+mytheme <- theme_minimal(base_size = 15) +
+  theme(
+    aspect.ratio = 1,
+    panel.background =
+      element_rect(
+        colour = "black",
+        size = 1
+      )
+  )
 
-ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-       geom_point(alpha = 0.8) + 
-       mytheme # notice the lack of parantheses, because this is an object, not a function
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point(alpha = 0.8) +
+  mytheme # notice the lack of parantheses, because this is an object, not a function
 ```
 
 
@@ -512,14 +597,18 @@ knitr::include_graphics("img/ggplot-labels-legends.png")
 ```
 
 ```{r fig.height=3, fig.width=5}
-ggplot(data = diamonds,
-  mapping = aes(x = cut, y = log(price), fill = cut)) + 
-  geom_boxplot()  + 
-  labs(y = "Price (log scale)", x = "Cut", color = "Cut", 
-       title = "Distribution of diamond prices by cut", 
-       subtitle = "Data come from a random sample of 1000 diamonds",
-       caption = "Source: diamonds dataset from ggplot2") +
-  annotate(geom = "text", x = 1, y = 5, label = "Random text") + 
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, y = log(price), fill = cut)
+) +
+  geom_boxplot() +
+  labs(
+    y = "Price (log scale)", x = "Cut", color = "Cut",
+    title = "Distribution of diamond prices by cut",
+    subtitle = "Data come from a random sample of 1000 diamonds",
+    caption = "Source: diamonds dataset from ggplot2"
+  ) +
+  annotate(geom = "text", x = 1, y = 5, label = "Random text") +
   theme_bw()
 ```
 
@@ -528,16 +617,18 @@ ggplot(data = diamonds,
 ### How to add a line to a plot? (Exercise 16)
 
 ```{r fig.height=3, fig.width=4}
-p <- ggplot(data = diamonds_subset, 
-       mapping = aes(x = carat, y = price, color = cut)) + 
-       geom_point(alpha = 0.8) +
-       theme_few()
+p <- ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point(alpha = 0.8) +
+  theme_few()
 
 p + geom_line()
 p + geom_hline(aes(yintercept = 5000))
 p + geom_vline(aes(xintercept = 2))
 p + geom_smooth(method = lm)
-p + geom_abline(aes(intercept=0.5, slope=5000))
+p + geom_abline(aes(intercept = 0.5, slope = 5000))
 ```
 
 ### How to combine multiple plots into a figure? (Exercise 17)
@@ -546,20 +637,20 @@ p + geom_abline(aes(intercept=0.5, slope=5000))
 plot1 <- p
 plot2 <- p + geom_hline(aes(yintercept = 5000))
 plot3 <- p + geom_vline(aes(xintercept = 2))
-plot4 <- p + geom_abline(aes(intercept=0.5, slope=5000)) 
+plot4 <- p + geom_abline(aes(intercept = 0.5, slope = 5000))
 
-all_plots <- plot_grid(plot1, plot2, plot3, plot4, labels = c("A","B", "C", "D"), nrow = 2)
-all_plots 
+all_plots <- plot_grid(plot1, plot2, plot3, plot4, labels = c("A", "B", "C", "D"), nrow = 2)
+all_plots
 
 # we have 4 legends, which is too many - can they be removed?
-# Yes, but it is not exactly straightforward 
+# Yes, but it is not exactly straightforward
 legend <- get_legend(plot1 + theme(legend.position = "bottom"))
 plot1 <- p + theme(legend.position = "none")
 plot2 <- p + geom_hline(aes(yintercept = 5000)) + theme(legend.position = "none")
 plot3 <- p + geom_vline(aes(xintercept = 2)) + theme(legend.position = "none")
-plot4 <- p + geom_abline(aes(intercept=0.5, slope=5000)) + theme(legend.position = "none")
+plot4 <- p + geom_abline(aes(intercept = 0.5, slope = 5000)) + theme(legend.position = "none")
 
-all_plots <- plot_grid(plot1, plot2, plot3, plot4, labels = c("A","B", "C", "D"), nrow = 2)
+all_plots <- plot_grid(plot1, plot2, plot3, plot4, labels = c("A", "B", "C", "D"), nrow = 2)
 plot_final <- plot_grid(all_plots, legend, ncol = 1, rel_heights = c(1, .1))
 plot_final
 ```
@@ -567,7 +658,7 @@ More information on using plot_grid (from package `cowplot`) is [here](https://w
 
 ### Saving plots (Exercise 18)
 ```{r}
-ggsave("img/plot_final.png", width = 5, height = 5) 
+ggsave("img/plot_final.png", width = 5, height = 5)
 # Saves last plot as 5’ x 5’ file named "plot_final.png" in working directory. Matches file type to file extension
 ```
 

@@ -20,8 +20,6 @@ library(knitr)
 library(ggthemes)
 library(cowplot)
 library(DT)
-
-
 ```
 
 ------------------------------------------------------------------------
@@ -222,10 +220,8 @@ corresponding parametric tests**.
 Non-Parametric](https://statisticsbyjim.com/hypothesis-testing/nonparametric-parametric-tests/)
 
 ```{r, echo=FALSE}
-tibble("Info" = c("better descriptor","# of samples (N)"), "Parametric" = c("mean","many"),"Non-Parametric" = c("median  ","few")) %>%
+tibble("Info" = c("better descriptor", "# of samples (N)"), "Parametric" = c("mean", "many"), "Non-Parametric" = c("median  ", "few")) %>%
   kable()
-
-  
 ```
 
 ------------------------------------------------------------------------
@@ -247,18 +243,18 @@ biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.tx
 colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
 
 # we are going to simplify this a bit and only keep some columns
-keep <- colnames(biochem)[c(1,6,9,14,15,24:28)]
-biochem <- biochem[,keep]
+keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
+biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
 weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
 
 # add column names
-colnames(weight) <- c("subject_name","weight")
+colnames(weight) <- c("subject_name", "weight")
 
 # add weight to biochem table and get rid of NAs
-biochem <- inner_join(biochem, weight, by="subject_name") %>%
+biochem <- inner_join(biochem, weight, by = "subject_name") %>%
   na.omit()
 
 
@@ -266,7 +262,6 @@ biochem <- inner_join(biochem, weight, by="subject_name") %>%
 colnames(biochem)
 str(biochem)
 # View(biochem)
-
 ```
 
 ------------------------------------------------------------------------
@@ -277,10 +272,9 @@ What is the relationship between weight and cholesterol?
 
 ```{r}
 ggplot(data = biochem, aes(y = weight, x = tot_cholesterol)) +
-  geom_point(size=.5) +
+  geom_point(size = .5) +
   scale_color_manual() +
   theme_minimal()
-
 ```
 
 ## Correlation vs Regression
@@ -340,7 +334,6 @@ $y_{i}$ = the "i-th" observation of the variable $y$
 $\overline{y}$ = mean of all observations of $y$
 
 ```{r pearson}
-
 r_pearson <- cor(x = biochem$tot_cholesterol, y = biochem$weight)
 
 r_pearson
@@ -358,8 +351,8 @@ diff_chol <- biochem$tot_cholesterol - avg_chol
 diff_weight <- biochem$weight - avg_weight
 
 # follow formula above
-manual_pearson <- sum(diff_chol*diff_weight)/(
-sqrt(sum(diff_chol^2))*sqrt(sum(diff_weight^2)))
+manual_pearson <- sum(diff_chol * diff_weight) / (
+  sqrt(sum(diff_chol^2)) * sqrt(sum(diff_weight^2)))
 
 manual_pearson
 
@@ -367,7 +360,6 @@ identical(manual_pearson, r_pearson)
 
 
 # cov(x = biochem$tot_cholesterol, y = biochem$weight)/(sd(biochem$tot_cholesterol)*sd(biochem$weight))
-
 ```
 
 ------------------------------------------------------------------------
@@ -385,18 +377,15 @@ More info
 [here](https://towardsdatascience.com/clearly-explained-pearson-v-s-spearman-correlation-coefficient-ada2f473b8#:~:text=The%20fundamental%20difference%20between%20the,with%20monotonic%20relationships%20as%20well.).
 
 ```{r spearman}
-
-x <- seq(1,30, 1)
+x <- seq(1, 30, 1)
 y <- 2^x
 
-plot(x,y, type = "l", las=2)
+plot(x, y, type = "l", las = 2)
 
-cor(x,y, method = "pearson")
-cor(x,y, method = "spearman")
+cor(x, y, method = "pearson")
+cor(x, y, method = "spearman")
 
 cor(x = biochem$tot_cholesterol, y = biochem$weight, method = "spearman")
-
-
 ```
 
 ## Regression
@@ -415,12 +404,10 @@ $b$ is the **y-intercept**
 a <- 2 # slope
 b <- 0.5 # y-int
 
-ggplot(data=data.frame( x=c(-1,3),y=c(-1,6) ), aes(x=x,y=y)) + 
+ggplot(data = data.frame(x = c(-1, 3), y = c(-1, 6)), aes(x = x, y = y)) +
   geom_blank() +
   geom_abline(intercept = b, slope = a, col = "red") +
   theme_minimal()
-
-
 ```
 
 $a$ = `r a` (the slope)\
@@ -444,11 +431,10 @@ Either way you write it, it's an intercept ($\beta_0$) and a slope
 ($\beta_1$) yielding a straight line:
 
 ```{r, echo=FALSE, fig.width=2, fig.height=2}
-ggplot(data=data.frame( x=c(-1,3),y=c(-1,6) ), aes(x=x,y=y)) + 
+ggplot(data = data.frame(x = c(-1, 3), y = c(-1, 6)), aes(x = x, y = y)) +
   geom_blank() +
   geom_abline(intercept = b, slope = a, col = "red") +
   theme_minimal()
-
 ```
 
 $\beta_0$ = `r b` (the y-intercept)\
@@ -478,13 +464,10 @@ Plot weight (y, response variable) and cholesterol levels (x,
 explanatory variable) of the mice.
 
 ```{r}
-
 ggplot(data = biochem, aes(y = weight, x = tot_cholesterol)) +
-  geom_point(size=.5) +
+  geom_point(size = .5) +
   scale_color_manual() +
   theme_minimal()
-
-
 ```
 
 ------------------------------------------------------------------------
@@ -524,16 +507,15 @@ alternative hypothesis by learning and examining the model coefficients
 ### STEP 4: Look at the $R^2$, $F$-value and $p$-value
 
 ```{r fit}
-
 # fitting a line
-fit_WvC <- lm(data = biochem,
-              formula = weight ~ 1 + tot_cholesterol)
+fit_WvC <- lm(
+  data = biochem,
+  formula = weight ~ 1 + tot_cholesterol
+)
 
 
 # base R summary of fit
 summary(fit_WvC)
-
-
 ```
 
 That's a lot of info, but how would I access it? Time to meet your new
@@ -542,23 +524,22 @@ best friend ---
 
 ```{r fit information}
 # information about the model fit
-glance(fit_WvC) 
+glance(fit_WvC)
 
 # information about the intercept and coefficients
 tidy(fit_WvC)
 
-chol_intercept <- tidy(fit_WvC)[1,2]
+chol_intercept <- tidy(fit_WvC)[1, 2]
 
-chol_slope <- tidy(fit_WvC)[2,2]
-# for every 1 unit increase in cholesterol there is a 1.85 unit increase weight 
+chol_slope <- tidy(fit_WvC)[2, 2]
+# for every 1 unit increase in cholesterol there is a 1.85 unit increase weight
 
 
 # add residuals and other information
-augment(fit_WvC) 
+augment(fit_WvC)
 
 # add residuals and other information into the biochem object
 biochem_WvC <- augment(fit_WvC, data = biochem)
-
 ```
 
 For every 1 unit increase in $cholesterol$ there is a
@@ -569,22 +550,20 @@ For every 1 unit increase in $cholesterol$ there is a
 ### STEP 5: Visualize fit and errors
 
 ```{r visualize lm}
-
 ggplot(data = biochem_WvC, aes(y = weight, x = tot_cholesterol)) +
-  geom_point(size=.5, col="white") +
-  geom_abline(intercept = pull(chol_intercept), slope = pull(chol_slope), col = "pink", size=1) +
-  geom_smooth(method=lm, col = "black", se = F, size=1, linetype="dashed") +
+  geom_point(size = .5, col = "white") +
+  geom_abline(intercept = pull(chol_intercept), slope = pull(chol_slope), col = "pink", size = 1) +
+  geom_smooth(method = lm, col = "black", se = F, size = 1, linetype = "dashed") +
   scale_color_manual() +
   theme_minimal()
 
 
 ggplot(data = biochem_WvC, aes(x = tot_cholesterol, y = weight)) +
-  geom_point(size=.5, aes(color = .resid)) + 
+  geom_point(size = .5, aes(color = .resid)) +
   geom_abline(intercept = pull(chol_intercept), slope = pull(chol_slope), col = "red") +
   scale_color_gradient2(low = "blue", mid = "black", high = "yellow") + # color code
   geom_segment(aes(xend = tot_cholesterol, yend = .fitted), alpha = .1) + # plot line representing residuals
   theme_minimal()
-
 ```
 
 ------------------------------------------------------------------------
@@ -621,7 +600,6 @@ errors around the least-squares fit
 $Var_{fit} = \displaystyle \frac {\sum_{i=1}^{n} (y_{i} - (\beta_0 \cdot 1+ \beta_1 \cdot x))}{n}$
 
 ```{r}
-
 fit_W <- lm(formula = weight ~ 1, data = biochem)
 
 summary(fit_W)
@@ -634,30 +612,27 @@ biochem_W <- augment(fit_W, data = biochem)
 First, let's look at $SS_{mean}$ for avg weight:
 
 ```{r}
-
 p_W <- ggplot(data = biochem_W, aes(x = tot_cholesterol, y = weight)) +
-  geom_hline(yintercept = biochem_W$.fitted, col = "red", size=.5) + # plot linear model fit
-  geom_point(size=.5, aes(color = .resid)) + # plot height as points and color code by the value of the residual
+  geom_hline(yintercept = biochem_W$.fitted, col = "red", size = .5) + # plot linear model fit
+  geom_point(size = .5, aes(color = .resid)) + # plot height as points and color code by the value of the residual
   scale_color_gradient2(low = "blue", mid = "black", high = "yellow") + # color code for plotting residuals
   geom_segment(aes(xend = tot_cholesterol, yend = .fitted), alpha = .25) + # plot line representing residuals
   theme_minimal()
-
 ```
 
 Now, let's look at $SS_{fit}$ for the $weight$ \~ $cholesterol$ :
 
 ```{r, fig.width=10}
-
 p_WvC <- ggplot(data = biochem_WvC, aes(x = tot_cholesterol, y = weight)) +
   geom_abline(intercept = pull(chol_intercept), slope = pull(chol_slope), col = "red") +
-  geom_point(size=.5, aes(color = .resid)) + # plot height as points and color code by the value of the residual
+  geom_point(size = .5, aes(color = .resid)) + # plot height as points and color code by the value of the residual
   scale_color_gradient2(low = "blue", mid = "black", high = "yellow") + # color code for plotting residuals
   # guides(color = FALSE) + # no legend for color code
   geom_segment(aes(xend = tot_cholesterol, yend = .fitted), alpha = .1) + # plot line representing residuals
   theme_minimal()
 
 
-plot_grid(p_W, p_WvC, ncol = 2, labels = c("weight by intercept","weight by cholesterol"))
+plot_grid(p_W, p_WvC, ncol = 2, labels = c("weight by intercept", "weight by cholesterol"))
 ```
 
 ------------------------------------------------------------------------
@@ -675,12 +650,12 @@ biochem_WvC$exceptions <- if_else(
   condition = abs(biochem_WvC$.resid) < 9,
   true = "",
   false = biochem_WvC$subject_name
-  )
+)
 
 ggplot(data = biochem_WvC, aes(x = tot_cholesterol, y = weight, label = exceptions)) +
   geom_point(color = ifelse(biochem_WvC$exceptions == "", "grey50", "red")) +
   geom_text_repel() +
-geom_point(size=.5, aes(color = .resid)) + # plot height as points and color code by the value of the residual
+  geom_point(size = .5, aes(color = .resid)) + # plot height as points and color code by the value of the residual
   scale_color_gradient2(low = "blue", mid = "black", high = "yellow") + # color code for plotting residuals
   # guides(color = FALSE) + # no legend for color code
   geom_segment(aes(xend = tot_cholesterol, yend = .fitted), alpha = .1) + # plot line representing residuals
@@ -720,11 +695,10 @@ ss.mean <- sum(biochem_W$.resid^2)
 
 
 # Calc R^2 value
-biochem_WvC_rsq <- (ss.mean - ss.fit) / ss.mean 
+biochem_WvC_rsq <- (ss.mean - ss.fit) / ss.mean
 biochem_WvC_rsq
 
 glance(fit_WvC) %>% pull(r.squared)
-
 ```
 
 #### Interpretation of $R^2$
@@ -743,7 +717,6 @@ cor(biochem$weight, biochem$tot_cholesterol, method = "pearson")
 
 # Pearson correlation R^2 value
 cor(biochem$weight, biochem$tot_cholesterol, method = "pearson")^2
-
 ```
 
 ------------------------------------------------------------------------
@@ -760,16 +733,13 @@ $p_{mean}$ --- number of parameters in the mean line\
 $n$ --- number of data points
 
 ```{r}
-
 # F-value
-biochem_WvC_F <- ((ss.mean - ss.fit) / (2 - 1)) / 
+biochem_WvC_F <- ((ss.mean - ss.fit) / (2 - 1)) /
   (ss.fit / (nrow(biochem_WvC) - 2))
 
-biochem_WvC_F 
+biochem_WvC_F
 
 glance(fit_WvC) %>% pull(statistic)
-
-
 ```
 
 #### P-value from the F-statistic
@@ -813,22 +783,20 @@ sample(x = 1:10)
 myPerms <- 100
 
 for (i in 1:myPerms) {
-
   tmp <- bind_cols(
     biochem_WvC[sample(nrow(biochem_WvC)), "weight"],
     biochem_WvC[sample(nrow(biochem_WvC)), "tot_cholesterol"],
-    "perm"=factor(rep(i,nrow(biochem_WvC)))
-    )
+    "perm" = factor(rep(i, nrow(biochem_WvC)))
+  )
 
-  fake_biochem <- bind_rows(fake_biochem,tmp)
+  fake_biochem <- bind_rows(fake_biochem, tmp)
   rm(tmp)
-
 }
 
 
 # let's look at permutations 1 and 2
-ggplot(fake_biochem %>% filter(perm %in% c(1:2)), aes(x=weight, y=tot_cholesterol, color=perm)) +
-  geom_point(size=.1) +
+ggplot(fake_biochem %>% filter(perm %in% c(1:2)), aes(x = weight, y = tot_cholesterol, color = perm)) +
+  geom_point(size = .1) +
   theme_minimal()
 ```
 
@@ -846,8 +814,6 @@ fake_biochem_lms <- fake_biochem %>%
     glanced = map(fit, glance)
   ) %>%
   unnest(glanced)
-
-
 ```
 
 #### Let's take a look at the null distribution of F-statistics from the randomized values
@@ -855,7 +821,7 @@ fake_biochem_lms <- fake_biochem %>%
 ```{r}
 fake_biochem_lms %>%
   ggplot(., aes(x = statistic)) +
-  geom_density(color="red") +
+  geom_density(color = "red") +
   theme_minimal()
 ```
 
@@ -863,14 +829,13 @@ remember that the $F-statistic$ we observed was
 \~`r round(biochem_WvC_F)`!
 
 ```{r}
-
 fake_biochem_lms %>%
   ggplot(., aes(x = statistic)) +
-  xlim(0,biochem_WvC_F*1.1) +
-  geom_density(color="red") +
+  xlim(0, biochem_WvC_F * 1.1) +
+  geom_density(color = "red") +
   geom_vline(xintercept = biochem_WvC_F, color = "blue") +
-#  scale_x_log10() +
-  theme_minimal() 
+  #  scale_x_log10() +
+  theme_minimal()
 
 glance(fit_WvC) %>% pull(p.value)
 ```
@@ -928,9 +893,6 @@ size first and then add in the sign second. So the signed rank here
 would be `2, 1, -3, 4`. Or in code:
 
 ```{r}
-
-
-
 npfit_WvC <- lm(formula = rank(weight) ~ 1 + rank(tot_cholesterol), data = biochem)
 
 tidy(npfit_WvC)
@@ -972,18 +934,18 @@ $\mathcal{H}_1:$ Mouse $cholesterol$ and $sodium$ does explain $weight$
 $weight = \beta_0 \cdot 1 + \beta_1 \cdot cholesterol + \beta_2 \cdot sodium$
 
 ```{r multiple regression}
-
 # how do different variables correlate with weight?
 biochem %>%
   select_if(is.numeric) %>%
   cor() %>%
-  as.data.frame %>%
+  as.data.frame() %>%
   select(weight) %>%
-  arrange(-weight) %>% rownames()
+  arrange(-weight) %>%
+  rownames()
 
 
 # does sodium + cholesterol predict weight better than cholesterol alone?
-fit_WvC_S <-  lm(data = biochem, formula = weight ~ 1 + tot_cholesterol + sodium)  
+fit_WvC_S <- lm(data = biochem, formula = weight ~ 1 + tot_cholesterol + sodium)
 
 
 fit_WvC_S %>% glance()
@@ -992,27 +954,26 @@ biochem_WvC_S <- augment(fit_WvC_S, data = biochem)
 
 ss.fit_C_S <- sum(biochem_WvC_S$.resid^2)
 
-var.fit_C_S <- ss.fit_C_S/nrow(biochem_WvC_S)
- 
+var.fit_C_S <- ss.fit_C_S / nrow(biochem_WvC_S)
+
 
 ss.fit_C <- sum(biochem_WvC$.resid^2)
 
-var.fit_C <- ss.fit_C/nrow(biochem_WvC)
+var.fit_C <- ss.fit_C / nrow(biochem_WvC)
 
 
 
-fit_Wvall <-  lm(data = biochem, formula = weight ~ 1 + tot_cholesterol + age + sodium + glucose + calcium + litter + cage_density)  
+fit_Wvall <- lm(data = biochem, formula = weight ~ 1 + tot_cholesterol + age + sodium + glucose + calcium + litter + cage_density)
 
-fit_Wvall %>% glance() 
-fit_Wvall %>% tidy() 
+fit_Wvall %>% glance()
+fit_Wvall %>% tidy()
 
 
 
 ggplot(data = biochem, aes(y = weight, x = calcium)) +
-  geom_point(size=.5) +
+  geom_point(size = .5) +
   scale_color_manual() +
   theme_minimal()
-
 ```
 
 ------------------------------------------------------------------------
@@ -1041,30 +1002,26 @@ the data.
 
 ```{r}
 # local-weighted regression fit
-loessfit_WvC <- loess(formula = weight ~  tot_cholesterol, data = biochem)
+loessfit_WvC <- loess(formula = weight ~ tot_cholesterol, data = biochem)
 
-loess_biochem_WvC <- augment(loessfit_WvC, biochem) 
+loess_biochem_WvC <- augment(loessfit_WvC, biochem)
 
 
 summary(loessfit_WvC)
 summary(fit_WvC)
-
 ```
 
 #### Plot loess fit depicting residuals
 
 ```{r}
-
 ggplot(data = loess_biochem_WvC, aes(x = tot_cholesterol, y = weight)) +
-  geom_smooth(method=lm, col = "black", se = F, size=.25, linetype="dashed") + # linear fit black dashed line
-  geom_smooth(method=loess, col = "red", se = F, size=.25) + # loess fit red line
-  geom_point(size=.5, aes(color = .resid)) +
+  geom_smooth(method = lm, col = "black", se = F, size = .25, linetype = "dashed") + # linear fit black dashed line
+  geom_smooth(method = loess, col = "red", se = F, size = .25) + # loess fit red line
+  geom_point(size = .5, aes(color = .resid)) +
   scale_color_gradient2(low = "blue", mid = "black", high = "yellow") +
   # guides(color = FALSE) +
   geom_segment(aes(xend = tot_cholesterol, yend = .fitted), alpha = .25) +
   theme_minimal()
-
-
 ```
 
 ------------------------------------------------------------------------

@@ -59,15 +59,15 @@ Use https://calendly.com/molb7950 to schedule a time with a TA.
 
 ```{r}
 # dplyr::starwars
-  head(starwars)
-  starwars  
-  glimpse(starwars)
-  #View(starwars)
+head(starwars)
+starwars
+glimpse(starwars)
+# View(starwars)
 
-# dplyr::band_members 
-  band_members 
-  band_instruments
-  band_instruments2
+# dplyr::band_members
+band_members
+band_instruments
+band_instruments2
 ```
 
 ### dplyr package
@@ -117,7 +117,7 @@ filter(starwars, height < 150)
 filter(starwars, mass > mean(mass, na.rm = TRUE))
 
 filter(starwars, is.na(hair_color))
-#View(filter(starwars, is.na(hair_color))) # if you want to look at the filtered data in a table without creating a new table
+# View(filter(starwars, is.na(hair_color))) # if you want to look at the filtered data in a table without creating a new table
 ```
 
 * Most frequently used comparison operators are: >, <, >=, <=, == (equal), != (not equal), is.na(), !is.na(), and %in% (contained in a list). 
@@ -154,7 +154,7 @@ select(starwars, -hair_color) # can also use not `!hair_color`
 select(starwars, hair_color, skin_color, eye_color)
 select(starwars, hair_color:eye_color) # select using x:y columns
 select(starwars, !(hair_color:eye_color)) # reverse selection using the not `!` operator
-select(starwars, ends_with("color")) # select by specific conditions are met by column names: starts_with, ends_with, contains... 
+select(starwars, ends_with("color")) # select by specific conditions are met by column names: starts_with, ends_with, contains...
 
 select_if(starwars, is.numeric) # select_if to return all columns with numeric values
 ```
@@ -192,23 +192,28 @@ starwars %>%
 
 # mutate allows you to refer to columns that you’ve just created
 starwars %>%
-  mutate(height_m = height / 100,
-         BMI = mass / (height_m^2)) %>%
+  mutate(
+    height_m = height / 100,
+    BMI = mass / (height_m^2)
+  ) %>%
   select(name, BMI, everything())
 
 # output needs to be saved into a new dataframe since dplyr does not "change" the original dataframe
 starwars_bmi <- starwars %>%
-                      mutate(height_m = height / 100,
-                             BMI = mass / (height_m^2)) %>%
-                      select(name, BMI, everything())
+  mutate(
+    height_m = height / 100,
+    BMI = mass / (height_m^2)
+  ) %>%
+  select(name, BMI, everything())
 
 # using if_else clauses with mutate
 starwars_height <- starwars %>%
-                      mutate(tall_short = if_else(
-                                            condition = height > 160, 
-                                            true = "tall", 
-                                            false = "short")) %>%
-                      select(name, tall_short, everything())
+  mutate(tall_short = if_else(
+    condition = height > 160,
+    true = "tall",
+    false = "short"
+  )) %>%
+  select(name, tall_short, everything())
 ```
 
 Why use pipes? So you don't have to create too many intermediate files! However, note that intermediate files _can_ be useful in the context of troubleshooting a pipeline. 
@@ -224,8 +229,12 @@ Why use pipes? So you don't have to create too many intermediate files! However,
 data <- read_csv(file = "data/data_transcript_exp_subset.csv")
 
 # calculate mean for each time point using mutate in a rowwise fashion!
-data_mean <- data %>% rowwise() %>% mutate(mean_0h = mean(c(rna_0h_rep1, rna_0h_rep2, rna_0h_rep3)), 
-                                           mean_14h = mean(c(rna_14h_rep1, rna_14h_rep2, rna_14h_rep3)))
+data_mean <- data %>%
+  rowwise() %>%
+  mutate(
+    mean_0h = mean(c(rna_0h_rep1, rna_0h_rep2, rna_0h_rep3)),
+    mean_14h = mean(c(rna_14h_rep1, rna_14h_rep2, rna_14h_rep3))
+  )
 ```
 More information here: https://dplyr.tidyverse.org/articles/rowwise.html
 
@@ -333,8 +342,8 @@ left_join(data1, data2, by = c("col1" = "col2")) # if the columns names that mat
 band_members %>% left_join(band_instruments)
 band_members %>% right_join(band_instruments)
 band_members %>% inner_join(band_instruments)
-band_members %>% full_join(band_instruments) 
-# band_members %>% full_join(band_instruments2) 
+band_members %>% full_join(band_instruments)
+# band_members %>% full_join(band_instruments2)
 # the above code won't work because there are no matching column names
 band_members %>% full_join(band_instruments2, by = c("name" = "artist"))
 ```
