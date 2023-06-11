@@ -22,6 +22,7 @@ library(fs)
 library(glue)
 library(gt)
 library(here)
+library(emo)
 
 room <- "AHSB 2201"
 time <- "9:00-10:30am"
@@ -60,25 +61,25 @@ sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
   mutate(
     # page links
     page_link = case_when(
-      qmd_exists(page_html) == TRUE ~ glue('[📄]({page_html})'),
+      qmd_exists(page_html) == TRUE ~ glue('[{emo::ji("page")}]({page_html})'),
       .default = '-'
     ),
     page_link = map(page_link, gt::md),
     # slides links
     slides_link = case_when(
-      qmd_exists(slides_html) == TRUE ~ glue('[🛝🛝]({slides_html})'),
+      qmd_exists(slides_html) == TRUE ~ glue('[{emo::ji("page")}]({slides_html})'),
       .default = '-'
     ),
     slides_link = map(slides_link, gt::md),
     # exercises links
     ex_link = case_when(
-      qmd_exists(ex_html) == TRUE ~ glue('[🏋🏋️]({ex_html})'),
+      qmd_exists(ex_html) == TRUE ~ glue('[{emo::ji("biceps")}]({ex_html})'),
       .default = '-'
     ),
     ex_link = map(ex_link, gt::md),
     # problem sets links
     ps_link = case_when(
-      qmd_exists(ps_html) == TRUE ~ glue('[🧠]({ps_html})'),
+      qmd_exists(ps_html) == TRUE ~ glue('[{emo::ji("brain")}]({ps_html})'),
       .default = '-'
     ),
     ps_link = map(ps_link, gt::md),
