@@ -18,13 +18,18 @@ format:
 #| warning: false
 #| column: body
 library(tidyverse)
+library(fs)
 library(glue)
 library(gt)
-library(emo)
 library(here)
 
 room <- "AHSB 2201"
 time <- "9:00-10:30am"
+
+qmd_exists <- function(path) {
+  path <- path_ext_set(here(path), ".qmd")
+  file_exists(path)
+}
 
 sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
   mutate(
@@ -46,16 +51,31 @@ sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
     )
   ) |>
   mutate(
+    common_dir = path("content", str_to_lower(block), str_to_lower(topic)),
+    page_html = path(common_dir, glue("class-{class}.html")),
+    slides_html = path(common_dir, "slides", glue("class-{class}.html")),
+    ex_html = path(common_dir, "exercises", glue("class-{class}.html")),
+  ) |>
+  mutate(
     # page links
-    page_dir = str_c("content", block, glue("class-{class}.html"), sep = "/"),
-    page_link = glue('[{emo::ji("page")}]({page_dir})'),
+    page_link = case_when(
+      qmd_exists(page_html) == TRUE ~ glue('[📄]({page_html})'),
+      .default = '-'
+    ),
     page_link = map(page_link, gt::md),
     # slides links
-    slides_dir = str_c("content", block, glue("class-{class}.slides.html"), sep = "/"),
-    slides_link = glue('[{emo::ji("page")}]({slides_dir})'),
+    slides_link = case_when(
+      qmd_exists(slides_html) == TRUE ~ glue('[🛝🛝]({slides_html})'),
+      .default = '-'
+    ),
     slides_link = map(slides_link, gt::md),
-  ) |>
-  select(-ends_with("_dir"))
+    # exercises links
+    ex_link = case_when(
+      qmd_exists(ex_html) == TRUE ~ glue('[🏋🏋️]{ex_html})'),
+      .default = '-'
+    ),
+    ex_link = map(ex_link, gt::md)
+  )
 
 gt(
   sched_tbl,
@@ -82,8 +102,12 @@ gt(
     instructor = md("**Instructor**"),
     problem_set = md("**Problem Set**"),
     page_link = md("**Page**"),
-    slides_link = md("**Slides**")
+    slides_link = md("**Slides**"),
+    ex_link = md("**Exercises**")
   ) |>
+  cols_hide(
+    c(ends_with("_html"), ends_with("_dir"))
+    ) |>
   tab_spanner(
     label = md("**Links**"),
     columns = ends_with("_link")
