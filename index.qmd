@@ -16,7 +16,7 @@ format:
 #| echo: false
 #| message: false
 #| warning: false
-#| column: body
+#| column: screen-inset-right
 library(tidyverse)
 library(fs)
 library(glue)
@@ -34,8 +34,11 @@ qmd_exists <- function(path) {
 
 sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
   mutate(
-    class      = row_number(),
-    date       = ymd(date)
+    date = ymd(date)
+  ) |>
+  mutate(
+    class = row_number(),
+    .by = c(block, topic)
   ) |>
   arrange(date) |>
   mutate(
@@ -85,7 +88,7 @@ sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
     ps_link = map(ps_link, gt::md),
     # problem set keys links
     ps_key_link = case_when(
-      qmd_exists(ps_key_html) == TRUE ~ glue('[🔑]({ps_key_html})'),
+      qmd_exists(ps_key_html) == TRUE ~ glue('[{emo::ji("key")}]({ps_key_html})'),
       .default = '-'
     ),
     ps_key_link = map(ps_key_link, gt::md)
