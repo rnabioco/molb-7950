@@ -23,7 +23,16 @@ jobs:
         with:
           use-public-rspm: true
           r-version: 'release'
-      
+    
+      - name: Install system dependencies 
+        run: |
+          sudo apt-get install libcurl4-openssl-dev
+          
+      - name: Tell renv to use pak
+        run: |
+          echo "RENV_CONFIG_PAK_ENABLED = TRUE" >> ~/.Renviron
+        shell: bash  
+          
       - name: Install R Dependencies
         uses: r-lib/actions/setup-renv@v2
         with:
