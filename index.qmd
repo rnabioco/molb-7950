@@ -34,15 +34,17 @@ qmd_exists <- function(path) {
 
 sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
   mutate(
-    date = ymd(date)
+    date = ymd(date),
+    class_num = row_number()
   ) |>
   mutate(
-    class = row_number(),
+    block_num = row_number(),
+    block_num = str_pad(block_num, 2, "left", "0"),
     .by = c(block, topic)
   ) |>
   arrange(date) |>
   mutate(
-    class = str_pad(class, 2, "left", "0"),
+    class_num = str_pad(class_num, 2, "left", "0"),
     week = isoweek(date),
     week = week - min(week) + 1,
     week = str_c("Week ", week)
@@ -55,11 +57,11 @@ sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
   ) |>
   mutate(
     common_dir = path("content", str_to_lower(block), str_to_lower(topic)),
-    page_html = path(common_dir, glue("class-{class}.html")),
-    slides_html = path(common_dir, "slides", glue("class-{class}.html")),
-    ex_html = path(common_dir, "exercises", glue("class-{class}.html")),
-    ps_html = path(common_dir, "problem-sets", glue("class-{class}.html")),
-    ps_key_html = path(common_dir, "problem-set-keys", glue("class-{class}.html")),
+    page_html = path(common_dir, glue("class-{block_num}.html")),
+    slides_html = path(common_dir, "slides", glue("class-{block_num}.html")),
+    ex_html = path(common_dir, "exercises", glue("class-{block_num}.html")),
+    hw_html = path(common_dir, "problem-sets", glue("class-{block_num}.html")),
+    hw_key_html = path(common_dir, "problem-set-keys", glue("class-{block_num}.html")),
   ) |>
   mutate(
     # page links
@@ -81,23 +83,23 @@ sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
     ),
     ex_link = map(ex_link, gt::md),
     # problem sets links
-    ps_link = case_when(
-      qmd_exists(ps_html) == TRUE ~ glue('[{emo::ji("brain")}]({ps_html})'),
+    hw_link = case_when(
+      qmd_exists(hw_html) == TRUE ~ glue('[{emo::ji("brain")}]({hw_html})'),
       .default = '-'
     ),
-    ps_link = map(ps_link, gt::md),
+    hw_link = map(hw_link, gt::md),
     # problem set keys links
-    ps_key_link = case_when(
-      qmd_exists(ps_key_html) == TRUE ~ glue('[{emo::ji("key")}]({ps_key_html})'),
+    hw_key_link = case_when(
+      qmd_exists(hw_key_html) == TRUE ~ glue('[{emo::ji("key")}]({hw_key_html})'),
       .default = '-'
     ),
-    ps_key_link = map(ps_key_link, gt::md)
+    hw_key_link = map(hw_key_link, gt::md)
   )
 
 gt(
   sched_tbl,
   groupname_col = "week",
-  rowname_col = "class"
+  rowname_col = "class_num"
 ) |>
   tab_header(
     title = md("**MOLB 7950 - Fall 2023 Schedule**"),
@@ -111,7 +113,7 @@ gt(
     align = "center"
   ) |>
   cols_label(
-    class = md("**Class**"),
+    # class = md("**Class**"),
     date = md("**Date**"),
     block = md("**Block**"),
     topic = md("**Topic**"),
@@ -120,11 +122,11 @@ gt(
     page_link = md("**Page**"),
     slides_link = md("**Slides**"),
     ex_link = md("**Exercises**"),
-    ps_link = md("**Problem Set**"),
-    ps_key_link = md("**Key**")
+    hw_link = md("**HW**"),
+    hw_key_link = md("**Key**")
   ) |>
   cols_hide(
-    c(ends_with("_html"), ends_with("_dir"))
+    c(ends_with("_html"), ends_with("_dir"), block_num)
     ) |>
   tab_spanner(
     label = md("**Links**"),
