@@ -3,8 +3,6 @@ title: "Genome sequencing 2 - practice"
 author: "Your name here"
 ---
 
-# Variant Calling --- Theory (Review from Friday)
-
 ## Sequencing Coverage
 
 From binomial theory, we learned we need a certain level of coverage to generate reliable variant calls, due to the randomness of sampling alleles at a site using sequencing.
@@ -96,6 +94,7 @@ Strains 4365-4368 are a tetrad from this F2 x wt cross with genotypes:
 Yeast are not humans (duh). They can be made stably haploid, so the genotype-phenotype link is easier to study.
 
 ```{r}
+#| include: false
 knitr::include_graphics("img/yeast-life-cycle.png")
 ```
 
@@ -124,15 +123,11 @@ You can increase the power of the approach in humans by expanding to people in a
 
 1.  Align to the reference [Saccharomyces cerevisiae reference genome](https://hgdownload.soe.ucsc.edu/goldenPath/sacCer3/bigZips/) with [bwa](https://github.com/lh3/bwa). \[**`FASTQ > BAM`**\].
 
-    ```         
     bwa mem -x ref.fa reads.fq | samtools sort > alignment.bam
-    ```
 
 2.  Call variants in the BAM file with respect to the reference using [freebayes](https://github.com/ekg/freebayes) \[**`BAM > VCF`**\]
 
-    ```         
     freebayes -f ref.fa alignment.bam > combined.vcf
-    ```
 
 ## VCF inspection
 
@@ -145,13 +140,16 @@ There two files in `data/`:
 
 For the first steps, we'll start with the first file, `combined.vcf.gz`.
 
-We'll use command line tools (`zcat`, `grep`, `awk`, `less`) to inspect the file.
-
-Then we'll use the [cyvcf2](https://github.com/brentp/cyvcf2) Python package to do more complex operations with the VCF file.
+We'll use the [`VariantAnnotation`](https://bioconductor.org/packages/release/bioc/vignettes/VariantAnnotation/inst/doc/VariantAnnotation.pdf) library from Bioconductor to inspect the file. 
 
 Let's inspect the VCF file to review its structure.
 
-```{bash}
+```{r}
+#| message: false
+library(VariantAnnotation)
+vcf <- readVcf("data/combined.vcf.gz")
+vcf
+
 # What are the first few lines?
 # What are the column names (first line after the comment section)
 # What is in the INFO field?
@@ -160,62 +158,23 @@ Let's inspect the VCF file to review its structure.
 
 How many samples are in the VCF file?
 
-```{bash}
-# use bcftools; like samtools but for vcf (bcf)
-# https://samtools.github.io/bcftools/howtos/query.html
-bcftools query --list-samples data/combined.vcf.gz
-```
-
-```{python}
-import cyvcf2
-
-vcf = cyvcf2.VCF("data/combined.vcf.gz")
-print(vcf.samples)
+```{r}
+# use `length` to get the number of samples
+samples(header(vcf))
 ```
 
 #### Excercises
 
 How many variants are in the VCF file?
 
-First, do this with shell commands:
+```{r}
 
-```{bash}
-# zcat data/combined.vcf.gz | grep -c -v "^#"
-gzcat data/combined.vcf.gz | grep -c -v "^#"
-
-# using bcftools
-bcftools query -f 'pos=%POS\n' data/combined.vcf.gz | wc -l
-```
-
-Now do this with python:
-
-```{python}
-import cyvcf2
-count = 0
-for vnt in cyvcf2.VCF("data/combined.vcf.gz"):
-    # do something with count. a variant is available each iteration through the for loop
-    ...
-print(count)  
 ```
 
 2.  How many sites involve complex REF or ALT alleles (i.e., not SNPs)?
 
-Do this in bash:
+```{r}
 
-```{bash}
-# zcat data/combined.vcf.gz | grep -v "^#" | awk 'length($3) != 1 || length($4) != 1' | wc -l
-gzcat data/combined.vcf.gz | grep -v "^#" | awk 'length($3) != 1 || length($4) != 1' | wc -l
-```
-
-Do this in python:
-
-```{python}
-import cyvcf2
-count = 0
-for vnt in cyvcf2.VCF("data/combined.vcf.gz"):
-  # `is_snp` is a boolean attribute attached to each Variant (i.e. vnt.is_snp is True or False)
-  ...
-print(count)  
 ```
 
 ## Identifying variants associated with phenotypes
@@ -233,8 +192,6 @@ For example, two of the strains below have wild-type tubulin function (TUB) and 
 
 We'll inspect the `gt_types` associated with each variant to ask for variant types that segregate in the expected pattern.
 
-Genotype are encoded with 0, 1, 2, 3 (<https://github.com/brentp/cyvcf2#cyvcf2>):
-
 > `gt_types` is an array of 0,1,2,3 == HOM_REF, HET, UNKNOWN, HOM_ALT\`
 
 So `[0, 0, 0, 0]` means all four samples are HOM_REF (homozygous reference). So `[0, 1, 0, 1]` means samples 1 and 3 are HOM_REF and 2 and 4 are HET (heterozygous).
@@ -245,55 +202,20 @@ For variants that explain the *sup* phenotype, we want to filter for `[1, 0, 1, 
 
 N.B.: The genome of these cells is haploid. But I forgot to adjust the `--ploidy` parameter in freebayes (default is 2, diploid). So some of the sites have enough coverage to be called heterozygous, when really they should only be "homozygous" alternate.
 
-```{python}
-import cyvcf2
+```{r}
 
-# print info for the first variant
-for vnt in cyvcf2.VCF('data/combined.vcf.gz'):
-  chrom = vnt.CHROM; pos = vnt.POS; types = vnt.gt_types
-  break
-print(chrom, pos, types)  
 ```
 
 Let's filter for variants that track with the tub phenotype.
 
-```{python}
-import cyvcf2
+```{r}
 
-# find mutations that explain tub. it's genotype is encoded like [alt, alt, ref, ref].
-# n.b. this is ordered with respect to the sample names in the VCF
-gts = [ [1, 1, 0, 0], [3, 3, 0, 0] ]
-
-count = 0
-for vnt in cyvcf2.VCF("data/combined.vcf.gz"):
-  if vnt.gt_types.tolist() in gts:
-    count += 1
-    
-print(count)
 ```
 
 That's an excitingly small number! How else might we winnow these down? Hint: let's filter for high confidence calls.
 
-```{python}
-import cyvcf2
+```{r}
 
-def high_quality(vnt):
-  ''' is a variant high quality? '''
-  if vnt.QUAL >= 40 and vnt.INFO.get("DP") >= 40 and vnt.is_snp:
-    return True
-  return False
-
-# find mutations that explain tub. it's genotype is encoded like [alt, alt, ref, ref].
-# n.b. this is ordered with respect to the sample names in the VCF
-gts = [ [1, 1, 0, 0], [3, 3, 0, 0] ]
-
-count = 0
-for vnt in cyvcf2.VCF("data/combined.vcf.gz"):
-  # how would we use `high_quality()` in this check? 
-  if vnt.gt_types.tolist() == gts:
-    count += 1
-    
-print(count)
 ```
 
 Welp. That didn't help much, and we don't have many more ways with this file to winnow down the number further with the existing data
@@ -314,13 +236,13 @@ That new file is in `data/combined.annotated.vcf.gz`.
 
 Let's inspect the annotated VCF. How many variants are in the annotated VCF file? How many are in the unannotated file?
 
-```{bash}
+```{r}
 
 ```
 
 Let's find some variants that impact coding regions specifically.
 
-```{bash}
+```{r}
 
 ```
 
@@ -331,37 +253,18 @@ How does the software decide between LOW, MODERATE, and HIGH impacts? This is, i
 **Question:** What drives the low likelihood of substitution between e.g., tryptophan (W) and aspartate (D)? Perhaps looking at amino acid side chain chemistries might help.
 
 ```{r}
+#| include: false
 knitr::include_graphics("img/amino-acids.png")
 ```
 
-```{python}
-import cyvcf2
+```{r}
 
-def high_impact(vnt):
-  ''' is a variant high (or moderate) impact ? '''
-  anns = vnt.INFO.get("ANN")
-  if "HIGH" in anns or "MODERATE" in anns:
-    return True
-  return False
-
-# find mutations that explain tub. it's genotype is encoded like [alt, alt, ref, ref].
-# n.b. this is ordered with respect to the sample names in the VCF
-gts = [ [1, 1, 0, 0], [3, 3, 0, 0] ]
-
-keep = []
-for vnt in cyvcf2.VCF("data/combined.annotated.vcf.gz"):
-  for gt in gts:
-    if vnt.gt_types.tolist() == gt and high_quality(vnt) and high_impact(vnt): 
-      keep.append(vnt)
-    
-print(len(keep))
 ```
 
 **YES!** Now that is a small number of variants. What are they?
 
-```{r eval=FALSE}
-# we can access the `keep` object we built in the last chunk like this:
-py$keep
+```{r}
+
 ```
 
 But that's sort of ugly. Can we clean it up? Let's inspect the contents of the [`ANN` field](https://pcingola.github.io/SnpEff/SnpEff_manual.html).
@@ -372,8 +275,8 @@ Try to print:
 2.  the position
 3.  fields 2, 3, 4, 12, and 13 of the first ANN field (these are joined by commas)
 
-```{python}
-# write some code together 
+```{r}
+
 ```
 
 ## Variant interpretation
@@ -390,14 +293,10 @@ Let's try to interpret the impact of this variant.
 
 Imagine you have a locus structured like this:
 
-```         
-----A--B----Alu---<<<<----Alu----C--D------
-```
+    ----A--B----Alu---<<<<----Alu----C--D------
 
 where A, B, C, D are genes, the `<<<<` is a directional promoter, and the Alu elements are representative repetitive elements.
 
 Recombination between the Alu elements could sometimes give you this:
 
-```         
-----A--B----Alu--->>>>----Alu----C--D------
-```
+    ----A--B----Alu--->>>>----Alu----C--D------
