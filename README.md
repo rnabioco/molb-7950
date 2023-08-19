@@ -1,15 +1,36 @@
 # molb-7950
 
-Materials for "MOLB 7950: Informatics and Statistics for Molecular Biology".
+Course materials for "MOLB 7950: Informatics and Statistics for Molecular Biology".
 
 ## Installing local packages
 
-After cloning this repository, set `RENV_CONFIG_PAK_ENABLED = TRUE` in the user's `.Renviron` file to use pak
-installation, which is a lot faster ([issue](https://github.com/rstudio/renv/issues/1210)).
+After cloning this repository, set `RENV_CONFIG_PAK_ENABLED = TRUE` in the
+user's `.Renviron` file (`usethis::edit_r_environ()`) to use pak installation,
+which is a lot faster ([issue](https://github.com/rstudio/renv/issues/1210)).
 
-Then, run `renv::activate()` and `renv::restore()`, which will install  project packages locally.
+Then, run `renv::activate()` and `renv::restore()`, which will install project
+packages in a project-local library under `renv/`.
 
-If you add new libraries to your content, run `renv::snapshot()`, follow instructions to `renv::install()` if needed, and then be sure to commit the `renv.lock` file.
+If you add new libraries to your content, run `renv::snapshot()`, follow
+instructions to `renv::install()` if needed, and then be sure to commit the
+`renv.lock` file.
+
+## Previewing content
+
+Use `quarto render` or `quarto preview` locally to inspect content prior to
+commit / push. A Github Action builds the site automatically unless you include
+`[ci skip]` in the commit message.
+
+## File structure
+
+Pages should be named based on the syllabus table, e.g., `class-01.qmd`.
+
+* qmd you want rendered as webpages go in `pages/`
+* qmd you want rendered as slides go in `slides/`
+
+There are also directories for `exercises/`, `problem-sets/`, and `problem-set-keys/`.
+
+Each of these will be linked in the table on the front page.
 
 ## Syllabus updates
 
@@ -23,5 +44,5 @@ If you add new libraries to your content, run `renv::snapshot()`, follow instruc
 
 ### Acknowledgements
 
-This work borrows and modifies
+This work borrows fromand modifies:
 https://github.com/mine-cetinkaya-rundel/quarto-sdss
