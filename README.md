@@ -32,6 +32,8 @@ There are also directories for `exercises/`, `problem-sets/`, and `problem-set-k
 
 Each of these will be linked in the table on the front page.
 
+If you want to suppress quarto rendering of a file, use an underscore prefix like `_class-01.qmd`.
+
 ## Syllabus updates
 
 1.  Edit the "Syllabus" sheet on the [Google
