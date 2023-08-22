@@ -59,19 +59,26 @@ sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
   ) |>
   mutate(
     common_dir = path("content", str_to_lower(block), str_to_lower(topic)),
-    page_html = path("pages", glue("class-{class_num}.html")),
+    prepare_html = path("prepare", glue("class-{class_num}.html")),
+    # page_html = path("pages", glue("class-{class_num}.html")),
     slides_html = path("slides", glue("class-{class_num}.html")),
     ex_html = path("exercises", glue("class-{class_num}.html")),
     hw_html = path("problem-sets", glue("class-{class_num}.html")),
     hw_key_html = path("problem-set-keys", glue("class-{class_num}.html")),
   ) |>
   mutate(
-    # page links
-    page_link = case_when(
-      qmd_exists(page_html) == TRUE ~ glue('[{emo::ji("page")}]({page_html})'),
+    # prepare links
+    prepare_link = case_when(
+      qmd_exists(prepare_html) == TRUE ~ glue('[{emo::ji("book")}]({prepare_html})'),
       .default = ''
     ),
-    page_link = map(page_link, gt::md),
+    prepare_link = map(prepare_link, gt::md),
+    # page links
+    # page_link = case_when(
+    #   qmd_exists(page_html) == TRUE ~ glue('[{emo::ji("page")}]({page_html})'),
+    #   .default = ''
+    # ),
+    # page_link = map(page_link, gt::md),
     # slides links
     slides_link = case_when(
       qmd_exists(slides_html) == TRUE ~ glue('[{emo::ji("page")}]({slides_html})'),
@@ -118,7 +125,8 @@ gt(
     topic = md("**Topic**"),
     title = md("**Title**"),
     instructor = md("**Instructor**"),
-    page_link = md("**Page**"),
+    prepare_link = md("**Prepare**"),
+    # page_link = md("**Page**"),
     slides_link = md("**Slides**"),
     ex_link = md("**Exercises**"),
     hw_link = md("**HW**"),
