@@ -1,0 +1,900 @@
+---
+title: "R Bootcamp - Day 4"
+author: "Jay Hesselberth"
+date: last-modified
+---
+
+```{r include=FALSE}
+library(tidyverse)
+library(knitr)
+library(here)
+
+library(cowplot) # to make panels of plots
+library(ggridges) # ridge plots
+```
+
+## Class 4 outline 
+
+:::: {.columns}
+
+::: {.column width="50%"}
+- Introduce _ggplot2_ & today's datasets (Exercise 1)
+- Understand the basics of ggplot2 (Exercise 2, 3)
+- Geom functions (Exercise 4-8)
+- Geom_point properties (Exercise 9)
+- Position adjustments (Exercise 10)
+- Coordinate and Scale Functions (Exercise 11)
+- Zooming into a plot (Exercise 12)
+:::
+
+::: {.column width="50%"}
+- Faceting (Exercise 13)
+- Themes (Exercise 14)
+- Labels & Legends (Exercise 15)
+- Adding lines to plots (Exercise 16)
+- Making multi-panel figures (Exercise 17)
+- Saving a plot (Exercise 18)
+:::
+
+::::
+
+## *ggplot2*
+
+ggplot2 is based on the "grammar of graphics", the idea that you can build every graph from the same components: a data set, a coordinate system, and "geoms" - visual marks that represent data points.
+
+## Today's datasets
+
+In this class, we will use a data set from ggplot2: `diamonds` contains thousands of gem prices and qualities.
+
+There are many interesting data sets you can install as R packages for learning to manipulate and plot data:
+
+::: {.nonincremental}
+- [babynames](https://hadley.github.io/babynames/)
+- [gapminder](https://jennybc.github.io/gapminder/)
+- [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/)
+:::
+
+## Getting familiar with the data - Exercise 1
+
+---
+
+```{r}
+#| echo: true
+summary(diamonds)
+```
+
+Also examine:
+
+```r
+?diamonds
+head(diamonds)
+glimpse(diamonds)
+View(diamonds)
+```
+
+## The syntax of `ggplot()`  
+
+`ggplot()` builds plots piece by piece.
+
+ggplot divides a plot into three different fundamental parts:
+
+plot = _data_ + _coordinate-system_ + _geometry_.  
+
+```{r, echo = FALSE, out.width= '60%'}
+knitr::include_graphics(here("img/ggplot-syntax.png"))
+```
+
+---
+
+**aesthetics** map variables in the data to visual
+properties of the geom like `size`, `color`, and `x`
+and `y` locations.
+
+```{r, echo = FALSE, out.width= '60%'}
+knitr::include_graphics(here("img/ggplot-aesthetics.png"))
+```
+
+## Making a plot step-by-step (Exercise 2)
+
+---
+
+Initialize a plot with data.
+
+```{r fig.width=6}
+#| echo: true
+#| output-location: column-fragment
+ggplot(data = diamonds) 
+```
+
+---
+
+Next, specify the coordinate system.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+#| code-line-numbers: "3-5"
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = carat,
+    y = price
+  )
+) 
+```
+
+---
+
+Add a geom (`geom_point`).
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+#| code-line-numbers: "8"
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = carat,
+    y = price
+  )
+) +
+  geom_point()
+```
+
+---
+
+Map aesthetics to other variables.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+#| code-line-numbers: "6-7"
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = carat,
+    y = price,
+    color = cut,
+    size = carat
+  )
+) +
+  geom_point()
+```
+
+---
+
+Reduce overplotting by adjusting the transparency of points.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+#| code-line-numbers: "10"
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = carat,
+    y = price,
+    color = cut,
+    size = carat
+  )
+) +
+  geom_point(alpha = 0.2)
+```
+
+## Looking under the hood of ggplot (Exercise 3)
+
+```{r}
+#| echo: true
+#| output-location: slide
+p <- ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = carat,
+    y = price,
+    color = cut,
+    size = carat
+  )
+) +
+  geom_point(alpha = 0.2)
+
+summary(p)
+```
+
+## ggplot powerfully simple for making complex plots
+
+```{r fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  diamonds,
+  aes(x = carat)
+) +
+  geom_histogram()
+```
+
+. . .
+
+Note you can drop the `data` and `mapping` specifications, as `ggplot`
+expects these as the first two arguments. See `?ggplot`.
+
+---
+
+Why can't I just do this?
+
+```{r fig.height=4, fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+hist(diamonds$carat)
+```
+
+. . . 
+
+You can. But the advantage of ggplot is that it is equally "simple" to make basic and complex plots.
+
+The underlying grammar lets you exquisitely customize the appearance of your plot and easily generate *reproducible & publishable* figures. 
+
+## Creating more complex plots
+
+```{r, echo = FALSE, out.width= '50%'}
+knitr::include_graphics(here("img/ggplot-layers.png"))
+```
+
+## Geom functions
+
+* Use a geom function to represent data points, use the geom aesthetic properties to represent variables.
+* Each function returns a plot layer.
+* There are many geoms in ggplot that are specific to plots with 1, 2, or 3 variables 
+
+## Geom functions for one variable - Exercise 4
+
+```{r, echo = FALSE, out.width= '60%'}
+knitr::include_graphics(here("img/ggplot-1variable.png"))
+```
+
+---
+
+Make a bar plot.
+
+```{r fig.height=3, fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut)
+) +
+  geom_bar()
+```
+
+---
+
+Update the bar plot aesthetics.
+
+```{r fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+#| code-line-numbers: "3-6"
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = cut,
+    fill = clarity
+  )
+) +
+  geom_bar()
+```
+
+---
+
+Change to a density plot.
+
+```{r fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+#| code-line-numbers: "5"
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat)
+) +
+  geom_density()
+```
+
+---
+
+Color the density plot.
+
+```{r fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+#| code-line-numbers: "5"
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat)
+) +
+  geom_density(fill = "tomato1")
+```
+
+---
+
+Plot subsets by mapping `fill` to `cut`
+
+```{r fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = carat,
+    fill = cut
+  )
+) +
+  geom_density(alpha = 0.8)
+```
+
+---
+
+Use `ggridges` to plot staggered subsets.
+
+https://wilkelab.org/ggridges/
+
+```{r fig.width=7}
+#| echo: true
+#| output-location: column-fragment
+#| code-line-numbers: "9-10"
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = carat,
+    y = cut,
+    fill = cut
+  )
+) +
+  # geom from `ggridges`
+  geom_density_ridges()
+```
+
+## Geom functions for two variables
+
+With two variables, depending on the nature of the data, you can have different
+kinds of geoms:
+
+  - discrete x, continuous y
+  - continuous x, continuous y
+  - continuous bivariate
+  - & others (check out the cheatsheet!)
+  
+## discrete x, continuous y - Exercise 5
+
+```{r, echo = FALSE, out.width= '60%'}
+knitr::include_graphics(here("img/ggplot-geom-dx-cy.png"))
+```
+
+---
+
+Make a column plot.
+
+```{r fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = cut,
+    y = price
+  )
+) +
+  geom_col()
+```
+
+---
+
+Same data with a box plot.
+
+```{r fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = cut,
+    y = price
+  )
+) +
+  geom_boxplot()
+```
+
+---
+
+Box plot, with fill color by cut.
+
+```{r fig.height=3, fig.width=7}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = cut,
+    y = price,
+    fill = cut)
+) +
+  geom_boxplot()
+```
+
+. . .
+
+What about this plot is not ideal? (hint: how many ways is `cut` represented?)
+
+---
+
+Violin plot with fill color by cut.
+
+```{r fig.height=3, fig.width=7}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = cut,
+    y = price,
+    fill = cut
+  )
+) +
+  geom_violin()
+```
+
+## continuous x, continuous y - Exercise 6
+
+```{r, echo = FALSE, out.width= '60%'}
+knitr::include_graphics(here("img/ggplot-geom-cx-cy.png"))
+```
+
+---
+
+Subset diamonds to see points more clearly
+
+```{r fig.height=3, fig.width=4}
+#| echo: true
+diamonds_subset <- diamonds |> sample_n(size = 1000)
+```
+---
+
+Make a scatter plot.
+
+```{r fig.height=3, fig.width=4}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point()
+```
+
+Now add a smoothing line.
+
+```{r fig.height=3, fig.width=4}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_smooth()
+```
+
+Here we can combine geoms to see points & the fit
+
+```{r fig.height=3, fig.width=4}
+#| echo: true
+#| output-location: column-fragment1yy
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point() +
+  geom_smooth()
+```
+
+## continuous bivariate - Exercise 7
+
+```{r, echo = FALSE, out.width= '50%'}
+knitr::include_graphics(here("img/ggplot-geom-cont-bivar.png"))
+```
+
+```{r fig.height=3, fig.width=3}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price)
+) +
+  geom_point()
+
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price)
+) +
+  geom_hex()
+```
+
+## shape, size, fill, color, and transparency - Exercise 9
+
+R has 25 built in shapes that are identified by numbers.
+
+Some are similar: 0, 15, and 22 are all squares, but interact differently with `color` and `fill` aesthetics.
+
+Hollow shapes have a border determined by `color`, solid shapes (15–18) are
+filled with `color`, an the filled shapes (21–24) have `color` border and `fill`
+inside.
+
+```{r, echo = FALSE, out.width= '80%'}
+knitr::include_graphics(here("img/ggplot-shapes.png"))
+```
+
+---
+
+Note that aesthetics can also be defined *within* a geoms.
+
+This is useful if you use two different geoms that share an aesthetic.
+
+```{r fig.height=3, fig.width=4}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price)
+) +
+  geom_point(
+    aes(fill = cut, size = depth),
+    alpha = 0.8,
+    shape = 24,
+    color = "white"
+  )
+```
+
+## Position adjustments - Exercise 10
+
+Position adjustments determine how to arrange geoms that would otherwise occupy the same space. 
+```{r, echo = FALSE, out.width= '60%'}
+knitr::include_graphics(here("img/ggplot-position.png"))
+```
+
+---
+
+A stacked bar chart.
+
+```{r fig.height=3, fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, fill = clarity)
+) +
+  geom_bar()
+```
+
+---
+
+Dodged bars are easier to read (proportions are clearer)
+
+```{r fig.height=3, fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut, fill = clarity)
+) +
+  geom_bar(position = "dodge")
+```
+
+## Coordinate and Scale Functions - Exercise 11
+
+We won't go into these functions too much today, but here is a brief overview: 
+
+* The coordinate system determines how the x and y aesthetics combine to position elements in the plot. The default coordinate system is Cartesian ( coord_cartesian() ), which can be tweaked with coord_map() , coord_fixed() , coord_flip() , and coord_trans() , or completely replaced with coord_polar()
+
+* Scales control the details of how data values are translated to visual properties. There are 20+ scale functions. We will look at one; the ggplot2 cheatsheet is your friend for the rest. 
+
+---
+
+Logarithmic axes - 1
+
+Note the difference between axis labels in these two examples.
+
+```{r fig.height=3, fig.width=3}
+#| echo: true
+#| output-location: column-fragment
+ggplot(diamonds_subset, aes(carat, price)) +
+  geom_point() +
+  coord_trans(x = "log10")
+```
+
+---
+
+Logarithmic axes - 2
+
+```{r fig.height=3, fig.width=3}
+#| echo: true
+#| output-location: column-fragment
+ggplot(diamonds_subset, aes(carat, price)) +
+  geom_point() +
+  scale_x_log10()
+```
+
+---
+
+Flipping coordinate system (swapping `x` and `y`)
+
+```{r fig.height=3, fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut)
+) +
+  geom_bar()
+```
+
+---
+
+Now flip the axis.
+
+```{r fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(x = cut)
+) +
+  geom_bar() +
+  coord_flip()
+```
+
+---
+
+Brief aside: ggplot can handle on-the-fly data transformations. 
+
+Here we log-transform carat and convert USD to CAD.
+
+```{r fig.height=3, fig.width=3}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds_subset,
+  aes(
+    x = log10(carat),
+    y = price * 1.32
+  )
+  ) +
+  geom_point()
+```
+
+## Zooming into a plot - Exercise 12
+
+---
+
+We might want to change the limits of x or y axes to zoom in.
+
+```{r fig.height=3, fig.width=3}
+#| echo: true
+#| output-location: column-fragment
+ggplot(diamonds_subset, aes(carat, price)) +
+  geom_point(alpha = 0.5) +
+  xlim(0, 2) +
+  ylim(0, 5000)
+```
+
+. . . 
+
+You can also use `coord_cartesian(xlim, ylim)`
+
+## Faceting to plot subsets of data into separate panels - Exercise 13
+
+"Facets" are a powerful tool to subdivide a plot based on the values of one or more discrete variables.
+
+```{r, echo = FALSE, out.width= '60%'}
+knitr::include_graphics(here("img/ggplot-facet.png"))
+```
+
+---
+
+Density plot we've seen before. Which variables can we use to subdivide the data?
+
+```{r fig.height=3, fig.width=7}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, fill = cut)
+) +
+  geom_density(alpha = 0.8)
+```
+
+---
+
+Faceted by `cut`
+
+```{r fig.height=2, fig.width=7}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(x = log(price), fill = cut)
+) +
+  geom_density(color = "black") +
+  facet_wrap(~cut, nrow = 1)
+```
+
+---
+
+Scatter plot with facets.
+
+```{r fig.height=2, fig.width=7}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point(alpha = .05) +
+  facet_wrap(~cut, nrow = 1)
+```
+
+## Themes - Exercise 14
+
+Themes can significantly affect the appearance of your plot. Thanksfully, there are a lot to choose from. 
+
+```{r, echo = FALSE, out.width= '60%'}
+knitr::include_graphics(here("img/ggplot-themes.png"))
+```
+
+---
+
+Scatter plot with default theme. 
+
+```{r fig.height=3, fig.width=4}
+#| echo: true
+#| output-location: column-fragment
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(
+    x = carat,
+    y = price,
+    color = cut
+  )
+) +
+  geom_point(alpha = 0.8)
+```
+
+---
+
+Change the theme with `theme_bw()`.
+
+```{r fig.height=3, fig.width=4}
+#| echo: true
+#| output-location: column-fragment
+#| code-line-numbers: "10"
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(
+    x = carat,
+    y = price,
+    color = cut
+  )
+) +
+  geom_point(alpha = 0.8) +
+  theme_bw()
+```
+
+---
+
+My go-to is `cowplot::theme_cowplot()`.
+
+It implements much of the advice in the "Dataviz" book, e.g. YOUR LABELS ARE TOO
+SMALL.
+
+```{r fig.height=3, fig.width=4}
+#| echo: true
+#| output-location: column-fragment
+#| code-line-numbers: "10"
+ggplot(
+  data = diamonds_subset,
+  mapping = aes(
+    x = carat,
+    y = price,
+    color = cut
+  )
+) +
+  geom_point(alpha = 0.8) +
+  theme_cowplot()
+```
+
+. . .
+
+We're not going to cover it, but you can also customize pre-existing themes.
+
+## Labels & Legends - Exercise 15
+    
+```{r, echo = FALSE, out.width= '50%'}
+knitr::include_graphics(here("img/ggplot-labels-legends.png"))
+```
+
+---
+
+Use `labs()` to add / change plot labels.
+
+```{r fig.height=3, fig.width=5}
+#| echo: true
+#| output-location: column-fragment
+#| code-line-numbers: "10-17"
+ggplot(
+  data = diamonds,
+  mapping = aes(
+    x = cut,
+    y = log(price),
+    fill = cut
+  )
+) +
+  geom_boxplot() +
+  labs(
+    x = "Cut",
+    y = "Price (log)",
+    color = "Cut",
+    title = "Distribution of diamond prices by cut",
+    subtitle = "Data come from a random sample of 1000 diamonds",
+    caption = "Source: diamonds dataset from ggplot2"
+  ) +
+  theme_cowplot()
+```
+
+# *Additional points*
+
+## How to add a line to a plot? (Exercise 16)
+
+```{r fig.height=3, fig.width=4}
+p <- ggplot(
+  data = diamonds_subset,
+  mapping = aes(x = carat, y = price, color = cut)
+) +
+  geom_point(alpha = 0.8) +
+  theme_cowplot()
+
+p + geom_line()
+p + geom_hline(aes(yintercept = 5000))
+p + geom_vline(aes(xintercept = 2))
+p + geom_smooth(method = lm)
+p + geom_abline(aes(intercept = 0.5, slope = 5000))
+```
+
+## How to combine multiple plots into a figure? (Exercise 17)
+
+```{r fig.height=4, fig.width=6}
+plot1 <- p
+plot2 <- p + geom_hline(aes(yintercept = 5000))
+plot3 <- p + geom_vline(aes(xintercept = 2))
+plot4 <- p + geom_abline(aes(intercept = 0.5, slope = 5000))
+
+all_plots <- plot_grid(plot1, plot2, plot3, plot4, labels = c("A", "B", "C", "D"), nrow = 2)
+all_plots
+
+# we have 4 legends, which is too many - can they be removed?
+# Yes, but it is not exactly straightforward
+legend <- get_legend(plot1 + theme(legend.position = "bottom"))
+plot1 <- p + theme(legend.position = "none")
+plot2 <- p + geom_hline(aes(yintercept = 5000)) + theme(legend.position = "none")
+plot3 <- p + geom_vline(aes(xintercept = 2)) + theme(legend.position = "none")
+plot4 <- p + geom_abline(aes(intercept = 0.5, slope = 5000)) + theme(legend.position = "none")
+
+all_plots <- plot_grid(plot1, plot2, plot3, plot4, labels = c("A", "B", "C", "D"), nrow = 2)
+plot_final <- plot_grid(all_plots, legend, ncol = 1, rel_heights = c(1, .1))
+plot_final
+```
+
+More information on using plot_grid (from package `cowplot`) is [here](https://wilkelab.org/cowplot/articles/plot_grid.html)
+
+## Saving plots (Exercise 18)
+
+Saves last plot as 5’ x 5’ file named "plot_final.png" in working directory. Matches file type to file extension
+
+```{r}
+ggsave(here("img/plot_final.png"), width = 5, height = 5)
+```
