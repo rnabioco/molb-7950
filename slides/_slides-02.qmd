@@ -1,7 +1,7 @@
 ---
 title: "R Bootcamp - Day 2"
+subtitle: "Tidy data & tidyr"
 author: "Jay Hesselberth"
-date: last-modified
 ---
 
 ```{r include=FALSE}
@@ -38,11 +38,11 @@ library(here)
 
 * Tidyverse is an opinionated collection of R packages designed for data science. 
 * All packages share an underlying design philosophy, grammar, and data structures.
-* 25 packages, total (as of today) - we will focus mainly on tidyr, dplyr, and ggplot2
+* Comprised of a few dozen packages - we will focus mainly on tidyr, dplyr, and ggplot2
 
 ## Tidyverse workflow
 
-```{r, echo = FALSE, out.width= '100%'}
+```{r, echo = FALSE, out.width= '100%', fig.cap='Source: R for Data Science'}
 knitr::include_graphics(here("img/tidy1.png"))
 ```
 
@@ -51,6 +51,8 @@ knitr::include_graphics(here("img/tidy1.png"))
 >   "Tidy datasets are all alike but every messy dataset is messy in its own way."
 >   
 >   --- Hadley Wickham
+
+<br>
 
 ```{r, echo = FALSE, out.width= '100%', fig.cap='Source: Rstudio cheatsheets'}
 knitr::include_graphics(here("img/tidydata.png"))
@@ -73,34 +75,30 @@ knitr::include_graphics(here("img/readr-args.png"))
 
 ## Data sets for tidying - Exercise 2
 
----
-
 * In this class, we will use the datasets that come with the tidyr package to explore all the functions provided by tidyr.
-
-* Explore the contents of tidyr package (Exercise #2)
 
 * `table1`, `table2`, `table3`, `table4a`, `table4b`, and `table5` all display the number of TB cases documented by the World Health Organization in Afghanistan, Brazil, and China between 1999 and 2000. 
 
+* Let's take a look at these data sets.
+
 ## Getting familiar with the data - Exercise 3
 
----
+R provides many functions to examine features of data:
 
-R provides many functions to examine features of a data object
+  - `View()`: To open the table up in an excel-like interface - not recommended for large tables
+  - `class()`: what kind of object is it (high-level)?
+  - `typeof()`: what is an object data type (low-level)?
+  - `is_tibble()`: use `is` functions to query data type
+  - `str()`: what is the structure of the object?
+  - `attributes()`: does it have any metadata?
 
-  - `View()` - To open the table up in an excel-like interface - not recommended for large tables
-  - `class()` - what kind of object is it (high-level)?
-  - `typeof()` - what is the object’s data type (low-level)?
-  - `is_tibble()` - use is.? to confirm data type
-  - `str()` - what is the structure of the object?
-  - `attributes()` - does it have any metadata?
+. . .
 
-* Let's explore `table1`
+Let's use these to explore `table1`
 
-## Getting familiar with the data - Exercise 4
+## Getting familiar with the data - Exercise 4 {.smaller}
 
----
-
-Some of the useful functions for data.frames / tibbles are as follows:  
+Useful functions for tibbles:  
 
 - `head()` - shows first 6 rows  
 - `tail()` - shows last 6 rows  
@@ -110,34 +108,45 @@ Some of the useful functions for data.frames / tibbles are as follows:
 - `names()` or `colnames()` - both show the names attribute for a data frame  
 - `glimpse()`
 
-# Exercise 5 -Getting familiar with data - _summary_, _hist_, & _table_
+. . .
 
----
+Use these on `table1`
 
-_summary_: A generic function used to produce result summaries of the results of various model fitting functions.
+## Exercise 5 - _summary_, _hist_, & _table_ {.smaller}
+
+`summary()`: A generic function used to produce result summaries of the results of various model fitting functions.
 
 ```{r}
 #| echo: true
 summary(table1) # summary of the whole table
-summary(table1$cases) # summary of just one column of the table
 ```
+
+. . .
+
+you can also summarize one variable, e.g. `summary(table1$cases)`
 
 ---
 
-_hist_: Takes in a vector of values and plots a histogram.
+`hist()`: takes a vector and plots a histogram.
 
 ```{r fig.height= 4, fig.width= 4}
 #| echo: true
-hist(table1$cases) # summary of just one column of the table
+hist(table1$cases)
 ```
 
 ---
 
-_table_: Uses the cross-classifying factors to build a contingency table of the counts at each combination of factor levels.
+`table()`: uses classifying factors to build a contingency table of the counts for each factor combination.
 
 ```{r}
 #| echo: true
 table(table2$year) # tally of one column
+```
+
+. . . 
+
+```{r}
+#| echo: true
 table(table2$year, table2$type) # two columns at a time
 ```
 
@@ -152,9 +161,11 @@ The four verbs to keep in mind for reshaping data with `tidyr` are:
   - `separate`  
   - `unite` 
 
+. . .
+
 There are other verbs as well - look at the `tidyr` cheatsheet!
 
-## pivot_wider - syntax
+---
 
 `pivot_wider()` "widens" data, increasing the number of columns and decreasing the number of rows. 
 
@@ -164,7 +175,8 @@ knitr::include_graphics(here("img/pivot_wider.png"))
 
 ---
 
-```{r, eval=FALSE}
+```{r}
+#| eval: false
 pivot_wider(
   data,
   names_from = name,
@@ -173,15 +185,19 @@ pivot_wider(
 )
 ```
 
-## pivot_wider - Exercise 6
+## `pivot_wider()` - Exercise 6 {.smaller}
 
 What will the output look like?
 
 ```{r}
 #| echo: true
-#| output-location: slide
-library(tidyr)
+#| output-location: column
+table2
+```
 
+```{r}
+#| echo: true
+#| output-location: column-fragment
 pivot_wider(
   table2,
   names_from = type,
@@ -205,7 +221,7 @@ table2_tidy <- pivot_wider(
 table2_tidy
 ```
 
-## pivot_longer - syntax
+---
 
 `pivot_longer()` "lengthens" data, increasing the number of rows and decreasing the number of columns. 
 
@@ -225,22 +241,57 @@ pivot_longer(
 )
 ```
 
-## pivot_longer - Exercise 7
+## `pivot_longer()` - Exercise 7 {.smaller}
 
 What will the output look like?
 
 ```{r}
 #| echo: true
-#| output-location: slide
+#| output-location: column
 table4a
-pivot_longer(table4a, 2:3, names_to = "year", values_to = "cases")
-pivot_longer(table4a, -country, names_to = "year", values_to = "cases")
+```
 
-table4_tidy <- pivot_longer(table4a, -country, names_to = "year", values_to = "cases")
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+pivot_longer(
+  table4a,
+  2:3,
+  names_to = "year",
+  values_to = "cases"
+)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+pivot_longer(
+  table4a,
+  -country,
+  names_to = "year",
+  values_to = "cases"
+)
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+table4_tidy <- pivot_longer(
+  table4a,
+  -country,
+  names_to = "year",
+  values_to = "cases"
+)
+
 table4_tidy
 ```
 
-## separate - yntax
+## separate - syntax
 
 Given either a regular expression or a vector of character positions, `separate()` turns a single character column into multiple columns.
 
@@ -250,7 +301,8 @@ knitr::include_graphics(here("img/separate.png"))
 
 ---
 
-```{r eval=FALSE}
+```{r}
+#| eval: false
 separate(
   data,
   col,
@@ -265,53 +317,28 @@ separate(
 
 ```
 
-## separate - Exercise 8
+## separate - Exercise 8 {.smaller}
 
 What will the output look like?
 
 ```{r}
 #| echo: true
-#| output-location: slide
+#| output-location: column
 table3
-table3_tidy_1 <- separate(table3,
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+separate(
+  table3,
   rate,
   into = c("cases", "population"),
   sep = "/"
 )
-table3_tidy_1
 ```
 
-## separate_rows - syntax
-
-Given either a regular expression or a vector of character positions, `separate_rows()` turns a single character column into multiple rows. 
-
-```{r, echo = FALSE, out.width= '50%'}
-knitr::include_graphics(here("img/separate_rows.png"))
-```
-
----
-
-```r
-separate_rows(
-  data, 
-  ..., 
-  sep = "[^[:alnum:].]+", 
-  convert = FALSE)
-```
-
-### separate_rows - Exercise 9
-
-```{r}
-#| echo: true
-#| output-location: slide
-table3
-table3_tidy_2 <- separate_rows(table3, rate, sep = "/")
-table3_tidy_2
-```
-
-This is not a great example because in creating two rows, the case and population numbers are now mixed up and we have lost information. So always think about and be intentional to avoid information loss.  
-
-### unite - Syntax
+### `unite()` - syntax
 
 `unite()` combines multiple columns into a single column.
 
@@ -330,7 +357,7 @@ unite(data,
       na.rm = FALSE) #default is set to FALSE
 ```
 
-## unite - Exercise 10
+## unite - Exercise 9
 
 ```{r}
 #| echo: true
