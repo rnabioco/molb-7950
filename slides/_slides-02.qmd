@@ -373,3 +373,44 @@ table6_tidy
 ```{r, echo = FALSE, out.width= '100%', fig.cap='Source: Rstudio cheatsheets'}
 knitr::include_graphics(here("img/missing-values.png"))
 ```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: column 
+df <- tibble(x = c(1, 2, NA), y = c("a", NA, "b"))
+df
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+drop_na(df)
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+df %>% replace_na(list(x = 0, y = "unknown"))
+```
+
+## brief aside - finding files in a project with `here`
+
+The `here` packages makes it easy to reference files in an R project.
+
+```{r}
+#| echo: true
+library(here)
+here("data/syllabus.tsv")
+```
+
+Paths identified by `here()` can be fed to e.g. `read_*` functions.
+
+```{r}
+#| echo: true
+read_tsv(here("data/syllabus.tsv"))
+```
+
