@@ -1,0 +1,99 @@
+---
+title: "Problem Set 2 Key"
+author: "JH"
+---
+
+```{r, setup}
+library(tidyverse)
+library(here)
+```
+
+## Problem Set
+
+Each problem below is worth **4 points**.
+
+Use the data files in the `data/` directory to answer the questions.
+
+For this problem set, you are allowed to help each other, but you are
+not allowed to post correct answers in slack.
+
+**The problem set is due 12pm on Aug 30.**
+
+### Grading rubric
+
+- Everything is good: 5 points
+- Partially correct answers: 3-4 points
+- Reasonable attempt: 2 points
+
+## Question 1 
+
+Import the dataset `data_transcript_exp_subset` using the *readr*
+package.
+
+Hint: The file is located at the following path
+`data/data_transcript_exp_subset.csv.gz`
+
+```{r, q1}
+x <- read_csv(here("data/data_transcript_exp_subset.csv.gz"))
+```
+
+## Question 2
+
+**Explore the dataset. Is this dataset tidy? If not, why not?**
+
+This data frame is a subset (100 lines) of transcript-level gene
+expression data where transcript abundance was measured at two different
+time points of a certain treatment conducted in triplicates. The column
+names have the format of `molecule_time_replicate`
+
+First, explore the structure of the dataset using some of the functions
+we learned in class.
+
+```{r, q2}
+x
+
+summary(x)
+
+glimpse(x)
+```
+
+Comment on whether this dataset is tidy, and if not, list the
+reasons why. Hint: In a tidy dataframe, every column represents a single
+variable and every row represents a single observation
+
+### Answer
+
+It is not tidy because the time points and replicates are not in their own columns.
+## Question 3 
+
+**How will you reshape the data frame so that each row has only one experimental observation?**
+
+Hint: Use `pivot_longer()`
+
+```{r, q3}
+x |> pivot_longer(-ensembl_transcript_id)
+```
+
+### Question 4
+
+**How will you modify the dataframe so that multiple variables are not present in a single column?**
+
+Hint: Use `separate()`
+
+```{r, q4}
+x_tidy <- x |>
+  pivot_longer(-ensembl_transcript_id) |>
+  separate(name, into = c('mol', 'time', 'rep'), sep = '_')
+```
+
+### Question 5 
+
+**How will you save your output as a TSV file?**
+
+Hint: Use the *readr* cheatsheet to figure this out.
+
+https://rstudio.cloud/learn/cheat-sheets
+
+```{r, q5}
+write_csv(x_tidy, "transcripts.tidy.csv")
+```
