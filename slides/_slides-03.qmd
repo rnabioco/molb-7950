@@ -1,7 +1,7 @@
 ---
 title: "R Bootcamp - Day 3"
+subtitle: "dplyr"
 author: "Jay Hesselberth"
-date: last-modified
 ---
 
 ```{r include=FALSE}
@@ -15,72 +15,93 @@ library(here)
 
 * Introduce _dplyr_ & today's datasets (Exercise 1)
 * Review basic functions of _dplyr_
-    * core dplyr verbs: 
-        - `arrange` (Exercise 2)
-        - `filter` (Exercise 3)
-        - `select` (Exercise 4)
-        - `mutate` (Exercise 5)
-        - `summarise` (Exercise 6)
-    * modify scope of verbs using: `group_by` (Exercise 7)
-    * pipe: `|>` (Exercise 5)
-    * Combining tables with dplyr: join functions, binding columns/rows, etc. (Exercise 8)
-    * ... and many others! `rename`, `count`, `add_row`, `add_column`, `distinct`, `sample_n`, `sample_frac`, `slice`, `pull` (Exercise 9)
+  * core dplyr verbs: 
+  - `arrange` (Exercise 2)
+  - `filter` (Exercise 3)
+  - `select` (Exercise 4)
+  - `mutate`  and the pipe (Exercise 5)
+  - `summarise` (Exercise 6)
+  * modify scope of verbs using: `group_by` (Exercise 7)
+  * and many others! `rename`, `count`, `add_row`, `add_column`, `distinct`,
+    `sample_n`, `sample_frac`, `slice`, `pull` (Exercise 8)
 
-# dplyr
+## dplyr overview
 
-## dplyr outline
+dplyr: 
 
-* _dplyr_ provides a set of tools for efficiently manipulating datasets in R. 
-* Extremely fast even with large datasets. 
-* Follows the tidyverse grammar and philosophy; human-readable and intuitive
-* String different _dplyr_ verbs together using pipes `|>` (or `|>`)
+* provides a set of tools for efficiently manipulating data sets in R. 
+* is extremely fast even with large data sets. 
+* follows the tidyverse grammar and philosophy; human-readable and intuitive
+* encourages linking of verbs together using pipes `|>` (or the older `%>%`)
 
-## Today's datasets
+## Today's datasets {.smaller}
 
-* We will use one of the datasets that come with the `dplyr` package to explore all the functions provided by dplyr.  
-* `dplyr::starwars` data frame contains data about 87 characters from Starwars
-* `dplyr::band_members`, `dplyr::band_instruments`, `dplyr::band_instruments2` describe band members and instruments 
+* We will use a data set that comes with the `dplyr` package to explore its functions.  
+
+* `dplyr::starwars` contains data for characters from Star Wars.
 
 ```{r}
-# dplyr::starwars
-head(starwars)
+#| echo: true
 starwars
-glimpse(starwars)
-# View(starwars)
-
-# dplyr::band_members
-band_members
-band_instruments
-band_instruments2
 ```
 
-## dplyr package
+. . .
 
-* `dplyr` is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges:
+Explore `starwars` in the console with `head()`, `View()`, and `summary()`.
+
+## dplyr package {.smaller}
+
+`dplyr` is a grammar of data manipulation, providing a consistent set of
+verbs that help you solve the most common data manipulation challenges:
+
   - `arrange()` changes the ordering of the rows.
   - `filter()` picks cases based on their values.
   - `select()` picks variables based on their names.
   - `mutate()` adds new variables that are functions of existing variables
   - `summarise()` reduces multiple values down to a single summary.
-  
-These all combine naturally with `group_by()` which allows you to perform any operation “by group”. 
+ 
+. . .
 
-Pipes `|>` allows different functions to be used together to create a workflow. `x |> f(y)` turns into `f(x, y)`
+- These all combine naturally with `group_by()` which allows you to perform
+any operation “by group”. 
+
+- Pipes `|>` allows different functions to be used together to create a
+workflow. `x |> f(y)` turns into `f(x, y)`
 
 ## arrange - Syntax
 
-- `arrange()` orders rows by values of one or more columns (low to high). `desc()` orders high to low. 
+- `arrange()` orders rows by values of one or more columns (low to high).
+- The `desc()` helper orders high to low. 
 
 ```r
 arrange(data = ..., <colname>)
 ```
 
-## arrange - Exercise 2
+## arrange - Exercise 2 {.smaller}
 
 ```{r}
-arrange(starwars, height) # default is to arrange in ascending order
-arrange(starwars, desc(height)) # arrange in descending order
-arrange(starwars, height, mass) # arrange by multiple columns
+#| echo: true
+#| output-location: fragment
+# default is to arrange in ascending order
+arrange(starwars, height)
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# arrange in descending order
+arrange(starwars, desc(height))
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# arrange by multiple columns
+arrange(starwars, height, mass)
 ```
 
 ## filter - Syntax
@@ -91,36 +112,94 @@ arrange(starwars, height, mass) # arrange by multiple columns
 filter(data = ..., <condition>)
 ```
 
-## filter - Exercise 3
+## filter - Exercise 3 {.smaller}
 
 ```{r}
+#| echo: true
+#| output-location: fragment
 filter(starwars, skin_color == "light")
-filter(starwars, height < 150)
-filter(starwars, mass > mean(mass, na.rm = TRUE))
+```
 
-filter(starwars, is.na(hair_color))
-# View(filter(starwars, is.na(hair_color))) # if you want to look at the filtered data in a table without creating a new table
+. . .
+
+```{r}
+#| echo: true
+#| output-location: fragment
+filter(starwars, height < 150)
 ```
 
 ---
 
-* Most frequently used comparison operators are: >, <, >=, <=, == (equal), != (not equal), is.na(), !is.na(), and %in% (contained in a list). 
+```{r}
+#| echo: true
+#| output-location: fragment
+filter(
+  starwars,
+  mass > mean(mass, na.rm = TRUE)
+)
+```
+
+. . .
+
+Filter out cases where `hair_color` is `NA`
 
 ```{r}
-filter(starwars, skin_color %in% c("light", "fair", "pale")) # using %in%
+#| echo: true
+#| output-location: fragment
+filter(starwars, is.na(hair_color))
+```
 
+---
+
+* Most frequently used comparison operators are:
+
+- `>`, `<`, `>=`, `<=`, `==` (equal), `!=` (not equal)
+- `is.na()`, `!is.na()`, and `%in%` (contained in a vector of cases). 
+
+```{r}
+#| echo: true
+#| output-location: fragment
+filter(
+  starwars,
+  skin_color %in% c("light", "fair", "pale")
+)
+```
+
+--- 
+
+```{r}
+#| echo: true
+#| output-location: fragment
 # can also store as a named vector and use %in% with the vector
 color <- c("light", "fair", "pale")
-filter(starwars, skin_color %in% color) # using %in%
+filter(starwars, skin_color %in% color)
 ```
 
-* Conditions can be combined using & (and), | (or). 
+---
+
+Conditions can be combined using `&` (and), `|` (or). 
+
 ```{r}
-filter(starwars, skin_color == "light" | eye_color == "brown") # using or
-filter(starwars, skin_color == "light" & eye_color == "brown") # using and
+#| echo: true
+#| output-location: fragment
+filter(
+  starwars,
+  skin_color == "light" | eye_color == "brown"
+)
 ```
 
-### select - Syntax
+. . .
+
+```{r}
+#| echo: true
+#| output-location: fragment
+filter(
+  starwars,
+  skin_color == "light" & eye_color == "brown"
+)
+```
+
+## select - Syntax
 
 - `select` extracts one or more columns from a table 
 
@@ -128,19 +207,55 @@ filter(starwars, skin_color == "light" & eye_color == "brown") # using and
 select(data = ..., <colname>)  
 ```
 
-### select - Exercise 4
+## select - Exercise 4
 
 ```{r}
+#| echo: true
+#| output-location: fragment
+# select *only* the variable `hair_color`
 select(starwars, hair_color)
-select(starwars, -hair_color) # can also use not `!hair_color`
-select(starwars, hair_color, skin_color, eye_color)
-select(starwars, hair_color:eye_color) # select using x:y columns
-select(starwars, !(hair_color:eye_color)) # reverse selection using the not `!` operator
-select(starwars, ends_with("color")) # select by specific conditions are met by column names: starts_with, ends_with, contains...
-
 ```
 
-### mutate - Syntax
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# drop the variable `hair_color`
+select(starwars, -hair_color)
+```
+
+
+```{r}
+#| echo: true
+#| output-location: fragment
+select(starwars, hair_color, skin_color, eye_color)
+```
+
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# select variables `hair_color` through `eye_color`
+select(starwars, hair_color:eye_color)
+```
+
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# drop variables `hair_color` through `eye_color`
+select(starwars, !(hair_color:eye_color))
+```
+
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# `starts_with`, `ends_with`, `contains`
+select(starwars, ends_with("color"))
+```
+
+## mutate - Syntax
 
 - `mutate()` to compute new columns
 
@@ -153,72 +268,96 @@ knitr::include_graphics(here("img/mutate.png"))
 ```r
 mutate(data = ..., <newcolname> =  funs(<oldcolname>))
 mutate(data = ..., <colname>, funs(x))
-
-# using pipes! |>
-data |> mutate(<colname>, funs(x)) # this is useful when you need to use multiple functions to act sequentially on a dataframe. Input becomes obvious by leading with it. 
 ```
 
-### mutate (& pipe |>)- Exercise 5
+. . .
+
+or with the the pipe `|>`
+
+Useful when multiple functions act sequentially on a dataframe.
+
+```r
+data |>
+  mutate(<colname>, funs(x)) 
+```
+
+## mutate (& pipe |>)- Exercise 5
 
 ```{r}
+#| echo: true
+#| output-location: fragment
 # create a new column to display height in meters
-starwars |> mutate(height_m = height / 100) # using pipe to feed data into the function
+mutate(starwars, height_m = height / 100)
+```
 
+```{r}
+#| echo: true
+#| output-location: fragment
 # using the pipe to feed data into multiple functions sequentially
 starwars |>
-  mutate(height_m = height / 100) |> # this columns is always appended to the end of the table, by default
-  select(name, height_m, height, everything()) # using select to rearrange columns
+  mutate(height_m = height / 100) |>
+  select(name, height_m, height, everything())
+```
+---
+  
+Mutate allows you to refer to columns that you’ve just created
 
-# mutate allows you to refer to columns that you’ve just created
+```{r}
+#| echo: true
+#| output-location: fragment
 starwars |>
   mutate(
     height_m = height / 100,
-    BMI = mass / (height_m^2)
+    BMI = mass / (height_m ^ 2)
   ) |>
   select(name, BMI, everything())
+```
 
-# output needs to be saved into a new dataframe since dplyr does not "change" the original dataframe
+---
+
+Output needs to be saved into a new dataframe since dplyr does not "change" the original dataframe.
+
+```{r}
+#| echo: true
+#| output-location: fragment
 starwars_bmi <- starwars |>
   mutate(
     height_m = height / 100,
     BMI = mass / (height_m^2)
   ) |>
   select(name, BMI, everything())
+```
 
-# using if_else clauses with mutate
-starwars_height <- starwars |>
-  mutate(tall_short = if_else(
-    condition = height > 160,
-    true = "tall",
-    false = "short"
-  )) |>
+---
+
+Using `case_when()`clauses with `mutate()`.
+
+Let's create a new variable `tall_short` based on other values.
+
+```{r}
+#| echo: true
+#| output-location: fragment
+#| code-line-numbers: "1-4"
+starwars |>
+  mutate(
+    tall_short = case_when(
+      height > 160 ~ "tall",
+      .default = "short"
+    )
+  ) |>
   select(name, tall_short, everything())
 ```
 
-Why use pipes? So you don't have to create too many intermediate files! However, note that intermediate files _can_ be useful in the context of troubleshooting a pipeline. 
+. . .
 
-### rowwise operations (if time permits)
+**Why use pipes?**
 
-* dplyr (& tidyverse in general) is very easy to perform vectorized operations column-wise, and not so easy with row-wise operations. 
-* the function _rowwise()_ offers a solution to this
-* Let's look at an example:
+So you don't have to create too many intermediate files! However, intermediate files *can* be useful in the context of troubleshooting a pipeline. 
 
-```{r}
-# let's input data (same one used in yesterday's problem set)
-data <- read_csv(here("data/data_transcript_exp_subset.csv"))
-
-# calculate mean for each time point using mutate in a rowwise fashion!
-data_mean <- data |>
-  rowwise() |>
-  mutate(
-    mean_0h = mean(c(rna_0h_rep1, rna_0h_rep2, rna_0h_rep3)),
-    mean_14h = mean(c(rna_14h_rep1, rna_14h_rep2, rna_14h_rep3))
-  )
-```
 
 More information here: https://dplyr.tidyverse.org/articles/rowwise.html
 
-### summarise - Syntax
+## summarise - Syntax
 
 - `summarise()` reduces multiple values down to a single summary.
 
@@ -234,18 +373,36 @@ summarise_at(data = ..., vars(<cols), funs())
 
 ```
 
-### summarise - Exercise 6
+## `group_by()` & `summarise()` - Exercise 6
+
+`group_by` creates a grouped copy of a table. 
+
+* This changes the unit of analysis from the complete data set to individual groups. 
+* dplyr verbs automatically detect grouped tables and calculate “by group”. 
+
+```r
+group_by(data = ..., <colname>)
+```
+
+## group_by + summarize - Exercise 7
 
 ```{r}
 #| echo: true
-starwars |> summarise(mean_height = mean(height, na.rm = TRUE))
-starwars |> summarise_if(is.numeric, mean, na.rm = TRUE)
-starwars |> summarise_at(vars(height:mass), mean, na.rm = TRUE)
+#| output-location: fragment
+starwars |> group_by(species)
 ```
 
-* summarise() on its own is not terribly useful. But it becomes powerful when paired with group_by(). 
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars |> summarise(mean_height = mean(height, na.rm = TRUE))
+```
 
-### group_by - Syntax
+. . .
+
+`summarise()` and `group_by()` on their own are not terribly useful. 
+
+## group_by - Syntax
 
 * `group_by` creates a grouped copy of a table. 
 * This changes the unit of analysis from the complete dataset to individual groups. 
@@ -255,87 +412,43 @@ starwars |> summarise_at(vars(height:mass), mean, na.rm = TRUE)
 group_by(data = ..., <colname>)
 ```
 
-### group_by + summarize - Exercise 7
+## group_by + summarize - Exercise 7
 
 ```{r}
+#| echo: true
+#| output-location: fragment
 starwars |>
   group_by(species)
+```
 
+---
+
+Group by multiple variables.
+
+```{r}
+#| echo: true
+#| output-location: fragment
 starwars |>
-  group_by(species) |> # group by species
+  group_by(species) |> 
   summarise(
     height = mean(height, na.rm = TRUE)
   )
-
-starwars |>
-  group_by(species, gender) |> # group by multiple variables
-  summarise(
-    height = mean(height, na.rm = TRUE),
-    mass = mean(mass, na.rm = TRUE) # calculate multiple summaries
-  )
 ```
-
-## Combining tables
-
-- Combine variables (i.e. columns)
-    + `bind_cols()`
-    + `left_join()`
-    + `right_join()`
-    + `inner_join()`
-    + `full_join()`
-    
-- Combine cases (i.e. rows)
-    + `bind_rows()`
-    + `intersect()`
-    + `setdiff()`
-    + `union()`
-
-```{r, echo = FALSE, out.width= '100%'}
-knitr::include_graphics(here("img/combining-tables.png"))
-```
-Source: Rstudio cheatsheets
-
-### Combine variables and cases - pasting tables together - Syntax
-
-- `bind_cols()` to paste tables beside each other
-- `bind_rows()` to paste tables below each other as they are. 
-
-```{show-code}
-bind_cols(data1, data2) # should have same number of rows
-bind_rows(data1, data2) # should have same number of columns
-```
-
-## Combine variables - joining tables by a variable - Syntax
-
-- `left_join()` to join matching values from the right dataset to the left dataset
-- `right_join()` to join matching values from the left dataset to the right dataset
-- `inner_join()` to only join matching values present in both datasets
-- `full_join()` to join all values in both datasets
-
-```{show-code}
-left_join(data1, data2)
-left_join(data1, data2, by = ...) # if multiple columns match
-left_join(data1, data2, by = c("col1" = "col2")) # if the columns names that match are different
-```
-
-## Combine variables - joining tables by a variable - Exercise 8
-```{r}
-band_members |> left_join(band_instruments)
-band_members |> right_join(band_instruments)
-band_members |> inner_join(band_instruments)
-band_members |> full_join(band_instruments)
-# band_members |> full_join(band_instruments2)
-# the above code won't work because there are no matching column names
-band_members |> full_join(band_instruments2, by = c("name" = "artist"))
-```
-
-* Joining tables is something you will do a LOT in genomic analyses.   
-* Things to watch out for are to:
-    - explicitly say which variable to join by
-    - making sure there aren't subtle difference between what you think of as "common" variables 
-    - eg. Paul vs. Paul M; ENST79286869869 vs ENST79286869869.12
 
 ---
+
+Calucate multiple summary statistics.
+
+```{r}
+#| echo: true
+#| output-location: fragment
+starwars |>
+  group_by(species, gender) |>
+  summarise(
+    height = mean(height, na.rm = TRUE),
+    mass = mean(mass, na.rm = TRUE)
+  )
+```
 
 ## Other dplyr verbs
 
@@ -360,4 +473,23 @@ rename(band_instruments2, name = artist)
 
 select(band_instruments2, name = artist) # select drops the rest of the columns
 select(band_instruments2, name = artist, everything()) # this fixes it, but one extra thing to remember
+```
+
+## rowwise operations (if time permits)
+
+* dplyr (& tidyverse in general) is very easy to perform vectorized operations column-wise, and not so easy with row-wise operations. 
+* the function _rowwise()_ offers a solution to this
+* Let's look at an example:
+
+```{r}
+# let's input data (same one used in yesterday's problem set)
+data <- read_csv(here("data/data_transcript_exp_subset.csv"))
+
+# calculate mean for each time point using mutate in a rowwise fashion!
+data_mean <- data |>
+  rowwise() |>
+  mutate(
+    mean_0h = mean(c(rna_0h_rep1, rna_0h_rep2, rna_0h_rep3)),
+    mean_14h = mean(c(rna_14h_rep1, rna_14h_rep2, rna_14h_rep3))
+  )
 ```
