@@ -83,7 +83,9 @@ library(here)
 here("data/syllabus.tsv")
 ```
 
-Paths identified by `here()` can be fed to e.g. `read_*` functions.
+---
+
+### Paths identified by `here()` can be fed to e.g. `read_*` functions. {.smaller}
 
 ```{r}
 #| echo: true
@@ -92,7 +94,7 @@ read_tsv(here("data/syllabus.tsv"))
 
 ## Data sets for tidying - Exercise 2
 
-* In this class, we will use the datasets that come with the tidyr package to explore all the functions provided by tidyr.
+* In this class, we will use the data sets that come with the tidyr package to explore all the functions provided by tidyr.
 
 * `table1`, `table2`, `table3`, `table4a`, `table4b`, and `table5` all display the number of TB cases documented by the World Health Organization in Afghanistan, Brazil, and China between 1999 and 2000. 
 
@@ -171,12 +173,12 @@ table(table2$year, table2$type) # two columns at a time
 
 ## Tidying data
 
-The four verbs to keep in mind for reshaping data with `tidyr` are:  
+The four verbs (functions) to keep in mind for reshaping data with `tidyr` are:  
 
-  - `pivot_wider`  
-  - `pivot_longer`  
-  - `separate`  
-  - `unite` 
+  - `pivot_wider()`  
+  - `pivot_longer()`  
+  - `separate()`  
+  - `unite()` 
 
 . . .
 
@@ -186,14 +188,19 @@ There are other verbs as well - look at the `tidyr` cheatsheet!
 
 `pivot_wider()` "widens" data, increasing the number of columns and decreasing the number of rows. 
 
-```{r, echo = FALSE, out.width= '50%'}
+```{r, echo = FALSE, out.width= '40%'}
 knitr::include_graphics(here("img/pivot_wider.png"))
 ```
 
+. . .
+
+**Is the left tibble tidy?**
+
 ---
 
-```{r}
-#| eval: false
+### `pivot_wider()` syntax
+
+```r
 pivot_wider(
   data,
   names_from = name,
@@ -246,9 +253,13 @@ table2_tidy
 knitr::include_graphics(here("img/pivot_longer.png"))
 ```
 
+**Is the left tibble tidy?**
+
 ---
 
-```{r eval=FALSE}
+### `pivot_longer()` syntax
+
+```r
 pivot_longer(
   data,
   cols,
@@ -318,8 +329,9 @@ knitr::include_graphics(here("img/separate.png"))
 
 ---
 
-```{r}
-#| eval: false
+### `separate()` syntax
+
+```r
 separate(
   data,
   col,
@@ -355,7 +367,7 @@ separate(
 )
 ```
 
-### `unite()` - syntax
+## `unite()` - syntax
 
 `unite()` combines multiple columns into a single column.
 
@@ -365,24 +377,42 @@ knitr::include_graphics(here("img/unite.png"))
 
 ---
 
+### `unite()` syntax
+
 ```r
-unite(data, 
-      col, 
-      ..., #select columns to unite
-      sep = "[^[:alnum:]]+", #any sequence of non-alphanumeric values
-      remove = TRUE, #default is set to TRUE
-      na.rm = FALSE) #default is set to FALSE
+unite(
+  data, 
+  col, 
+  ..., # select columns to unite
+  sep = "[^[:alnum:]]+", #any sequence of non-alphanumeric values
+  remove = TRUE, #default is set to TRUE
+  na.rm = FALSE #default is set to FALSE
+)
 ```
 
-## unite - Exercise 9
+## unite - Exercise 9 {.smaller}
 
 ```{r}
 #| echo: true
-#| output-location: slide
-table6 <- read_csv(here("data/table6.csv"))
+#| output-location: column
+table6 <- read_csv(
+  here("data/table6.csv"),
+  show_col_types = FALSE
+)
 
-table6_tidy <- unite(table6, "new", century, year, sep = "")
-table6_tidy
+table6
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+unite(
+  table6,
+  "new",
+  century,
+  year,
+  sep = ""
+)
 ```
 
 ## Handling missing values
@@ -391,16 +421,20 @@ table6_tidy
 knitr::include_graphics(here("img/missing-values.png"))
 ```
 
----
+## Handling missing values {.smaller}
 
 ```{r}
 #| echo: true
 #| output-location: column 
-df <- tibble(x = c(1, 2, NA), y = c("a", NA, "b"))
+df <- tibble(
+  x = c(1, 2, NA),
+  y = c("a", NA, "b")
+)
+
 df
 ```
 
----
+<br>
 
 ```{r}
 #| echo: true
@@ -408,9 +442,13 @@ df
 drop_na(df)
 ```
 
+<br>
+
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-df %>% replace_na(list(x = 0, y = "unknown"))
+replace_na(
+  df,
+  list(x = 0, y = "unknown")
+)
 ```
-
