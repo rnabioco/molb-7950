@@ -1,0 +1,76 @@
+---
+title: "R Bootcamp Problem Set 3"
+author: "Insert your name here"
+---
+
+## Setup
+
+Start by loading libraries you need analysis in the code chunk below.
+
+When in doubt, start by loading the tidyverse package.
+
+```{r, setup}
+library(tidyverse)
+library(here)
+```
+
+## Problem Set
+
+Each problem below is worth **5 points**.
+
+Use the data files in the `data/` directory to answer the questions.
+
+For this problem set, you are allowed to help each other, but you are not allowed to post correct answers in slack.
+
+**The problem set is due 12pm on Aug 31.**
+
+### Grading rubric
+
+- Everything is good: 5 points
+- Partially correct answers: 3-4 points
+- Reasonable attempt: 2 points
+
+## Question 1 
+
+Use `arrange`, `filter`, and `select` on a tibble. Do the following, in order:
+
+1. Import the data set `data/data_transcript_exp_tidy.csv.gz` (use the `here` package). 
+2. Sort the tibble by expression data (`count`) from highest to lowest level.
+3. Filter the tibble by `count` > 100
+4. Select all columns *except* for `type`
+5. Assign the output to a new object `exp_tbl`.
+
+```{r, q1}
+raw_tbl <- read_csv(
+  here("data/data_transcript_exp_tidy.csv.gz")
+)
+
+exp_tbl <- raw_tbl |> 
+  arrange(desc(count)) |>
+  filter(count > 100) |>
+  select(-type)
+
+exp_tbl
+```
+
+
+## Question 2
+
+Next, do some manipulation on `exp_tbl`:
+
+1. Create a new variable `count_log` that contains `log10`-transformed `count` values
+
+```{r, q3}
+exp_tbl |>
+  mutate(count_log = log10(count))
+```
+
+## Question 3 
+
+Nowtranscript-level counts to gene-level counts, while keeping the `time`, `replicate`, and `hgnc_symbol` information?**
+
+Hint: Use `group_by` with multiple variables, and `summarise` the "count" values using `sum()`
+
+```{r, q4}
+
+```
