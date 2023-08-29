@@ -11,7 +11,7 @@ library(here)
 ```
 
 
-## Class 3 outline 
+## Class 3 outline {.smaller}
 
 * Introduce _dplyr_ & today's datasets (Exercise 1)
 * Review basic functions of _dplyr_
@@ -40,6 +40,8 @@ dplyr:
 
 * `dplyr::starwars` contains data for characters from Star Wars.
 
+. . .
+
 ```{r}
 #| echo: true
 starwars
@@ -63,7 +65,7 @@ verbs that help you solve the most common data manipulation challenges:
 . . .
 
 - These all combine naturally with `group_by()` which allows you to perform
-any operation “by group”. 
+any operation "by group". 
 
 - Pipes `|>` allows different functions to be used together to create a
 workflow. `x |> f(y)` turns into `f(x, y)`
@@ -72,6 +74,8 @@ workflow. `x |> f(y)` turns into `f(x, y)`
 
 - `arrange()` orders rows by values of one or more columns (low to high).
 - The `desc()` helper orders high to low. 
+
+. . .
 
 ```r
 arrange(data = ..., <colname>)
@@ -86,7 +90,7 @@ arrange(data = ..., <colname>)
 arrange(starwars, height)
 ```
 
----
+## arrange - Exercise 2 {.smaller}
 
 ```{r}
 #| echo: true
@@ -95,7 +99,7 @@ arrange(starwars, height)
 arrange(starwars, desc(height))
 ```
 
----
+## arrange - Exercise 2 {.smaller}
 
 ```{r}
 #| echo: true
@@ -120,7 +124,7 @@ filter(data = ..., <condition>)
 filter(starwars, skin_color == "light")
 ```
 
-. . .
+## filter - Exercise 3 {.smaller}
 
 ```{r}
 #| echo: true
@@ -128,7 +132,7 @@ filter(starwars, skin_color == "light")
 filter(starwars, height < 150)
 ```
 
----
+## filter - Exercise 3 {.smaller}
 
 ```{r}
 #| echo: true
@@ -139,7 +143,7 @@ filter(
 )
 ```
 
-. . .
+## filter - Exercise 3 {.smaller}
 
 Filter out cases where `hair_color` is `NA`
 
@@ -149,12 +153,14 @@ Filter out cases where `hair_color` is `NA`
 filter(starwars, is.na(hair_color))
 ```
 
----
+## filter - Exercise 3 {.smaller}
 
-* Most frequently used comparison operators are:
+* The most frequently used comparison operators are:
 
 - `>`, `<`, `>=`, `<=`, `==` (equal), `!=` (not equal)
 - `is.na()`, `!is.na()`, and `%in%` (contained in a vector of cases). 
+
+. . .
 
 ```{r}
 #| echo: true
@@ -188,7 +194,7 @@ filter(
 )
 ```
 
-. . .
+---
 
 ```{r}
 #| echo: true
@@ -207,7 +213,7 @@ filter(
 select(data = ..., <colname>)  
 ```
 
-## select - Exercise 4
+## select - Exercise 4 {.smaller}
 
 ```{r}
 #| echo: true
@@ -216,6 +222,7 @@ select(data = ..., <colname>)
 select(starwars, hair_color)
 ```
 
+## select - Exercise 4 {.smaller}
 
 ```{r}
 #| echo: true
@@ -224,6 +231,7 @@ select(starwars, hair_color)
 select(starwars, -hair_color)
 ```
 
+## select - Exercise 4 {.smaller}
 
 ```{r}
 #| echo: true
@@ -231,6 +239,7 @@ select(starwars, -hair_color)
 select(starwars, hair_color, skin_color, eye_color)
 ```
 
+## select - Exercise 4 {.smaller}
 
 ```{r}
 #| echo: true
@@ -239,6 +248,7 @@ select(starwars, hair_color, skin_color, eye_color)
 select(starwars, hair_color:eye_color)
 ```
 
+## select - Exercise 4 {.smaller}
 
 ```{r}
 #| echo: true
@@ -247,6 +257,7 @@ select(starwars, hair_color:eye_color)
 select(starwars, !(hair_color:eye_color))
 ```
 
+## select - Exercise 4 {.smaller}
 
 ```{r}
 #| echo: true
@@ -281,7 +292,7 @@ data |>
   mutate(<colname>, funs(x)) 
 ```
 
-## mutate (& pipe |>)- Exercise 5
+## mutate (& pipe |>)- Exercise 5 {.smaller}
 
 ```{r}
 #| echo: true
@@ -289,6 +300,8 @@ data |>
 # create a new column to display height in meters
 mutate(starwars, height_m = height / 100)
 ```
+
+## mutate (& pipe |>)- Exercise 5 {.smaller}
 
 ```{r}
 #| echo: true
@@ -298,8 +311,9 @@ starwars |>
   mutate(height_m = height / 100) |>
   select(name, height_m, height, everything())
 ```
----
-  
+
+## mutate (& pipe |>)- Exercise 5 {.smaller}
+
 Mutate allows you to refer to columns that you’ve just created
 
 ```{r}
@@ -315,7 +329,7 @@ starwars |>
 
 ---
 
-Output needs to be saved into a new dataframe since dplyr does not "change" the original dataframe.
+Output needs to be saved into a new data frame since dplyr does not "change" the original dataframe.
 
 ```{r}
 #| echo: true
@@ -330,14 +344,14 @@ starwars_bmi <- starwars |>
 
 ---
 
-Using `case_when()`clauses with `mutate()`.
+## Using `case_when()`clauses with `mutate()`. {.smaller}
 
 Let's create a new variable `tall_short` based on other values.
 
 ```{r}
 #| echo: true
 #| output-location: fragment
-#| code-line-numbers: "1-4"
+#| code-line-numbers: "3-6"
 starwars |>
   mutate(
     tall_short = case_when(
@@ -348,71 +362,32 @@ starwars |>
   select(name, tall_short, everything())
 ```
 
-. . .
-
-**Why use pipes?**
-
-So you don't have to create too many intermediate files! However, intermediate files *can* be useful in the context of troubleshooting a pipeline. 
-
-
-More information here: https://dplyr.tidyverse.org/articles/rowwise.html
-
-## summarise - Syntax
-
-- `summarise()` reduces multiple values down to a single summary.
-
-```{r, echo = FALSE, out.width= '60%'}
-knitr::include_graphics(here("img/summarise.png"))
-```
-
----
-
-```r
-summarise(data = ..., <newcolname> =  funs(<oldcolname>))
-summarise_at(data = ..., vars(<cols), funs())
-
-```
-
 ## `group_by()` & `summarise()` - Exercise 6
 
 `group_by` creates a grouped copy of a table. 
 
 * This changes the unit of analysis from the complete data set to individual groups. 
-* dplyr verbs automatically detect grouped tables and calculate “by group”. 
-
-```r
-group_by(data = ..., <colname>)
-```
-
-## group_by + summarize - Exercise 7
-
-```{r}
-#| echo: true
-#| output-location: fragment
-starwars |> group_by(species)
-```
-
-```{r}
-#| echo: true
-#| output-location: fragment
-starwars |> summarise(mean_height = mean(height, na.rm = TRUE))
-```
+* dplyr verbs automatically detect grouped tables and calculate "by group". 
 
 . . .
 
-`summarise()` and `group_by()` on their own are not terribly useful. 
+```r
+group_by(data = ..., <colname>)
+```
 
 ## group_by - Syntax
 
-* `group_by` creates a grouped copy of a table. 
+* `group_by()` creates a grouped tibble. 
 * This changes the unit of analysis from the complete dataset to individual groups. 
-* Then, when you use the dplyr verbs on a grouped data frame they’ll be automatically applied “by group”. 
+* Then, when you use the dplyr verbs on a grouped data frame they'll be automatically applied "by group". 
+
+. . .
 
 ```r
 group_by(data = ..., <colname>)
 ```
 
-## group_by + summarize - Exercise 7
+## group_by + summarize - Exercise 7 {.smaller}
 
 ```{r}
 #| echo: true
@@ -421,9 +396,17 @@ starwars |>
   group_by(species)
 ```
 
----
+## summarize - syntax
 
-Group by multiple variables.
+* `summarize()` takes named expressions and calculates a summary based on group.
+
+. . .
+
+```r
+summarize(data = ..., name = expression)
+```
+
+## Calculate a summary statistic *by species* {.smaller}
 
 ```{r}
 #| echo: true
@@ -447,49 +430,5 @@ starwars |>
   summarise(
     height = mean(height, na.rm = TRUE),
     mass = mean(mass, na.rm = TRUE)
-  )
-```
-
-## Other dplyr verbs
-
-There are many other dplyr verbs: `rename`, `count`, `add_row`, `add_column`, `distinct`, `sample_n`, `sample_frac`, `slice`, `pull`
-
-Check out the dplyr cheatsheet to learn more! 
-
-## rename - Syntax
-
-- `rename()` renames the variables in a table. Keeps all columns. `select()` can also do this, but with some caveats. 
-
-```r
-rename(data = ..., <colname>)
-```
-
-## rename - Exercise 9
-
-```{r}
-band_instruments2
-
-rename(band_instruments2, name = artist)
-
-select(band_instruments2, name = artist) # select drops the rest of the columns
-select(band_instruments2, name = artist, everything()) # this fixes it, but one extra thing to remember
-```
-
-## rowwise operations (if time permits)
-
-* dplyr (& tidyverse in general) is very easy to perform vectorized operations column-wise, and not so easy with row-wise operations. 
-* the function _rowwise()_ offers a solution to this
-* Let's look at an example:
-
-```{r}
-# let's input data (same one used in yesterday's problem set)
-data <- read_csv(here("data/data_transcript_exp_subset.csv"))
-
-# calculate mean for each time point using mutate in a rowwise fashion!
-data_mean <- data |>
-  rowwise() |>
-  mutate(
-    mean_0h = mean(c(rna_0h_rep1, rna_0h_rep2, rna_0h_rep3)),
-    mean_14h = mean(c(rna_14h_rep1, rna_14h_rep2, rna_14h_rep3))
   )
 ```
