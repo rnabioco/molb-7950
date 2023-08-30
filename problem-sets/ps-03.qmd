@@ -9,8 +9,6 @@ Start by loading libraries you need analysis in the code chunk below.
 When in doubt, start by loading the tidyverse package.
 
 ```{r, setup}
-library(tidyverse)
-library(here)
 ```
 
 ## Problem Set
@@ -21,7 +19,7 @@ Use the data files in the `data/` directory to answer the questions.
 
 For this problem set, you are allowed to help each other, but you are not allowed to post correct answers in slack.
 
-**The problem set is due 12pm on Aug 313131.**
+**The problem set is due 12pm on Aug 31.**
 
 ### Grading rubric
 
@@ -37,18 +35,11 @@ Use `drop_na()` to remove rows with `NA` values in the `penguins` tibble. How ma
 
 
 ```{r}
-library(palmerpenguins)
-
-summary(penguins)
-
-penguins_nona <- drop_na(penguins)
-nrow(penguins) - nrow(penguins_nona)
 ```
 
 Then, use `replace_na()` to replace `NA` values in `bill_length_mm` and `bill_depth_mm` with a value of 0.
 
 ```{r}
-replace_na(penguins, list(bill_length_mm = 0, bill_depth_mm = 0))
 ```
 
 ## Question 2
@@ -61,12 +52,6 @@ Use `arrange`, `filter`, and `select` on a dataframe. Do the following, in order
 4. Select all columns *except* for `type`
 
 ```{r, q1}
-exp_tbl <- read_csv(here("data/data_transcript_exp_tidy.csv.gz"))
-exp_tbl |>
-  arrange(count) |>
-  filter(count > 100) |>
-  select(-type)
-
 ```
 
 ## Question 3
@@ -81,9 +66,6 @@ B) rearrange the columns in the following order: ensembl_transcript_id, type, ti
 Hint: Use `mutate` and `select`
 
 ```{r, q3}
-exp_tbl |>
-  mutate(log10count = log10(count)) |>
-  select(ensembl_transcript_id, type, time, replicate, count, log10count)
 ```
 
 ## Question 4
@@ -93,7 +75,4 @@ Calculate a per-transcript sum, while keeping the `time` information?
 Hint: Use `group_by` with multiple variables, and `summarise` the "count" values using `sum()`
 
 ```{r, q4}
-exp_tbl |>
-  group_by(ensembl_transcript_id, time) |>
-  summarize(count_sum = sum(count))
 ```
