@@ -243,6 +243,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#question-2" id="toc-question-2" class="nav-link" data-scroll-target="#question-2">Question 2</a>
   <ul class="collapse">
   <li><a href="#answer" id="toc-answer" class="nav-link" data-scroll-target="#answer">Answer</a></li>
+  </ul></li>
+  <li><a href="#question-3" id="toc-question-3" class="nav-link" data-scroll-target="#question-3">Question 3</a>
+  <ul class="collapse">
   <li><a href="#question-4" id="toc-question-4" class="nav-link" data-scroll-target="#question-4">Question 4</a></li>
   <li><a href="#question-5" id="toc-question-5" class="nav-link" data-scroll-target="#question-5">Question 5</a></li>
   </ul></li>
@@ -390,7 +393,11 @@ $ rna_14h_rep3          &lt;dbl&gt; 239.00, 8.00, 14.00, 30.00, 2.00, 27.33, 155
 <p>Comment on whether this dataset is tidy, and if not, list the reasons why. Hint: In a tidy dataframe, every column represents a single variable and every row represents a single observation</p>
 <section id="answer" class="level3">
 <h3 class="anchored" data-anchor-id="answer">Answer</h3>
-<p>It is not tidy because the time points and replicates are not in their own columns. ## Question 3</p>
+<p>It is not tidy because the time points and replicates are not in their own columns.</p>
+</section>
+</section>
+<section id="question-3" class="level2">
+<h2 class="anchored" data-anchor-id="question-3">Question 3</h2>
 <p><strong>How will you reshape the data frame so that each row has only one experimental observation?</strong></p>
 <p>Hint: Use <code>pivot_longer()</code></p>
 <div class="cell">
@@ -412,7 +419,6 @@ $ rna_14h_rep3          &lt;dbl&gt; 239.00, 8.00, 14.00, 30.00, 2.00, 27.33, 155
 # ℹ 590 more rows</code></pre>
 </div>
 </div>
-</section>
 <section id="question-4" class="level3">
 <h3 class="anchored" data-anchor-id="question-4">Question 4</h3>
 <p><strong>How will you modify the dataframe so that multiple variables are not present in a single column?</strong></p>
@@ -420,7 +426,25 @@ $ rna_14h_rep3          &lt;dbl&gt; 239.00, 8.00, 14.00, 30.00, 2.00, 27.33, 155
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>x_tidy <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>ensembl_transcript_id) <span class="sc">|&gt;</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(name, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">'mol'</span>, <span class="st">'time'</span>, <span class="st">'rep'</span>), <span class="at">sep =</span> <span class="st">'_'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(name, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">'mol'</span>, <span class="st">'time'</span>, <span class="st">'rep'</span>), <span class="at">sep =</span> <span class="st">'_'</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>x_tidy</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 600 × 5
+   ensembl_transcript_id      mol   time  rep   value
+   &lt;chr&gt;                      &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;dbl&gt;
+ 1 ENST00000327044.6_51_2298  rna   0h    rep1    243
+ 2 ENST00000327044.6_51_2298  rna   0h    rep2    322
+ 3 ENST00000327044.6_51_2298  rna   0h    rep3    303
+ 4 ENST00000327044.6_51_2298  rna   14h   rep1    177
+ 5 ENST00000327044.6_51_2298  rna   14h   rep2    177
+ 6 ENST00000327044.6_51_2298  rna   14h   rep3    239
+ 7 ENST00000338591.7_360_2034 rna   0h    rep1     19
+ 8 ENST00000338591.7_360_2034 rna   0h    rep2     17
+ 9 ENST00000338591.7_360_2034 rna   0h    rep3     15
+10 ENST00000338591.7_360_2034 rna   14h   rep1      9
+# ℹ 590 more rows</code></pre>
+</div>
 </div>
 </section>
 <section id="question-5" class="level3">
@@ -429,7 +453,7 @@ $ rna_14h_rep3          &lt;dbl&gt; 239.00, 8.00, 14.00, 30.00, 2.00, 27.33, 155
 <p>Hint: Use the <em>readr</em> cheatsheet to figure this out.</p>
 <p>https://rstudio.cloud/learn/cheat-sheets</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(x_tidy, <span class="st">"transcripts.tidy.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(x_tidy, <span class="st">"transcripts.tidy.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
