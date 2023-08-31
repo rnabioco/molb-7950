@@ -1,0 +1,151 @@
+---
+title: "R Bootcamp Problem Set 4"
+author: "Your name here"
+date: last-modified 
+---
+
+## Problem Set
+
+Each problem below is worth different points, depending on the number of steps
+involved and the difficulty of the problem.
+
+Use the data files in the `data/` directory to answer the questions.
+
+For this problem set, you are allowed to help each other, but you are not
+allowed to post correct answers in slack.
+
+**The problem set is due 12pm on Sept 1.**
+
+## Grading rubric
+
+- Everything is good: full points
+- Partially correct answer: depends on how many steps are correct
+- Reasonable attempt: half points
+
+## Question 1 **5 points**
+
+1. Load packages tidyverse and here.  
+2. Import datasets: `data/data_rna_protein.csv.gz`.
+
+`data_rna_protein.csv.gz`: This is a combined dataset from an RNAseq and SILAC
+proteomics experiment, where a transcription factor (TF) was differentially
+expressed and the fold change in RNA and protein calculated between
+TF-expressing and non-expressing cells.
+   
+```{r, q1}
+library(tidyverse)
+library(cowplot)
+library(here)
+
+exp_tbl <- read_csv(
+   here("problem-sets/data/data_rna_protein.csv.gz")
+)
+```
+
+## Question 2 **5 points**
+
+Using the imported data set, carry out the following:  
+
+1. Inspect the data so you know what you are dealing with (`summary()` etc). 
+
+2. Select only the following columns: `geneid`, `iDUX4_logFC`, `iDUX4_fdr`,
+   `hl.ratio`, and `pval`.
+
+3. Rename them as follows: rna_FC = iDUX4_logFC, rna_pval = iDUX4_fdr,
+   protein_FC = hl.ratio, protein_pval = pval (hint: use `dplyr::rename()`)
+
+4. Drop all rows with `NA` values in them (hint: use a function from `tidyr`)
+
+6. Remove duplicate rows (hint: use `dplyr::distinct()`).
+
+7. Arrange the table by descending `rna_FC` and ascending 
+   `protein_FC`.
+   
+8. Conduct steps 2-7 by piping the output of one step to another (i.e, a single
+   workflow & remember to comment).
+   
+9. Save the output of this workflow into a new object.
+
+```{r, q2}
+exp_tbl_subset <- exp_tbl |>
+   select(geneid, iDUX4_logFC, iDUX4_fdr, hl.ratio, pval) |>
+   rename(
+      rna_FC = iDUX4_logFC,
+      rna_pval = iDUX4_fdr,
+      protein_FC = hl.ratio,
+      protein_pval = pval
+      ) |>
+   drop_na() |>
+   distinct() |>
+   arrange(desc(rna_FC), protein_FC)
+```
+
+## Question 3  **5 points**
+
+How well do the overall `rna_FC` and `protein_FC` values correlate in this
+experiment?
+
+Using the output from the above question, do the following:  
+
+1. Create a scatter plot of `rna_FC` vs `protein_FC`. observe how the points scatter.
+
+2. Add a line to the plot that would indicate perfect 1:1 correlation.
+   Hint: use `geom_abline()` with its `slope` argument.
+   
+3. Add a linear model fit using `geom_smooth()` (`method = 'lm'`-- look up these
+   options so you know what you are doing -- Observe how the x=y line deviates from
+   your geom_smooth line.
+
+4. Calculate the Spearman correlation coefficient. (Hint: This uses a base R math
+   function called `cor` - Use help() or Google to learn more and how to specify
+   method as `spearman`)
+
+5. Using all of the information from above, comment on the correlation between
+   `rna_FC` and `protein_FC` below.
+
+```{r, q4}
+ggplot(exp_tbl_subset, aes(rna_FC, protein_FC)) +
+   geom_point() +
+   geom_abline(linewidth = 1, color = 'green') +
+   geom_smooth(method = 'lm', se = FALSE, linewidth = 1)
+
+rna_prot_cor <- cor(exp_tbl_subset$rna_FC, exp_tbl_subset$protein_FC)         
+```
+
+### Answer
+
+The shows perfect correlation, whereas the Spearman coorelation between RNA and protein fold-changes is `rna_prot_cor`. indicating a small positive correlation between protein and RNA. So, in general, there are `rna_prot_cor` proteins made from each transcript.
+
+## Question 5 - How does the RNA and protein foldchange differ for the genes under the different categories of "housekeeping", "target" and "other"? **6 points**
+
+Using `data_genestatus`, do the following:  
+1) Drop th columns `rna_pval` and `protein_pval`. Make the table long such that both rna_FC and protein_FC values go in a single column (called `foldchange`), and create a new column called `molecule` that contains the information about whether the `foldchange` is for `rna` or `protein`. Clean up the `molecule` column by separating out the "_FC" and dropping it (look up `extra = "drop"` option of `separate`). (Bonus: You can use the `stringr` package to remove "_FC". You could try that if you want for a bonus point!)  
+- Let's call the dataframe you just created `data_genestatus_long`  
+2) Group the cases in `data_genestatus_long` by `molecule` and `genestatus` & summarise the `foldchange` values using `mean`  
+4) Using ggridges, create a stacked density plot where `x = foldchange` and `y = genestatus`, `fill = genestatus` and facet_wrap the plots by `molecule`  
+5) Using ggplot, create a box-and-whisker plot with `genestatus` on x-axis, `foldchange` on Y-axis, fill by `genestatus` and facet_wrap'ed by `molecule`  
+6) Based on the information you gleaned from #1 and #2, comment on what the results imply. Remember: `rna_FC` is the log2 RNA fold change and `protein_FC` is the log2 protein fold change between cells that express our transcription factor of interest versus not.  
+
+
+```{r, q5}
+```
+
+## Question 6 - Create a multi-panel, publication-quality figure **3 points**
+
+This figure will be a composite of the scatter plot you made for Q4 (panel A), the ridge plot you made in Q5 (panel B), and the box-and-whisker plot you made, also in Q5 (panel C).  
+1) Remake all three plots with:    
+    A) a new theme (you can pick or create your favorite theme using one of the ggthemes styles as a basis)   
+    B) Add informative labels, titles, and legends   
+Save these new plots as ggplot objects `panelA`, `panelB`, and `panelC`
+2) Combine these panels into a single-column figure using `plot_grid`   
+3) Save this plot in your `img` folder.   
+
+Bonus: Make this figure aesthetically pleasing in terms of aspect ratio, position of legends, relative text size, etc. Each of these requires you to go down a rabbit hole, but you will learn from doing so. No points for doing this - just for fun!   
+
+```{r, q6}
+```
+
+**** the end **** 
+
+<br/>
+

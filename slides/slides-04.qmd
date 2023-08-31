@@ -54,14 +54,14 @@ There are many interesting data sets you can install as R packages for learning 
 - [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/)
 :::
 
-## Getting familiar with the data - Exercise 1
-
----
+## Getting familiar with the data - Exercise 1 {.smaller}
 
 ```{r}
 #| echo: true
 summary(diamonds)
 ```
+
+. . .
 
 Also examine:
 
@@ -102,7 +102,7 @@ Initialize a plot with data.
 
 ```{r fig.width=6}
 #| echo: true
-#| output-location: column-fragment
+#| output-location: fragment
 ggplot(data = diamonds) 
 ```
 
@@ -112,7 +112,7 @@ Next, specify the coordinate system.
 
 ```{r}
 #| echo: true
-#| output-location: column-fragment
+#| output-location: fragment
 #| code-line-numbers: "3-5"
 ggplot(
   data = diamonds,
@@ -129,7 +129,7 @@ Add a geom (`geom_point`).
 
 ```{r}
 #| echo: true
-#| output-location: column-fragment
+#| output-location: fragment
 #| code-line-numbers: "8"
 ggplot(
   data = diamonds,
@@ -147,7 +147,7 @@ Map aesthetics to other variables.
 
 ```{r}
 #| echo: true
-#| output-location: column-fragment
+#| output-location: fragment
 #| code-line-numbers: "6-7"
 ggplot(
   data = diamonds,
@@ -167,7 +167,7 @@ Reduce overplotting by adjusting the transparency of points.
 
 ```{r}
 #| echo: true
-#| output-location: column-fragment
+#| output-location: fragment
 #| code-line-numbers: "10"
 ggplot(
   data = diamonds,
@@ -181,7 +181,7 @@ ggplot(
   geom_point(alpha = 0.2)
 ```
 
-## Looking under the hood of ggplot (Exercise 3)
+## Looking under the hood of ggplot (Exercise 3) {.smaller}
 
 ```{r}
 #| echo: true
@@ -310,7 +310,9 @@ ggplot(
   data = diamonds,
   mapping = aes(x = carat)
 ) +
-  geom_density(fill = "tomato1")
+  geom_density(
+    fill = "tomato1"
+  )
 ```
 
 ---
@@ -408,7 +410,7 @@ Box plot, with fill color by cut.
 
 ```{r fig.height=3, fig.width=7}
 #| echo: true
-#| output-location: column-fragment
+#| output-location: fragment
 ggplot(
   data = diamonds,
   mapping = aes(
@@ -453,7 +455,8 @@ Subset diamonds to see points more clearly.
 
 ```{r fig.height=3, fig.width=4}
 #| echo: true
-diamonds_subset <- diamonds |> sample_n(size = 1000)
+diamonds_subset <- diamonds |>
+  sample_n(size = 1000)
 ```
 
 ---
@@ -477,16 +480,22 @@ Now add a smoothing line.
 #| output-location: column-fragment
 ggplot(
   data = diamonds_subset,
-  mapping = aes(x = carat, y = price, color = cut)
+  mapping = aes(
+    x = carat,
+    y = price,
+    color = cut
+  )
 ) +
   geom_smooth()
 ```
+
+---
 
 Here we can combine geoms to see points & the fit
 
 ```{r fig.height=3, fig.width=4}
 #| echo: true
-#| output-location: column-fragment1yy
+#| output-location: column-fragment
 ggplot(
   data = diamonds_subset,
   mapping = aes(x = carat, y = price, color = cut)
@@ -501,18 +510,30 @@ ggplot(
 knitr::include_graphics(here("img/ggplot-geom-cont-bivar.png"))
 ```
 
+---
+
 ```{r fig.height=3, fig.width=3}
 #| echo: true
 #| output-location: column-fragment
 ggplot(
   data = diamonds_subset,
-  mapping = aes(x = carat, y = price)
+  mapping = aes(
+    x = carat,
+    y = price
+  )
 ) +
   geom_point()
+```
 
+```{r fig.height=3, fig.width=3}
+#| echo: true
+#| output-location: column-fragment
 ggplot(
   data = diamonds_subset,
-  mapping = aes(x = carat, y = price)
+  mapping = aes(
+    x = carat,
+    y = price
+  )
 ) +
   geom_hex()
 ```
@@ -523,8 +544,8 @@ R has 25 built in shapes that are identified by numbers.
 
 Some are similar: 0, 15, and 22 are all squares, but interact differently with `color` and `fill` aesthetics.
 
-Hollow shapes have a border determined by `color`, solid shapes (15–18) are
-filled with `color`, an the filled shapes (21–24) have `color` border and `fill`
+Hollow shapes have a border determined by `color`, solid shapes (15-18) are
+filled with `color`, an the filled shapes (21-24) have `color` border and `fill`
 inside.
 
 ```{r, echo = FALSE, out.width= '80%'}
@@ -542,10 +563,16 @@ This is useful if you use two different geoms that share an aesthetic.
 #| output-location: column-fragment
 ggplot(
   data = diamonds_subset,
-  mapping = aes(x = carat, y = price)
+  mapping = aes(
+    x = carat,
+    y = price
+  )
 ) +
   geom_point(
-    aes(fill = cut, size = depth),
+    aes(
+      fill = cut,
+      size = depth
+      ),
     alpha = 0.8,
     shape = 24,
     color = "white"
@@ -568,7 +595,10 @@ A stacked bar chart.
 #| output-location: column-fragment
 ggplot(
   data = diamonds,
-  mapping = aes(x = cut, fill = clarity)
+  mapping = aes(
+    x = cut,
+    fill = clarity
+  )
 ) +
   geom_bar()
 ```
@@ -594,7 +624,6 @@ We won't go into these functions too much today, but here is a brief overview:
 * The coordinate system determines how the x and y aesthetics combine to position elements in the plot. The default coordinate system is Cartesian ( coord_cartesian() ), which can be tweaked with coord_map() , coord_fixed() , coord_flip() , and coord_trans() , or completely replaced with coord_polar()
 
 * Scales control the details of how data values are translated to visual properties. There are 20+ scale functions. We will look at one; the ggplot2 cheatsheet is your friend for the rest. 
-
 ---
 
 Logarithmic axes - 1
@@ -604,7 +633,10 @@ Note the difference between axis labels in these two examples.
 ```{r fig.height=3, fig.width=3}
 #| echo: true
 #| output-location: column-fragment
-ggplot(diamonds_subset, aes(carat, price)) +
+ggplot(
+  diamonds_subset,
+  aes(carat, price)
+  ) +
   geom_point() +
   coord_trans(x = "log10")
 ```
@@ -616,7 +648,10 @@ Logarithmic axes - 2
 ```{r fig.height=3, fig.width=3}
 #| echo: true
 #| output-location: column-fragment
-ggplot(diamonds_subset, aes(carat, price)) +
+ggplot(
+  diamonds_subset,
+  aes(carat, price)
+  ) +
   geom_point() +
   scale_x_log10()
 ```
@@ -678,7 +713,10 @@ We might want to change the limits of x or y axes to zoom in.
 ```{r fig.height=3, fig.width=3}
 #| echo: true
 #| output-location: column-fragment
-ggplot(diamonds_subset, aes(carat, price)) +
+ggplot(
+  diamonds_subset,
+  aes(carat, price)
+  ) +
   geom_point(alpha = 0.5) +
   xlim(0, 2) +
   ylim(0, 5000)
