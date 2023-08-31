@@ -19,7 +19,7 @@ allowed to post correct answers in slack.
 - Partially correct answer: depends on how many steps are correct
 - Reasonable attempt: half points
 
-## Question 1 **2 points**
+## Question 1 **5 points**
 
 1. Load the tidyverse and here packages.  
 2. Import datasets: `data/data_rna_protein.csv.gz`.
@@ -30,10 +30,15 @@ expressed and the fold change in RNA and protein calculated between
 TF-expressing and non-expressing cells.
    
 ```{r, q1}
+library(tidyverse)
+library(here)
 
+exp_tbl <- read_csv(
+   here("problem-sets/data/data_rna_protein.csv.gz")
+)
 ```
 
-## Question 2 **9 points**
+## Question 2 **5 points**
 
 Using the imported data set, carry out the following:  
 
@@ -58,36 +63,59 @@ Using the imported data set, carry out the following:
 9. Save the output of this workflow into a new object.
 
 ```{r, q2}
-
+exp_tbl_subset <- exp_tbl |>
+   select(geneid, iDUX4_logFC, iDUX4_fdr, hl.ratio, pval) |>
+   rename(
+      rna_FC = iDUX4_logFC,
+      rna_pval = iDUX4_fdr,
+      protein_FC = hl.ratio,
+      protein_pval = pval
+      ) |>
+   drop_na() |>
+   distinct() |>
+   arrange(desc(rna_FC), protein_FC)
 ```
 
-## Question 3  **9 points**
+## Question 3  **5 points**
 
-**How well do the overall `rna_FC` and `protein_FC` values correlate in this
-experiment?**
+How well do the overall `rna_FC` and `protein_FC` values correlate in this
+experiment?
 
-Using the output from Question 2, do the following:  
+Using the output from the above question, do the following:  
 
 1. Create a scatter plot of `rna_FC` vs `protein_FC`. observe how the points scatter.
 
 2. Add a line to the plot that would indicate perfect 1:1 correlation.
    Hint: use `geom_abline()` with its `slope` argument.
    
-3. Add a linear model fit using `geom_smooth()` using its `method = 'lm'` argument.
-   Observe how the x=y line deviates from your geom_smooth line.
+3. Add a linear model fit using `geom_smooth()` (`method = 'lm'`-- look up these
+   options so you know what you are doing -- Observe how the x=y line deviates from
+   your geom_smooth line.
 
 4. Calculate the Spearman correlation coefficient. (Hint: This uses a base R math
-   function called `cor`. Use `?cor` or Google to learn more and how to specify
-   method as `spearman`.
+   function called `cor` - Use help() or Google to learn more and how to specify
+   method as `spearman`)
 
 5. Using all of the information from above, comment on the correlation between
    `rna_FC` and `protein_FC` below.
 
 ```{r, q4}
+ggplot(exp_tbl_subset, aes(rna_FC, protein_FC)) +
+   geom_point() +
+   geom_abline(linewidth = 1, color = 'green') +
+   geom_smooth(method = 'lm', se = FALSE, linewidth = 1)
+
+rna_prot_cor <- cor(
+   exp_tbl_subset$rna_FC,
+   exp_tbl_subset$protein_FC,
+   method = 'spearman'
+)
 
 ```
 
 ### Answer
+
+The green line indicates a perfect correlation, and the blue line is the linear model fit of the data. The Spearman correlation is `rna_prot_cor`, indictating a strong positive correlation. One way to think about this is that there are `rna_prot_cor` proteins made per 1 mRNA.
 
 ## Submit
 
