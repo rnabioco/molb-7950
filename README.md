@@ -13,7 +13,7 @@ Create a new template project and manually install packages.
 While renv is a nice idea and is helpful for local development, in practice
 it doesn't seem robust enough on Posit Cloud.
 
-Then, run `renv::activate()` and `renv::restore()`, which will install project
+If you wanted to try using renv, clone the direction and then run `renv::activate()` and `renv::restore()`, which will install project
 packages in a project-local library under `renv/`.
 
 If you add new libraries to your content, run `renv::snapshot()`, follow
@@ -31,6 +31,10 @@ In practice, pak with renv seems a bit flaky.
 Use `quarto render` or `quarto preview` locally to inspect content prior to
 commit / push. A Github Action builds the site automatically unless you include
 `[ci skip]` in the commit message.
+
+After a significant update (i.e., uploading a lot of class material), you should 
+`quarto render` the entire site, and then commit & push the contents of the `_freeze` directory, 
+which will enable rendering of only changed materials relative to that build.
 
 ## File structure
 
