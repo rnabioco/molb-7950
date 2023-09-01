@@ -4,9 +4,14 @@ Course materials for "MOLB 7950: Informatics and Statistics for Molecular Biolog
 
 ## Installing local packages
 
-After cloning this repository, set `RENV_CONFIG_PAK_ENABLED = TRUE` in the
-user's `.Renviron` file (`usethis::edit_r_environ()`) to use pak installation,
-which is a lot faster ([issue](https://github.com/rstudio/renv/issues/1210)).
+### Posit Cloud
+
+Create a new template project and manually install packages.
+
+### renv
+
+While renv is a nice idea and is helpful for local development, in practice
+it doesn't seem robust enough on Posit Cloud.
 
 Then, run `renv::activate()` and `renv::restore()`, which will install project
 packages in a project-local library under `renv/`.
@@ -14,6 +19,12 @@ packages in a project-local library under `renv/`.
 If you add new libraries to your content, run `renv::snapshot()`, follow
 instructions to `renv::install()` if needed, and then be sure to commit the
 `renv.lock` file.
+
+You can also trying using `pak` for installation by setting
+`RENV_CONFIG_PAK_ENABLED = TRUE` in the user's `.Renviron` file 
+(`usethis::edit_r_environ()`) to use pak installation,
+which is a lot faster ([issue](https://github.com/rstudio/renv/issues/1210)).
+In practice, pak with renv seems a bit flaky.
 
 ## Previewing content
 
@@ -25,14 +36,11 @@ commit / push. A Github Action builds the site automatically unless you include
 
 Pages should be named based on the syllabus table, e.g., `class-01.qmd`.
 
-* qmd you want rendered as webpages go in `pages/`
-* qmd you want rendered as slides go in `slides/`
-
-There are also directories for `exercises/`, `problem-sets/`, and `problem-set-keys/`.
+The qmd files you want rendered as slides go in `slides/`, `exercises/`, `problem-sets/`, and `problem-set-keys/`
 
 Each of these will be linked in the table on the front page.
 
-If you want to suppress quarto rendering of a file, use an underscore prefix like `_class-01.qmd`.
+If you want to suppress quarto rendering of a file, prefix the filename with an underscore like `_class-01.qmd`.
 
 ## Syllabus updates
 
