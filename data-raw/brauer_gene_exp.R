@@ -69,6 +69,10 @@ brauer_gene_exp <-
   mutate(across(c(rate, nutrient), as_factor)) |>
   arrange(desc(systematic_name), nutrient, rate)
 
-save_data(brauer_gene_exp_raw)
-save_data(brauer_gene_exp)
-save_data(yeast_go_terms)
+write_tsv(brauer_gene_exp, file = here("data", "brauer_gene_exp.tsv.gz"))
+write_tsv(brauer_gene_exp_raw, file = here("data", "brauer_gene_exp_raw.tsv.gz"))
+write_tsv(yeast_go_terms, file = here("data", "yeast_go_terms.tsv.gz"))
+
+# save_data(brauer_gene_exp_raw)
+# save_data(brauer_gene_exp)
+# save_data(yeast_go_terms)
