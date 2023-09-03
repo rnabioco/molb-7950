@@ -73,6 +73,10 @@ write_tsv(brauer_gene_exp, file = here("data", "brauer_gene_exp.tsv.gz"))
 write_tsv(brauer_gene_exp_raw, file = here("data", "brauer_gene_exp_raw.tsv.gz"))
 write_tsv(yeast_go_terms, file = here("data", "yeast_go_terms.tsv.gz"))
 
+url <- 'http://sgd-archive.yeastgenome.org/curation/calculated_protein_info/archive/protein_properties.tab.20210422.gz'
+yeast_prot_prop <- read_tsv(url)
+write_tsv(yeast_prot_prop, here("data/yeast_prot_prop.tsv.gz"))
+
 # save_data(brauer_gene_exp_raw)
 # save_data(brauer_gene_exp)
 # save_data(yeast_go_terms)
