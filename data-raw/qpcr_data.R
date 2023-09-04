@@ -14,15 +14,16 @@ plus_rts <- filter(sample_data, rt == "+")
 
 t0 <- filter(plus_rts, time == 0) |> rowwise() |> mutate(exp = sample(5:15, 1))
 t12 <- filter(plus_rts, time == 12) |> rowwise() |> mutate(exp = sample(45:55, 1))
-t24 <- filter(plus_rts, time == 24) |> rowwise() |> mutate(exp = sample(95:100, 1))
-t48 <- filter(plus_rts, time == 48) |> rowwise() |> mutate(exp = sample(350:600, 1))
+t24 <- filter(plus_rts, time == 24) |> rowwise() |> mutate(exp = sample(95:140, 1))
+t48 <- filter(plus_rts, time == 48) |> rowwise() |> mutate(exp = sample(240:280, 1))
 
 plus_rts <- bind_rows(t0, t12, t24, t48)
 
 # add multiplier for genes
-ifns <- filter(plus_rts, gene == "IFN") |> mutate(exp = exp * 1.5)
+ifns_wt <- filter(plus_rts, gene == "IFN" & sample == "wt") |> mutate(exp = exp * 1.2)
+ifns_mut <- filter(plus_rts, gene == "IFN" & sample == "mut") |> mutate(exp = exp * 0.3)
 actins <- filter(plus_rts, gene == "ACTIN") |> mutate(exp = exp * 0.2)
-plus_rts <- bind_rows(ifns, actins)
+plus_rts <- bind_rows(ifns_wt, ifns_mut, actins)
 
 minus_rts <- filter(sample_data, rt == "-") |> mutate(exp = 0)
 
