@@ -1,0 +1,14 @@
+{
+  "hash": "b4997df97d6997d7c2b5fea9c50b1da5",
+  "result": {
+    "markdown": "---\ntitle: \"R Bootcamp - Problem Set 5 (Extreme aRt)\"\nauthor: \"JH\"\nformat:\n  html:\n    code-fold: true\n---\n\n::: {.cell}\n\n:::\n\n\n# 🐧❤️🍕\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\nlibrary(emo)\nlibrary(here)\nlibrary(gganimate)\nlibrary(palmerpenguins)\nlibrary(ragg)\n\nanim <- penguins |>\n  drop_na() |>\n  mutate(\n    emoji = case_when(\n      sex == \"female\" ~ emo::ji(\"pizza\"),\n      sex == \"male\" ~ emo::ji(\"penguin\")\n    )\n  ) |>\n  rowwise() |>\n  mutate(angle = sample(0:360, size = 1)) |>\n  ungroup() |>\n  ggplot(\n    aes(\n      x = body_mass_g,\n      y = flipper_length_mm\n    )\n  ) +\n  geom_text(\n    aes(\n      label = emoji,\n      angle = angle\n    ),\n    size = 13,\n  ) +\n  coord_trans(x = \"log\", y = \"log\") +\n  labs(\n    title = paste0(\n      \"PENGUIN\", emo::ji(\"penguin\"),\n      \"PIZZA\", emo::ji(\"pizza\"),\n      \"PARTY\", emo::ji(\"party\"),\n      collapse = \"\"\n    ),\n    x = paste0(emo::ji(\"island\"), \"maybe latitude or longitude\", collapse = \"  \"),\n    y = paste0(emo::ji(\"sun\"), \"temperature (K)\", collapse = \"  \")\n  ) +\n  theme(\n    legend.position = \"none\",\n    axis.text = element_text(angle = 180),\n    plot.title = element_text(hjust = 0.5, size = 30),\n    axis.title = element_text(size = 30),\n    axis.text.x = element_text(size = 2),\n    axis.text.y = element_text(size = 2),\n    plot.background = element_rect(fill = \"#ffcc5c\"),\n    panel.background = element_rect(fill = \"#ffeead\"),\n    panel.grid.major = element_line(color = \"#ff6f69\"),\n    panel.grid.minor = element_line(color = \"#96ceb4\")\n  ) +\n  transition_states(\n    transition_length = 1,\n    state_length = 0.001,\n    year\n  ) +\n  enter_grow() +\n  exit_shrink() +\n  view_follow()\n\np <- animate(anim, device = \"ragg_png\")\nanim_save(here(\"img/ugly_plot.gif\"), p)\n```\n:::\n\n\n![](../img/ugly_plot.gif)\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

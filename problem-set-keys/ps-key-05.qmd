@@ -1,0 +1,86 @@
+---
+title: "R Bootcamp - Problem Set 5 (Extreme aRt)"
+author: "JH"
+format:
+  html:
+    code-fold: true
+---
+
+```{r}
+#| echo: false
+library(emo)
+emos <- paste0(emo::ji("penguin"), emo::ji("heart"), emo::ji("pizza"), collapse = " ")
+```
+
+# `r emos`
+
+```{r}  
+#| eval: false
+library(tidyverse)
+library(emo)
+library(here)
+library(gganimate)
+library(palmerpenguins)
+library(ragg)
+
+anim <- penguins |>
+  drop_na() |>
+  mutate(
+    emoji = case_when(
+      sex == "female" ~ emo::ji("pizza"),
+      sex == "male" ~ emo::ji("penguin")
+    )
+  ) |>
+  rowwise() |>
+  mutate(angle = sample(0:360, size = 1)) |>
+  ungroup() |>
+  ggplot(
+    aes(
+      x = body_mass_g,
+      y = flipper_length_mm
+    )
+  ) +
+  geom_text(
+    aes(
+      label = emoji,
+      angle = angle
+    ),
+    size = 13,
+  ) +
+  coord_trans(x = "log", y = "log") +
+  labs(
+    title = paste0(
+      "PENGUIN", emo::ji("penguin"),
+      "PIZZA", emo::ji("pizza"),
+      "PARTY", emo::ji("party"),
+      collapse = ""
+    ),
+    x = paste0(emo::ji("island"), "maybe latitude or longitude", collapse = "  "),
+    y = paste0(emo::ji("sun"), "temperature (K)", collapse = "  ")
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text = element_text(angle = 180),
+    plot.title = element_text(hjust = 0.5, size = 30),
+    axis.title = element_text(size = 30),
+    axis.text.x = element_text(size = 2),
+    axis.text.y = element_text(size = 2),
+    plot.background = element_rect(fill = "#ffcc5c"),
+    panel.background = element_rect(fill = "#ffeead"),
+    panel.grid.major = element_line(color = "#ff6f69"),
+    panel.grid.minor = element_line(color = "#96ceb4")
+  ) +
+  transition_states(
+    transition_length = 1,
+    state_length = 0.001,
+    year
+  ) +
+  enter_grow() +
+  exit_shrink() +
+  view_follow()
+
+p <- animate(anim, device = "ragg_png")
+anim_save(here("img/ugly_plot.gif"), p)
+```
+
+![](../img/ugly_plot.gif)
