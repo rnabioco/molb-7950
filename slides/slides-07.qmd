@@ -1,0 +1,125 @@
+---
+title: "R Bootcamp - Day 7"
+subtitle: "odds & ends"
+author: "Jay Hesselberth"
+---
+
+```{r include=FALSE}
+library(tidyverse)
+library(here)
+```
+
+## Class 7 outline
+
+* Useful dplyr verbs (Exercises XXX)
+* Combining tables (Exercises XXX)
+
+## Combining tables by *variables* (i.e., columns)
+
+  - `bind_cols()`
+  - `left_join()`
+  - `right_join()`
+  - `inner_join()`
+  - `full_join()`
+ 
+## Combining tables by *cases* (i.e., rows)
+
+  - `bind_rows()`
+  - `intersect()`
+  - `setdiff()`
+  - `union()`
+
+## dplyr cheatsheet
+
+Look at "combine variables" and "combine cases" at the top.
+
+![](../img/dplyr/combining-tables.png){fig-align="center"}
+
+## mutating joins - visualized
+
+:::: {.columns}
+::: {.column width="50%"}
+![](../img/tidyexplain/left-join.gif)
+:::
+
+::: {.column width="50%"}
+![](../img/tidyexplain/right-join.gif)
+:::
+::::
+
+::: aside
+[tidyexplain](https://github.com/gadenbuie/tidyexplain) from @gadenbuie 
+:::
+
+## Joining tables by a variable - Exercise 1
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  left_join(band_instruments)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  right_join(band_instruments)
+```
+
+## filtering joins - visualized
+
+:::: {.columns}
+::: {.column width="50%"}
+![](../img/tidyexplain/inner-join.gif)
+:::
+
+::: {.column width="50%"}
+![](../img/tidyexplain/full-join.gif)
+:::
+::::
+
+::: aside
+[tidyexplain](https://github.com/gadenbuie/tidyexplain) from @gadenbuie 
+:::
+
+## Joining tables by a variable - Exercise 2
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  inner_join(band_instruments)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  full_join(band_instruments)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  full_join(
+    band_instruments2,
+    by = c("name" = "artist")
+  )
+```
+
+## Other dplyr verbs
+
+There are many other dplyr verbs.
+
+We've used `rename`, `count`, `add_row`, `add_column`,
+`distinct`, `sample_n`, `sample_frac`, `slice`, `pull`
+
+Check out the [dplyr cheatsheet]() to learn more! 
