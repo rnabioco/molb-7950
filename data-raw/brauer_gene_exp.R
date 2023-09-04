@@ -2,7 +2,6 @@ source("common.R")
 
 library(tidyverse)
 library(here)
-library(usethis)
 
 url <- "http://varianceexplained.org/files/Brauer2008_DataSet1.tds"
 
