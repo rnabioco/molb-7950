@@ -38,8 +38,8 @@ yeast_go_terms <-
     brauer_gene_exp_raw,
     systematic_name,
     common_name = name,
-    molecular_function = MF,
-    biological_process = BP
+    go_molecular_function = MF,
+    go_biological_process = BP
   ) |>
   distinct()
 
