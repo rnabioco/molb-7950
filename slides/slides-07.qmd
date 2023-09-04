@@ -1,0 +1,214 @@
+---
+title: "R Bootcamp - Day 7"
+subtitle: "odds & ends"
+author: "Jay Hesselberth"
+---
+
+```{r include=FALSE}
+library(tidyverse)
+library(here)
+```
+
+## Class 7 outline
+
+* Useful dplyr verbs (Exercises XXX)
+* Combining tables (Exercises XXX)
+
+# dplyr
+
+## Combining tables by *variables* (i.e., columns)
+
+  - `bind_cols()`
+  - `left_join()`
+  - `right_join()`
+  - `inner_join()`
+  - `full_join()`
+ 
+## Combining tables by *cases* (i.e., rows)
+
+  - `bind_rows()`
+  - `intersect()`
+  - `setdiff()`
+  - `union()`
+
+## dplyr cheatsheet
+
+Look at "combine variables" and "combine cases" at the top.
+
+![](../img/dplyr/combining-tables.png){fig-align="center"}
+
+## mutating joins - visualized
+
+:::: {.columns}
+::: {.column width="50%"}
+![](../img/tidyexplain/left-join.gif)
+:::
+
+::: {.column width="50%"}
+![](../img/tidyexplain/right-join.gif)
+:::
+::::
+
+::: aside
+[tidyexplain](https://github.com/gadenbuie/tidyexplain) from @gadenbuie 
+:::
+
+## Joining tables by a variable - Exercise 1
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  left_join(band_instruments)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  right_join(band_instruments)
+```
+
+## filtering joins - visualized
+
+:::: {.columns}
+::: {.column width="50%"}
+![](../img/tidyexplain/inner-join.gif)
+:::
+
+::: {.column width="50%"}
+![](../img/tidyexplain/full-join.gif)
+:::
+::::
+
+::: aside
+[tidyexplain](https://github.com/gadenbuie/tidyexplain) from @gadenbuie 
+:::
+
+## Joining tables by a variable - Exercise 2
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  inner_join(band_instruments)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  full_join(band_instruments)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  full_join(
+    band_instruments2,
+    by = c("name" = "artist")
+  )
+```
+
+## Other dplyr verbs
+
+There are many other dplyr verbs.
+
+We've used `rename`, `count`, `add_row`, `add_column`,
+`distinct`, `sample_n`, `sample_frac`, `slice`, `pull`
+
+Check out the [dplyr cheatsheet]() to learn more!
+
+# ggplot2
+
+## Set up a points plot
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+p <- ggplot(
+  diamonds_subset,
+  aes(
+    x = carat,
+    y = price,
+    color = cut
+  )
+) +
+  geom_point(alpha = 0.8) +
+  theme_cowplot()
+
+p + geom_line()
+```
+
+## How to combine multiple plots into a figure? (Exercise 17)
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# `plot_grid()` is from `cowplot`
+plot_grid(
+  p, p, p, p,
+  labels = c(
+    "A", "B",
+    "C", "D"
+  ),
+  nrow = 2
+)
+```
+
+---
+  
+We have 4 legends - can they be condensed?
+  
+Yes, but it is not exactly straightforward.
+
+**need to scroll below**
+
+```{r}
+#| echo: true
+#| output-location: slide
+# fetch the legend for `p1`
+legend <- get_legend(
+  p + theme(legend.position = "bottom")
+)
+
+p <- p + theme(legend.position = "none")
+
+# first `plot_grid` builds the panels
+panels <- plot_grid(
+  p, p, p, p,
+  labels = c(
+    "A", "B", "C", "D"
+  ),
+  nrow = 2
+)
+
+# second `plot_grid` adds the legend to the panels
+plot_grid(
+  panels,
+  legend,
+  ncol = 1,
+  rel_heights = c(1, .1)
+)
+```
+
+## Saving plots (Exercise 18)
+
+Saves last plot as 5' x 5' file named "plot_final.png" in working directory.
+
+Matches file type to file extension.
+
+```{r}
+#| echo: true
+#| eval: false
+# default is to save last plot in the buffer
+# can also specify with the `plot` argument
+ggsave(here("img/plot_final.png"), width = 5, height = 5)
+```
