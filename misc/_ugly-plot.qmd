@@ -21,10 +21,10 @@ anim <- penguins |>
   drop_na() |>
   mutate(
     emoji = case_when(
-      sex == 'female' ~ emo::ji("pizza"),
-      sex == 'male' ~ emo::ji("penguin") 
+      sex == "female" ~ emo::ji("pizza"),
+      sex == "male" ~ emo::ji("penguin")
     )
-  ) |> 
+  ) |>
   rowwise() |>
   mutate(angle = sample(0:360, size = 1)) |>
   ungroup() |>
@@ -33,15 +33,15 @@ anim <- penguins |>
       x = body_mass_g,
       y = flipper_length_mm
     )
-  ) + 
+  ) +
   geom_text(
     aes(
       label = emoji,
       angle = angle
     ),
     size = 13,
-    ) +
-  coord_trans(x = "log", y = "log") + 
+  ) +
+  coord_trans(x = "log", y = "log") +
   labs(
     title = paste0(
       "PENGUIN", emo::ji("penguin"),
@@ -53,7 +53,7 @@ anim <- penguins |>
     y = paste0(emo::ji("sun"), "temperature (K)", collapse = "  ")
   ) +
   theme(
-    legend.position = 'none',
+    legend.position = "none",
     axis.text = element_text(angle = 180),
     plot.title = element_text(hjust = 0.5, size = 30),
     axis.title = element_text(size = 30),
@@ -63,12 +63,12 @@ anim <- penguins |>
     panel.background = element_rect(fill = "#ffeead"),
     panel.grid.major = element_line(color = "#ff6f69"),
     panel.grid.minor = element_line(color = "#96ceb4")
-    ) +
+  ) +
   transition_states(
     transition_length = 1,
     state_length = 0.001,
     year
-    ) +
+  ) +
   enter_grow() +
   exit_shrink() +
   view_follow()

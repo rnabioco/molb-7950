@@ -34,7 +34,7 @@ library(tidyverse)
 library(here)
 
 exp_tbl <- read_csv(
-   here("problem-sets/data/data_rna_protein.csv.gz")
+  here("problem-sets/data/data_rna_protein.csv.gz")
 )
 ```
 
@@ -64,16 +64,16 @@ Using the imported data set, carry out the following:
 
 ```{r, q2}
 exp_tbl_subset <- exp_tbl |>
-   select(geneid, iDUX4_logFC, iDUX4_fdr, hl.ratio, pval) |>
-   rename(
-      rna_FC = iDUX4_logFC,
-      rna_pval = iDUX4_fdr,
-      protein_FC = hl.ratio,
-      protein_pval = pval
-      ) |>
-   drop_na() |>
-   distinct() |>
-   arrange(desc(rna_FC), protein_FC)
+  select(geneid, iDUX4_logFC, iDUX4_fdr, hl.ratio, pval) |>
+  rename(
+    rna_FC = iDUX4_logFC,
+    rna_pval = iDUX4_fdr,
+    protein_FC = hl.ratio,
+    protein_pval = pval
+  ) |>
+  drop_na() |>
+  distinct() |>
+  arrange(desc(rna_FC), protein_FC)
 ```
 
 ## Question 3  **5 points**
@@ -100,14 +100,14 @@ Using the output from the above question, do the following:
 
 ```{r, q4}
 ggplot(exp_tbl_subset, aes(rna_FC, protein_FC)) +
-   geom_point() +
-   geom_abline(linewidth = 1, color = 'green') +
-   geom_smooth(method = 'lm', se = FALSE, linewidth = 1)
+  geom_point() +
+  geom_abline(linewidth = 1, color = "green") +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1)
 
 rna_prot_cor <- cor(
-   exp_tbl_subset$rna_FC,
-   exp_tbl_subset$protein_FC,
-   method = 'spearman'
+  exp_tbl_subset$rna_FC,
+  exp_tbl_subset$protein_FC,
+  method = "spearman"
 )
 ```
 
