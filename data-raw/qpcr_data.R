@@ -1,5 +1,6 @@
 # get data for class 3
 library(tidyverse)
+library(here)
 
 sample <- c('wt', 'mut')
 gene <- c('IFN', 'ACTIN')
@@ -20,9 +21,10 @@ t48 <- filter(plus_rts, time == 48) %>% rowwise() %>% mutate(exp = sample(350:60
 plus_rts <- bind_rows(t0, t12, t24, t48)
 
 # add multiplier for genes
-ifns <- filter(plus_rts, gene == "IFN") %>% mutate(exp = exp * 1.5)
+ifns_wt <- filter(plus_rts, gene == "IFN" & sample == "wt") %>% mutate(exp = exp * 1.5)
+ifns_mut <- filter(plus_rts, gene == "IFN" & sample == "mut") %>% mutate(exp = exp * 02)
 actins <- filter(plus_rts, gene == "ACTIN") %>% mutate(exp = exp * 0.2)
-plus_rts <- bind_rows(ifns, actins)
+plus_rts <- bind_rows(ifns_wt, ifns_mut, actins)
 
 minus_rts <- filter(sample_data, rt == "-") %>% mutate(exp = 0)
 
@@ -44,3 +46,6 @@ qpcr_data <- sample_data %>%
   set_names(nm = 1:12) %>%
   mutate(row = toupper(letters[1:8])) %>%
   select(row, everything())
+
+write_tsv(qpcr_names, here("data/qpcr_names.tsv.gz"))
+write_tsv(qpcr_data, here("data/qpcr_data.tsv.gz"))
