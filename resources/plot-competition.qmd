@@ -1,0 +1,959 @@
+---
+title: Plot competition entries
+execute: 
+  message: false
+  warning: false
+format:
+  html:
+    code-fold: true
+---
+
+```{r}
+#| include: false
+library(tidyverse)
+library(here)
+```
+
+**Vote for your favorites at [Google Form](https://forms.gle/17YJ5EKjFtF8Byn38).**
+
+### Plot 1
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+tst=penguins
+# View(tst)
+tstpp=drop_na(tst)
+# View(tstpp)
+ggplot(data=tstpp,aes(x=body_mass_g/6350.29,                 y=flipper_length_mm))+geom_point(aes(shape=sex, color=species),alpha=0.4, shape= 8)+ labs(title=" Stones & Flippers in Penguins",x="Stones is a totally normal unit", y="aQuAtIc LoCoMoTiOn ApPeNdAgE (mm)")+theme(panel.background = element_rect(fill = "magenta"))+theme(panel.grid.major = element_line(linewidth = 5, color = "#ff1493"))+theme(panel.grid.minor = element_line(linewidth = 5, color = "#ffd700"))+theme(legend.background = element_rect(fill = "yellow"))+theme(legend.title = element_text(angle = 310, face = "bold", color = "#FFFACD", size = 56))+theme(axis.text.y = element_text(face = "bold", color = "#EEE685", size = 5, angle = 67))+theme(axis.text.x = element_text(face = "italic", color = "#8B8970", size = 5, angle = 67))+theme( legend.text = element_text(face="italic",color = "red", size = 36))+theme( legend.key = element_rect(color = "white", fill = "olivedrab1"))+theme(axis.title.y = element_text(color = "#ffd700", angle = 90, size = 9))+ theme(axis.title.x = element_text(size = 16, color = "magenta", angle = 0))+theme(plot.background = element_rect(fill = "red"))+theme(plot.title = element_text(face = "plain", color = "magenta", size = 24, angle = 0))
+```
+
+### Plot 2
+
+```{r}
+library(tidyverse)
+library(knitr)
+library(here)
+
+library(cowplot) # to make panels of plots
+library(ggridges) # ridge plots
+
+#HOW GOOD IS THE SIMPSON
+simpson_tibble <- read_csv(here("data/plot-competition/simpsons_episodes.csv.gz"))
+simpson_tibble_cleaned <- simpson_tibble |> select(-image_url, -video_url)
+
+simpson_tibble_cleaned_1.1 <- simpson_tibble_cleaned |> 
+  group_by(season, us_viewers_in_millions) |>
+  summarise(season, us_viewers_in_millions)
+
+simpson_plot_ugly <- ggplot(
+  simpson_tibble_cleaned,
+  aes(x = season,
+      y = us_viewers_in_millions,
+      color = imdb_rating,
+      size = imdb_votes
+      )
+  ) +
+  geom_point(alpha = 0.1) +
+  facet_wrap (
+    ~ imdb_rating,
+    nrow = 1
+  ) +
+   labs(
+    title = "istheSiMpSoNsSTILLPOPULAR!!!!!!!!!!!!",
+    subtitle = "D'OOOOOOOOOHHHHHHHHHHH?",
+    y = "THEPPLWHOWATCH",
+    x = "SIMIPSONS OVER THE YEARS",
+  ) +
+  theme(
+    plot.background = element_rect(fill = "limegreen"),
+    axis.text.x = element_text( color = "purple", size = 18, angle = 156), 
+    axis.text.y = element_text( color = "red", size = 18, angle = 135), 
+    plot.title = element_text( color = "green", size = 10, angle = 263), 
+    plot.caption = element_text(color = "gray", size = 22), 
+    axis.title.x = element_text(size = 22, color = "hotpink", angle = 66), 
+    axis.title.y = element_text(color = "maroon", angle = 473, size = 17),
+    legend.background = element_rect(fill = "yellow"), 
+    legend.title = element_text(angle = 71, face = "bold", color = "blue", size = 12), 
+    legend.key = element_rect(color = "green", fill = "lightblue"), 
+    legend.text = element_text(color = "cyan", size = 14)
+    ) 
+simpson_plot_ugly
+```
+
+### Plot 3
+
+```{r}
+library(tidyverse)
+
+ggplot(starwars,
+       aes(
+         x = height,
+         y = birth_year,
+         color = homeworld
+       )) +
+  geom_point() +
+  labs(
+    title = "starwars?"
+  ) +
+  theme(
+    plot.title = element_text(face = "italic", color = "yellow", size = 16, angle = -45),
+    plot.background = element_rect(fill = 'green'),
+    panel.background = element_rect(fill = 'tomato1'),
+    plot.caption = element_text(),
+    legend.position = "none",
+    axis.title = element_text(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank()) +
+  coord_polar()
+  
+```
+
+### Plot 4
+
+```{r}
+
+library(tidyverse)
+library(palmerpenguins)
+penguins_tbl = as_tibble(penguins)
+
+penguin2 <- drop_na(penguins_tbl)
+
+ggplot(
+  penguin2,
+  aes(
+    x = bill_length_mm,
+    y = flipper_length_mm,
+    color = species,
+    shape = sex
+  )
+) +
+  geom_point(alpha = .65, size = 10) +
+  xlim(30,61) +
+  ylim(150,250) +
+  labs(
+    x = "Choose ur fighter",
+    y = "How big that flipper?",
+    title = "What penguin wins in a fight?",
+    caption = "Fight club: antarctica edition"
+    ) + 
+  theme(
+    axis.text.x = element_text(family = "serif", face = "bold", color = "purple", size = 20, angle = 11),
+    axis.text.y = element_text(family = "luminari", face = "bold.italic", color = "yellow", size = 24, angle = 135),
+    plot.background = element_rect(fill = "#8c510a"),
+    plot.title = element_text(family = "luminari", face = "bold", color = "green", size = 20, angle = 1, line= -5 ), 
+    plot.caption = element_text(family = "short", face = "italic", color = "#35978f", size = 26, angle = 8), 
+    axis.title.x = element_text(family = "mono", size = 30, color = "blue", angle = 183), 
+    axis.title.y = element_text(color = "darkorange", angle = 275, size = 17),
+    legend.background = element_rect(fill = "#dfc27d"),
+     legend.title = element_text(family = "short", angle = 11, face = "bold", color = "hotpink", size = 9), 
+    legend.key = element_rect(color = "darkgreen", fill = "red"), 
+    legend.text = element_text(color = "yellow", size = 10, angle = 187, face = "italic"), 
+    panel.background = element_rect(fill = "brown"), 
+    panel.grid.major.x = element_line(linewidth = 5, color = "yellow"),
+      panel.grid.minor = element_line(linewidth = 3, color = "red"),
+    panel.grid.major.y = element_line(color = "green", linewidth = 4),
+    
+   
+  )
+```
+
+### Plot 5
+
+```{r}
+#| eval: false
+ggplot(
+  quakes,
+  aes(
+    x = lat,
+    y = long,
+    fill = mag,
+  )
+) +
+  geom_hex(fill = "orange2") +
+  geom_rug(sides = "trbl", alpha = 1/2, position = "jitter", fill = "sienna1") +
+  geom_violin(fill = "yellow2") +
+  scale_y_reverse() + 
+  scale_x_continuous() +
+  labs(
+    x = "the higher the latittude, the higher the altitude",
+    y = "totally longitudinal",
+    title = "DroP THaT a$$ Like an εαρτηQUAKE"
+  ) + 
+  theme(
+    axis.text.x = element_text(family = "Impact",face = "bold", color = "darkgoldenrod2", size = 15, angle = 183, debug = TRUE), 
+    axis.text.y = element_text(family = "Courier New", face = "bold", color = "darkgoldenrod3", size = 15, angle = 290, debug = TRUE), 
+    axis.title.x = element_text(family="Comic Sans MS", face = "bold", color = "blanchedalmond", size = 22, debug = TRUE),
+    axis.title.y = element_text(family="Comic Sans MS", face = "bold", color = "bisque1", size = 22, debug = TRUE),
+    panel.background = element_rect(fill = "burlywood1", color = "chocolate1", linewidth = 4), 
+    plot.background = element_rect(fill = "khaki1"),
+    panel.grid.major = element_line(linewidth = 1, color = "tan1"),
+    panel.grid.minor = element_line(linewidth = 4, color = "lightgoldenrod1"),
+    plot.title = element_text(face = "bold", color = "darkgoldenrod1", size = 20)
+  )
+```
+
+![](../data/plot-competition/plot-5.png){width=7in}
+
+### Plot 6
+
+```{r}
+#| eval: false
+library(ggpubr)
+library(jpeg)
+url <- "https://i.imgur.com/qtPINjN.jpg"
+download.file(url, destfile = here("data/plot-competition/trees.jpg"))
+img <- jpeg::readJPEG(here("data/plot-competition/trees.jpg"))
+
+ggplot(
+ data = trees,
+  mapping = aes(
+    x = Height,
+    y = Girth,
+    color = count(x),
+    size = 10
+  )
+) +
+  background_image(img) +
+  annotate("rect", 
+           xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf,
+           fill = "green", alpha = .8) +
+  geom_jitter(
+    aes(
+    fill = Volume,
+    size = Height
+  ), 
+  alpha = 0.9,
+  shape = 24,
+  color = "magenta"
+) +
+  theme(
+    plot.background = element_rect(fill = "magenta"),
+    axis.text.x = element_text(face = "bold", color = "orange", size = 12, angle = 200),
+    axis.text.y = element_text(face = "bold", color = "yellow", size = 18, angle = 179),
+    axis.title.x = element_text(size = 34, color = "grey", angle = 90), 
+    axis.title.y = element_text(color = "maroon", angle = 180, size = 17),
+  ) +
+  labs(
+    title = "nature \U1F600",
+    x = "tall",
+    y = "beefy"
+  ) +
+theme(legend.position = "none")
+```
+
+![](../data/plot-competition/plot-6.png){width=7in}
+
+### Plot 7
+
+```{r}
+library(tidyverse)
+library(here)
+library(knitr)
+library(palmerpenguins)
+library(cowplot)
+library(ggridges)
+library(datasets)
+
+chk_tbl <- as_tibble(ChickWeight)
+
+ggplot(
+  chk_tbl,
+  aes(
+    x = Time,
+    y = weight,
+    color = Diet,
+    size = weight
+  )
+) + 
+  geom_point(
+  ) + 
+  labs(
+    title = "how much chonk can a little chick chonk if a\nlittle chick could chomp chomp?",
+    subtitle = "cheep! cheep!                                       chomp!",
+    x = "time",
+    y = "chick chonk",
+    legend = "dr. chomp's\nexperimental diet programs",
+    Diet = "dr. chomp's\nexperimental diet programs"
+  ) +
+  xlim(
+    -3, 25
+  )  + 
+  theme(
+    axis.text.x = element_text(face = "bold.italic", color = "#FFE70F", size = 18, angle = 180),
+    axis.text.y = element_text(face = "bold", color = "#FFE70F", size = 25, angle = 290),
+    axis.title.x = element_text(face = "bold", color = "lightgoldenrod3", size = 26, angle = 358), 
+    axis.title.y = element_text(face = "bold", color = "lightgoldenrod3", size = 12, angle = 275),
+    plot.background = element_rect(fill = "#C4C254"),
+    plot.title = element_text(face = "bold", color = "gold2", size = 16, angle = 1),
+    legend.background = element_rect(fill = "yellow"),
+    legend.title = element_text(face = "bold", color = "palevioletred4", size = 10, angle = 156), 
+    legend.text = element_text(color = "lightgoldenrod3", size = 14),
+    panel.background = element_rect(fill = "khaki4"),
+    panel.grid.major.y = element_line(color = "rosybrown3"), 
+    panel.grid.major.x = element_line(color = "cadetblue4"),
+    panel.grid.minor = element_line(color = "khaki4")
+  ) +
+  scale_color_manual(
+    breaks = c("1", "2", "3", "4"),
+    values = c("thistle1", "darkslategray4", "lightcyan", "yellowgreen")
+  ) 
+```
+
+### Plot 8
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+library(cowplot)
+
+penguins <- drop_na(penguins)
+
+ggplot(penguins,
+       aes(x = log2(bill_depth_mm),
+           y = flipper_length_mm/log2(bill_length_mm),
+           shape = (species))) +
+    geom_point(aes(color = body_mass_g/333), size = 8) +
+    scale_color_gradient2(low = "magenta", mid = "yellow", high = "chartreuse4", midpoint = 14) +
+    facet_grid(~ year) +
+    theme_minimal_grid() +
+    labs(
+        title = "Fun penguin facts - by year (as inspired by a watermelon)",
+        x = "thick beak with log2?",
+        y = "long flipper/long bill? if long bill still long when log2",
+        caption = "Wut do u mean these data mean nothing to you?"
+    ) +
+#Ugly theme inspired by Yunus Ozekin
+      theme(
+    axis.text.x = element_text(face = "bold.italic", color = "#993333", size = 29, angle = 330), 
+    axis.text.y = element_text(face = "bold", color = "orange", size = 23, angle = 186), 
+    plot.background = element_rect(fill = "chartreuse4"), 
+    plot.title = element_text(face = "bold", color = "chartreuse", size = 65, angle = 1),
+    panel.background = element_rect(fill = "brown1"), 
+    panel.grid.major.y = element_line(color = "chartreuse1", linetype = "dotdash", linewidth = 1.2), 
+    panel.grid.major.x = element_line(color = "magenta3", linewidth = 3, linetype = "twodash"), 
+    axis.title.x = element_text(face = "italic", size = 37, color = "purple4", angle = 12), 
+    axis.title.y = element_text(face = "bold", color = "yellow3", angle = 273, size = 28),
+    plot.caption = element_text(size = 33, color = "brown3", angle = 4)
+)
+
+```
+
+### Plot 9
+
+```{r}
+#| eval: false
+library(tidyverse)
+library(ggplot2)
+
+lyrics <- c("I was tired of my lady wed been together too long Like a worn-out recording of a favorite song So while she lay there sleepin I read the paper in bed And in the personal columns there was this letter I read If you like Pina Coladas and getting caught in the rain If youre not into yoga if you have half a brain If you like making love at midnight in the dunes on the cape Then Im the love that youve looked for write to me and escape")
+
+# Process lyrics into vector
+lyrics <- lyrics %>%
+  tolower() %>%
+  str_split(pattern = " ") %>%
+  unlist() %>%
+  unique()
+
+# Create tibble
+colada_tbl <- tibble(song_lyrics_1 = lyrics)
+
+# Add values for similarity of each given word in the song to each other given word
+for (num_x in 1:length(lyrics)){
+  new_vector <- c()
+  for (num_y in 1:length(lyrics)){
+    characters_1 <- str_split(lyrics[num_x], "")[[1]]
+    characters_2 <- str_split(lyrics[num_y], "")[[1]]
+    similarity <- sum(characters_1 %in% characters_2)/((length(characters_1)+length(characters_2))/2)
+    new_vector <- c(new_vector,similarity)}
+  colada_tbl[lyrics[num_x]] <- new_vector
+}
+
+# Function to add an beach scene
+ocean <- function(tbl,disp_word){
+  disp_word <- unlist(str_split(disp_word,pattern = ""))
+    for (i in 1:length(disp_word)){
+      sea <- sample(30:35,1)
+      foam <- sample(2:6,1)
+      sand <- 64 - sea - foam
+      tbl <- tbl %>%
+      rbind(c(disp_word[i],rep(1, sea), rep(0.2, foam), rep(-1, sand)))
+    }
+  return(tbl)
+}
+
+# Add in a beach scene with some random row names
+colada_tbl <- ocean(colada_tbl,'QWERTYUOPASDFGHJKLZXCVBNM1234567890')
+
+# Make into long tbl
+colada_long <- pivot_longer(colada_tbl, cols = lyrics,names_to = "song_lyrics_2", values_to = "Similarity")
+
+# Order tibble correctly for visualization
+colada_long$song_lyrics_1 <- factor(colada_long$song_lyrics_1, 
+                                   levels = c(rev(unlist(str_split('QWERTYUOPASDFGHJKLZXCVBNM1234567890',pattern=""))),rev(lyrics)))
+  
+colada_long$song_lyrics_2 <- factor(colada_long$song_lyrics_2, 
+                                   levels = lyrics)
+
+# Make similarity values numeric
+colada_long$Similarity <- as.numeric(colada_long$Similarity)
+
+# Plot the Piña Colada Art
+ggplot(colada_long, aes(x = song_lyrics_2, y = song_lyrics_1)) +
+  geom_tile(aes(fill = Similarity)) + # Fill based on word similarity values
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, # Font, color, size, and orientation of axis labels
+                                   color = 'darkgrey',family = "Comic Sans MS"),
+        axis.text.y = element_text(angle = 0, hjust = 1, 
+                                   color = 'darkgrey',family = "Comic Sans MS")) +
+  scale_fill_gradient2(low = "#F0E68C", high = "skyblue", mid = "white", midpoint = 0.2) + # Add scale of heatmap
+  geom_boxplot(aes(x = song_lyrics_2, y = Similarity*8-8, color = song_lyrics_2)) + # Add rainbow boxplots
+  scale_color_discrete() +
+  theme(legend.position = "none") + # Remove legend
+  theme(text = element_text(size = 6)) +
+  labs(title = "DUNES ON THE CAPE", # Add title and axis labels
+       x= 'Getting Caught in the Rain', 
+       y = 'Piña Coladas') +
+  theme(plot.title = element_text(size = 25,family = "Times New Roman",color='lavender', 
+                                  face = 'bold', hjust = 0.5),
+        axis.title.x = element_text(size = 15,family = "Comic Sans MS",color='salmon'),
+        axis.title.y = element_text(size = 15,family = "Comic Sans MS",color='pink')) + # Add in "Margaritaville" text
+            geom_text(aes(x = 'like', y = 'like', label = 'Piña Colada'),size = 3, 
+                      color = 'skyblue') +
+            geom_text(aes(x = 'while', y = 'while', label = 'Piña Colada'),size = 5, 
+                      color = 'skyblue') +
+            geom_text(aes(x = 'columns', y = 'columns', label = 'Piña Colada'),size = 8, 
+                      color = 'skyblue') +
+            geom_text(aes(x = 'midnight', y = 'midnight', label = 'Piña Colada'),size = 10, 
+                      color = 'skyblue')
+```
+
+![](../data/plot-competition/plot-9.png){width=7in}
+
+### Plot 10
+
+```{r}
+#| eval: false
+library(tidyverse)
+library(gganimate)
+library(gifski)
+library(cowplot)
+
+#Plot stacked columns with lengths as percent of world population per year
+# Pipe that assigns output as df and starts with the world population dataset
+df <- population |>
+        mutate(percent_population=(population/max(population)*100)) |>
+          filter(percent_population>5) |>
+            arrange(population)
+p <-  ggplot(data=df) +       
+      geom_col(aes(country, percent_population)) +
+      labs(title = 'Percent of World Population of Countries in {frame_time}', x='', y='') +
+      theme_cowplot() +
+      transition_time(as.integer(year)) +
+      ease_aes('linear') 
+# Animate graphs and save animation
+suppressWarnings(animate(p, renderer=gifski_renderer(), file_renderer="data/out/animation"))
+anim_save("data/out/animation/gg_anim_wc.gif")
+```
+
+![](../data/plot-competition/plot-10.gif){width=7in}
+
+### Plot 11
+
+```{r}
+#| eval: false
+library(tidyverse)
+library(gapminder)
+
+ggplot(
+  gapminder,
+  aes(
+    x = lifeExp,
+    y = gdpPercap,
+    color = year,
+    shape = continent,
+    size = pop
+  )
+) +
+
+  geom_jitter(
+    color = "#edfd07", 
+    fill = "white", 
+    size = 10,
+    alpha = 0.2
+  ) +
+  scale_x_log10() +
+  scale_y_sqrt() +
+  labs(
+    x = "When die?",
+    y = "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",
+    title = "money made x age",
+    ) + 
+  scale_x_discrete(position = "top") + 
+  theme(
+    axis.text.x = element_text(face = "bold.italic", color = "purple", size = 18, angle = 180), 
+    axis.text.y = element_text(face = "italic", color = "white", size = 12, angle = 90), 
+    plot.title = element_text(face = "bold.italic", color = "#6ef710", size = 15, angle = 90), 
+    axis.title.x = element_text(size = 10, color = "pink", angle = 270), 
+    axis.title.y = element_text(color = "white", angle = 120, size = 20),
+    plot.background = element_rect(fill = "#10f7ed"), 
+    legend.background = element_rect(fill = "#6ef710"), 
+    legend.title = element_text(angle = 95, face = "italic", color = "#edfd07", size = 7), 
+    legend.key = element_rect(color = "magenta", fill = "#10f7ed"), 
+    legend.text = element_text(color = "#10f7ed", size = 8), 
+    panel.background = element_rect(fill = "magenta"), 
+    legend.position = "right",
+    panel.grid = element_blank()
+  )
+
+```
+
+![](../data/plot-competition/plot-11.png){width=7in}
+
+### Plot 12
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+data("starwars")
+starwars_data <- starwars %>%
+  select(name, height, mass, species)
+
+dat <- data.frame(
+  x0 = rep(0, nrow(starwars_data)),
+  y0 = rep(0, nrow(starwars_data)),
+  x1 = runif(nrow(starwars_data)),
+  y1 = runif(nrow(starwars_data)),
+  shade = seq(1, nrow(starwars_data)),
+  size = 0.6
+)
+
+ggplot(dat, aes(x = x0, y = y0, xend = x1, yend = y1, colour = shade, size = size)) +
+  geom_segment(show.legend = FALSE) +
+  coord_polar() +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_color_gradient(low = "blue", high = "white") + 
+  scale_size(range = c(2, 10)) + 
+  theme_void() +
+  theme(plot.background = element_rect(fill = "black"))
+```
+
+### Plot 13
+
+```{r}
+library(readr)
+library(tidyverse)
+library(ggplot2)
+bfro_reports_geocoded <- read_csv(here("data/plot-competition/bfro_reports_geocoded.csv.gz"))
+
+cobigfoot = filter(
+  bfro_reports_geocoded,
+  state == "Colorado"
+)
+
+ggplot(
+  cobigfoot,
+  aes(
+    x = conditions,
+    y = temperature_high
+  )
+) +
+  geom_point(
+    aes(
+      color = season,
+      size = wind_speed
+    ),
+    shape = 8,
+  ) +
+  coord_polar() +
+  labs(
+    x = "Hows that sky?",
+    y = "Hot or Not: Temperature",
+    title = "Will YOU see Bigf00t?",
+    subtitle = "Colorado edition",
+    caption = "ItS BiGf00t SeAsON"
+  ) +
+  scale_x_discrete(position = "top") +
+  theme(axis.title.x = element_text(family = "mono", color = "lightblue", face = "bold", size = 15)) +
+   theme(axis.title.y = element_text(family = "sans", color = "blue", face = "bold", size = 13)) +
+   theme(plot.caption = element_text(color = "purple", size = 22, angle = 20, family = "mono")) +
+   theme(plot.title = element_text(family = "mono",color = "red", hjust = 0.5, line = -10, size = 30))  +
+  theme(plot.subtitle = element_text(family = "serif",hjust = 0.75, angle = 5, line = -2, color = "pink", size = 25)) +
+  theme(plot.background = element_rect(fill = "darkblue")) +
+  theme(panel.background = element_rect(fill = "yellow")) +
+  theme(panel.grid.major = element_blank()) +
+  theme(legend.title = element_text(face = "bold", color = "purple", size = 5)) +
+  theme(legend.text = element_text(color = "magenta", size = 5)) +
+  theme(axis.text.x = element_text(family = "mono", color = "lightblue", face = "bold")) +
+theme(axis.text.y = element_text(family = "serif", color = "white", face = "bold", size = 10)) + 
+  geom_jitter(
+    color = "green",
+    shape = 12
+  )
+```
+
+### Plot 14
+
+```{r}
+library(tidyverse)
+ggplot(data = Orange,
+       mapping = aes(
+         x = age,
+         y =  circumference,
+         color = Tree,
+       )
+) +
+  geom_point() +
+  theme(panel.background = element_rect(fill = "green")) +
+  labs(
+    x = "age",
+    y = "CIRCUMFERENCE",
+    title = "orange trees",
+    ) +
+  theme(legend.position = "bottom") +
+  theme(plot.background = element_rect(fill = "red"))
+```
+
+### Plot 15
+
+```{r}
+#| eval: false
+library(tidyverse)
+library(DAAG)
+
+greatLakes <- as_tibble(greatLakes) %>%
+  mutate(Michigan = michHuron, year = 1918:2009) %>%
+  #, puddle_in_my_backyard = Ontario
+  #mutate(puddle_in_my_backyard = 0) %>%
+  select(year, Huron = michHuron, everything()) %>%
+  pivot_longer(cols = 2:6, names_to = "lake", values_to = "heights")
+greatLakes$heights[552] = 2
+
+ggplot(data = greatLakes, aes(x = year, y = heights^3, color = lake)) + 
+  geom_point() + geom_line(alpha = 0.9, linewidth = 4) +
+  geom_vline(aes(xintercept = 1965), color = "white") +
+  geom_text(aes(label = "lake level", angle = 100), size = 2) +
+  theme(plot.background = element_rect(fill = "mediumspringgreen"),
+        plot.title = element_text(color = "greenyellow", size = 17, angle = 1), 
+        plot.caption = element_text(color = "white", size = 22),#not in use
+        axis.title.x = element_text(size = 12, color = "pink", angle = 1), 
+        axis.title.y = element_text(color = "pink", size = 12, angle = 92), 
+        axis.ticks = element_line(color = "pink", linewidth = 13),
+        axis.text = element_text(color = "green2", face = "bold"),
+        legend.background = element_rect(fill = "black"), 
+        legend.title = element_text(color = "mediumorchid4", size = 10, angle = 359), 
+        legend.key = element_rect(color = "orange", fill = "yellow"), 
+        legend.text = element_text(color = "red", size = 6, face = "bold"), 
+        panel.background = element_rect(fill = "red"), 
+        panel.grid.major.y = element_line(color = "yellow", linewidth = 10, linetype = "dashed"), 
+        panel.grid.major.x = element_line(color = "yellow", linewidth = 0.1), 
+        panel.grid.minor = element_line(color = "green", linewidth = 0.2)
+        #legend.position = "bottom"
+) +
+  labs(x = "year", y = "heights (cubed)",
+       title = "gr8 lakes") +
+  annotate(x = 1975, y = 3000000, label = "1975: Edmund Fitzgerald sinks", size = 2.5,  vjust = 3.5, geom="label")
+```
+
+![](../data/plot-competition/plot-15.png){width=7in}
+
+### Plot 16
+
+```{r}
+#| eval: false
+library(tidyverse)
+library(cowplot)
+library(RColorBrewer)
+library(Rtsne)
+
+setup_coords <- function(groups = 3, n = 100, sd = .05) {
+  tibble(
+    x = rep(1:groups, each = n) + rnorm(groups*n, sd = sd),
+    y = rep(seq(from = 0, to = 10, length.out = n), groups) + 
+          rnorm(groups*n, sd = sd),
+    group = rep(letters[1:groups], each = n)
+  )
+}
+
+do_tsne <- function(coords, perplexity = 5) {
+  tsne_fit <- coords %>%
+    select(x, y) %>%
+    scale() %>%
+    Rtsne(perplexity = perplexity, max_iter = 500, check_duplicates = FALSE)
+  
+    tsne_fit$Y %>%
+      as.data.frame() %>%
+      cbind(select(coords, -x, -y))
+}
+
+final_plot <- function(groups = 24, n = 800, sd = 4, perplexity = 100) {
+  setup_coords(groups = groups, n = n, sd = sd) %>%
+    do_tsne(perplexity) %>%
+    ggplot(aes(V1, V2, color = group)) + 
+    geom_point(show.legend = FALSE) +
+    coord_fixed() + theme_void() + 
+    ggtitle("It is a flower")+
+    scale_color_brewer(palette='PiYG', type="seq")+
+    theme(
+      plot.margin = margin(20, 20, 20, 20),
+      panel.border = element_rect(color = "white", fill = NA),
+      plot.title = element_text(family = "serif", hjust = 0.5, face = "italic")
+      )
+}
+
+final_plot(groups = 15, sd = 40)
+```
+
+![](../data/plot-competition/plot-16.png){width=7in}
+
+### Plot 17
+
+```{r}
+library(tidyverse)
+library(knitr)
+library(here)
+library(ggridges)
+library(viridis)
+
+ggplot(
+  diamonds,
+  aes(
+    x = carat,
+    y = log10(depth) + sin(carat)
+  )
+) + 
+  stat_density2d(
+    aes(fill = after_stat(density)), 
+    geom = 'tile', 
+    contour = F,
+    size = 0.22,
+    bins = 20,
+    linetype = 5,
+    show.legend = FALSE
+  ) +
+  scale_fill_viridis()+
+  geom_density2d(
+    aes(fill = ..level..), 
+    geom = "polygon", 
+    colour= "white",
+   linewidth = 0.25, 
+   bins = 10
+  ) +
+  theme_void()+
+  xlim(0,2.5)+
+  ylim(1.9,2.9)
+```
+
+### Plot 18
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(RColorBrewer)
+
+custom_colors<-c("tan4","olivedrab4","orange3")
+
+ggplot(
+  data=iris,
+  mapping=aes(
+    x=Petal.Width,
+    y=Petal.Length,
+    fill=Species
+  )
+)+
+  geom_boxplot()+
+  labs(
+    x="Error",
+    y="errors per error",
+    color="error",
+    title = "Teefs",
+    subtitle="ERROR codes COLLECTED infinity gauntlet style I am Thanos but better (or WORSE?????)",
+  )+
+  theme_cowplot()+
+  scale_fill_manual(values=custom_colors)+
+  theme(
+    axis.text.x=element_text(color="pink4",size = 18),
+    axis.text.y=element_text(color="purple4",size=9),
+    panel.background = element_rect(fill="magenta")
+  )
+```
+
+### Plot 19
+
+```{r}
+#| eval: false
+library(tidyverse)
+library(knitr)
+library(here)
+library(ggplot2)
+library(tidyquant)
+library(cowplot)
+library(dplyr)
+
+options("getSymbols.warning4.0"=FALSE)
+options("getSymbols.yahoo.warning"=FALSE)
+
+tickers = c("BBBYQ", "GME")
+
+prices <- tq_get(tickers,
+                 from = "2017-01-01",
+                 to = "2017-12-31",
+                 get = "stock.prices")
+
+meme_stocks <- prices %>%
+  group_by(symbol)
+
+p2 <- meme_stocks %>%
+  ggplot(aes(x = date, y = adjusted, color = symbol)) +
+  geom_line(linewidth = 2) +
+  geom_point(shape=23, fill="blue", color="yellow", size=3) +
+  geom_smooth() +
+  geom_polygon() +
+  facet_grid(symbol ~ ., scales = "free_y") +
+  theme_cowplot(font_size = 20) +
+  labs(x = 'Date',
+       y = "Adjusted Price",
+       title = "Before the Meme Stocks Era: Gamestop (GME) and Bed, Bath & Beyond (BBBYQ)",
+       caption = "Data Source from CodingFinance") +
+  scale_x_date(date_breaks = "month",
+               date_labels = "%b\n%y") +
+  theme(axis.text.x = element_text(face = "bold", color = "#993333", 
+                           size = 12, angle = 45), plot.caption = element_text(color = "red", face = "italic", size = 15)) +
+  xlab("\nDate") + ylab("Adjusted Price\n")
+   #+
+  #geom_density(alpha = 0.5) #+
+  #transition_reveal(date, keep_last = TRUE) +
+  #view_follow(fixed_y=T)
+
+x <- ggdraw() +
+  draw_image("https://i.kym-cdn.com/entries/icons/facebook/000/033/559/cover1.jpg") +
+  draw_plot(p2) +
+  theme(rect = element_rect(fill = "transparent"))
+x
+```
+
+![](../data/plot-competition/plot-19.png){width=7in}
+
+### Plot 20
+
+```{r}
+storms1 <- drop_na(storms)
+storms2 <- sample_n(storms1,100)
+
+storms3 <- ggplot(
+  storms2, 
+  aes(
+    x = pressure,
+    y = wind,
+)
+) +
+  geom_point(
+    aes(
+       fill = pressure,
+      size = category
+      ),
+    alpha = 0.8,
+    shape = 25,
+    color = "green"
+  ) + coord_flip()+
+  theme_cowplot()+
+  labs(y ="Wind speed",
+       x =" # Waffle Homes open",
+       title = "Is wafflehouse open?")+
+  geom_jitter(
+    color = "pink",
+    shape = 17
+  )+ 
+  theme(plot.background = element_rect(fill = "magenta")) +
+  theme(plot.title = element_text(color = "orange"))
+
+storms3 + geom_line()
+
+```
+
+### Plot 21
+
+```{r}
+#| eval: false
+library(tidyverse)
+library(palmerpenguins)
+library(cowplot)
+
+penguins_clean <- drop_na(penguins)
+
+penguin_subset1 <- penguins_clean |>
+  sample_n(size = 40)
+
+penguin_subset2 <- penguins_clean |>
+  sample_n(size = 40)
+
+penguin_subset3 <- penguins_clean |>
+  sample_n(size = 40)
+
+penguin_subset4 <- penguins_clean |>
+  sample_n(size = 40)
+
+ggplot(
+  penguins_clean,
+  aes(
+    x = body_mass_g,
+    y = species
+  )
+) +
+  geom_jitter(alpha=0.2)+
+  geom_jitter(
+    data = penguin_subset1,
+    color = "black",
+    aes(
+      show.legend = "confused by the concept of weight"
+    )
+  )+
+  geom_jitter(
+    data = penguin_subset2,
+    color = "red"
+  )+
+  geom_jitter(
+    data = penguin_subset3,
+    color = "green"
+  )+
+  geom_jitter(
+    data = penguin_subset4,
+    color = "blue"
+  )+
+    labs(
+      x = "Fatness",
+      y = "",
+      title = "Name the Fattest Penguin",
+      caption = "be nice."
+    ) +
+  theme_bw()+
+  theme(
+    plot.caption = element_text(face = "bold", color = "black", size = 25),
+    plot.background = element_rect(fill = "white"),
+    legend.position = "right",
+    legend
+  )
+```
+
+![](../data/plot-competition/plot-21.png){width=7in}
+
+### Plot 22
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+library(cowplot)
+
+penguins_clean <- drop_na(penguins)
+
+ggplot(
+  penguins_clean,
+  aes(
+    x = body_mass_g / 1000,
+    y = bill_length_mm)
+  )  +
+  geom_point(alpha = 1, shape = 21, colour = "pink", fill = "orange", size = 5, stroke = 5)
+```
+
