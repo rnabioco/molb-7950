@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.3.450">
 
   <meta name="author" content="Jay Hesselberth">
-  <meta name="dcterms.date" content="2023-09-04">
+  <meta name="dcterms.date" content="2023-09-05">
   <title>MOLB 7950 - R Bootcamp - Day 7</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -388,10 +388,10 @@
     }
   </style>
 <meta property="og:title" content="MOLB 7950 - R Bootcamp - Day 7">
-<meta property="og:description" content="odds &amp; ends">
+<meta property="og:description" content="tidyverse odds &amp; ends">
 <meta property="og:site-name" content="MOLB 7950">
 <meta name="twitter:title" content="MOLB 7950 - R Bootcamp - Day 7">
-<meta name="twitter:description" content="odds &amp; ends">
+<meta name="twitter:description" content="tidyverse odds &amp; ends">
 <meta name="twitter:image" content="https://rnabioco.github.io/molb-7950/slides/images/twitter-card.png">
 <meta name="twitter:creator" content="@rnabioco">
 <meta name="twitter:card" content="summary_large_image">
@@ -402,7 +402,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">R Bootcamp - Day 7</h1>
-  <p class="subtitle">odds &amp; ends</p>
+  <p class="subtitle">tidyverse odds &amp; ends</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -415,15 +415,344 @@ Jay Hesselberth
     </div>
 </div>
 
-  <p class="date">2023-09-04</p>
+  <p class="date">2023-09-05</p>
 </section>
 <section id="class-7-outline" class="slide level2">
 <h2>Class 7 outline</h2>
 <ul>
-<li class="fragment">Useful dplyr verbs (Exercises XXX)</li>
-<li class="fragment">Combining tables (Exercises XXX)</li>
+<li class="fragment">Accessing data in vectors (Exercise)</li>
+<li class="fragment">other tidyverse packages (stringr &amp; forcats)</li>
+<li class="fragment">dplyr table joins (Exercise)</li>
+<li class="fragment">ggplot2 scale functions</li>
+<li class="fragment">ggplot2 multi-panel figures (Exercise)</li>
+<li class="fragment">ggplot2 saving figures</li>
 </ul>
 </section>
+<section>
+<section id="accessing-data-in-vectors" class="title-slide slide level1 center">
+<h1>Accessing data in vectors</h1>
+
+</section>
+<section id="using-and" class="slide level2 smaller">
+<h2>Using <code>[</code>, <code>[[</code>, and <code>$</code></h2>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># `hp` vector from mtcars</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>mtcars<span class="sc">$</span>hp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 110 110  93 110 175 105 245  62  95 123 123 180 180 180 205 215 230  66  52
+[20]  65  97 150 150 245 175  66  91 113 264 175 335 109</code></pre>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="co"># columns by name</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a>mtcars[<span class="fu">c</span>(<span class="st">"hp"</span>, <span class="st">"mpg"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code>                     hp  mpg
+Mazda RX4           110 21.0
+Mazda RX4 Wag       110 21.0
+Datsun 710           93 22.8
+Hornet 4 Drive      110 21.4
+Hornet Sportabout   175 18.7
+Valiant             105 18.1
+Duster 360          245 14.3
+Merc 240D            62 24.4
+Merc 230             95 22.8
+Merc 280            123 19.2
+Merc 280C           123 17.8
+Merc 450SE          180 16.4
+Merc 450SL          180 17.3
+Merc 450SLC         180 15.2
+Cadillac Fleetwood  205 10.4
+Lincoln Continental 215 10.4
+Chrysler Imperial   230 14.7
+Fiat 128             66 32.4
+Honda Civic          52 30.4
+Toyota Corolla       65 33.9
+Toyota Corona        97 21.5
+Dodge Challenger    150 15.5
+AMC Javelin         150 15.2
+Camaro Z28          245 13.3
+Pontiac Firebird    175 19.2
+Fiat X1-9            66 27.3
+Porsche 914-2        91 26.0
+Lotus Europa        113 30.4
+Ford Pantera L      264 15.8
+Ferrari Dino        175 19.7
+Maserati Bora       335 15.0
+Volvo 142E          109 21.4</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># first 10 items in hp</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>hp <span class="ot">&lt;-</span> mtcars<span class="sc">$</span>hp</span>
+<span id="cb5-3"><a href="#cb5-3"></a>hp[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 110 110  93 110 175 105 245  62  95 123</code></pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># 2 ways to get the 10th value </span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>hp[<span class="dv">10</span>]</span>
+<span id="cb7-3"><a href="#cb7-3"></a>hp[[<span class="dv">10</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+
+</div>
+</div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># this is an error</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>hp[[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-error">
+<pre><code>Error in hp[[1:10]]: attempt to select more than one element in vectorIndex</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment">
+<p><code>[</code> can return a range, <code>[[</code> returns a single value.</p>
+</div>
+</section>
+<section id="vector-selection-with-logic" class="slide level2 smaller">
+<h2>vector selection with logic</h2>
+<p>one-step filtering.</p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>hp[hp <span class="sc">&gt;</span> <span class="dv">100</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 110 110 110 175 105 245 123 123 180 180 180 205 215 230 150 150 245 175 113
+[20] 264 175 335 109</code></pre>
+</div>
+</div>
+</div>
+<div class="fragment">
+<p>two-step filtering. same result.</p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># get a vector of T/F values</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a>x <span class="ot">&lt;-</span> hp <span class="sc">&gt;</span> <span class="dv">100</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a>x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
+[13]  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE
+[25]  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE</code></pre>
+</div>
+</div>
+</div>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="co"># use that vector to index the original</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a>hp[x]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 110 110 110 175 105 245 123 123 180 180 180 205 215 230 150 150 245 175 113
+[20] 264 175 335 109</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment">
+<p>also can use with <code>is.na()</code> to identify / exclude <code>NA</code> values in a vector.</p>
+</div>
+</section>
+<section class="slide level2">
+
+<p>Use <code>sum()</code> to figure out how many are <code>TRUE</code>.</p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>x <span class="ot">&lt;-</span> hp <span class="sc">&gt;</span> <span class="dv">100</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="co"># how many are TRUE?</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="fu">sum</span>(x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 23</code></pre>
+</div>
+</div>
+</div>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="fu">length</span>(hp[x])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 23</code></pre>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="other-tidyverse-libraries" class="title-slide slide level1 center">
+<h1>other tidyverse libraries</h1>
+
+</section>
+<section id="string-operations-with-stringr" class="slide level2 smaller">
+<h2>string operations with stringr</h2>
+<p>stringr provides several useful functions for operating on strings.</p>
+<p>See the <a href="https://github.com/rstudio/cheatsheets/blob/main/strings.pdf">stringr cheatsheet</a></p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="fu">str_c</span>(<span class="st">"letter: "</span>, letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "letter: a" "letter: b" "letter: c" "letter: d" "letter: e"</code></pre>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a><span class="fu">str_detect</span>(<span class="st">"A"</span>, LETTERS[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  TRUE FALSE FALSE FALSE FALSE</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="fu">str_pad</span>(</span>
+<span id="cb24-2"><a href="#cb24-2"></a>  <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,</span>
+<span id="cb24-3"><a href="#cb24-3"></a>  <span class="at">width =</span> <span class="dv">2</span>,</span>
+<span id="cb24-4"><a href="#cb24-4"></a>  <span class="at">side =</span> <span class="st">"left"</span>,</span>
+<span id="cb24-5"><a href="#cb24-5"></a>  <span class="at">pad =</span> <span class="dv">0</span></span>
+<span id="cb24-6"><a href="#cb24-6"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "01" "02" "03" "04" "05" "06" "07" "08" "09" "10"</code></pre>
+</div>
+</div>
+</div>
+
+</div>
+<aside><div>
+<p><code>str_c()</code> is similar to <code>paste</code> and <code>paste0</code> but the behavior is more consistent.</p>
+</div></aside></section>
+<section id="forcats-operations-for-factors" class="slide level2 smaller">
+<h2>forcats operations for factors</h2>
+<p>forcats provides several utilities for working with factors.</p>
+<p>See the <a href="https://github.com/rstudio/cheatsheets/blob/main/factors.pdf">forcats cheatsheet</a></p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a><span class="fu">library</span>(palmerpenguins)</span>
+<span id="cb26-2"><a href="#cb26-2"></a>penguins[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 344 x 3
+   species island    bill_length_mm
+   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;
+ 1 Adelie  Torgersen           39.1
+ 2 Adelie  Torgersen           39.5
+ 3 Adelie  Torgersen           40.3
+ 4 Adelie  Torgersen           NA  
+ 5 Adelie  Torgersen           36.7
+ 6 Adelie  Torgersen           39.3
+ 7 Adelie  Torgersen           38.9
+ 8 Adelie  Torgersen           39.2
+ 9 Adelie  Torgersen           34.1
+10 Adelie  Torgersen           42  
+# i 334 more rows</code></pre>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a><span class="fu">fct_count</span>(penguins<span class="sc">$</span>species)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 x 2
+  f             n
+  &lt;fct&gt;     &lt;int&gt;
+1 Adelie      152
+2 Chinstrap    68
+3 Gentoo      124</code></pre>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a><span class="fu">fct_lump_min</span>(</span>
+<span id="cb30-2"><a href="#cb30-2"></a>  penguins<span class="sc">$</span>species,</span>
+<span id="cb30-3"><a href="#cb30-3"></a>  <span class="at">min =</span> <span class="dv">150</span></span>
+<span id="cb30-4"><a href="#cb30-4"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb30-5"><a href="#cb30-5"></a>  <span class="fu">fct_count</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 x 2
+  f          n
+  &lt;fct&gt;  &lt;int&gt;
+1 Adelie   152
+2 Other    192</code></pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="use-forcats-to-reorder-aspects-of-plots" class="slide level2 smaller">
+<h2>Use forcats to reorder aspects of plots</h2>
+<p>See the <a href="https://ggplot2.tidyverse.org/articles/faq-reordering.html">FAQ on rordering in ggplot2</a></p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb32-2"><a href="#cb32-2"></a>  mpg,</span>
+<span id="cb32-3"><a href="#cb32-3"></a>  <span class="fu">aes</span>(</span>
+<span id="cb32-4"><a href="#cb32-4"></a>    <span class="at">x =</span> class,</span>
+<span id="cb32-5"><a href="#cb32-5"></a>    <span class="at">y =</span> hwy</span>
+<span id="cb32-6"><a href="#cb32-6"></a>  )</span>
+<span id="cb32-7"><a href="#cb32-7"></a>) <span class="sc">+</span> <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output-display">
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-18-1.png" class="margin-caption" width="960"></p>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb33-2"><a href="#cb33-2"></a>  mpg,</span>
+<span id="cb33-3"><a href="#cb33-3"></a>  <span class="fu">aes</span>(</span>
+<span id="cb33-4"><a href="#cb33-4"></a>    <span class="at">x =</span> <span class="fu">fct_reorder</span>(</span>
+<span id="cb33-5"><a href="#cb33-5"></a>      class,</span>
+<span id="cb33-6"><a href="#cb33-6"></a>      hwy,</span>
+<span id="cb33-7"><a href="#cb33-7"></a>      <span class="at">.fun =</span> median</span>
+<span id="cb33-8"><a href="#cb33-8"></a>    ),</span>
+<span id="cb33-9"><a href="#cb33-9"></a>    <span class="at">y =</span> hwy </span>
+<span id="cb33-10"><a href="#cb33-10"></a>  )</span>
+<span id="cb33-11"><a href="#cb33-11"></a>) <span class="sc">+</span> <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output-display">
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-19-1.png" class="margin-caption" width="960"></p>
+</div>
+</div>
+</div>
+</div>
+</section></section>
 <section>
 <section id="dplyr" class="title-slide slide level1 center">
 <h1>dplyr</h1>
@@ -453,6 +782,37 @@ Jay Hesselberth
 <p>Look at “combine variables” and “combine cases” at the top.</p>
 
 <img data-src="../img/dplyr/combining-tables.png" class="margin-caption r-stretch quarto-figure-center"></section>
+<section id="tables-for-joining" class="slide level2">
+<h2>tables for joining</h2>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>band_members</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 x 2
+  name  band   
+  &lt;chr&gt; &lt;chr&gt;  
+1 Mick  Stones 
+2 John  Beatles
+3 Paul  Beatles</code></pre>
+</div>
+</div>
+</div>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a>band_instruments</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 x 2
+  name  plays 
+  &lt;chr&gt; &lt;chr&gt; 
+1 John  guitar
+2 Paul  bass  
+3 Keith guitar</code></pre>
+</div>
+</div>
+</div>
+</section>
 <section id="mutating-joins---visualized" class="slide level2">
 <h2>mutating joins - visualized</h2>
 <div class="columns">
@@ -470,8 +830,8 @@ Jay Hesselberth
 <h2>Joining tables by a variable - Exercise 1</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a>band_members <span class="sc">|&gt;</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a>  <span class="fu">left_join</span>(band_instruments)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>band_members <span class="sc">|&gt;</span></span>
+<span id="cb38-2"><a href="#cb38-2"></a>  <span class="fu">left_join</span>(band_instruments)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 x 3
@@ -486,8 +846,8 @@ Jay Hesselberth
 <div class="fragment">
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>band_members <span class="sc">|&gt;</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">right_join</span>(band_instruments)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a>band_members <span class="sc">|&gt;</span></span>
+<span id="cb40-2"><a href="#cb40-2"></a>  <span class="fu">right_join</span>(band_instruments)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 x 3
@@ -504,9 +864,11 @@ Jay Hesselberth
 <section id="filtering-joins---visualized" class="slide level2">
 <h2>filtering joins - visualized</h2>
 <div class="columns">
-<div class="column" style="width:50%;">
+<div class="column" style="width:33%;">
+<p><img data-src="../img/tidyexplain/semi-join.gif" class="margin-caption"></p>
+</div><div class="column" style="width:33%;">
 <p><img data-src="../img/tidyexplain/inner-join.gif" class="margin-caption"></p>
-</div><div class="column" style="width:50%;">
+</div><div class="column" style="width:33%;">
 <p><img data-src="../img/tidyexplain/full-join.gif" class="margin-caption"></p>
 </div>
 </div>
@@ -518,8 +880,23 @@ Jay Hesselberth
 <h2>Joining tables by a variable - Exercise 2</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>band_members <span class="sc">|&gt;</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a>  <span class="fu">inner_join</span>(band_instruments)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>band_members <span class="sc">|&gt;</span></span>
+<span id="cb42-2"><a href="#cb42-2"></a>  <span class="fu">semi_join</span>(band_instruments)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 x 2
+  name  band   
+  &lt;chr&gt; &lt;chr&gt;  
+1 John  Beatles
+2 Paul  Beatles</code></pre>
+</div>
+</div>
+</div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a>band_members <span class="sc">|&gt;</span></span>
+<span id="cb44-2"><a href="#cb44-2"></a>  <span class="fu">inner_join</span>(band_instruments)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 x 3
@@ -530,32 +907,15 @@ Jay Hesselberth
 </div>
 </div>
 </div>
-<div class="fragment">
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>band_members <span class="sc">|&gt;</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a>  <span class="fu">full_join</span>(band_instruments)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div><div class="column fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 x 3
-  name  band    plays 
-  &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt; 
-1 Mick  Stones  &lt;NA&gt;  
-2 John  Beatles guitar
-3 Paul  Beatles bass  
-4 Keith &lt;NA&gt;    guitar</code></pre>
-</div>
-</div>
-</div>
 </div>
 <div class="fragment">
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>band_members <span class="sc">|&gt;</span></span>
-<span id="cb9-2"><a href="#cb9-2"></a>  <span class="fu">full_join</span>(</span>
-<span id="cb9-3"><a href="#cb9-3"></a>    band_instruments2,</span>
-<span id="cb9-4"><a href="#cb9-4"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"name"</span> <span class="ot">=</span> <span class="st">"artist"</span>)</span>
-<span id="cb9-5"><a href="#cb9-5"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a>band_members <span class="sc">|&gt;</span></span>
+<span id="cb46-2"><a href="#cb46-2"></a>  <span class="fu">full_join</span>(</span>
+<span id="cb46-3"><a href="#cb46-3"></a>    band_instruments2,</span>
+<span id="cb46-4"><a href="#cb46-4"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"name"</span> <span class="ot">=</span> <span class="st">"artist"</span>)</span>
+<span id="cb46-5"><a href="#cb46-5"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 x 3
@@ -573,7 +933,9 @@ Jay Hesselberth
 <section id="other-dplyr-verbs" class="slide level2">
 <h2>Other dplyr verbs</h2>
 <p>There are many other dplyr verbs.</p>
-<p>We’ve used <code>rename</code>, <code>count</code>, <code>add_row</code>, <code>add_column</code>, <code>distinct</code>, <code>sample_n</code>, <code>sample_frac</code>, <code>slice</code>, <code>pull</code></p>
+<ul>
+<li class="fragment">We’ve used <code>rename</code>, <code>count</code>, <code>add_row</code>, <code>add_column</code>, <code>distinct</code>, <code>sample_n</code>, <code>sample_frac</code>, <code>slice</code>, <code>pull</code></li>
+</ul>
 <p>Check out the <a href="">dplyr cheatsheet</a> to learn more!</p>
 </section></section>
 <section>
@@ -581,97 +943,149 @@ Jay Hesselberth
 <h1>ggplot2</h1>
 
 </section>
-<section id="set-up-a-points-plot" class="slide level2">
+<section id="scale-functions-in-ggplot2" class="slide level2">
+<h2>scale functions in ggplot2</h2>
+<ul>
+<li class="fragment"><code>scale_color_brewer()</code> and <code>scale_fill_brewer()</code> control <code>color</code> and <code>fill</code> aesthetics.</li>
+<li class="fragment">See available <a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html#palettes">ggplot2 brewer palettes</a></li>
+</ul>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
+<span id="cb48-2"><a href="#cb48-2"></a>  mtcars,</span>
+<span id="cb48-3"><a href="#cb48-3"></a>  <span class="fu">aes</span>(</span>
+<span id="cb48-4"><a href="#cb48-4"></a>    <span class="at">x =</span> mpg,</span>
+<span id="cb48-5"><a href="#cb48-5"></a>    <span class="at">y =</span> hp,</span>
+<span id="cb48-6"><a href="#cb48-6"></a>    <span class="at">color =</span> <span class="fu">factor</span>(cyl)</span>
+<span id="cb48-7"><a href="#cb48-7"></a>  )</span>
+<span id="cb48-8"><a href="#cb48-8"></a>) <span class="sc">+</span></span>
+<span id="cb48-9"><a href="#cb48-9"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb48-10"><a href="#cb48-10"></a>  <span class="fu">theme_cowplot</span>()</span>
+<span id="cb48-11"><a href="#cb48-11"></a></span>
+<span id="cb48-12"><a href="#cb48-12"></a>p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column">
+<div class="cell-output-display">
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-27-1.png" class="margin-caption" width="960"></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="scale-functions-in-ggplot2-1" class="slide level2 smaller">
+<h2>scale functions in ggplot2</h2>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1"></a>p <span class="sc">+</span> <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output-display">
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-28-1.png" class="margin-caption" width="960"></p>
+</div>
+</div>
+</div>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a>p <span class="sc">+</span> <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output-display">
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-29-1.png" class="margin-caption" width="960"></p>
+</div>
+</div>
+</div>
+</section>
+<section id="set-up-a-points-plot" class="slide level2 smaller">
 <h2>Set up a points plot</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb11-2"><a href="#cb11-2"></a><span class="fu">library</span>(cowplot)</span>
-<span id="cb11-3"><a href="#cb11-3"></a></span>
-<span id="cb11-4"><a href="#cb11-4"></a>diamonds_subset <span class="ot">&lt;-</span> <span class="fu">sample_n</span>(diamonds, <span class="dv">1000</span>)</span>
-<span id="cb11-5"><a href="#cb11-5"></a></span>
-<span id="cb11-6"><a href="#cb11-6"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
-<span id="cb11-7"><a href="#cb11-7"></a>  diamonds_subset,</span>
-<span id="cb11-8"><a href="#cb11-8"></a>  <span class="fu">aes</span>(</span>
-<span id="cb11-9"><a href="#cb11-9"></a>    <span class="at">x =</span> carat,</span>
-<span id="cb11-10"><a href="#cb11-10"></a>    <span class="at">y =</span> price,</span>
-<span id="cb11-11"><a href="#cb11-11"></a>    <span class="at">color =</span> cut</span>
-<span id="cb11-12"><a href="#cb11-12"></a>  )</span>
-<span id="cb11-13"><a href="#cb11-13"></a>) <span class="sc">+</span></span>
-<span id="cb11-14"><a href="#cb11-14"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb11-15"><a href="#cb11-15"></a>  <span class="fu">theme_cowplot</span>()</span>
-<span id="cb11-16"><a href="#cb11-16"></a></span>
-<span id="cb11-17"><a href="#cb11-17"></a>p <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1"></a>diamonds_subset <span class="ot">&lt;-</span> <span class="fu">sample_n</span>(diamonds, <span class="dv">1000</span>)</span>
+<span id="cb51-2"><a href="#cb51-2"></a></span>
+<span id="cb51-3"><a href="#cb51-3"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
+<span id="cb51-4"><a href="#cb51-4"></a>  diamonds_subset,</span>
+<span id="cb51-5"><a href="#cb51-5"></a>  <span class="fu">aes</span>(</span>
+<span id="cb51-6"><a href="#cb51-6"></a>    <span class="at">x =</span> carat,</span>
+<span id="cb51-7"><a href="#cb51-7"></a>    <span class="at">y =</span> price,</span>
+<span id="cb51-8"><a href="#cb51-8"></a>    <span class="at">color =</span> cut</span>
+<span id="cb51-9"><a href="#cb51-9"></a>  )</span>
+<span id="cb51-10"><a href="#cb51-10"></a>) <span class="sc">+</span></span>
+<span id="cb51-11"><a href="#cb51-11"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb51-12"><a href="#cb51-12"></a>  <span class="fu">theme_cowplot</span>()</span>
+<span id="cb51-13"><a href="#cb51-13"></a></span>
+<span id="cb51-14"><a href="#cb51-14"></a>p <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-7-1.png" class="margin-caption" width="960"></p>
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-30-1.png" class="margin-caption" width="960"></p>
 </div>
 </div>
 </div>
 </section>
-<section id="how-to-combine-multiple-plots-into-a-figure-exercise-17" class="slide level2">
-<h2>How to combine multiple plots into a figure? (Exercise 17)</h2>
+<section id="how-to-combine-multiple-plots-into-a-figure" class="slide level2 smaller">
+<h2>How to combine multiple plots into a figure?</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># `plot_grid()` is from `cowplot`</span></span>
-<span id="cb12-2"><a href="#cb12-2"></a><span class="fu">plot_grid</span>(</span>
-<span id="cb12-3"><a href="#cb12-3"></a>  p, p, p, p,</span>
-<span id="cb12-4"><a href="#cb12-4"></a>  <span class="at">labels =</span> <span class="fu">c</span>(</span>
-<span id="cb12-5"><a href="#cb12-5"></a>    <span class="st">"A"</span>, <span class="st">"B"</span>,</span>
-<span id="cb12-6"><a href="#cb12-6"></a>    <span class="st">"C"</span>, <span class="st">"D"</span></span>
-<span id="cb12-7"><a href="#cb12-7"></a>  ),</span>
-<span id="cb12-8"><a href="#cb12-8"></a>  <span class="at">nrow =</span> <span class="dv">2</span></span>
-<span id="cb12-9"><a href="#cb12-9"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a><span class="co"># `plot_grid()` is from `cowplot`</span></span>
+<span id="cb52-2"><a href="#cb52-2"></a><span class="fu">plot_grid</span>(</span>
+<span id="cb52-3"><a href="#cb52-3"></a>  p, p, p, p,</span>
+<span id="cb52-4"><a href="#cb52-4"></a>  <span class="at">labels =</span> <span class="fu">c</span>(</span>
+<span id="cb52-5"><a href="#cb52-5"></a>    <span class="st">"A"</span>, <span class="st">"B"</span>,</span>
+<span id="cb52-6"><a href="#cb52-6"></a>    <span class="st">"C"</span>, <span class="st">"D"</span></span>
+<span id="cb52-7"><a href="#cb52-7"></a>  ),</span>
+<span id="cb52-8"><a href="#cb52-8"></a>  <span class="at">nrow =</span> <span class="dv">2</span></span>
+<span id="cb52-9"><a href="#cb52-9"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell fragment">
-<div class="cell-output-display">
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-8-1.png" class="margin-caption" width="960"></p>
-</div>
-</div>
-</section>
-<section class="slide level2">
 
-<p>We have 4 legends - can they be condensed?</p>
+
+<aside><div>
+<p><a href="https://github.com/thomasp85/patchwork">patchwork</a> is a related library that uses arithmetic syntax (<code>a + b | c</code>)</p>
+</div></aside></section>
+<section id="how-to-combine-multiple-plots-into-a-figure-output" class="slide level2 smaller output-location-slide"><h2>How to combine multiple plots into a figure?</h2><div class="cell output-location-slide">
+<div class="cell-output-display">
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-31-1.png" class="margin-caption" width="960"></p>
+</div>
+</div></section><section id="we-have-4-legends---can-they-be-condensed" class="slide level2 smaller">
+<h2>We have 4 legends - can they be condensed?</h2>
 <p>Yes, but it is not exactly straightforward.</p>
-<p><strong>need to scroll below</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># fetch the legend for `p1`</span></span>
-<span id="cb13-2"><a href="#cb13-2"></a>legend <span class="ot">&lt;-</span> <span class="fu">get_legend</span>(</span>
-<span id="cb13-3"><a href="#cb13-3"></a>  p <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
-<span id="cb13-4"><a href="#cb13-4"></a>)</span>
-<span id="cb13-5"><a href="#cb13-5"></a></span>
-<span id="cb13-6"><a href="#cb13-6"></a>p <span class="ot">&lt;-</span> p <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span>
-<span id="cb13-7"><a href="#cb13-7"></a></span>
-<span id="cb13-8"><a href="#cb13-8"></a><span class="co"># first `plot_grid` builds the panels</span></span>
-<span id="cb13-9"><a href="#cb13-9"></a>panels <span class="ot">&lt;-</span> <span class="fu">plot_grid</span>(</span>
-<span id="cb13-10"><a href="#cb13-10"></a>  p, p, p, p,</span>
-<span id="cb13-11"><a href="#cb13-11"></a>  <span class="at">labels =</span> <span class="fu">c</span>(</span>
-<span id="cb13-12"><a href="#cb13-12"></a>    <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"D"</span></span>
-<span id="cb13-13"><a href="#cb13-13"></a>  ),</span>
-<span id="cb13-14"><a href="#cb13-14"></a>  <span class="at">nrow =</span> <span class="dv">2</span></span>
-<span id="cb13-15"><a href="#cb13-15"></a>)</span>
-<span id="cb13-16"><a href="#cb13-16"></a></span>
-<span id="cb13-17"><a href="#cb13-17"></a><span class="co"># second `plot_grid` adds the legend to the panels</span></span>
-<span id="cb13-18"><a href="#cb13-18"></a><span class="fu">plot_grid</span>(</span>
-<span id="cb13-19"><a href="#cb13-19"></a>  panels,</span>
-<span id="cb13-20"><a href="#cb13-20"></a>  legend,</span>
-<span id="cb13-21"><a href="#cb13-21"></a>  <span class="at">ncol =</span> <span class="dv">1</span>,</span>
-<span id="cb13-22"><a href="#cb13-22"></a>  <span class="at">rel_heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, .<span class="dv">1</span>)</span>
-<span id="cb13-23"><a href="#cb13-23"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1"></a><span class="co"># fetch the legend for `p1`</span></span>
+<span id="cb53-2"><a href="#cb53-2"></a>legend <span class="ot">&lt;-</span> <span class="fu">get_legend</span>(</span>
+<span id="cb53-3"><a href="#cb53-3"></a>  p <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb53-4"><a href="#cb53-4"></a>)</span>
+<span id="cb53-5"><a href="#cb53-5"></a></span>
+<span id="cb53-6"><a href="#cb53-6"></a>p <span class="ot">&lt;-</span> p <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span>
+<span id="cb53-7"><a href="#cb53-7"></a></span>
+<span id="cb53-8"><a href="#cb53-8"></a><span class="co"># first `plot_grid` builds the panels</span></span>
+<span id="cb53-9"><a href="#cb53-9"></a>panels <span class="ot">&lt;-</span> <span class="fu">plot_grid</span>(</span>
+<span id="cb53-10"><a href="#cb53-10"></a>  p, p, p, p,</span>
+<span id="cb53-11"><a href="#cb53-11"></a>  <span class="at">labels =</span> <span class="fu">c</span>(</span>
+<span id="cb53-12"><a href="#cb53-12"></a>    <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>, <span class="st">"D"</span></span>
+<span id="cb53-13"><a href="#cb53-13"></a>  ),</span>
+<span id="cb53-14"><a href="#cb53-14"></a>  <span class="at">nrow =</span> <span class="dv">2</span></span>
+<span id="cb53-15"><a href="#cb53-15"></a>)</span>
+<span id="cb53-16"><a href="#cb53-16"></a></span>
+<span id="cb53-17"><a href="#cb53-17"></a><span class="co"># second `plot_grid` adds the legend to the panels</span></span>
+<span id="cb53-18"><a href="#cb53-18"></a><span class="fu">plot_grid</span>(</span>
+<span id="cb53-19"><a href="#cb53-19"></a>  panels,</span>
+<span id="cb53-20"><a href="#cb53-20"></a>  legend,</span>
+<span id="cb53-21"><a href="#cb53-21"></a>  <span class="at">ncol =</span> <span class="dv">1</span>,</span>
+<span id="cb53-22"><a href="#cb53-22"></a>  <span class="at">rel_heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, .<span class="dv">1</span>)</span>
+<span id="cb53-23"><a href="#cb53-23"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 </section>
-<section id="" class="slide level2 output-location-slide"><div class="cell output-location-slide">
+<section id="we-have-4-legends---can-they-be-condensed-output" class="slide level2 smaller output-location-slide"><h2>We have 4 legends - can they be condensed?</h2><div class="cell output-location-slide">
 <div class="cell-output-display">
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-9-1.png" class="margin-caption" width="960"></p>
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-32-1.png" class="margin-caption" width="960"></p>
 </div>
 </div></section><section id="saving-plots-exercise-18" class="slide level2">
 <h2>Saving plots (Exercise 18)</h2>
-<p>Saves last plot as 5’ x 5’ file named “plot_final.png” in working directory.</p>
+<p>Saves last plot as 5’ x 5’ file named <code>plot_final.png</code> in working directory.</p>
 <p>Matches file type to file extension.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="co"># default is to save last plot in the buffer</span></span>
-<span id="cb14-2"><a href="#cb14-2"></a><span class="co"># can also specify with the `plot` argument</span></span>
-<span id="cb14-3"><a href="#cb14-3"></a><span class="fu">ggsave</span>(<span class="fu">here</span>(<span class="st">"img/plot_final.png"</span>), <span class="at">width =</span> <span class="dv">5</span>, <span class="at">height =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a><span class="co"># default is to save last plot in the buffer</span></span>
+<span id="cb54-2"><a href="#cb54-2"></a><span class="co"># can also specify with the `plot` argument</span></span>
+<span id="cb54-3"><a href="#cb54-3"></a><span class="fu">ggsave</span>(</span>
+<span id="cb54-4"><a href="#cb54-4"></a>  <span class="fu">here</span>(<span class="st">"img/plot_final.png"</span>),</span>
+<span id="cb54-5"><a href="#cb54-5"></a>  <span class="at">width =</span> <span class="dv">5</span>,</span>
+<span id="cb54-6"><a href="#cb54-6"></a>  <span class="at">height =</span> <span class="dv">5</span></span>
+<span id="cb54-7"><a href="#cb54-7"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 <div class="footer footer-default">
