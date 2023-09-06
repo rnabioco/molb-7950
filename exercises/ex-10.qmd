@@ -1,0 +1,211 @@
+---
+title: "Exercises Set Stats Bootcamp - class 10"
+subtitle: "Stats intro and history"
+author: "Neelanjan Mukherjee"
+date: last-modified
+format: revealjs
+editor: visual
+---
+
+```{r, echo=FALSE}
+library(tidyverse)
+```
+
+## Coin flips
+
+```{r simulate flips}
+
+# flip a coin 10 times with equal prob of H or T
+rbinom(n = 10, size = 1, prob = .5)
+
+# concept of seed
+set.seed(32)
+rbinom(n = 10, size = 1, prob = .5)
+
+# flip a coin 100 times with equal prob of H or T
+rbinom(n = 100, size = 1, prob = .5)
+
+# flip a coin 100 times with equal prob of H or T, what is the mean?
+rbinom(n = 100, size = 1, prob = .5) %>% mean()
+
+
+
+# let's scale up and mess around
+numFlips <- 10
+numRounds <- 10
+
+myFairTosses <- vector()
+
+for (i in 1:numRounds) {
+  myFairTosses[i] <- rbinom(n = numFlips, size = 1, prob = .5) %>% mean()
+}
+
+
+
+myUnfairTosses <- vector()
+
+for (i in 1:numRounds) {
+  myUnfairTosses[i] <- rbinom(n = numFlips, size = 1, prob = .2) %>% mean()
+}
+
+
+data.frame(fair = myFairTosses,
+           unfair = myUnfairTosses) %>% 
+  pivot_longer(cols = c("fair","unfair"), names_to = "cheating", values_to = "avg") %>% 
+  ggplot(., aes(x=cheating, y=avg, color=cheating)) +
+  geom_jitter() +
+  stat_summary(fun.y=mean, geom="point", shape=18,
+                 size=3, color="black") +
+  ylim(-0.05,1.05) +
+  geom_hline(yintercept = .5, linetype = "dashed") +
+  geom_hline(yintercept = .2, linetype = "dashed") +
+  theme_classic()
+
+
+# create a function with the name flippy, that has parameters:
+# nFlip (# of flips to avg), nRound (# rounds of flipping), myProb (# prob heads)
+
+flippy <- function(nFlip, nRound, myProb) { # create a function with the name flippy
+  # nFlip <- 10
+  # nRound <- 10
+  # myProb <- .5
+  
+  myFairTosses <- vector()
+  
+  for (i in 1:nRound) {
+    myFairTosses[i] <- rbinom(n = nFlip, size = 1, prob = myProb) %>% mean()
+  }
+  return(myFairTosses)
+}
+
+flippy(nFlip = 5, nRound = 20, myProb = .5)
+
+# let's make this more scaleable
+# list of numFlips using 5 , 50
+numFlips <- c(5,50)
+
+# let's do 5 rounds of 5 and 30 flips using this function with a fair coin
+lapply(numFlips, flippy, nRound = 5, myProb = .5) %>% unlist()
+
+# let's do 5 rounds of 5 and 30 flips using this function with a unfair coin
+lapply(numFlips, flippy, nRound = 5, myProb = .2) %>% unlist()
+
+# say we want to do 3 rounds with a fair and unfair coin and put it in a dataframe
+r <- 3
+
+r3 <- data.frame(flips=rep(numFlips,each=r),
+           rounds=rep(r),
+           fair=lapply(numFlips, flippy, nRound = r, myProb = .5) %>% unlist(),
+           unfair=lapply(numFlips, flippy, nRound = r, myProb = .2) %>% unlist())
+
+
+# say we want to do 30 rounds also
+r <- 30
+r30 <- data.frame(flips=rep(numFlips,each=r),
+           rounds=rep(r),
+           fair=lapply(numFlips, flippy, nRound = r, myProb = .5) %>% unlist(),
+           unfair=lapply(numFlips, flippy, nRound = r, myProb = .2) %>% unlist())
+
+
+bind_rows(r3, r30) %>% 
+  pivot_longer(cols = c("fair","unfair"), names_to = "cheating", values_to = "avg") %>%
+  ggplot(., aes(x=cheating, y=avg, color=cheating)) +
+  geom_jitter() +
+  stat_summary(fun.y=mean, geom="point", shape=18,
+                 size=3, color="black") +
+  ylim(-0.05,1.05) +
+   facet_grid(flips~rounds) +
+  geom_hline(yintercept = .5, linetype = "dashed") + # true mean fair
+  geom_hline(yintercept = .2, linetype = "dashed") + # true mean unfair
+  theme_cowplot()
+
+
+```
+
+[Need help! My friend thinks coin flips are 50-50!](https://www.physicsforums.com/threads/need-help-my-stupid-friend-thinks-coin-flips-are-50-50.60279/)
+
+## The Monty Hall Problem
+
+> Suppose you're on a game show, and you're given the choice of three doors: Behind one door is a car; behind the others, goats. You pick a door, say No. 1, and the host, who knows what's behind the doors, opens another door, say No. 3, which has a goat. He then says to you, "Do you want to pick door No. 2?" Is it to your advantage to switch your choice? \~ (From Parade magazine's Ask Marilyn column)
+
+## Pick a door, any door
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Monty_closed_doors.svg/1920px-Monty_closed_doors.svg.png){fig-align="center" width="500"}
+
+## Will you switch?
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Monty_open_door_chances.svg/1280px-Monty_open_door_chances.svg.png){fig-align="center" width="500"}
+
+## Switching improves your odds 2x
+
+Say you choose Door #1
+
++-----------+-----------+-----------+----------------+------------+
+| Behind\   | Behind\   | Behind\   | Result if STAY | Result if\ |
+| Door 1    | Door 2    | Door 3    |                | SWITCH     |
++===========+===========+===========+================+============+
+| **Car**   | Goat      | Goat      | **Car**        | Goat       |
++-----------+-----------+-----------+----------------+------------+
+| Goat      | **Car**   | Goat      | Goat           | **Car**    |
++-----------+-----------+-----------+----------------+------------+
+| Goat      | Goat      | **Car**   | Goat           | **Car**    |
++-----------+-----------+-----------+----------------+------------+
+
+## Simulation of Monty Hall Problem
+
+```{r simulate monty}
+# number of times to repeat the experiment
+iter <- 1000 
+
+# defining the doors
+doors <- c("goat","goat","car")
+
+# initialize dataframe to store the result per iteration
+monte_hall <- function(iteration){
+        # iteration <- 10
+        contestant_door <-  sample(doors, size = iteration, replace = TRUE)
+        
+        i=1:iteration
+        
+        # stick_win which is equal to 1 if the contestant_door in current i is car, 0 otherwise.
+        # switch_win which is equal to 0 if the contestant_door is equal to car, 1 otherwise.
+        stick_win <- ifelse(contestant_door == 'car',1,0)
+        switch_win <- ifelse(contestant_door == 'car',0,1)
+        
+        stick_prob <- cumsum(stick_win)/i
+        switch_prob <- cumsum(switch_win)/i
+        
+        #store result in a dataframe
+        results <- data.frame(i=i,
+                              contestant_door=contestant_door, 
+                              stick_win=stick_win,
+                              switch_win=switch_win,
+                              stick_prob=stick_prob,
+                              switch_prob=switch_prob
+                              )
+        
+        return(results)
+}
+
+
+monte_hall_results <- monte_hall(iter)
+
+ggplot(monte_hall_results, mapping = aes(x=i, y=stick_prob)) +
+  geom_line(color="#3333ff") +
+  geom_line(aes(y=switch_prob), color= "#ff751a") +
+  ylab('Est.Probability') + 
+  xlab('Iteration') +
+  geom_label(data = data.frame(label = c('switch', 'stick'), i = c(iter,iter), stick_prob = c(0.75,0.25)), 
+                   aes(label = label),
+                   show.legend = FALSE
+                   ) +
+  ggtitle("Estimated Probability of Winning") +
+  theme_classic()
+
+
+```
+
+## References
+
+-   [The Monty Hall Problem](https://rpubs.com/njdcornites/simulating_monty_hall_problem)
+-   [Monty Hall Problem: Solution Explained Simply](https://www.statisticshowto.com/probability-and-statistics/monty-hall-problem/?fbclid=IwAR1nrrDYvT9_Wz75TiVwpUiHHieOUK2Dl3XJS9bKcBVQcaHImTVv9C5shos)
