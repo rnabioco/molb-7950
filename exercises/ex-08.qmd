@@ -20,7 +20,9 @@ For the next two classes we'll combine everything we've learned to process and v
 Load the libraries you need for analysis below.
 
 ```{r}
-
+library(tidyverse)
+library(here)
+library(cowplot)
 ```
 
 # A quantitative PCR experiment
@@ -41,7 +43,8 @@ These data are in two TSV files:
 Load these data sets and inspect.
 
 ```{r}
-
+qpcr_names <- read_tsv(here("data/qpcr_names.tsv.gz"))
+qpcr_data <- read_tsv(here("data/qpcr_data.tsv.gz"))
 ```
 
 Note the shape of the data and the names of the rows and columns. Do they remind you of anything?
@@ -56,7 +59,12 @@ Given the experimental setup and the shape of the tibbles, you should be able to
 -   Are the variables the column names?
 
 ```{r}
+qpcr_data_long <-
+  pivot_longer(qpcr_data, -row, names_to = "col")
 
+qpcr_names_long <- 
+  pivot_longer(qpcr_names, -row, names_to = "col") |>
+  separate(value, into = c("gt", "time", "gene", "rt", "rep"), sep = "_")
 ```
 
 ### Merge the data
@@ -66,7 +74,12 @@ Note the structure of the tidied data. What columns (variables) are shared by bo
 How we can *join* the data from these two tibbles, linking the sample identifiers with their gene expression values?
 
 ```{r}
-
+qpcr_tidy <-
+  left_join(qpcr_names_long, qpcr_data_long) |>
+  # we don't need row & col anymore.
+  # the -RT samples are all 0, so we can drop those, too
+  filter(rt == "+") |>
+  select(-(row:col), -rt)
 ```
 
 ### Summarize the data
@@ -80,7 +93,16 @@ Do this two ways:
 2.  Calculate a ratio of interferon to actin levels for each sample *before* calculating the mean and standard deviation of the ratios.
 
 ```{r}
-
+qpcr_summary <-
+  group_by(
+    qpcr_tidy,
+    gt, time, gene) |>
+  summarize(
+    qpcr_tidy,
+    exp_mean = mean(value),
+    exp_sd = sd(value)
+  ) |>
+  arrange(gt, time, gene)
 ```
 
 ### Plot the data

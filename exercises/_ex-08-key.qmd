@@ -24,7 +24,6 @@ Load the libraries you need for analysis below.
 library(tidyverse)
 library(here)
 library(cowplot)
-library(colorblindr)
 ```
 
 # A quantitative PCR experiment
@@ -78,6 +77,9 @@ How we can *join* the data from these two tibbles, linking the sample identifier
 ```{r}
 qpcr_tidy <-
   left_join(qpcr_names_long, qpcr_data_long) |>
+  # we don't need row & col anymore.
+  # the -RT samples are all 0, so we can drop those, too
+  filter(rt == "+") |>
   select(-(row:col), -rt)
 ```
 
@@ -93,11 +95,13 @@ Do this two ways:
 
 ```{r}
 qpcr_summary <-
+  group_by(
+    qpcr_tidy,
+    gt, time, gene) |>
   summarize(
     qpcr_tidy,
     exp_mean = mean(value),
-    exp_sd = sd(value),
-    .by = c(gt, time, gene)
+    exp_sd = sd(value)
   ) |>
   arrange(gt, time, gene)
 ```
@@ -107,29 +111,7 @@ qpcr_summary <-
 Now we can plot the summary statistics. We'll use [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html) to represent the mean and standard deviation.
 
 ```{r}
-ggplot(
-  qpcr_summary,
-  aes(
-    x = time,
-    y = exp_mean,
-    color = gene
-  ),
-) +
-  geom_pointrange(
-    aes(
-      ymin = exp_mean - exp_sd,
-      ymax = exp_mean + exp_sd
-    ),
-    position = position_dodge(width = 0.5)
-  ) +
-  scale_color_brewer(palette = "Set1") +
-  facet_grid(~ gt) +
-  theme_minimal_hgrid() +
-  labs(
-    x = "Time (hours)",
-    y = "Expression level",
-    title = "qPCR analysis in wild-type and mutant cells"
-  )
+
 ```
 
 ### Interpret the plot
