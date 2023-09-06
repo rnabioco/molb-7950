@@ -42,17 +42,20 @@ yeast_go_terms <-
   ) |>
   distinct()
 
-brauer_gene_exp <-
+brauer_gene_exp_wide <-
   select(
     brauer_gene_exp_raw,
     -name,
     -number, -GID, -YORF,
     -GWEIGHT, -BP, -MF
-    ) |>
+  )
+
+brauer_gene_exp_tidy <-
   pivot_longer(
+    brauer_gene_exp_wide,
     -systematic_name,
     names_to = "nutrient_rate",
-    values_to = "exp_level"
+    values_to = "exp"
     ) |>
   separate(
     nutrient_rate,
@@ -64,12 +67,15 @@ brauer_gene_exp <-
   left_join(nutrient_abbrs, by = "nutrient_abbr") |>
   select(
     systematic_name,
-    nutrient, everything(), -nutrient_abbr
+    nutrient,
+    everything(),
+    -nutrient_abbr
     ) |>
   mutate(across(c(rate, nutrient), as_factor)) |>
   arrange(desc(systematic_name), nutrient, rate)
 
-write_tsv(brauer_gene_exp, file = here("data", "brauer_gene_exp.tsv.gz"))
+write_tsv(brauer_gene_exp, file = here("data", "brauer_gene_exp_tidy.tsv.gz"))
+write_tsv(brauer_gene_exp, file = here("data", "brauer_gene_exp_wide.tsv.gz"))
 write_tsv(brauer_gene_exp_raw, file = here("data", "brauer_gene_exp_raw.tsv.gz"))
 write_tsv(yeast_go_terms, file = here("data", "yeast_go_terms.tsv.gz"))
 
