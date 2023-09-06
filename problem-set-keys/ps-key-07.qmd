@@ -1,0 +1,113 @@
+---
+title: "R Bootcamp Problem Set 6"
+author: "Your name here"
+date: last-modified 
+---
+
+## Problem Set
+
+Use the data files in the `data/` directory to answer the questions.
+
+For this problem set, you are allowed to help each other, but you are not
+allowed to post correct answers in slack.
+
+**The problem set is due 12pm on Sept 1.**
+
+## Grading rubric
+
+- Everything is good: full points
+- Partially correct answer: depends on how many steps are correct
+- Reasonable attempt: half points
+
+## Libraries
+
+Load the libraries you need for analysis below.
+
+```{r}
+library(tidyverse)
+library(here)
+library(palmerpenguins)
+```
+
+## Question 1 - **5 points**
+
+Run the following chunk:
+
+```{r run_me}
+set.seed(42)
+x <- sample(1000, replace = TRUE)
+```
+
+Now use logical indexing to find the number of values > 450 in `x`.
+
+```{r}
+# either are correct
+sum(x > 450)
+length(x[x > 450])
+```
+
+## Question 2 - **5 points**
+
+Count the number of species in the `penguins` tibble using `forcats::fct_count()` 
+
+Count number of island + sex combinations using `dplyr::count()`, and sort the result by count.
+
+```{r}
+forcats::fct_count(penguins$island)
+```
+
+```{r}
+dplyr::count(penguins, island, sex, sort = TRUE)
+```
+
+## Question 3 - **5 points**
+
+Use `stringr::str_c()` to combine upper and lowercase letters from `letters` and `LETTERS` with a slash.
+
+Your answer should look like: `"A/a" "B/b" "C/c"` etc.
+
+```{r}
+combined <- str_c(LETTERS, '/', letters)
+```
+
+Use `stringr::str_split()` or one of its variants to split up the strings you made above and extract the letter after the slash.
+
+```{r}
+str_split_i(combined, '/', 2)
+str_split(combined, '/') |> purrr::map(2) |> unlist()
+```
+
+## Question 4 - **5 points**
+
+Create a ggplot using the diamonds data set.
+
+- Generate a `ggridges::geom_density_ridges()` for the prices, with a different `fill` color for each `cut`.
+- Recolor the densities using `ggplot2::scale_fill_brewer()`, choosing a specific palette.
+- make the outline of the densities black, and change their alpha to 0.2.
+- change the theme to `cowplot::theme_minimal_grid()`
+- remove the legend (google: "remove legend from ggplot2")
+- add an informative title and subtitle using `ggplot2::labs()`.
+
+```{r}
+library(ggridges)
+library(cowplot)
+
+ggplot(
+  diamonds,
+  aes(
+    x = price,
+    y = cut,
+    fill = cut
+  )
+) +
+  geom_density_ridges(color = 'black', alpha = 0.2) +
+  scale_fill_brewer(palette = "Set2") +
+  theme_minimal_grid() +
+  theme(legend.position = 'none')
+```
+
+## Submit
+
+Be sure to click the "Render" button to render the HTML output.
+
+Then paste the URL of this Posit Cloud project into the problem set on Canvas.
