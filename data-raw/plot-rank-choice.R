@@ -15,6 +15,12 @@ vote_tbl <- read_sheet(ss, sheet = "Form Responses 4") |>
   mutate(plot= str_replace(plot, 'top_3_selections_ranked_plot_', '')) |>
   drop_na() |>
   select(-your_student_id) |>
-  count(plot, rank, sort = TRUE)
+  count(plot, rank, sort = TRUE) |>
+  pivot_wider(names_from = "rank", values_from = "n") |>
+  rename(plot = plot, first = `1st`, second = `2nd`, third = `3rd`) |>
+  select(plot, first, second, third) |>
+  rowwise() |>
+  mutate(score_sum = sum(3 * first, 2 * second, third, na.rm = TRUE)) |>
+  arrange(-score_sum)
 
 
