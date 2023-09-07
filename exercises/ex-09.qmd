@@ -1,0 +1,249 @@
+---
+title: "Exercises 9"
+author: "Jay Hesselberth"
+---
+
+# A yeast gene expression experiment
+
+Next, we'll examine some gene expression data from the budding yeast *S. cerevisiae*. We'll roughly follow the analysis strategy taken by David Robinson in his blog [*Variance Explained*](http://varianceexplained.org/r/tidy-genomics-broom/).
+
+The [data](http://growthrate.princeton.edu/transcriptome/download.shtml) come from:
+
+> Brauer MJ, Huttenhower C, Airoldi EM, Rosenstein R, Matese JC, Gresham D, Boer VM, Troyanskaya OG, Botstein D. **Coordination of growth rate, cell cycle, stress response, and metabolic activity in yeast.** *Mol Biol Cell.* 2008 [**\[Link**\]](https://pubmed.ncbi.nlm.nih.gov/17959824/)
+
+They used [chemostats](https://dunham.gs.washington.edu/chemostatv2.htm) to control the growth rate of cells under different nutrient-limited conditions.
+
+In this experiment, cells were grown in different media limited for (one of) glucose, uracil, leucine, sulfate, phosphate, or ammonia. Over a series of fixed, equilibrium growth rates (established by the dilution rate of fresh media), cells were harvested and gene expression was measured by genome-wide microarrays.
+
+This is a well organized experiment (so it's useuful for teaching / learning), but there's nothing particularly special about the setup.
+
+-   We could be measuring protein or metabolite levels instead of gene expression, or analyzing cell features from images taken of the cells.
+
+-   We might be adding an increasing amount of a drug candidate instead of nutrient deprivation
+
+-   We might be altering the growth density of mammalian cells (by plating) instead of controlling growth rate in a chemostat.
+
+### Load libraries
+
+Load libraries you'll need for the analysis below.
+
+```{r}
+#| label: load-libs
+```
+
+### Load the data
+
+A raw version of the gene expression data are in:
+
+-   `data/brauer_gene_exp_wide.tsv.gz`
+
+In addition, another tibbles contains related information:
+
+-   `data/yeast_go_terms.tsv.gz`
+
+Load each of the above files and inspect.
+
+```{r}
+#| label: load-data
+#| eval: false
+brauer_gene_exp_wide <- ___ 
+yeast_go_terms <- ___
+```
+
+### Tidy the data
+
+**Are these data tidy?**
+
+```{r}
+#| label: tidy-data
+#| eval: false
+brauer_gene_exp_tidy <-
+  pivot_longer(
+    data = ___,
+    cols = ___,
+    names_to = "___",
+    values_to = "___"
+  ) |>
+  separate(
+    ___,
+    into = c("___", "___"),
+    sep = 1,
+    convert = TRUE
+  )
+```
+
+Next, we want to update the nutrient abbreviations so they're easier to remember.
+
+```{r}
+nutrient_abbrs <- tribble(
+  ~ nutrient_abbr, ~ nutrient,
+  "G", "Glucose",
+  "L", "Leucine",
+  "P", "Phosphate",
+  "S", "Sulfate",
+  "N", "Ammonia",
+  "U", "Uracil"
+)
+
+# now, we need to *join* the tibbles
+brauer_gene_exp_tidy <-
+  left_join(___, ___) |>
+  # drop the nutreient abbreviation 
+  select(___)
+```
+
+Next, we want the common gene names, which contain useful information for filtering and grouping. These are in `yeast_go_terms`, so we need to join.
+
+```{r}
+# need a tibble that maps systematic
+# common names
+name_map <- select(
+  yeast_go_terms,
+  ___, ___ 
+)
+
+# we need to *join* again . . .
+brauer_gene_exp_tidy <-
+  left_join(___, ___) |>
+  # reorganize so that systematic and common names come first
+  select(___)
+```
+
+Finally, we'll drop all rows with `NA` expression values, and arrange the tibble.
+
+```{r}
+brauer_gene_exp_tidy <-
+  # drop rows where `exp` is `NA`
+  drop_na(___, ___) |>
+  # arrange by common name, nutrient, and rate
+  arrange(___) 
+```
+
+### Heatmap of gene expression values
+
+Heatmaps are a useful approach to visualize thousands of data points, orgnaized by experimental variables to show patterns in the data.
+
+We'll use the [ComplexHeatmap](https://jokergoo.github.io/ComplexHeatmap-reference/book/) package from Bioconductor, which provides a flexible framework for generating heatmaps.
+
+```{r}
+#| label: heatmap!
+#| eval: false
+brauer_mat_dat <-
+  brauer_gene_exp |>
+  unite(___, ___) |>
+  pivot_wider(
+    names_from = ___,
+    values_from = ___
+  )
+
+brauer_mat <-
+  # remove name columns, just need the data
+  select(___, ___) |>
+  as.matrix()
+
+# Inspect the matrix above.
+
+ComplexHeatmap::Heatmap(___)
+```
+
+### Expression of select genes associated with nutrient metabolism
+
+Examine the genes (`common_name`) that start with LEU.
+
+```{r}
+leu_genes_tbl <- brauer_gene_exp_tidy |>
+  filter(str_detect(___, "___"))
+
+ggplot(
+  leu_genes_tbl,
+  aes(
+    x = ___,
+    y = ___,
+    color = ___ 
+  )
+) +
+  geom_point() + 
+  geom_smooth(method = 'lm', se = FALSE) +
+  facet_wrap(~ ___) +
+  theme_cowplot() +
+  scale_color_brewer(palette = "Dark2")
+```
+
+### Modeling the relationship between gene expression and growth rate
+
+#### One gene
+
+Let's look specifically at a linear model of the data for LEU1 under leucine starvation.
+
+```{r}
+leu1_tbl <- leu_genes_tbl |>
+  filter(common_name == "___" & nutrient == "___")
+
+ggplot(leu1_tbl, aes(___, ___)) +
+  geom_point(size = 3) +
+  theme_cowplot()
+```
+
+Let's take a look at the linear model of these data.
+
+```{r}
+mod <- lm(exp ~ rate, data = leu1_tbl)
+summary(mod)
+```
+
+The relevant information (rate, intercept, p.value) for the model is not easily accessed.
+
+We can use the [broom](https://broom.tidymodels.org/) library to tidy the model information.
+
+```{r}
+library(broom)
+broom::tidy(mod)
+```
+
+#### All genes
+
+Doing this for one gene is interesting, but really we'd like models for all of the conditions so that we can compare between them to identify interesting patterns.
+
+The following code chunk will do the following:
+
+1.  nest data for model fitting into a new column `data`
+2.  fit linear models to the `data` column using `purrr::map()`
+3.  tidy the linear models using `broom::tidy()`
+4.  unnest the model coefficients
+
+```{r}
+linear_model_tbl <-
+  brauer_gene_exp_tidy |>
+  group_by(systematic_name, common_name, nutrient) |>
+  nest() |>
+  # look at the data up to the `nest()` call
+  mutate(
+    model = purrr::map(
+      data,
+      ~ lm(exp ~ rate, data = .)
+    )
+  ) |>
+  mutate(
+    model_tidy = purrr::map(
+      model,
+      broom::tidy
+    )
+  ) |>
+  select(-model, -data) |>
+  unnest(cols = c(model_tidy))
+```
+
+Note that we now have slope and intercept terms for each group we specified.
+
+-   the `intercept` indicates how highly a gene is expressed when starved of a nutrient.
+-   the `rate` indicates how much a gene's expression responds to increasing nutrient (i.e., growth rate).
+
+### Further analysis
+
+At this point, you can ask questions like the following:
+
+-   How do other groups of metabolic genes respond to nutrient deprivation? Start with the 'PHO', 'URA', and 'SUL' genes. Comment on features that stand out, both within and across nutrient deprivation conditions.
+
+-   What if you include and *group by* the GO terms in the `yeast_go_terms` tibble instead of gene name? I.e., you could detect the string `leucine` in the biological process and group by those instead of gene name (you'd need to *join* the tidy tibble with the GO information first).
+
+-   Are there other genes that behave like LEU1 under leucine starvation? I.e., a strong negative slope in one condition, and positive slopes in the others?
