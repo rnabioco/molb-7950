@@ -1,0 +1,166 @@
+---
+title: "R Bootcamp Problem Set 9"
+author: "Your Name Here"
+date: last-modified 
+---
+
+## Problem Set
+
+Use the data files in the `data/` directory to answer the questions.
+
+For this problem set, you are allowed to help each other, but you are not
+allowed to post correct answers in slack.
+
+**The problem set is due 12pm on Sept 11.**
+
+# A quantitative PCR experiment
+
+This problem set is a more complex version of the qPCR experiment we discussed in class.
+
+Here is the experimental setup:
+
+-   Three cell lines (`wt`, `TF-mutant`, `RL-mutant`) were treated with a drug that induces interferon expression.
+
+-   After specific time points (0, 4, 8, 12, 24 hours), cells were harvested and actin and interferon mRNA were analyzed by quantitative PCR (with 3 biological replicates, and 3 technical replicates).
+
+Data for the Biological replicates come from three independent cultures and RNA samples.
+
+Data for the technical replicates come the same RNA sample, measured in 3 independent qPCR reactions.
+
+The data are in `data/`:
+
+- `data/qpcr_names_ps.tsv.gz`
+- `data/qpcr_data.tsv.gz`
+
+## Libraries
+
+Load the libraries you need for analysis below.
+
+```{r}
+
+```
+
+
+### Load the data
+
+Load the data sets and inspect.
+
+```{r}
+
+```
+
+### Tidy the data (4 points)
+
+Given the experimental setup and the shape of the tibbles, you should be able to answer: **Are these data tidy?**
+
+-   What are the variables in the data?
+
+> Answer
+
+-   Are the variables the column names?
+
+> Answer
+
+The names are encoded in the following order:
+
+`gt`, `time`, `gene`, `rep_tech`, `rep_bio`.
+
+```{r}
+
+```
+
+## Question 1 (4 points)
+
+Calculate summary statistics for the experiment.
+
+1. Calculate the mean of the technical replicates within each group of genotype, time, gene, and biological replicate.
+
+2. Calculate the mean and standard deviation of the biolgical replicates (which is the mean of technical replicates, above).
+
+You should have a tibble that looks like this:
+
+```
+# A tibble: 36 × 5
+   gt         time gene     bio_mean bio_sd
+   <chr>     <int> <chr>       <dbl>  <dbl>
+ 1 RL-mutant     0 GAPDH       0.444 0.0759
+ 2 RL-mutant     0 IFN-beta    3.32  0.188 
+ 3 RL-mutant     4 GAPDH       1.61  0.487 
+ 4 RL-mutant     4 IFN-beta   18.4   1.15  
+ 5 RL-mutant     8 GAPDH       3.25  1.06  
+ 6 RL-mutant     8 IFN-beta   32.2   1.82  
+ 7 RL-mutant    12 GAPDH       3.90  0.911 
+ 8 RL-mutant    12 IFN-beta   47.5   3.78  
+ 9 RL-mutant    24 GAPDH       7.93  3.41  
+10 RL-mutant    24 IFN-beta   76.7   4.75  
+# ℹ 26 more rows
+# ℹ Use `print(n = ...)` to see more rows
+```
+
+```{r}
+
+```
+
+## Question 2 (4 points)
+
+1. Create a plot of expression by time from the data, using the mean of the biological replicates as the `y` value.
+
+2. Color the plot by genes.
+
+3. Use `ggplot2::geom_pointrange()` do represent the standard deviation of the data. Alternatively, use `ggplot2::geom_errobar()` with `geom_point()`.
+
+4. Draw a line through the points with `geom_line()`.
+
+4. Facet the plot by genotype.
+
+5. Change the colors of the of the plot with a `scale` function.
+
+6. Update the labels on the plot ("time (hours)", etc.).
+
+```{r}
+
+```
+
+## Question 3 (4 points)
+
+- What can you say about the expression of GAPDH and IFN in the different cell types?
+
+> Answer.
+
+- Can you come up with a simple molecular mechanism to explain the results?
+
+> Answer.
+
+## Question 4 (4 points)
+
+Reformat the data from Question 2 such that you calculate a ratio of IFN to GAPDH. Start with the data Question 1.2, above.
+
+Re-plot the data as in Question 2, but leave out the color as you have collapsed the two genes into one value.
+
+```{r}
+
+```
+
+## Question 5 (4 points)
+
+Is there more spread across the technical replicates, or across the biological replicates (across the whole experiment)?
+
+To get at this question, calculate the standard deviations across the two sets of replicates separately. Which one has a greater spread (max - min)? And what might this mean?
+
+> Answer.
+
+```{r}
+
+```
+
+## Grading rubric
+
+- Everything is good: full points
+- Partially correct answer: depends on how many steps are correct
+- Reasonable attempt: half points
+
+## Submit
+
+Be sure to click the "Render" button to render the HTML output.
+
+Then paste the URL of this Posit Cloud project into the problem set on Canvas.
