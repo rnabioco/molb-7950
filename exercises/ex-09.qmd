@@ -75,6 +75,7 @@ brauer_gene_exp_tidy <-
 Next, we want to update the nutrient abbreviations so they're easier to remember.
 
 ```{r}
+#| eval: false
 nutrient_abbrs <- tribble(
   ~ nutrient_abbr, ~ nutrient,
   "G", "Glucose",
@@ -97,6 +98,7 @@ Next, we want the common gene names, which contain useful information for filter
 ```{r}
 # need a tibble that maps systematic
 # common names
+#| eval: false
 name_map <- select(
   yeast_go_terms,
   ___, ___ 
@@ -112,6 +114,7 @@ brauer_gene_exp_tidy <-
 Finally, we'll drop all rows with `NA` expression values, and arrange the tibble.
 
 ```{r}
+#| eval: false
 brauer_gene_exp_tidy <-
   # drop rows where `exp` is `NA`
   drop_na(___, ___) |>
@@ -151,6 +154,7 @@ ComplexHeatmap::Heatmap(___)
 Examine the genes (`common_name`) that start with LEU.
 
 ```{r}
+#| eval: false
 leu_genes_tbl <- brauer_gene_exp_tidy |>
   filter(str_detect(___, "___"))
 
@@ -176,6 +180,7 @@ ggplot(
 Let's look specifically at a linear model of the data for LEU1 under leucine starvation.
 
 ```{r}
+#| eval: false
 leu1_tbl <- leu_genes_tbl |>
   filter(common_name == "___" & nutrient == "___")
 
@@ -187,6 +192,7 @@ ggplot(leu1_tbl, aes(___, ___)) +
 Let's take a look at the linear model of these data.
 
 ```{r}
+#| eval: false
 mod <- lm(exp ~ rate, data = leu1_tbl)
 summary(mod)
 ```
@@ -196,6 +202,7 @@ The relevant information (rate, intercept, p.value) for the model is not easily 
 We can use the [broom](https://broom.tidymodels.org/) library to tidy the model information.
 
 ```{r}
+#| eval: false
 library(broom)
 broom::tidy(mod)
 ```
@@ -212,6 +219,7 @@ The following code chunk will do the following:
 4.  unnest the model coefficients
 
 ```{r}
+#| eval: false
 linear_model_tbl <-
   brauer_gene_exp_tidy |>
   group_by(systematic_name, common_name, nutrient) |>
