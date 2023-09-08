@@ -14,13 +14,13 @@ Slide numbers correspond to the class number on the left of the main schedule ta
 - The [quarto docs](https://quarto.org/docs/presentations/revealjs/) on slide markup are excellent. They are spread
   over a few pages, with simpler and more advanced approaches.
 
--   Use h1 headers (`#`) to demarcate sections of slides. The title will appear on its own slide.
+-   Use h1 headers (`#`) to demarcate sections of slides. The title will appear on its own slide. These also improve navigation in the overview (`Esc` when you're in the slide show).
 
 -   Slides under the headers start with h2 (`##`).
 
 If you are displaying code on a slide, and expect them to type it out, consider the following:
 
--   Ensure that the code doesn't spill over the code block on a slide.
+-   Ensure that the code doesn't spill over the code block on a slide. If they are following along on the projector screen and not on their own screens, they won't be able to slide the slider, and it will be annoying for you to do so.
 
 E.g., this code:
 
@@ -88,5 +88,6 @@ gggplot(
 
 Other formatting suggestions, which will surprise students the least:
 
+-   Spell out `TRUE` and `FALSE` instead of the shorthand `T` and `F`. Explicit is better than implicit.
 -   Prefer `tibble()` over `data.frame()` (find and replace)
 -   Prefer base `|>` over magrittr `%>%` (find and replace)
