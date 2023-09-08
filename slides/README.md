@@ -96,16 +96,16 @@ gggplot(
 ```
 ````
 
-### Slide outputs
-
 -   Use the revealjs separators `. . .` and `---` throughout slides. `. . .` places a stall in a slide that you click through to reveal. `---` creates a new slide, and you don't need a header on the new one, so use it mainly to continue the thought from a previous slide.
 
--   Use the [`output.location`](https://quarto.org/docs/presentations/revealjs/index.html#output-location) chunk label to direct output:
+-   Use the [`output-location`](https://quarto.org/docs/presentations/revealjs/index.html#output-location) chunk label to direct output:
 
     -   `column` puts the output in a second column next to the code chunk. useful for text output
-    -   `column-fragment` is like \`column, but you clide to reveal the output
+    -   `column-fragment` is like `column`, but you click to reveal the output
     -   `fragment` places the output below a code chunk that spans the width of the slide
     -   `slide` places the output on the next slide. useful for larger, more complex plots.
+
+    [See. the above in action.](https://mine-cetinkaya-rundel.github.io/quarto-tip-a-day/posts/05-output-location/)
 
 -   Use [`aside` blocks](https://quarto.org/docs/presentations/revealjs/index.html#asides-footnotes) for peripheral suggestions.
 
