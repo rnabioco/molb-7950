@@ -11,12 +11,17 @@ Slide numbers correspond to the class number on the left of the main schedule ta
 
 ## Suggestions for slide content.
 
-- The [quarto docs](https://quarto.org/docs/presentations/revealjs/) on slide markup are excellent. They are spread
-  over a few pages, with simpler and more advanced approaches.
+-   The [quarto docs](https://quarto.org/docs/presentations/revealjs/) on slide markup are excellent. They are spread over a few pages, with simpler and more advanced approaches.
+
+### Headers
 
 -   Use h1 headers (`#`) to demarcate sections of slides. The title will appear on its own slide. These also improve navigation in the overview (`Esc` when you're in the slide show).
 
 -   Slides under the headers start with h2 (`##`).
+
+-   You can also use h3 and h4, but I don't find them to be useful in practice as stuff usually spills off the end of the slide.
+
+### Code formatting
 
 If you are displaying code on a slide, and expect them to type it out, consider the following:
 
@@ -40,12 +45,14 @@ ggplot(
   )
 ) +
   geom_point(size = 3) +
-  scale_color_brewer(palette = "Set1")
+  scale_color_brewer(
+    palette = "Set1"
+  )
 ```
 
 You can run `styler::style_file()` on the qmd and it will help move things around (but definitely isn't perfect, so inspect the changes).
 
--  For longer code chunks where you want them to type something so that they're actually thinking about it, use a "fill in the blanks" approach rather than having them type everything out.
+-   For longer code chunks where you want them to type something so that they're actually thinking about it, use a "fill in the blanks" approach rather than having them type everything out.
 
 ``` r
 #| eval: false
@@ -61,7 +68,7 @@ gggplot(
 ) + geom_???
 ```
 
--   Ensure you are using shortest possible names for variables, assuming you are expecting students to type things out. Especially the early learners will feel the need to type things out exactly.
+-   Ensure you are using shortest possible names for variables, assuming you are expecting students to type things out. Especially the early learners will feel the need to type things out exactly
 
     E.g., so this code:
 
@@ -75,18 +82,36 @@ gggplot(
     tbl <- tibble(x = c(1,2,3), y = c(2,4,6))
     ```
 
+-   Prefer quarto-style over Rmarkdown-style code chunks. Readability is better with quarto style, plus the editor will do tab-completion for you.
+
+```` markdown
+```{r}
+#| label: chunk-1
+#| warning: false
+# quarto style
+```
+
+```{r chunk-1, warning=FALSE}
+# rmarkdown style 
+```
+````
+
+### Slide outputs
+
 -   Use the revealjs separators `. . .` and `---` throughout slides. `. . .` places a stall in a slide that you click through to reveal. `---` creates a new slide, and you don't need a header on the new one, so use it mainly to continue the thought from a previous slide.
 
--   Use the `output.location` chunk label to direct output.
+-   Use the [`output.location`](https://quarto.org/docs/presentations/revealjs/index.html#output-location) chunk label to direct output:
 
     -   `column` puts the output in a second column next to the code chunk. useful for text output
     -   `column-fragment` is like \`column, but you clide to reveal the output
     -   `fragment` places the output below a code chunk that spans the width of the slide
     -   `slide` places the output on the next slide. useful for larger, more complex plots.
 
-- Use [`aside` blocks](https://quarto.org/docs/presentations/revealjs/index.html#asides-footnotes) for peripheral suggestions.
+-   Use [`aside` blocks](https://quarto.org/docs/presentations/revealjs/index.html#asides-footnotes) for peripheral suggestions.
 
-Other formatting suggestions, which will surprise students the least:
+### Other formatting
+
+These approaches will surprise students the least.
 
 -   Spell out `TRUE` and `FALSE` instead of the shorthand `T` and `F`. Explicit is better than implicit.
 -   Prefer `tibble()` over `data.frame()` (find and replace)
