@@ -1,0 +1,267 @@
+---
+title: "Accessibility Class 1"
+author: "Jay Hesselberth"
+---
+
+# DNA Accessibility
+
+Today we will work with two datasets in budding yeast that map genome-wide accessibility. We will go back to our old friends:
+
+1.  rtracklayer
+2.  Gviz - this is a way to generate pretty images of genome browser snapshots within Rstudio.
+3.  deepTools
+
+These tools are useful for us to look at the data directly, but will also be of great use to you when you write papers and want to create nice plots of the raw data.
+
+```{r}
+library(tidyverse)
+library(here)
+
+library(valr)
+library(Gviz)
+library(rtracklayer)
+```
+
+## Calculate length distributions
+
+Today we will analyze ATAC-seq and MNase-seq datasets from budding yeast. Here are the references for the datasets:
+
+1.  ATAC-seq - <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4617971/> (GSM1621323)
+2.  MNase-seq - <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3889552/> (GSM1199785)
+
+In case of MNase-seq, usually, DNA around 150 bp is extracted, so as to look only at nucleosome occupancy/positioning. However, the study we are analyzing today did not perform size selection. This is very important as now we can look at both TFs and nucleosomes with the MNase-seq data.
+
+First, we will determine the fragment size distributions obtained from the two experiments. The sizes are the fingerprints of particles that were protecting the DNA inside the yeast cells.
+
+I have performed the alignment of paired-end reads and converted all reads into a bed file where each line of the bed file denotes a single fragment from start to end.
+
+Since bed files are tab separated, we will read them in as dataframes. Be careful about doing this with large files - might want to sample subset of reads in that case or use other means to read the files.
+
+First, the ATAC-seq reads:
+
+```{r}
+atac <- read_bed(
+  here('data_acc/yeast_atac_chrII.bed')
+)
+atac
+```
+
+Second, the MNase reads.
+
+```{r}
+mnase <- read_bed(
+  here('data_acc/yeast_mnase_chrII.bed')
+)
+mnase
+```
+
+By the file names, hope you have guessed that we are looking at chromosome II of the yeast genome. You will see that working with a small genome is a huge advantage - we can study the whole chromosome in this class. For Drosophila and human data we dealt with before, we were looking at a subsection of the chromosome.
+
+For the MNase bed file, you see that there are only three columns: chr, start, and end. Calculating fragment length is very simple:
+
+```{r}
+mutate(mnase, frag_len = end - start)
+```
+
+We will calculate the fragment length distribution using the R function "hist". Some points to consider:
+
+1.  We want to be able to compare the two distributions, so we keep fragments between the lengths 30 and 500 bp for both datasets.
+2.  For same reason as point 1, we will set the same bins for both datasets, so we set breaks manually. We are setting 1 bp bins from 30 to 500.
+3.  Finally, we want to plot the two together, so we turn off the default plot function of hist. Instead, we will use the bin positions and the densities for plots later.
+
+```{r}
+ggplot(atac, aes(x = end - start)) + geom_histogram(binwidth = 1)
+
+atac_hist <- hist(atac[atac$V4>=30 & atac$V4<=500,]$V4,breaks=seq(30,500,1),plot = F)
+mnase_hist <- hist(mnase[mnase$V4>=30 & mnase$V4<=500,]$V4,breaks=seq(30,500,1),plot=F)
+```
+
+## Let us plot the length distributions
+
+Examine the hist object - it has several variables of use to us. We will use only the "mids" which are midpoints of bins, and "density" here.
+
+```{r fig.height = 3, fig.width = 3}
+plot(atac_hist$mids,atac_hist$density,xlim=c(30,350),type='l',col='black',ylim=c(0,0.023))
+lines(mnase_hist$mids,mnase_hist$density,xlim=c(30,350),type='l',col='red',ylim=c(0,0.023))
+legend("topright",legend = c("ATAC", "MNase"),col = c('black','red'),pch = 16)
+
+#abline(h = max(mnase_hist$density),col='cornflowerblue')
+#abline(v=148, col='darkorange3')
+#abline(v=120, col='blueviolet')
+#temp <- data.frame(mnase_hist$mids,mnase_hist$density)
+#tail(temp[order(temp$mnase_hist.density),1])
+```
+
+1.  How would you describe the two distributions?
+2.  Are they similar?
+3.  Can you make any biological conclustions based on the length distributions?
+
+ATAC data seems to be periodic. How can we test that hypothesis? We can calculate the autocorrelation of the length distribution. Can someone explain what autocorrelation means?
+
+Here, "density" is a vector at bp resolution. We will use acf to calculate autocorrelation. We will store the autocorrelation object instead of plotting it in the default mode. Examine the acf object to see the variables inside it.
+
+```{r}
+atac_acf <- acf(atac_hist$density,lag.max = 50,plot = F)
+```
+
+Now let us plot the autocorrelation:
+
+```{r fig.height = 5, fig.width = 5}
+plot(atac_acf$lag,atac_acf$acf,xlim=c(0,25),col='black',type='l',ylim=c(0.67,1))
+abline(v=10,col='red')
+abline(v=21,col='red')
+```
+
+So, it looks like there is a significant bumps in autocorrelation at 10 and 21 bp positions, indicating that ATAC length distribution is periodic.
+
+### Why 10 bp periodicity?
+
+Ok, how do we confirm these bumps are interesting? Let us calculate the acf of a negative control - the length distribution of MNase data:
+
+```{r fig.height = 5, fig.width = 5}
+mnase_acf <- acf(mnase_hist$counts,lag.max = 50,plot = F)
+plot(mnase_acf$lag,mnase_acf$acf,xlim=c(0,25),ylim=c(0.4,1),col='black',type='l')
+lines(atac_acf$lag,atac_acf$acf,xlim=c(0,25),col='red',type='l',ylim=c(0.4,1))
+abline(v=10,col='cornflowerblue')
+abline(v=21,col='cornflowerblue')
+legend("topright",legend = c("MNase_ACF", "ATAC_ACF"),col = c('black','red'),pch = 16)
+```
+
+We see a monotonic decrease here, which confirms that the bumps we see are distinctive features of ATAC-seq data.
+
+## Visualize the raw read density in a given region of the genome
+
+We will use Gviz to visualize read densities in any given region.
+
+```{r echo=FALSE}
+library(Gviz)
+library(rtracklayer)
+```
+
+Gviz can plot annotation tracks and data tracks.
+
+## Load tracks
+
+First, we will load the gene annotations from ENSEMBL. What does the function BiomartGeneRegionTrack do?
+
+```{r}
+yeast_genome <- UcscTrack(genome ="sacCer3",track = "ensGene",chromosome ="chrII",start=530811, end=540885,trackType = "GeneRegionTrack",gene ="name",rstarts = "exonStarts",rends = "exonEnds",symbol = "name2", transcript = "name",strand = "strand")
+yeast_genome
+```
+
+We will import the bigwig file containing yeast nucleosomal sized fragments from MNase-seq using import.bw function from rtracklayer. What is "GRanges"?
+
+```{r}
+mnase_nuc <- import.bw("data_acc/yeast_mnase_134_160.bw",as="GRanges") 
+mnase_nuc
+```
+
+We will then load the GRanges object as a track for Gviz to plot:
+
+```{r}
+mnase_nuc_trk <- DataTrack(mnase_nuc,name='MNase_nuc') 
+mnase_nuc_trk
+```
+
+Now, we can make a plot for this particular region of chrII:
+
+```{r fig.height = 3, fig.width = 5}
+plotTracks(c(yeast_genome,mnase_nuc_trk),from=530811, to=540885,chromosome = "chrII",type='l',transcriptAnnotation="gene",shape="arrow",type='h')
+```
+
+That looks great! Let us load all the other datasets we have.
+
+1.  We will first load the bigwigs as a GRanges onject
+2.  Then we will convert that into a data track that Gviz can plot
+
+```{r}
+mnase_tf <- import.bw("data_acc/yeast_mnase_lt50.bw",as="GRanges") 
+atac_short <- import.bw("data_acc/yeast_atac_lt120.bw",as="GRanges") 
+atac_long <- import.bw("data_acc/yeast_atac_gt120.bw",as="GRanges") 
+mnase_tf_trk <- DataTrack(mnase_tf,name='MNase_TF') 
+atac_short_trk <- DataTrack(atac_short,name='ATAC_Short') 
+atac_long_trk <- DataTrack(atac_long,name='ATAC_Long') 
+```
+
+Now, we just have to make a list of tracks to plot and Gviz takes care of teh rest. Some questions to think about as you look at the tracks:
+
+1.  What is each dataset reporting on?
+2.  What can you infer about genome function based on these tracks?
+3.  What are the major differences between MNase-seq and ATAC-seq based on these tracks?
+
+```{r fig.height = 3, fig.width = 5}
+plotTracks(c(yeast_genome,mnase_nuc_trk,mnase_tf_trk,atac_long_trk,atac_short_trk),from=530811, to=540885,chromosome = "chrII",type='h',transcriptAnnotation="gene",shape="arrow")
+```
+
+## Metaplots and heatmap
+
+So a small region of chrII is telling us a lot about chromatin structure and the different methods to profile accessibility.
+
+Next, we want to make sure these conclusions are valid throughout the genome. Well since we want to keep the file sizes small, we can ask if it is valid throughout chrII. We will go to our old pal, deeptools to do this analysis.
+
+First we will plot the profiles of all our datasets relative to the transcription start site (TSS), where all the action seems to be happening:
+
+```{bash eval=FALSE}
+computeMatrix reference-point --referencePoint center -a 750 -b 750 \
+-S data_acc/yeast_atac_gt120.bw  data_acc/yeast_mnase_134_160.bw \
+data_acc/yeast_atac_lt120.bw  data_acc/yeast_mnase_lt50.bw \
+--regionsFileName data_acc/yeast_tss_chrII.bed \
+--outFileName data_acc/tss.mat.gz --missingDataAsZero
+
+plotHeatmap -m data_acc/tss.mat.gz -o data_acc/heatmap_tss.png \
+--zMin 0 50 0 0 \
+--zMax 500 225 850 800 \
+--colorList '#e5f5f9,#2ca25f' '#efedf5,#756bb1' '#e5f5f9,#2ca25f' '#efedf5,#756bb1' \
+--whatToShow 'heatmap and colorbar'
+
+plotProfile -m data_acc/tss.mat.gz -o data_acc/profile_tss.png \
+--yMin 75 50 50 50 \
+--yMax 500 225 850 800 \
+--colors '#2ca25f' '#756bb1' '#2ca25f' '#756bb1' \
+--plotType=fill
+```
+
+```{r echo=FALSE, out.width = '100%'}
+knitr::include_graphics("data_acc/profile_tss.png")
+```
+
+```{r echo=FALSE, out.width = '100%'}
+knitr::include_graphics("data_acc/heatmap_tss.png")
+```
+
+1.  How do heatmaps and metaplots work?
+2.  What can you conclude from these plots?
+3.  What are the disting features of MNase-seq and ATAC-seq that become clearer when looking at many genes at the same time?
+4.  What are some hypotheses you can generate based on these plots?
+
+## Perspective matters!
+
+We centered our analysis on TSSs and observed many interesting features. We can change our perspective slightly and see what happens. We can measure the position of the first nucleosome downstream of the TSS highly accurately in yeast (at bp resolution!). I have put the list of +1 positions in a bed file. Let us see how the plots differ when we shift the center to +1 nucleosomes instead of TSSs:
+
+```{bash eval=FALSE}
+
+computeMatrix reference-point --referencePoint center -a 750 -b 750 \
+-S data_acc/yeast_atac_gt120.bw  data_acc/yeast_mnase_134_160.bw \
+data_acc/yeast_atac_lt120.bw  data_acc/yeast_mnase_lt50.bw \
+--regionsFileName data_acc/yeast_p1_chrII.bed \
+--outFileName data_acc/p1.mat.gz --missingDataAsZero
+
+plotHeatmap -m data_acc/p1.mat.gz -o data_acc/heatmap_p1.png \
+--zMin 0 50 0 0 --zMax 500 225 850 800 \
+--colorList '#e5f5f9,#2ca25f' '#efedf5,#756bb1' '#e5f5f9,#2ca25f' '#efedf5,#756bb1' \
+--whatToShow 'heatmap and colorbar'
+
+plotProfile -m data_acc/p1.mat.gz -o data_acc/profile_p1.png \
+--yMin 75 50 25 50 \
+--yMax 500 225 850 800 \
+--colors '#2ca25f' '#756bb1' '#2ca25f' '#756bb1' \
+--plotType=fill
+```
+
+```{r echo=FALSE, out.width = '100%'}
+knitr::include_graphics("data_acc/profile_p1.png")
+```
+
+```{r echo=FALSE, out.width = '100%'}
+knitr::include_graphics("data_acc/heatmap_p1.png")
+```
