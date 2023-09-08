@@ -45,6 +45,22 @@ ggplot(
 
 You can run `styler::style_file()` on the qmd and it will help move things around (but definitely isn't perfect, so inspect the changes).
 
+-  For longer code chunks where you want them to type something so that they're actually thinking about it, use a "fill in the blanks" approach rather than having them type everything out.
+
+``` r
+#| eval: false
+# *important* be sure to include the `eval: false` label above
+# so that quarto doesn't try to render it.
+# (which will fail because of the blanks below)
+gggplot(
+  ___,
+  aes(
+    x = ___, 
+    y = ___
+  ) 
+) + geom_???
+```
+
 -   Ensure you are using shortest possible names for variables, assuming you are expecting students to type things out. Especially the early learners will feel the need to type things out exactly.
 
     E.g., so this code:
