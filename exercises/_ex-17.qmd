@@ -1,20 +1,24 @@
 ---
-title: "Accessibility Class 1"
+title: "Chromatin accessibility - Class 1"
 author: "Jay Hesselberth"
 ---
 
 # DNA Accessibility
 
-Today we will work with two datasets in budding yeast that map genome-wide accessibility. We will go back to our old friends:
+Today we will work with two datas xets in budding yeast that map genome-wide accessibility. We will go back to our old friends:
 
-1.  rtracklayer
-2.  Gviz - this is a way to generate pretty images of genome browser snapshots within Rstudio.
-3.  deepTools
+## Libraries
+
+1. valr - 
+1. rtracklayer
+1. Gviz - this is a way to generate pretty images of genome browser snapshots within Rstudio.
 
 These tools are useful for us to look at the data directly, but will also be of great use to you when you write papers and want to create nice plots of the raw data.
 
 ```{r}
+#| label: load-libs
 library(tidyverse)
+library(cowplot)
 library(here)
 
 library(valr)
@@ -35,81 +39,89 @@ First, we will determine the fragment size distributions obtained from the two e
 
 I have performed the alignment of paired-end reads and converted all reads into a bed file where each line of the bed file denotes a single fragment from start to end.
 
-Since bed files are tab separated, we will read them in as dataframes. Be careful about doing this with large files - might want to sample subset of reads in that case or use other means to read the files.
+Since bed files are tab separated, we will read them in as tibbles.
+
+Be careful about doing this with large files - might want to sample subset of reads in that case or use other means to read the files.
 
 First, the ATAC-seq reads:
 
 ```{r}
-atac <- read_bed(
-  here('data_acc/yeast_atac_chrII.bed')
-)
-atac
+atac_tbl <- read_bed(
+  here("data/block-dna/yeast_atac_chrII.bed.gz"),
+  n_fields = 6
+) |>
+  select(chrom:end)
+atac_tbl
 ```
 
 Second, the MNase reads.
 
 ```{r}
-mnase <- read_bed(
-  here('data_acc/yeast_mnase_chrII.bed')
+mnase_tbl <- read_bed(
+  here("data/block-dna/yeast_mnase_chrII.bed.gz"),
+  n_fields = 6
 )
-mnase
+mnase_tbl
 ```
 
-By the file names, hope you have guessed that we are looking at chromosome II of the yeast genome. You will see that working with a small genome is a huge advantage - we can study the whole chromosome in this class. For Drosophila and human data we dealt with before, we were looking at a subsection of the chromosome.
+You might have guessed by by the file names that we are looking at chromosome II of the yeast genome.
 
-For the MNase bed file, you see that there are only three columns: chr, start, and end. Calculating fragment length is very simple:
+You will see that working with a small genome is a huge advantage - we can study the whole chromosome in this class. For Drosophila and human data we dealt with before, we were looking at a subsection of the chromosome.
+
+For the MNase bed file, you see that there are only three columns: `chrom`, `start`, and `end`. Calculating fragment length is very simple:
 
 ```{r}
 mutate(mnase, frag_len = end - start)
 ```
 
-We will calculate the fragment length distribution using the R function "hist". Some points to consider:
-
-1.  We want to be able to compare the two distributions, so we keep fragments between the lengths 30 and 500 bp for both datasets.
-2.  For same reason as point 1, we will set the same bins for both datasets, so we set breaks manually. We are setting 1 bp bins from 30 to 500.
-3.  Finally, we want to plot the two together, so we turn off the default plot function of hist. Instead, we will use the bin positions and the densities for plots later.
+Let's examine the fragment length distribution. We'll set `binwidth = 1` as we want base-pair resolution.
 
 ```{r}
-ggplot(atac, aes(x = end - start)) + geom_histogram(binwidth = 1)
+#| echo: true
+#| warning: false
+#| output-location: column
+combined_tbl <-
+  bind_rows(
+    mutate(mnase_tbl, type = "mnase"),
+    mutate(atac_tbl, type = "atac")
+  )
 
-atac_hist <- hist(atac[atac$V4>=30 & atac$V4<=500,]$V4,breaks=seq(30,500,1),plot = F)
-mnase_hist <- hist(mnase[mnase$V4>=30 & mnase$V4<=500,]$V4,breaks=seq(30,500,1),plot=F)
-```
-
-## Let us plot the length distributions
-
-Examine the hist object - it has several variables of use to us. We will use only the "mids" which are midpoints of bins, and "density" here.
-
-```{r fig.height = 3, fig.width = 3}
-plot(atac_hist$mids,atac_hist$density,xlim=c(30,350),type='l',col='black',ylim=c(0,0.023))
-lines(mnase_hist$mids,mnase_hist$density,xlim=c(30,350),type='l',col='red',ylim=c(0,0.023))
-legend("topright",legend = c("ATAC", "MNase"),col = c('black','red'),pch = 16)
-
-#abline(h = max(mnase_hist$density),col='cornflowerblue')
-#abline(v=148, col='darkorange3')
-#abline(v=120, col='blueviolet')
-#temp <- data.frame(mnase_hist$mids,mnase_hist$density)
-#tail(temp[order(temp$mnase_hist.density),1])
+p <- ggplot(
+  combined_tbl,
+  aes(x = end - start)
+  ) +
+  geom_histogram(
+    binwidth = 1
+  ) + 
+  facet_grid(
+    type ~ .,
+    scales = "free_y"
+    ) +
+  xlim(30, 500) +
+  labs(x = "fragment length") +
+  theme_cowplot()
 ```
 
 1.  How would you describe the two distributions?
+
 2.  Are they similar?
-3.  Can you make any biological conclustions based on the length distributions?
+
+3.  Can you make any biological conclusions based on the length distributions?
 
 ATAC data seems to be periodic. How can we test that hypothesis? We can calculate the autocorrelation of the length distribution. Can someone explain what autocorrelation means?
 
 Here, "density" is a vector at bp resolution. We will use acf to calculate autocorrelation. We will store the autocorrelation object instead of plotting it in the default mode. Examine the acf object to see the variables inside it.
 
 ```{r}
-atac_acf <- acf(atac_hist$density,lag.max = 50,plot = F)
+atac_acf <- acf(atac_hist$density, lag.max = 50, plot = F)
 ```
 
 Now let us plot the autocorrelation:
 
 ```{r fig.height = 5, fig.width = 5}
-plot(atac_acf$lag,atac_acf$acf,xlim=c(0,25),col='black',type='l',ylim=c(0.67,1))
-abline(v=10,col='red')
-abline(v=21,col='red')
+plot(atac_acf$lag, atac_acf$acf, xlim = c(0, 25), col = "black", type = "l", ylim = c(0.67, 1))
+abline(v = 10, col = "red")
+abline(v = 21, col = "red")
 ```
 
 So, it looks like there is a significant bumps in autocorrelation at 10 and 21 bp positions, indicating that ATAC length distribution is periodic.
@@ -119,12 +131,12 @@ So, it looks like there is a significant bumps in autocorrelation at 10 and 21 b
 Ok, how do we confirm these bumps are interesting? Let us calculate the acf of a negative control - the length distribution of MNase data:
 
 ```{r fig.height = 5, fig.width = 5}
-mnase_acf <- acf(mnase_hist$counts,lag.max = 50,plot = F)
-plot(mnase_acf$lag,mnase_acf$acf,xlim=c(0,25),ylim=c(0.4,1),col='black',type='l')
-lines(atac_acf$lag,atac_acf$acf,xlim=c(0,25),col='red',type='l',ylim=c(0.4,1))
-abline(v=10,col='cornflowerblue')
-abline(v=21,col='cornflowerblue')
-legend("topright",legend = c("MNase_ACF", "ATAC_ACF"),col = c('black','red'),pch = 16)
+mnase_acf <- acf(mnase_hist$counts, lag.max = 50, plot = F)
+plot(mnase_acf$lag, mnase_acf$acf, xlim = c(0, 25), ylim = c(0.4, 1), col = "black", type = "l")
+lines(atac_acf$lag, atac_acf$acf, xlim = c(0, 25), col = "red", type = "l", ylim = c(0.4, 1))
+abline(v = 10, col = "cornflowerblue")
+abline(v = 21, col = "cornflowerblue")
+legend("topright", legend = c("MNase_ACF", "ATAC_ACF"), col = c("black", "red"), pch = 16)
 ```
 
 We see a monotonic decrease here, which confirms that the bumps we see are distinctive features of ATAC-seq data.
@@ -145,28 +157,28 @@ Gviz can plot annotation tracks and data tracks.
 First, we will load the gene annotations from ENSEMBL. What does the function BiomartGeneRegionTrack do?
 
 ```{r}
-yeast_genome <- UcscTrack(genome ="sacCer3",track = "ensGene",chromosome ="chrII",start=530811, end=540885,trackType = "GeneRegionTrack",gene ="name",rstarts = "exonStarts",rends = "exonEnds",symbol = "name2", transcript = "name",strand = "strand")
+yeast_genome <- UcscTrack(genome = "sacCer3", track = "ensGene", chromosome = "chrII", start = 530811, end = 540885, trackType = "GeneRegionTrack", gene = "name", rstarts = "exonStarts", rends = "exonEnds", symbol = "name2", transcript = "name", strand = "strand")
 yeast_genome
 ```
 
 We will import the bigwig file containing yeast nucleosomal sized fragments from MNase-seq using import.bw function from rtracklayer. What is "GRanges"?
 
 ```{r}
-mnase_nuc <- import.bw("data_acc/yeast_mnase_134_160.bw",as="GRanges") 
+mnase_nuc <- import.bw("data_acc/yeast_mnase_134_160.bw", as = "GRanges")
 mnase_nuc
 ```
 
 We will then load the GRanges object as a track for Gviz to plot:
 
 ```{r}
-mnase_nuc_trk <- DataTrack(mnase_nuc,name='MNase_nuc') 
+mnase_nuc_trk <- DataTrack(mnase_nuc, name = "MNase_nuc")
 mnase_nuc_trk
 ```
 
 Now, we can make a plot for this particular region of chrII:
 
 ```{r fig.height = 3, fig.width = 5}
-plotTracks(c(yeast_genome,mnase_nuc_trk),from=530811, to=540885,chromosome = "chrII",type='l',transcriptAnnotation="gene",shape="arrow",type='h')
+plotTracks(c(yeast_genome, mnase_nuc_trk), from = 530811, to = 540885, chromosome = "chrII", type = "l", transcriptAnnotation = "gene", shape = "arrow", type = "h")
 ```
 
 That looks great! Let us load all the other datasets we have.
@@ -175,12 +187,12 @@ That looks great! Let us load all the other datasets we have.
 2.  Then we will convert that into a data track that Gviz can plot
 
 ```{r}
-mnase_tf <- import.bw("data_acc/yeast_mnase_lt50.bw",as="GRanges") 
-atac_short <- import.bw("data_acc/yeast_atac_lt120.bw",as="GRanges") 
-atac_long <- import.bw("data_acc/yeast_atac_gt120.bw",as="GRanges") 
-mnase_tf_trk <- DataTrack(mnase_tf,name='MNase_TF') 
-atac_short_trk <- DataTrack(atac_short,name='ATAC_Short') 
-atac_long_trk <- DataTrack(atac_long,name='ATAC_Long') 
+mnase_tf <- import.bw("data_acc/yeast_mnase_lt50.bw", as = "GRanges")
+atac_short <- import.bw("data_acc/yeast_atac_lt120.bw", as = "GRanges")
+atac_long <- import.bw("data_acc/yeast_atac_gt120.bw", as = "GRanges")
+mnase_tf_trk <- DataTrack(mnase_tf, name = "MNase_TF")
+atac_short_trk <- DataTrack(atac_short, name = "ATAC_Short")
+atac_long_trk <- DataTrack(atac_long, name = "ATAC_Long")
 ```
 
 Now, we just have to make a list of tracks to plot and Gviz takes care of teh rest. Some questions to think about as you look at the tracks:
@@ -190,7 +202,7 @@ Now, we just have to make a list of tracks to plot and Gviz takes care of teh re
 3.  What are the major differences between MNase-seq and ATAC-seq based on these tracks?
 
 ```{r fig.height = 3, fig.width = 5}
-plotTracks(c(yeast_genome,mnase_nuc_trk,mnase_tf_trk,atac_long_trk,atac_short_trk),from=530811, to=540885,chromosome = "chrII",type='h',transcriptAnnotation="gene",shape="arrow")
+plotTracks(c(yeast_genome, mnase_nuc_trk, mnase_tf_trk, atac_long_trk, atac_short_trk), from = 530811, to = 540885, chromosome = "chrII", type = "h", transcriptAnnotation = "gene", shape = "arrow")
 ```
 
 ## Metaplots and heatmap
@@ -265,3 +277,4 @@ knitr::include_graphics("data_acc/profile_p1.png")
 ```{r echo=FALSE, out.width = '100%'}
 knitr::include_graphics("data_acc/heatmap_p1.png")
 ```
+
