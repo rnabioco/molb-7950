@@ -1,0 +1,939 @@
+---
+title: "Stats Bootcamp - class 11"
+subtitle: "Distributions and summary stats"
+author: "Neelanjan Mukherjee"
+editor: visual
+---
+
+```{r}
+#| echo: false
+#| include: false
+library(tidyverse)
+library(rstatix)
+library(cowplot)
+library(palmerpenguins)
+library(janitor)
+library(stringr)
+
+```
+
+## Learning objectives
+
+-   Learn types of variables
+
+-   Calculate and visualize summary statistics
+
+-   Properties of data distributions
+
+-   Perform exploratory data analysis
+
+## Quantitative Variables
+
+**Discrete variable**: numeric variables that have a countable number of values between any two values - `integer` in R (e.g., number of mice, read counts).
+
+**Continuous variable**: numeric variables that have an infinite number of values between any two values - `numeric` in R (e.g., normalized expression values, fluorescent intensity).
+
+## Categorical Variables
+
+**Nominal variable**: (unordered) random variables have categories where order doesn't matter - `factor` in R (e.g., country, type of gene, genotype).
+
+**Ordinal variable**: (ordered) random variables have ordered categories - order of `levels` in R ( e.g. grade of tumor).
+
+## Distributions and probabilities
+
+A **distribution** in statistics is a function that shows the possible values for a variable and how often they occur.
+
+We can visualize this with a histogram or density plots as we did earlier.
+
+We are going to start with simulated data and then use Palmer Penguins later.
+
+## Create a normal distribution {.smaller}
+
+Assume that the test scores of a college entrance exam fits a normal distribution. Furthermore, the mean test score is 76, and the standard deviation is 13.8.
+
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+
+d <- tibble(n1=rnorm(n = ??, mean = ??, sd = ??))
+
+head(d)
+```
+
+## Visualize a normal distribution {.smaller}
+
+first we will look at a histogram n1
+
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+
+ggplot(data = ??, 
+       aes(x=??)
+       ) +
+  geom_??() +
+  theme_cowplot() 
+
+
+```
+
+------------------------------------------------------------------------
+
+next a density plot
+
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+
+ggplot(data = d, 
+       aes(x=n1)
+       ) +
+  geom_??() +
+  geom_vline(xintercept = ??) + # draw mean
+  theme_cowplot() 
+
+
+```
+
+## Determine the probability of a given value {.smaller}
+
+Probability is used to estimate how probable a sample is based on a given distribution.
+
+Probability refers to the area under curve (AUC) on the distribution curve. The higher the value, the more probable that the data come from this distribution.
+
+What is the probability of students scoring 85 or more in the exam?
+
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+
+s <- ??
+pnorm(s, mean=76, sd=13.8, lower.tail = F) 
+
+```
+
+. . .
+
+What is the probability of students scoring 85 or less in the exam?
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+pnorm(s, mean=76, sd=13.8, lower.tail = T) 
+
+```
+
+------------------------------------------------------------------------
+
+Prob of 85 or more is equivalent to the area under the curve to the right of 85.
+
+```{r}
+#| eval: false
+ggplot(data = d, 
+       aes(x=n1)
+       ) +
+  geom_density() +
+  geom_vline(xintercept = s) +
+  theme_cowplot() 
+
+
+```
+
+## Determine the likelihood of a given value {.smaller}
+
+Likelihood is used to estimate how good a model fits the data. Likelihood refers to a specific point on the distribution curve. The lower the likelihood, the worse the model fits the data.
+
+What is the likelihood of students scoring 85 on the exam?
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+l <- dnorm(s, mean=76, sd=13.8) 
+l
+```
+
+------------------------------------------------------------------------
+
+The likelihood is the y-axis value on the curve when th x-axis = 85.
+
+```{r}
+#| eval: false
+ggplot(data = d, 
+       aes(x=n1)
+       ) +
+  geom_density() +
+  geom_vline(xintercept = s) +
+  geom_hline(yintercept = l) +
+  theme_cowplot() 
+
+```
+
+## Now to real (messy!) data {.smaller}
+
+We will use the [Palmer Penguins dataset](https://allisonhorst.github.io/palmerpenguins/)
+
+```{r}
+#| echo: true
+#| output-location: fragment
+
+penguins_raw 
+
+```
+
+. . .
+
+Yikes! Some of these column names have horrible formatting e.g. spaces, slashes, parenthesis. These characters can be misinterpreted by R. Also, long/wonky names makes coding annoying.
+
+## Let's tidy the names {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: fragment
+
+penguins_raw |> colnames()
+
+```
+
+. . .
+
+[janitor](https://cran.r-project.org/web/packages/janitor/vignettes/janitor.html) package to the rescue.
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: fragment
+
+
+
+```
+
+. . .
+
+Create a new object `pen` that has nice clean variable names. And get rid of any variable that is the same for all observations (not useful).
+
+```{r}
+#| echo: true
+#| output-location: fragment
+
+pen <- penguins_raw |>
+  clean_names() |>
+  janitor::remove_constant()
+
+```
+
+## Let's inspect the data {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column
+
+pen |>
+  str()
+
+```
+
+------------------------------------------------------------------------
+
+Let's select a few of these columns to keep and get rid of `NA`s
+
+```{r}
+#| echo: true
+#| output-location: fragment
+
+p <- pen |> 
+  select(species, island, culmen_length_mm, flipper_length_mm, body_mass_g, sex) |> 
+  drop_na()
+
+
+```
+
+. . .
+
+clean species names
+```{r}
+#| echo: true
+#| output-location: fragment
+unique(p$species)
+
+
+p <- p |>
+  mutate(species = str_remove(species, pattern = " [P|p]en.*")
+         )
+
+```
+
+
+
+## Visualizing quantitative variables {.smaller}
+
+histogram of body mass
+
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+
+ggplot(data = ??, 
+       aes(x=??)
+       ) +
+  geom_histogram() +
+  theme_cowplot()
+  
+
+```
+
+------------------------------------------------------------------------
+
+density plot of body mass
+
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+
+ggplot(data = p, 
+       aes(x=body_mass_g)
+       ) +
+  geom_??() +
+  theme_cowplot()
+
+  
+
+```
+
+## Visualizing categorical variables {.smaller}
+
+barplot - 1 category
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+
+ggplot(data = p, aes(x = island, fill = island)) +
+    geom_bar() +
+  theme_cowplot()
+  
+
+```
+
+## barplot - categories (island vs sex) {.smaller}
+
+stacked:
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = p, aes(x = island, fill = sex)) +
+  geom_bar() +
+  theme_cowplot()
+
+
+```
+
+------------------------------------------------------------------------
+
+proportion
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = p, aes(x = island, fill = sex)) +
+  geom_bar(position = "fill") +
+  theme_cowplot()
+
+```
+
+------------------------------------------------------------------------
+
+per category
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = p, aes(x = island, fill = sex)) +
+  geom_bar(position = "dodge") +
+  theme_cowplot()
+
+```
+
+## Descriptive statistics for continuous data
+
+-   `n`: \# observations/individuals or sample size
+
+-   mean ($\mu$): sum of all observations divided by \# of observations, $\mu = \displaystyle \frac {\sum x_i} {n}$
+
+-   median: the "middle" value of a data set. Not as sensitive to outliers as the mean.
+
+    ![](https://miro.medium.com/v2/resize:fit:4800/format:webp/0*wHMvuwRa_YF9SFwY.png)
+
+## Descriptive statistics for body weight {.smaller}
+
+Let's look at the distribution again
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = p, 
+       aes(x=body_mass_g)
+       ) +
+  geom_density() +
+  theme_cowplot()
+
+  
+
+```
+
+. . .
+
+n
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+length(p$body_mass_g)
+
+```
+
+. . .
+
+mean
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+mean(p$body_mass_g)
+
+```
+
+. . .
+
+median
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+median(p$body_mass_g)
+
+```
+
+------------------------------------------------------------------------
+
+viz mean + median
+
+```{r}
+
+ggplot(data = p, 
+       aes(x=body_mass_g)
+       ) +
+  geom_density() +
+#  geom_vline() +
+#  geom_vline() +
+  theme_cowplot()
+
+  
+
+```
+
+## Other descriptive statistics {.smaller}
+
+Min: minimum value. \
+Max: maximum value. \
+q1, q3: the first and the third quartile, respectively.\
+IQR: interquartile range measures the spread of the middle half of your data (q3-q1).
+
+Quick way to get all these stats:
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+p |>
+  get_summary_stats(body_mass_g, type = "common")
+
+
+```
+
+. . .
+get mean, median 
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+
+p |>
+  get_summary_stats(body_mass_g,
+                    show = c("??","??")
+                    ) 
+
+
+```
+
+## Statistics describing spread of values
+
+Variance: the average of the squared differences from the mean
+
+$\sigma^2 = \displaystyle \frac {\sum (x_{i} - \mu)^2}{n}$
+
+Standard Deviation: square root of the variance
+
+$\sigma = \sqrt {\displaystyle \frac {\sum (x_{i} - \mu)^2}{n}}$
+
+> ```         
+> The variance measures the mathematical dispersion of the data relative to the mean. However, it is more difficult to apply in a real-world sense because the values used to calculate it were squared. 
+>
+> The standard deviation, as the square root of the variance, is in the same units as the original values, which makes it much easier to work with and interpret w/respect to the mean.
+> ```
+
+## Other stats describing spread of data
+
+Confidence Interval (**ci**): a range of values that you can be 95% (or x%) certain contains the true population mean. Gets into inferential statistics.
+
+![](https://stats.libretexts.org/@api/deki/files/834/rule.png?revision=1&size=bestfit&width=855&height=369)
+
+## Get more descriptive stats easily {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+p |>
+  get_summary_stats(body_mass_g, show = c("mean","median","sd")) 
+
+
+```
+
+. . .
+
+by species
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+p |>
+  group_by(species) |>
+  get_summary_stats(body_mass_g, show = c("mean","median","sd"))
+
+
+```
+
+---
+
+by species and island
+```{r}
+#| echo: true
+#| output-location: fragment
+
+p |>
+  group_by(species,island) |>
+  get_summary_stats(body_mass_g, show = c("mean","median","sd")) 
+
+
+```
+
+
+## Normal distribution {.smaller}
+
+The mean, mode, and median are all equal. \
+
+The distribution is symmetric about the mean---half the values fall below the mean and half above the mean. \
+
+The distribution can be described by two values: the mean and the standard deviation. \
+
+![](https://stats.libretexts.org/@api/deki/files/834/rule.png?revision=1&size=bestfit&width=855&height=369)
+
+## **Bell curve or standard normal:** {.smaller}
+
+Is a special normal distribution where the mean is 0 and the standard deviation is 1.
+
+![](/img/bellcurve.jpg)
+
+## Normal distribution metrics
+
+Skewness is a measure of the asymmetry around the mean. 0 for bell curve.
+
+![](https://miro.medium.com/v2/resize:fit:4800/format:webp/0*wHMvuwRa_YF9SFwY.png)
+
+
+## Normal distribution metrics
+
+Kurtosis is a measure of the "flatness" of the distribution.
+
+![](https://cdn.analystprep.com/cfa-level-1-exam/wp-content/uploads/2019/08/05085139/page-64.png)
+
+
+## Is my data normal(ly distributed)? {.smaller}
+
+
+Let's look at the test score distribution again
+
+
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+
+ggplot(data = d,
+       aes(x = n1)) +
+  geom_density() +
+  theme_cowplot()
+
+
+```
+
+## QQ-plot {.smaller}
+
+quantile-quantile plot to compare an empirical distribution to a theoretical distribution. 
+
+Quantile is the fraction (or percent) of points below the given value. For example, the 0.2 (or 20%) quantile is the point at which 20% percent of the data fall below and 80% fall above that value.
+
+
+
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+ggplot(data = d,
+       aes(sample = n1)) +
+  geom_qq() +
+  geom_qq_line() + 
+  theme_cowplot()
+
+```
+
+
+## Shapiro-Wilk Normality Test {.smaller}
+
+Shapiro-Wilk test is a hypothesis test that evaluates whether a data set is normally distributed. /
+
+It evaluates data from a sample with the null hypothesis that the data set is normally distributed. /
+
+A large p-value indicates the data set is normally distributed, a low p-value indicates that it isn’t normally distributed.
+
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+
+d |>
+  shapiro_test(n1)
+```
+
+## Back to penguin body mass
+
+Distribution
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = p,
+       aes(x = body_mass_g)) +
+  geom_density() +
+  theme_cowplot()
+```
+
+
+
+## QQ-plot body mass {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = p,
+       aes(sample = body_mass_g)) +
+  geom_qq() +
+  geom_qq_line() + 
+  theme_cowplot()
+
+
+```
+
+Hmmm...
+
+## Shapiro-Wilk body mass {.smaller}
+
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+
+p |>
+  shapiro_test(??)  
+
+```
+
+That does not look normal!
+
+## Penguin body mass by species?
+
+Distribution
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = p,
+       aes(x = body_mass_g, color = species)) +
+  geom_density() +
+  theme_cowplot()
+```
+
+
+
+## QQ-plot body weight {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = p,
+       aes(sample = body_mass_g, color = species)) +
+  geom_qq() +
+  geom_qq_line() + 
+  theme_cowplot()
+
+
+```
+
+That looks better...
+
+## Shapiro-Wilk body weight by species {.smaller}
+
+```{r}
+#| echo: true
+#| eval: false
+#| output-location: column-fragment
+
+p |>
+  group_by(??) |>
+  shapiro_test(??)  
+
+```
+
+Ok so Chinstrap and Gentoo look normal. Not sure about Adelie. We may want to consider using non-parametric test to compare mean body weights between Adelie vs Chinstrap or Gentoo.
+
+## Central limit theorem {.smaller}
+
+The central limit theorem states that if you take sufficiently large samples from a population, the samples' means will be normally distributed, even if the population isn't normally distributed.
+
+Back to coin flips!! 50 flips, one round.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+n <- 50
+
+# make a hundred fair and unfair flips
+f <- tibble(fair=rbinom(n = n, size = 1, prob = .5),
+       unfair=rbinom(n = n, size = 1, prob = .2)) |> 
+    pivot_longer(cols = c("fair","unfair"), names_to = "cheating", values_to = "flips")
+
+```
+
+## flip distributions {.smaller}
+
+Look at the distribution of fair flips
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = f |> filter(cheating=="fair"), 
+       aes(x=flips)
+       ) +
+  geom_histogram() +
+  theme_cowplot()
+
+```
+
+Look at the distribution of unfair flips
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = f |> filter(cheating=="unfair"), 
+       aes(x=flips)
+       ) +
+  geom_histogram() +
+  theme_cowplot()
+
+```
+
+
+## Now lets sample means {.smaller}
+
+let's do 100 round of 50 flips and take the average of each round.
+
+remember the `size` that i told you to ignore last class!
+```{r}
+#| echo: true
+
+r <- 100
+
+rbinom(n = n, size = r, prob = .5)/r
+
+```
+
+```{r}
+#| echo: true
+fmean <- tibble(
+  fair=rbinom(n = n, size = r, prob = .5)/r,
+  unfair=rbinom(n = n, size = r, prob = .2)/r) |>
+  pivot_longer(cols = c("fair","unfair"),
+               names_to = "cheating",
+               values_to = "flips"
+               )
+
+```
+
+## sampled flip mean distributions {.smaller}
+
+Look at the distribution of fair flips
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = fmean |> filter(cheating=="fair"), 
+       aes(x=flips)
+       ) +
+  geom_density() +
+  geom_vline(xintercept = .5) +
+  xlim(0,1) +
+  theme_cowplot()
+
+```
+
+Look at the distribution of unfair flips
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(data = fmean |> filter(cheating=="unfair"), 
+       aes(x=flips)
+       ) +
+  geom_density() +
+  geom_vline(xintercept = .2) + 
+  xlim(0,1) +
+  theme_cowplot()
+
+
+```
+
+
+## but is it normal?
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+fmean |>
+  group_by(cheating) |>
+  shapiro_test(flips)
+
+```
+
+yup!
+
+
+## What about the mean + sd with different parameters? {.smaller}
+
+10 fair and unfair flips \
+20 and 80 times
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+fair10 <- tibble(
+  r20=rbinom(n = 10, size = 20, prob = .5)/20,
+  r80=rbinom(n = 10, size = 80, prob = .5)/80,
+  type=rep("fair10")
+  )
+```
+
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+unfair10 <- tibble(
+  r20=rbinom(n = 10, size = 20, prob = .2)/20,
+  r80=rbinom(n = 10, size = 80, prob = .2)/80,
+  type=rep("unfair10")
+  )
+```
+
+---
+
+put it all together
+```{r}
+#| echo: true
+
+all <- bind_rows(fair10, unfair10) |>
+  pivot_longer(cols = c("r20","r80"),
+             names_to = "r",
+             values_to = "f"
+             )
+```
+
+## Visualize {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggplot(all , aes(x=r, y=f, color=r)) +
+  geom_jitter() +
+  stat_summary(fun.y=mean, geom="point", shape=18,
+                 size=3, color="black") +
+  ylim(-0.05,1.05) +
+   facet_grid(~type) +
+  geom_hline(yintercept = .5, linetype = "dashed") +
+  geom_hline(yintercept = .2, linetype = "dashed") +
+  theme_cowplot()
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+all |> 
+  group_by(type,r) |>
+  get_summary_stats(show = c("mean","sd"))
+
+```
+
+
+## References
+
+-   [The Normal Distribution, Confidence Intervals, and Their Deceptive Simplicity](https://medium.com/swlh/a-simple-refresher-on-confidence-intervals-1e29a8580697)
+
+-   [Central limit theorem](https://www.scribbr.com/statistics/central-limit-theorem/)
+
+-   [Histograms, Clearly Explained](https://www.youtube.com/watch?v=qBigTkBLU6g)
+
+-   [The Main Ideas behind Probability Distributions](https://www.youtube.com/watch?v=oI3hZJqXJuc)
+
+-   [The Normal Distribution, Clearly Explained!!!](https://www.youtube.com/watch?v=rzFX5NWojp0)
+
+-   [Probability vs Likelihood](https://www.youtube.com/watch?v=pYxNSUDSFH4)
