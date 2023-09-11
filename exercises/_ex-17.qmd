@@ -9,92 +9,92 @@ Today we will work with two datas xets in budding yeast that map genome-wide acc
 
 ## Libraries
 
-1. valr - 
 1. rtracklayer
 1. Gviz - this is a way to generate pretty images of genome browser snapshots within Rstudio.
 
-These tools are useful for us to look at the data directly, but will also be of great use to you when you write papers and want to create nice plots of the raw data.
+These tools are useful for us to look at the data directly, and are great use to you when you write papers and want to create nice plots. 
 
 ```{r}
 #| label: load-libs
+#| message: false
 library(tidyverse)
 library(cowplot)
 library(here)
+library(patchwork)
 
 library(valr)
 library(Gviz)
 library(rtracklayer)
 ```
 
-## Calculate length distributions
+# Patterns of DNA-protein binding
+
+## Load the data 
 
 Today we will analyze ATAC-seq and MNase-seq datasets from budding yeast. Here are the references for the datasets:
 
 1.  ATAC-seq - <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4617971/> (GSM1621323)
 2.  MNase-seq - <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3889552/> (GSM1199785)
 
-In case of MNase-seq, usually, DNA around 150 bp is extracted, so as to look only at nucleosome occupancy/positioning. However, the study we are analyzing today did not perform size selection. This is very important as now we can look at both TFs and nucleosomes with the MNase-seq data.
+In case of MNase-seq, usually, DNA around 150 bp is extracted, so as to look only at nucleosome occupancy & positioning. However, the study we are analyzing today did not perform size selection. This is very important as now we can look at both TFs and nucleosomes within the MNase-seq data.
 
-First, we will determine the fragment size distributions obtained from the two experiments. The sizes are the fingerprints of particles that were protecting the DNA inside the yeast cells.
+First, we will determine the fragment size distributions obtained from the two experiments. These sizes are the fingerprints of particles that were protecting the DNA inside the cells.
 
 I have performed the alignment of paired-end reads and converted all reads into a bed file where each line of the bed file denotes a single fragment from start to end.
-
-Since bed files are tab separated, we will read them in as tibbles.
-
-Be careful about doing this with large files - might want to sample subset of reads in that case or use other means to read the files.
 
 First, the ATAC-seq reads:
 
 ```{r}
-atac_tbl <- read_bed(
+atac_tbl <- valr::read_bed(
   here("data/block-dna/yeast_atac_chrII.bed.gz"),
-  n_fields = 6
-) |>
-  select(chrom:end)
+) 
 atac_tbl
 ```
 
 Second, the MNase reads.
 
 ```{r}
-mnase_tbl <- read_bed(
-  here("data/block-dna/yeast_mnase_chrII.bed.gz"),
-  n_fields = 6
+mnase_tbl <- valr::read_bed(
+  here("data/block-dna/yeast_mnase_chrII.bed.gz")
 )
 mnase_tbl
 ```
 
 You might have guessed by by the file names that we are looking at chromosome II of the yeast genome.
 
-You will see that working with a small genome is a huge advantage - we can study the whole chromosome in this class. For Drosophila and human data we dealt with before, we were looking at a subsection of the chromosome.
+You will see that working with a small genome is a huge advantage -- we can study the whole chromosome in this class. For *Drosophila* and human data we dealt with before, we were looking at a subsection of the chromosome.
 
-For the MNase bed file, you see that there are only three columns: `chrom`, `start`, and `end`. Calculating fragment length is very simple:
+For the MNase BED file, you see that there are only three columns: `chrom`, `start`, and `end`. Calculating fragment length is very simple:
 
 ```{r}
-mutate(mnase, frag_len = end - start)
+#| echo: true
+mutate(mnase_tbl, frag_len = end - start)
 ```
 
-Let's examine the fragment length distribution. We'll set `binwidth = 1` as we want base-pair resolution.
+## Length distributions of chromatin-derived DNA fragments
+
+Let's examine the fragment length distribution. 
 
 ```{r}
 #| echo: true
 #| warning: false
 #| output-location: column
-combined_tbl <-
+acc_tbl <-
   bind_rows(
     mutate(mnase_tbl, type = "mnase"),
     mutate(atac_tbl, type = "atac")
   )
 
-p <- ggplot(
-  combined_tbl,
+ggplot(
+  acc_tbl,
   aes(x = end - start)
   ) +
   geom_histogram(
+    # single base-pair resolution
     binwidth = 1
   ) + 
   facet_grid(
-    type ~ .,
+    rows = vars(type),
     scales = "free_y"
     ) +
   xlim(30, 500) +
@@ -102,41 +102,105 @@ p <- ggplot(
   theme_cowplot()
 ```
 
-1.  How would you describe the two distributions?
+### Interpreations
 
-2.  Are they similar?
+1.  How would you describe the two distributions? Are they similar?
 
-3.  Can you make any biological conclusions based on the length distributions?
+2.  Can you make any biological conclusions based on the length distributions?
 
-ATAC data seems to be periodic. How can we test that hypothesis? We can calculate the autocorrelation of the length distribution. Can someone explain what autocorrelation means?
+## Periodicity in the fragment lengths
 
-Here, "density" is a vector at bp resolution. We will use acf to calculate autocorrelation. We will store the autocorrelation object instead of plotting it in the default mode. Examine the acf object to see the variables inside it.
+The ATAC data seems to be periodic. How can we test that hypothesis? We can calculate the autocorrelation of the length distribution. Can someone explain what [autocorrelation](https://en.wikipedia.org/wiki/Autocorrelation) means?
+
+We'll use the base `hist` function to calculate the densities of the above histogram. Let's write a function we can use to analyze fragment lengths.
 
 ```{r}
-atac_acf <- acf(atac_hist$density, lag.max = 50, plot = F)
+#| label: fun-fragment-len
+#| echo: true
+fragment_len_hist <- function(tbl) {
+  frag_lens <- 
+    mutate(
+      tbl,
+      frag_len = end - start
+    ) |>
+    filter(
+      frag_len >= 30 &
+        frag_len <= 500
+    ) |>
+    pull(frag_len)
+  
+  hist(
+    frag_lens,
+    breaks = seq(30, 500, 1),
+    plot = FALSE
+  )
+}
 ```
 
-Now let us plot the autocorrelation:
 
-```{r fig.height = 5, fig.width = 5}
-plot(atac_acf$lag, atac_acf$acf, xlim = c(0, 25), col = "black", type = "l", ylim = c(0.67, 1))
-abline(v = 10, col = "red")
-abline(v = 21, col = "red")
+```{r}
+atac_frag_lens <- fragment_len_hist(atac_tbl)
 ```
 
-So, it looks like there is a significant bumps in autocorrelation at 10 and 21 bp positions, indicating that ATAC length distribution is periodic.
+The `density` slot contains a vector of densities at base-pair resolution. We will use `acf()` to calculate the autocorrelation of these values, and will store the tidied result. 
 
-### Why 10 bp periodicity?
+```{r}
+#| echo: true
+atac_acf_tbl <-
+  acf(
+    atac_hist$density,
+    lag.max = 40,
+    plot = FALSE
+  ) |>
+    broom::tidy()
 
-Ok, how do we confirm these bumps are interesting? Let us calculate the acf of a negative control - the length distribution of MNase data:
+atac_acf_tbl
+```
 
-```{r fig.height = 5, fig.width = 5}
-mnase_acf <- acf(mnase_hist$counts, lag.max = 50, plot = F)
-plot(mnase_acf$lag, mnase_acf$acf, xlim = c(0, 25), ylim = c(0.4, 1), col = "black", type = "l")
-lines(atac_acf$lag, atac_acf$acf, xlim = c(0, 25), col = "red", type = "l", ylim = c(0.4, 1))
-abline(v = 10, col = "cornflowerblue")
-abline(v = 21, col = "cornflowerblue")
-legend("topright", legend = c("MNase_ACF", "ATAC_ACF"), col = c("black", "red"), pch = 16)
+Now let's plot the autocorrelation:
+
+```{r}
+plot_len_acf <- function(tbl, title) {
+  ggplot(
+    tbl,
+    aes(lag, acf)
+  ) +
+    geom_point(size = 2) +
+    geom_line() +
+    theme_minimal_grid() +
+    geom_vline(xintercept = c(10, 21), color = 'red') +
+    labs(title = title)
+}
+```
+
+```{r}
+plot_atac_acf <- plot_len_acf(atac_acf_tbl, "ATAC ACF")
+plot_atac_acf
+```
+
+So, it looks like there significant bumps in autocorrelation at 10 and 21 bp positions, indicating that ATAC length distribution is periodic.
+
+How do we confirm these bumps are interesting? Let's calculate the acf of a negative control -- the length distribution of the MNase data.
+
+```{r}
+#| label: plot-acfs
+#| echo: true
+#| output-location: default
+mnase_frag_lens <-
+  fragment_len_hist(mnase_tbl)
+
+mnase_acf_tbl <-
+  acf(
+    mnase_frag_lens$density,
+    lag.max = 40,
+    plot = FALSE
+  ) |>
+  broom::tidy()
+
+plot_mnase_acf <- plot_len_acf(mnase_acf_tbl, "MNase ACF")
+
+# patchwork plot
+plot_atac_acf / plot_mnase_acf
 ```
 
 We see a monotonic decrease here, which confirms that the bumps we see are distinctive features of ATAC-seq data.
@@ -145,11 +209,6 @@ We see a monotonic decrease here, which confirms that the bumps we see are disti
 
 We will use Gviz to visualize read densities in any given region.
 
-```{r echo=FALSE}
-library(Gviz)
-library(rtracklayer)
-```
-
 Gviz can plot annotation tracks and data tracks.
 
 ## Load tracks
@@ -157,13 +216,29 @@ Gviz can plot annotation tracks and data tracks.
 First, we will load the gene annotations from ENSEMBL. What does the function BiomartGeneRegionTrack do?
 
 ```{r}
-yeast_genome <- UcscTrack(genome = "sacCer3", track = "ensGene", chromosome = "chrII", start = 530811, end = 540885, trackType = "GeneRegionTrack", gene = "name", rstarts = "exonStarts", rends = "exonEnds", symbol = "name2", transcript = "name", strand = "strand")
-yeast_genome
+sgd_genes <-
+  UcscTrack(
+    genome = "sacCer3",
+    track = "sgdGene",
+    chromosome = "chrII",
+    start = 530811,
+    end = 540885,
+    trackType = "GeneRegionTrack",
+    gene = "name",
+    rstarts = "exonStarts",
+    rends = "exonEnds",
+    symbol = "name",
+    transcript = "name",
+    strand = "strand"
+  )
+
+plotTracks(sgd_genes)
 ```
 
 We will import the bigwig file containing yeast nucleosomal sized fragments from MNase-seq using import.bw function from rtracklayer. What is "GRanges"?
 
 ```{r}
+mnase_
 mnase_nuc <- import.bw("data_acc/yeast_mnase_134_160.bw", as = "GRanges")
 mnase_nuc
 ```
