@@ -55,7 +55,7 @@ As **scientists** we need to assign confidence to our results.
 
 ```{r}
 # flip a coin
-sample(x = c("H","T"), size = 100, replace = T)
+sample(x = c("H", "T"), size = 100, replace = T)
 ```
 
 [Need help! My friend thinks coin flips are 50-50!](https://www.physicsforums.com/threads/need-help-my-stupid-friend-thinks-coin-flips-are-50-50.60279/)
@@ -75,7 +75,6 @@ Flip a coin 5 times with equal prob of H or T
 #| output-location: column-fragment
 
 rbinom(n = 5, size = 1, prob = .5)
-
 ```
 
 Again
@@ -85,7 +84,6 @@ Again
 #| output-location: column-fragment
 
 rbinom(n = 5, size = 1, prob = .5)
-
 ```
 
 . . .
@@ -96,20 +94,18 @@ Set a seed
 #| echo: true
 #| output-location: column-fragment
 
-# 
+#
 set.seed(33)
 rbinom(n = 5, size = 1, prob = .5)
-
 ```
 
 ```{r}
 #| echo: true
 #| output-location: column-fragment
 
-# 
+#
 set.seed(33)
 rbinom(n = 5, size = 1, prob = .5)
-
 ```
 
 ## Let's flip an unfair coin {.smaller}
@@ -121,7 +117,6 @@ Flip a coin 5 times with equal prob of H or T
 #| output-location: column-fragment
 
 rbinom(n = 5, size = 1, prob = .2)
-
 ```
 
 Again
@@ -131,7 +126,6 @@ Again
 #| output-location: column-fragment
 
 rbinom(n = 5, size = 1, prob = .2)
-
 ```
 
 ## Let's summarize the flipping results {.smaller}
@@ -143,7 +137,6 @@ Flip a fair coin 10
 #| output-location: column-fragment
 
 rbinom(n = 10, size = 1, prob = .5)
-
 ```
 
 Flip a fair coin 10 and calculate mean
@@ -154,7 +147,6 @@ Flip a fair coin 10 and calculate mean
 
 rbinom(n = 10, size = 1, prob = .5) %>%
   mean()
-
 ```
 
 Again
@@ -165,7 +157,6 @@ Again
 
 rbinom(n = 10, size = 1, prob = .5) %>%
   mean()
-
 ```
 
 . . .
@@ -178,7 +169,6 @@ Unfair coin
 
 rbinom(n = 10, size = 1, prob = .2) %>%
   mean()
-
 ```
 
 Unfair coin, again
@@ -189,7 +179,6 @@ Unfair coin, again
 
 rbinom(n = 10, size = 1, prob = .2) %>%
   mean()
-
 ```
 
 ## Let's go wild flipping {.smaller}
@@ -237,9 +226,11 @@ make a dataframe with means and accompanying info
 #| echo: true
 #| output-location: column-fragment
 
-allFlips <- data.frame(fair = myFairTosses,
-           unfair = myUnfairTosses) %>% 
-  pivot_longer(cols = c("fair","unfair"), names_to = "cheating", values_to = "avg") 
+allFlips <- data.frame(
+  fair = myFairTosses,
+  unfair = myUnfairTosses
+) %>%
+  pivot_longer(cols = c("fair", "unfair"), names_to = "cheating", values_to = "avg")
 
 allFlips %>% top_n(5)
 ```
@@ -252,11 +243,13 @@ plot it
 #| echo: true
 #| output-location: column-fragment
 
-ggplot(allFlips, aes(x=cheating, y=avg, color=cheating)) +
+ggplot(allFlips, aes(x = cheating, y = avg, color = cheating)) +
   geom_jitter() +
-  stat_summary(fun.y=mean, geom="point", shape=18,
-                 size=3, color="black") +
-  ylim(-0.05,1.05) +
+  stat_summary(
+    fun.y = mean, geom = "point", shape = 18,
+    size = 3, color = "black"
+  ) +
+  ylim(-0.05, 1.05) +
   geom_hline(yintercept = .5, linetype = "dashed") + # true mean fair
   geom_hline(yintercept = .2, linetype = "dashed") + # true mean unfair
   theme_cowplot()
@@ -283,14 +276,18 @@ for (i in 1:numRounds) {
   myUnfairTosses[i] <- rbinom(n = numFlips, size = 1, prob = .2) %>% mean()
 }
 
-data.frame(fair = myFairTosses,
-           unfair = myUnfairTosses) %>% 
-  pivot_longer(cols = c("fair","unfair"), names_to = "cheating", values_to = "avg") %>%
-  ggplot(., aes(x=cheating, y=avg, color=cheating)) +
+data.frame(
+  fair = myFairTosses,
+  unfair = myUnfairTosses
+) %>%
+  pivot_longer(cols = c("fair", "unfair"), names_to = "cheating", values_to = "avg") %>%
+  ggplot(., aes(x = cheating, y = avg, color = cheating)) +
   geom_jitter() +
-  stat_summary(fun.y=mean, geom="point", shape=18,
-                 size=3, color="black") +
-  ylim(-0.05,1.05) +
+  stat_summary(
+    fun.y = mean, geom = "point", shape = 18,
+    size = 3, color = "black"
+  ) +
+  ylim(-0.05, 1.05) +
   geom_hline(yintercept = .5, linetype = "dashed") + # true mean fair
   geom_hline(yintercept = .2, linetype = "dashed") + # true mean unfair
   theme_cowplot()
@@ -327,54 +324,54 @@ Say you choose Door #1
 
 ```{r simulate monty}
 # number of times to repeat the experiment
-iter <- 1000 
+iter <- 1000
 
 # defining the doors
-doors <- c("goat","goat","car")
+doors <- c("goat", "goat", "car")
 
 # initialize dataframe to store the result per iteration
-monte_hall <- function(iteration){
-        # iteration <- 10
-        contestant_door <-  sample(doors, size = iteration, replace = TRUE)
-        
-        i=1:iteration
-        
-        # stick_win which is equal to 1 if the contestant_door in current i is car, 0 otherwise.
-        # switch_win which is equal to 0 if the contestant_door is equal to car, 1 otherwise.
-        stick_win <- ifelse(contestant_door == 'car',1,0)
-        switch_win <- ifelse(contestant_door == 'car',0,1)
-        
-        stick_prob <- cumsum(stick_win)/i
-        switch_prob <- cumsum(switch_win)/i
-        
-        #store result in a dataframe
-        results <- data.frame(i=i,
-                              contestant_door=contestant_door, 
-                              stick_win=stick_win,
-                              switch_win=switch_win,
-                              stick_prob=stick_prob,
-                              switch_prob=switch_prob
-                              )
-        
-        return(results)
+monte_hall <- function(iteration) {
+  # iteration <- 10
+  contestant_door <- sample(doors, size = iteration, replace = TRUE)
+
+  i <- 1:iteration
+
+  # stick_win which is equal to 1 if the contestant_door in current i is car, 0 otherwise.
+  # switch_win which is equal to 0 if the contestant_door is equal to car, 1 otherwise.
+  stick_win <- ifelse(contestant_door == "car", 1, 0)
+  switch_win <- ifelse(contestant_door == "car", 0, 1)
+
+  stick_prob <- cumsum(stick_win) / i
+  switch_prob <- cumsum(switch_win) / i
+
+  # store result in a dataframe
+  results <- data.frame(
+    i = i,
+    contestant_door = contestant_door,
+    stick_win = stick_win,
+    switch_win = switch_win,
+    stick_prob = stick_prob,
+    switch_prob = switch_prob
+  )
+
+  return(results)
 }
 
 
 monte_hall_results <- monte_hall(iter)
 
-ggplot(monte_hall_results, mapping = aes(x=i, y=stick_prob)) +
-  geom_line(color="#3333ff") +
-  geom_line(aes(y=switch_prob), color= "#ff751a") +
-  ylab('Est.Probability') + 
-  xlab('Iteration') +
-  geom_label(data = data.frame(label = c('switch', 'stick'), i = c(iter,iter), stick_prob = c(0.75,0.25)), 
-                   aes(label = label),
-                   show.legend = FALSE
-                   ) +
+ggplot(monte_hall_results, mapping = aes(x = i, y = stick_prob)) +
+  geom_line(color = "#3333ff") +
+  geom_line(aes(y = switch_prob), color = "#ff751a") +
+  ylab("Est.Probability") +
+  xlab("Iteration") +
+  geom_label(
+    data = data.frame(label = c("switch", "stick"), i = c(iter, iter), stick_prob = c(0.75, 0.25)),
+    aes(label = label),
+    show.legend = FALSE
+  ) +
   ggtitle("Estimated Probability of Winning") +
   theme_classic()
-
-
 ```
 
 -   [The Monty Hall Problem](https://rpubs.com/njdcornites/simulating_monty_hall_problem)
