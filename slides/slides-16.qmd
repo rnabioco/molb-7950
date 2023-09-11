@@ -25,7 +25,7 @@ author: "Jay Hesselberth"
 ::: {.column width="60%"}
 Before genome-wide DNA accessibility measurements, we knew about chromatin transactions at only a handful of sequences.
 
-This was a classic "keys under the lamppost" situation.
+This was a classic "keys under the lamppost" situation, leading to general models of chromatin-based gene regulation.
 :::
 
 ::: {.column width="40%"}
@@ -61,3 +61,71 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 ![](../img/block-dna/atac-input-comparison.png)
 
 # Analysis details
+
+## {.smaller} 
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Overview of a chromatin profiling experiment**
+:::
+
+::: {.column width="50%"}
+```{mermaid}
+%%{init: {"flowchart": { "useMaxWidth": true, "htmlLabels": false}} }%%
+flowchart TB
+
+  EXP[ATAC/MNase/DNase-seq experiment]:::exp
+  
+  %% files %%
+  FQ["Sequencing reads (FASTQ)"]:::file
+  FAREF("Reference genome (FASTA)"):::file
+  BAM["Alignment (BAM)"]:::file 
+  BEDFRAG["Fragment coordinates (BED)"]:::file
+  BEDPEAK("Peak coordinates (BED)"):::file
+  FAPEAK("Peak sequences"):::file
+  WIG("`**Genome coverage**
+  (WIG/bedGraph)`"):::file
+  META("`Metaplots
+  (R & Bioconductor)`"):::file
+ 
+  %% software %% 
+  ALN("`**Read alignment**
+  (Bowtie2 / BWA)`"):::sw
+  PEAKCALL("`**Peak calling** (MACS2)`"):::sw
+  MOTIFS("` **Motif discovery**
+  (MEME & FIMO)`"):::sw
+  BEDTOOLS("`BEDtools`"):::sw
+  BROWSE("`**Genome browser**
+  (UCSC or IGV)`"):::sw
+  
+  EXP --> FQ
+  FQ --> ALN
+  FAREF --> ALN
+  ALN --> BAM
+  BAM --> BEDFRAG
+  %% genome browser %%
+  BEDFRAG --> BEDTOOLS --> WIG
+  WIG --> BROWSE
+  WIG --> META
+  %% peak calling %%
+  BEDFRAG --> PEAKCALL
+  PEAKCALL --> BEDPEAK
+  BEDPEAK --> FAPEAK
+  FAPEAK --> MOTIFS 
+
+  click WIG href "https://genome.ucsc.edu/goldenPath/help/bedgraph.html"
+  click BROWSE href "https://software.broadinstitute.org/software/igv/"
+  click ALN href "https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml"
+  click BEDTOOLS href "https://bedtools.readthedocs.io/en/latest/"
+  click PEAKCALL href "https://macs3-project.github.io/MACS/"
+  click MOTIFS href "https://meme-suite.org/meme/"
+  
+  classDef default fill:#ddd,stroke:#333,stroke-width:1px;
+  classDef exp fill:#3bf
+  classDef file fill:#fc7
+  classDef sw fill:#7ec
+```
+:::
+
+::::
