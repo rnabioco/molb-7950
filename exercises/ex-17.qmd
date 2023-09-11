@@ -1,11 +1,11 @@
 ---
-title: "Chromatin accessibility - Class 1"
+title: "Chromatin accessibility I"
 author: "Jay Hesselberth"
 ---
 
 # DNA Accessibility
 
-Today we will work with two datas xets in budding yeast that map genome-wide accessibility. We will go back to our old friends:
+Today we will work with two datas sets in budding yeast that map genome-wide accessibility. We will go back to our old friends:
 
 ## Libraries
 
@@ -174,7 +174,7 @@ plot_len_acf <- function(tbl, title) {
 ```
 
 ```{r}
-plot_atac_acf <- plot_len_acf(atac_acf_tbl, "ATAC ACF")
+plot_atac_acf <- plot_len_acf(atac_acf_tbl, title = "ATAC ACF")
 plot_atac_acf
 ```
 
@@ -197,7 +197,7 @@ mnase_acf_tbl <-
   ) |>
   broom::tidy()
 
-plot_mnase_acf <- plot_len_acf(mnase_acf_tbl, "MNase ACF")
+plot_mnase_acf <- plot_len_acf(mnase_acf_tbl, title = "MNase ACF")
 
 # patchwork plot
 plot_atac_acf / plot_mnase_acf
@@ -205,17 +205,17 @@ plot_atac_acf / plot_mnase_acf
 
 We see a monotonic decrease here, which confirms that the bumps we see are distinctive features of ATAC-seq data.
 
-## Visualize the raw read density in a given region of the genome
+## Visualize read density in genomic region {.smaller}
 
-We will use Gviz to visualize read densities in any given region.
+We will use Gviz to visualize read densities relative to a reference.
 
-Gviz can plot annotation tracks and data tracks.
+### Load tracks
 
-## Load tracks
-
-First, we will load the gene annotations from ENSEMBL. What does the function BiomartGeneRegionTrack do?
+First, we load the gene annotations from the [Saccharomyces Genome Databases](https://yeastgenome.org) (SGD).
 
 ```{r}
+#| echo: true
+#| output-location: column
 sgd_genes <-
   UcscTrack(
     genome = "sacCer3",
@@ -235,121 +235,94 @@ sgd_genes <-
 plotTracks(sgd_genes)
 ```
 
-We will import the bigwig file containing yeast nucleosomal sized fragments from MNase-seq using import.bw function from rtracklayer. What is "GRanges"?
+Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using `rtracklayer::import.bw()`. What is "GRanges"?
 
 ```{r}
-mnase_
-mnase_nuc <- import.bw("data_acc/yeast_mnase_134_160.bw", as = "GRanges")
+#| echo: true
+mnase_nuc <- import.bw(
+  here("data/block-dna/yeast_mnase_134_160.bw"),
+  as = "GRanges"
+)
 mnase_nuc
 ```
 
-We will then load the GRanges object as a track for Gviz to plot:
+Next, load the GRanges object as a track for Gviz to plot:
 
 ```{r}
-mnase_nuc_trk <- DataTrack(mnase_nuc, name = "MNase_nuc")
+mnase_nuc_trk <- DataTrack(
+  mnase_nuc,
+  name = "MNase_nuc"
+)
 mnase_nuc_trk
 ```
 
 Now, we can make a plot for this particular region of chrII:
 
-```{r fig.height = 3, fig.width = 5}
-plotTracks(c(yeast_genome, mnase_nuc_trk), from = 530811, to = 540885, chromosome = "chrII", type = "l", transcriptAnnotation = "gene", shape = "arrow", type = "h")
+```{r}
+#| echo: true
+#| output-location: column
+plotTracks(
+  c(sgd_genes,
+    mnase_nuc_trk),
+  from = 530811,
+  to = 540885,
+  chromosome = "chrII",
+  transcriptAnnotation = "gene",
+  shape = "arrow",
+  type = "h"
+)
 ```
 
-That looks great! Let us load all the other datasets we have.
+That looks great! Let's load all the other data sets.
 
-1.  We will first load the bigwigs as a GRanges onject
-2.  Then we will convert that into a data track that Gviz can plot
+1.  Load each bigWig as a GRanges object with `rtracklayer::import.bw()`
+2.  Convert each to a `Gviz::DataTrack()` for plotting
 
 ```{r}
-mnase_tf <- import.bw("data_acc/yeast_mnase_lt50.bw", as = "GRanges")
-atac_short <- import.bw("data_acc/yeast_atac_lt120.bw", as = "GRanges")
-atac_long <- import.bw("data_acc/yeast_atac_gt120.bw", as = "GRanges")
-mnase_tf_trk <- DataTrack(mnase_tf, name = "MNase_TF")
-atac_short_trk <- DataTrack(atac_short, name = "ATAC_Short")
-atac_long_trk <- DataTrack(atac_long, name = "ATAC_Long")
+track_info <-
+  tibble(
+    file_name = c(
+      "yeast_mnase_134_160.bw",
+      "yeast_mnase_lt50.bw",
+      "yeast_atac_lt120.bw",
+      "yeast_atac_gt120.bw"
+    ),
+    track_name = c(
+      "MNase_Short", "MNase_Long",
+      "ATAC_Short", "ATAC_Long"
+    )
+  ) |>
+  mutate(
+    file_path = here("data/block-dna", file_name),
+    big_wig = purrr::map(
+      file_path, ~ import.bw(.x, as = "GRanges")
+    ),
+    data_track = purrr::map2(
+      big_wig, track_name, ~ DataTrack(.x, name = .y)
+    )
+  )
 ```
 
-Now, we just have to make a list of tracks to plot and Gviz takes care of teh rest. Some questions to think about as you look at the tracks:
+Now, we just have to make a list of tracks to plot and Gviz takes care of the rest.
 
-1.  What is each dataset reporting on?
+
+```{r}
+plotTracks(
+  c(sgd_genes,
+    track_info$data_track),
+  from = 530811,
+  to = 540885,
+  chromosome = "chrII",
+  transcriptAnnotation = "gene",
+  shape = "arrow",
+  type = "histogram"
+)
+```
+
+## Interpretations
+
+Some questions to think about as you look at the tracks:
+
+1.  What is each data set reporting on?
 2.  What can you infer about genome function based on these tracks?
 3.  What are the major differences between MNase-seq and ATAC-seq based on these tracks?
-
-```{r fig.height = 3, fig.width = 5}
-plotTracks(c(yeast_genome, mnase_nuc_trk, mnase_tf_trk, atac_long_trk, atac_short_trk), from = 530811, to = 540885, chromosome = "chrII", type = "h", transcriptAnnotation = "gene", shape = "arrow")
-```
-
-## Metaplots and heatmap
-
-So a small region of chrII is telling us a lot about chromatin structure and the different methods to profile accessibility.
-
-Next, we want to make sure these conclusions are valid throughout the genome. Well since we want to keep the file sizes small, we can ask if it is valid throughout chrII. We will go to our old pal, deeptools to do this analysis.
-
-First we will plot the profiles of all our datasets relative to the transcription start site (TSS), where all the action seems to be happening:
-
-```{bash eval=FALSE}
-computeMatrix reference-point --referencePoint center -a 750 -b 750 \
--S data_acc/yeast_atac_gt120.bw  data_acc/yeast_mnase_134_160.bw \
-data_acc/yeast_atac_lt120.bw  data_acc/yeast_mnase_lt50.bw \
---regionsFileName data_acc/yeast_tss_chrII.bed \
---outFileName data_acc/tss.mat.gz --missingDataAsZero
-
-plotHeatmap -m data_acc/tss.mat.gz -o data_acc/heatmap_tss.png \
---zMin 0 50 0 0 \
---zMax 500 225 850 800 \
---colorList '#e5f5f9,#2ca25f' '#efedf5,#756bb1' '#e5f5f9,#2ca25f' '#efedf5,#756bb1' \
---whatToShow 'heatmap and colorbar'
-
-plotProfile -m data_acc/tss.mat.gz -o data_acc/profile_tss.png \
---yMin 75 50 50 50 \
---yMax 500 225 850 800 \
---colors '#2ca25f' '#756bb1' '#2ca25f' '#756bb1' \
---plotType=fill
-```
-
-```{r echo=FALSE, out.width = '100%'}
-knitr::include_graphics("data_acc/profile_tss.png")
-```
-
-```{r echo=FALSE, out.width = '100%'}
-knitr::include_graphics("data_acc/heatmap_tss.png")
-```
-
-1.  How do heatmaps and metaplots work?
-2.  What can you conclude from these plots?
-3.  What are the disting features of MNase-seq and ATAC-seq that become clearer when looking at many genes at the same time?
-4.  What are some hypotheses you can generate based on these plots?
-
-## Perspective matters!
-
-We centered our analysis on TSSs and observed many interesting features. We can change our perspective slightly and see what happens. We can measure the position of the first nucleosome downstream of the TSS highly accurately in yeast (at bp resolution!). I have put the list of +1 positions in a bed file. Let us see how the plots differ when we shift the center to +1 nucleosomes instead of TSSs:
-
-```{bash eval=FALSE}
-
-computeMatrix reference-point --referencePoint center -a 750 -b 750 \
--S data_acc/yeast_atac_gt120.bw  data_acc/yeast_mnase_134_160.bw \
-data_acc/yeast_atac_lt120.bw  data_acc/yeast_mnase_lt50.bw \
---regionsFileName data_acc/yeast_p1_chrII.bed \
---outFileName data_acc/p1.mat.gz --missingDataAsZero
-
-plotHeatmap -m data_acc/p1.mat.gz -o data_acc/heatmap_p1.png \
---zMin 0 50 0 0 --zMax 500 225 850 800 \
---colorList '#e5f5f9,#2ca25f' '#efedf5,#756bb1' '#e5f5f9,#2ca25f' '#efedf5,#756bb1' \
---whatToShow 'heatmap and colorbar'
-
-plotProfile -m data_acc/p1.mat.gz -o data_acc/profile_p1.png \
---yMin 75 50 25 50 \
---yMax 500 225 850 800 \
---colors '#2ca25f' '#756bb1' '#2ca25f' '#756bb1' \
---plotType=fill
-```
-
-```{r echo=FALSE, out.width = '100%'}
-knitr::include_graphics("data_acc/profile_p1.png")
-```
-
-```{r echo=FALSE, out.width = '100%'}
-knitr::include_graphics("data_acc/heatmap_p1.png")
-```
-
