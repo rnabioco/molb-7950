@@ -354,14 +354,14 @@
     "href": "exercises/ex-11.html",
     "title": "Stats Bootcamp - class 11",
     "section": "",
-    "text": "Learn types of variables\nCalculate and visualize summary statistics\nProperties of data distributions\nPerform exploratory data analysis"
+    "text": "Learn types of variables\nCalculate and visualize summary statistics\nProperties of data distributions\nCentral limit theorem"
   },
   {
     "objectID": "exercises/ex-11.html#learning-objectives",
     "href": "exercises/ex-11.html#learning-objectives",
     "title": "Stats Bootcamp - class 11",
     "section": "",
-    "text": "Learn types of variables\nCalculate and visualize summary statistics\nProperties of data distributions\nPerform exploratory data analysis"
+    "text": "Learn types of variables\nCalculate and visualize summary statistics\nProperties of data distributions\nCentral limit theorem"
   },
   {
     "objectID": "exercises/ex-11.html#quantitative-variables",
@@ -606,7 +606,7 @@
     "href": "exercises/ex-11.html#now-lets-sample-means",
     "title": "Stats Bootcamp - class 11",
     "section": "Now lets sample means",
-    "text": "Now lets sample means\nlet’s do 100 round of 50 flips and take the average of each round.\nremember the size that i told you to ignore last class!\n\nr &lt;- 100\n\nrbinom(n = n, size = r, prob = .5)/r\n\n [1] 0.48 0.60 0.52 0.44 0.50 0.45 0.53 0.45 0.39 0.52 0.44 0.54 0.48 0.46 0.42\n[16] 0.53 0.53 0.54 0.57 0.49 0.53 0.52 0.51 0.47 0.57 0.50 0.52 0.56 0.51 0.55\n[31] 0.43 0.59 0.50 0.45 0.47 0.54 0.51 0.43 0.50 0.46 0.41 0.51 0.48 0.49 0.46\n[46] 0.50 0.44 0.46 0.51 0.50\n\n\n\nfmean &lt;- tibble(\n  fair=rbinom(n = n, size = r, prob = .5)/r,\n  unfair=rbinom(n = n, size = r, prob = .2)/r) |&gt;\n  pivot_longer(cols = c(\"fair\",\"unfair\"),\n               names_to = \"cheating\",\n               values_to = \"flips\"\n               )"
+    "text": "Now lets sample means\nlet’s do 100 round of 50 flips and take the average of each round.\nremember the size that i told you to ignore last class!\n\nr &lt;- 100\n\nrbinom(n = n, size = r, prob = .5)/r\n\n [1] 0.47 0.56 0.44 0.44 0.46 0.43 0.53 0.43 0.49 0.51 0.45 0.49 0.58 0.42 0.44\n[16] 0.42 0.42 0.46 0.48 0.49 0.42 0.47 0.53 0.49 0.56 0.53 0.47 0.43 0.53 0.44\n[31] 0.44 0.46 0.56 0.51 0.45 0.51 0.48 0.48 0.59 0.51 0.56 0.50 0.49 0.42 0.55\n[46] 0.52 0.50 0.52 0.51 0.50\n\n\n\nfmean &lt;- tibble(\n  fair=rbinom(n = n, size = r, prob = .5)/r,\n  unfair=rbinom(n = n, size = r, prob = .2)/r) |&gt;\n  pivot_longer(cols = c(\"fair\",\"unfair\"),\n               names_to = \"cheating\",\n               values_to = \"flips\"\n               )"
   },
   {
     "objectID": "exercises/ex-11.html#sampled-flip-mean-distributions",
@@ -620,7 +620,7 @@
     "href": "exercises/ex-11.html#but-is-it-normal",
     "title": "Stats Bootcamp - class 11",
     "section": "but is it normal?",
-    "text": "but is it normal?\n\nfmean |&gt;\n  group_by(cheating) |&gt;\n  shapiro_test(flips)\n\n# A tibble: 2 × 4\n  cheating variable statistic      p\n  &lt;chr&gt;    &lt;chr&gt;        &lt;dbl&gt;  &lt;dbl&gt;\n1 fair     flips        0.969 0.215 \n2 unfair   flips        0.947 0.0261\n\n\nyup!"
+    "text": "but is it normal?\n\nfmean |&gt;\n  group_by(cheating) |&gt;\n  shapiro_test(flips)\n\n# A tibble: 2 × 4\n  cheating variable statistic     p\n  &lt;chr&gt;    &lt;chr&gt;        &lt;dbl&gt; &lt;dbl&gt;\n1 fair     flips        0.966 0.161\n2 unfair   flips        0.977 0.427\n\n\nyup!"
   },
   {
     "objectID": "exercises/ex-11.html#what-about-the-mean-sd-with-different-parameters",
@@ -634,7 +634,7 @@
     "href": "exercises/ex-11.html#visualize",
     "title": "Stats Bootcamp - class 11",
     "section": "Visualize",
-    "text": "Visualize\n\nggplot(all , aes(x=r, y=f, color=r)) +\n  geom_jitter() +\n  stat_summary(fun.y=mean, geom=\"point\", shape=18,\n                 size=3, color=\"black\") +\n  ylim(-0.05,1.05) +\n   facet_grid(~type) +\n  geom_hline(yintercept = .5, linetype = \"dashed\") +\n  geom_hline(yintercept = .2, linetype = \"dashed\") +\n  theme_cowplot()\n\nWarning: The `fun.y` argument of `stat_summary()` is deprecated as of ggplot2 3.3.0.\nℹ Please use the `fun` argument instead.\n\n\n\n\n\n. . .\n\nall |&gt; \n  group_by(type,r) |&gt;\n  get_summary_stats(show = c(\"mean\",\"sd\"))\n\n# A tibble: 4 × 6\n  type     r     variable     n  mean    sd\n  &lt;chr&gt;    &lt;chr&gt; &lt;fct&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n1 fair10   r20   f           10 0.52  0.111\n2 fair10   r80   f           10 0.534 0.051\n3 unfair10 r20   f           10 0.185 0.067\n4 unfair10 r80   f           10 0.221 0.051"
+    "text": "Visualize\n\nggplot(all , aes(x=r, y=f, color=r)) +\n  geom_jitter() +\n  stat_summary(fun.y=mean, geom=\"point\", shape=18,\n                 size=3, color=\"black\") +\n  ylim(-0.05,1.05) +\n   facet_grid(~type) +\n  geom_hline(yintercept = .5, linetype = \"dashed\") +\n  geom_hline(yintercept = .2, linetype = \"dashed\") +\n  theme_cowplot()\n\nWarning: The `fun.y` argument of `stat_summary()` is deprecated as of ggplot2 3.3.0.\nℹ Please use the `fun` argument instead.\n\n\n\n\n\n. . .\n\nall |&gt; \n  group_by(type,r) |&gt;\n  get_summary_stats(show = c(\"mean\",\"sd\"))\n\n# A tibble: 4 × 6\n  type     r     variable     n  mean    sd\n  &lt;chr&gt;    &lt;chr&gt; &lt;fct&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n1 fair10   r20   f           10 0.49  0.124\n2 fair10   r80   f           10 0.519 0.046\n3 unfair10 r20   f           10 0.17  0.092\n4 unfair10 r80   f           10 0.175 0.038"
   },
   {
     "objectID": "exercises/ex-11.html#references",
