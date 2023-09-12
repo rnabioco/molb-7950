@@ -5,14 +5,12 @@ author: "Jay Hesselberth"
 
 # DNA Accessibility
 
-Today we will work with two datas sets in budding yeast that map genome-wide accessibility. We will go back to our old friends:
-
 ## Libraries
 
-1. rtracklayer
-1. Gviz - this is a way to generate pretty images of genome browser snapshots within Rstudio.
+1.  rtracklayer - prov
+2.  Gviz - this is a way to generate pretty images of genome browser snapshots within Rstudio.
 
-These tools are useful for us to look at the data directly, and are great use to you when you write papers and want to create nice plots. 
+These tools are useful for us to look at the data directly, and are great use to you when you write papers and want to create nice plots.
 
 ```{r}
 #| label: load-libs
@@ -27,9 +25,7 @@ library(Gviz)
 library(rtracklayer)
 ```
 
-# Patterns of DNA-protein binding
-
-## Load the data 
+## Load the data
 
 Today we will analyze ATAC-seq and MNase-seq datasets from budding yeast. Here are the references for the datasets:
 
@@ -45,8 +41,10 @@ I have performed the alignment of paired-end reads and converted all reads into 
 First, the ATAC-seq reads:
 
 ```{r}
+#| echo: true
+#| output-location: column
 atac_tbl <- valr::read_bed(
-  here("data/block-dna/yeast_atac_chrII.bed.gz"),
+  here("data/lock-dna/yeast_atac_chrII.bed.gz"),
 ) 
 atac_tbl
 ```
@@ -54,26 +52,40 @@ atac_tbl
 Second, the MNase reads.
 
 ```{r}
+#| echo: true
+#| output-location: column
 mnase_tbl <- valr::read_bed(
   here("data/block-dna/yeast_mnase_chrII.bed.gz")
 )
 mnase_tbl
 ```
 
-You might have guessed by by the file names that we are looking at chromosome II of the yeast genome.
+(You might have guessed by by the file names that we are looking at chromosome II of the yeast genome.)
 
-You will see that working with a small genome is a huge advantage -- we can study the whole chromosome in this class. For *Drosophila* and human data we dealt with before, we were looking at a subsection of the chromosome.
+Working with a small genome is a huge advantage -- we can study the whole chromosome in this class. For *Drosophila* and human data we dealt with before, we were looking at a subsection of the chromosome.
 
-For the MNase BED file, you see that there are only three columns: `chrom`, `start`, and `end`. Calculating fragment length is very simple:
+## Expectations for chromatin fragment lengths
+
+Let's remind ourselves of the expectations for chromatin fragment lengths from MNase-seq and ATAC-seq experiments.
+
+### MNase-seq
+
+![](../img/block-dna/mnase-overview.png)
+
+### ATAC-seq
+
+![](../img/block-dna/atac-explain.png)
+
+## Length distributions of chromatin-derived DNA fragments
+
+For the MNase-seq BED file, you see that there are only three columns: `chrom`, `start`, and `end`. Calculating fragment length is very simple:
 
 ```{r}
 #| echo: true
 mutate(mnase_tbl, frag_len = end - start)
 ```
 
-## Length distributions of chromatin-derived DNA fragments
-
-Let's examine the fragment length distribution. 
+Let's use this approach to examine the fragment length distribution.
 
 ```{r}
 #| echo: true
@@ -98,7 +110,7 @@ ggplot(
     scales = "free_y"
     ) +
   xlim(30, 500) +
-  labs(x = "fragment length") +
+  labs(x = "fragment length (bp)") +
   theme_cowplot()
 ```
 
@@ -137,12 +149,11 @@ fragment_len_hist <- function(tbl) {
 }
 ```
 
-
 ```{r}
 atac_frag_lens <- fragment_len_hist(atac_tbl)
 ```
 
-The `density` slot contains a vector of densities at base-pair resolution. We will use `acf()` to calculate the autocorrelation of these values, and will store the tidied result. 
+The `density` slot contains a vector of densities at base-pair resolution. We will use `acf()` to calculate the autocorrelation of these values, and will store the tidied result.
 
 ```{r}
 #| echo: true
@@ -157,10 +168,10 @@ atac_acf_tbl <-
 atac_acf_tbl
 ```
 
-Now let's plot the autocorrelation:
+Now let's plot the autocorrelation.
 
 ```{r}
-plot_len_acf <- function(tbl, title) {
+plot_acf <- function(tbl, title) {
   ggplot(
     tbl,
     aes(lag, acf)
@@ -174,7 +185,7 @@ plot_len_acf <- function(tbl, title) {
 ```
 
 ```{r}
-plot_atac_acf <- plot_len_acf(atac_acf_tbl, title = "ATAC ACF")
+plot_atac_acf <- plot_acf(atac_acf_tbl, title = "ATAC ACF")
 plot_atac_acf
 ```
 
@@ -197,13 +208,13 @@ mnase_acf_tbl <-
   ) |>
   broom::tidy()
 
-plot_mnase_acf <- plot_len_acf(mnase_acf_tbl, title = "MNase ACF")
+plot_mnase_acf <- plot_acf(mnase_acf_tbl, title = "MNase ACF")
 
 # patchwork plot
 plot_atac_acf / plot_mnase_acf
 ```
 
-We see a monotonic decrease here, which confirms that the bumps we see are distinctive features of ATAC-seq data.
+We can see a monotonic decrease in the MNase-seq data, which confirms that the bumps we see are distinctive features of ATAC-seq data.
 
 ## Visualize read density in genomic region {.smaller}
 
@@ -235,7 +246,9 @@ sgd_genes <-
 plotTracks(sgd_genes)
 ```
 
-Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using `rtracklayer::import.bw()`. What is "GRanges"?
+Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using `rtracklayer::import.bw()`.
+
+Inspect the object. What is "GRanges"?
 
 ```{r}
 #| echo: true
@@ -269,9 +282,11 @@ plotTracks(
   chromosome = "chrII",
   transcriptAnnotation = "gene",
   shape = "arrow",
-  type = "h"
+  type = "histogram"
 )
 ```
+
+## Load the remaining data
 
 That looks great! Let's load all the other data sets.
 
@@ -279,6 +294,7 @@ That looks great! Let's load all the other data sets.
 2.  Convert each to a `Gviz::DataTrack()` for plotting
 
 ```{r}
+#| echo: true
 track_info <-
   tibble(
     file_name = c(
@@ -305,8 +321,9 @@ track_info <-
 
 Now, we just have to make a list of tracks to plot and Gviz takes care of the rest.
 
-
 ```{r}
+#| echo: true
+#| output-location: column-fragment
 plotTracks(
   c(sgd_genes,
     track_info$data_track),
@@ -321,8 +338,16 @@ plotTracks(
 
 ## Interpretations
 
+::: columns
+::: {.column width="50%"}
 Some questions to think about as you look at the tracks:
 
 1.  What is each data set reporting on?
 2.  What can you infer about genome function based on these tracks?
 3.  What are the major differences between MNase-seq and ATAC-seq based on these tracks?
+:::
+
+::: {.column width="50%"}
+![](../img/block-dna/mnase-overview.png)
+:::
+:::

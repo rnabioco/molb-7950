@@ -1,0 +1,205 @@
+---
+title: "Chromatin accessibility II"
+author: "Jay Hesselberth"
+---
+
+## Metaplots and heatmap
+
+So a small region of chrII is telling us a lot about chromatin structure and the different methods to profile accessibility.
+
+Next, we want to make sure these conclusions are valid throughout the genome.
+
+Since we want to keep the file sizes small, we can ask if it is valid throughout chrII. 
+
+First we will plot the profiles of all our data sets relative to the transcription start site (TSS), where all the action seems to be happening:
+
+```{r}
+library(tidyverse)
+library(valr)
+library(here)
+```
+
+First, we need to load relevant files:
+
+- `yeast_tss_chrII.bed.gz` contains transcription start sites (TSS) for genes on yeast chromosome 2.
+- `sacCer3.chrom.sizes` contains the sizes of all yeast chromosomes, needed for some of the calculations we'll do.
+
+```{r}
+yeast_tss <- read_bed(
+  here("data/block-dna/yeast_tss_chrII.bed.gz"),
+  n_fields = 6
+)
+
+genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
+```
+
+Next we'll load bigWigs for the ATAC and MNase experiments, containing either short or long fragments.
+
+```{r}
+acc_tbl <-
+  tibble(
+    file_name = c(
+      "yeast_mnase_134_160.bw",
+      "yeast_mnase_lt50.bw",
+      "yeast_atac_lt120.bw",
+      "yeast_atac_gt120.bw"
+    ),
+    sample_type = c(
+      "MNase_Short", "MNase_Long",
+      "ATAC_Short", "ATAC_Long"
+    )
+  ) |>
+  mutate(
+    file_path = here("data/block-dna", file_name),
+    big_wig = purrr::map(
+      file_path, ~ read_bigwig(.x)
+    )
+  ) |>
+  select(sample_type, big_wig)
+```
+
+Next, we need to set up some windows for analyzing signal relative to each TSS.
+
+```{r}
+region_size <- 1500
+side_size <- region_size / 2
+win_size <- 10
+
+win_coords <- seq(
+  -side_size,
+  side_size,
+  win_size
+)
+  
+tss_win_tbl <-
+  yeast_tss |>
+  bed_slop(genome, both = side_size) |>
+  bed_makewindows(win_size = win_size) |>
+  mutate(
+    win_coord = case_when(
+      strand == "-" ~ rev(win_coords), 
+      .default = win_coords
+    ),
+    .by = name
+  ) |>
+  select(-.win_id)
+```
+
+This next step uses the magic of `bed_map()` to calculate a summary statistic for 
+each window by intersecting with signals from the bigWig files.
+
+```{r}
+acc_tbl <-
+  acc_tbl |>
+  mutate(
+    tss_win_sum = purrr::map(
+      big_wig,
+      ~ bed_map(
+        tss_win_tbl,
+        .x,
+        win_signal = sum(score)
+      )
+    )
+  )
+```
+
+Once we have the values from `bed_map()`, we can group by the `win_coord` and calculate
+a summary statistic for each window. Remember that the window positions are the same
+reletive to TSSs, so these numbers represent a composite signal
+for all TSS.
+
+```{r}
+tss_meta_tbl <-
+  select(acc_tbl, sample_type, tss_win_sum) |>
+  unnest(cols = c(tss_win_sum)) |>
+  group_by(
+    win_coord,
+    sample_type
+    ) |>
+  summarize(
+    win_mean = mean(win_signal, na.rm = TRUE),
+    win_sd = sd(win_signal, na.rm = TRUE)
+  ) |>
+  replace_na(list(win_mean = 0, win_sd = 0))
+```
+
+Finally, we'll plot the data relative to TSS for each of the windows.
+
+```{r}
+ggplot(
+  tss_meta_tbl,
+  aes(x = win_coord, y = win_mean)
+) +
+  geom_line(size = 1, color = "red") +
+  facet_wrap(~ sample_type, nrow = 2, scales = "free_y") +
+  theme_minimal_grid() +
+  theme(
+    axis.text.x = element_text(
+      angle = 45,
+      vjust = 1,
+      hjust = 1
+    )
+  ) +
+  labs(
+    x = "Position relative to TSS (bp)",
+    y = "Signal (mean of window sums)"
+  )
+```
+
+## Now let's make a heatmap
+
+```{r}
+acc_tbl_wide <-
+  acc_tbl |>
+  select(-big_wig) |>
+  unnest(cols = c(tss_win_sum)) |>
+  filter(sample_type == "MNase_Short") |>
+  select(name, win_coord, win_signal) |>
+  arrange(name, win_coord) |>
+  replace_na(list(win_signal = 0)) |>
+  pivot_wider(id_cols = name, names_from = "win_coord", values_from = "win_signal")
+
+acc_mtx <-
+  select(acc_tbl_wide, -name) |>
+  arrange(desc(`150`)) |>
+  as.matrix()
+
+ComplexHeatmap::Heatmap(
+  acc_mtx,
+  cluster_columns = FALSE,
+  show_row_dend = FALSE,
+  show_column_names = FALSE,
+  show_heatmap_legend = FALSE,
+  width = 4,
+  height = 8
+)
+```
+
+1.  How do heatmaps and metaplots work?
+2.  What can you conclude from these plots?
+3.  What are the disting features of MNase-seq and ATAC-seq that become clearer when looking at many genes at the same time?
+4.  What are some hypotheses you can generate based on these plots?
+
+## Perspective matters!
+
+We centered our analysis on TSSs and observed many interesting features. We can change our perspective slightly and see what happens. We can measure the position of the first nucleosome downstream of the TSS highly accurately in yeast (at bp resolution!). I have put the list of +1 positions in a bed file. Let us see how the plots differ when we shift the center to +1 nucleosomes instead of TSSs:
+
+```{bash eval=FALSE}
+
+computeMatrix reference-point --referencePoint center -a 750 -b 750 \
+-S data_acc/yeast_atac_gt120.bw  data_acc/yeast_mnase_134_160.bw \
+data_acc/yeast_atac_lt120.bw  data_acc/yeast_mnase_lt50.bw \
+--regionsFileName data_acc/yeast_p1_chrII.bed \
+--outFileName data_acc/p1.mat.gz --missingDataAsZero
+
+plotHeatmap -m data_acc/p1.mat.gz -o data_acc/heatmap_p1.png \
+--zMin 0 50 0 0 --zMax 500 225 850 800 \
+--colorList '#e5f5f9,#2ca25f' '#efedf5,#756bb1' '#e5f5f9,#2ca25f' '#efedf5,#756bb1' \
+--whatToShow 'heatmap and colorbar'
+
+plotProfile -m data_acc/p1.mat.gz -o data_acc/profile_p1.png \
+--yMin 75 50 25 50 \
+--yMax 500 225 850 800 \
+--colors '#2ca25f' '#756bb1' '#2ca25f' '#756bb1' \
+--plotType=fill
+```
