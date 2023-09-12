@@ -1,0 +1,280 @@
+---
+title: "Problem Set Stats Bootcamp - class 12"
+subtitle: "Hypothesis Testing"
+author: "Neelanjan Mukherjee"
+editor: visual
+---
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(gt)
+library(janitor)
+library(here)
+```
+
+
+```{r}
+biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+  janitor::clean_names()
+
+# simplify names a bit more
+colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
+
+# we are going to simplify this a bit and only keep some columns
+keep <- colnames(biochem)[c(1,6,9,14,15,24:28)]
+biochem <- biochem[,keep]
+
+# get weights for each individual mouse
+# careful: did not come with column names
+weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
+
+# add column names
+colnames(weight) <- c("subject_name","weight")
+
+# add weight to biochem table and get rid of NAs
+# rename gender to sex
+b <- inner_join(biochem, weight, by="subject_name") |> 
+  na.omit() |>
+  rename(sex=gender)
+
+
+```
+
+## Problem \# 1
+
+Does mouse sex explain mouse total cholesterol levels? Make sure to run chunks above.
+
+1. Examine and specify the variable(s)
+
+> The response variable y is $tot\_cholesterol$   
+> The explantory variable x is $sex$
+
+### Make a plot:
+
+response variable on the y-axis
+
+explanatory variable on the x-axis
+
+
+```{r}
+
+ggviolin(
+  data = b,
+  y = "tot_cholesterol",
+  x = "sex",
+  fill = "sex",
+  add = "mean_sd"
+  )
+
+```
+
+### Get n, mean, median, sd
+
+```{r}
+b |>
+  group_by(sex) |>
+get_summary_stats(tot_cholesterol,
+                  type = "common",
+                  show = c("mean","median","sd"))
+
+```
+
+
+### Is it normally distribute?
+
+```{r}
+ggqqplot(
+  data = b,
+  x = "tot_cholesterol",
+  color = "sex"
+  )
+
+
+b |> 
+  group_by(sex) |>
+  shapiro_test(tot_cholesterol) |>
+  gt()
+
+```
+
+> Yes, based on the qq-plot and the high $n$, but i do understand if you want to play it safe due to the shapiro_test p-value.
+
+
+### Is it variance similar between groups?
+```{r}
+b |> 
+  levene_test(tot_cholesterol~sex) |>
+  gt()
+```
+
+> Yes
+
+### What kind of test are you picking and why?
+
+> t_test since i think it is normally distribute, 
+with equal variance based on levene test
+
+### 2. Declare null hypothesis $\mathcal{H}_0$
+
+$\mathcal{H}_0$ is that $sex$ does not explain $tot\_cholesterol$
+
+### 3. Calculate test-statistic, exact p-value and plot
+
+
+```{r}
+b |>
+  t_test(tot_cholesterol ~ sex,
+         var.equal = T,
+         ref.group = "F") |>
+  gt()
+
+statres <- b |>
+  t_test(tot_cholesterol ~ sex,
+         var.equal = T, 
+         ref.group = "F")
+
+
+ggviolin(
+  data = b,
+  y = "tot_cholesterol",
+  x = "sex",
+  fill = "sex",
+  add = "mean_sd"
+  ) +
+  stat_pvalue_manual(
+    statres,
+    label = "p",
+    y.position = 5.8 
+    ) +
+  ylim(1,6)
+
+```
+
+
+
+
+
+
+
+```{r}
+# i have pre-selected some families to compare
+myfams <- c("B1.5:E1.4(4) B1.5:A1.4(5)",
+            "F1.3:A1.2(3) F1.3:E2.2(3)",
+            "A1.3:D1.2(3) A1.3:H1.2(3)",
+            "D5.4:G2.3(4) D5.4:C4.3(4)")
+
+# only keep the familys in myfams
+bfam <- b |>
+  filter(family %in% myfams) |>
+  droplevels() 
+
+# simplify family names and make factor
+bfam$family <- gsub(pattern = "\\..*", replacement = "", x = bfam$family) |>
+  as.factor()
+
+
+# make B1 the reference (most similar to overall mean)
+bfam$family <- relevel(x = bfam$family, ref ="B1")
+```
+
+
+## Problem \# 2
+
+
+Does mouse family explain mouse total cholesterol levels? Make sure to run chunk above.
+
+1. Examine and specify the variable(s)
+
+> The response variable y is $tot\_cholesterol$   
+> The explantory variable x is $family$
+
+### Make a plot:
+
+response variable on the y-axis
+
+explanatory variable on the x-axis
+
+
+```{r}
+
+ggviolin(
+  data = bfam,
+  y = "tot_cholesterol",
+  x = "family",
+  fill = "family",
+  add = "mean_sd"
+  )
+
+```
+
+### Get n, mean, median, sd
+
+```{r}
+bfam |>
+  group_by(family) |>
+get_summary_stats(tot_cholesterol,
+                  type = "common",
+                  show = c("mean","median","sd"))
+
+```
+
+
+### Is it normally distribute?
+
+```{r}
+ggqqplot(
+  data = bfam,
+  x = "tot_cholesterol",
+  color = "family"
+  )
+
+
+bfam |> 
+  group_by(family) |>
+  shapiro_test(tot_cholesterol) |>
+  gt()
+
+```
+
+> Yes
+
+
+### Is it variance similar between groups?
+```{r}
+b |> 
+  levene_test(tot_cholesterol~family) |>
+  gt()
+```
+
+> Yes
+
+### What kind of test are you picking and why?
+
+> anova_test since i think it is normally distribute and has equal variance
+
+### 2. Declare null hypothesis $\mathcal{H}_0$
+
+$\mathcal{H}_0$ is that $family$ does not explain $tot\_cholesterol$
+
+### 3. Calculate test-statistic, exact p-value and plot
+
+
+```{r}
+bfam |>
+  anova_test(tot_cholesterol ~ family) |>
+  gt()
+
+
+ggviolin(
+  data = bfam,
+  y = "tot_cholesterol",
+  x = "family",
+  fill = "family",
+  add = "mean_sd"
+  ) +
+  stat_anova_test()
+  
+```
+
