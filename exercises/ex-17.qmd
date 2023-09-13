@@ -5,7 +5,7 @@ author: "Jay Hesselberth"
 
 # DNA Accessibility
 
-## Libraries
+## Load the libraries 
 
 1.  rtracklayer - prov
 2.  Gviz - this is a way to generate pretty images of genome browser snapshots within Rstudio.
@@ -27,40 +27,45 @@ library(rtracklayer)
 
 ## Load the data
 
-Today we will analyze ATAC-seq and MNase-seq datasets from budding yeast. Here are the references for the datasets:
+In this and the next class we will analyze ATAC-seq and MNase-seq data sets from budding yeast. Here are the references for the two data set:
 
-1.  ATAC-seq - <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4617971/> (GSM1621323)
-2.  MNase-seq - <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3889552/> (GSM1199785)
+#### ATAC-seq
 
-In case of MNase-seq, usually, DNA around 150 bp is extracted, so as to look only at nucleosome occupancy & positioning. However, the study we are analyzing today did not perform size selection. This is very important as now we can look at both TFs and nucleosomes within the MNase-seq data.
+> Schep AN, Buenrostro JD, Denny SK, Schwartz K, Sherlock G, Greenleaf WJ. Structured nucleosome fingerprints enable high-resolution mapping of chromatin architecture within regulatory regions. Genome Res. 2015 PMID: 26314830; PMCID: PMC4617971. [[Link]](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4617971/) [[Data]](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE66386)
+
+#### MNase-seq
+
+> Zentner GE, Henikoff S. Mot1 redistributes TBP from TATA-containing to TATA-less promoters. Mol Cell Biol. 2013 PMID: 24144978; PMCID: PMC3889552. [[Link]](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3889552/) [[Data]](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE44200)
+
+### Considerations
+
+In a standard MNase-seq experiment, DNA around 150 bp is extracted, so as to look closely at nucleosome occupancy & positioning. However, the study we are analyzing today did not perform size selection. This is important as now we can look at both transcription factor binding sites and nucleosome positions.
 
 First, we will determine the fragment size distributions obtained from the two experiments. These sizes are the fingerprints of particles that were protecting the DNA inside the cells.
 
 I have performed the alignment of paired-end reads and converted all reads into a bed file where each line of the bed file denotes a single fragment from start to end.
 
-First, the ATAC-seq reads:
+First, load the ATAC-seq reads:
 
 ```{r}
 #| echo: true
 #| output-location: column
-atac_tbl <- valr::read_bed(
-  here("data/lock-dna/yeast_atac_chrII.bed.gz"),
+atac_tbl <- read_bed(
+  here("data/block-dna/yeast_atac_chrII.bed.gz"),
 ) 
 atac_tbl
 ```
 
-Second, the MNase reads.
+Next, load the MNase reads.
 
 ```{r}
 #| echo: true
 #| output-location: column
-mnase_tbl <- valr::read_bed(
+mnase_tbl <- read_bed(
   here("data/block-dna/yeast_mnase_chrII.bed.gz")
 )
 mnase_tbl
 ```
-
-(You might have guessed by by the file names that we are looking at chromosome II of the yeast genome.)
 
 Working with a small genome is a huge advantage -- we can study the whole chromosome in this class. For *Drosophila* and human data we dealt with before, we were looking at a subsection of the chromosome.
 
@@ -159,7 +164,7 @@ The `density` slot contains a vector of densities at base-pair resolution. We wi
 #| echo: true
 atac_acf_tbl <-
   acf(
-    atac_hist$density,
+    atac_frag_lens$density,
     lag.max = 40,
     plot = FALSE
   ) |>
@@ -229,7 +234,7 @@ First, we load the gene annotations from the [Saccharomyces Genome Databases](ht
 #| output-location: column
 sgd_genes <-
   UcscTrack(
-    genome = "sacCer3",
+    genome = "sacCer1",
     track = "sgdGene",
     chromosome = "chrII",
     start = 530811,
@@ -252,18 +257,18 @@ Inspect the object. What is "GRanges"?
 
 ```{r}
 #| echo: true
-mnase_nuc <- import.bw(
+mnase_nuc_gr <- import.bw(
   here("data/block-dna/yeast_mnase_134_160.bw"),
   as = "GRanges"
 )
-mnase_nuc
+mnase_nuc_gr
 ```
 
 Next, load the GRanges object as a track for Gviz to plot:
 
 ```{r}
 mnase_nuc_trk <- DataTrack(
-  mnase_nuc,
+  mnase_nuc_gr,
   name = "MNase_nuc"
 )
 mnase_nuc_trk
@@ -338,16 +343,12 @@ plotTracks(
 
 ## Interpretations
 
-::: columns
-::: {.column width="50%"}
+Recall this plot:
+
+![](../img/block-dna/mnase-overview.png)
+
 Some questions to think about as you look at the tracks:
 
 1.  What is each data set reporting on?
 2.  What can you infer about genome function based on these tracks?
 3.  What are the major differences between MNase-seq and ATAC-seq based on these tracks?
-:::
-
-::: {.column width="50%"}
-![](../img/block-dna/mnase-overview.png)
-:::
-:::
