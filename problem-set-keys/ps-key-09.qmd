@@ -1,0 +1,241 @@
+---
+title: "R Bootcamp Problem Set 9"
+author: "JH"
+date: last-modified 
+---
+
+## Problem Set
+
+Use the data files in the `data/` directory to answer the questions.
+
+For this problem set, you are allowed to help each other, but you are not
+allowed to post correct answers in slack.
+
+**The problem set is due 12pm on Sept 11.**
+
+# A quantitative PCR experiment
+
+This problem set is a more complex version of the qPCR experiment we discussed in class.
+
+Here is the experimental setup:
+
+-   Three cell lines (`wt`, `TF-mutant`, `RL-mutant`) were treated with a drug that induces interferon expression.
+
+-   After specific time points (0, 4, 8, 12, 24 hours), cells were harvested and actin and interferon mRNA were analyzed by quantitative PCR (with 3 biological replicates, and 3 technical replicates).
+
+Data for the Biological replicates come from three independent cultures and RNA samples.
+
+Data for the technical replicates come the same RNA sample, measured in 3 independent qPCR reactions.
+
+The data are in `data/`:
+
+- `data/qpcr_names_ps.tsv.gz`
+- `data/qpcr_data.tsv.gz`
+
+## Libraries
+
+Load the libraries you need for analysis below.
+
+```{r}
+#| label: load-libs
+library(tidyverse)
+library(here)
+library(cowplot)
+```
+
+
+### Load the data
+
+Load the data sets and inspect.
+
+```{r}
+#| label: load-data
+qpcr_names <- read_tsv(here("data/qpcr_names_ps.tsv.gz"))
+qpcr_data <- read_tsv(here("data/qpcr_data_ps.tsv.gz"))
+```
+
+### Tidy the data
+
+Given the experimental setup and the shape of the tibbles, you should be able to answer: **Are these data tidy?**
+
+-   What are the variables in the data?
+
+> genotype, time, gene, biological replicate, technical replicate 
+
+-   Are the variables the column names?
+
+> Nope.
+
+The names are encoded in the following order:
+
+`gt`, `time`, `gene`, `rep_tech`, `rep_bio`.
+
+```{r}
+qpcr_names_long <-
+  pivot_longer(qpcr_names, -row, names_to = "col") |>
+  separate(
+    value,
+    into = c("gt", "time", "gene", "rep_tech", "rep_bio"),
+    sep = "_",
+    convert = TRUE
+  )
+qpcr_data_long <-
+  pivot_longer(qpcr_data, -row, names_to = "col", values_to = "exp")
+
+qpcr_tidy <-
+  left_join(qpcr_names_long, qpcr_data_long) |>
+  select(-row, -col)
+```
+
+## Question 1
+
+Calculate summary statistics for the experiment.
+
+1. Calculate the mean of the technical replicates within each group of genotype, time, gene, and biological replicate.
+
+2. Calculate the mean and standard deviation of the biolgical replicates (which is the mean of technical replicates, above).
+
+You should have a tibble that looks like this:
+
+```
+# A tibble: 36 × 5
+   gt         time gene     bio_mean bio_sd
+   <chr>     <int> <chr>       <dbl>  <dbl>
+ 1 RL-mutant     0 GAPDH       0.456  0.133
+ 2 RL-mutant     0 IFN-beta    3.54   0.203
+ 3 RL-mutant     4 GAPDH       1.65   0.432
+ 4 RL-mutant     4 IFN-beta   17.0    2.22 
+ 5 RL-mutant     8 GAPDH       2.09   1.17 
+ 6 RL-mutant     8 IFN-beta   31.8    3.29 
+ 7 RL-mutant    12 GAPDH       4.90   1.38 
+ 8 RL-mutant    12 IFN-beta   45.8    3.61 
+ 9 RL-mutant    24 GAPDH       8.50   2.49 
+10 RL-mutant    24 IFN-beta   78.1    5.80 
+# ℹ 26 more rows
+# ℹ Use `print(n = ...)` to see more rows
+```
+
+```{r}
+qpcr_summary <-
+  qpcr_tidy |>
+  group_by(gt, time, gene, rep_bio) |>
+  summarize(
+    tech_mean = mean(exp),
+  ) |>
+  group_by(gt, time, gene) |>
+  summarize(
+    bio_mean = mean(tech_mean),
+    bio_sd = sd(tech_mean)
+  ) |>
+  ungroup()
+```
+
+## Question 2
+
+1. Create a plot of expression by time from the data, using the mean of the biological replicates as the `y` value.
+
+2. Color the plot by genes.
+
+3. Use `ggplot2::geom_pointrange()` do represent the standard deviation of the data. Alternatively, use `ggplot2::geom_errobar()` with `geom_point()`.
+
+4. Draw a line through the points with `geom_line()`.
+
+4. Facet the plot by genotype.
+
+5. Change the colors of the of the plot with a `scale` function.
+
+6. Update the labels on the plot ("time (hours)", etc.).
+
+```{r}
+ggplot(
+  qpcr_summary,
+  aes(
+    x = time,
+    y = bio_mean,
+    color = gene
+  )
+) +
+  geom_pointrange(
+    aes(
+      ymin = bio_mean - bio_sd,
+      ymax = bio_mean + bio_sd
+    )
+  ) +
+  geom_line() +
+  facet_grid(~gt) +
+  scale_color_brewer(palette = "Set1") +
+  theme_cowplot()
+```
+
+### Interpret the plot
+
+- What can you say about the expression of GAPDH and IFN in the different cell types?
+
+> 
+
+- Can you come up with a simple molecular mechanism to explain the results?
+
+> A straightforward explanation is that "TF" is a repssor of IFN induction (i.e., IFN goes up in its absence),
+and RL is similar, but possibly via an indirect effect on IFN expression. In any case, the mutants
+have negligible impact on GAPDH expression.
+
+## Question 3
+
+Reformat the data from question 2 such that you calculate a ratio of IFN to GAPDH. Start with the data question 1.2 above.
+
+Re-plot the data as in question 2, but leave out the color as you have collapsed the two genes into one value.
+
+```{r}
+qpcr_summary |>
+  select(-bio_sd) |>
+  pivot_wider(names_from = gene, values_from = bio_mean) |>
+  rowwise() |>
+  mutate(exp_ratio = `IFN-beta` / GAPDH) |>
+  ggplot(
+    aes(x = time, y = exp_ratio)
+  ) +
+  geom_point() +
+  facet_grid(~gt) +
+  ylim(0, 15) +
+  theme_cowplot()
+```
+
+> This is considerably less interesting than I was planning, caused by the fractional values of GAPDH. C'est la vie. Consider this an exercise in pivoting.
+
+## Question 4
+
+Is there greater variance across the technical replicates, or across the biological replicates (across the whole experiment)?
+
+To get at this question, calculate the standard deviations across the two sets of replicates separately. Which one has a greater spread?
+
+> The key is the way you used `group_by()`. The technical replicates are tighter, which is expected if i) biology is variable and ii) you are any good at pipetting. 
+
+```{r}
+# one way
+qpcr_tidy |>
+  group_by(rep_tech) |>
+  summarize(tech_sd = sd(exp))
+qpcr_tidy |>
+  group_by(rep_bio) |>
+  summarize(bio_sd = sd(exp))
+
+# another
+qpcr_tidy |>
+  group_by(rep_tech) |>
+  summarize(tech_range = max(exp) - min(exp))
+qpcr_tidy |>
+  group_by(rep_bio) |>
+  summarize(bio_range = max(exp) - min(exp))
+```
+
+## Grading rubric
+
+- Everything is good: full points
+- Partially correct answer: depends on how many steps are correct
+- Reasonable attempt: half points
+
+## Submit
+
+Be sure to click the "Render" button to render the HTML output.
+
+Then paste the URL of this Posit Cloud project into the problem set on Canvas.
