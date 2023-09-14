@@ -83,10 +83,8 @@ Calculate the frequency of your observation vs all null distribution values\
 [More on choosing Parametric vs Non-Parametric](https://statisticsbyjim.com/hypothesis-testing/nonparametric-parametric-tests/)
 
 ```{r, echo=FALSE}
-tibble("Info" = c("better descriptor","# of samples (N)"), "Parametric" = c("mean","many"),"Nonparametric" = c("median  ","few")) |>
+tibble("Info" = c("better descriptor", "# of samples (N)"), "Parametric" = c("mean", "many"), "Nonparametric" = c("median  ", "few")) |>
   gt()
-
-
 ```
 
 ## Appropriate statistical test cheatsheet
@@ -123,8 +121,6 @@ tibble("Info" = c("better descriptor","# of samples (N)"), "Parametric" = c("mea
 read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
   janitor::clean_names() |>
   colnames()
-
-
 ```
 
 ## Prepare mouse biochem data {.smaller}
@@ -140,21 +136,21 @@ biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.tx
 colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
 
 # we are going to simplify this a bit and only keep some columns
-keep <- colnames(biochem)[c(1,6,9,14,15,24:28)]
-biochem <- biochem[,keep]
+keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
+biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
 weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
 
 # add column names
-colnames(weight) <- c("subject_name","weight")
+colnames(weight) <- c("subject_name", "weight")
 
 # add weight to biochem table and get rid of NAs
 # rename gender to sex
-b <- inner_join(biochem, weight, by="subject_name") |> 
+b <- inner_join(biochem, weight, by = "subject_name") |>
   na.omit() |>
-  rename(sex=gender)
+  rename(sex = gender)
 ```
 
 ## Compare mean of a variable to a known value {.smaller}
@@ -192,8 +188,7 @@ ggdensity(
   x = "weight",
   add = "mean",
   rug = TRUE
-  )
-
+)
 ```
 
 . . .
@@ -204,13 +199,12 @@ let's see some summary stats
 #| echo: true
 #| output-location: column-fragment
 
-b |> 
+b |>
   get_summary_stats(
     weight,
     type = "common",
-    show = c("mean","median","sd")
-    )
-
+    show = c("mean", "median", "sd")
+  )
 ```
 
 ## Is it normally distributed?
@@ -222,8 +216,7 @@ b |>
 ggqqplot(
   data = b,
   x = "weight"
-  )
-
+)
 ```
 
 Looks reasonable
@@ -234,7 +227,7 @@ Looks reasonable
 #| echo: true
 #| output-location: column-fragment
 
-b |> 
+b |>
   shapiro_test(weight)
 ```
 
@@ -266,8 +259,6 @@ x <- 27.5 # standard from google
 b |>
   wilcox_test(weight ~ 1, mu = x) |>
   gt()
-
-
 ```
 
 . . .
@@ -282,8 +273,6 @@ x <- 27.5 # standard from google
 b |>
   t_test(weight ~ 1, mu = x) |>
   gt()
-
-
 ```
 
 . . .
@@ -352,8 +341,7 @@ ggdensity(
   x = "weight",
   add = "mean",
   rug = TRUE
-  )
-
+)
 ```
 
 ------------------------------------------------------------------------
@@ -372,8 +360,7 @@ ggviolin(
   x = "sex",
   fill = "sex",
   add = "mean_sd"
-  )
-
+)
 ```
 
 . . .
@@ -382,14 +369,13 @@ ggviolin(
 #| echo: true
 #| output-location: column-fragment
 
-b |> 
+b |>
   group_by(sex) |>
   get_summary_stats(
     weight,
     type = "common",
-    show = c("mean","median","sd")
-    )
-
+    show = c("mean", "median", "sd")
+  )
 ```
 
 ## Is it normally distributed? {.smaller}
@@ -402,8 +388,7 @@ ggqqplot(
   data = b,
   x = "weight",
   color = "sex"
-  )
-
+)
 ```
 
 . . .
@@ -412,11 +397,10 @@ ggqqplot(
 #| echo: true
 #| output-location: column-fragment
 
-b |> 
+b |>
   group_by(sex) |>
   shapiro_test(weight) |>
   gt()
-
 ```
 
 Looks reasonable
@@ -427,10 +411,9 @@ Looks reasonable
 #| echo: true
 #| output-location: column-fragment
 
-b |> 
-  levene_test(weight~sex) |>
+b |>
+  levene_test(weight ~ sex) |>
   gt()
-
 ```
 
 OK - so we can use t-test, but variance is not equal.
@@ -450,8 +433,6 @@ Nonparametric test:
 b |>
   wilcox_test(weight ~ sex, ref.group = "F") |>
   gt()
-
-
 ```
 
 . . .
@@ -465,11 +446,10 @@ x <- 27.5 # standard from google
 
 b |>
   t_test(weight ~ sex,
-         var.equal = F,
-         ref.group = "F") |>
+    var.equal = F,
+    ref.group = "F"
+  ) |>
   gt()
-
-
 ```
 
 . . .
@@ -489,8 +469,9 @@ $sex$ can explain $weight$
 # save statistical test result
 statres <- b |>
   t_test(weight ~ sex,
-         var.equal = F, 
-         ref.group = "F")
+    var.equal = F,
+    ref.group = "F"
+  )
 
 
 ggviolin(
@@ -499,15 +480,13 @@ ggviolin(
   x = "sex",
   fill = "sex",
   add = "mean_sd"
-  ) +
+) +
   stat_pvalue_manual(
     statres,
     label = "p",
-    y.position = 34 
-    ) +
-  ylim(10,35)
-
-
+    y.position = 34
+  ) +
+  ylim(10, 35)
 ```
 
 ## Compare means of three or more groups {.smaller}
@@ -546,15 +525,17 @@ $weight$ \~ $family$
 #| echo: true
 
 # i have pre-selected some families to compare
-myfams <- c("B1.5:E1.4(4) B1.5:A1.4(5)",
-            "F1.3:A1.2(3) F1.3:E2.2(3)",
-            "A1.3:D1.2(3) A1.3:H1.2(3)",
-            "D5.4:G2.3(4) D5.4:C4.3(4)")
+myfams <- c(
+  "B1.5:E1.4(4) B1.5:A1.4(5)",
+  "F1.3:A1.2(3) F1.3:E2.2(3)",
+  "A1.3:D1.2(3) A1.3:H1.2(3)",
+  "D5.4:G2.3(4) D5.4:C4.3(4)"
+)
 
 # only keep the familys in myfams
 bfam <- b |>
   filter(family %in% myfams) |>
-  droplevels() 
+  droplevels()
 
 # simplify family names and make factor
 bfam$family <- gsub(pattern = "\\..*", replacement = "", x = bfam$family) |>
@@ -562,8 +543,7 @@ bfam$family <- gsub(pattern = "\\..*", replacement = "", x = bfam$family) |>
 
 
 # make B1 the reference (most similar to overall mean)
-bfam$family <- relevel(x = bfam$family, ref ="B1")
-
+bfam$family <- relevel(x = bfam$family, ref = "B1")
 ```
 
 ## Visualize the variable(s) {.smaller}
@@ -581,8 +561,7 @@ ggboxplot(
   y = "weight",
   x = "family",
   fill = "family"
-  )
-
+)
 ```
 
 . . .
@@ -591,14 +570,13 @@ ggboxplot(
 #| echo: true
 #| output-location: column-fragment
 
-bfam |> 
+bfam |>
   group_by(family) |>
   get_summary_stats(
     weight,
     type = "common",
-    show = c("mean","median","sd")
-    )
-
+    show = c("mean", "median", "sd")
+  )
 ```
 
 ## Is it normally distributed? {.smaller}
@@ -611,8 +589,7 @@ ggqqplot(
   data = bfam,
   x = "weight",
   color = "family"
-  )
-
+)
 ```
 
 . . .
@@ -621,11 +598,10 @@ ggqqplot(
 #| echo: true
 #| output-location: column-fragment
 
-bfam |> 
+bfam |>
   group_by(family) |>
   shapiro_test(weight) |>
   gt()
-
 ```
 
 Looks reasonable
@@ -636,10 +612,9 @@ Looks reasonable
 #| echo: true
 #| output-location: column-fragment
 
-bfam |> 
-  levene_test(weight~family) |>
+bfam |>
+  levene_test(weight ~ family) |>
   gt()
-
 ```
 
 OK - so we can use anova!
@@ -660,8 +635,6 @@ Parametric test:
 bfam |>
   anova_test(weight ~ family) |>
   gt()
-
-
 ```
 
 . . .
@@ -675,9 +648,6 @@ Nonparametric test:
 bfam |>
   kruskal_test(weight ~ family) |>
   gt()
-
-
-
 ```
 
 . . .
@@ -704,10 +674,8 @@ ggboxplot(
   y = "weight",
   x = "family",
   fill = "family"
-  ) + 
+) +
   stat_anova_test()
-  
-
 ```
 
 ## Multiple pairwise comparisons {.smaller}
@@ -720,22 +688,20 @@ Quick aside
 
 # save statistical test result
 pairwise <- bfam |>
-  t_test(weight ~ family, ref.group = "B1") 
+  t_test(weight ~ family, ref.group = "B1")
 
 
 ggboxplot(bfam,
-          x = "family",
-          y = "weight",
-          fill = "weight",
-          ) +
+  x = "family",
+  y = "weight",
+  fill = "weight",
+) +
   stat_pvalue_manual(
     pairwise,
-    label = "p.adj", 
+    label = "p.adj",
     y.position = c(30, 32, 34)
-    ) +
-  ylim(10,38)
-
-
+  ) +
+  ylim(10, 38)
 ```
 
 Notice that not all pairwise differences are significant, yet the ANOVA is significant.

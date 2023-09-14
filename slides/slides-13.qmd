@@ -32,21 +32,21 @@ biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.tx
 colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
 
 # we are going to simplify this a bit and only keep some columns
-keep <- colnames(biochem)[c(1,6,9,14,15,24:28)]
-biochem <- biochem[,keep]
+keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
+biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
 weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
 
 # add column names
-colnames(weight) <- c("subject_name","weight")
+colnames(weight) <- c("subject_name", "weight")
 
 # add weight to biochem table and get rid of NAs
 # rename gender to sex
-b <- inner_join(biochem, weight, by="subject_name") |> 
+b <- inner_join(biochem, weight, by = "subject_name") |>
   na.omit() |>
-  rename(sex=gender)
+  rename(sex = gender)
 ```
 
 ## Learning objectives
@@ -64,10 +64,8 @@ b <- inner_join(biochem, weight, by="subject_name") |>
 [More on choosing Parametric vs Non-Parametric](https://statisticsbyjim.com/hypothesis-testing/nonparametric-parametric-tests/)
 
 ```{r, echo=FALSE}
-tibble("Info" = c("better descriptor","# of samples (N)"), "Parametric" = c("mean","many"),"Nonparametric" = c("median  ","few")) |>
+tibble("Info" = c("better descriptor", "# of samples (N)"), "Parametric" = c("mean", "many"), "Nonparametric" = c("median  ", "few")) |>
   gt()
-
-
 ```
 
 ## Random variables
@@ -154,7 +152,6 @@ $\overline{y}$ = mean of all observations of $y$
 #| output-location: column-fragment
 
 ggscatter(data = b, y = "weight", x = "tot_cholesterol")
-
 ```
 
 we previously established these are normal enough \> $\mathcal{H}_0$ is no (linear) relationship between $tot\_cholesterol$ and $weight$
@@ -165,11 +162,10 @@ we previously established these are normal enough \> $\mathcal{H}_0$ is no (line
 #| echo: true
 #| output-location: column-fragment
 
-b |> 
+b |>
   cor_test(weight, tot_cholesterol,
-           method = "pearson"
-           )
-
+    method = "pearson"
+  )
 ```
 
 P value well below 0.05
@@ -184,14 +180,16 @@ So there is a (linear) relationship between $tot\_cholesterol$ and $weight$
 #| echo: true
 #| output-location: slide
 
-ggscatter(data = b,
-          y = "weight",
-          x = "tot_cholesterol"
-          ) + 
-  stat_cor(method = "pearson",
-           label.x = 1,
-           label.y = 30)
-
+ggscatter(
+  data = b,
+  y = "weight",
+  x = "tot_cholesterol"
+) +
+  stat_cor(
+    method = "pearson",
+    label.x = 1,
+    label.y = 30
+  )
 ```
 
 ## Manual calculation of Pearson correlation {.smaller}
@@ -215,12 +213,10 @@ diff_chol <- b$tot_cholesterol - m_chol
 diff_weight <- b$weight - m_weight
 
 # follow formula above
-manual_pearson <- sum(diff_chol*diff_weight)/(
-sqrt(sum(diff_chol^2))*sqrt(sum(diff_weight^2)))
+manual_pearson <- sum(diff_chol * diff_weight) / (
+  sqrt(sum(diff_chol^2)) * sqrt(sum(diff_weight^2)))
 
 manual_pearson
-
-
 ```
 
 ## Spearman Correlation (nonparametric) {.smaller}
@@ -234,11 +230,10 @@ More info [here](https://towardsdatascience.com/clearly-explained-pearson-v-s-sp
 #| output-location: column-fragment
 
 
-b |> 
+b |>
   cor_test(weight, tot_cholesterol,
-           method = "spearman"
-           )
-
+    method = "spearman"
+  )
 ```
 
 P value well below 0.05
@@ -251,14 +246,16 @@ P value well below 0.05
 #| echo: true
 #| output-location: slide
 
-ggscatter(data = b,
-          y = "weight",
-          x = "tot_cholesterol"
-          ) + 
-  stat_cor(method = "spearman",
-           label.x = 1,
-           label.y = 30)
-
+ggscatter(
+  data = b,
+  y = "weight",
+  x = "tot_cholesterol"
+) +
+  stat_cor(
+    method = "spearman",
+    label.x = 1,
+    label.y = 30
+  )
 ```
 
 ## Let's create a hypothetical example {.smaller}
@@ -274,9 +271,9 @@ $y$, which is $x^{10}$
 #| output-location: column-fragment
 
 d <- tibble(
-  x=seq(1:50),
-  y=x^10)
-
+  x = seq(1:50),
+  y = x^10
+)
 ```
 
 . . .
@@ -298,12 +295,11 @@ Pearson
 #| echo: true
 #| output-location: column-fragment
 
-d |> 
+d |>
   cor_test(x, y,
-           method = "pearson"
-           ) |>
+    method = "pearson"
+  ) |>
   select(cor)
-
 ```
 
 . . .
@@ -314,12 +310,11 @@ Spearman
 #| echo: true
 #| output-location: column-fragment
 
-d |> 
+d |>
   cor_test(x, y,
-           method = "spearman"
-           ) |>
+    method = "spearman"
+  ) |>
   select(cor)
-
 ```
 
 ## Additional examples with correlation {.smaller}
@@ -333,7 +328,6 @@ compare 1 variable to all other quantitative variables
 b |>
   cor_test(weight, method = "spearman") |>
   gt()
-
 ```
 
 relationship between $weight$ and $tot\_cholesterol$ by $sex$
@@ -346,8 +340,6 @@ b |>
   group_by(sex) |>
   cor_test(weight, tot_cholesterol, method = "pearson") |>
   gt()
-
-
 ```
 
 ## Appropriate statistical test cheatsheet
@@ -379,18 +371,19 @@ $a$ is the **SLOPE** (2) $b$ is the **y-intercept** (1)
 #| echo: true
 #| output-location: column-fragment
 
-d <- tibble(x=c(-1,3),
-            y=c(-1,6)
-             )
+d <- tibble(
+  x = c(-1, 3),
+  y = c(-1, 6)
+)
 
-ggplot(data=d, aes(x=x,y=y)) + 
+ggplot(data = d, aes(x = x, y = y)) +
   geom_blank() +
-  geom_abline(intercept = 1,
-              slope = 2,
-              col = "red") +
+  geom_abline(
+    intercept = 1,
+    slope = 2,
+    col = "red"
+  ) +
   theme_linedraw()
-
-
 ```
 
 ## Stats equation for a line {.smaller}
@@ -419,13 +412,14 @@ All you need is an intercept ($\beta_0$) and a slope ($\beta_1$) to get a line:
 #| echo: true
 #| output-location: column-fragment
 
-ggplot(data=d, aes(x=x,y=y)) + 
+ggplot(data = d, aes(x = x, y = y)) +
   geom_blank() +
-  geom_abline(intercept = 1,
-              slope = 2,
-              col = "red") +
+  geom_abline(
+    intercept = 1,
+    slope = 2,
+    col = "red"
+  ) +
   theme_linedraw()
-
 ```
 
 $\beta_0$ = 1 (the y-intercept), $\beta_1$ = 2 (the slope)
@@ -451,15 +445,16 @@ $y = 1 + 2x$
 Plot $weight$ (y, response variable) and $tot_cholesterol$ (x, explanatory variable)
 
 ```{r}
-
-ggplot(data = b,
-       aes(y = weight,
-           x = tot_cholesterol)) +
-  geom_point(size=.5) +
+ggplot(
+  data = b,
+  aes(
+    y = weight,
+    x = tot_cholesterol
+  )
+) +
+  geom_point(size = .5) +
   scale_color_manual() +
   theme_linedraw()
-
-
 ```
 
 ## STEP 2: Do the regression {.smaller}
@@ -489,12 +484,12 @@ The cool thing here is that we can assess and compare our null and alternative h
 # fitting a line
 fit_WvC <- lm(
   data = b,
-  formula = weight ~ 1 + tot_cholesterol)
+  formula = weight ~ 1 + tot_cholesterol
+)
 
 
 # base R summary of fit
 summary(fit_WvC)
-
 ```
 
 That's a lot of info, but how would I access it? Time to meet your new best friend:
@@ -520,9 +515,9 @@ information about the intercept and coefficients
 #| echo: true
 #| output-location: column-fragment
 
-tidy(fit_WvC)|>
+tidy(fit_WvC) |>
   gt() |>
-  fmt_number(columns =estimate:statistic, decimals = 3)
+  fmt_number(columns = estimate:statistic, decimals = 3)
 ```
 
 save the intercept and slope into variable to use later
@@ -531,10 +526,9 @@ save the intercept and slope into variable to use later
 #| echo: true
 #| output-location: column-fragment
 
-chol_intercept <- tidy(fit_WvC)[1,2]
+chol_intercept <- tidy(fit_WvC)[1, 2]
 
-chol_slope <- tidy(fit_WvC)[2,2]
-
+chol_slope <- tidy(fit_WvC)[2, 2]
 ```
 
 ------------------------------------------------------------------------
@@ -542,16 +536,17 @@ chol_slope <- tidy(fit_WvC)[2,2]
 > for every 1 unit increase in cholesterol there is a 1.85 unit increase weight
 
 ```{r}
-
-ggplot(data = b,
-       aes(y = weight,
-           x = tot_cholesterol)) +
+ggplot(
+  data = b,
+  aes(
+    y = weight,
+    x = tot_cholesterol
+  )
+) +
   geom_smooth(method = "lm") +
-  geom_point(size=.5) +
+  geom_point(size = .5) +
   scale_color_manual() +
   theme_linedraw()
-
-
 ```
 
 ## Collecting residuals and other information {.smaller}
@@ -564,8 +559,6 @@ add residuals and other information
 b_WvC <- augment(fit_WvC, data = b)
 
 b_WvC
-
-
 ```
 
 ## What are **Residuals** {.smaller}
@@ -581,19 +574,29 @@ Residuals with large absolute values indicate the data point is NOT well explain
 Visualize the residuals OR the error around the fit
 
 ```{r}
-ggplot(data = b_WvC,
-       aes(x = tot_cholesterol, y = weight)) +
-  geom_point(size=1, aes(color = .resid)) + 
-  geom_abline(intercept = pull(chol_intercept),
-              slope = pull(chol_slope),
-              col = "red") +
-  scale_color_gradient2(low = "blue", 
-                        mid = "black",
-                        high = "yellow") + 
-  geom_segment(aes(xend = tot_cholesterol,
-                   yend = .fitted),
-               alpha = .1) + # plot line representing residuals
-  theme_linedraw() 
+ggplot(
+  data = b_WvC,
+  aes(x = tot_cholesterol, y = weight)
+) +
+  geom_point(size = 1, aes(color = .resid)) +
+  geom_abline(
+    intercept = pull(chol_intercept),
+    slope = pull(chol_slope),
+    col = "red"
+  ) +
+  scale_color_gradient2(
+    low = "blue",
+    mid = "black",
+    high = "yellow"
+  ) +
+  geom_segment(
+    aes(
+      xend = tot_cholesterol,
+      yend = .fitted
+    ),
+    alpha = .1
+  ) + # plot line representing residuals
+  theme_linedraw()
 ```
 
 ------------------------------------------------------------------------
@@ -603,19 +606,29 @@ Visualize the total error OR the error around the null. So no cholesterol fit, j
 ```{r}
 avg_weight <- mean(b_WvC$weight)
 
-ggplot(data = b_WvC,
-       aes(x = tot_cholesterol, y = weight)) +
-  geom_point(size=1, aes(color = weight - avg_weight)) + 
-  geom_abline(intercept = avg_weight,
-              slope = 0,
-              col = "red") +
-  scale_color_gradient2(low = "blue", 
-                        mid = "black",
-                        high = "yellow") + 
-  geom_segment(aes(xend = tot_cholesterol,
-                   yend = avg_weight),
-               alpha = 25) + # plot line representing residuals
-  theme_linedraw() 
+ggplot(
+  data = b_WvC,
+  aes(x = tot_cholesterol, y = weight)
+) +
+  geom_point(size = 1, aes(color = weight - avg_weight)) +
+  geom_abline(
+    intercept = avg_weight,
+    slope = 0,
+    col = "red"
+  ) +
+  scale_color_gradient2(
+    low = "blue",
+    mid = "black",
+    high = "yellow"
+  ) +
+  geom_segment(
+    aes(
+      xend = tot_cholesterol,
+      yend = avg_weight
+    ),
+    alpha = 25
+  ) + # plot line representing residuals
+  theme_linedraw()
 ```
 
 ## STEP 6: Calculate $R^2$, $F$-value, $p$-value ourselves {.smaller}
@@ -653,8 +666,9 @@ $SS_{null}$ --- sum of squared errors around the mean of $y$
 #| output-location: column-fragment
 
 ss_null <- sum(
-  (b_WvC$weight - avg_weight)^2) 
-ss_null 
+  (b_WvC$weight - avg_weight)^2
+)
+ss_null
 ```
 
 $R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
@@ -663,7 +677,7 @@ $R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
 #| echo: true
 #| output-location: column-fragment
 
-rsq <- 1- ss_fit/ss_null
+rsq <- 1 - ss_fit / ss_null
 
 glance(fit_WvC) |> select(r.squared)
 ```
@@ -673,13 +687,13 @@ glance(fit_WvC) |> select(r.squared)
 BTW this is the same $R$ as from the Pearson correlation, just squared:
 
 ```{r}
-b |> 
-  cor_test(weight,tot_cholesterol,
-           method = "pearson") |>
+b |>
+  cor_test(weight, tot_cholesterol,
+    method = "pearson"
+  ) |>
   mutate(rsq = cor^2) |>
   pull(rsq) |>
   round(2)
-
 ```
 
 ## Interpret $R^2$
@@ -711,15 +725,13 @@ pfit <- 2
 pnull <- 1
 n <- nrow(b_WvC)
 
-f <- ((ss_null - ss_fit) / (pfit - pnull)) / 
+f <- ((ss_null - ss_fit) / (pfit - pnull)) /
   (ss_fit / (n - pfit))
 
 
 f
 
 glance(fit_WvC) |> select(statistic)
-
-
 ```
 
 ## P-values {.smaller}
@@ -755,19 +767,18 @@ myPerms <- 100
 for (i in 1:myPerms) {
   tmp <- bind_cols(
     b_WvC[sample(nrow(b_WvC)), "weight"],
-    b_WvC[sample(nrow(b_WvC)),"tot_cholesterol"],
-    "perm"=factor(rep(i,nrow(b_WvC)))
-    )
+    b_WvC[sample(nrow(b_WvC)), "tot_cholesterol"],
+    "perm" = factor(rep(i, nrow(b_WvC)))
+  )
 
-  fake_biochem <- bind_rows(fake_biochem,tmp)
+  fake_biochem <- bind_rows(fake_biochem, tmp)
   rm(tmp)
-
 }
 
 
 # let's look at permutations 1 and 2
-ggplot(fake_biochem |> filter(perm %in% c(1:2)), aes(x=weight, y=tot_cholesterol, color=perm)) +
-  geom_point(size=.1) +
+ggplot(fake_biochem |> filter(perm %in% c(1:2)), aes(x = weight, y = tot_cholesterol, color = perm)) +
+  geom_point(size = .1) +
   theme_minimal()
 ```
 
@@ -786,8 +797,6 @@ fake_biochem_lms <- fake_biochem |>
     glanced = map(fit, glance)
   ) |>
   unnest(glanced)
-
-
 ```
 
 ## Visualize the null {.smaller}
@@ -798,11 +807,12 @@ Let's take a look at the null distribution of F-statistics from the randomized v
 #| echo: true
 #| output-location: column-fragment
 
-ggplot(fake_biochem_lms,
-       aes(x = statistic)) +
-geom_density(color="red") +
-theme_minimal()
-
+ggplot(
+  fake_biochem_lms,
+  aes(x = statistic)
+) +
+  geom_density(color = "red") +
+  theme_minimal()
 ```
 
 ------------------------------------------------------------------------
@@ -814,13 +824,11 @@ remember that the $F-statistic$ we observed was \~`r round(f)`!
 #| output-location: slide
 
 ggplot(fake_biochem_lms, aes(x = statistic)) +
-xlim(0,f*1.1) +
-geom_density(color="red") +
-geom_vline(xintercept = f, color = "blue") +
-#  scale_x_log10() +
-theme_minimal() 
-
-
+  xlim(0, f * 1.1) +
+  geom_density(color = "red") +
+  geom_vline(xintercept = f, color = "blue") +
+  #  scale_x_log10() +
+  theme_minimal()
 ```
 
 In our 100 randoized simulations, we never see an F-statistic as extreme as the one we observed in the actual data. Therefore:
@@ -831,7 +839,9 @@ Reminder, our calculate P value was:
 
 ```{r}
 #| include: false
-glance(fit_WvC) |> select(p.value) |> gt() |> 
+glance(fit_WvC) |>
+  select(p.value) |>
+  gt() |>
   fmt_scientific()
 ```
 

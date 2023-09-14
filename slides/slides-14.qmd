@@ -31,21 +31,21 @@ biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.tx
 colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
 
 # we are going to simplify this a bit and only keep some columns
-keep <- colnames(biochem)[c(1,6,9,14,15,24:28)]
-biochem <- biochem[,keep]
+keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
+biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
 weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
 
 # add column names
-colnames(weight) <- c("subject_name","weight")
+colnames(weight) <- c("subject_name", "weight")
 
 # add weight to biochem table and get rid of NAs
 # rename sex to sex
-b <- inner_join(biochem, weight, by="subject_name") |> 
+b <- inner_join(biochem, weight, by = "subject_name") |>
   na.omit() |>
-  rename(sex=gender)
+  rename(sex = gender)
 ```
 
 ## Learning objectives
@@ -99,25 +99,32 @@ We will compare mouse $weight$ by $sex$.
 #| output-location: slide
 
 # plot weight by sex
-p_ws <- ggplot(b,
-               aes(x = sex, y = weight)) +
-  geom_jitter(size=1) +
-  geom_hline(yintercept = mean(b$weight),
-             color = "red") +
+p_ws <- ggplot(
+  b,
+  aes(x = sex, y = weight)
+) +
+  geom_jitter(size = 1) +
+  geom_hline(
+    yintercept = mean(b$weight),
+    color = "red"
+  ) +
   theme_cowplot()
 
 
-# plot weight by sex with mean weight and mean weight by sex  
-p_ws2 <- ggplot(b,
-                aes(x = sex, y = weight)) +
-  geom_jitter(size=1) +
-  geom_hline(yintercept = mean(b$weight),
-             color = "red") +
- stat_summary(fun = "mean", geom = "point",  fill = "blue", shape = 23, size=3) +
+# plot weight by sex with mean weight and mean weight by sex
+p_ws2 <- ggplot(
+  b,
+  aes(x = sex, y = weight)
+) +
+  geom_jitter(size = 1) +
+  geom_hline(
+    yintercept = mean(b$weight),
+    color = "red"
+  ) +
+  stat_summary(fun = "mean", geom = "point", fill = "blue", shape = 23, size = 3) +
   theme_cowplot()
 
-plot_grid(p_ws, p_ws2, ncol = 2, labels = c("weight","weight by sex"), scale = c(1,1))
-
+plot_grid(p_ws, p_ws2, ncol = 2, labels = c("weight", "weight by sex"), scale = c(1, 1))
 ```
 
 ## STEP 1: Can mouse sex explain mouse weight? {.smaller}
@@ -142,7 +149,7 @@ We will explore this in more detail soon.
 #| echo: true
 #| output-location: fragment
 
-fit_ws <- lm(formula = weight ~ 1 + sex , data = b)
+fit_ws <- lm(formula = weight ~ 1 + sex, data = b)
 ```
 
 Fit summary:
@@ -153,7 +160,6 @@ Fit summary:
 glance(fit_ws) |>
   gt() |>
   fmt_number(columns = r.squared:statistic, decimals = 3)
-
 ```
 
 Coefficient summary:
@@ -163,9 +169,7 @@ Coefficient summary:
 #| output-location: column-fragment
 tidy(fit_ws) |>
   gt() |>
-  fmt_number(columns =estimate:statistic, decimals = 3)
-  
-
+  fmt_number(columns = estimate:statistic, decimals = 3)
 ```
 
 ## Collecting residuals and other information {.smaller}
@@ -177,7 +181,7 @@ add residuals and other information
 #| output-location: column-fragment
 
 
-#augment
+# augment
 b_ws <- augment(fit_ws, data = b)
 
 # mean weight
@@ -193,9 +197,8 @@ w <- b |>
 #| output-location: column-fragment
 
 # mean weight female
-avg_wf <- pull(w[1,4] )
+avg_wf <- pull(w[1, 4])
 avg_wf
-
 ```
 
 ```{r}
@@ -203,7 +206,7 @@ avg_wf
 #| output-location: column-fragment
 
 # mean weight male
-avg_wm <- pull(w[2,4] )
+avg_wm <- pull(w[2, 4])
 avg_wm
 ```
 
@@ -215,24 +218,41 @@ avg_wm
 
 
 # plot of data with mean and colored by residuals
-p_ws <- ggplot(b_ws,
-               aes(x = sex, y = weight)) +
-  geom_point(position = position_jitter(),
-             aes(color = .resid)) +
-  scale_color_gradient2(low = "blue",
-                        mid = "black",
-                        high = "yellow") +
-    geom_hline(yintercept = avg_w,
-               color = "darkgrey") +
-  geom_segment(aes(x=.5, xend=1.5,
-                   y=avg_wf, yend=avg_wf),
-               color="red") +
-    geom_segment(aes(x=1.5, xend=2.5,
-                     y=avg_wm), yend=avg_wm,
-                 color="red") +
+p_ws <- ggplot(
+  b_ws,
+  aes(x = sex, y = weight)
+) +
+  geom_point(
+    position = position_jitter(),
+    aes(color = .resid)
+  ) +
+  scale_color_gradient2(
+    low = "blue",
+    mid = "black",
+    high = "yellow"
+  ) +
+  geom_hline(
+    yintercept = avg_w,
+    color = "darkgrey"
+  ) +
+  geom_segment(
+    aes(
+      x = .5, xend = 1.5,
+      y = avg_wf, yend = avg_wf
+    ),
+    color = "red"
+  ) +
+  geom_segment(
+    aes(
+      x = 1.5, xend = 2.5,
+      y = avg_wm
+    ),
+    yend = avg_wm,
+    color = "red"
+  ) +
   theme_cowplot()
-  
-p_ws 
+
+p_ws
 ```
 
 ## STEP 4: Visualize the error around the null (mean weight) {.smaller}
@@ -241,17 +261,25 @@ p_ws
 #| echo: true
 #| output-location: column-fragment
 
-p_w <- ggplot(b_ws,
-               aes(x = sex, y = weight)) +
-  geom_point(position = position_jitter(),
-             aes(color = weight-avg_w)) +
-  scale_color_gradient2(low = "blue",
-                        mid = "black",
-                        high = "yellow") +
-    geom_hline(yintercept = avg_w,
-               color = "darkgrey") +
+p_w <- ggplot(
+  b_ws,
+  aes(x = sex, y = weight)
+) +
+  geom_point(
+    position = position_jitter(),
+    aes(color = weight - avg_w)
+  ) +
+  scale_color_gradient2(
+    low = "blue",
+    mid = "black",
+    high = "yellow"
+  ) +
+  geom_hline(
+    yintercept = avg_w,
+    color = "darkgrey"
+  ) +
   theme_cowplot()
-  
+
 p_w
 ```
 
@@ -260,8 +288,7 @@ p_w
 ```{r}
 #| echo: true
 
-plot_grid(p_ws, p_w, ncol = 2, labels = c("weight by sex","weight by intercept"))
-
+plot_grid(p_ws, p_w, ncol = 2, labels = c("weight by sex", "weight by intercept"))
 ```
 
 We are fitting 2 lines to the data. For the weight by sex model of the fit (left), we fit **2** lines. For the weight by null model (right) we fit **1** line.
@@ -271,13 +298,12 @@ We are fitting 2 lines to the data. For the weight by sex model of the fit (left
 ```{r}
 #| echo: false
 
-b_ws |> 
+b_ws |>
   arrange(-.resid) |>
   top_n(15) |>
-  select(subject_name,weight,sex,.resid,.fitted) |>
+  select(subject_name, weight, sex, .resid, .fitted) |>
   gt() |>
   fmt_number(decimals = 2)
-
 ```
 
 ## Matrices Interlude *Begin* {.smaller}
@@ -312,8 +338,8 @@ $y_{62}= 0 \cdot F_{avg} + 1 \cdot M_{avg} + residual_{62}$
 ## Let's focus on just a few mice {.smaller}
 
 ```{r}
-b_ws |> 
-  filter(subject_name %in% c("A048054885","A067109771","A066822351","A048274362")) |>
+b_ws |>
+  filter(subject_name %in% c("A048054885", "A067109771", "A066822351", "A048274362")) |>
   select(subject_name, weight, sex, .fitted, .resid) |>
   arrange(sex) |>
   gt()
@@ -361,8 +387,9 @@ $SS_{null}$ --- sum of squared errors around the mean of $y$
 #| output-location: column-fragment
 
 ss_null <- sum(
-  (b_ws$weight - avg_w)^2) 
-ss_null 
+  (b_ws$weight - avg_w)^2
+)
+ss_null
 ```
 
 $R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
@@ -371,7 +398,7 @@ $R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
 #| echo: true
 #| output-location: column-fragment
 
-rsq <- 1- ss_fit/ss_null
+rsq <- 1 - ss_fit / ss_null
 rsq
 ```
 
@@ -390,11 +417,10 @@ Woohoo!!
 #| echo: true
 #| output-location: column-fragment
 
-b |> 
+b |>
   t_test(weight ~ 1 + sex) |>
-  select(-c(n1,n2,df)) |>
+  select(-c(n1, n2, df)) |>
   gt()
-
 ```
 
 ```{r}
@@ -404,7 +430,6 @@ b |>
 tidy(fit_ws) |>
   select(term, estimate, statistic, p.value) |>
   gt()
-
 ```
 
 ## prep data for fams {.smaller}
@@ -413,15 +438,17 @@ tidy(fit_ws) |>
 #| echo: true
 
 # i have pre-selected some families to compare
-myfams <- c("B1.5:E1.4(4) B1.5:A1.4(5)",
-            "F1.3:A1.2(3) F1.3:E2.2(3)",
-            "A1.3:D1.2(3) A1.3:H1.2(3)",
-            "D5.4:G2.3(4) D5.4:C4.3(4)")
+myfams <- c(
+  "B1.5:E1.4(4) B1.5:A1.4(5)",
+  "F1.3:A1.2(3) F1.3:E2.2(3)",
+  "A1.3:D1.2(3) A1.3:H1.2(3)",
+  "D5.4:G2.3(4) D5.4:C4.3(4)"
+)
 
 # only keep the familys in myfams
 bfam <- b |>
   filter(family %in% myfams) |>
-  droplevels() 
+  droplevels()
 
 # simplify family names and make factor
 bfam$family <- gsub(pattern = "\\..*", replacement = "", x = bfam$family) |>
@@ -429,7 +456,7 @@ bfam$family <- gsub(pattern = "\\..*", replacement = "", x = bfam$family) |>
 
 
 # make B1 the reference (most similar to overall mean)
-bfam$family <- relevel(x = bfam$family, ref ="B1")
+bfam$family <- relevel(x = bfam$family, ref = "B1")
 ```
 
 ## STEP 1: Can family explain weight? {.smaller}
@@ -442,11 +469,12 @@ Let's compare the $weight$ by $family$, but only for a few selected families.
 #| echo: true
 #| output-location: slide
 
-ggplot(data = bfam,
-       aes(y = weight, x =family, color=family)) +
+ggplot(
+  data = bfam,
+  aes(y = weight, x = family, color = family)
+) +
   geom_jitter(width = .2) +
   theme_cowplot()
-
 ```
 
 ## What does the model look like? {.smaller}
@@ -484,7 +512,6 @@ Fit summary:
 glance(fit_wf) |>
   gt() |>
   fmt_number(columns = r.squared:statistic, decimals = 3)
-
 ```
 
 Coefficient summary:
@@ -494,8 +521,7 @@ Coefficient summary:
 #| output-location: column-fragment
 tidy(fit_wf) |>
   gt() |>
-  fmt_number(columns =estimate:statistic, decimals = 3)
-  
+  fmt_number(columns = estimate:statistic, decimals = 3)
 ```
 
 ## Collecting residuals and other information {.smaller}
@@ -507,7 +533,7 @@ add residuals and other information
 #| output-location: column-fragment
 
 
-#augment
+# augment
 b_wf <- augment(fit_wf, data = bfam)
 
 # mean weight per fam
@@ -521,7 +547,6 @@ mean_D5 <- fit_wf$coefficients[1] +
 
 mean_F1 <- fit_wf$coefficients[1] +
   fit_wf$coefficients[4]
-
 ```
 
 ## STEP 3: Visualize the error around fit {.smaller}
@@ -530,20 +555,25 @@ mean_F1 <- fit_wf$coefficients[1] +
 #| echo: true
 #| output-location: slide
 
-ggplot(b_wf,
-               aes(x = family, y = weight)) +
-  geom_point(position = position_jitter(),
-             aes(color = .resid)) +
-  scale_color_gradient2(low = "blue",
-                        mid = "black",
-                        high = "yellow") +
-geom_segment(aes(x=.5, xend=1.5, y=mean_B1, yend=mean_B1), color="red") +
-  geom_segment(aes(x=1.5, xend=2.5, y=mean_A1, yend=mean_A1), color="red") +
-  geom_segment(aes(x=2.5, xend=3.5, y=mean_D5, yend=mean_D5), color="red") +
-  geom_segment(aes(x=3.5, xend=4.5, y=mean_F1, yend=mean_F1), color="red") +
-  geom_segment(aes(x=.5, xend=4.5, y=mean(weight), yend=mean(weight)), color="black") +
+ggplot(
+  b_wf,
+  aes(x = family, y = weight)
+) +
+  geom_point(
+    position = position_jitter(),
+    aes(color = .resid)
+  ) +
+  scale_color_gradient2(
+    low = "blue",
+    mid = "black",
+    high = "yellow"
+  ) +
+  geom_segment(aes(x = .5, xend = 1.5, y = mean_B1, yend = mean_B1), color = "red") +
+  geom_segment(aes(x = 1.5, xend = 2.5, y = mean_A1, yend = mean_A1), color = "red") +
+  geom_segment(aes(x = 2.5, xend = 3.5, y = mean_D5, yend = mean_D5), color = "red") +
+  geom_segment(aes(x = 3.5, xend = 4.5, y = mean_F1, yend = mean_F1), color = "red") +
+  geom_segment(aes(x = .5, xend = 4.5, y = mean(weight), yend = mean(weight)), color = "black") +
   theme_cowplot()
-
 ```
 
 ## Compare to traditional ANOVA {.smaller}
@@ -552,10 +582,9 @@ geom_segment(aes(x=.5, xend=1.5, y=mean_B1, yend=mean_B1), color="red") +
 #| echo: true
 #| output-location: column-fragment
 
-bfam |> 
+bfam |>
   anova_test(weight ~ 1 + family) |>
   gt()
-
 ```
 
 ```{r}
@@ -565,7 +594,6 @@ bfam |>
 tidy(fit_wf) |>
   select(term, estimate, statistic, p.value) |>
   gt()
-
 ```
 
 ## Comparing 2 groups of 2 continuous variables {.smaller}
@@ -576,9 +604,9 @@ tidy(fit_wf) |>
 #| echo: true
 #| output-location: slide
 
-ggplot(data = b, aes(y = weight, x = age, color=sex)) +
-  geom_point(size=.5) +
-  geom_smooth(method=lm) +
+ggplot(data = b, aes(y = weight, x = age, color = sex)) +
+  geom_point(size = .5) +
+  geom_smooth(method = lm) +
   theme_cowplot()
 ```
 
@@ -590,7 +618,6 @@ ggplot(data = b, aes(y = weight, x = age, color=sex)) +
 
 fit_wa_sex <- lm(formula = weight ~ 1 + age + sex, data = b)
 b_wa_sex <- augment(fit_ws, data = b)
-
 ```
 
 Fit summary:
@@ -601,7 +628,6 @@ Fit summary:
 glance(fit_wa_sex) |>
   gt() |>
   fmt_number(columns = r.squared:statistic, decimals = 3)
-
 ```
 
 Compare to traditional:
@@ -612,8 +638,6 @@ Compare to traditional:
 
 aov(formula = weight ~ 1 + age + sex, data = b) %>%
   glance()
-
-
 ```
 
 ## References
