@@ -428,21 +428,21 @@ Neelanjan Mukherjee
 <span id="cb1-6"><a href="#cb1-6"></a><span class="fu">colnames</span>(biochem) <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">"biochem_"</span>, <span class="at">replacement =</span> <span class="st">""</span>, <span class="fu">colnames</span>(biochem))</span>
 <span id="cb1-7"><a href="#cb1-7"></a></span>
 <span id="cb1-8"><a href="#cb1-8"></a><span class="co"># we are going to simplify this a bit and only keep some columns</span></span>
-<span id="cb1-9"><a href="#cb1-9"></a>keep <span class="ot">&lt;-</span> <span class="fu">colnames</span>(biochem)[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">6</span>,<span class="dv">9</span>,<span class="dv">14</span>,<span class="dv">15</span>,<span class="dv">24</span><span class="sc">:</span><span class="dv">28</span>)]</span>
-<span id="cb1-10"><a href="#cb1-10"></a>biochem <span class="ot">&lt;-</span> biochem[,keep]</span>
+<span id="cb1-9"><a href="#cb1-9"></a>keep <span class="ot">&lt;-</span> <span class="fu">colnames</span>(biochem)[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">6</span>, <span class="dv">9</span>, <span class="dv">14</span>, <span class="dv">15</span>, <span class="dv">24</span><span class="sc">:</span><span class="dv">28</span>)]</span>
+<span id="cb1-10"><a href="#cb1-10"></a>biochem <span class="ot">&lt;-</span> biochem[, keep]</span>
 <span id="cb1-11"><a href="#cb1-11"></a></span>
 <span id="cb1-12"><a href="#cb1-12"></a><span class="co"># get weights for each individual mouse</span></span>
 <span id="cb1-13"><a href="#cb1-13"></a><span class="co"># careful: did not come with column names</span></span>
 <span id="cb1-14"><a href="#cb1-14"></a>weight <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight"</span>, <span class="at">col_names =</span> F, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb1-15"><a href="#cb1-15"></a></span>
 <span id="cb1-16"><a href="#cb1-16"></a><span class="co"># add column names</span></span>
-<span id="cb1-17"><a href="#cb1-17"></a><span class="fu">colnames</span>(weight) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"subject_name"</span>,<span class="st">"weight"</span>)</span>
+<span id="cb1-17"><a href="#cb1-17"></a><span class="fu">colnames</span>(weight) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"subject_name"</span>, <span class="st">"weight"</span>)</span>
 <span id="cb1-18"><a href="#cb1-18"></a></span>
 <span id="cb1-19"><a href="#cb1-19"></a><span class="co"># add weight to biochem table and get rid of NAs</span></span>
 <span id="cb1-20"><a href="#cb1-20"></a><span class="co"># rename sex to sex</span></span>
-<span id="cb1-21"><a href="#cb1-21"></a>b <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(biochem, weight, <span class="at">by=</span><span class="st">"subject_name"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb1-21"><a href="#cb1-21"></a>b <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(biochem, weight, <span class="at">by =</span> <span class="st">"subject_name"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb1-22"><a href="#cb1-22"></a>  <span class="fu">na.omit</span>() <span class="sc">|&gt;</span></span>
-<span id="cb1-23"><a href="#cb1-23"></a>  <span class="fu">rename</span>(<span class="at">sex=</span>gender)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-23"><a href="#cb1-23"></a>  <span class="fu">rename</span>(<span class="at">sex =</span> gender)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="learning-objectives" class="slide level2">
@@ -486,30 +486,38 @@ Neelanjan Mukherjee
 <p>We will compare mouse <span class="math inline">\(weight\)</span> by <span class="math inline">\(sex\)</span>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># plot weight by sex</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a>p_ws <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(b,</span>
-<span id="cb2-3"><a href="#cb2-3"></a>               <span class="fu">aes</span>(<span class="at">x =</span> sex, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a>  <span class="fu">geom_jitter</span>(<span class="at">size=</span><span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb2-5"><a href="#cb2-5"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">mean</span>(b<span class="sc">$</span>weight),</span>
-<span id="cb2-6"><a href="#cb2-6"></a>             <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a>  <span class="fu">theme_cowplot</span>()</span>
-<span id="cb2-8"><a href="#cb2-8"></a></span>
-<span id="cb2-9"><a href="#cb2-9"></a></span>
-<span id="cb2-10"><a href="#cb2-10"></a><span class="co"># plot weight by sex with mean weight and mean weight by sex  </span></span>
-<span id="cb2-11"><a href="#cb2-11"></a>p_ws2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(b,</span>
-<span id="cb2-12"><a href="#cb2-12"></a>                <span class="fu">aes</span>(<span class="at">x =</span> sex, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
-<span id="cb2-13"><a href="#cb2-13"></a>  <span class="fu">geom_jitter</span>(<span class="at">size=</span><span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb2-14"><a href="#cb2-14"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">mean</span>(b<span class="sc">$</span>weight),</span>
-<span id="cb2-15"><a href="#cb2-15"></a>             <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb2-16"><a href="#cb2-16"></a> <span class="fu">stat_summary</span>(<span class="at">fun =</span> <span class="st">"mean"</span>, <span class="at">geom =</span> <span class="st">"point"</span>,  <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">shape =</span> <span class="dv">23</span>, <span class="at">size=</span><span class="dv">3</span>) <span class="sc">+</span></span>
-<span id="cb2-17"><a href="#cb2-17"></a>  <span class="fu">theme_cowplot</span>()</span>
-<span id="cb2-18"><a href="#cb2-18"></a></span>
-<span id="cb2-19"><a href="#cb2-19"></a><span class="fu">plot_grid</span>(p_ws, p_ws2, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"weight"</span>,<span class="st">"weight by sex"</span>), <span class="at">scale =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2"></a>p_ws <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
+<span id="cb2-3"><a href="#cb2-3"></a>  b,</span>
+<span id="cb2-4"><a href="#cb2-4"></a>  <span class="fu">aes</span>(<span class="at">x =</span> sex, <span class="at">y =</span> weight)</span>
+<span id="cb2-5"><a href="#cb2-5"></a>) <span class="sc">+</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a>  <span class="fu">geom_jitter</span>(<span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>  <span class="fu">geom_hline</span>(</span>
+<span id="cb2-8"><a href="#cb2-8"></a>    <span class="at">yintercept =</span> <span class="fu">mean</span>(b<span class="sc">$</span>weight),</span>
+<span id="cb2-9"><a href="#cb2-9"></a>    <span class="at">color =</span> <span class="st">"red"</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-11"><a href="#cb2-11"></a>  <span class="fu">theme_cowplot</span>()</span>
+<span id="cb2-12"><a href="#cb2-12"></a></span>
+<span id="cb2-13"><a href="#cb2-13"></a></span>
+<span id="cb2-14"><a href="#cb2-14"></a><span class="co"># plot weight by sex with mean weight and mean weight by sex</span></span>
+<span id="cb2-15"><a href="#cb2-15"></a>p_ws2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
+<span id="cb2-16"><a href="#cb2-16"></a>  b,</span>
+<span id="cb2-17"><a href="#cb2-17"></a>  <span class="fu">aes</span>(<span class="at">x =</span> sex, <span class="at">y =</span> weight)</span>
+<span id="cb2-18"><a href="#cb2-18"></a>) <span class="sc">+</span></span>
+<span id="cb2-19"><a href="#cb2-19"></a>  <span class="fu">geom_jitter</span>(<span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb2-20"><a href="#cb2-20"></a>  <span class="fu">geom_hline</span>(</span>
+<span id="cb2-21"><a href="#cb2-21"></a>    <span class="at">yintercept =</span> <span class="fu">mean</span>(b<span class="sc">$</span>weight),</span>
+<span id="cb2-22"><a href="#cb2-22"></a>    <span class="at">color =</span> <span class="st">"red"</span></span>
+<span id="cb2-23"><a href="#cb2-23"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-24"><a href="#cb2-24"></a>  <span class="fu">stat_summary</span>(<span class="at">fun =</span> <span class="st">"mean"</span>, <span class="at">geom =</span> <span class="st">"point"</span>, <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">shape =</span> <span class="dv">23</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb2-25"><a href="#cb2-25"></a>  <span class="fu">theme_cowplot</span>()</span>
+<span id="cb2-26"><a href="#cb2-26"></a></span>
+<span id="cb2-27"><a href="#cb2-27"></a><span class="fu">plot_grid</span>(p_ws, p_ws2, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"weight"</span>, <span class="st">"weight by sex"</span>), <span class="at">scale =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 </section>
 <section id="comparing-means-between-two-groups-output" class="slide level2 smaller output-location-slide"><h2>Comparing means between two groups</h2><div class="cell output-location-slide">
 <div class="cell-output-display">
-<p><img data-src="slides-14_files/figure-html/unnamed-chunk-3-1.png" width="960"></p>
+<p><img data-src="slides-14_files/figure-revealjs/unnamed-chunk-3-1.png" width="960"></p>
 </div>
 </div></section><section id="step-1-can-mouse-sex-explain-mouse-weight" class="slide level2 smaller">
 <h2>STEP 1: Can mouse sex explain mouse weight?</h2>
@@ -524,7 +532,7 @@ Neelanjan Mukherjee
 <section id="step-2-fit-linear-model-and-examine-results" class="slide level2 smaller">
 <h2>STEP 2: Fit linear model and examine results</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>fit_ws <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> sex , <span class="at">data =</span> b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>fit_ws <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> sex, <span class="at">data =</span> b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell fragment">
 
@@ -538,23 +546,23 @@ Neelanjan Mukherjee
 </div><div class="column fragment">
 <div class="cell-output-display">
 
-<div id="kulpxcnfqw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#kulpxcnfqw table {
+<div id="ewvpfxyuoe" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#ewvpfxyuoe table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#kulpxcnfqw thead, #kulpxcnfqw tbody, #kulpxcnfqw tfoot, #kulpxcnfqw tr, #kulpxcnfqw td, #kulpxcnfqw th {
+#ewvpfxyuoe thead, #ewvpfxyuoe tbody, #ewvpfxyuoe tfoot, #ewvpfxyuoe tr, #ewvpfxyuoe td, #ewvpfxyuoe th {
   border-style: none;
 }
 
-#kulpxcnfqw p {
+#ewvpfxyuoe p {
   margin: 0;
   padding: 0;
 }
 
-#kulpxcnfqw .gt_table {
+#ewvpfxyuoe .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -580,12 +588,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#kulpxcnfqw .gt_caption {
+#ewvpfxyuoe .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#kulpxcnfqw .gt_title {
+#ewvpfxyuoe .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -597,7 +605,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#kulpxcnfqw .gt_subtitle {
+#ewvpfxyuoe .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -609,7 +617,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#kulpxcnfqw .gt_heading {
+#ewvpfxyuoe .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -621,13 +629,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#kulpxcnfqw .gt_bottom_border {
+#ewvpfxyuoe .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#kulpxcnfqw .gt_col_headings {
+#ewvpfxyuoe .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -642,7 +650,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#kulpxcnfqw .gt_col_heading {
+#ewvpfxyuoe .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -662,7 +670,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#kulpxcnfqw .gt_column_spanner_outer {
+#ewvpfxyuoe .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -674,15 +682,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#kulpxcnfqw .gt_column_spanner_outer:first-child {
+#ewvpfxyuoe .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#kulpxcnfqw .gt_column_spanner_outer:last-child {
+#ewvpfxyuoe .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#kulpxcnfqw .gt_column_spanner {
+#ewvpfxyuoe .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -694,11 +702,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#kulpxcnfqw .gt_spanner_row {
+#ewvpfxyuoe .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#kulpxcnfqw .gt_group_heading {
+#ewvpfxyuoe .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -724,7 +732,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#kulpxcnfqw .gt_empty_group_heading {
+#ewvpfxyuoe .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -739,15 +747,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#kulpxcnfqw .gt_from_md > :first-child {
+#ewvpfxyuoe .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#kulpxcnfqw .gt_from_md > :last-child {
+#ewvpfxyuoe .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#kulpxcnfqw .gt_row {
+#ewvpfxyuoe .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -766,7 +774,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#kulpxcnfqw .gt_stub {
+#ewvpfxyuoe .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -779,7 +787,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#kulpxcnfqw .gt_stub_row_group {
+#ewvpfxyuoe .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -793,15 +801,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#kulpxcnfqw .gt_row_group_first td {
+#ewvpfxyuoe .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#kulpxcnfqw .gt_row_group_first th {
+#ewvpfxyuoe .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#kulpxcnfqw .gt_summary_row {
+#ewvpfxyuoe .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -811,16 +819,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#kulpxcnfqw .gt_first_summary_row {
+#ewvpfxyuoe .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#kulpxcnfqw .gt_first_summary_row.thick {
+#ewvpfxyuoe .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#kulpxcnfqw .gt_last_summary_row {
+#ewvpfxyuoe .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -830,7 +838,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#kulpxcnfqw .gt_grand_summary_row {
+#ewvpfxyuoe .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -840,7 +848,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#kulpxcnfqw .gt_first_grand_summary_row {
+#ewvpfxyuoe .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -850,7 +858,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#kulpxcnfqw .gt_last_grand_summary_row_top {
+#ewvpfxyuoe .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -860,11 +868,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#kulpxcnfqw .gt_striped {
+#ewvpfxyuoe .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#kulpxcnfqw .gt_table_body {
+#ewvpfxyuoe .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -873,7 +881,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#kulpxcnfqw .gt_footnotes {
+#ewvpfxyuoe .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -887,7 +895,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#kulpxcnfqw .gt_footnote {
+#ewvpfxyuoe .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -896,7 +904,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#kulpxcnfqw .gt_sourcenotes {
+#ewvpfxyuoe .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -910,7 +918,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#kulpxcnfqw .gt_sourcenote {
+#ewvpfxyuoe .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -918,63 +926,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#kulpxcnfqw .gt_left {
+#ewvpfxyuoe .gt_left {
   text-align: left;
 }
 
-#kulpxcnfqw .gt_center {
+#ewvpfxyuoe .gt_center {
   text-align: center;
 }
 
-#kulpxcnfqw .gt_right {
+#ewvpfxyuoe .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#kulpxcnfqw .gt_font_normal {
+#ewvpfxyuoe .gt_font_normal {
   font-weight: normal;
 }
 
-#kulpxcnfqw .gt_font_bold {
+#ewvpfxyuoe .gt_font_bold {
   font-weight: bold;
 }
 
-#kulpxcnfqw .gt_font_italic {
+#ewvpfxyuoe .gt_font_italic {
   font-style: italic;
 }
 
-#kulpxcnfqw .gt_super {
+#ewvpfxyuoe .gt_super {
   font-size: 65%;
 }
 
-#kulpxcnfqw .gt_footnote_marks {
+#ewvpfxyuoe .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#kulpxcnfqw .gt_asterisk {
+#ewvpfxyuoe .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#kulpxcnfqw .gt_indent_1 {
+#ewvpfxyuoe .gt_indent_1 {
   text-indent: 5px;
 }
 
-#kulpxcnfqw .gt_indent_2 {
+#ewvpfxyuoe .gt_indent_2 {
   text-indent: 10px;
 }
 
-#kulpxcnfqw .gt_indent_3 {
+#ewvpfxyuoe .gt_indent_3 {
   text-indent: 15px;
 }
 
-#kulpxcnfqw .gt_indent_4 {
+#ewvpfxyuoe .gt_indent_4 {
   text-indent: 20px;
 }
 
-#kulpxcnfqw .gt_indent_5 {
+#ewvpfxyuoe .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -1022,27 +1030,27 @@ Neelanjan Mukherjee
 <div class="column">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">tidy</span>(fit_ws) <span class="sc">|&gt;</span></span>
 <span id="cb5-2"><a href="#cb5-2"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-3"><a href="#cb5-3"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span>estimate<span class="sc">:</span>statistic, <span class="at">decimals =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-3"><a href="#cb5-3"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span> estimate<span class="sc">:</span>statistic, <span class="at">decimals =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 
-<div id="cpxghrvosf" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#cpxghrvosf table {
+<div id="mktyultzjm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#mktyultzjm table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#cpxghrvosf thead, #cpxghrvosf tbody, #cpxghrvosf tfoot, #cpxghrvosf tr, #cpxghrvosf td, #cpxghrvosf th {
+#mktyultzjm thead, #mktyultzjm tbody, #mktyultzjm tfoot, #mktyultzjm tr, #mktyultzjm td, #mktyultzjm th {
   border-style: none;
 }
 
-#cpxghrvosf p {
+#mktyultzjm p {
   margin: 0;
   padding: 0;
 }
 
-#cpxghrvosf .gt_table {
+#mktyultzjm .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1068,12 +1076,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#cpxghrvosf .gt_caption {
+#mktyultzjm .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#cpxghrvosf .gt_title {
+#mktyultzjm .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1085,7 +1093,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#cpxghrvosf .gt_subtitle {
+#mktyultzjm .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1097,7 +1105,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#cpxghrvosf .gt_heading {
+#mktyultzjm .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1109,13 +1117,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#cpxghrvosf .gt_bottom_border {
+#mktyultzjm .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#cpxghrvosf .gt_col_headings {
+#mktyultzjm .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1130,7 +1138,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#cpxghrvosf .gt_col_heading {
+#mktyultzjm .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1150,7 +1158,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#cpxghrvosf .gt_column_spanner_outer {
+#mktyultzjm .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1162,15 +1170,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#cpxghrvosf .gt_column_spanner_outer:first-child {
+#mktyultzjm .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#cpxghrvosf .gt_column_spanner_outer:last-child {
+#mktyultzjm .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#cpxghrvosf .gt_column_spanner {
+#mktyultzjm .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1182,11 +1190,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#cpxghrvosf .gt_spanner_row {
+#mktyultzjm .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#cpxghrvosf .gt_group_heading {
+#mktyultzjm .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1212,7 +1220,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#cpxghrvosf .gt_empty_group_heading {
+#mktyultzjm .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1227,15 +1235,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#cpxghrvosf .gt_from_md > :first-child {
+#mktyultzjm .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#cpxghrvosf .gt_from_md > :last-child {
+#mktyultzjm .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#cpxghrvosf .gt_row {
+#mktyultzjm .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1254,7 +1262,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#cpxghrvosf .gt_stub {
+#mktyultzjm .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1267,7 +1275,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#cpxghrvosf .gt_stub_row_group {
+#mktyultzjm .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1281,15 +1289,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#cpxghrvosf .gt_row_group_first td {
+#mktyultzjm .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#cpxghrvosf .gt_row_group_first th {
+#mktyultzjm .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#cpxghrvosf .gt_summary_row {
+#mktyultzjm .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1299,16 +1307,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#cpxghrvosf .gt_first_summary_row {
+#mktyultzjm .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#cpxghrvosf .gt_first_summary_row.thick {
+#mktyultzjm .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#cpxghrvosf .gt_last_summary_row {
+#mktyultzjm .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1318,7 +1326,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#cpxghrvosf .gt_grand_summary_row {
+#mktyultzjm .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1328,7 +1336,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#cpxghrvosf .gt_first_grand_summary_row {
+#mktyultzjm .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1338,7 +1346,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#cpxghrvosf .gt_last_grand_summary_row_top {
+#mktyultzjm .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1348,11 +1356,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#cpxghrvosf .gt_striped {
+#mktyultzjm .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#cpxghrvosf .gt_table_body {
+#mktyultzjm .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1361,7 +1369,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#cpxghrvosf .gt_footnotes {
+#mktyultzjm .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1375,7 +1383,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#cpxghrvosf .gt_footnote {
+#mktyultzjm .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1384,7 +1392,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#cpxghrvosf .gt_sourcenotes {
+#mktyultzjm .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1398,7 +1406,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#cpxghrvosf .gt_sourcenote {
+#mktyultzjm .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1406,63 +1414,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#cpxghrvosf .gt_left {
+#mktyultzjm .gt_left {
   text-align: left;
 }
 
-#cpxghrvosf .gt_center {
+#mktyultzjm .gt_center {
   text-align: center;
 }
 
-#cpxghrvosf .gt_right {
+#mktyultzjm .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#cpxghrvosf .gt_font_normal {
+#mktyultzjm .gt_font_normal {
   font-weight: normal;
 }
 
-#cpxghrvosf .gt_font_bold {
+#mktyultzjm .gt_font_bold {
   font-weight: bold;
 }
 
-#cpxghrvosf .gt_font_italic {
+#mktyultzjm .gt_font_italic {
   font-style: italic;
 }
 
-#cpxghrvosf .gt_super {
+#mktyultzjm .gt_super {
   font-size: 65%;
 }
 
-#cpxghrvosf .gt_footnote_marks {
+#mktyultzjm .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#cpxghrvosf .gt_asterisk {
+#mktyultzjm .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#cpxghrvosf .gt_indent_1 {
+#mktyultzjm .gt_indent_1 {
   text-indent: 5px;
 }
 
-#cpxghrvosf .gt_indent_2 {
+#mktyultzjm .gt_indent_2 {
   text-indent: 10px;
 }
 
-#cpxghrvosf .gt_indent_3 {
+#mktyultzjm .gt_indent_3 {
   text-indent: 15px;
 }
 
-#cpxghrvosf .gt_indent_4 {
+#mktyultzjm .gt_indent_4 {
   text-indent: 20px;
 }
 
-#cpxghrvosf .gt_indent_5 {
+#mktyultzjm .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -1502,7 +1510,7 @@ Neelanjan Mukherjee
 <p>add residuals and other information</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">#augment</span></span>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># augment</span></span>
 <span id="cb6-2"><a href="#cb6-2"></a>b_ws <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_ws, <span class="at">data =</span> b)</span>
 <span id="cb6-3"><a href="#cb6-3"></a></span>
 <span id="cb6-4"><a href="#cb6-4"></a><span class="co"># mean weight</span></span>
@@ -1518,7 +1526,7 @@ Neelanjan Mukherjee
 <div class="cell columns column-output-location">
 <div class="column">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># mean weight female</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a>avg_wf <span class="ot">&lt;-</span> <span class="fu">pull</span>(w[<span class="dv">1</span>,<span class="dv">4</span>] )</span>
+<span id="cb7-2"><a href="#cb7-2"></a>avg_wf <span class="ot">&lt;-</span> <span class="fu">pull</span>(w[<span class="dv">1</span>, <span class="dv">4</span>])</span>
 <span id="cb7-3"><a href="#cb7-3"></a>avg_wf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
@@ -1529,7 +1537,7 @@ Neelanjan Mukherjee
 <div class="cell columns column-output-location">
 <div class="column">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co"># mean weight male</span></span>
-<span id="cb9-2"><a href="#cb9-2"></a>avg_wm <span class="ot">&lt;-</span> <span class="fu">pull</span>(w[<span class="dv">2</span>,<span class="dv">4</span>] )</span>
+<span id="cb9-2"><a href="#cb9-2"></a>avg_wm <span class="ot">&lt;-</span> <span class="fu">pull</span>(w[<span class="dv">2</span>, <span class="dv">4</span>])</span>
 <span id="cb9-3"><a href="#cb9-3"></a>avg_wm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
@@ -1543,27 +1551,44 @@ Neelanjan Mukherjee
 <div class="cell columns column-output-location">
 <div class="column">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># plot of data with mean and colored by residuals</span></span>
-<span id="cb11-2"><a href="#cb11-2"></a>p_ws <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(b_ws,</span>
-<span id="cb11-3"><a href="#cb11-3"></a>               <span class="fu">aes</span>(<span class="at">x =</span> sex, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
-<span id="cb11-4"><a href="#cb11-4"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(),</span>
-<span id="cb11-5"><a href="#cb11-5"></a>             <span class="fu">aes</span>(<span class="at">color =</span> .resid)) <span class="sc">+</span></span>
-<span id="cb11-6"><a href="#cb11-6"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>,</span>
-<span id="cb11-7"><a href="#cb11-7"></a>                        <span class="at">mid =</span> <span class="st">"black"</span>,</span>
-<span id="cb11-8"><a href="#cb11-8"></a>                        <span class="at">high =</span> <span class="st">"yellow"</span>) <span class="sc">+</span></span>
-<span id="cb11-9"><a href="#cb11-9"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> avg_w,</span>
-<span id="cb11-10"><a href="#cb11-10"></a>               <span class="at">color =</span> <span class="st">"darkgrey"</span>) <span class="sc">+</span></span>
-<span id="cb11-11"><a href="#cb11-11"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span>.<span class="dv">5</span>, <span class="at">xend=</span><span class="fl">1.5</span>,</span>
-<span id="cb11-12"><a href="#cb11-12"></a>                   <span class="at">y=</span>avg_wf, <span class="at">yend=</span>avg_wf),</span>
-<span id="cb11-13"><a href="#cb11-13"></a>               <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb11-14"><a href="#cb11-14"></a>    <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">1.5</span>, <span class="at">xend=</span><span class="fl">2.5</span>,</span>
-<span id="cb11-15"><a href="#cb11-15"></a>                     <span class="at">y=</span>avg_wm), <span class="at">yend=</span>avg_wm,</span>
-<span id="cb11-16"><a href="#cb11-16"></a>                 <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb11-17"><a href="#cb11-17"></a>  <span class="fu">theme_cowplot</span>()</span>
-<span id="cb11-18"><a href="#cb11-18"></a>  </span>
-<span id="cb11-19"><a href="#cb11-19"></a>p_ws </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-2"><a href="#cb11-2"></a>p_ws <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
+<span id="cb11-3"><a href="#cb11-3"></a>  b_ws,</span>
+<span id="cb11-4"><a href="#cb11-4"></a>  <span class="fu">aes</span>(<span class="at">x =</span> sex, <span class="at">y =</span> weight)</span>
+<span id="cb11-5"><a href="#cb11-5"></a>) <span class="sc">+</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb11-7"><a href="#cb11-7"></a>    <span class="at">position =</span> <span class="fu">position_jitter</span>(),</span>
+<span id="cb11-8"><a href="#cb11-8"></a>    <span class="fu">aes</span>(<span class="at">color =</span> .resid)</span>
+<span id="cb11-9"><a href="#cb11-9"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a>  <span class="fu">scale_color_gradient2</span>(</span>
+<span id="cb11-11"><a href="#cb11-11"></a>    <span class="at">low =</span> <span class="st">"blue"</span>,</span>
+<span id="cb11-12"><a href="#cb11-12"></a>    <span class="at">mid =</span> <span class="st">"black"</span>,</span>
+<span id="cb11-13"><a href="#cb11-13"></a>    <span class="at">high =</span> <span class="st">"yellow"</span></span>
+<span id="cb11-14"><a href="#cb11-14"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-15"><a href="#cb11-15"></a>  <span class="fu">geom_hline</span>(</span>
+<span id="cb11-16"><a href="#cb11-16"></a>    <span class="at">yintercept =</span> avg_w,</span>
+<span id="cb11-17"><a href="#cb11-17"></a>    <span class="at">color =</span> <span class="st">"darkgrey"</span></span>
+<span id="cb11-18"><a href="#cb11-18"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-19"><a href="#cb11-19"></a>  <span class="fu">geom_segment</span>(</span>
+<span id="cb11-20"><a href="#cb11-20"></a>    <span class="fu">aes</span>(</span>
+<span id="cb11-21"><a href="#cb11-21"></a>      <span class="at">x =</span> .<span class="dv">5</span>, <span class="at">xend =</span> <span class="fl">1.5</span>,</span>
+<span id="cb11-22"><a href="#cb11-22"></a>      <span class="at">y =</span> avg_wf, <span class="at">yend =</span> avg_wf</span>
+<span id="cb11-23"><a href="#cb11-23"></a>    ),</span>
+<span id="cb11-24"><a href="#cb11-24"></a>    <span class="at">color =</span> <span class="st">"red"</span></span>
+<span id="cb11-25"><a href="#cb11-25"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-26"><a href="#cb11-26"></a>  <span class="fu">geom_segment</span>(</span>
+<span id="cb11-27"><a href="#cb11-27"></a>    <span class="fu">aes</span>(</span>
+<span id="cb11-28"><a href="#cb11-28"></a>      <span class="at">x =</span> <span class="fl">1.5</span>, <span class="at">xend =</span> <span class="fl">2.5</span>,</span>
+<span id="cb11-29"><a href="#cb11-29"></a>      <span class="at">y =</span> avg_wm</span>
+<span id="cb11-30"><a href="#cb11-30"></a>    ),</span>
+<span id="cb11-31"><a href="#cb11-31"></a>    <span class="at">yend =</span> avg_wm,</span>
+<span id="cb11-32"><a href="#cb11-32"></a>    <span class="at">color =</span> <span class="st">"red"</span></span>
+<span id="cb11-33"><a href="#cb11-33"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-34"><a href="#cb11-34"></a>  <span class="fu">theme_cowplot</span>()</span>
+<span id="cb11-35"><a href="#cb11-35"></a></span>
+<span id="cb11-36"><a href="#cb11-36"></a>p_ws</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
-<p><img data-src="slides-14_files/figure-html/unnamed-chunk-10-1.png" width="672"></p>
+<p><img data-src="slides-14_files/figure-revealjs/unnamed-chunk-10-1.png" width="960"></p>
 </div>
 </div>
 </div>
@@ -1572,21 +1597,29 @@ Neelanjan Mukherjee
 <h2>STEP 4: Visualize the error around the null (mean weight)</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>p_w <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(b_ws,</span>
-<span id="cb12-2"><a href="#cb12-2"></a>               <span class="fu">aes</span>(<span class="at">x =</span> sex, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
-<span id="cb12-3"><a href="#cb12-3"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(),</span>
-<span id="cb12-4"><a href="#cb12-4"></a>             <span class="fu">aes</span>(<span class="at">color =</span> weight<span class="sc">-</span>avg_w)) <span class="sc">+</span></span>
-<span id="cb12-5"><a href="#cb12-5"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>,</span>
-<span id="cb12-6"><a href="#cb12-6"></a>                        <span class="at">mid =</span> <span class="st">"black"</span>,</span>
-<span id="cb12-7"><a href="#cb12-7"></a>                        <span class="at">high =</span> <span class="st">"yellow"</span>) <span class="sc">+</span></span>
-<span id="cb12-8"><a href="#cb12-8"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> avg_w,</span>
-<span id="cb12-9"><a href="#cb12-9"></a>               <span class="at">color =</span> <span class="st">"darkgrey"</span>) <span class="sc">+</span></span>
-<span id="cb12-10"><a href="#cb12-10"></a>  <span class="fu">theme_cowplot</span>()</span>
-<span id="cb12-11"><a href="#cb12-11"></a>  </span>
-<span id="cb12-12"><a href="#cb12-12"></a>p_w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>p_w <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
+<span id="cb12-2"><a href="#cb12-2"></a>  b_ws,</span>
+<span id="cb12-3"><a href="#cb12-3"></a>  <span class="fu">aes</span>(<span class="at">x =</span> sex, <span class="at">y =</span> weight)</span>
+<span id="cb12-4"><a href="#cb12-4"></a>) <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb12-6"><a href="#cb12-6"></a>    <span class="at">position =</span> <span class="fu">position_jitter</span>(),</span>
+<span id="cb12-7"><a href="#cb12-7"></a>    <span class="fu">aes</span>(<span class="at">color =</span> weight <span class="sc">-</span> avg_w)</span>
+<span id="cb12-8"><a href="#cb12-8"></a>  ) <span class="sc">+</span></span>
+<span id="cb12-9"><a href="#cb12-9"></a>  <span class="fu">scale_color_gradient2</span>(</span>
+<span id="cb12-10"><a href="#cb12-10"></a>    <span class="at">low =</span> <span class="st">"blue"</span>,</span>
+<span id="cb12-11"><a href="#cb12-11"></a>    <span class="at">mid =</span> <span class="st">"black"</span>,</span>
+<span id="cb12-12"><a href="#cb12-12"></a>    <span class="at">high =</span> <span class="st">"yellow"</span></span>
+<span id="cb12-13"><a href="#cb12-13"></a>  ) <span class="sc">+</span></span>
+<span id="cb12-14"><a href="#cb12-14"></a>  <span class="fu">geom_hline</span>(</span>
+<span id="cb12-15"><a href="#cb12-15"></a>    <span class="at">yintercept =</span> avg_w,</span>
+<span id="cb12-16"><a href="#cb12-16"></a>    <span class="at">color =</span> <span class="st">"darkgrey"</span></span>
+<span id="cb12-17"><a href="#cb12-17"></a>  ) <span class="sc">+</span></span>
+<span id="cb12-18"><a href="#cb12-18"></a>  <span class="fu">theme_cowplot</span>()</span>
+<span id="cb12-19"><a href="#cb12-19"></a></span>
+<span id="cb12-20"><a href="#cb12-20"></a>p_w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
-<p><img data-src="slides-14_files/figure-html/unnamed-chunk-11-1.png" width="672"></p>
+<p><img data-src="slides-14_files/figure-revealjs/unnamed-chunk-11-1.png" width="960"></p>
 </div>
 </div>
 </div>
@@ -1594,36 +1627,33 @@ Neelanjan Mukherjee
 <section id="compare-fit-error-to-null-error-graphically" class="slide level2 smaller">
 <h2>Compare fit error to null error graphically</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="fu">plot_grid</span>(p_ws, p_w, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"weight by sex"</span>,<span class="st">"weight by intercept"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="fu">plot_grid</span>(p_ws, p_w, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"weight by sex"</span>, <span class="st">"weight by intercept"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
-<img data-src="slides-14_files/figure-html/unnamed-chunk-12-1.png" width="672" class="r-stretch"><p>We are fitting 2 lines to the data. For the weight by sex model of the fit (left), we fit <strong>2</strong> lines. For the weight by null model (right) we fit <strong>1</strong> line.</p>
+<img data-src="slides-14_files/figure-revealjs/unnamed-chunk-12-1.png" width="960" class="r-stretch"><p>We are fitting 2 lines to the data. For the weight by sex model of the fit (left), we fit <strong>2</strong> lines. For the weight by null model (right) we fit <strong>1</strong> line.</p>
 </section>
 <section id="exceptions-mice-with-highest-residuals" class="slide level2 smaller">
 <h2>Exceptions: mice with highest residuals</h2>
 <div class="cell">
-<div class="cell-output cell-output-stderr">
-<pre><code>Selecting by .std.resid</code></pre>
-</div>
 <div class="cell-output-display">
 
-<div id="txdmrikgft" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#txdmrikgft table {
+<div id="seaclbykyl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#seaclbykyl table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#txdmrikgft thead, #txdmrikgft tbody, #txdmrikgft tfoot, #txdmrikgft tr, #txdmrikgft td, #txdmrikgft th {
+#seaclbykyl thead, #seaclbykyl tbody, #seaclbykyl tfoot, #seaclbykyl tr, #seaclbykyl td, #seaclbykyl th {
   border-style: none;
 }
 
-#txdmrikgft p {
+#seaclbykyl p {
   margin: 0;
   padding: 0;
 }
 
-#txdmrikgft .gt_table {
+#seaclbykyl .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1649,12 +1679,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#txdmrikgft .gt_caption {
+#seaclbykyl .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#txdmrikgft .gt_title {
+#seaclbykyl .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1666,7 +1696,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#txdmrikgft .gt_subtitle {
+#seaclbykyl .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1678,7 +1708,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#txdmrikgft .gt_heading {
+#seaclbykyl .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1690,13 +1720,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#txdmrikgft .gt_bottom_border {
+#seaclbykyl .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#txdmrikgft .gt_col_headings {
+#seaclbykyl .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1711,7 +1741,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#txdmrikgft .gt_col_heading {
+#seaclbykyl .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1731,7 +1761,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#txdmrikgft .gt_column_spanner_outer {
+#seaclbykyl .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1743,15 +1773,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#txdmrikgft .gt_column_spanner_outer:first-child {
+#seaclbykyl .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#txdmrikgft .gt_column_spanner_outer:last-child {
+#seaclbykyl .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#txdmrikgft .gt_column_spanner {
+#seaclbykyl .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1763,11 +1793,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#txdmrikgft .gt_spanner_row {
+#seaclbykyl .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#txdmrikgft .gt_group_heading {
+#seaclbykyl .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1793,7 +1823,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#txdmrikgft .gt_empty_group_heading {
+#seaclbykyl .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1808,15 +1838,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#txdmrikgft .gt_from_md > :first-child {
+#seaclbykyl .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#txdmrikgft .gt_from_md > :last-child {
+#seaclbykyl .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#txdmrikgft .gt_row {
+#seaclbykyl .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1835,7 +1865,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#txdmrikgft .gt_stub {
+#seaclbykyl .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1848,7 +1878,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#txdmrikgft .gt_stub_row_group {
+#seaclbykyl .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1862,15 +1892,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#txdmrikgft .gt_row_group_first td {
+#seaclbykyl .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#txdmrikgft .gt_row_group_first th {
+#seaclbykyl .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#txdmrikgft .gt_summary_row {
+#seaclbykyl .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1880,16 +1910,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#txdmrikgft .gt_first_summary_row {
+#seaclbykyl .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#txdmrikgft .gt_first_summary_row.thick {
+#seaclbykyl .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#txdmrikgft .gt_last_summary_row {
+#seaclbykyl .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1899,7 +1929,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#txdmrikgft .gt_grand_summary_row {
+#seaclbykyl .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1909,7 +1939,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#txdmrikgft .gt_first_grand_summary_row {
+#seaclbykyl .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1919,7 +1949,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#txdmrikgft .gt_last_grand_summary_row_top {
+#seaclbykyl .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1929,11 +1959,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#txdmrikgft .gt_striped {
+#seaclbykyl .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#txdmrikgft .gt_table_body {
+#seaclbykyl .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1942,7 +1972,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#txdmrikgft .gt_footnotes {
+#seaclbykyl .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1956,7 +1986,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#txdmrikgft .gt_footnote {
+#seaclbykyl .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1965,7 +1995,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#txdmrikgft .gt_sourcenotes {
+#seaclbykyl .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1979,7 +2009,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#txdmrikgft .gt_sourcenote {
+#seaclbykyl .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1987,63 +2017,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#txdmrikgft .gt_left {
+#seaclbykyl .gt_left {
   text-align: left;
 }
 
-#txdmrikgft .gt_center {
+#seaclbykyl .gt_center {
   text-align: center;
 }
 
-#txdmrikgft .gt_right {
+#seaclbykyl .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#txdmrikgft .gt_font_normal {
+#seaclbykyl .gt_font_normal {
   font-weight: normal;
 }
 
-#txdmrikgft .gt_font_bold {
+#seaclbykyl .gt_font_bold {
   font-weight: bold;
 }
 
-#txdmrikgft .gt_font_italic {
+#seaclbykyl .gt_font_italic {
   font-style: italic;
 }
 
-#txdmrikgft .gt_super {
+#seaclbykyl .gt_super {
   font-size: 65%;
 }
 
-#txdmrikgft .gt_footnote_marks {
+#seaclbykyl .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#txdmrikgft .gt_asterisk {
+#seaclbykyl .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#txdmrikgft .gt_indent_1 {
+#seaclbykyl .gt_indent_1 {
   text-indent: 5px;
 }
 
-#txdmrikgft .gt_indent_2 {
+#seaclbykyl .gt_indent_2 {
   text-indent: 10px;
 }
 
-#txdmrikgft .gt_indent_3 {
+#seaclbykyl .gt_indent_3 {
   text-indent: 15px;
 }
 
-#txdmrikgft .gt_indent_4 {
+#seaclbykyl .gt_indent_4 {
   text-indent: 20px;
 }
 
-#txdmrikgft .gt_indent_5 {
+#seaclbykyl .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -2171,30 +2201,25 @@ Neelanjan Mukherjee
 <section id="lets-focus-on-just-a-few-mice-1" class="slide level2 smaller">
 <h2>Let’s focus on just a few mice</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>b_ws <span class="sc">|&gt;</span> </span>
-<span id="cb15-2"><a href="#cb15-2"></a>  <span class="fu">filter</span>(subject_name <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"A048054885"</span>,<span class="st">"A067109771"</span>,<span class="st">"A066822351"</span>,<span class="st">"A048274362"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb15-3"><a href="#cb15-3"></a>  <span class="fu">select</span>(subject_name, weight, sex, .fitted, .resid) <span class="sc">|&gt;</span></span>
-<span id="cb15-4"><a href="#cb15-4"></a>  <span class="fu">arrange</span>(sex) <span class="sc">|&gt;</span></span>
-<span id="cb15-5"><a href="#cb15-5"></a>  <span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 
-<div id="nvwslesoxs" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#nvwslesoxs table {
+<div id="amhoujomxj" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#amhoujomxj table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#nvwslesoxs thead, #nvwslesoxs tbody, #nvwslesoxs tfoot, #nvwslesoxs tr, #nvwslesoxs td, #nvwslesoxs th {
+#amhoujomxj thead, #amhoujomxj tbody, #amhoujomxj tfoot, #amhoujomxj tr, #amhoujomxj td, #amhoujomxj th {
   border-style: none;
 }
 
-#nvwslesoxs p {
+#amhoujomxj p {
   margin: 0;
   padding: 0;
 }
 
-#nvwslesoxs .gt_table {
+#amhoujomxj .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -2220,12 +2245,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#nvwslesoxs .gt_caption {
+#amhoujomxj .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#nvwslesoxs .gt_title {
+#amhoujomxj .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -2237,7 +2262,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#nvwslesoxs .gt_subtitle {
+#amhoujomxj .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -2249,7 +2274,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#nvwslesoxs .gt_heading {
+#amhoujomxj .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -2261,13 +2286,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#nvwslesoxs .gt_bottom_border {
+#amhoujomxj .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#nvwslesoxs .gt_col_headings {
+#amhoujomxj .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2282,7 +2307,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#nvwslesoxs .gt_col_heading {
+#amhoujomxj .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2302,7 +2327,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#nvwslesoxs .gt_column_spanner_outer {
+#amhoujomxj .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2314,15 +2339,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#nvwslesoxs .gt_column_spanner_outer:first-child {
+#amhoujomxj .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#nvwslesoxs .gt_column_spanner_outer:last-child {
+#amhoujomxj .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#nvwslesoxs .gt_column_spanner {
+#amhoujomxj .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2334,11 +2359,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#nvwslesoxs .gt_spanner_row {
+#amhoujomxj .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#nvwslesoxs .gt_group_heading {
+#amhoujomxj .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2364,7 +2389,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#nvwslesoxs .gt_empty_group_heading {
+#amhoujomxj .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2379,15 +2404,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#nvwslesoxs .gt_from_md > :first-child {
+#amhoujomxj .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#nvwslesoxs .gt_from_md > :last-child {
+#amhoujomxj .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#nvwslesoxs .gt_row {
+#amhoujomxj .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2406,7 +2431,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#nvwslesoxs .gt_stub {
+#amhoujomxj .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2419,7 +2444,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#nvwslesoxs .gt_stub_row_group {
+#amhoujomxj .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2433,15 +2458,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#nvwslesoxs .gt_row_group_first td {
+#amhoujomxj .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#nvwslesoxs .gt_row_group_first th {
+#amhoujomxj .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#nvwslesoxs .gt_summary_row {
+#amhoujomxj .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2451,16 +2476,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#nvwslesoxs .gt_first_summary_row {
+#amhoujomxj .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#nvwslesoxs .gt_first_summary_row.thick {
+#amhoujomxj .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#nvwslesoxs .gt_last_summary_row {
+#amhoujomxj .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2470,7 +2495,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#nvwslesoxs .gt_grand_summary_row {
+#amhoujomxj .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2480,7 +2505,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#nvwslesoxs .gt_first_grand_summary_row {
+#amhoujomxj .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2490,7 +2515,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#nvwslesoxs .gt_last_grand_summary_row_top {
+#amhoujomxj .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2500,11 +2525,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#nvwslesoxs .gt_striped {
+#amhoujomxj .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#nvwslesoxs .gt_table_body {
+#amhoujomxj .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2513,7 +2538,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#nvwslesoxs .gt_footnotes {
+#amhoujomxj .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2527,7 +2552,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#nvwslesoxs .gt_footnote {
+#amhoujomxj .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -2536,7 +2561,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#nvwslesoxs .gt_sourcenotes {
+#amhoujomxj .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2550,7 +2575,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#nvwslesoxs .gt_sourcenote {
+#amhoujomxj .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -2558,63 +2583,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#nvwslesoxs .gt_left {
+#amhoujomxj .gt_left {
   text-align: left;
 }
 
-#nvwslesoxs .gt_center {
+#amhoujomxj .gt_center {
   text-align: center;
 }
 
-#nvwslesoxs .gt_right {
+#amhoujomxj .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#nvwslesoxs .gt_font_normal {
+#amhoujomxj .gt_font_normal {
   font-weight: normal;
 }
 
-#nvwslesoxs .gt_font_bold {
+#amhoujomxj .gt_font_bold {
   font-weight: bold;
 }
 
-#nvwslesoxs .gt_font_italic {
+#amhoujomxj .gt_font_italic {
   font-style: italic;
 }
 
-#nvwslesoxs .gt_super {
+#amhoujomxj .gt_super {
   font-size: 65%;
 }
 
-#nvwslesoxs .gt_footnote_marks {
+#amhoujomxj .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#nvwslesoxs .gt_asterisk {
+#amhoujomxj .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#nvwslesoxs .gt_indent_1 {
+#amhoujomxj .gt_indent_1 {
   text-indent: 5px;
 }
 
-#nvwslesoxs .gt_indent_2 {
+#amhoujomxj .gt_indent_2 {
   text-indent: 10px;
 }
 
-#nvwslesoxs .gt_indent_3 {
+#amhoujomxj .gt_indent_3 {
   text-indent: 15px;
 }
 
-#nvwslesoxs .gt_indent_4 {
+#amhoujomxj .gt_indent_4 {
   text-indent: 20px;
 }
 
-#nvwslesoxs .gt_indent_5 {
+#amhoujomxj .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -2681,8 +2706,8 @@ Neelanjan Mukherjee
 <p><span class="math inline">\(SS_{fit}\)</span> — sum of squared errors around the least-squares fit</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>ss_fit <span class="ot">&lt;-</span> <span class="fu">sum</span>(b_ws<span class="sc">$</span>.resid<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb16-2"><a href="#cb16-2"></a>ss_fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>ss_fit <span class="ot">&lt;-</span> <span class="fu">sum</span>(b_ws<span class="sc">$</span>.resid<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb14-2"><a href="#cb14-2"></a>ss_fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 11467.91</code></pre>
@@ -2692,9 +2717,10 @@ Neelanjan Mukherjee
 <p><span class="math inline">\(SS_{null}\)</span> — sum of squared errors around the mean of <span class="math inline">\(y\)</span></p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>ss_null <span class="ot">&lt;-</span> <span class="fu">sum</span>(</span>
-<span id="cb18-2"><a href="#cb18-2"></a>  (b_ws<span class="sc">$</span>weight <span class="sc">-</span> avg_w)<span class="sc">^</span><span class="dv">2</span>) </span>
-<span id="cb18-3"><a href="#cb18-3"></a>ss_null </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>ss_null <span class="ot">&lt;-</span> <span class="fu">sum</span>(</span>
+<span id="cb16-2"><a href="#cb16-2"></a>  (b_ws<span class="sc">$</span>weight <span class="sc">-</span> avg_w)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb16-3"><a href="#cb16-3"></a>)</span>
+<span id="cb16-4"><a href="#cb16-4"></a>ss_null</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 19820.85</code></pre>
@@ -2704,8 +2730,8 @@ Neelanjan Mukherjee
 <p><span class="math inline">\(R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}\)</span></p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a>rsq <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">-</span> ss_fit<span class="sc">/</span>ss_null</span>
-<span id="cb20-2"><a href="#cb20-2"></a>rsq</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a>rsq <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> ss_fit <span class="sc">/</span> ss_null</span>
+<span id="cb18-2"><a href="#cb18-2"></a>rsq</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.4214218</code></pre>
@@ -2714,7 +2740,7 @@ Neelanjan Mukherjee
 </div>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a><span class="fu">glance</span>(fit_ws) <span class="sc">|&gt;</span> <span class="fu">select</span>(r.squared)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1"></a><span class="fu">glance</span>(fit_ws) <span class="sc">|&gt;</span> <span class="fu">select</span>(r.squared)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 1
@@ -2730,30 +2756,30 @@ Neelanjan Mukherjee
 <h2>Compare to traditional t-test</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a>b <span class="sc">|&gt;</span> </span>
-<span id="cb24-2"><a href="#cb24-2"></a>  <span class="fu">t_test</span>(weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> sex) <span class="sc">|&gt;</span></span>
-<span id="cb24-3"><a href="#cb24-3"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(n1,n2,df)) <span class="sc">|&gt;</span></span>
-<span id="cb24-4"><a href="#cb24-4"></a>  <span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1"></a>b <span class="sc">|&gt;</span></span>
+<span id="cb22-2"><a href="#cb22-2"></a>  <span class="fu">t_test</span>(weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> sex) <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a href="#cb22-3"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(n1, n2, df)) <span class="sc">|&gt;</span></span>
+<span id="cb22-4"><a href="#cb22-4"></a>  <span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 
-<div id="onuxvulipm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#onuxvulipm table {
+<div id="grqimhaqvg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#grqimhaqvg table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#onuxvulipm thead, #onuxvulipm tbody, #onuxvulipm tfoot, #onuxvulipm tr, #onuxvulipm td, #onuxvulipm th {
+#grqimhaqvg thead, #grqimhaqvg tbody, #grqimhaqvg tfoot, #grqimhaqvg tr, #grqimhaqvg td, #grqimhaqvg th {
   border-style: none;
 }
 
-#onuxvulipm p {
+#grqimhaqvg p {
   margin: 0;
   padding: 0;
 }
 
-#onuxvulipm .gt_table {
+#grqimhaqvg .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -2779,12 +2805,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#onuxvulipm .gt_caption {
+#grqimhaqvg .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#onuxvulipm .gt_title {
+#grqimhaqvg .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -2796,7 +2822,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#onuxvulipm .gt_subtitle {
+#grqimhaqvg .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -2808,7 +2834,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#onuxvulipm .gt_heading {
+#grqimhaqvg .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -2820,13 +2846,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#onuxvulipm .gt_bottom_border {
+#grqimhaqvg .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#onuxvulipm .gt_col_headings {
+#grqimhaqvg .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2841,7 +2867,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#onuxvulipm .gt_col_heading {
+#grqimhaqvg .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2861,7 +2887,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#onuxvulipm .gt_column_spanner_outer {
+#grqimhaqvg .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2873,15 +2899,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#onuxvulipm .gt_column_spanner_outer:first-child {
+#grqimhaqvg .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#onuxvulipm .gt_column_spanner_outer:last-child {
+#grqimhaqvg .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#onuxvulipm .gt_column_spanner {
+#grqimhaqvg .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2893,11 +2919,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#onuxvulipm .gt_spanner_row {
+#grqimhaqvg .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#onuxvulipm .gt_group_heading {
+#grqimhaqvg .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2923,7 +2949,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#onuxvulipm .gt_empty_group_heading {
+#grqimhaqvg .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2938,15 +2964,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#onuxvulipm .gt_from_md > :first-child {
+#grqimhaqvg .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#onuxvulipm .gt_from_md > :last-child {
+#grqimhaqvg .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#onuxvulipm .gt_row {
+#grqimhaqvg .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2965,7 +2991,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#onuxvulipm .gt_stub {
+#grqimhaqvg .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2978,7 +3004,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#onuxvulipm .gt_stub_row_group {
+#grqimhaqvg .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2992,15 +3018,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#onuxvulipm .gt_row_group_first td {
+#grqimhaqvg .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#onuxvulipm .gt_row_group_first th {
+#grqimhaqvg .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#onuxvulipm .gt_summary_row {
+#grqimhaqvg .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -3010,16 +3036,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#onuxvulipm .gt_first_summary_row {
+#grqimhaqvg .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#onuxvulipm .gt_first_summary_row.thick {
+#grqimhaqvg .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#onuxvulipm .gt_last_summary_row {
+#grqimhaqvg .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3029,7 +3055,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#onuxvulipm .gt_grand_summary_row {
+#grqimhaqvg .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -3039,7 +3065,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#onuxvulipm .gt_first_grand_summary_row {
+#grqimhaqvg .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3049,7 +3075,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#onuxvulipm .gt_last_grand_summary_row_top {
+#grqimhaqvg .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3059,11 +3085,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#onuxvulipm .gt_striped {
+#grqimhaqvg .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#onuxvulipm .gt_table_body {
+#grqimhaqvg .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -3072,7 +3098,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#onuxvulipm .gt_footnotes {
+#grqimhaqvg .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -3086,7 +3112,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#onuxvulipm .gt_footnote {
+#grqimhaqvg .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -3095,7 +3121,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#onuxvulipm .gt_sourcenotes {
+#grqimhaqvg .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -3109,7 +3135,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#onuxvulipm .gt_sourcenote {
+#grqimhaqvg .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -3117,63 +3143,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#onuxvulipm .gt_left {
+#grqimhaqvg .gt_left {
   text-align: left;
 }
 
-#onuxvulipm .gt_center {
+#grqimhaqvg .gt_center {
   text-align: center;
 }
 
-#onuxvulipm .gt_right {
+#grqimhaqvg .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#onuxvulipm .gt_font_normal {
+#grqimhaqvg .gt_font_normal {
   font-weight: normal;
 }
 
-#onuxvulipm .gt_font_bold {
+#grqimhaqvg .gt_font_bold {
   font-weight: bold;
 }
 
-#onuxvulipm .gt_font_italic {
+#grqimhaqvg .gt_font_italic {
   font-style: italic;
 }
 
-#onuxvulipm .gt_super {
+#grqimhaqvg .gt_super {
   font-size: 65%;
 }
 
-#onuxvulipm .gt_footnote_marks {
+#grqimhaqvg .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#onuxvulipm .gt_asterisk {
+#grqimhaqvg .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#onuxvulipm .gt_indent_1 {
+#grqimhaqvg .gt_indent_1 {
   text-indent: 5px;
 }
 
-#onuxvulipm .gt_indent_2 {
+#grqimhaqvg .gt_indent_2 {
   text-indent: 10px;
 }
 
-#onuxvulipm .gt_indent_3 {
+#grqimhaqvg .gt_indent_3 {
   text-indent: 15px;
 }
 
-#onuxvulipm .gt_indent_4 {
+#grqimhaqvg .gt_indent_4 {
   text-indent: 20px;
 }
 
-#onuxvulipm .gt_indent_5 {
+#grqimhaqvg .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -3204,29 +3230,29 @@ Neelanjan Mukherjee
 </div>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="fu">tidy</span>(fit_ws) <span class="sc">|&gt;</span></span>
-<span id="cb25-2"><a href="#cb25-2"></a>  <span class="fu">select</span>(term, estimate, statistic, p.value) <span class="sc">|&gt;</span></span>
-<span id="cb25-3"><a href="#cb25-3"></a>  <span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="fu">tidy</span>(fit_ws) <span class="sc">|&gt;</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a>  <span class="fu">select</span>(term, estimate, statistic, p.value) <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3"></a>  <span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 
-<div id="tgostgypuk" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#tgostgypuk table {
+<div id="rwzidowvuq" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#rwzidowvuq table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#tgostgypuk thead, #tgostgypuk tbody, #tgostgypuk tfoot, #tgostgypuk tr, #tgostgypuk td, #tgostgypuk th {
+#rwzidowvuq thead, #rwzidowvuq tbody, #rwzidowvuq tfoot, #rwzidowvuq tr, #rwzidowvuq td, #rwzidowvuq th {
   border-style: none;
 }
 
-#tgostgypuk p {
+#rwzidowvuq p {
   margin: 0;
   padding: 0;
 }
 
-#tgostgypuk .gt_table {
+#rwzidowvuq .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -3252,12 +3278,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#tgostgypuk .gt_caption {
+#rwzidowvuq .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#tgostgypuk .gt_title {
+#rwzidowvuq .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -3269,7 +3295,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#tgostgypuk .gt_subtitle {
+#rwzidowvuq .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -3281,7 +3307,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#tgostgypuk .gt_heading {
+#rwzidowvuq .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -3293,13 +3319,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#tgostgypuk .gt_bottom_border {
+#rwzidowvuq .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#tgostgypuk .gt_col_headings {
+#rwzidowvuq .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -3314,7 +3340,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#tgostgypuk .gt_col_heading {
+#rwzidowvuq .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3334,7 +3360,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#tgostgypuk .gt_column_spanner_outer {
+#rwzidowvuq .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3346,15 +3372,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#tgostgypuk .gt_column_spanner_outer:first-child {
+#rwzidowvuq .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#tgostgypuk .gt_column_spanner_outer:last-child {
+#rwzidowvuq .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#tgostgypuk .gt_column_spanner {
+#rwzidowvuq .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -3366,11 +3392,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#tgostgypuk .gt_spanner_row {
+#rwzidowvuq .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#tgostgypuk .gt_group_heading {
+#rwzidowvuq .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3396,7 +3422,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#tgostgypuk .gt_empty_group_heading {
+#rwzidowvuq .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -3411,15 +3437,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#tgostgypuk .gt_from_md > :first-child {
+#rwzidowvuq .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#tgostgypuk .gt_from_md > :last-child {
+#rwzidowvuq .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#tgostgypuk .gt_row {
+#rwzidowvuq .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3438,7 +3464,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#tgostgypuk .gt_stub {
+#rwzidowvuq .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3451,7 +3477,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#tgostgypuk .gt_stub_row_group {
+#rwzidowvuq .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3465,15 +3491,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#tgostgypuk .gt_row_group_first td {
+#rwzidowvuq .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#tgostgypuk .gt_row_group_first th {
+#rwzidowvuq .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#tgostgypuk .gt_summary_row {
+#rwzidowvuq .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -3483,16 +3509,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#tgostgypuk .gt_first_summary_row {
+#rwzidowvuq .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#tgostgypuk .gt_first_summary_row.thick {
+#rwzidowvuq .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#tgostgypuk .gt_last_summary_row {
+#rwzidowvuq .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3502,7 +3528,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#tgostgypuk .gt_grand_summary_row {
+#rwzidowvuq .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -3512,7 +3538,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#tgostgypuk .gt_first_grand_summary_row {
+#rwzidowvuq .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3522,7 +3548,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#tgostgypuk .gt_last_grand_summary_row_top {
+#rwzidowvuq .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3532,11 +3558,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#tgostgypuk .gt_striped {
+#rwzidowvuq .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#tgostgypuk .gt_table_body {
+#rwzidowvuq .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -3545,7 +3571,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#tgostgypuk .gt_footnotes {
+#rwzidowvuq .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -3559,7 +3585,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#tgostgypuk .gt_footnote {
+#rwzidowvuq .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -3568,7 +3594,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#tgostgypuk .gt_sourcenotes {
+#rwzidowvuq .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -3582,7 +3608,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#tgostgypuk .gt_sourcenote {
+#rwzidowvuq .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -3590,63 +3616,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#tgostgypuk .gt_left {
+#rwzidowvuq .gt_left {
   text-align: left;
 }
 
-#tgostgypuk .gt_center {
+#rwzidowvuq .gt_center {
   text-align: center;
 }
 
-#tgostgypuk .gt_right {
+#rwzidowvuq .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#tgostgypuk .gt_font_normal {
+#rwzidowvuq .gt_font_normal {
   font-weight: normal;
 }
 
-#tgostgypuk .gt_font_bold {
+#rwzidowvuq .gt_font_bold {
   font-weight: bold;
 }
 
-#tgostgypuk .gt_font_italic {
+#rwzidowvuq .gt_font_italic {
   font-style: italic;
 }
 
-#tgostgypuk .gt_super {
+#rwzidowvuq .gt_super {
   font-size: 65%;
 }
 
-#tgostgypuk .gt_footnote_marks {
+#rwzidowvuq .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#tgostgypuk .gt_asterisk {
+#rwzidowvuq .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#tgostgypuk .gt_indent_1 {
+#rwzidowvuq .gt_indent_1 {
   text-indent: 5px;
 }
 
-#tgostgypuk .gt_indent_2 {
+#rwzidowvuq .gt_indent_2 {
   text-indent: 10px;
 }
 
-#tgostgypuk .gt_indent_3 {
+#rwzidowvuq .gt_indent_3 {
   text-indent: 15px;
 }
 
-#tgostgypuk .gt_indent_4 {
+#rwzidowvuq .gt_indent_4 {
   text-indent: 20px;
 }
 
-#tgostgypuk .gt_indent_5 {
+#rwzidowvuq .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -3681,24 +3707,26 @@ Neelanjan Mukherjee
 <section id="prep-data-for-fams" class="slide level2 smaller">
 <h2>prep data for fams</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a><span class="co"># i have pre-selected some families to compare</span></span>
-<span id="cb26-2"><a href="#cb26-2"></a>myfams <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"B1.5:E1.4(4) B1.5:A1.4(5)"</span>,</span>
-<span id="cb26-3"><a href="#cb26-3"></a>            <span class="st">"F1.3:A1.2(3) F1.3:E2.2(3)"</span>,</span>
-<span id="cb26-4"><a href="#cb26-4"></a>            <span class="st">"A1.3:D1.2(3) A1.3:H1.2(3)"</span>,</span>
-<span id="cb26-5"><a href="#cb26-5"></a>            <span class="st">"D5.4:G2.3(4) D5.4:C4.3(4)"</span>)</span>
-<span id="cb26-6"><a href="#cb26-6"></a></span>
-<span id="cb26-7"><a href="#cb26-7"></a><span class="co"># only keep the familys in myfams</span></span>
-<span id="cb26-8"><a href="#cb26-8"></a>bfam <span class="ot">&lt;-</span> b <span class="sc">|&gt;</span></span>
-<span id="cb26-9"><a href="#cb26-9"></a>  <span class="fu">filter</span>(family <span class="sc">%in%</span> myfams) <span class="sc">|&gt;</span></span>
-<span id="cb26-10"><a href="#cb26-10"></a>  <span class="fu">droplevels</span>() </span>
-<span id="cb26-11"><a href="#cb26-11"></a></span>
-<span id="cb26-12"><a href="#cb26-12"></a><span class="co"># simplify family names and make factor</span></span>
-<span id="cb26-13"><a href="#cb26-13"></a>bfam<span class="sc">$</span>family <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">..*"</span>, <span class="at">replacement =</span> <span class="st">""</span>, <span class="at">x =</span> bfam<span class="sc">$</span>family) <span class="sc">|&gt;</span></span>
-<span id="cb26-14"><a href="#cb26-14"></a>  <span class="fu">as.factor</span>()</span>
-<span id="cb26-15"><a href="#cb26-15"></a></span>
-<span id="cb26-16"><a href="#cb26-16"></a></span>
-<span id="cb26-17"><a href="#cb26-17"></a><span class="co"># make B1 the reference (most similar to overall mean)</span></span>
-<span id="cb26-18"><a href="#cb26-18"></a>bfam<span class="sc">$</span>family <span class="ot">&lt;-</span> <span class="fu">relevel</span>(<span class="at">x =</span> bfam<span class="sc">$</span>family, <span class="at">ref =</span><span class="st">"B1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1"></a><span class="co"># i have pre-selected some families to compare</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a>myfams <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb24-3"><a href="#cb24-3"></a>  <span class="st">"B1.5:E1.4(4) B1.5:A1.4(5)"</span>,</span>
+<span id="cb24-4"><a href="#cb24-4"></a>  <span class="st">"F1.3:A1.2(3) F1.3:E2.2(3)"</span>,</span>
+<span id="cb24-5"><a href="#cb24-5"></a>  <span class="st">"A1.3:D1.2(3) A1.3:H1.2(3)"</span>,</span>
+<span id="cb24-6"><a href="#cb24-6"></a>  <span class="st">"D5.4:G2.3(4) D5.4:C4.3(4)"</span></span>
+<span id="cb24-7"><a href="#cb24-7"></a>)</span>
+<span id="cb24-8"><a href="#cb24-8"></a></span>
+<span id="cb24-9"><a href="#cb24-9"></a><span class="co"># only keep the familys in myfams</span></span>
+<span id="cb24-10"><a href="#cb24-10"></a>bfam <span class="ot">&lt;-</span> b <span class="sc">|&gt;</span></span>
+<span id="cb24-11"><a href="#cb24-11"></a>  <span class="fu">filter</span>(family <span class="sc">%in%</span> myfams) <span class="sc">|&gt;</span></span>
+<span id="cb24-12"><a href="#cb24-12"></a>  <span class="fu">droplevels</span>()</span>
+<span id="cb24-13"><a href="#cb24-13"></a></span>
+<span id="cb24-14"><a href="#cb24-14"></a><span class="co"># simplify family names and make factor</span></span>
+<span id="cb24-15"><a href="#cb24-15"></a>bfam<span class="sc">$</span>family <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">..*"</span>, <span class="at">replacement =</span> <span class="st">""</span>, <span class="at">x =</span> bfam<span class="sc">$</span>family) <span class="sc">|&gt;</span></span>
+<span id="cb24-16"><a href="#cb24-16"></a>  <span class="fu">as.factor</span>()</span>
+<span id="cb24-17"><a href="#cb24-17"></a></span>
+<span id="cb24-18"><a href="#cb24-18"></a></span>
+<span id="cb24-19"><a href="#cb24-19"></a><span class="co"># make B1 the reference (most similar to overall mean)</span></span>
+<span id="cb24-20"><a href="#cb24-20"></a>bfam<span class="sc">$</span>family <span class="ot">&lt;-</span> <span class="fu">relevel</span>(<span class="at">x =</span> bfam<span class="sc">$</span>family, <span class="at">ref =</span> <span class="st">"B1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="step-1-can-family-explain-weight" class="slide level2 smaller">
@@ -3706,16 +3734,18 @@ Neelanjan Mukherjee
 <p>ANOVA -&gt; comparing means of 3 or more groups.</p>
 <p>Let’s compare the <span class="math inline">\(weight\)</span> by <span class="math inline">\(family\)</span>, but only for a few selected families.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> bfam,</span>
-<span id="cb27-2"><a href="#cb27-2"></a>       <span class="fu">aes</span>(<span class="at">y =</span> weight, <span class="at">x =</span>family, <span class="at">color=</span>family)) <span class="sc">+</span></span>
-<span id="cb27-3"><a href="#cb27-3"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> .<span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb27-4"><a href="#cb27-4"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb25-2"><a href="#cb25-2"></a>  <span class="at">data =</span> bfam,</span>
+<span id="cb25-3"><a href="#cb25-3"></a>  <span class="fu">aes</span>(<span class="at">y =</span> weight, <span class="at">x =</span> family, <span class="at">color =</span> family)</span>
+<span id="cb25-4"><a href="#cb25-4"></a>) <span class="sc">+</span></span>
+<span id="cb25-5"><a href="#cb25-5"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> .<span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb25-6"><a href="#cb25-6"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 </section>
 <section id="step-1-can-family-explain-weight-output" class="slide level2 smaller output-location-slide"><h2>STEP 1: Can family explain weight?</h2><div class="cell output-location-slide">
 <div class="cell-output-display">
-<p><img data-src="slides-14_files/figure-html/unnamed-chunk-21-1.png" width="672"></p>
+<p><img data-src="slides-14_files/figure-revealjs/unnamed-chunk-21-1.png" width="960"></p>
 </div>
 </div></section><section id="what-does-the-model-look-like" class="slide level2 smaller">
 <h2>What does the model look like?</h2>
@@ -3732,7 +3762,7 @@ Neelanjan Mukherjee
 <h2>STEP 2: Fit linear model and examine results</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a>fit_wf <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> family, <span class="at">data =</span> bfam)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>fit_wf <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> family, <span class="at">data =</span> bfam)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 
 </div>
@@ -3740,29 +3770,29 @@ Neelanjan Mukherjee
 <p>Fit summary:</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="fu">glance</span>(fit_wf) <span class="sc">|&gt;</span></span>
-<span id="cb29-2"><a href="#cb29-2"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
-<span id="cb29-3"><a href="#cb29-3"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span> r.squared<span class="sc">:</span>statistic, <span class="at">decimals =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="fu">glance</span>(fit_wf) <span class="sc">|&gt;</span></span>
+<span id="cb27-2"><a href="#cb27-2"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb27-3"><a href="#cb27-3"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span> r.squared<span class="sc">:</span>statistic, <span class="at">decimals =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 
-<div id="wqlzthxrzw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#wqlzthxrzw table {
+<div id="yemwbkhbdb" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#yemwbkhbdb table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#wqlzthxrzw thead, #wqlzthxrzw tbody, #wqlzthxrzw tfoot, #wqlzthxrzw tr, #wqlzthxrzw td, #wqlzthxrzw th {
+#yemwbkhbdb thead, #yemwbkhbdb tbody, #yemwbkhbdb tfoot, #yemwbkhbdb tr, #yemwbkhbdb td, #yemwbkhbdb th {
   border-style: none;
 }
 
-#wqlzthxrzw p {
+#yemwbkhbdb p {
   margin: 0;
   padding: 0;
 }
 
-#wqlzthxrzw .gt_table {
+#yemwbkhbdb .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -3788,12 +3818,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#wqlzthxrzw .gt_caption {
+#yemwbkhbdb .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#wqlzthxrzw .gt_title {
+#yemwbkhbdb .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -3805,7 +3835,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#wqlzthxrzw .gt_subtitle {
+#yemwbkhbdb .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -3817,7 +3847,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#wqlzthxrzw .gt_heading {
+#yemwbkhbdb .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -3829,13 +3859,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#wqlzthxrzw .gt_bottom_border {
+#yemwbkhbdb .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#wqlzthxrzw .gt_col_headings {
+#yemwbkhbdb .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -3850,7 +3880,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#wqlzthxrzw .gt_col_heading {
+#yemwbkhbdb .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3870,7 +3900,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#wqlzthxrzw .gt_column_spanner_outer {
+#yemwbkhbdb .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3882,15 +3912,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#wqlzthxrzw .gt_column_spanner_outer:first-child {
+#yemwbkhbdb .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#wqlzthxrzw .gt_column_spanner_outer:last-child {
+#yemwbkhbdb .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#wqlzthxrzw .gt_column_spanner {
+#yemwbkhbdb .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -3902,11 +3932,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#wqlzthxrzw .gt_spanner_row {
+#yemwbkhbdb .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#wqlzthxrzw .gt_group_heading {
+#yemwbkhbdb .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3932,7 +3962,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#wqlzthxrzw .gt_empty_group_heading {
+#yemwbkhbdb .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -3947,15 +3977,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#wqlzthxrzw .gt_from_md > :first-child {
+#yemwbkhbdb .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#wqlzthxrzw .gt_from_md > :last-child {
+#yemwbkhbdb .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#wqlzthxrzw .gt_row {
+#yemwbkhbdb .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3974,7 +4004,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#wqlzthxrzw .gt_stub {
+#yemwbkhbdb .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3987,7 +4017,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#wqlzthxrzw .gt_stub_row_group {
+#yemwbkhbdb .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4001,15 +4031,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#wqlzthxrzw .gt_row_group_first td {
+#yemwbkhbdb .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#wqlzthxrzw .gt_row_group_first th {
+#yemwbkhbdb .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#wqlzthxrzw .gt_summary_row {
+#yemwbkhbdb .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -4019,16 +4049,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#wqlzthxrzw .gt_first_summary_row {
+#yemwbkhbdb .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#wqlzthxrzw .gt_first_summary_row.thick {
+#yemwbkhbdb .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#wqlzthxrzw .gt_last_summary_row {
+#yemwbkhbdb .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4038,7 +4068,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#wqlzthxrzw .gt_grand_summary_row {
+#yemwbkhbdb .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -4048,7 +4078,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#wqlzthxrzw .gt_first_grand_summary_row {
+#yemwbkhbdb .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4058,7 +4088,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#wqlzthxrzw .gt_last_grand_summary_row_top {
+#yemwbkhbdb .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4068,11 +4098,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#wqlzthxrzw .gt_striped {
+#yemwbkhbdb .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#wqlzthxrzw .gt_table_body {
+#yemwbkhbdb .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -4081,7 +4111,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#wqlzthxrzw .gt_footnotes {
+#yemwbkhbdb .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -4095,7 +4125,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#wqlzthxrzw .gt_footnote {
+#yemwbkhbdb .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -4104,7 +4134,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#wqlzthxrzw .gt_sourcenotes {
+#yemwbkhbdb .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -4118,7 +4148,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#wqlzthxrzw .gt_sourcenote {
+#yemwbkhbdb .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -4126,63 +4156,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#wqlzthxrzw .gt_left {
+#yemwbkhbdb .gt_left {
   text-align: left;
 }
 
-#wqlzthxrzw .gt_center {
+#yemwbkhbdb .gt_center {
   text-align: center;
 }
 
-#wqlzthxrzw .gt_right {
+#yemwbkhbdb .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#wqlzthxrzw .gt_font_normal {
+#yemwbkhbdb .gt_font_normal {
   font-weight: normal;
 }
 
-#wqlzthxrzw .gt_font_bold {
+#yemwbkhbdb .gt_font_bold {
   font-weight: bold;
 }
 
-#wqlzthxrzw .gt_font_italic {
+#yemwbkhbdb .gt_font_italic {
   font-style: italic;
 }
 
-#wqlzthxrzw .gt_super {
+#yemwbkhbdb .gt_super {
   font-size: 65%;
 }
 
-#wqlzthxrzw .gt_footnote_marks {
+#yemwbkhbdb .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#wqlzthxrzw .gt_asterisk {
+#yemwbkhbdb .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#wqlzthxrzw .gt_indent_1 {
+#yemwbkhbdb .gt_indent_1 {
   text-indent: 5px;
 }
 
-#wqlzthxrzw .gt_indent_2 {
+#yemwbkhbdb .gt_indent_2 {
   text-indent: 10px;
 }
 
-#wqlzthxrzw .gt_indent_3 {
+#yemwbkhbdb .gt_indent_3 {
   text-indent: 15px;
 }
 
-#wqlzthxrzw .gt_indent_4 {
+#yemwbkhbdb .gt_indent_4 {
   text-indent: 20px;
 }
 
-#wqlzthxrzw .gt_indent_5 {
+#yemwbkhbdb .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -4228,29 +4258,29 @@ Neelanjan Mukherjee
 <p>Coefficient summary:</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a><span class="fu">tidy</span>(fit_wf) <span class="sc">|&gt;</span></span>
-<span id="cb30-2"><a href="#cb30-2"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
-<span id="cb30-3"><a href="#cb30-3"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span>estimate<span class="sc">:</span>statistic, <span class="at">decimals =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a><span class="fu">tidy</span>(fit_wf) <span class="sc">|&gt;</span></span>
+<span id="cb28-2"><a href="#cb28-2"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span> estimate<span class="sc">:</span>statistic, <span class="at">decimals =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 
-<div id="uftbfiwekm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#uftbfiwekm table {
+<div id="zjdmmoytqg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#zjdmmoytqg table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#uftbfiwekm thead, #uftbfiwekm tbody, #uftbfiwekm tfoot, #uftbfiwekm tr, #uftbfiwekm td, #uftbfiwekm th {
+#zjdmmoytqg thead, #zjdmmoytqg tbody, #zjdmmoytqg tfoot, #zjdmmoytqg tr, #zjdmmoytqg td, #zjdmmoytqg th {
   border-style: none;
 }
 
-#uftbfiwekm p {
+#zjdmmoytqg p {
   margin: 0;
   padding: 0;
 }
 
-#uftbfiwekm .gt_table {
+#zjdmmoytqg .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -4276,12 +4306,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#uftbfiwekm .gt_caption {
+#zjdmmoytqg .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#uftbfiwekm .gt_title {
+#zjdmmoytqg .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -4293,7 +4323,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#uftbfiwekm .gt_subtitle {
+#zjdmmoytqg .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -4305,7 +4335,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#uftbfiwekm .gt_heading {
+#zjdmmoytqg .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -4317,13 +4347,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#uftbfiwekm .gt_bottom_border {
+#zjdmmoytqg .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#uftbfiwekm .gt_col_headings {
+#zjdmmoytqg .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -4338,7 +4368,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#uftbfiwekm .gt_col_heading {
+#zjdmmoytqg .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4358,7 +4388,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#uftbfiwekm .gt_column_spanner_outer {
+#zjdmmoytqg .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4370,15 +4400,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#uftbfiwekm .gt_column_spanner_outer:first-child {
+#zjdmmoytqg .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#uftbfiwekm .gt_column_spanner_outer:last-child {
+#zjdmmoytqg .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#uftbfiwekm .gt_column_spanner {
+#zjdmmoytqg .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -4390,11 +4420,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#uftbfiwekm .gt_spanner_row {
+#zjdmmoytqg .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#uftbfiwekm .gt_group_heading {
+#zjdmmoytqg .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4420,7 +4450,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#uftbfiwekm .gt_empty_group_heading {
+#zjdmmoytqg .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -4435,15 +4465,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#uftbfiwekm .gt_from_md > :first-child {
+#zjdmmoytqg .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#uftbfiwekm .gt_from_md > :last-child {
+#zjdmmoytqg .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#uftbfiwekm .gt_row {
+#zjdmmoytqg .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4462,7 +4492,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#uftbfiwekm .gt_stub {
+#zjdmmoytqg .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4475,7 +4505,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#uftbfiwekm .gt_stub_row_group {
+#zjdmmoytqg .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4489,15 +4519,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#uftbfiwekm .gt_row_group_first td {
+#zjdmmoytqg .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#uftbfiwekm .gt_row_group_first th {
+#zjdmmoytqg .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#uftbfiwekm .gt_summary_row {
+#zjdmmoytqg .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -4507,16 +4537,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#uftbfiwekm .gt_first_summary_row {
+#zjdmmoytqg .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#uftbfiwekm .gt_first_summary_row.thick {
+#zjdmmoytqg .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#uftbfiwekm .gt_last_summary_row {
+#zjdmmoytqg .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4526,7 +4556,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#uftbfiwekm .gt_grand_summary_row {
+#zjdmmoytqg .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -4536,7 +4566,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#uftbfiwekm .gt_first_grand_summary_row {
+#zjdmmoytqg .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4546,7 +4576,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#uftbfiwekm .gt_last_grand_summary_row_top {
+#zjdmmoytqg .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4556,11 +4586,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#uftbfiwekm .gt_striped {
+#zjdmmoytqg .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#uftbfiwekm .gt_table_body {
+#zjdmmoytqg .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -4569,7 +4599,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#uftbfiwekm .gt_footnotes {
+#zjdmmoytqg .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -4583,7 +4613,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#uftbfiwekm .gt_footnote {
+#zjdmmoytqg .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -4592,7 +4622,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#uftbfiwekm .gt_sourcenotes {
+#zjdmmoytqg .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -4606,7 +4636,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#uftbfiwekm .gt_sourcenote {
+#zjdmmoytqg .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -4614,63 +4644,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#uftbfiwekm .gt_left {
+#zjdmmoytqg .gt_left {
   text-align: left;
 }
 
-#uftbfiwekm .gt_center {
+#zjdmmoytqg .gt_center {
   text-align: center;
 }
 
-#uftbfiwekm .gt_right {
+#zjdmmoytqg .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#uftbfiwekm .gt_font_normal {
+#zjdmmoytqg .gt_font_normal {
   font-weight: normal;
 }
 
-#uftbfiwekm .gt_font_bold {
+#zjdmmoytqg .gt_font_bold {
   font-weight: bold;
 }
 
-#uftbfiwekm .gt_font_italic {
+#zjdmmoytqg .gt_font_italic {
   font-style: italic;
 }
 
-#uftbfiwekm .gt_super {
+#zjdmmoytqg .gt_super {
   font-size: 65%;
 }
 
-#uftbfiwekm .gt_footnote_marks {
+#zjdmmoytqg .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#uftbfiwekm .gt_asterisk {
+#zjdmmoytqg .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#uftbfiwekm .gt_indent_1 {
+#zjdmmoytqg .gt_indent_1 {
   text-indent: 5px;
 }
 
-#uftbfiwekm .gt_indent_2 {
+#zjdmmoytqg .gt_indent_2 {
   text-indent: 10px;
 }
 
-#uftbfiwekm .gt_indent_3 {
+#zjdmmoytqg .gt_indent_3 {
   text-indent: 15px;
 }
 
-#uftbfiwekm .gt_indent_4 {
+#zjdmmoytqg .gt_indent_4 {
   text-indent: 20px;
 }
 
-#uftbfiwekm .gt_indent_5 {
+#zjdmmoytqg .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -4720,20 +4750,20 @@ Neelanjan Mukherjee
 <p>add residuals and other information</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a><span class="co">#augment</span></span>
-<span id="cb31-2"><a href="#cb31-2"></a>b_wf <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_wf, <span class="at">data =</span> bfam)</span>
-<span id="cb31-3"><a href="#cb31-3"></a></span>
-<span id="cb31-4"><a href="#cb31-4"></a><span class="co"># mean weight per fam</span></span>
-<span id="cb31-5"><a href="#cb31-5"></a>mean_B1 <span class="ot">&lt;-</span> fit_wf<span class="sc">$</span>coefficients[<span class="dv">1</span>]</span>
-<span id="cb31-6"><a href="#cb31-6"></a></span>
-<span id="cb31-7"><a href="#cb31-7"></a>mean_A1 <span class="ot">&lt;-</span> fit_wf<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span></span>
-<span id="cb31-8"><a href="#cb31-8"></a>  fit_wf<span class="sc">$</span>coefficients[<span class="dv">2</span>]</span>
-<span id="cb31-9"><a href="#cb31-9"></a></span>
-<span id="cb31-10"><a href="#cb31-10"></a>mean_D5 <span class="ot">&lt;-</span> fit_wf<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span></span>
-<span id="cb31-11"><a href="#cb31-11"></a>  fit_wf<span class="sc">$</span>coefficients[<span class="dv">3</span>]</span>
-<span id="cb31-12"><a href="#cb31-12"></a></span>
-<span id="cb31-13"><a href="#cb31-13"></a>mean_F1 <span class="ot">&lt;-</span> fit_wf<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span></span>
-<span id="cb31-14"><a href="#cb31-14"></a>  fit_wf<span class="sc">$</span>coefficients[<span class="dv">4</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1"></a><span class="co"># augment</span></span>
+<span id="cb29-2"><a href="#cb29-2"></a>b_wf <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_wf, <span class="at">data =</span> bfam)</span>
+<span id="cb29-3"><a href="#cb29-3"></a></span>
+<span id="cb29-4"><a href="#cb29-4"></a><span class="co"># mean weight per fam</span></span>
+<span id="cb29-5"><a href="#cb29-5"></a>mean_B1 <span class="ot">&lt;-</span> fit_wf<span class="sc">$</span>coefficients[<span class="dv">1</span>]</span>
+<span id="cb29-6"><a href="#cb29-6"></a></span>
+<span id="cb29-7"><a href="#cb29-7"></a>mean_A1 <span class="ot">&lt;-</span> fit_wf<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span></span>
+<span id="cb29-8"><a href="#cb29-8"></a>  fit_wf<span class="sc">$</span>coefficients[<span class="dv">2</span>]</span>
+<span id="cb29-9"><a href="#cb29-9"></a></span>
+<span id="cb29-10"><a href="#cb29-10"></a>mean_D5 <span class="ot">&lt;-</span> fit_wf<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span></span>
+<span id="cb29-11"><a href="#cb29-11"></a>  fit_wf<span class="sc">$</span>coefficients[<span class="dv">3</span>]</span>
+<span id="cb29-12"><a href="#cb29-12"></a></span>
+<span id="cb29-13"><a href="#cb29-13"></a>mean_F1 <span class="ot">&lt;-</span> fit_wf<span class="sc">$</span>coefficients[<span class="dv">1</span>] <span class="sc">+</span></span>
+<span id="cb29-14"><a href="#cb29-14"></a>  fit_wf<span class="sc">$</span>coefficients[<span class="dv">4</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 
 </div>
@@ -4742,53 +4772,59 @@ Neelanjan Mukherjee
 <section id="step-3-visualize-the-error-around-fit-1" class="slide level2 smaller">
 <h2>STEP 3: Visualize the error around fit</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a><span class="fu">ggplot</span>(b_wf,</span>
-<span id="cb32-2"><a href="#cb32-2"></a>               <span class="fu">aes</span>(<span class="at">x =</span> family, <span class="at">y =</span> weight)) <span class="sc">+</span></span>
-<span id="cb32-3"><a href="#cb32-3"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(),</span>
-<span id="cb32-4"><a href="#cb32-4"></a>             <span class="fu">aes</span>(<span class="at">color =</span> .resid)) <span class="sc">+</span></span>
-<span id="cb32-5"><a href="#cb32-5"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">"blue"</span>,</span>
-<span id="cb32-6"><a href="#cb32-6"></a>                        <span class="at">mid =</span> <span class="st">"black"</span>,</span>
-<span id="cb32-7"><a href="#cb32-7"></a>                        <span class="at">high =</span> <span class="st">"yellow"</span>) <span class="sc">+</span></span>
-<span id="cb32-8"><a href="#cb32-8"></a><span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span>.<span class="dv">5</span>, <span class="at">xend=</span><span class="fl">1.5</span>, <span class="at">y=</span>mean_B1, <span class="at">yend=</span>mean_B1), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb32-9"><a href="#cb32-9"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">1.5</span>, <span class="at">xend=</span><span class="fl">2.5</span>, <span class="at">y=</span>mean_A1, <span class="at">yend=</span>mean_A1), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb32-10"><a href="#cb32-10"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">2.5</span>, <span class="at">xend=</span><span class="fl">3.5</span>, <span class="at">y=</span>mean_D5, <span class="at">yend=</span>mean_D5), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb32-11"><a href="#cb32-11"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fl">3.5</span>, <span class="at">xend=</span><span class="fl">4.5</span>, <span class="at">y=</span>mean_F1, <span class="at">yend=</span>mean_F1), <span class="at">color=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb32-12"><a href="#cb32-12"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x=</span>.<span class="dv">5</span>, <span class="at">xend=</span><span class="fl">4.5</span>, <span class="at">y=</span><span class="fu">mean</span>(weight), <span class="at">yend=</span><span class="fu">mean</span>(weight)), <span class="at">color=</span><span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb32-13"><a href="#cb32-13"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb30-2"><a href="#cb30-2"></a>  b_wf,</span>
+<span id="cb30-3"><a href="#cb30-3"></a>  <span class="fu">aes</span>(<span class="at">x =</span> family, <span class="at">y =</span> weight)</span>
+<span id="cb30-4"><a href="#cb30-4"></a>) <span class="sc">+</span></span>
+<span id="cb30-5"><a href="#cb30-5"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb30-6"><a href="#cb30-6"></a>    <span class="at">position =</span> <span class="fu">position_jitter</span>(),</span>
+<span id="cb30-7"><a href="#cb30-7"></a>    <span class="fu">aes</span>(<span class="at">color =</span> .resid)</span>
+<span id="cb30-8"><a href="#cb30-8"></a>  ) <span class="sc">+</span></span>
+<span id="cb30-9"><a href="#cb30-9"></a>  <span class="fu">scale_color_gradient2</span>(</span>
+<span id="cb30-10"><a href="#cb30-10"></a>    <span class="at">low =</span> <span class="st">"blue"</span>,</span>
+<span id="cb30-11"><a href="#cb30-11"></a>    <span class="at">mid =</span> <span class="st">"black"</span>,</span>
+<span id="cb30-12"><a href="#cb30-12"></a>    <span class="at">high =</span> <span class="st">"yellow"</span></span>
+<span id="cb30-13"><a href="#cb30-13"></a>  ) <span class="sc">+</span></span>
+<span id="cb30-14"><a href="#cb30-14"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> .<span class="dv">5</span>, <span class="at">xend =</span> <span class="fl">1.5</span>, <span class="at">y =</span> mean_B1, <span class="at">yend =</span> mean_B1), <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb30-15"><a href="#cb30-15"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">1.5</span>, <span class="at">xend =</span> <span class="fl">2.5</span>, <span class="at">y =</span> mean_A1, <span class="at">yend =</span> mean_A1), <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb30-16"><a href="#cb30-16"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">2.5</span>, <span class="at">xend =</span> <span class="fl">3.5</span>, <span class="at">y =</span> mean_D5, <span class="at">yend =</span> mean_D5), <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb30-17"><a href="#cb30-17"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">3.5</span>, <span class="at">xend =</span> <span class="fl">4.5</span>, <span class="at">y =</span> mean_F1, <span class="at">yend =</span> mean_F1), <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb30-18"><a href="#cb30-18"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> .<span class="dv">5</span>, <span class="at">xend =</span> <span class="fl">4.5</span>, <span class="at">y =</span> <span class="fu">mean</span>(weight), <span class="at">yend =</span> <span class="fu">mean</span>(weight)), <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb30-19"><a href="#cb30-19"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 </section>
 <section id="step-3-visualize-the-error-around-fit-1-output" class="slide level2 smaller output-location-slide"><h2>STEP 3: Visualize the error around fit</h2><div class="cell output-location-slide">
 <div class="cell-output-display">
-<p><img data-src="slides-14_files/figure-html/unnamed-chunk-26-1.png" width="672"></p>
+<p><img data-src="slides-14_files/figure-revealjs/unnamed-chunk-26-1.png" width="960"></p>
 </div>
 </div></section><section id="compare-to-traditional-anova" class="slide level2 smaller">
 <h2>Compare to traditional ANOVA</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>bfam <span class="sc">|&gt;</span> </span>
-<span id="cb33-2"><a href="#cb33-2"></a>  <span class="fu">anova_test</span>(weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> family) <span class="sc">|&gt;</span></span>
-<span id="cb33-3"><a href="#cb33-3"></a>  <span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a>bfam <span class="sc">|&gt;</span></span>
+<span id="cb31-2"><a href="#cb31-2"></a>  <span class="fu">anova_test</span>(weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> family) <span class="sc">|&gt;</span></span>
+<span id="cb31-3"><a href="#cb31-3"></a>  <span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 
-<div id="dghllgissk" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#dghllgissk table {
+<div id="orcfdbvzyz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#orcfdbvzyz table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#dghllgissk thead, #dghllgissk tbody, #dghllgissk tfoot, #dghllgissk tr, #dghllgissk td, #dghllgissk th {
+#orcfdbvzyz thead, #orcfdbvzyz tbody, #orcfdbvzyz tfoot, #orcfdbvzyz tr, #orcfdbvzyz td, #orcfdbvzyz th {
   border-style: none;
 }
 
-#dghllgissk p {
+#orcfdbvzyz p {
   margin: 0;
   padding: 0;
 }
 
-#dghllgissk .gt_table {
+#orcfdbvzyz .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -4814,12 +4850,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#dghllgissk .gt_caption {
+#orcfdbvzyz .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#dghllgissk .gt_title {
+#orcfdbvzyz .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -4831,7 +4867,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#dghllgissk .gt_subtitle {
+#orcfdbvzyz .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -4843,7 +4879,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#dghllgissk .gt_heading {
+#orcfdbvzyz .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -4855,13 +4891,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#dghllgissk .gt_bottom_border {
+#orcfdbvzyz .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#dghllgissk .gt_col_headings {
+#orcfdbvzyz .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -4876,7 +4912,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#dghllgissk .gt_col_heading {
+#orcfdbvzyz .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4896,7 +4932,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#dghllgissk .gt_column_spanner_outer {
+#orcfdbvzyz .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4908,15 +4944,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#dghllgissk .gt_column_spanner_outer:first-child {
+#orcfdbvzyz .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#dghllgissk .gt_column_spanner_outer:last-child {
+#orcfdbvzyz .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#dghllgissk .gt_column_spanner {
+#orcfdbvzyz .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -4928,11 +4964,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#dghllgissk .gt_spanner_row {
+#orcfdbvzyz .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#dghllgissk .gt_group_heading {
+#orcfdbvzyz .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4958,7 +4994,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#dghllgissk .gt_empty_group_heading {
+#orcfdbvzyz .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -4973,15 +5009,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#dghllgissk .gt_from_md > :first-child {
+#orcfdbvzyz .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#dghllgissk .gt_from_md > :last-child {
+#orcfdbvzyz .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#dghllgissk .gt_row {
+#orcfdbvzyz .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -5000,7 +5036,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#dghllgissk .gt_stub {
+#orcfdbvzyz .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -5013,7 +5049,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#dghllgissk .gt_stub_row_group {
+#orcfdbvzyz .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -5027,15 +5063,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#dghllgissk .gt_row_group_first td {
+#orcfdbvzyz .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#dghllgissk .gt_row_group_first th {
+#orcfdbvzyz .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#dghllgissk .gt_summary_row {
+#orcfdbvzyz .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -5045,16 +5081,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#dghllgissk .gt_first_summary_row {
+#orcfdbvzyz .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#dghllgissk .gt_first_summary_row.thick {
+#orcfdbvzyz .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#dghllgissk .gt_last_summary_row {
+#orcfdbvzyz .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -5064,7 +5100,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#dghllgissk .gt_grand_summary_row {
+#orcfdbvzyz .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -5074,7 +5110,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#dghllgissk .gt_first_grand_summary_row {
+#orcfdbvzyz .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -5084,7 +5120,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#dghllgissk .gt_last_grand_summary_row_top {
+#orcfdbvzyz .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -5094,11 +5130,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#dghllgissk .gt_striped {
+#orcfdbvzyz .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#dghllgissk .gt_table_body {
+#orcfdbvzyz .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -5107,7 +5143,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#dghllgissk .gt_footnotes {
+#orcfdbvzyz .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -5121,7 +5157,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#dghllgissk .gt_footnote {
+#orcfdbvzyz .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -5130,7 +5166,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#dghllgissk .gt_sourcenotes {
+#orcfdbvzyz .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -5144,7 +5180,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#dghllgissk .gt_sourcenote {
+#orcfdbvzyz .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -5152,63 +5188,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#dghllgissk .gt_left {
+#orcfdbvzyz .gt_left {
   text-align: left;
 }
 
-#dghllgissk .gt_center {
+#orcfdbvzyz .gt_center {
   text-align: center;
 }
 
-#dghllgissk .gt_right {
+#orcfdbvzyz .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#dghllgissk .gt_font_normal {
+#orcfdbvzyz .gt_font_normal {
   font-weight: normal;
 }
 
-#dghllgissk .gt_font_bold {
+#orcfdbvzyz .gt_font_bold {
   font-weight: bold;
 }
 
-#dghllgissk .gt_font_italic {
+#orcfdbvzyz .gt_font_italic {
   font-style: italic;
 }
 
-#dghllgissk .gt_super {
+#orcfdbvzyz .gt_super {
   font-size: 65%;
 }
 
-#dghllgissk .gt_footnote_marks {
+#orcfdbvzyz .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#dghllgissk .gt_asterisk {
+#orcfdbvzyz .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#dghllgissk .gt_indent_1 {
+#orcfdbvzyz .gt_indent_1 {
   text-indent: 5px;
 }
 
-#dghllgissk .gt_indent_2 {
+#orcfdbvzyz .gt_indent_2 {
   text-indent: 10px;
 }
 
-#dghllgissk .gt_indent_3 {
+#orcfdbvzyz .gt_indent_3 {
   text-indent: 15px;
 }
 
-#dghllgissk .gt_indent_4 {
+#orcfdbvzyz .gt_indent_4 {
   text-indent: 20px;
 }
 
-#dghllgissk .gt_indent_5 {
+#orcfdbvzyz .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -5243,29 +5279,29 @@ Neelanjan Mukherjee
 </div>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a><span class="fu">tidy</span>(fit_wf) <span class="sc">|&gt;</span></span>
-<span id="cb34-2"><a href="#cb34-2"></a>  <span class="fu">select</span>(term, estimate, statistic, p.value) <span class="sc">|&gt;</span></span>
-<span id="cb34-3"><a href="#cb34-3"></a>  <span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1"></a><span class="fu">tidy</span>(fit_wf) <span class="sc">|&gt;</span></span>
+<span id="cb32-2"><a href="#cb32-2"></a>  <span class="fu">select</span>(term, estimate, statistic, p.value) <span class="sc">|&gt;</span></span>
+<span id="cb32-3"><a href="#cb32-3"></a>  <span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 
-<div id="pscarxikur" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#pscarxikur table {
+<div id="nndqqpvjxi" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#nndqqpvjxi table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#pscarxikur thead, #pscarxikur tbody, #pscarxikur tfoot, #pscarxikur tr, #pscarxikur td, #pscarxikur th {
+#nndqqpvjxi thead, #nndqqpvjxi tbody, #nndqqpvjxi tfoot, #nndqqpvjxi tr, #nndqqpvjxi td, #nndqqpvjxi th {
   border-style: none;
 }
 
-#pscarxikur p {
+#nndqqpvjxi p {
   margin: 0;
   padding: 0;
 }
 
-#pscarxikur .gt_table {
+#nndqqpvjxi .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -5291,12 +5327,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#pscarxikur .gt_caption {
+#nndqqpvjxi .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#pscarxikur .gt_title {
+#nndqqpvjxi .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -5308,7 +5344,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#pscarxikur .gt_subtitle {
+#nndqqpvjxi .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -5320,7 +5356,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#pscarxikur .gt_heading {
+#nndqqpvjxi .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -5332,13 +5368,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#pscarxikur .gt_bottom_border {
+#nndqqpvjxi .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#pscarxikur .gt_col_headings {
+#nndqqpvjxi .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -5353,7 +5389,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#pscarxikur .gt_col_heading {
+#nndqqpvjxi .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -5373,7 +5409,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#pscarxikur .gt_column_spanner_outer {
+#nndqqpvjxi .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -5385,15 +5421,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#pscarxikur .gt_column_spanner_outer:first-child {
+#nndqqpvjxi .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#pscarxikur .gt_column_spanner_outer:last-child {
+#nndqqpvjxi .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#pscarxikur .gt_column_spanner {
+#nndqqpvjxi .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -5405,11 +5441,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#pscarxikur .gt_spanner_row {
+#nndqqpvjxi .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#pscarxikur .gt_group_heading {
+#nndqqpvjxi .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -5435,7 +5471,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#pscarxikur .gt_empty_group_heading {
+#nndqqpvjxi .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -5450,15 +5486,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#pscarxikur .gt_from_md > :first-child {
+#nndqqpvjxi .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#pscarxikur .gt_from_md > :last-child {
+#nndqqpvjxi .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#pscarxikur .gt_row {
+#nndqqpvjxi .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -5477,7 +5513,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#pscarxikur .gt_stub {
+#nndqqpvjxi .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -5490,7 +5526,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#pscarxikur .gt_stub_row_group {
+#nndqqpvjxi .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -5504,15 +5540,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#pscarxikur .gt_row_group_first td {
+#nndqqpvjxi .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#pscarxikur .gt_row_group_first th {
+#nndqqpvjxi .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#pscarxikur .gt_summary_row {
+#nndqqpvjxi .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -5522,16 +5558,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#pscarxikur .gt_first_summary_row {
+#nndqqpvjxi .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#pscarxikur .gt_first_summary_row.thick {
+#nndqqpvjxi .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#pscarxikur .gt_last_summary_row {
+#nndqqpvjxi .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -5541,7 +5577,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#pscarxikur .gt_grand_summary_row {
+#nndqqpvjxi .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -5551,7 +5587,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#pscarxikur .gt_first_grand_summary_row {
+#nndqqpvjxi .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -5561,7 +5597,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#pscarxikur .gt_last_grand_summary_row_top {
+#nndqqpvjxi .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -5571,11 +5607,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#pscarxikur .gt_striped {
+#nndqqpvjxi .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#pscarxikur .gt_table_body {
+#nndqqpvjxi .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -5584,7 +5620,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#pscarxikur .gt_footnotes {
+#nndqqpvjxi .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -5598,7 +5634,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#pscarxikur .gt_footnote {
+#nndqqpvjxi .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -5607,7 +5643,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#pscarxikur .gt_sourcenotes {
+#nndqqpvjxi .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -5621,7 +5657,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#pscarxikur .gt_sourcenote {
+#nndqqpvjxi .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -5629,63 +5665,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#pscarxikur .gt_left {
+#nndqqpvjxi .gt_left {
   text-align: left;
 }
 
-#pscarxikur .gt_center {
+#nndqqpvjxi .gt_center {
   text-align: center;
 }
 
-#pscarxikur .gt_right {
+#nndqqpvjxi .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#pscarxikur .gt_font_normal {
+#nndqqpvjxi .gt_font_normal {
   font-weight: normal;
 }
 
-#pscarxikur .gt_font_bold {
+#nndqqpvjxi .gt_font_bold {
   font-weight: bold;
 }
 
-#pscarxikur .gt_font_italic {
+#nndqqpvjxi .gt_font_italic {
   font-style: italic;
 }
 
-#pscarxikur .gt_super {
+#nndqqpvjxi .gt_super {
   font-size: 65%;
 }
 
-#pscarxikur .gt_footnote_marks {
+#nndqqpvjxi .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#pscarxikur .gt_asterisk {
+#nndqqpvjxi .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#pscarxikur .gt_indent_1 {
+#nndqqpvjxi .gt_indent_1 {
   text-indent: 5px;
 }
 
-#pscarxikur .gt_indent_2 {
+#nndqqpvjxi .gt_indent_2 {
   text-indent: 10px;
 }
 
-#pscarxikur .gt_indent_3 {
+#nndqqpvjxi .gt_indent_3 {
   text-indent: 15px;
 }
 
-#pscarxikur .gt_indent_4 {
+#nndqqpvjxi .gt_indent_4 {
   text-indent: 20px;
 }
 
-#pscarxikur .gt_indent_5 {
+#nndqqpvjxi .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -5729,55 +5765,52 @@ Neelanjan Mukherjee
 <h2>Comparing 2 groups of 2 continuous variables</h2>
 <p><strong>ANCOVA, Analysis of Covariance.</strong> ANOVA with more than one independent variable. What is the impact of mouse age on mouse weight for males vs females.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> b, <span class="fu">aes</span>(<span class="at">y =</span> weight, <span class="at">x =</span> age, <span class="at">color=</span>sex)) <span class="sc">+</span></span>
-<span id="cb35-2"><a href="#cb35-2"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span>.<span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb35-3"><a href="#cb35-3"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span>lm) <span class="sc">+</span></span>
-<span id="cb35-4"><a href="#cb35-4"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> b, <span class="fu">aes</span>(<span class="at">y =</span> weight, <span class="at">x =</span> age, <span class="at">color =</span> sex)) <span class="sc">+</span></span>
+<span id="cb33-2"><a href="#cb33-2"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> .<span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb33-3"><a href="#cb33-3"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> lm) <span class="sc">+</span></span>
+<span id="cb33-4"><a href="#cb33-4"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 </section>
 <section id="comparing-2-groups-of-2-continuous-variables-output" class="slide level2 smaller output-location-slide"><h2>Comparing 2 groups of 2 continuous variables</h2><div class="cell output-location-slide">
-<div class="cell-output cell-output-stderr">
-<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
-</div>
 <div class="cell-output-display">
-<p><img data-src="slides-14_files/figure-html/ANCOVA-1.png" width="672"></p>
+<p><img data-src="slides-14_files/figure-revealjs/ANCOVA-1.png" width="960"></p>
 </div>
 </div></section><section id="step-2-fit-linear-model-and-examine-results-2" class="slide level2 smaller">
 <h2>STEP 2: Fit linear model and examine results</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>fit_wa_sex <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> age <span class="sc">+</span> sex, <span class="at">data =</span> b)</span>
-<span id="cb37-2"><a href="#cb37-2"></a>b_wa_sex <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_ws, <span class="at">data =</span> b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>fit_wa_sex <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> age <span class="sc">+</span> sex, <span class="at">data =</span> b)</span>
+<span id="cb34-2"><a href="#cb34-2"></a>b_wa_sex <span class="ot">&lt;-</span> <span class="fu">augment</span>(fit_ws, <span class="at">data =</span> b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell fragment">
 
 </div>
 <p>Fit summary:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a><span class="fu">glance</span>(fit_wa_sex) <span class="sc">|&gt;</span></span>
-<span id="cb38-2"><a href="#cb38-2"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
-<span id="cb38-3"><a href="#cb38-3"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span> r.squared<span class="sc">:</span>statistic, <span class="at">decimals =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a><span class="fu">glance</span>(fit_wa_sex) <span class="sc">|&gt;</span></span>
+<span id="cb35-2"><a href="#cb35-2"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb35-3"><a href="#cb35-3"></a>  <span class="fu">fmt_number</span>(<span class="at">columns =</span> r.squared<span class="sc">:</span>statistic, <span class="at">decimals =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell fragment">
 <div class="cell-output-display">
 
-<div id="jqjcylmvto" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#jqjcylmvto table {
+<div id="eqrhdzpjli" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#eqrhdzpjli table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#jqjcylmvto thead, #jqjcylmvto tbody, #jqjcylmvto tfoot, #jqjcylmvto tr, #jqjcylmvto td, #jqjcylmvto th {
+#eqrhdzpjli thead, #eqrhdzpjli tbody, #eqrhdzpjli tfoot, #eqrhdzpjli tr, #eqrhdzpjli td, #eqrhdzpjli th {
   border-style: none;
 }
 
-#jqjcylmvto p {
+#eqrhdzpjli p {
   margin: 0;
   padding: 0;
 }
 
-#jqjcylmvto .gt_table {
+#eqrhdzpjli .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -5803,12 +5836,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#jqjcylmvto .gt_caption {
+#eqrhdzpjli .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#jqjcylmvto .gt_title {
+#eqrhdzpjli .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -5820,7 +5853,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#jqjcylmvto .gt_subtitle {
+#eqrhdzpjli .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -5832,7 +5865,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#jqjcylmvto .gt_heading {
+#eqrhdzpjli .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -5844,13 +5877,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#jqjcylmvto .gt_bottom_border {
+#eqrhdzpjli .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#jqjcylmvto .gt_col_headings {
+#eqrhdzpjli .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -5865,7 +5898,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#jqjcylmvto .gt_col_heading {
+#eqrhdzpjli .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -5885,7 +5918,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#jqjcylmvto .gt_column_spanner_outer {
+#eqrhdzpjli .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -5897,15 +5930,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#jqjcylmvto .gt_column_spanner_outer:first-child {
+#eqrhdzpjli .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#jqjcylmvto .gt_column_spanner_outer:last-child {
+#eqrhdzpjli .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#jqjcylmvto .gt_column_spanner {
+#eqrhdzpjli .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -5917,11 +5950,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#jqjcylmvto .gt_spanner_row {
+#eqrhdzpjli .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#jqjcylmvto .gt_group_heading {
+#eqrhdzpjli .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -5947,7 +5980,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#jqjcylmvto .gt_empty_group_heading {
+#eqrhdzpjli .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -5962,15 +5995,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#jqjcylmvto .gt_from_md > :first-child {
+#eqrhdzpjli .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#jqjcylmvto .gt_from_md > :last-child {
+#eqrhdzpjli .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#jqjcylmvto .gt_row {
+#eqrhdzpjli .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -5989,7 +6022,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#jqjcylmvto .gt_stub {
+#eqrhdzpjli .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -6002,7 +6035,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#jqjcylmvto .gt_stub_row_group {
+#eqrhdzpjli .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -6016,15 +6049,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#jqjcylmvto .gt_row_group_first td {
+#eqrhdzpjli .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#jqjcylmvto .gt_row_group_first th {
+#eqrhdzpjli .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#jqjcylmvto .gt_summary_row {
+#eqrhdzpjli .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -6034,16 +6067,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#jqjcylmvto .gt_first_summary_row {
+#eqrhdzpjli .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#jqjcylmvto .gt_first_summary_row.thick {
+#eqrhdzpjli .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#jqjcylmvto .gt_last_summary_row {
+#eqrhdzpjli .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -6053,7 +6086,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#jqjcylmvto .gt_grand_summary_row {
+#eqrhdzpjli .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -6063,7 +6096,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#jqjcylmvto .gt_first_grand_summary_row {
+#eqrhdzpjli .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -6073,7 +6106,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#jqjcylmvto .gt_last_grand_summary_row_top {
+#eqrhdzpjli .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -6083,11 +6116,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#jqjcylmvto .gt_striped {
+#eqrhdzpjli .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#jqjcylmvto .gt_table_body {
+#eqrhdzpjli .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -6096,7 +6129,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#jqjcylmvto .gt_footnotes {
+#eqrhdzpjli .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -6110,7 +6143,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#jqjcylmvto .gt_footnote {
+#eqrhdzpjli .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -6119,7 +6152,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#jqjcylmvto .gt_sourcenotes {
+#eqrhdzpjli .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -6133,7 +6166,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#jqjcylmvto .gt_sourcenote {
+#eqrhdzpjli .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -6141,63 +6174,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#jqjcylmvto .gt_left {
+#eqrhdzpjli .gt_left {
   text-align: left;
 }
 
-#jqjcylmvto .gt_center {
+#eqrhdzpjli .gt_center {
   text-align: center;
 }
 
-#jqjcylmvto .gt_right {
+#eqrhdzpjli .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#jqjcylmvto .gt_font_normal {
+#eqrhdzpjli .gt_font_normal {
   font-weight: normal;
 }
 
-#jqjcylmvto .gt_font_bold {
+#eqrhdzpjli .gt_font_bold {
   font-weight: bold;
 }
 
-#jqjcylmvto .gt_font_italic {
+#eqrhdzpjli .gt_font_italic {
   font-style: italic;
 }
 
-#jqjcylmvto .gt_super {
+#eqrhdzpjli .gt_super {
   font-size: 65%;
 }
 
-#jqjcylmvto .gt_footnote_marks {
+#eqrhdzpjli .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#jqjcylmvto .gt_asterisk {
+#eqrhdzpjli .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#jqjcylmvto .gt_indent_1 {
+#eqrhdzpjli .gt_indent_1 {
   text-indent: 5px;
 }
 
-#jqjcylmvto .gt_indent_2 {
+#eqrhdzpjli .gt_indent_2 {
   text-indent: 10px;
 }
 
-#jqjcylmvto .gt_indent_3 {
+#eqrhdzpjli .gt_indent_3 {
   text-indent: 15px;
 }
 
-#jqjcylmvto .gt_indent_4 {
+#eqrhdzpjli .gt_indent_4 {
   text-indent: 20px;
 }
 
-#jqjcylmvto .gt_indent_5 {
+#eqrhdzpjli .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -6241,8 +6274,8 @@ Neelanjan Mukherjee
 </div>
 <p>Compare to traditional:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a><span class="fu">aov</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> age <span class="sc">+</span> sex, <span class="at">data =</span> b) <span class="sc">%&gt;%</span></span>
-<span id="cb39-2"><a href="#cb39-2"></a>  <span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a><span class="fu">aov</span>(<span class="at">formula =</span> weight <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> age <span class="sc">+</span> sex, <span class="at">data =</span> b) <span class="sc">%&gt;%</span></span>
+<span id="cb36-2"><a href="#cb36-2"></a>  <span class="fu">glance</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell fragment">
 <div class="cell-output cell-output-stdout">
@@ -6477,6 +6510,44 @@ Neelanjan Mukherjee
         ]
       });
     </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
       const toggleBodyColorMode = (bsSheetEl) => {
