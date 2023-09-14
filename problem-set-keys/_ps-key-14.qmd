@@ -1,0 +1,239 @@
+---
+title: "Problem Set Stats Bootcamp - class 12"
+subtitle: "Hypothesis Testing"
+author: "Neelanjan Mukherjee"
+editor: visual
+---
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(gt)
+library(janitor)
+library(here)
+```
+
+```{r}
+biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+  janitor::clean_names()
+
+# simplify names a bit more
+colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
+
+# we are going to simplify this a bit and only keep some columns
+keep <- colnames(biochem)[c(1,6,9,14,15,24:28)]
+biochem <- biochem[,keep]
+
+# get weights for each individual mouse
+# careful: did not come with column names
+weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
+
+# add column names
+colnames(weight) <- c("subject_name","weight")
+
+# add weight to biochem table and get rid of NAs
+# rename gender to sex
+b <- inner_join(biochem, weight, by="subject_name") |> 
+  na.omit() |>
+  rename(sex=gender)
+
+
+```
+
+## Problem \# 1
+
+Can mouse sex explain mouse weight? {.smaller}
+
+## STEP 1: Null hypothesis and variable specification
+
+$\mathcal{H}_0:$ mouse $sex$ does NOT explain $cholesterol$
+
+> $cholesterol$ is the response variable
+
+> $sex$ is the explanatory variable
+
+
+## STEP 2: Fit linear model and examine results {.smaller}
+
+```{r}
+#| echo: true
+
+fit_cs <- lm(formula = tot_cholesterol ~ 1 + sex , data = b)
+```
+
+Fit summary:
+
+```{r, echo=FALSE}
+#| echo: true
+#| output-location: column-fragment
+glance(fit_cs) |>
+  gt() |>
+  fmt_number(columns = r.squared:statistic, decimals = 3)
+
+```
+
+Coefficient summary:
+
+```{r, echo=FALSE}
+#| echo: true
+#| output-location: column-fragment
+tidy(fit_cs) |>
+  gt() |>
+  fmt_number(columns =estimate:statistic, decimals = 3)
+  
+
+```
+
+## Collecting residuals and other information {.smaller}
+
+add residuals and other information
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+
+#augment
+b_cs <- augment(fit_cs, data = b)
+
+
+avg_c <- mean(b_cs$tot_cholesterol )
+
+c <- b |>
+  group_by(sex) |>
+  get_summary_stats(tot_cholesterol, type = "mean")
+
+
+# mean chol female
+avg_cf <- pull(c[1,4] )
+
+
+# mean chol male
+avg_cm <- pull(c[2,4] )
+
+```
+
+## STEP 4: Visualize the error around fit {.smaller}
+
+```{r, echo=FALSE}
+#| echo: true
+#| output-location: column-fragment
+
+
+# plot of data with mean and colored by residuals
+p_cs <- ggplot(b_cs,
+               aes(x = sex, y = tot_cholesterol)) +
+  geom_point(position = position_jitter(),
+             aes(color = .resid)) +
+  scale_color_gradient2(low = "blue",
+                        mid = "black",
+                        high = "yellow") +
+    geom_hline(yintercept = avg_c,
+               color = "darkgrey") +
+  geom_segment(aes(x=.5, xend=1.5,
+                   y=avg_cf, yend=avg_cf),
+               color="red") +
+    geom_segment(aes(x=1.5, xend=2.5,
+                     y=avg_cm), yend=avg_cm,
+                 color="red") +
+  theme_cowplot()
+  
+p_cs 
+```
+
+## STEP 3: Visualize the error around the null (mean weight) {.smaller}
+
+```{r, echo=FALSE}
+#| echo: true
+#| output-location: column-fragment
+
+p_c <- ggplot(b_cs,
+               aes(x = sex, y = tot_cholesterol)) +
+  geom_point(position = position_jitter(),
+             aes(color = tot_cholesterol-avg_c)) +
+  scale_color_gradient2(low = "blue",
+                        mid = "black",
+                        high = "yellow") +
+    geom_hline(yintercept = avg_c,
+               color = "darkgrey") +
+  theme_cowplot()
+  
+p_c
+```
+
+## Plot the fit error and the null error as 2 panels {.smaller}
+
+```{r}
+#| echo: true
+
+plot_grid(p_cs, p_c, ncol = 2, labels = c("cholesterol by sex","cholesterol"))
+
+```
+
+
+
+## Calculate $R^2$ {.smaller}
+
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ss_fit <- sum(b_cs$.resid^2)
+
+ss_null <- sum(
+  (b_cs$tot_cholesterol - avg_c)^2) 
+
+```
+
+$R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+rsq <- 1- ss_fit/ss_null
+rsq
+```
+
+check agains Rsq in your fit
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+glance(fit_cs) |> select(r.squared)
+```
+
+
+## Compare to traditional t-test {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+# run analagous t-test
+b |> 
+  t_test(tot_cholesterol ~ 1 + sex) |>
+  select(-c(n1,n2,df)) |>
+  gt()
+
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+tidy(fit_cs) |>
+  select(term, estimate, statistic, p.value) |>
+  gt()
+
+```
+
+## Provide your interpreation of the result
+
+
+The null model that mouse $sex$ does NOT explain $cholesterol$ is not well supported. Therefore, i believe that mouse $sex$ is able to explain ~%18 of the variation in $cholesterol$.
+
+
+
