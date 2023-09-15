@@ -21,13 +21,15 @@ transcription start site (TSS), where all the action seems to be happening:
 
 ```{r}
 #| label: load-libs
+#| message: false
 library(tidyverse)
-library(valr)
 library(here)
+library(cowplot)
 
 # `glue` is a handy library for plot annotations
 library(glue)
 
+library(valr)
 library(ComplexHeatmap)
 ```
 
@@ -128,7 +130,7 @@ point (`bed_slop()`) and then break those windows into evenly spaced segments
 #| label: create-tss-windows
 tss_win_tbl <-
   yeast_tss |>
-  bed_slop(genome, both = side_size) |>
+  bed_slop(genome, both = region_size_half) |>
   bed_makewindows(win_size = win_size) |>
   mutate(
     win_coord = case_when(
