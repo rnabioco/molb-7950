@@ -1,0 +1,166 @@
+---
+title: "Mapping chromatin structure and transactions"
+author: "Jay Hesselberth"
+---
+
+# Gene regulation by chromatin
+
+## Chromatin structure
+
+## DNA accessibility drives all biochemical transactions on the genome
+
+-   Transcription Initiation
+-   Transcription Elongation
+-   DNA Repair
+-   Initiation of DNA Replication
+-   Recombination
+-   Viral Integration
+
+## Structure of the nucleosome
+
+## Mapping & measurement are first steps toward understanding. {.smaller}
+
+::: columns
+::: {.column width="60%"}
+Before genome-wide DNA accessibility measurements, we knew about chromatin transactions at only a handful of loci.
+
+This was a classic "keys under the lamppost" situation, leading to general models of chromatin-based gene regulation.
+:::
+
+::: {.column width="40%"}
+![](../img/block-dna/street-lamp.jpg){width="100%"}
+:::
+:::
+
+::: aside
+Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on [Unsplash](https://unsplash.com/photos/PvQtCNm4teI?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText)
+:::
+
+## Using micrococcal nuclease to map chromatin
+
+-   Micrococcal nuclease is an endo/exonuclease from *Staphylococcus aureus*
+-   Efficient, **multiple turnover** enzyme that digests accessible DNA (& RNA)
+-   Dependent on calcium (Ca2+)
+
+![](../img/block-dna/mnase-overview.png){fig-align="center"}
+
+## Using ATAC to map chromatin
+
+-   Tn5 transposase catalyzes "cut-and-paste" insertion of DNA into a target
+-   In ATAC ("Assay for Transposase-Accessible Chromatin"), the transposase enzymes are loaded with DNA sequencing adaptors (blue and red in the image), so the products of transposition are ready to PCR.
+-   **Single turnover enzyme** that acts on accessible DNA.
+
+![](../img/block-dna/atac-explain.png){fig-align="center"}
+
+## **Chromatin mapping experimental summary** {.smaller}
+
+|                           |                     DNase-seq                     |                                                       ATAC-seq                                                        |             MNase-seq              |
+|------------------|:----------------:|:----------------:|:-----------------:|
+| **Genome representation** |                Most active regions                |                                                  Most active regions                                                  |            Whole genome            |
+| **Ease of experiment**    |                  Very difficult                   |                                                      Easy peasy                                                       |           One day's work           |
+| **What is profiled?**     | Accessible DNA, "footprints" at low cut frequency | Accessible DNA. Not really "footprints" (see Tn5 structure), single turnover enzyme, so fragments are not informative | Protections of TFs and nucleosomes |
+
+# Experimental details
+
+## 
+
+![](../img/block-dna/footprinting-exp-overview.png)
+
+## 
+
+![](../img/block-dna/atac-input-comparison.png)
+
+# Analysis details
+
+## Experimental workflow {.smaller}
+
+```{mermaid}
+%%{init: {"flowchart": { "useMaxWidth": true, "htmlLabels": false}} }%%
+flowchart LR
+
+  EXP[ATAC/MNase/DNase-seq experiment]:::exp
+  
+  %% files %%
+  FQ["Sequencing reads (FASTQ)"]:::file
+  FAREF("Reference genome (FASTA)"):::file
+  BAM["Alignment (BAM)"]:::file 
+  BEDFRAG["Fragment coordinates (BED)"]:::file
+  BEDPEAK("Peak coordinates (BED)"):::file
+  FAPEAK("Peak sequences"):::file
+  WIG("`**Genome coverage**
+  (WIG/bedGraph)`"):::file
+  META("`Metaplots
+  (R & Bioconductor)`"):::file
+  MTX("`Count matrix
+  relative to sites`"):::file
+  ANN("`**Annotations**
+  TSS, exons, etc.`"):::file
+ 
+  %% software %% 
+  ALN("`**Read alignment**
+  (Bowtie2 / BWA)`"):::sw
+  PEAKCALL("`**Peak calling** (MACS2)`"):::sw
+  MOTIFS("` **Motif discovery**
+  Sites with specific motif
+  (MEME & FIMO)`"):::sw
+  BEDTOOLS("`BEDtools`"):::sw
+  %% BROWSE("`**Genome browser** %%
+  %% (UCSC or IGV)`"):::sw %%
+ 
+  %% alignment %% 
+  subgraph Sequence Alignment [alignment]
+    direction TB
+    FQ --> ALN
+    FAREF --> ALN
+  end
+  
+  subgraph Process Alignment [process]
+    direction TB
+    ALN --> BAM
+    BAM --> BEDFRAG
+    BEDFRAG --> BEDTOOLS --> WIG
+  end
+  
+  subgraph Meta-Analysis [meta]
+    direction TB
+    %% WIG --> BROWSE %%
+    MTX --> META
+    WIG --> META
+    ANN --> META
+  end
+ 
+  subgraph Call Peaks [peaks]
+    direction TB
+    BEDFRAG --> PEAKCALL
+    PEAKCALL --> BEDPEAK
+    BEDPEAK --> FAPEAK
+    FAPEAK --> MOTIFS 
+  end
+
+  EXP --> alignment --> process --> peaks 
+  
+  click WIG href "https://genome.ucsc.edu/goldenPath/help/bedgraph.html"
+  click BROWSE href "https://software.broadinstitute.org/software/igv/"
+  click ALN href "https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml"
+  click BEDTOOLS href "https://bedtools.readthedocs.io/en/latest/"
+  click PEAKCALL href "https://macs3-project.github.io/MACS/"
+  click MOTIFS href "https://meme-suite.org/meme/"
+  
+  classDef default fill:#ddd,stroke:#333,stroke-width:1px;
+  classDef exp fill:#3bf
+  classDef file fill:#fc7
+  classDef sw fill:#7ec
+```
+
+# Data structures and tools used for analysis of chromatin mapping experiments
+
+## Data structures
+
+- BED format -- 
+- wig / bedGraph --
+- bigWig  --
+
+
+## Interval analysis
+
+The primary tool in the 
