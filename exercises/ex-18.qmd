@@ -43,7 +43,7 @@ yeast_tss <- read_bed(
   n_fields = 6
 )
 
-genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
+genome <- read_genome("https://hgdownload.soe.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.chrom.sizes")
 ```
 
 ### Load signals
@@ -78,7 +78,7 @@ acc_tbl <-
 ### Setting up regions for a meta-plot
 
 Next, we need to set up some windows for analyzing signal relative to each TSS.
-This is an important step that will eventually impact our conclusions.
+This is an important step that will ultimately impact our interpretations.
 
 In genomic meta-plots, you first decide on a window size relevant to the you are
 measuring, and then make "windows" around a reference point, spanning some
@@ -87,10 +87,10 @@ we also need to take strand into account.
 
 Reference points could be:
 
--   transcription start or end sites
--   boundaries of exons and introns
--   known enhancers
--   centromeres and telomeres
+- transcription start or end sites
+- boundaries of exons and introns
+- known enhancers
+- centromeres and telomeres
 
 The state of genome annotation directly influences the quality of the meta-plot
 or heatmap.
@@ -158,11 +158,11 @@ acc_tbl <-
   )
 ```
 
-Once we have the values from `bed_map()`, we can group by the `win_coord` and
+Once we have the values from `bed_map()`, we can group by `win_coord` and
 calculate a summary statistic for each window.
 
-Remember that the window positions are the same relative to TSSs, so these
-numbers represent a composite signal across all TSS.
+Remember that `win_coord` is the same relative position for each TSS, so these
+numbers represent a composite signal a the same position across all TSS.
 
 ```{r}
 #| label: calc-win-stats
@@ -214,9 +214,21 @@ ggplot(
   )
 ```
 
+## Interpreting the meta-plots 
+
+- What is the direction of transcription in these meta-plots?
+
+- What are the features of chromatin near TSS measured by these different experimental conditions?
+
+- How do you interpret the increased signal of the +1 nucleosome in the "MNase_Long" condition, relative to e.g. -1, +2, +3, etc.?
+
+- What are the differences in ATAC and MNase treatments that lead to these distinctive patterns?
+
 ## Heatmap of signals around TSSs
 
-First, we need to reformat our data slightly. Take a look at `acc_tbl` and think about how you might reorganize the following way:
+To generate a heatmap, we need to reformat our data slightly.
+
+Take a look at `acc_tbl` and think about how you might reorganize the following way:
 
 - rows contain the data for individual loci (i.e., each TSS)
 - columns are ordered positions relative to the TSS (i.e., most upstream to most downstream)
@@ -234,7 +246,10 @@ Or, using dplyr / tidyr:
 ```{r}
 #| label: heatmap-data-tidy
 #| eval: false
-mnase_tbl <- filter(acc_tbl, sample_type == "MNase_Long") |>
+mnase_tbl <- filter(
+  acc_tbl,
+  sample_type == "MNase_Long"
+  ) |>
   select(-big_wig) |>
   unnest(cols = c(tss_win_sum))
 ```
