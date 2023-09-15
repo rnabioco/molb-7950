@@ -18,42 +18,32 @@ Assume that the height [jackalopes](https://www.youtube.com/watch?v=VkUi4qdZStQ)
 1.  Simulate a normal distribution of `1000` jackalope heights using the `mean` and `sd` you painstakingly measured.
 
 ```{r}
-
-
-j <- tibble(height=rnorm(n = 1000, mean = 97, sd = 10))
-
-
+j <- tibble(height = rnorm(n = 1000, mean = 97, sd = 10))
 ```
 
 2.  Plot the density of the jackalope height distribution. Indicate with a vertical line the height of the jackalope your friend measured.
 
 ```{r}
-
-ggplot(data = j, 
-       aes(x=height)
-       ) +
+ggplot(
+  data = j,
+  aes(x = height)
+) +
   geom_density() +
   geom_vline(xintercept = 75) +
-  theme_cowplot() 
-
-
+  theme_cowplot()
 ```
 
 3.  Calculate the probability of a jackalope being 75 cm or shorter.
 
 ```{r}
-
 pnorm(75, mean = 97, sd = 10, lower.tail = T)
-
 ```
 
 3.  Are jackalope heights normally distributed?
 
 ```{r}
-
 j |>
   shapiro_test(height)
-
 ```
 
 ## Explore coin flip distribution characteristics
@@ -78,55 +68,54 @@ In class, we simulated coin flip experiments using two different coins that were
 # rbinom(n = 8, size = 12, prob = .5)/12
 
 fair5 <- tibble(
-  r10=rbinom(n = 5, size = 10, prob = .5)/10,
-  r100=rbinom(n = 5, size = 100, prob = .5)/100,
-  type=rep("fair5")
-  )
+  r10 = rbinom(n = 5, size = 10, prob = .5) / 10,
+  r100 = rbinom(n = 5, size = 100, prob = .5) / 100,
+  type = rep("fair5")
+)
 
 
 fair500 <- tibble(
-  r10=rbinom(n = 500, size = 10, prob = .5)/10,
-  r100=rbinom(n = 500, size = 100, prob = .5)/100,
-  type=rep("fair500")
-  ) 
+  r10 = rbinom(n = 500, size = 10, prob = .5) / 10,
+  r100 = rbinom(n = 500, size = 100, prob = .5) / 100,
+  type = rep("fair500")
+)
 
 
 unfair5 <- tibble(
-  r10=rbinom(n = 5, size = 10, prob = .9)/10,
-  r100=rbinom(n = 5, size = 100, prob = .9)/100,
-  type=rep("unfair5")
-  )
+  r10 = rbinom(n = 5, size = 10, prob = .9) / 10,
+  r100 = rbinom(n = 5, size = 100, prob = .9) / 100,
+  type = rep("unfair5")
+)
 
 unfair500 <- tibble(
-  r10=rbinom(n = 500, size = 10, prob = .9)/10,
-  r100=rbinom(n = 500, size = 100, prob = .9)/100,
-  type=rep("unfair500")
-  )
+  r10 = rbinom(n = 500, size = 10, prob = .9) / 10,
+  r100 = rbinom(n = 500, size = 100, prob = .9) / 100,
+  type = rep("unfair500")
+)
 
 all <- bind_rows(fair5, fair500, unfair5, unfair500) |>
-  pivot_longer(cols = c("r10","r100"),
-             names_to = "r",
-             values_to = "f"
-             )
-
-
+  pivot_longer(
+    cols = c("r10", "r100"),
+    names_to = "r",
+    values_to = "f"
+  )
 ```
 
 2.  Plot your result using `faceting`. I recommend `faceting` by `numFlips` (like in class describing both the number and fair v unfair) . Include the observed mean as a black diamond and the true mean as a dashed line.
 
 ```{r plot}
-
-ggplot(all , aes(x=r, y=f, color=r)) +
+ggplot(all, aes(x = r, y = f, color = r)) +
   geom_jitter() +
-  stat_summary(fun.y=mean, geom="point",
-               shape=18,
-               size=3, color="black") +
-  ylim(-0.05,1.05) +
-   facet_grid(~type) +
+  stat_summary(
+    fun.y = mean, geom = "point",
+    shape = 18,
+    size = 3, color = "black"
+  ) +
+  ylim(-0.05, 1.05) +
+  facet_grid(~type) +
   geom_hline(yintercept = .5, linetype = "dashed") +
   geom_hline(yintercept = .9, linetype = "dashed") +
   theme_cowplot()
-
 ```
 
 3\. Report the means and sd of each pair of `numFlips` and `numRounds`
@@ -135,10 +124,9 @@ ggplot(all , aes(x=r, y=f, color=r)) +
 #| echo: true
 #| output-location: slide
 
-all |> 
-  group_by(type,r) |>
-  get_summary_stats(show = c("mean","sd"))
-
+all |>
+  group_by(type, r) |>
+  get_summary_stats(show = c("mean", "sd"))
 ```
 
 4\. Describe in a few sentences how increasing `numFlips` and `numRounds` alters:The estimation of and spread around the true mean.

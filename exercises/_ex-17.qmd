@@ -53,7 +53,7 @@ First, load the ATAC-seq reads:
 #| output-location: column
 atac_tbl <- read_bed(
   here("data/block-dna/yeast_atac_chrII.bed.gz"),
-) 
+)
 atac_tbl
 ```
 
@@ -106,15 +106,15 @@ acc_tbl <-
 ggplot(
   acc_tbl,
   aes(x = end - start)
-  ) +
+) +
   geom_histogram(
     # single base-pair resolution
     binwidth = 1
-  ) + 
+  ) +
   facet_grid(
     rows = vars(type),
     scales = "free_y"
-    ) +
+  ) +
   xlim(30, 500) +
   labs(x = "fragment length (bp)") +
   theme_cowplot()
@@ -136,7 +136,7 @@ We'll use the base `hist` function to calculate the densities of the above histo
 #| label: fun-fragment-len
 #| echo: true
 fragment_len_hist <- function(tbl) {
-  frag_lens <- 
+  frag_lens <-
     mutate(
       tbl,
       frag_len = end - start
@@ -146,7 +146,7 @@ fragment_len_hist <- function(tbl) {
         frag_len <= 500
     ) |>
     pull(frag_len)
-  
+
   hist(
     frag_lens,
     breaks = seq(30, 500, 1),
@@ -169,7 +169,7 @@ atac_acf_tbl <-
     lag.max = 40,
     plot = FALSE
   ) |>
-    broom::tidy()
+  broom::tidy()
 
 atac_acf_tbl
 ```
@@ -185,7 +185,7 @@ plot_acf <- function(tbl, title) {
     geom_point(size = 2) +
     geom_line() +
     theme_minimal_grid() +
-    geom_vline(xintercept = c(10, 21), color = 'red') +
+    geom_vline(xintercept = c(10, 21), color = "red") +
     labs(title = title)
 }
 ```
@@ -274,8 +274,10 @@ Now, we can make a plot for this particular region of chrII:
 #| echo: true
 #| output-location: column
 plotTracks(
-  c(sgd_genes,
-    mnase_nuc_trk),
+  c(
+    sgd_genes,
+    mnase_nuc_trk
+  ),
   from = 530811,
   to = 540885,
   chromosome = "chrII",
@@ -324,8 +326,10 @@ Now, we just have to make a list of tracks to plot and Gviz takes care of the re
 #| echo: true
 #| output-location: column-fragment
 plotTracks(
-  c(sgd_genes,
-    track_info$data_track),
+  c(
+    sgd_genes,
+    track_info$data_track
+  ),
   from = 530811,
   to = 540885,
   chromosome = "chrII",

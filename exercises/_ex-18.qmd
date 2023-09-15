@@ -133,7 +133,7 @@ tss_win_tbl <-
   bed_makewindows(win_size = win_size) |>
   mutate(
     win_coord = case_when(
-      strand == "-" ~ rev(win_coords), 
+      strand == "-" ~ rev(win_coords),
       .default = win_coords
     ),
     .by = name
@@ -197,10 +197,10 @@ ggplot(
 ) +
   geom_line(size = 1, color = "red") +
   facet_wrap(
-    ~ sample_type,
+    ~sample_type,
     nrow = 2,
     scales = "free_y"
-    ) +
+  ) +
   theme_minimal_grid() +
   theme(
     axis.text.x = element_text(
@@ -241,7 +241,7 @@ to get these data.
 
 ```{r}
 #| label: heatmap-data-base
-mnase_tbl <- acc_tbl[acc_tbl$sample_type == "MNase_Short",]$tss_win_sum[[1]]
+mnase_tbl <- acc_tbl[acc_tbl$sample_type == "MNase_Short", ]$tss_win_sum[[1]]
 ```
 
 Or, using dplyr / tidyr:
@@ -252,7 +252,7 @@ Or, using dplyr / tidyr:
 mnase_tbl <- filter(
   acc_tbl,
   sample_type == "MNase_Long"
-  ) |>
+) |>
   select(-big_wig) |>
   unnest(cols = c(tss_win_sum))
 ```
@@ -266,11 +266,11 @@ mnase_tbl_wide <-
     name,
     win_coord,
     win_signal
-    ) |>
+  ) |>
   arrange(name, win_coord) |>
   replace_na(
     list(win_signal = 0)
-    ) |>
+  ) |>
   pivot_wider(
     id_cols = name,
     names_from = "win_coord",

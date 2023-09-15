@@ -22,23 +22,21 @@ biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.tx
 colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
 
 # we are going to simplify this a bit and only keep some columns
-keep <- colnames(biochem)[c(1,6,9,14,15,24:28)]
-biochem <- biochem[,keep]
+keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
+biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
 weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
 
 # add column names
-colnames(weight) <- c("subject_name","weight")
+colnames(weight) <- c("subject_name", "weight")
 
 # add weight to biochem table and get rid of NAs
 # rename gender to sex
-b <- inner_join(biochem, weight, by="subject_name") |> 
+b <- inner_join(biochem, weight, by = "subject_name") |>
   na.omit() |>
-  rename(sex=gender)
-
-
+  rename(sex = gender)
 ```
 
 ## Problem \# 1
@@ -58,7 +56,7 @@ $\mathcal{H}_0:$ mouse $sex$ does NOT explain $cholesterol$
 ```{r}
 #| echo: true
 
-fit_cs <- lm(formula = tot_cholesterol ~ 1 + sex , data = b)
+fit_cs <- lm(formula = tot_cholesterol ~ 1 + sex, data = b)
 ```
 
 Fit summary:
@@ -69,7 +67,6 @@ Fit summary:
 glance(fit_cs) |>
   gt() |>
   fmt_number(columns = r.squared:statistic, decimals = 3)
-
 ```
 
 Coefficient summary:
@@ -79,9 +76,7 @@ Coefficient summary:
 #| output-location: column-fragment
 tidy(fit_cs) |>
   gt() |>
-  fmt_number(columns =estimate:statistic, decimals = 3)
-  
-
+  fmt_number(columns = estimate:statistic, decimals = 3)
 ```
 
 ## Collecting residuals and other information {.smaller}
@@ -93,11 +88,11 @@ add residuals and other information
 #| output-location: column-fragment
 
 
-#augment
+# augment
 b_cs <- augment(fit_cs, data = b)
 
 
-avg_c <- mean(b_cs$tot_cholesterol )
+avg_c <- mean(b_cs$tot_cholesterol)
 
 c <- b |>
   group_by(sex) |>
@@ -105,12 +100,11 @@ c <- b |>
 
 
 # mean chol female
-avg_cf <- pull(c[1,4] )
+avg_cf <- pull(c[1, 4])
 
 
 # mean chol male
-avg_cm <- pull(c[2,4] )
-
+avg_cm <- pull(c[2, 4])
 ```
 
 ## STEP 4: Visualize the error around fit {.smaller}
@@ -121,24 +115,41 @@ avg_cm <- pull(c[2,4] )
 
 
 # plot of data with mean and colored by residuals
-p_cs <- ggplot(b_cs,
-               aes(x = sex, y = tot_cholesterol)) +
-  geom_point(position = position_jitter(),
-             aes(color = .resid)) +
-  scale_color_gradient2(low = "blue",
-                        mid = "black",
-                        high = "yellow") +
-    geom_hline(yintercept = avg_c,
-               color = "darkgrey") +
-  geom_segment(aes(x=.5, xend=1.5,
-                   y=avg_cf, yend=avg_cf),
-               color="red") +
-    geom_segment(aes(x=1.5, xend=2.5,
-                     y=avg_cm), yend=avg_cm,
-                 color="red") +
+p_cs <- ggplot(
+  b_cs,
+  aes(x = sex, y = tot_cholesterol)
+) +
+  geom_point(
+    position = position_jitter(),
+    aes(color = .resid)
+  ) +
+  scale_color_gradient2(
+    low = "blue",
+    mid = "black",
+    high = "yellow"
+  ) +
+  geom_hline(
+    yintercept = avg_c,
+    color = "darkgrey"
+  ) +
+  geom_segment(
+    aes(
+      x = .5, xend = 1.5,
+      y = avg_cf, yend = avg_cf
+    ),
+    color = "red"
+  ) +
+  geom_segment(
+    aes(
+      x = 1.5, xend = 2.5,
+      y = avg_cm
+    ),
+    yend = avg_cm,
+    color = "red"
+  ) +
   theme_cowplot()
-  
-p_cs 
+
+p_cs
 ```
 
 ## STEP 3: Visualize the error around the null (mean weight) {.smaller}
@@ -147,17 +158,25 @@ p_cs
 #| echo: true
 #| output-location: column-fragment
 
-p_c <- ggplot(b_cs,
-               aes(x = sex, y = tot_cholesterol)) +
-  geom_point(position = position_jitter(),
-             aes(color = tot_cholesterol-avg_c)) +
-  scale_color_gradient2(low = "blue",
-                        mid = "black",
-                        high = "yellow") +
-    geom_hline(yintercept = avg_c,
-               color = "darkgrey") +
+p_c <- ggplot(
+  b_cs,
+  aes(x = sex, y = tot_cholesterol)
+) +
+  geom_point(
+    position = position_jitter(),
+    aes(color = tot_cholesterol - avg_c)
+  ) +
+  scale_color_gradient2(
+    low = "blue",
+    mid = "black",
+    high = "yellow"
+  ) +
+  geom_hline(
+    yintercept = avg_c,
+    color = "darkgrey"
+  ) +
   theme_cowplot()
-  
+
 p_c
 ```
 
@@ -166,8 +185,7 @@ p_c
 ```{r}
 #| echo: true
 
-plot_grid(p_cs, p_c, ncol = 2, labels = c("cholesterol by sex","cholesterol"))
-
+plot_grid(p_cs, p_c, ncol = 2, labels = c("cholesterol by sex", "cholesterol"))
 ```
 
 ## Calculate $R^2$ {.smaller}
@@ -179,8 +197,8 @@ plot_grid(p_cs, p_c, ncol = 2, labels = c("cholesterol by sex","cholesterol"))
 ss_fit <- sum(b_cs$.resid^2)
 
 ss_null <- sum(
-  (b_cs$tot_cholesterol - avg_c)^2) 
-
+  (b_cs$tot_cholesterol - avg_c)^2
+)
 ```
 
 $R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
@@ -189,7 +207,7 @@ $R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
 #| echo: true
 #| output-location: column-fragment
 
-rsq <- 1- ss_fit/ss_null
+rsq <- 1 - ss_fit / ss_null
 rsq
 ```
 
@@ -209,11 +227,10 @@ glance(fit_cs) |> select(r.squared)
 #| output-location: column-fragment
 
 # run analagous t-test
-b |> 
+b |>
   t_test(tot_cholesterol ~ 1 + sex) |>
-  select(-c(n1,n2,df)) |>
+  select(-c(n1, n2, df)) |>
   gt()
-
 ```
 
 ```{r}
@@ -223,7 +240,6 @@ b |>
 tidy(fit_cs) |>
   select(term, estimate, statistic, p.value) |>
   gt()
-
 ```
 
 ## Provide your interpreation of the result

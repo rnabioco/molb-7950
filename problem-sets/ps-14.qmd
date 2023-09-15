@@ -22,23 +22,21 @@ biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.tx
 colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
 
 # we are going to simplify this a bit and only keep some columns
-keep <- colnames(biochem)[c(1,6,9,14,15,24:28)]
-biochem <- biochem[,keep]
+keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
+biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
 weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
 
 # add column names
-colnames(weight) <- c("subject_name","weight")
+colnames(weight) <- c("subject_name", "weight")
 
 # add weight to biochem table and get rid of NAs
 # rename gender to sex
-b <- inner_join(biochem, weight, by="subject_name") |> 
+b <- inner_join(biochem, weight, by = "subject_name") |>
   na.omit() |>
-  rename(sex=gender)
-
-
+  rename(sex = gender)
 ```
 
 ## Problem \# 1
@@ -57,8 +55,6 @@ $\mathcal{H}_0:$
 
 ```{r}
 #| echo: true
-
-
 ```
 
 Fit summary:
@@ -66,9 +62,6 @@ Fit summary:
 ```{r, echo=FALSE}
 #| echo: true
 #| output-location: column-fragment
-
-
-
 ```
 
 Coefficient summary:
@@ -76,10 +69,6 @@ Coefficient summary:
 ```{r, echo=FALSE}
 #| echo: true
 #| output-location: column-fragment
-
-
-  
-
 ```
 
 ## Collecting residuals and other information {.smaller}
@@ -89,10 +78,6 @@ add residuals and other information
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-
-
-
-
 ```
 
 ## STEP 4: Visualize the error around fit {.smaller}
@@ -103,7 +88,6 @@ add residuals and other information
 
 
 # plot of data with mean and colored by residuals
-
 ```
 
 ## STEP 3: Visualize the error around the null (mean weight) {.smaller}
@@ -111,16 +95,12 @@ add residuals and other information
 ```{r, echo=FALSE}
 #| echo: true
 #| output-location: column-fragment
-
-
 ```
 
 ## Plot the fit error and the null error as 2 panels {.smaller}
 
 ```{r}
 #| echo: true
-
-
 ```
 
 ## Calculate $R^2$ {.smaller}
@@ -128,9 +108,6 @@ add residuals and other information
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-
-
-
 ```
 
 $R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
@@ -138,7 +115,6 @@ $R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-
 ```
 
 check agains Rsq in your fit
@@ -146,8 +122,6 @@ check agains Rsq in your fit
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-
-
 ```
 
 ## Compare to traditional t-test {.smaller}
@@ -155,15 +129,11 @@ check agains Rsq in your fit
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-
-
 ```
 
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-
-
 ```
 
 ## Provide your interpreation of the result

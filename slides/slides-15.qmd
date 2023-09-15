@@ -17,7 +17,6 @@ library(ggpubr)
 library(gt)
 library(pheatmap)
 library(GeneOverlap)
-
 ```
 
 ## Learning objectives
@@ -94,7 +93,7 @@ For each ranked p-value, it is compared to the α calculated for its respective 
 #| eval: true
 #| output-location: slide
 
-rna <- read_csv(here("data/data_rna_protein.csv.gz")) |>select(iDUX4_pval)
+rna <- read_csv(here("data/data_rna_protein.csv.gz")) |> select(iDUX4_pval)
 
 
 rna$fdr <- p.adjust(p = rna$iDUX4_pval, method = "fdr", n = nrow(rna))
@@ -104,16 +103,14 @@ rna$BH <- p.adjust(p = rna$iDUX4_pval, method = "BH", n = nrow(rna))
 rna$bon <- p.adjust(p = rna$iDUX4_pval, method = "bonferroni", n = nrow(rna))
 
 
-rna_long <- rna |>pivot_longer(cols = iDUX4_pval:bon, names_to = "type") 
+rna_long <- rna |> pivot_longer(cols = iDUX4_pval:bon, names_to = "type")
 
 
 
-ggplot(data = rna_long, aes(x=value, fill = type)) +
+ggplot(data = rna_long, aes(x = value, fill = type)) +
   geom_histogram(bins = 50) +
   facet_wrap(~type) +
   theme_cowplot()
-
-
 ```
 
 ## Exploratory data analysis (EDA) {.smaller}
@@ -137,24 +134,22 @@ Is it normal-ish?
 #| eval: true
 #| output-location: column-fragment
 # get dux targets
-dux_targets <- read_csv(file = here("data","target_genes.csv.gz"))
+dux_targets <- read_csv(file = here("data", "target_genes.csv.gz"))
 
-d <- read_tsv(here("data","data_genelevel.tsv.gz")) |>
+d <- read_tsv(here("data", "data_genelevel.tsv.gz")) |>
   mutate(target = case_when(
     gene_symbol %in% dux_targets$hgnc_symbol ~ "target",
-    TRUE ~ "not_target")
-         ) |>
-  filter(gene_symbol!="ISCA1") |>
+    TRUE ~ "not_target"
+  )) |>
+  filter(gene_symbol != "ISCA1") |>
   drop_na()
 
 
 d |>
-  pivot_longer(cols = hour00_rep1:hour14_rep3) |> 
-  ggplot(aes(x=value, color=name)) +
+  pivot_longer(cols = hour00_rep1:hour14_rep3) |>
+  ggplot(aes(x = value, color = name)) +
   geom_density() +
   theme_cowplot()
-  
-
 ```
 
 . . .
@@ -171,12 +166,10 @@ We often transform data to make it closer to being normally-distributed. This al
 #| output-location: column-fragment
 
 d |>
-  pivot_longer(cols = hour00_rep1:hour14_rep3) |> 
-  ggplot(aes(x=log10(value), color=name)) +
+  pivot_longer(cols = hour00_rep1:hour14_rep3) |>
+  ggplot(aes(x = log10(value), color = name)) +
   geom_density() +
   theme_cowplot()
-  
-
 ```
 
 . . .
@@ -195,13 +188,10 @@ $log_{x}(0)$ is a common problem. One solution is to add a pseudocount. Since th
 #| output-location: column-fragment
 
 d |>
-  pivot_longer(cols = hour00_rep1:hour14_rep3) |> 
-  ggplot(aes(x=log10(value + 1), color=name)) +
+  pivot_longer(cols = hour00_rep1:hour14_rep3) |>
+  ggplot(aes(x = log10(value + 1), color = name)) +
   geom_density() +
   theme_cowplot()
-
-
-
 ```
 
 ## correlation analysis
@@ -214,9 +204,9 @@ prepare the data for analysis
 #| output-location: slide
 
 # pull counts
-x <-  d |>
-  select_if(is.numeric) |># keep only the numeric columns
-  mutate_all(funs(log2(1 + .))) |># log2 transform
+x <- d |>
+  select_if(is.numeric) |> # keep only the numeric columns
+  mutate_all(funs(log2(1 + .))) |> # log2 transform
   as.matrix() # matrix
 
 
@@ -229,11 +219,12 @@ x <- t(scale(t(x)))
 # pairwise pearson correlation
 p <- cor(x, method = "pearson")
 
-pheatmap(mat = p,
-         clustering_distance_rows = "euclidean",
-         clustering_distance_cols = "euclidean",
-         clustering_method = "ward.D2")
-
+pheatmap(
+  mat = p,
+  clustering_distance_rows = "euclidean",
+  clustering_distance_cols = "euclidean",
+  clustering_method = "ward.D2"
+)
 ```
 
 ## PCA
@@ -259,7 +250,6 @@ For more detailed explanations go [here](https://www.nature.com/articles/nbt0308
 pc <- prcomp(x)
 
 summary(pc) # summarize the PCs by variance
-
 ```
 
 ## PCA - prepare visualization
@@ -270,7 +260,7 @@ summary(pc) # summarize the PCs by variance
 #| output-location: slide
 
 # create a dataframe with the importance/explanation of variation for each PC
-pca_data_info <- summary(pc)$importance |>as.data.frame()
+pca_data_info <- summary(pc)$importance |> as.data.frame()
 
 pca_data_info <- round(x = pca_data_info, digits = 3)
 
@@ -278,23 +268,26 @@ pca_data_info <- round(x = pca_data_info, digits = 3)
 pca_plot_data <- pc$rotation %>%
   as.data.frame() %>%
   rownames_to_column(var = "ID") |>
-  separate(col = ID, into = c("time","rep"), sep = "_")
+  separate(col = ID, into = c("time", "rep"), sep = "_")
 
 # recode "rep"
 pca_plot_data$rep <- recode(pca_plot_data$rep,
-                            rep1 = "A",
-                            rep2 = "B",
-                            rep3 = "C")
+  rep1 = "A",
+  rep2 = "B",
+  rep3 = "C"
+)
 
 # gsub hour
-pca_plot_data$time <- gsub(pattern = "hour",
-                           replacement = "",
-                           x = pca_plot_data$time)
+pca_plot_data$time <- gsub(
+  pattern = "hour",
+  replacement = "",
+  x = pca_plot_data$time
+)
 
-ggplot(data = pca_plot_data, mapping = aes(x=PC1, y = PC2, color=time)) + 
+ggplot(data = pca_plot_data, mapping = aes(x = PC1, y = PC2, color = time)) +
   geom_point() +
-  xlab(paste("PC1, %",100 * pca_data_info["Proportion of Variance","PC1"])) +
-  ylab(paste("PC2, %",100 * pca_data_info["Proportion of Variance","PC2"])) + 
+  xlab(paste("PC1, %", 100 * pca_data_info["Proportion of Variance", "PC1"])) +
+  ylab(paste("PC2, %", 100 * pca_data_info["Proportion of Variance", "PC2"])) +
   ggtitle("PCA for DUX4 timecourse") +
   theme_cowplot()
 ```
@@ -375,16 +368,17 @@ We pick the cluster where that drop in total reaches diminishing returns -\> the
 #| output-location: slide
 
 set.seed(33)
-tmp <- pheatmap(mat = x,
-         clustering_distance_rows = "euclidean",
-         clustering_method = "ward.D2",
-         kmeans_k = 8,
-         cluster_cols = F,
-         scale = "none")
+tmp <- pheatmap(
+  mat = x,
+  clustering_distance_rows = "euclidean",
+  clustering_method = "ward.D2",
+  kmeans_k = 8,
+  cluster_cols = F,
+  scale = "none"
+)
 
 
 tmp$kmeans$tot.withinss
-
 ```
 
 ## Functions in R {.smaller}
@@ -398,13 +392,15 @@ tmp$kmeans$tot.withinss
 #| eval: true
 
 wss <- function(knum) {
-  ph <- pheatmap(mat = x,
-                 kmeans_k = knum,
-                 scale = "none",
-                 cluster_cols = F,
-                 clustering_distance_rows = "euclidean",
-                 clustering_method = "ward.D2",
-                 silent = T)
+  ph <- pheatmap(
+    mat = x,
+    kmeans_k = knum,
+    scale = "none",
+    cluster_cols = F,
+    clustering_distance_rows = "euclidean",
+    clustering_method = "ward.D2",
+    silent = T
+  )
   return(ph$kmeans$tot.withinss)
 }
 
@@ -418,12 +414,13 @@ wss(6)
 #| eval: true
 #| output-location: fragment
 
-tibble(wss=map_vec(2:15,wss),
-       k=2:15) %>%
-  ggplot(., aes(x=k, y=wss)) +
+tibble(
+  wss = map_vec(2:15, wss),
+  k = 2:15
+) %>%
+  ggplot(., aes(x = k, y = wss)) +
   geom_point() +
   theme_cowplot()
-
 ```
 
 ## Final clustering {.smaller}
@@ -434,21 +431,23 @@ tibble(wss=map_vec(2:15,wss),
 #| output-location: fragment
 
 set.seed(33)
-c <- pheatmap(mat = x,
-         clustering_distance_rows = "euclidean",
-         clustering_method = "ward.D2",
-         kmeans_k = 7,
-         cluster_cols = F,
-         scale = "none")
+c <- pheatmap(
+  mat = x,
+  clustering_distance_rows = "euclidean",
+  clustering_method = "ward.D2",
+  kmeans_k = 7,
+  cluster_cols = F,
+  scale = "none"
+)
 
-cg <- data.frame(Cluster=c$kmeans$cluster,
-                gene_symbol=names(c$kmeans$cluster)
-                )
+cg <- data.frame(
+  Cluster = c$kmeans$cluster,
+  gene_symbol = names(c$kmeans$cluster)
+)
 
-cd <- left_join(d, cg, by="gene_symbol") |>as_tibble()
+cd <- left_join(d, cg, by = "gene_symbol") |> as_tibble()
 
-write_tsv(cd,here("data","dux4_clustering_results.csv.gz"))
-
+write_tsv(cd, here("data", "dux4_clustering_results.csv.gz"))
 ```
 
 ## Which cluster(s) contains DUX4 targets? {.smaller}
@@ -468,8 +467,9 @@ clustList <- split(cd$gene_symbol, as.factor(cd$Cluster))
 
 # calculate all overlaps between lists
 gom.duxclust <- newGOM(duxList,
-                       clustList,
-                       genome.size = nrow(d))
+  clustList,
+  genome.size = nrow(d)
+)
 
 
 getMatrix(gom.duxclust, "pval") %>%
@@ -478,8 +478,6 @@ getMatrix(gom.duxclust, "pval") %>%
   rownames_to_column(var = "clust") |>
   as.tibble() |>
   arrange(target)
-
-
 ```
 
 ## Let's calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling {.smaller}

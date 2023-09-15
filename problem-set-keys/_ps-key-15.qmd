@@ -16,13 +16,13 @@ library(here)
 
 
 ```{r}
-ang <- read_csv("~/Downloads/edger.csv.gz") %>% 
-  clean_names() %>% 
+ang <- read_csv("~/Downloads/edger.csv.gz") %>%
+  clean_names() %>%
   filter(fdr < 0.05) %>%
   select(log_fc_time0_25:log_fc_time8) %>%
   as.matrix()
 
-colnames(ang) <- gsub(pattern = "log_fc_","",colnames(ang))
+colnames(ang) <- gsub(pattern = "log_fc_", "", colnames(ang))
 ```
 
 
@@ -35,7 +35,7 @@ Create hierarchical clustering heatmap of pairwise pearson correlation coefficie
 
 
 ```{r}
-#scale
+# scale
 ang <- t(scale(t(ang)))
 
 
@@ -43,10 +43,12 @@ ang <- t(scale(t(ang)))
 p_ang <- cor(ang, method = "pearson")
 
 # make heatmap
-pheatmap(mat = p_ang,
-         clustering_distance_rows = "euclidean",
-         clustering_distance_cols = "euclidean",
-         clustering_method = "ward.D2")
+pheatmap(
+  mat = p_ang,
+  clustering_distance_rows = "euclidean",
+  clustering_distance_cols = "euclidean",
+  clustering_method = "ward.D2"
+)
 ```
 
 Timepoints close to each other tend to correlate strongly with each other. The 4,6, and 8 hr time points are the most different from all others.
@@ -59,23 +61,22 @@ Perform PCA and visualize PC1 vs PC2.Provide 1-2 observations.
 pc_ang <- prcomp(p_ang)
 
 # gather info from summary
-pca_data_info <- summary(pc_ang)$importance |>as.data.frame()
+pca_data_info <- summary(pc_ang)$importance |> as.data.frame()
 
 pca_data_info <- round(x = pca_data_info, digits = 3)
 
 # we make a dataframe out of the rotations and will use this to plot
 pca_plot_data <- pc_ang$rotation %>%
   as.data.frame() %>%
-  rownames_to_column(var = "ID") 
+  rownames_to_column(var = "ID")
 
-#plot
-ggplot(data = pca_plot_data, mapping = aes(x=PC1, y = PC2, color=ID)) + 
+# plot
+ggplot(data = pca_plot_data, mapping = aes(x = PC1, y = PC2, color = ID)) +
   geom_point() +
-  xlab(paste("PC1, %",100 * pca_data_info["Proportion of Variance","PC1"])) +
-  ylab(paste("PC2, %",100 * pca_data_info["Proportion of Variance","PC2"])) + 
+  xlab(paste("PC1, %", 100 * pca_data_info["Proportion of Variance", "PC1"])) +
+  ylab(paste("PC2, %", 100 * pca_data_info["Proportion of Variance", "PC2"])) +
   ggtitle("PCA for angII timecourse") +
   theme_cowplot()
-
 ```
 
 There is a a circular patter that seems to correspond to the timepoints. Interestingly, 24 appears to group back with 0.25 indicating the system is resetting w/respect to RNA levels.
@@ -92,42 +93,42 @@ In order to do this, you will need to:
 
 ```{r}
 # read in data
-cd <- read_tsv(here("data","dux4_clustering_results.csv.gz"))
+cd <- read_tsv(here("data", "dux4_clustering_results.csv.gz"))
 
 # how many genes are in cluster 5?
-c5 <- cd |> 
-  filter(Cluster=="5") |>
+c5 <- cd |>
+  filter(Cluster == "5") |>
   nrow()
 
 # how many dux targets are in cluster 5?
-c5t <- cd |> 
-  filter(Cluster=="5" & target =="target") |>
+c5t <- cd |>
+  filter(Cluster == "5" & target == "target") |>
   nrow()
 
 
 sampled_targets <- vector()
 
 for (i in 1:1000) {
-sampled_targets[i] <- sample_n(tbl = cd, size = c5) %>%
-  group_by(target) %>%
-  tally() %>%
-  filter(target=="target") %>%
-  pull(n)
+  sampled_targets[i] <- sample_n(tbl = cd, size = c5) %>%
+    group_by(target) %>%
+    tally() %>%
+    filter(target == "target") %>%
+    pull(n)
 }
 
-n <- tibble(targets=sampled_targets,
-       type="null")
+n <- tibble(
+  targets = sampled_targets,
+  type = "null"
+)
 
 n |>
   arrange(-sampled_targets) |>
   top_n(10)
 
-ggplot(data = n, aes(x=targets)) +
+ggplot(data = n, aes(x = targets)) +
   geom_density() +
   geom_vline(xintercept = c5t, color = "red") +
   theme_cowplot()
-
-
 ```
 
 ### What is the p-value?
