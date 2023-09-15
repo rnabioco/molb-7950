@@ -1,9 +1,8 @@
 ---
 title: "Chromatin accessibility I"
+subtitle: "Chromatin-centric measurement of genomic features"
 author: "Jay Hesselberth"
 ---
-
-# DNA Accessibility
 
 ## Load the libraries 
 
@@ -23,6 +22,8 @@ library(patchwork)
 library(valr)
 library(Gviz)
 library(rtracklayer)
+
+library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 ```
 
 ## Load the data
@@ -232,23 +233,16 @@ First, we load the gene annotations from the [Saccharomyces Genome Databases](ht
 ```{r}
 #| echo: true
 #| output-location: column
+
 sgd_genes <-
-  UcscTrack(
-    genome = "sacCer1",
-    track = "sgdGene",
+  GeneRegionTrack(
+    TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,
     chromosome = "chrII",
     start = 530811,
     end = 540885,
-    trackType = "GeneRegionTrack",
-    gene = "name",
-    rstarts = "exonStarts",
-    rends = "exonEnds",
-    symbol = "name",
-    transcript = "name",
-    strand = "strand"
   )
 
-plotTracks(sgd_genes)
+sgd_genes
 ```
 
 Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using `rtracklayer::import.bw()`.
