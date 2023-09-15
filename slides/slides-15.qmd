@@ -1,0 +1,493 @@
+---
+title: "Stats Bootcamp - class 15"
+subtitle: "Dealing with big data"
+author: "Neelanjan Mukherjee"
+editor: visual
+---
+
+```{r}
+#| echo: false
+#| include: false
+library(here)
+library(tidyverse)
+library(rstatix)
+library(cowplot)
+library(janitor)
+library(ggpubr)
+library(gt)
+library(pheatmap)
+library(GeneOverlap)
+
+```
+
+## Learning objectives
+
+-   Types of error and multiple test corrections
+-   Exploratory data analysis
+-   Clustering and overlaps
+
+## Types I and II error
+
+False positives and False negatives
+
+![](https://www.scribbr.com/wp-content/uploads/2021/01/type-i-and-ii-error-2.png)
+
+$\alpha$ - significance level OR evidentiary standard
+
+$\beta$ - type II error rate, 1 - $\beta$ is power
+
+## Different visualization
+
+Power vs Significance
+
+![](https://www.scribbr.com/wp-content/uploads/2021/01/type-i-and-type-ii-error.png)
+
+## Genomics -\> Lots of Data -\> Lots of Hypothesis Tests
+
+In a typical RNA-seq experiment, we test \~10K different hypotheses. For example, you have 10K genes and for each gene you test whether the mean expression changed in condition A vs condition B. Using a standard p-value cut-off of 0.05, we'd expect **500 genes** to be deemed "significant" by chance. Thus, we are very concerned about **False Positives or Type I Errors**.
+
+## Multiple test corrections {.smaller}
+
+1.  Control overall α (also known as family-wise error rate or [FWER](https://en.wikipedia.org/wiki/Family-wise_error_rate)), which will affect the α\* for each test. That is, we are controlling the overall probability of making *at least one* false discovery. Bonferroni and Sidak corrections all control FWER.
+
+2.  Control [false discovery rate](https://en.wikipedia.org/wiki/False_discovery_rate) (FDR). These procedures allow for type 1 errors (false positives) but control the proportion of these false positives in relation to true positives. This is done by adjusting the decision made for the p-value associated with each individual test to decide rejection or not. Because this will result in a higher type 1 error rate, it has higher [power](https://en.wikipedia.org/wiki/Power_(statistics)). This affords a higher probability of *true discoveries.* The step procedures control for FDR.
+
+## Bonferroni Correction {.smaller}
+
+The most conservative of corrections, the Bonferroni correction is also perhaps the most straightforward in its approach. Simply divide α by the number of tests (*m*).
+
+> α = α/m
+
+However, with many tests, α will become very small. This reduces power, which means that we are very unlikely to make any true discoveries.
+
+### Sidak Correction
+
+> α = 1-(1-α)\^(1/*m*)
+
+## Holm's Step-Down Procedure {.smaller}
+
+The Holm-Bonferroni method is also fairly simple to calculate, but it is more powerful than the single-step Bonferroni.
+
+$HB = \displaystyle \frac {target \alpha}{n - rank + 1}$
+
+H1: 0.005\
+H2: 0.01\
+H3: 0.03\
+H4: = 0.04\
+
+Step 1: Order the p-values from smallest to greatest (already done)
+
+Step 2: Calc HB for the first rank HB = .05 / 4 -- 1 + 1 = .05 / 4 = .0125 H1: 0.005 \< .0125, so we reject the null
+
+Step 4: Repeat the HB formula for the second rank and keep going until we find $H{_N}$ \> $HB{_N}$. All subsequent hypotheses are non-significant (i.e. not rejected).
+
+## Hochberg's Step-Up Procedure {.smaller}
+
+More powerful than Holm's step-down procedure, Hochberg's step-up procedure also seeks to control the FDR and follows a similar process, only p-values are ranked from largest to smallest.
+
+For each ranked p-value, it is compared to the α calculated for its respective rank (same formula as Holm's procedure). Testing continues until you reach the first non-rejected hypothesis. You would then fail to reject all following hypotheses.
+
+## Example {.smaller}
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: slide
+
+rna <- read_csv(here("data/data_rna_protein.csv.gz")) |>select(iDUX4_pval)
+
+
+rna$fdr <- p.adjust(p = rna$iDUX4_pval, method = "fdr", n = nrow(rna))
+
+rna$BH <- p.adjust(p = rna$iDUX4_pval, method = "BH", n = nrow(rna))
+
+rna$bon <- p.adjust(p = rna$iDUX4_pval, method = "bonferroni", n = nrow(rna))
+
+
+rna_long <- rna |>pivot_longer(cols = iDUX4_pval:bon, names_to = "type") 
+
+
+
+ggplot(data = rna_long, aes(x=value, fill = type)) +
+  geom_histogram(bins = 50) +
+  facet_wrap(~type) +
+  theme_cowplot()
+
+
+```
+
+## Exploratory data analysis (EDA) {.smaller}
+
+Our goal here is to get an top-down big picture of the similarity/differences between variables in a dataset. For example, let's say you do RNA-seq in triplicate on 4 treatment/developmental times.
+
+### PCA
+
+We will perform PCA on all of the samples and visualize the relationship between samples.
+
+### Correlation matrix
+
+We will perform hierarchical clustering on a matrix representing the pairwise correlation between all these samples.
+
+## Explore data {.smaller}
+
+Is it normal-ish?
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+# get dux targets
+dux_targets <- read_csv(file = here("data","target_genes.csv.gz"))
+
+d <- read_tsv(here("data","data_genelevel.tsv.gz")) |>
+  mutate(target = case_when(
+    gene_symbol %in% dux_targets$hgnc_symbol ~ "target",
+    TRUE ~ "not_target")
+         ) |>
+  filter(gene_symbol!="ISCA1") |>
+  drop_na()
+
+
+d |>
+  pivot_longer(cols = hour00_rep1:hour14_rep3) |> 
+  ggplot(aes(x=value, color=name)) +
+  geom_density() +
+  theme_cowplot()
+  
+
+```
+
+. . .
+
+Definitely not normal
+
+## Data transformations {.smaller}
+
+We often transform data to make it closer to being normally-distributed. This allows us to use more powerful statistical tests on the same data. One approach is to log-transform the data.
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+
+d |>
+  pivot_longer(cols = hour00_rep1:hour14_rep3) |> 
+  ggplot(aes(x=log10(value), color=name)) +
+  geom_density() +
+  theme_cowplot()
+  
+
+```
+
+. . .
+
+What is this?
+
+> Warning message: Removed 1251 rows containing non-finite values (stat_density()).
+
+## Pseudocounts {.smaller}
+
+$log_{x}(0)$ is a common problem. One solution is to add a pseudocount. Since this is read count data, the smallest unit is 1 and so we will add 1 to all the observations before perforing the log transformation. $1$ represents the pseudocount in this case.
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+
+d |>
+  pivot_longer(cols = hour00_rep1:hour14_rep3) |> 
+  ggplot(aes(x=log10(value + 1), color=name)) +
+  geom_density() +
+  theme_cowplot()
+
+
+
+```
+
+## correlation analysis
+
+prepare the data for analysis
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: slide
+
+# pull counts
+x <-  d |>
+  select_if(is.numeric) |># keep only the numeric columns
+  mutate_all(funs(log2(1 + .))) |># log2 transform
+  as.matrix() # matrix
+
+
+rownames(x) <- d$gene_symbol
+
+
+x <- t(scale(t(x)))
+
+
+# pairwise pearson correlation
+p <- cor(x, method = "pearson")
+
+pheatmap(mat = p,
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "ward.D2")
+
+```
+
+## PCA
+
+PCA is a common dimensionality reduction method that is used to visualize the similarity and differences in your data.
+
+**Let's watch this fantastic 5 minute video explaining PCA**
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/HMOI_lkzW08" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+
+</iframe>
+
+For more detailed explanations go [here](https://www.nature.com/articles/nbt0308-303) and [here](https://liorpachter.wordpress.com/2014/05/26/what-is-principal-component-analysis/).
+
+## PCA
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: column-fragment
+
+# pairwise pearson correlation
+pc <- prcomp(x)
+
+summary(pc) # summarize the PCs by variance
+
+```
+
+## PCA - prepare visualization
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: slide
+
+# create a dataframe with the importance/explanation of variation for each PC
+pca_data_info <- summary(pc)$importance |>as.data.frame()
+
+pca_data_info <- round(x = pca_data_info, digits = 3)
+
+# we make a dataframe out of the rotations and will use this to plot
+pca_plot_data <- pc$rotation %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "ID") |>
+  separate(col = ID, into = c("time","rep"), sep = "_")
+
+# recode "rep"
+pca_plot_data$rep <- recode(pca_plot_data$rep,
+                            rep1 = "A",
+                            rep2 = "B",
+                            rep3 = "C")
+
+# gsub hour
+pca_plot_data$time <- gsub(pattern = "hour",
+                           replacement = "",
+                           x = pca_plot_data$time)
+
+ggplot(data = pca_plot_data, mapping = aes(x=PC1, y = PC2, color=time)) + 
+  geom_point() +
+  xlab(paste("PC1, %",100 * pca_data_info["Proportion of Variance","PC1"])) +
+  ylab(paste("PC2, %",100 * pca_data_info["Proportion of Variance","PC2"])) + 
+  ggtitle("PCA for DUX4 timecourse") +
+  theme_cowplot()
+```
+
+## Famous PCA example {.smaller}
+
+Using gene expression as your measurement, do you think the mouse liver is more similar to a mouse heart or a human liver?
+
+The Mouse ENCODE Consortium reported that comparative gene expression data from human and mouse tend to cluster more by species rather than by tissue.
+
+![](/img/bad_pca.jpg)
+
+[A comparative encyclopedia of DNA elements in the mouse genome](https://www.nature.com/articles/nature13992)
+
+[Comparison of the transcriptional landscapes between human and mouse tissues](https://www.pnas.org/doi/full/10.1073/pnas.1413624111)
+
+## Some found this hard to believe {.smaller}
+
+[Yoav Gilad's lab recapitulated the initial result:](https://f1000research.com/articles/4-121#ref-1)
+
+![](/img/redo_encode.jpg)
+
+This observation was surprising, as it contradicted much of the comparative gene regulatory data collected previously, as well as the common notion that major developmental pathways are highly conserved across a wide range of species, in particular across mammals.
+
+## Careful with batch effects {.smaller}
+
+But noticed something funny about which samples were sequenced on the same lanes.
+
+![](/img/batch.jpg)
+
+## Accounting for batch effects {.smaller}
+
+![](/img/fixencode.jpg)
+
+Here we show that the Mouse ENCODE gene expression data were collected using a flawed study design, which confounded sequencing batch (namely, the assignment of samples to sequencing flowcells and lanes) with species. When we account for the batch effect, the corrected comparative gene expression data from human and mouse tend to cluster by tissue, not by species.
+
+## K-means clustering to look for patterns {.smaller}
+
+Goal: to partition `n` observations into `k` clusters in which each observation belongs to the cluster with the nearest mean, serving as a prototype of the cluster. --Wiki
+
+**K-means** <iframe width="300" height="150" src="https://www.youtube.com/embed/4b5d3muPQmA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+## K-Means data preparation {.smaller}
+
+1.  Rows are observations (individuals) and columns are variables
+2.  Any missing value in the data must be removed or estimated.
+3.  The data must be standardized (i.e., scaled) to make variables comparable.
+
+## Scaling or z-score {.smaller}
+
+![](http://www.z-table.com/uploads/2/1/7/9/21795380/1426878678.png){%20}
+
+$x$ = observation\
+$\mu$ = population mean\
+$\sigma$ = population sd
+
+We will be using this function on each row. This will allow comparison of relative changes across a row, for all rows.
+
+## K-Means clustering
+
+1.  Computing k-means clustering in R (pheatmap)
+2.  Determine appropriate cluster number
+3.  Add new column with cluster number to initial data
+
+## How do we figure out the optimal \# clusters?
+
+There are many methods, but we will stick with the "elbow" method.
+
+K-means is minimizing the total within cluster sum of squares (wss).
+
+We pick the cluster where that drop in total reaches diminishing returns -\> the elbow.
+
+## Let's cluster once to see {.smaller}
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: slide
+
+set.seed(33)
+tmp <- pheatmap(mat = x,
+         clustering_distance_rows = "euclidean",
+         clustering_method = "ward.D2",
+         kmeans_k = 8,
+         cluster_cols = F,
+         scale = "none")
+
+
+tmp$kmeans$tot.withinss
+
+```
+
+## Functions in R {.smaller}
+
+![](https://www.learnbyexample.org/wp-content/uploads/r/r-function-syntax.png)
+
+## Create function to calculate wss {.smaller}
+
+```{r}
+#| echo: true
+#| eval: true
+
+wss <- function(knum) {
+  ph <- pheatmap(mat = x,
+                 kmeans_k = knum,
+                 scale = "none",
+                 cluster_cols = F,
+                 clustering_distance_rows = "euclidean",
+                 clustering_method = "ward.D2",
+                 silent = T)
+  return(ph$kmeans$tot.withinss)
+}
+
+wss(6)
+```
+
+## find the elbow {.smaller}
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: fragment
+
+tibble(wss=map_vec(2:15,wss),
+       k=2:15) %>%
+  ggplot(., aes(x=k, y=wss)) +
+  geom_point() +
+  theme_cowplot()
+
+```
+
+## Final clustering {.smaller}
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: fragment
+
+set.seed(33)
+c <- pheatmap(mat = x,
+         clustering_distance_rows = "euclidean",
+         clustering_method = "ward.D2",
+         kmeans_k = 7,
+         cluster_cols = F,
+         scale = "none")
+
+cg <- data.frame(Cluster=c$kmeans$cluster,
+                gene_symbol=names(c$kmeans$cluster)
+                )
+
+cd <- left_join(d, cg, by="gene_symbol") |>as_tibble()
+
+write_tsv(cd,here("data","dux4_clustering_results.csv.gz"))
+
+```
+
+## Which cluster(s) contains DUX4 targets? {.smaller}
+
+[Fisher's Exact Test and the Hypergeometric Distribution](https://www.youtube.com/watch?v=udyAvvaMjfM)
+
+```{r}
+#| echo: true
+#| eval: true
+#| output-location: slide
+
+# list of genes by dux4 targeting
+duxList <- split(cd$gene_symbol, cd$target)
+
+# list of genes by clustering
+clustList <- split(cd$gene_symbol, as.factor(cd$Cluster))
+
+# calculate all overlaps between lists
+gom.duxclust <- newGOM(duxList,
+                       clustList,
+                       genome.size = nrow(d))
+
+
+getMatrix(gom.duxclust, "pval") %>%
+  t() %>%
+  as.data.frame() |>
+  rownames_to_column(var = "clust") |>
+  as.tibble() |>
+  arrange(target)
+
+
+```
+
+## Let's calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling {.smaller}
+
+In order to do this, you will need to:
+
+1.  Identify which cluster is the most enriched for DUX4 targets.
+    -   Determine how many genes are in the cluster. You will need to know this to figure out how many genes to sample from the whole data set.
+    -   Determine how many of the genes in the cluster are DUX4 targets. This is the metric that you are interested in comparing between the null distribution and your observation.
+2.  Generate 1000 random sample of the proper size from all genes and find out how many of them are DUX4 targets.
+3.  Visualize the distribution of DUX4 targets in these 1000 random (your null distribution) and overlay the number of DUX4 targets you observed in the cluster that was most enriched for DUX4 targets.

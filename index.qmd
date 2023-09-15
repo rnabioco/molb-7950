@@ -46,40 +46,30 @@ sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
   ) |>
   arrange(date) |>
   mutate(
+    # set up dates / weeks
     class_num = str_pad(class_num, 2, "left", "0"),
     week = isoweek(date),
     week = week - min(week) + 1,
-    week = str_c("Week ", week)
-  ) |>
-  mutate(
+    week = str_c("Week ", week),
     across(
       c(block, topic, instructor, title),
       ~ replace_na(.x, "-")
-    )
-  ) |>
-  mutate(
+    ),
+    
+    # set up paths
     common_dir = path("content", str_to_lower(block), str_to_lower(topic)),
     prepare_html = path("prepare", glue("prepare-{class_num}.html")),
-    # page_html = path("pages", glue("class-{class_num}.html")),
     slides_html = path("slides", glue("slides-{class_num}.html")),
     ex_html = path("exercises", glue("ex-{class_num}.html")),
     hw_html = path("problem-sets", glue("ps-{class_num}.html")),
     hw_key_html = path("problem-set-keys", glue("ps-key-{class_num}.html")),
-  ) |>
-  mutate(
-    # prepare links
+    
+    # set up links
     prepare_link = case_when(
       qmd_exists(prepare_html) == TRUE ~ glue('[{emo::ji("book")}]({prepare_html})'),
       .default = ''
     ),
     prepare_link = map(prepare_link, gt::md),
-    # page links
-    # page_link = case_when(
-    #   qmd_exists(page_html) == TRUE ~ glue('[{emo::ji("page")}]({page_html})'),
-    #   .default = ''
-    # ),
-    # page_link = map(page_link, gt::md),
-    # slides links
     slides_link = case_when(
       qmd_exists(slides_html) == TRUE ~ glue('[{emo::ji("page")}]({slides_html})'),
       .default = ''

@@ -1,0 +1,721 @@
+---
+title: "Stats Bootcamp - class 12"
+subtitle: "Hypothesis testing"
+author: "Neelanjan Mukherjee"
+editor: visual
+---
+
+```{r}
+#| echo: false
+#| include: false
+library(here)
+library(tidyverse)
+library(rstatix)
+library(cowplot)
+library(palmerpenguins)
+library(janitor)
+library(ggpubr)
+library(gt)
+```
+
+## Learning objectives
+
+-   **Formulate** and **Execute** null hypothesis testing
+-   **Identify** and **Perform** the proper statistical test for data type/comparison
+-   **Calculate** and **Interpret** p-values
+
+## Hypothesis testing definitions {.smaller}
+
+**Hypothesis testing** is a statistical analysis that uses sample data to assess two mutually exclusive theories about the properties of a population. Statisticians call these theories the null hypothesis and the alternative hypothesis. A hypothesis test assesses your sample statistic and factors in an estimate of the sample error to determine which hypothesis the data support.
+
+When you can reject the null hypothesis, the results are statistically significant, and your data support the theory that an effect exists at the population level.
+
+## A legal analogy: Guilty or not guilty? {.smaller}
+
+The statistical concept of 'significant' vs. 'not significant' can be understood by comparing to the legal concept of 'guilty' vs. 'not guilty'.
+
+In the American legal system (and much of the world) a criminal defendant is presumed innocent until proven guilty. If the evidence proves the defendant guilty beyond a reasonable doubt, the verdict is 'guilty'. Otherwise the verdict is 'not guilty'. In some countries, this verdict is 'not proven', which is a better description. A 'not guilty' verdict does not mean the judge or jury concluded that the defendant is innocent \-- it just means that the evidence was not strong enough to persuade the judge or jury that the defendant was guilty.
+
+In statistical hypothesis testing, you start with the null hypothesis (usually that there is no difference between groups). If the evidence produces a small enough P value, you reject that null hypothesis, and conclude that the difference is real. If the P value is higher than your threshold (usually 0.05), you don't reject the null hypothesis. This doesn't mean the evidence convinced you that the treatment had no effect, only that the evidence was not persuasive enough to convince you that there is an effect.
+
+## Definitions {.smaller}
+
+**Effect** --- the difference between the population value and the null hypothesis value. The effect is also known as population effect or the difference. Typically, you do not know the size of the actual effect. However, you can use a hypothesis test to help you determine whether an effect exists and to estimate its size.
+
+**Null Hypothesis** or $\mathcal{H}_0$ --- one of two mutually exclusive theories about the properties of the population in hypothesis testing. Typically, the null hypothesis states that there is no effect (i.e., the effect size equals zero).
+
+**Alternative Hypothesis** or $\mathcal{H}_1$ --- the other theory about the properties of the population in hypothesis testing. Typically, the alternative hypothesis states that a population parameter does not equal the null hypothesis value. In other words, there is a non-zero effect. If your sample contains sufficient evidence, you can reject the null and favor the alternative hypothesis.
+
+## Definitions cont. {.smaller}
+
+**P-values** --- the probability of obtaining test results at least as extreme as the results actually observed, under the assumption that the null hypothesis is correct. Lower p-values represent stronger evidence against the null. P-values in conjunction with the significance level determines whether your data favor the null or alternative hypothesis.
+
+**Significance Level** or $a$ --- an evidentiary standard set before the study. It is the probability that you say there is an effect when there is no effect (the probability of rejecting the null hypothesis given that it is true). Lower significance levels indicate that you require stronger evidence before you will reject the null.It is usually set at or below .05.
+
+![](https://upload.wikimedia.org/wikipedia/commons/3/35/Guinness_Glass_2010.jpg){width="10%"}
+
+## Variables definitions
+
+## Random variables
+
+**Response Variable** ( **y** - aka dependent or outcome variable): this variable is predicted or its variation is explained by the explanatory variable. In an experiment, this is the outcome that is measured following manipulation of the explanatory variable.
+
+**Explanatory Variable** ( **x** - aka independent or predictor variable): explains variations in the response variable. In an experiment, it is manipulated by the researcher.
+
+## Null hypothesis testing
+
+1.  Examine and specify the variable(s)
+2.  Declare null hypothesis $\mathcal{H}_0$
+3.  Calculate test-statistic, exact p-value
+
+. . .
+
+calculating **empirical p-value** (alternative to 3):\
+Generate and visualize data reflecting null-distribution\
+Calculate the frequency of your observation vs all null distribution values\
+
+## Parametric vs Nonparametric tests
+
+**Parametric tests** are suitable for normally distributed data.
+
+**Nonparametric tests** are suitable for any continuous data. Though these tests have their own sets of assumption, you can think of Nonparametric tests as the **ranked versions of the corresponding parametric tests**.
+
+[More on choosing Parametric vs Non-Parametric](https://statisticsbyjim.com/hypothesis-testing/nonparametric-parametric-tests/)
+
+```{r, echo=FALSE}
+tibble("Info" = c("better descriptor", "# of samples (N)"), "Parametric" = c("mean", "many"), "Nonparametric" = c("median  ", "few")) |>
+  gt()
+```
+
+## Appropriate statistical test cheatsheet
+
+![](/img/stats_table.png)
+
+## Assumptions of many parametric tests
+
+1.  The data are randomly sampled (independent).
+2.  The distribution is approximately normal\*.
+    -   `shapiro_test()` [more info](https://www.itl.nist.gov/div898/software/dataplot/refman1/auxillar/wilkshap.htm)
+3.  There is homogeneity of variance (i.e., the variability of the data in each group is similar).
+    -   `levene_test()` [more info](https://www.itl.nist.gov/div898/handbook/eda/section3/eda35a.htm#:~:text=Equal%20variances%20across%20samples%20is,alternative%20to%20the%20Bartlett%20test.)
+
+. . .
+
+\*With many samples (\>20) then lack of normality assumption is not a concern due to the central limit theorem. AND `shapiro_test()` is too sensitive with large number of observations.
+
+## Two changes {.smaller}
+
+1.  We are going to use `ggpubr` rather than `ggplot2` - Don't tell Jay ;)
+
+-   It has great visualization for the stats on the plots.
+-   Different syntax!!
+    -   **must use double quotes around "variable names"**
+
+2.  Due to reviewer #3, we will pivot to a more "physiologically relevant" data set `biochem` that consists of mouse measurements.
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+  janitor::clean_names() |>
+  colnames()
+```
+
+## Prepare mouse biochem data {.smaller}
+
+```{r}
+#| echo: true
+
+# we are reading the data directly from the internet
+biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+  janitor::clean_names()
+
+# simplify names a bit more
+colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
+
+# we are going to simplify this a bit and only keep some columns
+keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
+biochem <- biochem[, keep]
+
+# get weights for each individual mouse
+# careful: did not come with column names
+weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
+
+# add column names
+colnames(weight) <- c("subject_name", "weight")
+
+# add weight to biochem table and get rid of NAs
+# rename gender to sex
+b <- inner_join(biochem, weight, by = "subject_name") |>
+  na.omit() |>
+  rename(sex = gender)
+```
+
+## Compare mean of a variable to a known value {.smaller}
+
+$y$ is independent of $x$
+
+$y$ is continuous
+
+$x$ is constant
+
+**Parametric: One-sample t-test**
+
+`t_test(y ~ 1, mu = x)`
+
+**Nonparametric: Wilcoxon signed-rank**
+
+`wilcox_test(y ~ 1, mu = x)`
+
+1.  Examine and specify the variable(s)
+2.  Declare null hypothesis $\mathcal{H}_0$
+3.  Calculate test-statistic, exact p-value
+
+Think did the expression of my gene change...
+
+## 1. Examine and specify the variable(s) {.smaller}
+
+Let's explore mouse $weight$
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggdensity(
+  data = b,
+  x = "weight",
+  add = "mean",
+  rug = TRUE
+)
+```
+
+. . .
+
+let's see some summary stats
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+b |>
+  get_summary_stats(
+    weight,
+    type = "common",
+    show = c("mean", "median", "sd")
+  )
+```
+
+## Is it normally distributed?
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggqqplot(
+  data = b,
+  x = "weight"
+)
+```
+
+Looks reasonable
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+b |>
+  shapiro_test(weight)
+```
+
+Yikes!
+
+No easy answers...gotta make a call. We'll try both.
+
+## 2. Declare null hypothesis $\mathcal{H}_0$
+
+Since this is a one-way test, we don't need to worry if the groups have equal variance (only 1 group). But, we need a standard to compare against. I asked google, `how much does a mouse weigh in grams?`
+
+Answer: 20-35 g, I'm going with $27.5 g$ as our standard.
+
+> $\mathcal{H}_0$ is that the mean of mouse $weight$ can be explained by $27.5$
+
+$weight$ is the *response variable*
+
+$27.5$ is the *explanatory variable*
+
+## 3. Calculate test-statistic, exact p-value {.smaller}
+
+Nonparametric test:
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+x <- 27.5 # standard from google
+
+b |>
+  wilcox_test(weight ~ 1, mu = x) |>
+  gt()
+```
+
+. . .
+
+Parametric test:
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+x <- 27.5 # standard from google
+
+b |>
+  t_test(weight ~ 1, mu = x) |>
+  gt()
+```
+
+. . .
+
+P values are well below 0.05
+
+> $\mathcal{H}_0$ is that the mean of mouse $weight$ can be explained by $27.5$ is **NOT WELL SUPPORTED**
+
+So $27.5 g$ not able to describe weight
+
+Not surprising since our mean mouse weight is `r round(mean(b$weight),1)`. Don't believe everything you read on the internet.
+
+## Compare mean of two groups {.smaller}
+
+$y$ is independent of $x$
+
+$y$ is continuous
+
+$x$ is categorical with 2 groups (factor w/2 levels)
+
+**Parametric: Student's t-test**
+
+`t_test(y ~ x)` [more here](https://rpkgs.datanovia.com/rstatix/reference/t_test.html)
+
+need to pay attention to: `var.equal` `paired`
+
+**Nonparametric: Wilcoxon signed-rank**
+
+`wilcox_test(y ~ x)` [more here](https://rpkgs.datanovia.com/rstatix/reference/wilcox_test.html)
+
+need to pay attention to: `paired`
+
+1.  Examine and specify the variable(s)
+2.  Declare null hypothesis $\mathcal{H}_0$
+3.  Calculate test-statistic, exact p-value
+
+## Tangent on Student's t-test
+
+The T-Distribution, also known as Student's t-distribution, gets its name from William Sealy Gosset who first published it in English in 1908 in the scientific journal Biometrika using his pseudonym "Student" because his employer preferred staff to use pen names when publishing scientific papers instead of their real name, so he used the name "Student" to hide his identity.
+
+## Guinness Brewery in Dublin
+
+![](/img/gosset.jpg){width="2in"}
+
+![](/img/inara_guinness.jpg){width="2in"}
+
+## 1. Examine and specify the variable(s) {.smaller}
+
+We will compare mouse $weight$ by $sex$.
+
+$weight$ is the *response variable*
+
+$sex$ is the *explanatory variable*
+
+$y$ \~ $x$
+
+$weight$ \~ $sex$
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggdensity(
+  data = b,
+  color = "sex",
+  x = "weight",
+  add = "mean",
+  rug = TRUE
+)
+```
+
+------------------------------------------------------------------------
+
+I want the response variable on the $y$ axis and the explanatory variable on the $x$ axis.
+
+Violin plot
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggviolin(
+  data = b,
+  y = "weight",
+  x = "sex",
+  fill = "sex",
+  add = "mean_sd"
+)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+b |>
+  group_by(sex) |>
+  get_summary_stats(
+    weight,
+    type = "common",
+    show = c("mean", "median", "sd")
+  )
+```
+
+## Is it normally distributed? {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggqqplot(
+  data = b,
+  x = "weight",
+  color = "sex"
+)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+b |>
+  group_by(sex) |>
+  shapiro_test(weight) |>
+  gt()
+```
+
+Looks reasonable
+
+## Equal variance?
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+b |>
+  levene_test(weight ~ sex) |>
+  gt()
+```
+
+OK - so we can use t-test, but variance is not equal.
+
+## 2. Declare null hypothesis $\mathcal{H}_0$
+
+> $\mathcal{H}_0$ is that $sex$ cannot explain $weight$
+
+## 3. Calculate test-statistic, exact p-value {.smaller}
+
+Nonparametric test:
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+b |>
+  wilcox_test(weight ~ sex, ref.group = "F") |>
+  gt()
+```
+
+. . .
+
+Parametric test:
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+x <- 27.5 # standard from google
+
+b |>
+  t_test(weight ~ sex,
+    var.equal = F,
+    ref.group = "F"
+  ) |>
+  gt()
+```
+
+. . .
+
+P values are well below 0.05
+
+> $\mathcal{H}_0$ is that $sex$ cannot explain $weight$ is **NOT WELL SUPPORTED**
+
+$sex$ can explain $weight$
+
+## Visualize the result {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+# save statistical test result
+statres <- b |>
+  t_test(weight ~ sex,
+    var.equal = F,
+    ref.group = "F"
+  )
+
+
+ggviolin(
+  data = b,
+  y = "weight",
+  x = "sex",
+  fill = "sex",
+  add = "mean_sd"
+) +
+  stat_pvalue_manual(
+    statres,
+    label = "p",
+    y.position = 34
+  ) +
+  ylim(10, 35)
+```
+
+## Compare means of three or more groups {.smaller}
+
+$y$ is independent of $x$
+
+$y$ is continuous
+
+$x$ is 2 or more groups of categorical data
+
+**Parametric: ANOVA**
+
+`anova_test(y ~ group)` [more info](https://rpkgs.datanovia.com/rstatix/reference/anova_test.html)
+
+**Nonparametric: Kruskal-Wallis test**
+
+`kruskal_test(y ~ group)` [more info](https://rpkgs.datanovia.com/rstatix/reference/kruskal_test.html)
+
+1.  Examine and specify the variable(s)
+2.  Declare null hypothesis $\mathcal{H}_0$
+3.  Calculate test-statistic, exact p-value
+
+## 1. Examine and specify the variable(s) {.smaller}
+
+We will compare mouse $weight$ by $family$.
+
+$weight$ is the *response variable*
+
+$family$ is the *explanatory variable*
+
+$y$ \~ $x$
+
+$weight$ \~ $family$
+
+```{r prep fam data}
+#| echo: true
+
+# i have pre-selected some families to compare
+myfams <- c(
+  "B1.5:E1.4(4) B1.5:A1.4(5)",
+  "F1.3:A1.2(3) F1.3:E2.2(3)",
+  "A1.3:D1.2(3) A1.3:H1.2(3)",
+  "D5.4:G2.3(4) D5.4:C4.3(4)"
+)
+
+# only keep the familys in myfams
+bfam <- b |>
+  filter(family %in% myfams) |>
+  droplevels()
+
+# simplify family names and make factor
+bfam$family <- gsub(pattern = "\\..*", replacement = "", x = bfam$family) |>
+  as.factor()
+
+
+# make B1 the reference (most similar to overall mean)
+bfam$family <- relevel(x = bfam$family, ref = "B1")
+```
+
+## Visualize the variable(s) {.smaller}
+
+I want the response variable on the $y$ axis and the explanatory variable on the $x$ axis.
+
+Boxplot
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggboxplot(
+  data = bfam,
+  y = "weight",
+  x = "family",
+  fill = "family"
+)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+bfam |>
+  group_by(family) |>
+  get_summary_stats(
+    weight,
+    type = "common",
+    show = c("mean", "median", "sd")
+  )
+```
+
+## Is it normally distributed? {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+ggqqplot(
+  data = bfam,
+  x = "weight",
+  color = "family"
+)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+bfam |>
+  group_by(family) |>
+  shapiro_test(weight) |>
+  gt()
+```
+
+Looks reasonable
+
+## Equal variance?
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+bfam |>
+  levene_test(weight ~ family) |>
+  gt()
+```
+
+OK - so we can use anova!
+
+## 2. Declare null hypothesis $\mathcal{H}_0$
+
+> $\mathcal{H}_0$ is that $family$ cannot explain $weight$
+
+## 3. Calculate test-statistic, exact p-value {.smaller}
+
+Parametric test:
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+
+bfam |>
+  anova_test(weight ~ family) |>
+  gt()
+```
+
+. . .
+
+Nonparametric test:
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+bfam |>
+  kruskal_test(weight ~ family) |>
+  gt()
+```
+
+. . .
+
+P values are well below 0.05
+
+> $\mathcal{H}_0$ is that $family$ cannot explain $weight$ is **NOT WELL SUPPORTED**
+
+$family$ can explain $weight$
+
+## Visualize the result {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+# save statistical test result
+statres <- bfam |>
+  anova_test(weight ~ sex)
+
+
+ggboxplot(
+  data = bfam,
+  y = "weight",
+  x = "family",
+  fill = "family"
+) +
+  stat_anova_test()
+```
+
+## Multiple pairwise comparisons {.smaller}
+
+Quick aside
+
+```{r}
+#| echo: true
+#| output-location: slide
+
+# save statistical test result
+pairwise <- bfam |>
+  t_test(weight ~ family, ref.group = "B1")
+
+
+ggboxplot(bfam,
+  x = "family",
+  y = "weight",
+  fill = "weight",
+) +
+  stat_pvalue_manual(
+    pairwise,
+    label = "p.adj",
+    y.position = c(30, 32, 34)
+  ) +
+  ylim(10, 38)
+```
+
+Notice that not all pairwise differences are significant, yet the ANOVA is significant.
+
+## Appropriate statistical test cheatsheet
+
+![](/img/stats_table.png)
+
+## References
+
+[Legal analogy](https://www.graphpad.com/guides/prism/latest/statistics/hypothesis_testing_and_statistical_significance.htm)\
+
+[StatQuest: P Values, clearly explained](https://www.youtube.com/watch?v=5Z9OIYA8He8)\
+
+[StatQuest: How to calculate p-values](https://www.youtube.com/watch?v=JQc3yx0-Q9E)\
+
+[The Curious Tale of William Sealy Gosset](https://medium.com/value-stream-design/the-curious-tale-of-william-sealy-gosset-b3178a9f6ac8)\

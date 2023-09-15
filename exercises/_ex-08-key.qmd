@@ -63,7 +63,7 @@ Given the experimental setup and the shape of the tibbles, you should be able to
 qpcr_data_long <-
   pivot_longer(qpcr_data, -row, names_to = "col")
 
-qpcr_names_long <- 
+qpcr_names_long <-
   pivot_longer(qpcr_names, -row, names_to = "col") |>
   separate(value, into = c("gt", "time", "gene", "rt", "rep"), sep = "_")
 ```
@@ -97,7 +97,8 @@ Do this two ways:
 qpcr_summary <-
   group_by(
     qpcr_tidy,
-    gt, time, gene) |>
+    gt, time, gene
+  ) |>
   summarize(
     qpcr_tidy,
     exp_mean = mean(value),
@@ -111,7 +112,6 @@ qpcr_summary <-
 Now we can plot the summary statistics. We'll use [`ggplot2::geom_pointrange()`](https://ggplot2.tidyverse.org/reference/geom_linerange.html) to represent the mean and standard deviation.
 
 ```{r}
-
 ```
 
 ### Interpret the plot
@@ -214,9 +214,9 @@ left_join(brauer_gene_exp, yeast_go_terms) |>
       color = nutrient
     )
   ) +
-  geom_point() + 
-  geom_smooth(method = 'lm', se = FALSE) + 
-  facet_wrap(~ common_name) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~common_name) +
   theme_cowplot() +
   scale_color_OkabeIto()
 ```

@@ -1,0 +1,141 @@
+---
+title: "Problem Set Stats Bootcamp - class 15"
+subtitle: "Dealing with big data"
+author: "Neelanjan Mukherjee"
+editor: visual
+---
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(rstatix)
+library(pheatmap)
+library(janitor)
+library(here)
+```
+
+
+
+```{r}
+ang <- read_csv("~/Downloads/edger.csv.gz") %>% 
+  clean_names() %>% 
+  filter(fdr < 0.05) %>%
+  select(log_fc_time0_25:log_fc_time8) %>%
+  as.matrix()
+
+colnames(ang) <- gsub(pattern = "log_fc_","",colnames(ang))
+```
+
+
+## Problem \# 1
+
+Make sure to run the chunk above. The data represent the avg fold change in gene expression for an angiotensin II time course (.25, .5, .75, 1, 1.5, 2, 3, 4, 6, 8, 24 hrs) compared to unstimulated.
+
+## correlation 
+Create hierarchical clustering heatmap of pairwise pearson correlation coefficients. And provide 1-2 observations. 
+
+
+```{r}
+#scale
+ang <- t(scale(t(ang)))
+
+
+# pairwise pearson correlation
+p_ang <- cor(ang, method = "pearson")
+
+# make heatmap
+pheatmap(mat = p_ang,
+         clustering_distance_rows = "euclidean",
+         clustering_distance_cols = "euclidean",
+         clustering_method = "ward.D2")
+```
+
+Timepoints close to each other tend to correlate strongly with each other. The 4,6, and 8 hr time points are the most different from all others.
+
+## PCA 
+Perform PCA and visualize PC1 vs PC2.Provide 1-2 observations. 
+
+```{r}
+# pca
+pc_ang <- prcomp(p_ang)
+
+# gather info from summary
+pca_data_info <- summary(pc_ang)$importance |>as.data.frame()
+
+pca_data_info <- round(x = pca_data_info, digits = 3)
+
+# we make a dataframe out of the rotations and will use this to plot
+pca_plot_data <- pc_ang$rotation %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "ID") 
+
+#plot
+ggplot(data = pca_plot_data, mapping = aes(x=PC1, y = PC2, color=ID)) + 
+  geom_point() +
+  xlab(paste("PC1, %",100 * pca_data_info["Proportion of Variance","PC1"])) +
+  ylab(paste("PC2, %",100 * pca_data_info["Proportion of Variance","PC2"])) + 
+  ggtitle("PCA for angII timecourse") +
+  theme_cowplot()
+
+```
+
+There is a a circular patter that seems to correspond to the timepoints. Interestingly, 24 appears to group back with 0.25 indicating the system is resetting w/respect to RNA levels.
+
+## Calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling {.smaller}
+
+In order to do this, you will need to:
+
+1.  Identify which cluster is the most enriched for DUX4 targets.
+    -   Determine how many genes are in the cluster. You will need to know this to figure out how many genes to sample from the whole data set.
+    -   Determine how many of the genes in the cluster are DUX4 targets. This is the metric that you are interested in comparing between the null distribution and your observation.
+2.  Generate 1000 random sample of the proper size from all genes and find out how many of them are DUX4 targets.
+3.  Visualize the distribution of DUX4 targets in these 1000 random (your null distribution) and overlay the number of DUX4 targets you observed in the cluster that was most enriched for DUX4 targets.
+
+```{r}
+# read in data
+cd <- read_tsv(here("data","dux4_clustering_results.csv.gz"))
+
+# how many genes are in cluster 5?
+c5 <- cd |> 
+  filter(Cluster=="5") |>
+  nrow()
+
+# how many dux targets are in cluster 5?
+c5t <- cd |> 
+  filter(Cluster=="5" & target =="target") |>
+  nrow()
+
+
+sampled_targets <- vector()
+
+for (i in 1:1000) {
+sampled_targets[i] <- sample_n(tbl = cd, size = c5) %>%
+  group_by(target) %>%
+  tally() %>%
+  filter(target=="target") %>%
+  pull(n)
+}
+
+n <- tibble(targets=sampled_targets,
+       type="null")
+
+n |>
+  arrange(-sampled_targets) |>
+  top_n(10)
+
+ggplot(data = n, aes(x=targets)) +
+  geom_density() +
+  geom_vline(xintercept = c5t, color = "red") +
+  theme_cowplot()
+
+
+```
+
+### What is the p-value?
+
+p < 0.001
+ 
+### What is your interpretation?
+
+The null hypothesis that the number of DUX4 targets in c5t can be explained by chance - IS NOT WELL SUPPORTED. 
+
+The number of DUX4 targets in c5t CANNOT be explained by chance.

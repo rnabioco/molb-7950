@@ -1,0 +1,171 @@
+---
+title: "Problem Set Stats Bootcamp - class 12"
+subtitle: "Hypothesis Testing"
+author: "Neelanjan Mukherjee"
+editor: visual
+---
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(rstatix)
+library(ggpubr)
+library(gt)
+library(janitor)
+library(here)
+```
+
+```{r}
+biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+  janitor::clean_names()
+
+# simplify names a bit more
+colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
+
+# we are going to simplify this a bit and only keep some columns
+keep <- colnames(biochem)[c(1,6,9,14,15,24:28)]
+biochem <- biochem[,keep]
+
+# get weights for each individual mouse
+# careful: did not come with column names
+weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
+
+# add column names
+colnames(weight) <- c("subject_name","weight")
+
+# add weight to biochem table and get rid of NAs
+# rename gender to sex
+b <- inner_join(biochem, weight, by="subject_name") |> 
+  na.omit() |>
+  rename(sex=gender)
+
+
+```
+
+## Problem \# 1
+
+Can mouse sex explain mouse cholesterol? {.smaller}
+
+## STEP 1: Null hypothesis and variable specification
+
+$\mathcal{H}_0:$ 
+
+> ?? is the response variable
+
+> ?? is the explanatory variable
+
+## STEP 2: Fit linear model and examine results {.smaller}
+
+```{r}
+#| echo: true
+
+
+```
+
+Fit summary:
+
+```{r, echo=FALSE}
+#| echo: true
+#| output-location: column-fragment
+
+
+
+```
+
+Coefficient summary:
+
+```{r, echo=FALSE}
+#| echo: true
+#| output-location: column-fragment
+
+
+  
+
+```
+
+## Collecting residuals and other information {.smaller}
+
+add residuals and other information
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+
+
+
+```
+
+## STEP 4: Visualize the error around fit {.smaller}
+
+```{r, echo=FALSE}
+#| echo: true
+#| output-location: column-fragment
+
+
+# plot of data with mean and colored by residuals
+
+```
+
+## STEP 3: Visualize the error around the null (mean weight) {.smaller}
+
+```{r, echo=FALSE}
+#| echo: true
+#| output-location: column-fragment
+
+
+```
+
+## Plot the fit error and the null error as 2 panels {.smaller}
+
+```{r}
+#| echo: true
+
+
+```
+
+## Calculate $R^2$ {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+
+
+```
+
+$R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+```
+
+check agains Rsq in your fit
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+
+```
+
+## Compare to traditional t-test {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+
+```
+
+## Provide your interpreation of the result
+
+
