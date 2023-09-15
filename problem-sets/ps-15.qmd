@@ -1,0 +1,107 @@
+---
+title: "Problem Set Stats Bootcamp - class 15"
+subtitle: "Dealing with big data"
+author: "Neelanjan Mukherjee"
+editor: visual
+---
+
+```{r, echo=FALSE}
+library(tidyverse)
+library(rstatix)
+library(pheatmap)
+library(janitor)
+library(here)
+```
+
+
+
+```{r}
+ang <- read_csv("~/Downloads/edger.csv.gz") %>% 
+  clean_names() %>% 
+  filter(fdr < 0.05) %>%
+  select(log_fc_time0_25:log_fc_time8) %>%
+  as.matrix()
+
+colnames(ang) <- gsub(pattern = "log_fc_","",colnames(ang))
+```
+
+
+## Problem \# 1
+
+Make sure to run the chunk above. The data represent the avg fold change in gene expression for an angiotensin II time course (.25, .5, .75, 1, 1.5, 2, 3, 4, 6, 8, 24 hrs) compared to unstimulated.
+
+## correlation 
+Create hierarchical clustering heatmap of pairwise pearson correlation coefficients. And provide 1-2 observations. 
+
+
+```{r}
+#scale
+
+# pairwise pearson correlation
+
+
+# make heatmap
+
+```
+
+Timepoints close to each other tend to correlate strongly with each other. The 4,6, and 8 hr time points are the most different from all others.
+
+## PCA 
+Perform PCA and visualize PC1 vs PC2.Provide 1-2 observations. 
+
+```{r}
+# pca
+
+
+# gather info from summary
+
+
+
+
+# we make a dataframe out of the rotations and will use this to plot
+
+
+#plot
+
+
+```
+
+
+## Calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling {.smaller}
+
+In order to do this, you will need to:
+
+1.  Identify which cluster is the most enriched for DUX4 targets.
+    -   Determine how many genes are in the cluster. You will need to know this to figure out how many genes to sample from the whole data set.
+    -   Determine how many of the genes in the cluster are DUX4 targets. This is the metric that you are interested in comparing between the null distribution and your observation.
+2.  Generate 1000 random sample of the proper size from all genes and find out how many of them are DUX4 targets.
+3.  Visualize the distribution of DUX4 targets in these 1000 random (your null distribution) and overlay the number of DUX4 targets you observed in the cluster that was most enriched for DUX4 targets.
+
+```{r}
+# read in data
+cd <- read_tsv(here("data","dux4_clustering_results.csv.gz"))
+
+# how many genes are in cluster of interest?
+
+# how many dux targets are in cluster interest?
+
+
+
+# initialize empty vector
+sampled_targets <- vector()
+
+# randomly sample # genes above from data 1000x and tally number of dux4 targets each random sampling
+
+
+
+#plot
+
+
+```
+
+### What is the p-value?
+
+
+ 
+### What is your interpretation?
+
