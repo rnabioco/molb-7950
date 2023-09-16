@@ -3,24 +3,35 @@ title: "Mapping chromatin structure and transactions"
 author: "Jay Hesselberth"
 ---
 
-# Gene regulation by chromatin
+## Gene regulation by chromatin
 
-## Chromatin structure
+::: {layout-ncol=3 layout-valign="center"}
+![Genome organization](../img/block-dna/ctcf.jpg)
+
+![Cell signaling](../img/block-dna/promoter.png)
+
+![Organism development](../img/block-dna/org-dev.jpg)
+:::
 
 ## DNA accessibility drives all biochemical transactions on the genome
 
+:::: {.columns}
+::: {.column width="50%"}
 -   Transcription Initiation
 -   Transcription Elongation
 -   DNA Repair
 -   Initiation of DNA Replication
 -   Recombination
 -   Viral Integration
-
-## Structure of the nucleosome
+:::
+::: {.column width="50%"}
+![](../img/block-dna/domino.gif)
+:::
+::::
 
 ## Mapping & measurement are first steps toward understanding. {.smaller}
 
-::: columns
+:::: {.columns}
 ::: {.column width="60%"}
 Before genome-wide DNA accessibility measurements, we knew about chromatin transactions at only a handful of loci.
 
@@ -30,16 +41,16 @@ This was a classic "keys under the lamppost" situation, leading to general model
 ::: {.column width="40%"}
 ![](../img/block-dna/street-lamp.jpg){width="100%"}
 :::
-:::
+::::
 
 ::: aside
 Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on [Unsplash](https://unsplash.com/photos/PvQtCNm4teI?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText)
 :::
 
-## Using micrococcal nuclease to map chromatin {.smaller}
+## Using micrococcal nuclease (MNase) to map chromatin {.smaller}
 
 :::: {.columns}
-::: {.column width="50%"}
+::: {.column width="50%" .nonincremental}
 -   Micrococcal nuclease is an endo/exonuclease from *Staphylococcus aureus*
 -   Efficient, **multiple turnover** enzyme that digests accessible DNA (& RNA)
 -   Dependent on calcium (Ca2+)
@@ -53,7 +64,7 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 ## Using ATAC to map chromatin {.smaller}
 
 :::: {.columns}
-::: {.column width="50%"}
+::: {.column width="50%" .nonincremental}
 -   Tn5 transposase catalyzes "cut-and-paste" insertion of DNA into a target
 -   In ATAC ("Assay for Transposase-Accessible Chromatin"), the transposase enzymes are loaded with DNA sequencing adaptors (blue and red in the image), so the products of transposition are ready to PCR.
 -   **Single turnover enzyme** that acts on accessible DNA.
@@ -84,105 +95,37 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 
 # Analysis details
 
-## Experimental workflow {.smaller}
+## Experimental workflow 
 
-```{mermaid}
-%%{init: {"flowchart": { "useMaxWidth": true, "htmlLabels": false}} }%%
-flowchart LR
-
-  EXP[ATAC/MNase/DNase-seq experiment]:::exp
-  
-  %% files %%
-  FQ["Sequencing reads (FASTQ)"]:::file
-  FAREF("Reference genome (FASTA)"):::file
-  BAM["Alignment (BAM)"]:::file 
-  BEDFRAG["Fragment coordinates (BED)"]:::file
-  BEDPEAK("Peak coordinates (BED)"):::file
-  FAPEAK("Peak sequences"):::file
-  WIG("`**Genome coverage**
-  (WIG/bedGraph)`"):::file
-  META("`Metaplots
-  (R & Bioconductor)`"):::file
-  MTX("`Count matrix
-  relative to sites`"):::file
-  ANN("`**Annotations**
-  TSS, exons, etc.`"):::file
- 
-  %% software %% 
-  ALN("`**Read alignment**
-  (Bowtie2 / BWA)`"):::sw
-  PEAKCALL("`**Peak calling** (MACS2)`"):::sw
-  MOTIFS("` **Motif discovery**
-  Sites with specific motif
-  (MEME & FIMO)`"):::sw
-  BEDTOOLS("`BEDtools`"):::sw
-  %% BROWSE("`**Genome browser** %%
-  %% (UCSC or IGV)`"):::sw %%
- 
-  %% alignment %% 
-  subgraph Sequence Alignment [alignment]
-    direction TB
-    FQ --> ALN
-    FAREF --> ALN
-  end
-  
-  subgraph Process Alignment [process]
-    direction TB
-    ALN --> BAM
-    BAM --> BEDFRAG
-    BEDFRAG --> BEDTOOLS --> WIG
-  end
-  
-  subgraph Meta-Analysis [meta]
-    direction TB
-    %% WIG --> BROWSE %%
-    MTX --> META
-    WIG --> META
-    ANN --> META
-  end
- 
-  subgraph Call Peaks [peaks]
-    direction TB
-    BEDFRAG --> PEAKCALL
-    PEAKCALL --> BEDPEAK
-    BEDPEAK --> FAPEAK
-    FAPEAK --> MOTIFS 
-  end
-
-  EXP --> alignment --> process --> peaks 
-  
-  click WIG href "https://genome.ucsc.edu/goldenPath/help/bedgraph.html"
-  click BROWSE href "https://software.broadinstitute.org/software/igv/"
-  click ALN href "https://bowtie-bio.sourceforge.net/bowtie2/manual.shtml"
-  click BEDTOOLS href "https://bedtools.readthedocs.io/en/latest/"
-  click PEAKCALL href "https://macs3-project.github.io/MACS/"
-  click MOTIFS href "https://meme-suite.org/meme/"
-  
-  classDef default fill:#ddd,stroke:#333,stroke-width:1px;
-  classDef exp fill:#3bf
-  classDef file fill:#fc7
-  classDef sw fill:#7ec
-```
+![](../img/block-dna/exp-outline.png)
 
 # Data structures and tools used for analysis of chromatin mapping experiments
 
 ## File formats 
 
-### BED format 
+### BED format {.smaller}
 
+:::: {.columns}
+::: {.column width="50%" .nonincremental}
 - Contains information about genomic intervals. 
 - Used to represent genomic features (exons, introns, transcription start sites)
 - First 3 columns are: `chrom`, `start`, `end`
 - Next 3 are: `name`, `score`, `strand`. Strand can be `+`, `-`, or `.` (no strand)
+:::
 
+::: {.column width="50%"}
 ```
-chr7    127473530  127474697  Pos3  0  +
-chr7    127474697  127475864  Pos4  0  +
-chr7    127475864  127477031  Neg1  0  -
-chr7    127477031  127478198  Neg2  0  -
+chr7 127473530 127474697 Pos3 0  +
+chr7 127474697 127475864 Pos4 0  +
+chr7 127475864 127477031 Neg1 0  -
+chr7 127477031 127478198 Neg2 0  -
 ```
+:::
+::::
 
-### wig / bedGraph
+---
+
+### wig / bedGraph {.smaller}
 
 - Used to store interval *signals*.
 
@@ -196,29 +139,41 @@ in a compressed, indexed format.
 
 ## Interval analysis {.smaller}
 
-The primary tool in the genome interval analysis is [BEDtools]() -- it's the 
+The primary tool in the genome interval analysis is [BEDtools](https://bedtools.readthedocs.io/en/latest/) -- it's the 
 Swiss-army knife of internal analysis. 
 
-We wrote an R package called [valr]() that provides the same tools, but you don't need to 
+We wrote an R package called [valr](https://rnabioco.github.io/valr/) that provides the same tools, but you don't need to 
 leave RStudio. 
 
 valr contains tools for reading and manipulating genome intervals.
 
 ```{r}
 #| label: valr-example
-#| output-location: column
+#| echo: true
 library(valr)
 
 snps <- read_bed(
   valr_example("hg19.snps147.chr22.bed.gz"),
   n = 6
 )
+
 genes <- read_bed(
   valr_example("genes.hg19.chr22.bed.gz"),
   n = 6
 )
+```
 
+## {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column
 snps
+```
+
+```{r}
+#| echo: true
+#| output-location: column
 genes
 ```
 
@@ -228,7 +183,7 @@ Let's find and characterize intergenic SNPs. We'll use the tools `bed_substract(
 
 ```{r}
 #| label: valr-ints
-#| output-location: column-fragment
+#| echo: true
 # find snps in intergenic regions
 intergenic <- bed_subtract(snps, genes)
 
@@ -236,10 +191,14 @@ intergenic <- bed_subtract(snps, genes)
 nearby <- bed_closest(intergenic, genes)
 ```
 
+## Interval manipulation {.smaller}
 
 ```{r}
 #| label: valr-dplyr
+#| echo: true
 #| output-location: column-fragment
+library(dplyr)
+
 nearby |>
   select(starts_with("name"), .overlap, .dist) |>
   filter(abs(.dist) < 5000)
