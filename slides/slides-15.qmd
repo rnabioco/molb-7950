@@ -93,19 +93,12 @@ For each ranked p-value, it is compared to the α calculated for its respective 
 #| eval: true
 #| output-location: slide
 
-rna <- read_csv(here("data/data_rna_protein.csv.gz")) |> select(iDUX4_pval)
-
+rna <- read_csv(here("data/bootcamp/data_rna_protein.csv.gz")) |> select(iDUX4_pval)
 
 rna$fdr <- p.adjust(p = rna$iDUX4_pval, method = "fdr", n = nrow(rna))
-
 rna$BH <- p.adjust(p = rna$iDUX4_pval, method = "BH", n = nrow(rna))
-
 rna$bon <- p.adjust(p = rna$iDUX4_pval, method = "bonferroni", n = nrow(rna))
-
-
 rna_long <- rna |> pivot_longer(cols = iDUX4_pval:bon, names_to = "type")
-
-
 
 ggplot(data = rna_long, aes(x = value, fill = type)) +
   geom_histogram(bins = 50) +
@@ -418,7 +411,7 @@ tibble(
   wss = map_vec(2:15, wss),
   k = 2:15
 ) |>
-  ggplot(., aes(x = k, y = wss)) +
+  ggplot(aes(x = k, y = wss)) +
   geom_point() +
   theme_cowplot()
 ```

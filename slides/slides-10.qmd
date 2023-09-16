@@ -226,11 +226,15 @@ make a dataframe with means and accompanying info
 #| echo: true
 #| output-location: column-fragment
 
-allFlips <- data.frame(
+allFlips <- tibble(
   fair = myFairTosses,
   unfair = myUnfairTosses
 ) |>
-  pivot_longer(cols = c("fair", "unfair"), names_to = "cheating", values_to = "avg")
+  pivot_longer(
+    cols = c("fair", "unfair"),
+    names_to = "cheating",
+    values_to = "avg"
+  )
 
 allFlips |> top_n(5)
 ```
@@ -246,7 +250,7 @@ plot it
 ggplot(allFlips, aes(x = cheating, y = avg, color = cheating)) +
   geom_jitter() +
   stat_summary(
-    fun.y = mean, geom = "point", shape = 18,
+    fun = mean, geom = "point", shape = 18,
     size = 3, color = "black"
   ) +
   ylim(-0.05, 1.05) +
@@ -276,15 +280,15 @@ for (i in 1:numRounds) {
   myUnfairTosses[i] <- rbinom(n = numFlips, size = 1, prob = .2) |> mean()
 }
 
-data.frame(
+tibble(
   fair = myFairTosses,
   unfair = myUnfairTosses
 ) |>
   pivot_longer(cols = c("fair", "unfair"), names_to = "cheating", values_to = "avg") |>
-  ggplot(., aes(x = cheating, y = avg, color = cheating)) +
+  ggplot(aes(x = cheating, y = avg, color = cheating)) +
   geom_jitter() +
   stat_summary(
-    fun.y = mean, geom = "point", shape = 18,
+    fun = mean, geom = "point", shape = 18,
     size = 3, color = "black"
   ) +
   ylim(-0.05, 1.05) +
@@ -309,16 +313,16 @@ data.frame(
 
 Say you choose Door #1
 
-+---------+---------+---------+----------------+------------+
-| Behind\ | Behind\ | Behind\ | Result if STAY | Result if\ |
-| Door 1  | Door 2  | Door 3  |                | SWITCH     |
-+=========+=========+=========+================+============+
-| **Car** | Goat    | Goat    | **Car**        | Goat       |
-+---------+---------+---------+----------------+------------+
-| Goat    | **Car** | Goat    | Goat           | **Car**    |
-+---------+---------+---------+----------------+------------+
-| Goat    | Goat    | **Car** | Goat           | **Car**    |
-+---------+---------+---------+----------------+------------+
++----------+----------+----------+----------------+------------+
+| Behind\  | Behind\  | Behind\  | Result if STAY | Result if\ |
+| Door 1   | Door 2   | Door 3   |                | SWITCH     |
++==========+==========+==========+================+============+
+| **Car**  | Goat     | Goat     | **Car**        | Goat       |
++----------+----------+----------+----------------+------------+
+| Goat     | **Car**  | Goat     | Goat           | **Car**    |
++----------+----------+----------+----------------+------------+
+| Goat     | Goat     | **Car**  | Goat           | **Car**    |
++----------+----------+----------+----------------+------------+
 
 ## Simulation of Monty Hall Problem
 
@@ -344,8 +348,8 @@ monte_hall <- function(iteration) {
   stick_prob <- cumsum(stick_win) / i
   switch_prob <- cumsum(switch_win) / i
 
-  # store result in a dataframe
-  results <- data.frame(
+  # store result in a tibble 
+  results <- tibble(
     i = i,
     contestant_door = contestant_door,
     stick_win = stick_win,
@@ -357,7 +361,6 @@ monte_hall <- function(iteration) {
   return(results)
 }
 
-
 monte_hall_results <- monte_hall(iter)
 
 ggplot(monte_hall_results, mapping = aes(x = i, y = stick_prob)) +
@@ -366,12 +369,12 @@ ggplot(monte_hall_results, mapping = aes(x = i, y = stick_prob)) +
   ylab("Est.Probability") +
   xlab("Iteration") +
   geom_label(
-    data = data.frame(label = c("switch", "stick"), i = c(iter, iter), stick_prob = c(0.75, 0.25)),
+    data = tibble(label = c("switch", "stick"), i = c(iter, iter), stick_prob = c(0.75, 0.25)),
     aes(label = label),
     show.legend = FALSE
   ) +
   ggtitle("Estimated Probability of Winning") +
-  theme_classic()
+  theme_cowplot()
 ```
 
 -   [The Monty Hall Problem](https://rpubs.com/njdcornites/simulating_monty_hall_problem)

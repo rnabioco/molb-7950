@@ -155,8 +155,6 @@ d |>
   ggplot(aes(x=value, color=name)) +
   ??() +
   theme_cowplot()
-  
-
 ```
 
 . . .
@@ -177,8 +175,6 @@ d |>
   ggplot(aes(x=??(value), color=name)) +
   geom_density() +
   theme_cowplot()
-  
-
 ```
 
 . . .
@@ -201,9 +197,6 @@ d |>
   ggplot(aes(x=??(value), color=name)) +
   geom_density() +
   theme_cowplot()
-
-
-
 ```
 
 ## correlation analysis
@@ -221,22 +214,20 @@ x <-  d |>
   mutate_all(funs(log2(1 + .))) |># log2 transform
   as.matrix() # matrix
 
-
 rownames(x) <- d$gene_symbol
-
 
 x <- t(scale(t(x))) # scale
 
-
 # pairwise pearson correlation
-p <- 
+p <- ???
 
 # heatmap
-pheatmap(mat = p,
-         clustering_distance_rows = "??",
-         clustering_distance_cols = "??",
-         clustering_method = "??")
-
+pheatmap(
+  mat = p,
+  clustering_distance_rows = "??",
+  clustering_distance_cols = "??",
+  clustering_method = "??"
+)
 ```
 
 ## PCA
@@ -245,9 +236,7 @@ PCA is a common dimensionality reduction method that is used to visualize the si
 
 **Let's watch this fantastic 5 minute video explaining PCA**
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/HMOI_lkzW08" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-
-</iframe>
+{{< video https://www.youtube.com/embed/HMOI_lkzW08 >}}
 
 For more detailed explanations go [here](https://www.nature.com/articles/nbt0308-303) and [here](https://liorpachter.wordpress.com/2014/05/26/what-is-principal-component-analysis/).
 
@@ -281,20 +270,31 @@ pca_data_info <- round(x = pca_data_info, digits = 3)
 pca_plot_data <- pc$rotation |>
   as.data.frame() |>
   rownames_to_column(var = "ID") |>
-  separate(col = ID, into = c("time","rep"), sep = "_")
+  separate(
+    ID,
+    into = c("time","rep"),
+    sep = "_"
+  )
 
 # recode "rep"
-pca_plot_data$rep <- recode(pca_plot_data$rep,
-                            rep1 = "A",
-                            rep2 = "B",
-                            rep3 = "C")
+pca_plot_data$rep <- recode(
+  pca_plot_data$rep,
+  rep1 = "A",
+  rep2 = "B",
+  rep3 = "C"
+)
 
 # gsub hour
-pca_plot_data$time <- gsub(pattern = "hour",
-                           replacement = "",
-                           x = pca_plot_data$time)
+pca_plot_data$time <- gsub(
+  pattern = "hour",
+  replacement = "",
+  x = pca_plot_data$time
+)
 
-ggplot(data = pca_plot_data, mapping = aes(x=PC1, y = PC2, color=time)) + 
+ggplot(
+  pca_plot_data, 
+  aes(x=PC1, y = PC2, color=time)
+  ) + 
   geom_point() +
   xlab(paste("PC1, %",100 * pca_data_info["Proportion of Variance","PC1"])) +
   ylab(paste("PC2, %",100 * pca_data_info["Proportion of Variance","PC2"])) + 
@@ -378,12 +378,14 @@ We pick the cluster where that drop in total reaches diminishing returns -\> the
 #| output-location: slide
 
 set.seed(33)
-tmp <- pheatmap(mat = x,
-         clustering_distance_rows = "euclidean",
-         clustering_method = "ward.D2",
-         kmeans_k = ??,
-         cluster_cols = F,
-         scale = "none")
+tmp <- pheatmap(
+  mat = x,
+  clustering_distance_rows = "euclidean",
+  clustering_method = "ward.D2",
+  kmeans_k = ??,
+  cluster_cols = FALSE,
+  scale = "none"
+)
 
 
 tmp$kmeans$tot.withinss
@@ -401,13 +403,15 @@ tmp$kmeans$tot.withinss
 #| eval: false
 
 wss <- function(knum) {
-  ph <- pheatmap(mat = x,
-                 kmeans_k = ??,
-                 scale = "none",
-                 cluster_cols = F,
-                 clustering_distance_rows = "euclidean",
-                 clustering_method = "ward.D2",
-                 silent = T)
+  ph <- pheatmap(
+    mat = x,
+    kmeans_k = ??,
+    scale = "none",
+    cluster_cols = FALSE,
+    clustering_distance_rows = "euclidean",
+    clustering_method = "ward.D2",
+    silent = TRUE
+  )
   return(ph$kmeans$tot.withinss)
 }
 
@@ -426,7 +430,6 @@ tibble(wss=map_vec(2:15,wss),
   ggplot(., aes(x=k, y=wss)) +
   geom_point() +
   theme_cowplot()
-
 ```
 
 ## Final clustering {.smaller}
@@ -437,20 +440,21 @@ tibble(wss=map_vec(2:15,wss),
 #| output-location: fragment
 
 set.seed(33)
-c <- pheatmap(mat = x,
-         clustering_distance_rows = "euclidean",
-         clustering_method = "ward.D2",
-         kmeans_k = 7,
-         cluster_cols = F,
-         scale = "none")
+c <- pheatmap(
+  mat = x,
+  clustering_distance_rows = "euclidean",
+  clustering_method = "ward.D2",
+  kmeans_k = 7,
+  cluster_cols = F,
+  scale = "none"
+)
 
-cg <- data.frame(Cluster=c$kmeans$cluster,
-                gene_symbol=names(c$kmeans$cluster)
-                )
+cg <- tibble(
+  Cluster=c$kmeans$cluster,
+  gene_symbol=names(c$kmeans$cluster)
+)
 
-cd <- left_join(d, cg, by="gene_symbol") |>as_tibble()
-
-
+cd <- left_join(d, cg, by="gene_symbol") 
 ```
 
 ## Which cluster(s) contains DUX4 targets? {.smaller}
@@ -480,8 +484,6 @@ getMatrix(gom.duxclust, "pval") |>
   rownames_to_column(var = "clust") |>
   as.tibble() |>
   arrange(target)
-
-
 ```
 
 ## Let's calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling {.smaller}
