@@ -13,26 +13,24 @@ library(janitor)
 library(here)
 ```
 
-
-
 ```{r}
-ang <- read_csv("~/Downloads/edger.csv.gz") %>%
-  clean_names() %>%
-  filter(fdr < 0.05) %>%
-  select(log_fc_time0_25:log_fc_time8) %>%
+#| eval: false
+ang <- read_csv(here("data/edger.csv.gz")) |>
+  clean_names() |>
+  filter(fdr < 0.05) |>
+  select(log_fc_time0_25:log_fc_time8) |>
   as.matrix()
 
 colnames(ang) <- gsub(pattern = "log_fc_", "", colnames(ang))
 ```
 
-
 ## Problem \# 1
 
 Make sure to run the chunk above. The data represent the avg fold change in gene expression for an angiotensin II time course (.25, .5, .75, 1, 1.5, 2, 3, 4, 6, 8, 24 hrs) compared to unstimulated.
 
-## correlation 
-Create hierarchical clustering heatmap of pairwise pearson correlation coefficients. And provide 1-2 observations. 
+## correlation
 
+Create hierarchical clustering heatmap of pairwise pearson correlation coefficients. And provide 1-2 observations.
 
 ```{r}
 # scale
@@ -45,8 +43,9 @@ Create hierarchical clustering heatmap of pairwise pearson correlation coefficie
 
 Timepoints close to each other tend to correlate strongly with each other. The 4,6, and 8 hr time points are the most different from all others.
 
-## PCA 
-Perform PCA and visualize PC1 vs PC2.Provide 1-2 observations. 
+## PCA
+
+Perform PCA and visualize PC1 vs PC2.Provide 1-2 observations.
 
 ```{r}
 # pca
@@ -62,7 +61,6 @@ Perform PCA and visualize PC1 vs PC2.Provide 1-2 observations.
 
 # plot
 ```
-
 
 ## Calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling {.smaller}
 
@@ -96,7 +94,4 @@ sampled_targets <- vector()
 
 ### What is the p-value?
 
-
- 
 ### What is your interpretation?
-

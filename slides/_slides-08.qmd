@@ -28,10 +28,10 @@ group_by(data, time)
 group_by(data, ensembl_transcript_id)
 
 # example of how group_by affects the way summarise works
-data %>% summarise(count = mean(count, na.rm = TRUE))
-group_by(data, time) %>% summarise(count = mean(count, na.rm = TRUE))
-group_by(data, ensembl_transcript_id) %>% summarise(count = mean(count, na.rm = TRUE))
-group_by(data, ensembl_transcript_id, time) %>% summarise(count = mean(count, na.rm = TRUE))
+data |> summarise(count = mean(count, na.rm = TRUE))
+group_by(data, time) |> summarise(count = mean(count, na.rm = TRUE))
+group_by(data, ensembl_transcript_id) |> summarise(count = mean(count, na.rm = TRUE))
+group_by(data, ensembl_transcript_id, time) |> summarise(count = mean(count, na.rm = TRUE))
 ```
   - functions to use within mutate - google is your friend
   - manipulation of cols & rows - use cheatsheets
@@ -42,7 +42,7 @@ group_by(data, ensembl_transcript_id, time) %>% summarise(count = mean(count, na
   
 ```{r, aesthetic_mapping}
 # specifying colors of plots
-diamonds_subset <- diamonds %>% sample_n(size = 1000)
+diamonds_subset <- diamonds |> sample_n(size = 1000)
 
 # scatter plot with color by cut - aesthetics specified in the main "mapping"
 ggplot(
@@ -75,7 +75,7 @@ ggplot(diamonds_subset, mapping = aes(x = carat, y = price)) +
   - piping data into ggplot - example below
 
 ```{r, piping_data}
-diamonds_subset %>% ggplot(mapping = aes(x = carat, y = price)) +
+diamonds_subset |> ggplot(mapping = aes(x = carat, y = price)) +
   geom_point(aes(color = cut)) +
   geom_smooth()
 ```

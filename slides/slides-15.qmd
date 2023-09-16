@@ -265,8 +265,8 @@ pca_data_info <- summary(pc)$importance |> as.data.frame()
 pca_data_info <- round(x = pca_data_info, digits = 3)
 
 # we make a dataframe out of the rotations and will use this to plot
-pca_plot_data <- pc$rotation %>%
-  as.data.frame() %>%
+pca_plot_data <- pc$rotation |>
+  as.data.frame() |>
   rownames_to_column(var = "ID") |>
   separate(col = ID, into = c("time", "rep"), sep = "_")
 
@@ -417,7 +417,7 @@ wss(6)
 tibble(
   wss = map_vec(2:15, wss),
   k = 2:15
-) %>%
+) |>
   ggplot(., aes(x = k, y = wss)) +
   geom_point() +
   theme_cowplot()
@@ -472,8 +472,8 @@ gom.duxclust <- newGOM(duxList,
 )
 
 
-getMatrix(gom.duxclust, "pval") %>%
-  t() %>%
+getMatrix(gom.duxclust, "pval") |>
+  t() |>
   as.data.frame() |>
   rownames_to_column(var = "clust") |>
   as.tibble() |>
