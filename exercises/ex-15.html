@@ -5,7 +5,7 @@
 <meta name="generator" content="quarto-1.3.450">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Neelanjan Mukherjee">
-<meta name="dcterms.date" content="2023-09-15">
+<meta name="dcterms.date" content="2023-09-16">
 <title>MOLB 7950 - Stats Bootcamp - class 15</title>
 <style>
 code{white-space: pre-wrap;}
@@ -185,6 +185,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Bootcamp resources</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/block-dna-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DNA Block resources</span></a>
+  </div>
+</li>
       </ul>
 </li>
         <li class="px-0"><hr class="sidebar-divider hi "></li>
@@ -285,7 +291,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 15, 2023</p>
+      <p class="date">September 16, 2023</p>
     </div>
   </div>
   
@@ -310,17 +316,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>In a typical RNA-seq experiment, we test ~10K different hypotheses. For example, you have 10K genes and for each gene you test whether the mean expression changed in condition A vs condition B. Using a standard p-value cut-off of 0.05, we’d expect <strong>500 genes</strong> to be deemed “significant” by chance. Thus, we are very concerned about <strong>False Positives or Type I Errors</strong>.</p>
 </section><section id="multiple-test-corrections" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="multiple-test-corrections">Multiple test corrections</h2>
 <ol type="1">
-<li><p>Control overall α (also known as family-wise error rate or <a href="https://en.wikipedia.org/wiki/Family-wise_error_rate">FWER</a>), which will affect the α* for each test. That is, we are controlling the overall probability of making <em>at least one</em> false discovery. Bonferroni and Sidak corrections all control FWER.</p></li>
+<li><p>Control overall <ce><b1> (also known as family-wise error rate or <a href="https://en.wikipedia.org/wiki/Family-wise_error_rate">FWER</a>), which will affect the <ce><b1>* for each test. That is, we are controlling the overall probability of making <em>at least one</em> false discovery. Bonferroni and Sidak corrections all control FWER.</b1></ce></b1></ce></p></li>
 <li><p>Control <a href="https://en.wikipedia.org/wiki/False_discovery_rate">false discovery rate</a> (FDR). These procedures allow for type 1 errors (false positives) but control the proportion of these false positives in relation to true positives. This is done by adjusting the decision made for the p-value associated with each individual test to decide rejection or not. Because this will result in a higher type 1 error rate, it has higher <a href="https://en.wikipedia.org/wiki/Power_(statistics)">power</a>. This affords a higher probability of <em>true discoveries.</em> The step procedures control for FDR.</p></li>
 </ol></section><section id="bonferroni-correction" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="bonferroni-correction">Bonferroni Correction</h2>
-<p>The most conservative of corrections, the Bonferroni correction is also perhaps the most straightforward in its approach. Simply divide α by the number of tests (<em>m</em>).</p>
+<p>The most conservative of corrections, the Bonferroni correction is also perhaps the most straightforward in its approach. Simply divide <ce><b1> by the number of tests (<em>m</em>).</b1></ce></p>
 <blockquote class="blockquote">
-<p>α = α/m</p>
+<p><ce><b1> = <ce><b1>/m</b1></ce></b1></ce></p>
 </blockquote>
-<p>However, with many tests, α will become very small. This reduces power, which means that we are very unlikely to make any true discoveries.</p>
+<p>However, with many tests, <ce><b1> will become very small. This reduces power, which means that we are very unlikely to make any true discoveries.</b1></ce></p>
 <section id="sidak-correction" class="level3"><h3 class="anchored" data-anchor-id="sidak-correction">Sidak Correction</h3>
 <blockquote class="blockquote">
-<p>α = 1-(1-α)^(1/<em>m</em>)</p>
+<p><ce><b1> = 1-(1-<ce><b1>)^(1/<em>m</em>)</b1></ce></b1></ce></p>
 </blockquote>
 </section></section><section id="holms-step-down-procedure" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="holms-step-down-procedure">Holm’s Step-Down Procedure</h2>
 <p>The Holm-Bonferroni method is also fairly simple to calculate, but it is more powerful than the single-step Bonferroni.</p>
@@ -334,7 +340,7 @@ H4: = 0.04<br></p>
 <p>Step 4: Repeat the HB formula for the second rank and keep going until we find <span class="math inline">\(H{_N}\)</span> &gt; <span class="math inline">\(HB{_N}\)</span>. All subsequent hypotheses are non-significant (i.e.&nbsp;not rejected).</p>
 </section><section id="hochbergs-step-up-procedure" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="hochbergs-step-up-procedure">Hochberg’s Step-Up Procedure</h2>
 <p>More powerful than Holm’s step-down procedure, Hochberg’s step-up procedure also seeks to control the FDR and follows a similar process, only p-values are ranked from largest to smallest.</p>
-<p>For each ranked p-value, it is compared to the α calculated for its respective rank (same formula as Holm’s procedure). Testing continues until you reach the first non-rejected hypothesis. You would then fail to reject all following hypotheses.</p>
+<p>For each ranked p-value, it is compared to the <ce><b1> calculated for its respective rank (same formula as Holm’s procedure). Testing continues until you reach the first non-rejected hypothesis. You would then fail to reject all following hypotheses.</b1></ce></p>
 </section><section id="example" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="example">Example</h2>
 <div class="cell" data-output-location="slide">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>rna <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data/data_rna_protein.csv.gz"</span>)) <span class="sc">|&gt;</span><span class="fu">select</span>(iDUX4_pval)</span>
@@ -418,27 +424,25 @@ H4: = 0.04<br></p>
 <span>  <span class="fu">mutate_all</span><span class="op">(</span><span class="fu">funs</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log2</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span><span class="co"># log2 transform</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># matrix</span></span>
 <span></span>
-<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">d</span><span class="op">$</span><span class="va">gene_symbol</span></span>
-<span></span>
 <span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html">scale</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="co"># scale</span></span>
 <span></span>
-<span></span>
 <span><span class="co"># pairwise pearson correlation</span></span>
-<span><span class="va">p</span> <span class="op">&lt;-</span> </span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="op">?</span><span class="op">?</span><span class="op">?</span></span>
 <span></span>
 <span><span class="co"># heatmap</span></span>
-<span><span class="fu">pheatmap</span><span class="op">(</span>mat <span class="op">=</span> <span class="va">p</span>,</span>
-<span>         clustering_distance_rows <span class="op">=</span> <span class="st">"??"</span>,</span>
-<span>         clustering_distance_cols <span class="op">=</span> <span class="st">"??"</span>,</span>
-<span>         clustering_method <span class="op">=</span> <span class="st">"??"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu">pheatmap</span><span class="op">(</span></span>
+<span>  mat <span class="op">=</span> <span class="va">p</span>,</span>
+<span>  clustering_distance_rows <span class="op">=</span> <span class="st">"??"</span>,</span>
+<span>  clustering_distance_cols <span class="op">=</span> <span class="st">"??"</span>,</span>
+<span>  clustering_method <span class="op">=</span> <span class="st">"??"</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section><section id="pca-1" class="level2"><h2 class="anchored" data-anchor-id="pca-1">PCA</h2>
 <p>PCA is a common dimensionality reduction method that is used to visualize the similarity and differences in your data.</p>
 <p><strong>Let’s watch this fantastic 5 minute video explaining PCA</strong></p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/HMOI_lkzW08" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="">
-</iframe>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/HMOI_lkzW08" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
 <p>For more detailed explanations go <a href="https://www.nature.com/articles/nbt0308-303">here</a> and <a href="https://liorpachter.wordpress.com/2014/05/26/what-is-principal-component-analysis/">here</a>.</p>
 </section><section id="pca-2" class="level2"><h2 class="anchored" data-anchor-id="pca-2">PCA</h2>
 <div class="cell" data-output-location="column-fragment">
@@ -455,23 +459,34 @@ H4: = 0.04<br></p>
 <span><span class="va">pca_data_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pca_data_info</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># we make a dataframe out of the rotations and will use this to plot</span></span>
-<span><span class="va">pca_plot_data</span> <span class="op">&lt;-</span> <span class="va">pc</span><span class="op">$</span><span class="va">rotation</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span><span class="va">pca_plot_data</span> <span class="op">&lt;-</span> <span class="va">pc</span><span class="op">$</span><span class="va">rotation</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">rownames_to_column</span><span class="op">(</span>var <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">separate</span><span class="op">(</span>col <span class="op">=</span> <span class="va">ID</span>, into <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"time"</span>,<span class="st">"rep"</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span></span>
+<span>  <span class="fu">separate</span><span class="op">(</span></span>
+<span>    <span class="va">ID</span>,</span>
+<span>    into <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"time"</span>,<span class="st">"rep"</span><span class="op">)</span>,</span>
+<span>    sep <span class="op">=</span> <span class="st">"_"</span></span>
+<span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># recode "rep"</span></span>
-<span><span class="va">pca_plot_data</span><span class="op">$</span><span class="va">rep</span> <span class="op">&lt;-</span> <span class="fu">recode</span><span class="op">(</span><span class="va">pca_plot_data</span><span class="op">$</span><span class="va">rep</span>,</span>
-<span>                            rep1 <span class="op">=</span> <span class="st">"A"</span>,</span>
-<span>                            rep2 <span class="op">=</span> <span class="st">"B"</span>,</span>
-<span>                            rep3 <span class="op">=</span> <span class="st">"C"</span><span class="op">)</span></span>
+<span><span class="va">pca_plot_data</span><span class="op">$</span><span class="va">rep</span> <span class="op">&lt;-</span> <span class="fu">recode</span><span class="op">(</span></span>
+<span>  <span class="va">pca_plot_data</span><span class="op">$</span><span class="va">rep</span>,</span>
+<span>  rep1 <span class="op">=</span> <span class="st">"A"</span>,</span>
+<span>  rep2 <span class="op">=</span> <span class="st">"B"</span>,</span>
+<span>  rep3 <span class="op">=</span> <span class="st">"C"</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># gsub hour</span></span>
-<span><span class="va">pca_plot_data</span><span class="op">$</span><span class="va">time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span>pattern <span class="op">=</span> <span class="st">"hour"</span>,</span>
-<span>                           replacement <span class="op">=</span> <span class="st">""</span>,</span>
-<span>                           x <span class="op">=</span> <span class="va">pca_plot_data</span><span class="op">$</span><span class="va">time</span><span class="op">)</span></span>
+<span><span class="va">pca_plot_data</span><span class="op">$</span><span class="va">time</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span></span>
+<span>  pattern <span class="op">=</span> <span class="st">"hour"</span>,</span>
+<span>  replacement <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  x <span class="op">=</span> <span class="va">pca_plot_data</span><span class="op">$</span><span class="va">time</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">pca_plot_data</span>, mapping <span class="op">=</span> <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">PC1</span>, y <span class="op">=</span> <span class="va">PC2</span>, color<span class="op">=</span><span class="va">time</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="fu">ggplot</span><span class="op">(</span></span>
+<span>  <span class="va">pca_plot_data</span>, </span>
+<span>  <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">PC1</span>, y <span class="op">=</span> <span class="va">PC2</span>, color<span class="op">=</span><span class="va">time</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">xlab</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PC1, %"</span>,<span class="fl">100</span> <span class="op">*</span> <span class="va">pca_data_info</span><span class="op">[</span><span class="st">"Proportion of Variance"</span>,<span class="st">"PC1"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ylab</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"PC2, %"</span>,<span class="fl">100</span> <span class="op">*</span> <span class="va">pca_data_info</span><span class="op">[</span><span class="st">"Proportion of Variance"</span>,<span class="st">"PC2"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
@@ -518,37 +533,41 @@ H4: = 0.04<br></p>
 </section><section id="lets-cluster-once-to-see" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="lets-cluster-once-to-see">Let’s cluster once to see</h2>
 <div class="cell" data-output-location="slide">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">33</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span> <span class="fu">pheatmap</span>(<span class="at">mat =</span> x,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">clustering_distance_rows =</span> <span class="st">"euclidean"</span>,</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">clustering_method =</span> <span class="st">"ward.D2"</span>,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">kmeans_k =</span> ??,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">cluster_cols =</span> F,</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">scale =</span> <span class="st">"none"</span>)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>tmp<span class="sc">$</span>kmeans<span class="sc">$</span>tot.withinss</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span> <span class="fu">pheatmap</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mat =</span> x,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">clustering_distance_rows =</span> <span class="st">"euclidean"</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">clustering_method =</span> <span class="st">"ward.D2"</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">kmeans_k =</span> ??,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">cluster_cols =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">scale =</span> <span class="st">"none"</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>tmp<span class="sc">$</span>kmeans<span class="sc">$</span>tot.withinss</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section><section id="functions-in-r" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="functions-in-r">Functions in R</h2>
 <p><img src="https://www.learnbyexample.org/wp-content/uploads/r/r-function-syntax.png" class="img-fluid"></p>
 </section><section id="create-function-to-calculate-wss" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="create-function-to-calculate-wss">Create function to calculate wss</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>wss <span class="ot">&lt;-</span> <span class="cf">function</span>(knum) {</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  ph <span class="ot">&lt;-</span> <span class="fu">pheatmap</span>(<span class="at">mat =</span> x,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">kmeans_k =</span> ??,</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">scale =</span> <span class="st">"none"</span>,</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">cluster_cols =</span> F,</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">clustering_distance_rows =</span> <span class="st">"euclidean"</span>,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">clustering_method =</span> <span class="st">"ward.D2"</span>,</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">silent =</span> T)</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(ph<span class="sc">$</span>kmeans<span class="sc">$</span>tot.withinss)</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">wss</span>(<span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  ph <span class="ot">&lt;-</span> <span class="fu">pheatmap</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mat =</span> x,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">kmeans_k =</span> ??,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">scale =</span> <span class="st">"none"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">cluster_cols =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">clustering_distance_rows =</span> <span class="st">"euclidean"</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">clustering_method =</span> <span class="st">"ward.D2"</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">silent =</span> <span class="cn">TRUE</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(ph<span class="sc">$</span>kmeans<span class="sc">$</span>tot.withinss)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="fu">wss</span>(<span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section><section id="find-the-elbow" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="find-the-elbow">find the elbow</h2>
 <div class="cell" data-output-location="fragment">
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">tibble</span><span class="op">(</span>wss<span class="op">=</span><span class="fu">map_vec</span><span class="op">(</span><span class="fl">2</span><span class="op">:</span><span class="fl">15</span>,<span class="va">wss</span><span class="op">)</span>,</span>
-<span>       k<span class="op">=</span><span class="fl">2</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>       k<span class="op">=</span><span class="fl">2</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">.</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">k</span>, y<span class="op">=</span><span class="va">wss</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_cowplot</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -556,18 +575,21 @@ H4: = 0.04<br></p>
 </section><section id="final-clustering" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="final-clustering">Final clustering</h2>
 <div class="cell" data-output-location="fragment">
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">33</span><span class="op">)</span></span>
-<span><span class="va">c</span> <span class="op">&lt;-</span> <span class="fu">pheatmap</span><span class="op">(</span>mat <span class="op">=</span> <span class="va">x</span>,</span>
-<span>         clustering_distance_rows <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
-<span>         clustering_method <span class="op">=</span> <span class="st">"ward.D2"</span>,</span>
-<span>         kmeans_k <span class="op">=</span> <span class="fl">7</span>,</span>
-<span>         cluster_cols <span class="op">=</span> <span class="cn">F</span>,</span>
-<span>         scale <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
+<span><span class="va">c</span> <span class="op">&lt;-</span> <span class="fu">pheatmap</span><span class="op">(</span></span>
+<span>  mat <span class="op">=</span> <span class="va">x</span>,</span>
+<span>  clustering_distance_rows <span class="op">=</span> <span class="st">"euclidean"</span>,</span>
+<span>  clustering_method <span class="op">=</span> <span class="st">"ward.D2"</span>,</span>
+<span>  kmeans_k <span class="op">=</span> <span class="fl">7</span>,</span>
+<span>  cluster_cols <span class="op">=</span> <span class="cn">F</span>,</span>
+<span>  scale <span class="op">=</span> <span class="st">"none"</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">cg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Cluster<span class="op">=</span><span class="va">c</span><span class="op">$</span><span class="va">kmeans</span><span class="op">$</span><span class="va">cluster</span>,</span>
-<span>                gene_symbol<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">c</span><span class="op">$</span><span class="va">kmeans</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span></span>
-<span>                <span class="op">)</span></span>
+<span><span class="va">cg</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span></span>
+<span>  Cluster<span class="op">=</span><span class="va">c</span><span class="op">$</span><span class="va">kmeans</span><span class="op">$</span><span class="va">cluster</span>,</span>
+<span>  gene_symbol<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">c</span><span class="op">$</span><span class="va">kmeans</span><span class="op">$</span><span class="va">cluster</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">cd</span> <span class="op">&lt;-</span> <span class="fu">left_join</span><span class="op">(</span><span class="va">d</span>, <span class="va">cg</span>, by<span class="op">=</span><span class="st">"gene_symbol"</span><span class="op">)</span> <span class="op">|&gt;</span><span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="va">cd</span> <span class="op">&lt;-</span> <span class="fu">left_join</span><span class="op">(</span><span class="va">d</span>, <span class="va">cg</span>, by<span class="op">=</span><span class="st">"gene_symbol"</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section><section id="which-clusters-contains-dux4-targets" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="which-clusters-contains-dux4-targets">Which cluster(s) contains DUX4 targets?</h2>
 <p><a href="https://www.youtube.com/watch?v=udyAvvaMjfM">Fisher’s Exact Test and the Hypergeometric Distribution</a></p>
@@ -584,8 +606,8 @@ H4: = 0.04<br></p>
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                       <span class="at">genome.size =</span> ??)</span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="fu">getMatrix</span>(gom.duxclust, <span class="st">"pval"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="fu">getMatrix</span>(gom.duxclust, <span class="st">"pval"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">t</span>() <span class="sc">|&gt;</span></span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
 <span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"clust"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.tibble</span>() <span class="sc">|&gt;</span></span>
