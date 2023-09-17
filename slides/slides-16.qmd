@@ -3,6 +3,20 @@ title: "Mapping chromatin structure and transactions"
 author: "Jay Hesselberth"
 ---
 
+## Final Projects
+
+Throughout the DNA and RNA blocks will refer to several data sets that might be good starting points for your final project (worth 20% of your grade).
+
+We will ask for a sketch of the rough plan for a final project by the end of week 7 (Fri Oct 13). In addition, if you 
+plan to work in a group, we'd like to know who you will be working with.
+
+**Final projects will be due Friday Nov 3. We will schedule short (5 minute) talks by each group on Oct 30 and Nov 1.**
+
+::: {.nonincremental}
+- [Final project overview](https://rnabioco.github.io/molb-7950/course-info/final-projects.html)
+- [DNA block resources](https://rnabioco.github.io/molb-7950/resources/block-dna-resources.html)
+:::
+
 ## Gene regulation by chromatin
 
 ::: {layout-ncol=3 layout-valign="center"}
@@ -68,6 +82,7 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 -   Tn5 transposase catalyzes "cut-and-paste" insertion of DNA into a target
 -   In ATAC ("Assay for Transposase-Accessible Chromatin"), the transposase enzymes are loaded with DNA sequencing adaptors (blue and red in the image), so the products of transposition are ready to PCR.
 -   **Single turnover enzyme** that acts on accessible DNA.
+- Requires about ~60 bp of accessible for transposition.
 :::
 
 ::: {.column width="50%"}
@@ -81,11 +96,11 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 |------------------|:----------------:|:----------------:|:-----------------:|
 | **Genome representation** |                Most active regions                |                                                  Most active regions                                                  |            Whole genome            |
 | **Ease of experiment**    |                  Very difficult                   |                                                      Easy peasy                                                       |           One day's work           |
-| **What is profiled?**     | Accessible DNA, "footprints" at low cut frequency | Accessible DNA. Not really "footprints" (see Tn5 structure), single turnover enzyme, so fragments are not informative | Protections of TFs and nucleosomes |
+| **What is profiled?**     | Accessible DNA, "footprints" at low cut frequency | Accessible DNA. Not really "footprints", single turnover enzyme, so fragments are not informative | Protections of TFs and nucleosomes |
 
 # Experimental details
 
-## 
+##
 
 ![](../img/block-dna/footprinting-exp-overview.png)
 
@@ -97,7 +112,7 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 
 ## Experimental workflow 
 
-![](../img/block-dna/exp-outline.png)
+![](../img/block-dna/acc-workflow.png)
 
 # Data structures and tools used for analysis of chromatin mapping experiments
 
@@ -139,13 +154,52 @@ in a compressed, indexed format.
 
 ## Interval analysis {.smaller}
 
+:::: {.columns}
+
+::: {.column width="50%"}
 The primary tool in the genome interval analysis is [BEDtools](https://bedtools.readthedocs.io/en/latest/) -- it's the 
 Swiss-army knife of internal analysis. 
 
 We wrote an R package called [valr](https://rnabioco.github.io/valr/) that provides the same tools, but you don't need to 
-leave RStudio. 
+leave RStudio. valr contains tools for reading and manipulating genome intervals.
 
-valr contains tools for reading and manipulating genome intervals.
+`bed_intersect()` is a fundamental operation. It identifies intervals from two tibbles that intersect and reports their overlaps.
+
+Let's take a look at that it does.
+:::
+
+::: {.column width="50%"}
+![](../img/block-dna/intersect-glyph.png)
+:::
+
+::::
+
+## `bed_intersect()` example {.smaller}
+
+```{r}
+#| label: bed-intersect
+#| echo: true
+#| output-location: column
+library(valr)
+library(dplyr)
+
+x <- tribble(
+  ~chrom, ~start, ~end,
+  "chr1", 25, 50,
+  "chr1", 100, 125
+)
+
+y <- tribble(
+  ~chrom, ~start, ~end,
+  "chr1", 30,     75
+)
+
+bed_intersect(x, y)
+```
+
+## valr example
+
+You can use `read_bed()` and related functions to load genome annotations and signals.
 
 ```{r}
 #| label: valr-example
@@ -153,28 +207,30 @@ valr contains tools for reading and manipulating genome intervals.
 library(valr)
 
 snps <- read_bed(
-  valr_example("hg19.snps147.chr22.bed.gz"),
-  n = 6
+  valr_example("hg19.snps147.chr22.bed.gz")
 )
 
 genes <- read_bed(
-  valr_example("genes.hg19.chr22.bed.gz"),
-  n = 6
+  valr_example("genes.hg19.chr22.bed.gz")
 )
 ```
 
-## {.smaller}
+::: aside
+We'll also use the valr functions `read_bedgraph()` and `read_bigwig()`.
+:::
+
+## What is in `snps` and `genes`? {.smaller}
 
 ```{r}
 #| echo: true
 #| output-location: column
-snps
+head(snps)
 ```
 
 ```{r}
 #| echo: true
 #| output-location: column
-genes
+head(genes)
 ```
 
 ## Interval manipulation {.smaller}
@@ -191,7 +247,14 @@ intergenic <- bed_subtract(snps, genes)
 nearby <- bed_closest(intergenic, genes)
 ```
 
+. . .
+
+Take a look at the `intergenic` and `nearby` objects in the console.
+
 ## Interval manipulation {.smaller}
+
+Now that you have overlaps and distances between SNPs and genes, you can 
+go back to dplyr tools to generate reports.
 
 ```{r}
 #| label: valr-dplyr
