@@ -657,7 +657,7 @@ chr7 127477031 127478198 Neg2 0  -</code></pre>
 <span id="cb2-15"><a href="#cb2-15"></a><span class="fu">bed_intersect</span>(x, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 x 6
+<pre><code># A tibble: 1 × 6
   chrom start.x end.x start.y end.y .overlap
   &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;    &lt;int&gt;
 1 chr1       25    50      30    75       20</code></pre>
@@ -672,12 +672,14 @@ chr7 127477031 127478198 Neg2 0  -</code></pre>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="fu">library</span>(valr)</span>
 <span id="cb4-2"><a href="#cb4-2"></a></span>
 <span id="cb4-3"><a href="#cb4-3"></a>snps <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
-<span id="cb4-4"><a href="#cb4-4"></a>  <span class="fu">valr_example</span>(<span class="st">"hg19.snps147.chr22.bed.gz"</span>)</span>
-<span id="cb4-5"><a href="#cb4-5"></a>)</span>
-<span id="cb4-6"><a href="#cb4-6"></a></span>
-<span id="cb4-7"><a href="#cb4-7"></a>genes <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
-<span id="cb4-8"><a href="#cb4-8"></a>  <span class="fu">valr_example</span>(<span class="st">"genes.hg19.chr22.bed.gz"</span>)</span>
-<span id="cb4-9"><a href="#cb4-9"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-4"><a href="#cb4-4"></a>  <span class="fu">valr_example</span>(<span class="st">"hg19.snps147.chr22.bed.gz"</span>),</span>
+<span id="cb4-5"><a href="#cb4-5"></a>  <span class="at">n_fields =</span> <span class="dv">6</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>)</span>
+<span id="cb4-7"><a href="#cb4-7"></a></span>
+<span id="cb4-8"><a href="#cb4-8"></a>genes <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
+<span id="cb4-9"><a href="#cb4-9"></a>  <span class="fu">valr_example</span>(<span class="st">"genes.hg19.chr22.bed.gz"</span>),</span>
+<span id="cb4-10"><a href="#cb4-10"></a>  <span class="at">n_fields =</span> <span class="dv">6</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 <aside><div>
@@ -690,15 +692,15 @@ chr7 127477031 127478198 Neg2 0  -</code></pre>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="fu">head</span>(snps)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 x 6
-  chrom    start      end X4             X5 X6   
-  &lt;chr&gt;    &lt;int&gt;    &lt;int&gt; &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;
-1 chr22 16053247 16053248 rs587721086     0 +    
-2 chr22 16053443 16053444 rs80167676      0 +    
-3 chr22 16055964 16055965 rs587706951     0 +    
-4 chr22 16069373 16069374 rs2154787       0 +    
-5 chr22 16069782 16069783 rs1963212       0 +    
-6 chr22 16100513 16100514 rs8140563       0 +    </code></pre>
+<pre><code># A tibble: 6 × 6
+  chrom    start      end name        score strand
+  &lt;chr&gt;    &lt;int&gt;    &lt;int&gt; &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; 
+1 chr22 16053247 16053248 rs587721086 0     +     
+2 chr22 16053443 16053444 rs80167676  0     +     
+3 chr22 16055964 16055965 rs587706951 0     +     
+4 chr22 16069373 16069374 rs2154787   0     +     
+5 chr22 16069782 16069783 rs1963212   0     +     
+6 chr22 16100513 16100514 rs8140563   0     +     </code></pre>
 </div>
 </div>
 </div>
@@ -707,15 +709,15 @@ chr7 127477031 127478198 Neg2 0  -</code></pre>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="fu">head</span>(genes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 x 6
-  chrom    start      end X4           X5 X6   
-  &lt;chr&gt;    &lt;int&gt;    &lt;int&gt; &lt;chr&gt;     &lt;dbl&gt; &lt;chr&gt;
-1 chr22 16150259 16193004 AK022914      8 -    
-2 chr22 16162065 16172265 LINC00516     3 +    
-3 chr22 16179617 16181004 BC017398      1 -    
-4 chr22 16239287 16239327 DQ590589      1 +    
-5 chr22 16240245 16240277 DQ573684      1 -    
-6 chr22 16240300 16240340 DQ595048      1 -    </code></pre>
+<pre><code># A tibble: 6 × 6
+  chrom    start      end name      score strand
+  &lt;chr&gt;    &lt;int&gt;    &lt;int&gt; &lt;chr&gt;     &lt;chr&gt; &lt;chr&gt; 
+1 chr22 16150259 16193004 AK022914  8     -     
+2 chr22 16162065 16172265 LINC00516 3     +     
+3 chr22 16179617 16181004 BC017398  1     -     
+4 chr22 16239287 16239327 DQ590589  1     +     
+5 chr22 16240245 16240277 DQ573684  1     -     
+6 chr22 16240300 16240340 DQ595048  1     -     </code></pre>
 </div>
 </div>
 </div>
@@ -746,20 +748,20 @@ chr7 127477031 127478198 Neg2 0  -</code></pre>
 <span id="cb10-5"><a href="#cb10-5"></a>  <span class="fu">filter</span>(<span class="fu">abs</span>(.dist) <span class="sc">&lt;</span> <span class="dv">5000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1,047 x 2
-   .overlap .dist
-      &lt;int&gt; &lt;int&gt;
- 1        0  2579
- 2        0  -268
- 3        0  -913
- 4        0  -953
- 5        0 -1399
- 6        0  4750
- 7        0  3558
- 8        0  3309
- 9        0  2745
-10        0 -1778
-# i 1,037 more rows</code></pre>
+<pre><code># A tibble: 1,047 × 4
+   name.x      name.y   .overlap .dist
+   &lt;chr&gt;       &lt;chr&gt;       &lt;int&gt; &lt;int&gt;
+ 1 rs530458610 P704P           0  2579
+ 2 rs2261631   P704P           0  -268
+ 3 rs570770556 POTEH           0  -913
+ 4 rs538163832 POTEH           0  -953
+ 5 rs190224195 POTEH           0 -1399
+ 6 rs2379966   DQ571479        0  4750
+ 7 rs142687051 DQ571479        0  3558
+ 8 rs528403095 DQ571479        0  3309
+ 9 rs555126291 DQ571479        0  2745
+10 rs5747567   DQ571479        0 -1778
+# ℹ 1,037 more rows</code></pre>
 </div>
 </div>
 </div>
