@@ -13,26 +13,23 @@ library(janitor)
 library(here)
 ```
 
-
-
 ```{r}
-ang <- read_csv("~/Downloads/edger.csv.gz") %>%
-  clean_names() %>%
-  filter(fdr < 0.05) %>%
-  select(log_fc_time0_25:log_fc_time8) %>%
+ang <- read_csv(here("data/bootcamp/edger.csv.gz")) |>
+  clean_names() |>
+  filter(fdr < 0.05) |>
+  select(log_fc_time0_25:log_fc_time8) |>
   as.matrix()
 
 colnames(ang) <- gsub(pattern = "log_fc_", "", colnames(ang))
 ```
 
-
 ## Problem \# 1
 
 Make sure to run the chunk above. The data represent the avg fold change in gene expression for an angiotensin II time course (.25, .5, .75, 1, 1.5, 2, 3, 4, 6, 8, 24 hrs) compared to unstimulated.
 
-## correlation 
-Create hierarchical clustering heatmap of pairwise pearson correlation coefficients. And provide 1-2 observations. 
+## correlation
 
+Create hierarchical clustering heatmap of pairwise pearson correlation coefficients. And provide 1-2 observations.
 
 ```{r}
 # scale
@@ -53,8 +50,9 @@ pheatmap(
 
 Timepoints close to each other tend to correlate strongly with each other. The 4,6, and 8 hr time points are the most different from all others.
 
-## PCA 
-Perform PCA and visualize PC1 vs PC2.Provide 1-2 observations. 
+## PCA
+
+Perform PCA and visualize PC1 vs PC2.Provide 1-2 observations.
 
 ```{r}
 # pca
@@ -133,10 +131,10 @@ ggplot(data = n, aes(x = targets)) +
 
 ### What is the p-value?
 
-p < 0.001
- 
+p \< 0.001
+
 ### What is your interpretation?
 
-The null hypothesis that the number of DUX4 targets in c5t can be explained by chance - IS NOT WELL SUPPORTED. 
+The null hypothesis that the number of DUX4 targets in c5t can be explained by chance - IS NOT WELL SUPPORTED.
 
 The number of DUX4 targets in c5t CANNOT be explained by chance.
