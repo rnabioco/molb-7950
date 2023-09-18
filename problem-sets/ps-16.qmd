@@ -1,0 +1,75 @@
+---
+title: "DNA Block - Problem Set 16"
+---
+
+## Problem Set
+
+You have two tasks for this problem set.
+
+1. Read the two papers in the [preparation](prepare/prepare-17.qmd) document before class on Wed.
+
+2. Look over the vignettes for the software in the preparation document. Use valr to complete the tasks below. These problems are due Wed at 5pm.
+
+Each problem below is worth **5 points**.
+
+## Setup
+
+Load libraries you'll need for analysis below.
+
+```{r}
+#| label: load-libs
+library(tidyverse)
+library(valr)
+```
+
+## Question 1 -- 5 points
+
+We'll work with a few different files for the next questions.
+
+- `hg19.refGene.chr22.bed.gz` is a BED12 file containing gene (mRNA) information for chr22.
+- `hg19.rmsk.chr22.bed.gz` is a BED6 containing repetitive elements in the human genome.
+- `hg19.dnase1.bw` is a bigWig file containing DNaseI signal.
+
+You can find the path to each with `valr_example()`. Load each one invdividually using the `read_*` functions.
+
+```{r}
+#| label: read-files
+```
+
+Some valr functions require a "genome" file, which is just a tibble of chromosome names and sizes.
+
+The hg19 genome file is available at `valr_example("hg19.chrom.sizes.gz")`. Use `read_genome()` to load it.
+
+Inspect the tibble. How many columns does it have? What is the largest chromosome?
+
+```{r}
+#| label: read-genome
+```
+
+## Question 2 -- 5 points
+ 
+Which repeat class covers the largest amount of chromosome 22?
+
+```{r}
+#| label: repeats
+```
+
+## Question 3 -- 5 points
+
+Which promoter has the highest DNase I accessibility?
+
+1. Use the `create_tss()` function to generate transcription start sites from the refGene annotations. How be are these intervals?
+2. Generate some promoter regions with `bed_slop()`, adding 500 bp up- and downstream of the TSS. `bed_slop()` requires the genome file above.
+3. Use `bed_map()` to calculate the total (i.e., summed) DNase I signal in the promoters (the `score` column in the DNase file).
+
+Which gene has the highest DNase I in the regions you defined above?
+
+```{r}
+#| label: tss-acc
+```
+
+## Submit
+
+Be sure to click the "Render" button to render the HTML output.
+
+Then paste the URL of this Posit Cloud project into the problem set on Canvas.
