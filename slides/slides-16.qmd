@@ -140,17 +140,32 @@ chr7 127477031 127478198 Neg2 0  -
 
 ---
 
-### wig / bedGraph {.smaller}
+### WIG / bedGraph {.smaller}
 
-- Used to store interval *signals*.
+:::: {.columns}
+::: {.column width="50%" .nonincremental}
+- WIG and bedGraph store interval *signals*.
 
   * Genome sequencing coverage
   * Coverage of reads from MNase / ATAC-seq
-  
-- bigWig is a binary form of WIG, used to store large amounts of signal
-in a compressed, indexed format.
 
 - Many studies will provide genome-scale data in these formats
+:::
+
+::: {.column width="50%"}
+```
+chr19 49302000 49302300 -1.0
+chr19 49302300 49302600 -0.75
+chr19 49302600 49302900 -0.50
+chr19 49302900 49303200 -0.25
+```
+:::
+::::
+
+::: aside
+bigWig is a binary form of WIG, used to store large amounts of signal
+in a compressed, indexed format.
+:::
 
 ## Interval analysis {.smaller}
 
@@ -161,7 +176,7 @@ The primary tool in the genome interval analysis is [BEDtools](https://bedtools.
 Swiss-army knife of internal analysis. 
 
 We wrote an R package called [valr](https://rnabioco.github.io/valr/) that provides the same tools, but you don't need to 
-leave RStudio. valr contains tools for reading and manipulating genome intervals.
+leave RStudio. valr provides the same tools for reading and manipulating genome intervals.
 
 `bed_intersect()` is a fundamental operation. It identifies intervals from two tibbles that intersect and reports their overlaps.
 
@@ -273,3 +288,65 @@ nearby |>
   ) |>
   filter(abs(.dist) < 5000)
 ```
+
+## `bed_map()` example
+
+:::: {.columns}
+
+::: {.column width="50%"}
+`bed_map()` does two things in order: 
+
+::: {.nonincremental}
+1. It identifies intersecting intervals between `x` and `y`
+2. Calculates summary statistics based on the intersection
+:::
+
+A typical use is to count up signals (e.g., coverage from an MNase-seq experiment) over specific regions (e.g., promoter regions).
+:::
+
+::: {.column width="50%"}
+![](../img/block-dna/map-glyph.png)
+:::
+::::
+
+## `bed_map()` example {.smaller}
+
+Copy / paste these into your console.
+
+```{r}
+#| echo: true
+x <- tribble(
+ ~chrom, ~start, ~end,
+ 'chr1', 100,    250,
+ 'chr2', 250,    500
+)
+
+y <- tribble(
+ ~chrom, ~start, ~end, ~value,
+ 'chr1', 100,    250,  10,
+ 'chr1', 150,    250,  20,
+ 'chr2', 250,    500,  500
+)
+```
+
+## `bed_map()` example continued {.smaller}
+
+First examine the intersecting intervals.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+bed_intersect(x, y)
+```
+
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+bed_map(
+  x, y,
+  .sum = sum(value),
+  .count = length(value)
+)
+```
+

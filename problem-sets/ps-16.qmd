@@ -28,9 +28,9 @@ We'll work with a few different files for the next questions.
 
 - `hg19.refGene.chr22.bed.gz` is a BED12 file containing gene (mRNA) information for chr22.
 - `hg19.rmsk.chr22.bed.gz` is a BED6 containing repetitive elements in the human genome.
-- `hg19.dnase1.bw` is a bigWig file containing DNaseI signal.
+- `hg19.dnase1.bw` is a bigWig file containing DNase-seq signal.
 
-You can find the path to each with `valr_example()`. Load each one invdividually using the `read_*` functions.
+You can find the path to each with `valr_example()`. Load each one individually using the valr `read_*` functions.
 
 ```{r}
 #| label: read-files
@@ -48,7 +48,7 @@ Inspect the tibble. How many columns does it have? What is the largest chromosom
 
 ## Question 2 -- 5 points
  
-Which repeat class covers the largest amount of chromosome 22?
+Which repeat class covers the largest amount of chromosome 22? Use dplyr tools to analyze the repeats in `hg19.rmsk.chr22.bed.gz`.
 
 ```{r}
 #| label: repeats
@@ -58,9 +58,9 @@ Which repeat class covers the largest amount of chromosome 22?
 
 Which promoter has the highest DNase I accessibility?
 
-1. Use the `create_tss()` function to generate transcription start sites from the refGene annotations. How be are these intervals?
-2. Generate some promoter regions with `bed_slop()`, adding 500 bp up- and downstream of the TSS. `bed_slop()` requires the genome file above.
-3. Use `bed_map()` to calculate the total (i.e., summed) DNase I signal in the promoters (the `score` column in the DNase file).
+1. Use the valr `create_tss()` function to generate transcription start sites from the BED12 refGene annotations. How big are these intervals?
+2. Generate promoter regions from the TSS with `bed_slop()`, adding 500 bp up- and downstream (i.e., both sides). `bed_slop()` requires the genome file above. How big are the regions now?
+3. Use `bed_map()` to calculate the total (i.e., summed) DNase I signal in the promoters (using the `score` column in the DNase file).
 
 Which gene has the highest DNase I in the regions you defined above?
 
