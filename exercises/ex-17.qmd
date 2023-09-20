@@ -4,7 +4,7 @@ subtitle: "Chromatin-centric measurement of genomic features"
 author: "Jay Hesselberth"
 ---
 
-## Chromatin accessbility patterns and genome function
+## Chromatin accessibility patterns and genome function
 
 This class we'll examine chromatin accessibility patterns and begin to get a sense of what they mean, both at the fine-scale (single base-pair) and across the genome.
 
@@ -19,11 +19,12 @@ library(tidyverse)
 library(cowplot)
 library(here)
 library(patchwork)
+library(broom)
 ```
 
 These are new libraries specifically for genome analysis. You learned about valr and Gviz for your homework.
 
-rtracklayer provides a few utility functions we'll use today, and TxDb.Scerevisiae.UCSC.sacCer3.sgdGene provides gene annotations for the S. cerevisiae genome.
+`rtracklayer` provides a few utility functions we'll use today, and `TxDb.Scerevisiae.UCSC.sacCer3.sgdGene` provides gene annotations for the S. cerevisiae genome.
 
 ```{r}
 #| label: genome-libs
@@ -57,12 +58,13 @@ First, we will determine the fragment size distributions obtained from the two e
 
 I have performed the alignment of paired-end reads and converted all reads into a bed file where each line of the bed file denotes a single fragment from start to end.
 
-First, load the ATAC-seq reads:
+First, load the ATAC-seq reads. They're in a BED file, so we'll use what function from valr?
 
 ```{r}
 #| echo: true
+#| eval: false
 #| output-location: column
-atac_tbl <- read_bed(
+atac_tbl <- read_???(
   here("data/block-dna/yeast_atac_chrII.bed.gz"),
 )
 atac_tbl
@@ -72,14 +74,13 @@ Next, load the MNase reads.
 
 ```{r}
 #| echo: true
+#| eval: false
 #| output-location: column
-mnase_tbl <- read_bed(
+mnase_tbl <- read_???(
   here("data/block-dna/yeast_mnase_chrII.bed.gz")
 )
 mnase_tbl
 ```
-
-Working with a small genome is a huge advantage -- we can study the whole chromosome in this class. d
 
 ## Expectations for chromatin fragment lengths
 
@@ -95,16 +96,19 @@ Let's remind ourselves of the expectations for chromatin fragment lengths from M
 
 ## Length distributions of chromatin-derived DNA fragments
 
-For the MNase-seq BED file, you see that there are only three columns: `chrom`, `start`, and `end`. Calculating fragment length is simple:
+For the MNase-seq BED file, you see that there are only three columns: `chrom`, `start`, and `end`. How do we calculate fragment length?
 
 ```{r}
 #| echo: true
-mutate(mnase_tbl, frag_len = end - start)
+#| eval: false
+mutate(mnase_tbl, frag_len = ___ - ___)
 ```
 
-Let's use this approach to examine the fragment length distribution.
+Let's use this approach to examine the fragment length distribution. First, we'll combine all the MNase and ATAC data into one tibble.
 
 ```{r}
+#| label: density-tbl
+#| eval: false
 #| echo: true
 #| warning: false
 #| output-location: column
@@ -113,14 +117,25 @@ acc_tbl <-
     mutate(mnase_tbl, type = "mnase"),
     mutate(atac_tbl, type = "atac")
   )
+```
 
+Next, we'll make a histogram and facet by the `type` we defined above.
+
+```{r}
+#| label: fig-frag-len-density
+#| echo: true
+#| eval: false
+#| warning: false
+#| output-location: column
 ggplot(
   acc_tbl,
-  aes(x = end - start)
+  # define the x-axis as fragment length
+  aes(x = ___ - ___)
 ) +
   geom_histogram(
-    # single base-pair resolution
-    binwidth = 1
+    # how to define single base-pair resolution?
+    # ?geom_histogram
+    ___ = 1
   ) +
   facet_grid(
     rows = vars(type),
@@ -148,8 +163,9 @@ Let's write a function to calculate densities of the above histogram.
 
 ```{r}
 #| label: fun-frag-len-density
+#| eval: false
 #| echo: true
-fragment_len_hist <- function(tbl) {
+fragment_len_density <- function(tbl) {
     mutate(
       tbl,
       frag_len = end - start
@@ -159,21 +175,26 @@ fragment_len_hist <- function(tbl) {
         frag_len <= 500
     ) |>
     count(frag_len) |>
-    mutate(n_wt = n / sum(n)) |>
-    pull(n_wt)
+    # now, calculate weighted counts
+    mutate(___ = ___ / ___) |>
+    pull(___)
 }
 ```
 
+Now let's use that function to calculate the density of ATAC fragment lengths.
+
 ```{r}
-atac_frag_len_density <- fragment_len_hist(atac_tbl)
+atac_frag_len_density <- fragment_len_density(atac_tbl)
 ```
 
-The `density` slot contains a vector of densities at base-pair resolution. We will use `acf()` to calculate the autocorrelation of these values, and will store the tidied result.
+We now have a vector of densities of fragment lengths at base-pair resolution. We will use `acf()` to calculate the autocorrelation of these values and store the tidied result.
 
 ```{r}
+#| label: acf-calc
+#| eval: false
 #| echo: true
 atac_acf_tbl <-
-  acf(
+  ___(
     atac_frag_len_density,
     lag.max = 40,
     plot = FALSE
@@ -194,7 +215,6 @@ plot_acf <- function(tbl, title) {
     geom_point(size = 2) +
     geom_line() +
     theme_minimal_grid() +
-    geom_vline(xintercept = c(10, 21), color = "red") +
     labs(title = title)
 }
 ```
@@ -204,16 +224,22 @@ plot_atac_acf <- plot_acf(atac_acf_tbl, title = "ATAC ACF")
 plot_atac_acf
 ```
 
-So, it looks like there significant bumps in autocorrelation at 10 and 21 bp positions, indicating that ATAC length distribution is periodic.
+Let's add lines to annotate where we think the inflection points are.
 
-How do we confirm these bumps are interesting? Let's calculate the acf of a negative control -- the length distribution of the MNase data.
+```{r}
+#| eval: false
+# add vertical lines to the plot
+atac_acf_tbl + geom_???(xintercept = c(___, ___), colo = "red")
+```
+
+Let's also compare this to the MNase data, which doesn't seem to have the same pattern.
 
 ```{r}
 #| label: plot-acfs
 #| echo: true
 #| output-location: default
 mnase_frag_len_density <-
-  fragment_len_hist(mnase_tbl)
+  fragment_len_density(mnase_tbl)
 
 mnase_acf_tbl <-
   acf(
@@ -237,9 +263,9 @@ We can see a monotonic decrease in the MNase-seq data, which confirms that the b
 
 ![](../img/block-dna/dna-protein-structures.jpg)
 
-## Visualize read density in genomic region {.smaller}
+## Visualize read density in genomic regions {.smaller}
 
-We will use [Gviz](https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html#2_Basic_Features) to visualize read densities relative to a reference.
+We will use [Gviz](https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html#2_Basic_Features) to visualize read densities relative to a reference sequence.
 
 ### Load tracks
 
@@ -248,13 +274,15 @@ First, we load the gene annotations from the [Saccharomyces Genome Databases](ht
 ```{r}
 #| echo: true
 #| output-location: column
+track_start <- 530000
+track_end <- 540000
 
 sgd_genes <-
   GeneRegionTrack(
     TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,
     chromosome = "chrII",
-    start = 530811,
-    end = 540885,
+    start = track_start,
+    end = track_end,
   )
 
 sgd_genes
@@ -298,8 +326,8 @@ plotTracks(
     mnase_nuc_trk,
     x_axis
   ),
-  from = 530811,
-  to = 540885,
+  from = track_start,
+  to = track_end,
   chromosome = "chrII",
   transcriptAnnotation = "gene",
   shape = "arrow",
@@ -326,7 +354,7 @@ big_wig <- import.bw(here("data/block-dna", file_name))
 data_track <- DataTrack(big_wig, track_name)
 ```
 
-Or we can create a tibble with file and track names, and use purrr to load and convert each one:
+Or we can create a tibble with file and track names, and use purrr to load and convert each one. First, we make a tibble containing file names and paths.
 
 ```{r}
 #| echo: true
@@ -346,6 +374,7 @@ track_info <-
   )
 ```
 
+Then, we use `purrr::map` to "map" the `import.bw()` function onto each item in the `file_path` column, then then convert each of the results into a `DataTrack`.
 
 ```{r}
 track_info <-
@@ -370,8 +399,8 @@ plotTracks(
     sgd_genes,
     track_info$data_track
   ),
-  from = 530811,
-  to = 540885,
+  from = track_start,
+  to = track_end,
   chromosome = "chrII",
   transcriptAnnotation = "gene",
   shape = "arrow",
@@ -388,5 +417,11 @@ Recall this plot:
 Some questions to think about as you look at the tracks:
 
 1.  What is each data set reporting on?
-3.  What are the major differences between MNase-seq and ATAC-seq based on these tracks?
-2.  What can you infer about gene regulation based on these tracks?
+2.  What are the major differences between MNase-seq and ATAC-seq based on these tracks?
+3.  What can you infer about gene regulation based on these tracks?
+
+## Homework
+
+Your homework tonight is to review the material from today. We'll build on these concepts on Friday, and your problem set will integrate all of these concepts.
+
+In particular, you should think a little about what the peaks are in the MNase-seq plot are that appear between \~90-120 bp. Consider the chromatin state at a model gene. What types of chromatin transitions occur during gene expression that might generate these kinds of particles? We'll talk more about this on Friday.
