@@ -41,9 +41,9 @@ First, we need to load relevant files:
 
 ```{r}
 #| label: load-data
+#| eval: false
 yeast_tss <- read_bed(
-  here("data/block-dna/yeast_tss_chrII.bed.gz"),
-  n_fields = 6
+  here("data/block-dna/yeast_tss_chrII.bed.gz")
 )
 
 genome <- read_genome("https://hgdownload.soe.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.chrom.sizes")
@@ -53,9 +53,11 @@ genome <- read_genome("https://hgdownload.soe.ucsc.edu/goldenPath/sacCer3/bigZip
 
 Next we'll load bigWigs for the ATAC and MNase experiments, containing either short or long fragments.
 
-Recall that the information encoded by short an long fragments should be reflected in our interpretations.
+Recall that the information encoded in short and long fragments should be reflected in our interpretations.
 
 ```{r}
+#| label: load-bigwigs
+#| eval: false
 acc_tbl <-
   tibble(
     file_name = c(
@@ -78,25 +80,27 @@ acc_tbl <-
   select(sample_type, big_wig)
 ```
 
-### Setting up regions for a meta-plot
+# Meta-plots
+
+## Setting up regions for a meta-plot
 
 Next, we need to set up some windows for analyzing signal relative to each TSS.
 This is an important step that will ultimately impact our interpretations.
 
-In genomic meta-plots, you first decide on a window size relevant to the you are
-measuring, and then make "windows" around a reference point, spanning some
-distance both up- and downstream. If the features involve gene characteristics,
-we also need to take strand into account.
+In genomic meta-plots, you first decide on a window size relevant to the
+features you are measuring, and then make "windows" around a reference point,
+spanning some distance both up- and downstream. If the features involve gene
+features, we also need to take strand into account.
 
 Reference points could be:
 
 - transcription start or end sites
 - boundaries of exons and introns
-- known enhancers
+- enhancers
 - centromeres and telomeres
 
-The state of genome annotation directly influences the quality of the meta-plot
-or heatmap.
+(The state of genome annotation directly influences the quality of the meta-plot
+or heatmap.)
 
 For small features like transcription factor binding sites (8-20 bp), you might
 set up smaller windows (maybe 1 bp) at a distance \~20 bp up- and downstream of
@@ -104,16 +108,22 @@ a reference point.
 
 For larger features like nucleosome positions or chromatin domains, you might
 set up larger windows (\~200 bp) at distances up to \~10 kbp up- and downstream
-of a reference set.
+of a set of reference points.
 
-### Chromatin accessibility around transcription start sites (TSSs)
+## Metaplot workflow
+
+![Metaplot workflow overview](../img/block-dna/metaplot-workflow.png)
+
+## Chromatin accessibility around transcription start sites (TSSs)
 
 ```{r}
 #| label: create-tss-coords
+#| eval: false
 region_size_total <- 1500
 region_size_half <- region_size_total / 2
 win_size <- 10
 
+# need a function that generates a sequence of numbers
 win_coords <- seq(
   -region_size_half,
   region_size_half,
@@ -121,9 +131,19 @@ win_coords <- seq(
 )
 ```
 
-Next, we'll use two functions from valr that expand the window of the reference
-point (`bed_slop()`) and then break those windows into evenly spaced segments
-(`bed_makewindows()`), assigning a unique ID to each.
+Next, we'll use two valr functions to expand the window of the reference
+point (`bed_slop()`) and then break those windows into evenly spaced intervals 
+(`bed_makewindows()`).
+
+```{r}
+#| label: tss-slop-mw
+#| eval: false
+yeast_tss |>
+  bed_slop(genome, both = region_size_half) |>
+  bed_makewindows(win_size = win_size)
+```
+
+At this point, we also address the fact that the TSS data are stranded. Can someone describe what the issue is here, based on the figure above?
 
 ```{r}
 #| label: create-tss-windows
@@ -141,9 +161,8 @@ tss_win_tbl <-
   select(-.win_id, -score, -strand)
 ```
 
-This next step uses the magic of another valr function, `bed_map()`, to
-calculate a summary statistic for each window by intersecting with signals from
-the bigWig files.
+This next step uses valr `bed_map()`, to calculate the total signal for each
+window by intersecting signals from the bigWig files.
 
 ```{r}
 #| label: map-signals
@@ -195,7 +214,7 @@ ggplot(
     y = win_mean
   )
 ) +
-  geom_line(size = 1, color = "red") +
+  geom_line(linewidth = 1, color = "red") +
   facet_wrap(
     ~sample_type,
     nrow = 2,
@@ -227,6 +246,8 @@ ggplot(
 
 - What are the differences in ATAC and MNase treatments that lead to these distinctive patterns?
 
+# Heatmaps
+
 ## Heatmap of signals around TSSs
 
 To generate a heatmap, we need to reformat our data slightly.
@@ -249,17 +270,19 @@ Or, using dplyr / tidyr:
 ```{r}
 #| label: heatmap-data-tidy
 #| eval: false
-mnase_tbl <- filter(
-  acc_tbl,
-  sample_type == "MNase_Long"
-) |>
-  select(-big_wig) |>
-  unnest(cols = c(tss_win_sum))
+mnase_tbl <-
+  filter(
+    acc_tbl,
+    sample_type == "MNase_Long"
+  ) |>
+    select(-big_wig) |>
+    unnest(cols = c(tss_win_sum))
 ```
 
 Either way, now we need to reformat the data.
 
 ```{r}
+#| label: pivot-heatmap-tbl
 mnase_tbl_wide <-
   mnase_tbl |>
   select(
@@ -285,7 +308,6 @@ Once we have the data reformatted, we just convert to a matrix and feed it to
 #| label: heatmap-matrix-plot
 mnase_mtx <-
   select(mnase_tbl_wide, -name) |>
-  arrange(desc(`150`)) |>
   as.matrix()
 
 ComplexHeatmap::Heatmap(
@@ -293,9 +315,7 @@ ComplexHeatmap::Heatmap(
   cluster_columns = FALSE,
   show_row_dend = FALSE,
   show_column_names = FALSE,
-  show_heatmap_legend = FALSE,
-  width = 4,
-  height = 8
+  show_heatmap_legend = FALSE
 )
 ```
 
