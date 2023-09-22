@@ -3,20 +3,21 @@ title: "Chromatin accessibility II"
 author: "Jay Hesselberth"
 ---
 
-## Genomewide chromatin analysis with meta-plots and heatmaps
+## Genomewide chromatin analysis with metaplots and heatmaps
 
 Last class we saw what the different methods to profile chromatin
 accessibility can tell us about general chromatin structure and possible regulation
 at specific regions in a small portion of a chromosome.
 
-We also want to make sure these conclusions are valid throughout the genome.
-Since we want to keep the file sizes small, we will ask if they are valid across
-an entire chromosome.
+We also want to make sure these conclusions are valid throughout the genome, and today
+we'll discuss two approaches for this: metaplots and heatmaps.
+
+# Metaplots
+
+We will examine aggregated profiles (metaplots) of genomewisde data (e.g., MNase-seq) relative to 
+recurrent features in a genome, like transcription start sites.
 
 ### Load libraries
-
-First we will plot the profiles of all our data sets relative to the
-transcription start site (TSS), where all the action seems to be happening:
 
 ```{r}
 #| label: load-libs
@@ -33,6 +34,9 @@ library(ComplexHeatmap)
 ```
 
 ### Load data
+
+We will examine aggreprofiles of all our data sets relative to the
+transcription start site (TSS), where all the action seems to be happening:
 
 First, we need to load relevant files:
 
@@ -80,24 +84,28 @@ acc_tbl <-
   select(sample_type, big_wig)
 ```
 
-# Meta-plots
-
 ## Setting up regions for a meta-plot
 
-Next, we need to set up some windows for analyzing signal relative to each TSS.
+We need to set up some windows for analyzing signal relative to each TSS.
 This is an important step that will ultimately impact our interpretations.
 
 In genomic meta-plots, you first decide on a window size relevant to the
-features you are measuring, and then make "windows" around a reference point,
-spanning some distance both up- and downstream. If the features involve gene
-features, we also need to take strand into account.
+some points of refernce in the genome you are measuring. 
 
-Reference points could be:
+These reference points could be:
 
 - transcription start or end sites
 - boundaries of exons and introns
 - enhancers
 - centromeres and telomeres
+
+The window size should be relevant the reference points, such that small- or
+large-scale features are emphasized in the plot. Moreover, the window typically
+spans some distance both up- and downstream of the reference points.
+
+Once the window size has been decided, the next step is to make "sub-windows"
+around a reference point. If gene features are involved, we also need to take
+strand into account.
 
 (The state of genome annotation directly influences the quality of the meta-plot
 or heatmap.)
@@ -143,7 +151,8 @@ yeast_tss |>
   bed_???(win_size = win_size)
 ```
 
-At this point, we also address the fact that the TSS data are stranded. Can someone describe what the issue is here, based on the figure above?
+At this point, we also address the fact that the TSS data are stranded. Can
+someone describe what the issue is here, based on the figure above?
 
 ```{r}
 #| label: create-tss-windows
@@ -296,6 +305,7 @@ mnase_tbl_wide <-
     win_coord,
     win_signal
   ) |>
+  # this step is important to sort + and - windows correctly
   arrange(name, win_coord) |>
   replace_na(
     list(win_signal = 0)
@@ -339,3 +349,23 @@ It's worth considering what meta-plots and heatmaps *can* and *can't* tell you.
 looking across many loci at the same time?
 
 4.  What are some hypotheses you can generate based on these plots?
+
+## Utility of metaplots and heatmaps in practice
+
+There are a few specific cases when you should consider using the metaplot /
+heatmap strategy.
+
+If you have data from two different conditions (i.e., plus/minus a transcription
+factor that might change the state of multiple promoters), you could make a
+metaplot for each of the plus and minus conditions, to see of common patterns
+manifest. You might also create a heatmap of the conditions, which might reveal
+smaller groups of affected genes that would be masked by the metaplot
+aggregation.
+
+The approaches are also useful to compare patterns across types of reference points.
+For example, you might examine chromatin marks (measured by CUT&TAG) relative to
+the following: transcription starts, exon starts, exon ends, transcription ends.
+
+  
+  
+
