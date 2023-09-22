@@ -65,8 +65,8 @@ pca_data_info <- summary(pc_ang)$importance |> as.data.frame()
 pca_data_info <- round(x = pca_data_info, digits = 3)
 
 # we make a dataframe out of the rotations and will use this to plot
-pca_plot_data <- pc_ang$rotation %>%
-  as.data.frame() %>%
+pca_plot_data <- pc_ang$rotation |>
+  as.data.frame() |>
   rownames_to_column(var = "ID")
 
 # plot
@@ -104,14 +104,15 @@ c5t <- cd |>
   filter(Cluster == "5" & target == "target") |>
   nrow()
 
-
 sampled_targets <- vector()
 
 for (i in 1:1000) {
-  sampled_targets[i] <- sample_n(tbl = cd, size = c5) %>%
-    group_by(target) %>%
-    tally() %>%
-    filter(target == "target") %>%
+  sampled_targets[i] <- sample_n(tbl = cd, size = c5) |>
+    group_by(target) |>
+    tally() |>
+    # need this so all groups have at least 1.
+    mutate(n = n + 1) |>
+    filter(target == "target") |>
     pull(n)
 }
 
