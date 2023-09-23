@@ -1,0 +1,649 @@
+---
+title: "Single cell RNA-seq I"
+author: "Kent Riemondy"
+---
+
+```{r}
+#| label: load-libs
+#| message: false
+#| echo: false
+library(tidyverse)
+library(cowplot)
+library(here)
+
+library(Seurat)
+library(DropletUtils)
+library(tximport)
+library(eds)
+library(Matrix)
+```
+
+# Overview
+
+Today we will begin a two-course segment on single cell RNA-seq analysis. We will begin with an introduction to single cell RNA-seq data, followed by a discussion of key quality control metrics used to exclude low-quality cells from the data. 
+
+The homework for today will involve calling cells from empty droplets in a new single cell dataset for the first part. The second part will involve selecting cut-offs to further filter low quality cells. These questions are found in single-cell-assignment_1.Rmd
+
+# Droplet based single cell RNA-seq
+
+The most common platform for generating single cell RNA-seq libraries uses a microfluidics device to capture single cells in droplets. A single cell suspension and a suspension of microparticles in lysis buffer with other reagents are flowed through an oil layer which generates droplets. Most droplets will be empty with only a microparticle, but some will have both a cell and particle. Depending on the # of cells loaded, between 1-8% of the cell-containing droplets will have 2 cells. Once encapsulated the cell will begin to lyse and reverse transcription will occur in the droplet. 
+
+![](../img/block-rna/drop-generation.png)
+
+The microparticles contain oligos with a 16 nucleotide 10x genomics cell-barcode (generated from ~3 million possibilities), a Unique Molecular Identifier sequence of 12 nucleotides  (fully randomized 4<sup>12</sup> possibilities), and a oligodT sequence for reverse transcription. 
+
+![](../img/block-rna/cb-umi-scheme.jpg)
+
+Reverse transcription will incorporate the cell barcode, UMI, and through a template switching reaction, a pcr handle at the 5' end. Full-length cDNA is amplified, then fragmented, and additional rounds of PCR are used to generate a cDNA library containing the cell barcode enriched for the 3' end of mRNA due to the poly(A) tail. 
+
+![](../img/block-rna/10x-library-scheme.jpg)
+
+The data that we will analyzing today will be a publicly available dataset provided by 10x genomics. There are numerous  [data sets](https://support.10xgenomics.com/single-cell-gene-expression/datasets) provided that you can also examine if interested. Today's [data set](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/pbmc4k) was generated from peripheral blood mononuclear cells (PBMCs) isolated from a healthy donor. ~4,000 cells were captured and sequenced to a read depth of ~85,000 reads per cell. 
+
+Read depths for droplet single cell datasets are generally ~50k-150K reads per cell. These libraries are very low complexity and additional sequencing will only lead to more PCR duplicates, not additional gene detection.  
+
+## Analysis challenges for single cell RNA-seq
+
+1) *The data sets are big.* This is not an issue for the computer but a challenge for the analyst to interpret the dataset. Droplet-based single cell libraries generally have **1,000 - 10,000 cells** per sample. Functionally this means that we will be analyzing a gene x cell matrix with **20,000 rows X 10,000 (or more) columns**.  We will need to use different approaches for visualizing and interpreting relationships between cells. For example making heatmaps of the pair-wise correlations between 10,000 cells is not a feasible or interpretable approach.  
+
+2) *There are no cell-type labels.* We will need to use unsupervised methods to identify cell types in the dataset. Functionally this means that we will be working with a matrix with column names that are not meaningful until we perform clustering and cell type annotation.
+
+3) *The data is noisy.* The data is very sparse per cell (e.g. 1-4K genes detected per cell). Even highly expressed genes that are actually likely expressed may not be detected in every cell. Need to use techniques to identify interesting biological variation (i.e. signal) while minimizing technical variation (i.e. noise). 
+
+## Analysis steps for single cell data. 
+
+Shown below is a workflow map of the steps involved in analyzing single cell datasets. The steps highlighted in blue are largely designed to generate:  
+
+1) A set of 2-D visualizations that provide an overview of the gene expression similarities (or differences) between cells in the sample.  
+
+2) A set of clustering results that group similar cells into clusters. These clusters can then be annotated as different cell types based on the genes that distinguish them from other cell-types in the data (aka *marker genes*).  
+
+Once cell-types have been established we can then perform downstream analysis as appropriate (examine changes in cellular distribution, identify unexpected heterogeneity or cell types, etc.)  
+
+![](../img/block-rna/analysis_workflow.png)
+
+Often single cell analysis requires an iterative process in order to refine the parameters to most optimally examine the question of interest. It is not uncommon to rerun each step with different parameters.
+
+## Quantifying gene-level counts (UMIs) using Alevin
+
+The first step is processing the raw sequencing reads into a cell x gene matrix containing the UMI counts. 
+
+Alevin ([documentation](https://salmon.readthedocs.io/en/latest/alevin.html) and [publication](https://doi.org/10.1186/s13059-019-1670-y)) is a subcommand of `salmon`.  
+`Alevin` uses the same index that was built for bulk rna-seq. Recall that we made an index that contains **transcript** sequences. 
+
+`Alevin` will use this index to quasi-map reads to transcripts, remove PCR duplicates using the UMI sequence and transcript mapping information, and aggregate the estimated counts to the gene-level.
+
+Similar to using `multiQC`, one can generate interactive QC reports using the  [alevinQC](https://csoneson.github.io/alevinQC/) package from bioconductor. 
+
+![](../img/block-rna/alevinQC_screenshot1.png)
+
+For reference, the PBMC data that we are working with contains ~200,000,000 paired-end reads, which were processed by alevin in ~25 minutes using 4 GB of RAM and 12 CPUs. This makes it feasible to run this step on your own laptop in a few hours. In contrast cellranger from 10x genomics may take >8 hours and require >30Gb of RAM. 
+
+### Working with single cell data in R
+
+Droplet based sequencing will produce samples with 100,000 - 1,000,000 cell barcodes in each experiment. This is because many empty droplets are generated, which will end up with a few reads. Storing a matrix of 20,000 genes x 1,000,000 cell barcodes would require a large amount of of memory (20 billion values). However most of these values (> 95%) are zeros due to many empty barcodes with few UMIs and the low efficiency of single cell library generation (< 10-20% efficient). To limit unnecessary memory usage single cell data matrices are often stored in a `sparseMatrix` format.
+
+```{r}
+# typical dense matrix format
+vals <- c(
+  0, 0, 0, 2, 0,
+  0, 1, 0, 0, 0,
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 1,
+  0, 0, 0, 0, 0
+)
+
+matrix(vals, nrow = 5)
+```
+
+The sparse matrix format only stores non-zero values in the matrix. 
+```{r}
+m <- tibble(
+  row = c(2, 4, 5),
+  col = c(2, 2, 4),
+  value = c(1, 2, 1)
+)
+```
+
+Converting a dense matrix to a sparse matrix can be accomplished using the generic `as` function (which is a common way to convert formats).
+
+```{r}
+#| message: false
+#| warning: false
+sparse <- as(m, "sparseMatrix")
+sparse
+```
+
+Many of the functions that manipulate matrices (e.g. `rowMeans`, `colSums`, `apply`, `[`) can also be used on sparseMatrices, provided that you load the `Matrix` package (e.g `library(Matrix)`).
+
+**Question 1**
+
+How can we see just the first 2 rows and first 3 columns of the sparse matrix `sprase` that we generated above?
+
+```{r}
+# print subset of sparse
+sparse[1:2, 1:3]
+```
+
+**Question 2**
+
+What are the sums of the columns of `sparse`
+
+```{r}
+# find column sums of sparse
+colSums(sparse)
+```
+
+### Reading the alevin output with tximport
+
+Our old-friend, the `tximport` package, has methods for importing the binary data from alevin. We just need to supply the path to the `quants_mat.gz` file. Note that in contrast to importing data from salmon, tximport only allows 1 file to be loaded. If you want to load multiple samples use iteration approaches (e.g. `lapply`, `purrr::map`, a `for` loop). Also note that the [`fishpond`](https://bioconductor.org/packages/release/bioc/html/fishpond.html) package was installed which speeds up the loading of the matrix.
+
+```{r}
+#| label: tximport
+library(tximport)
+tx <- tximport(
+  here("data/block-rna/pbmc/alevin/quants_mat.gz"),
+  type = "alevin"
+)
+names(tx)
+```
+
+`tx` is a list with 3 elements, `abundance`, `counts`, and `countsFromAbundance`. Let's look at the counts element
+
+```{r}
+tx$counts[5:10, 1:3]
+```
+
+Here you can see that `tx$counts` is a sparse matrix that is genes (rows) by cells (columns).
+
+**Question 3**
+How many barcodes are in `tx$counts`? How many genes?
+
+```{r}
+# TODO Find number of barcodes and genes in tx$counts
+dim(tx$counts)
+```
+
+What fraction of the matrix is non-zero? We can use the `nnzero `function from the `Matrix` package check
+
+```{r}
+nnzero(tx$counts) / length(tx$counts) # Length finds total elements (row*col)
+```
+
+## Quality Control: how to distinguish an empty droplet from a cell-containing droplet?
+
+Intuitively the amount of RNA and thus UMIs present in each droplet should be very different between a droplet with a cell versus one without. By plotting the total # of UMIs and rank per droplet we can see if there is a large dropoff in the number of UMIs. 
+
+```{r}
+#| label: cb-umi-plots
+total_umis <- Matrix::colSums(tx$counts) # calculate total # of UMIs per barcode
+ranks <- rank(-total_umis) # rank the umi totals in descending order
+
+cell_counts <- tibble(
+  barcode = colnames(tx$counts),
+  total_umis = total_umis,
+  bc_rank = ranks
+) |>
+  arrange(bc_rank)
+
+# plot on log-log scale
+ggplot(
+  cell_counts,
+  aes(
+    bc_rank,
+    total_umis)
+  ) +
+  geom_point() +
+  scale_x_log10(
+    labels = scales::comma,
+    breaks = c(10, 1000, 10000, 100000)
+  ) +
+  scale_y_log10(labels = scales::comma) +
+  labs(
+    x = "Barcode rank",
+    y = "Total UMIs"
+  )
+```
+
+
+What we'd like to is a clear "knee" in the UMI count distribution where it sharply decreases. There is a clear drop off at ~2,000 UMIs, indicating a clear difference between droplets with cells and without. However we also see a secondary plateau, what does the lower count plateau at ~ 20 UMIs represent?
+
+For reference here is a plot of a poor quality library.
+
+![](../img/block-rna/bad_data.png)
+
+Note that there is no distinction between a cell-containing or empty droplet. 
+
+In order to confidently identify which droplets are cells we will use the `emptydrops()` function from the [DropletUtils](https://bioconductor.org/packages/release/bioc/html/DropletUtils.html) bioconductor package to call cells. (See [manuscript](https://doi.org/10.1186/s13059-019-1662-y) if interested)
+
+To illustrate how it works we will generate a plot with specific points labeled. 
+
+```{r}
+bc_info <- barcodeRanks(tx$counts) # identify the knee and the inflection point
+
+ggplot(
+  cell_counts,
+  aes(
+    bc_rank,
+    total_umis)
+  ) +
+  geom_point() +
+  scale_x_log10(
+    labels = scales::comma,
+    breaks = c(10, 1000, 10000, 100000)
+  ) +
+  scale_y_log10() +
+  geom_hline(
+    yintercept = bc_info@metadata$knee,
+    color = "red",
+    linetype = "dashed"
+  ) +
+  geom_hline(
+    yintercept = bc_info@metadata$inflection,
+    color = "blue",
+    linetype = "dashed"
+  ) +
+  geom_hline(
+    yintercept = 100,
+    color = "orange",
+    linetype = "dashed"
+  ) +
+  labs(
+    x = "Barcode rank",
+    y = "Total UMIs"
+  )
+```
+
+This algorithm works as follows:
+
+1) Identify the point where first derivative is minimized (above some threshold UMI count e.g 100 shown in orange). This is the knee point in red at ~2000 UMIs. Assume all barcodes above this are cells. 
+
+2) Then test barcodes below knee (and above lower cutoff) against the average profile of cells with < 100 UMIs, which represents the "ambient" or background profile. Keep cells if significantly differently from ambient profile.
+
+Alternative approaches will just use the inflection point as the cutoff, which is the second derivative (shown in blue). 
+
+The emptyDrops function can be run as follows and will take a few seconds to run. It will return a data.frame with statistics for each droplet. 
+
+```{r}
+set.seed(42)
+out <- emptyDrops(tx$counts)
+out[1:3, ]
+```
+
+**Question 4**
+How could you learn more about the output columns of `out`?
+
+```{r}
+#| eval: false
+# explore the emptyDrops functions
+?emptyDrops
+```
+
+```{r}
+summary(out$FDR < 0.05)
+```
+
+Now we can subset the large matrix to only keep the cells based on the `FDR` values. 
+```{r}
+mat <- tx$counts[, which(out$FDR < 0.05)]
+```
+
+**Question 5**
+How would you subset the matrix based on cells that have at least 5,000 UMIs?
+
+```{r}
+# subset matrix based on umis
+umi_mat <- tx$counts[, which(out$Total > 5000)]
+```
+
+**Coding aside**
+
+When using logical vectors to subset another `vector`, `matrix`, or `data.frame`, you need to make sure that there are no `NA` values in the logical vector, otherwise R will return `NA` values. `which` is a function that will ignore `NA` values and return the index of each `TRUE` value in a vector.
+
+e.g.:
+
+```{r}
+lgl_vec <- c(TRUE, FALSE, NA, TRUE, FALSE)
+
+# vector of letters
+vals <- LETTERS[1:5]
+
+# compare the following
+vals
+vals[lgl_vec]
+vals[which(lgl_vec)]
+```
+
+Next we'll label the cells that are called by the algorithm.
+
+```{r}
+#| label: label-plot
+as.data.frame(out) |>
+  mutate(
+    bc_rank = rank(-Total),
+    is_cell = FDR < 0.05
+  ) |>
+  ggplot(aes(bc_rank, Total)) +
+  geom_point(aes(color = is_cell)) +
+  geom_hline(
+    yintercept = bc_info@metadata$knee,
+    color = "red",
+    linetype = "dashed"
+  ) +
+  geom_hline(
+    yintercept = bc_info@metadata$inflection,
+    color = "blue",
+    linetype = "dashed"
+  ) +
+  geom_hline(
+    yintercept = 100,
+    color = "orange",
+    linetype = "dashed"
+  ) +
+  scale_x_log10(labels = scales::comma) +
+  scale_y_log10() +
+  labs(
+    x = "Barcode rank",
+    y = "Total UMIs",
+    color = "Is a cell?"
+  )
+```
+
+Lastly, in addition to examining a visual knee plot another useful quality control metric is the `% of UMIs that are found in cells`. This should be ideally > 70%.
+
+```{r}
+# sum UMI counts in the filtered matrix
+n_umis_in_cells <- sum(mat)
+n_umis_in_raw_martix <- sum(tx$counts)
+
+100 * (n_umis_in_cells / n_umis_in_raw_martix)
+```
+
+~ 5-10 minute Break ~
+
+## Working with single cell data using the Seurat package 
+
+Now that we have identified the cells we can move forward with the analysis. We will use the Seurat package for single cell analysis, bioconductor has alternative packages [`scran`](https://bioconductor.org/packages/release/bioc/html/scran.html) and [`scater`](https://bioconductor.org/packages/release/bioc/html/scater.html) which are also very useful. If using python you can use [`scanpy`](https://scanpy.readthedocs.io/en/stable/index.html) package.  
+
+![](../img/block-rna/seurat_banner.jpg)
+
+https://github.com/satijalab/seurat  
+https://satijalab.org/seurat/  
+
+#### Seurat object structure
+
+Analysis using `Seurat` is centered around the `Seurat` object, which serves as a container to store the input data and any results that are generated. A `Seurat` object can be created from our sparse matrix using the `CreateSeuratObject` function.
+
+```{r}
+so <- Seurat::CreateSeuratObject(mat) # count matrix
+so
+```
+
+Look at `?CreateSeuratObject` to learn more about what you can add to this function
+
+We can also read in data directly from `cellranger` using the `Read10x` function from `Seurat`
+
+The `Seurat` object is organized into a hierarchy of data structures with the outermost layer including a number of "slots", which can be accessed using the `@` operator.
+
+```{r}
+slotNames(so)
+so@project.name
+```
+
+### Handling multiple data types using assays
+
+The `Seurat` object allows users to easily store multiple scRNA-seq assays (CITE-seq, cell hashing, VDJ data, ATAC, etc.) in the same object. The data from each assay is stored as a list in the `assays` slot. To switch between different assays users can change the value stored in the `active.assay` slot. We can also view the current default assay using the `DefaultAssay` function. Many `Seurat` functions also include an `assay` argument that lets users specify the desired assay. It defaults to `RNA` which we will be using.
+
+```{r}
+#| label: handle-assays
+# Assays are stored as a list in the "assays" slot
+so@assays
+# The Seurat object stores the current default assay
+so@active.assay
+# Change assay if needed
+DefaultAssay(so) <- "RNA"
+```
+
+ 
+#### Retrieving data matrices
+
+The data from each assay is stored as separate `Assay` objects that are also divided into slots that store the raw and normalized counts along with other downstream results. We can use the `GetAssayData` function to retrieve the raw (`counts`) and normalized counts (`data`) matrices.
+
+![](../img/block-rna/Seurat_structure_1.png)
+
+![](../img/block-rna/Seurat_structure_2.png)
+
+```r 
+so@assays$RNA@counts # raw UMI count matrix
+so@assays$RNA@data # normalized count matrix
+so@assays$RNA@scale.data # scaled data matrix used for PCA
+```
+
+```{r}
+ad <- GetAssayData(so, slot = "counts")
+ad[1:3, 1:4]
+```
+
+#### Accessing project meta.data
+
+The `Seurat` object includes a `data.frame` that contains cell-level meta-data that is stored in the `@meta.data` slot.
+
+![](../img/block-rna/Seurat_structure_3.png)
+
+Individual columns can be accessed directly using `$`. As we move through our analysis, information will be automatically or manually added to the meta.data. Initially the meta.data table will include the number of counts for each cell and the number of genes detected for each cell. There is also an `orig.ident` column which contains the original project name (or sample information derived from the column-names).
+
+```{r}
+#| label: access-metadata
+head(so@meta.data)
+
+so$nCount_RNA[1:3] # the $ operator grabs columns from the meta.data directly
+```
+
+We can modify the meta.data just like any other data.frame.
+```{r}
+so$samples <- sample(c("rep1", "rep2"), size = ncol(so), replace = TRUE)
+head(so@meta.data)
+```
+
+**Question 6**
+I want to add a column to the seurat object metadata that is the number of reads (`nCount_RNA)` divided by the number of genes (`nFeature_RNA`). How do I do this?
+
+```{r}
+# TODO add column to metadata that is nCount_RNA/nFeature_RNA
+so$fraction <- so$nCount_RNA / so$nFeature_RNA
+```
+
+### Setting active "Ident"
+
+In addition to having a default assay (e.g. `RNA`). Seurat also will store a default `Ident` which is a default cell label taken from the `meta.data`. This will select which attributes get used by some plotting and analysis functions. The default Ident is initially `orig.ident`, which we will change to something more meaningful. 
+
+```{r}
+#| label: "set-cell-ident"
+Idents(so)[1:5]
+Idents(so) <- "samples"
+Idents(so)[1:5]
+```
+
+#### Other data slots  
+
+``` r
+so@reductions # PCA, UMAP, tSNE matrices
+so@graphs # nearest neighbor graphs  
+?Seurat # description of each slot
+```
+
+![](../img/block-rna/Seurat_structure_4.png)
+
+#### Full Seurat object structure
+
+![](../img/block-rna/Seurat_structure_5.png)
+
+#### Additional quality control and cell filtering  
+
+Now that we have our data in Seurat we will perform some additional quality control to remove poor quality cells. 
+
+Metrics that are commonly used to assess cell quality include:
+
+* Number of counts per cell barcode (`e.g. nCount_RNA`)
+* Number of genes per barcode (`e.g. nFeature_RNA`)
+* The percentage of counts from mitochondrial genes per barcode
+
+A low number of counts, a low number of detected genes, and a high percentage of mitochondrial counts suggests that the cell had a broken membrane and the cytoplasmic mRNA leaked out. Conversely, an abnormally high number of counts and detected genes could indicate the presence of a doublet. See publication for more info ([Classification of low quality cells from single-cell RNA-seq data](https://doi.org/10.1186/s13059-016-0888-1))
+  
+### Plotting QC metrics
+
+First we will calculate the % of UMIs that are associated with mitochondrial RNAs. 
+
+```{r}
+str_subset(rownames(so), "^MT-") # in mouse it will be "^mt-"
+```
+
+The `PercentageFeatureSet` function will calculate the % of UMIs mapped to a subset of genes. 
+
+```{r}
+#| label: calc-per-mito
+# Calculate percentage of mitochondrial reads for each cell
+so <- PercentageFeatureSet(so, pattern = "^MT-", col.name = "percent_mito")
+head(so@meta.data[, 2:6])
+```
+
+To visualize these metrics we can use the `VlnPlot` function, which can plot columns from the meta.data or individual genes.
+
+```{r}
+VlnPlot(so,
+  features = c("nCount_RNA", "nFeature_RNA", "percent_mito"),
+  ncol     = 3,
+  pt.size  = 0.25
+)
+```
+  
+Note that there is a very large spread in the distributions, with cells with very few UMIs/genes and cells with very high. Keeping cell that are clear outliers will only likely increase the noise in the downstream analysis so they should be excluded. 
+
+**Minor aside** There are many plotting functions in Seurat, most of which are based on ggplot. 
+
+```{r}
+ls("package:Seurat") |> str_subset("Plot")
+```
+
+```{r}
+VlnPlot(so,
+  features = c("percent_mito"),
+  ncol     = 3,
+  pt.size  = 0.25
+) +
+  labs(title = "Look a title")
+```
+ 
+### Comparing UMI counts to % mitochondria provides some guidance on cutoffs
+
+We can plot the `# of UMIs` compared to the `percent mitochondrial UMIs` to help guide selection of some thresholds for filtering abberant cells. `FeatureScatter` generates scatter plots between meta.data columns (or genes and other attributes).
+
+```{r}
+p1 <- FeatureScatter(so,
+  feature1 = "nCount_RNA",
+  feature2 = "percent_mito"
+)
+p1
+```  
+
+Note how the lower UMI cells are more likely to have high % of mitochondria. 
+
+```{r}
+p2 <- FeatureScatter(so,
+  feature1 = "nCount_RNA",
+  feature2 = "nFeature_RNA"
+)
+p2
+``` 
+
+**Question 7**
+
+Do you expect a plot of `nFeature_RNA` vs. `percent_mito` to look similar to the `nCount_RNA` vs. `percent_mito`? Make the plot here to check your answer.
+
+```{r}
+# TODO plot nFeature_RNA vs percent_mito
+```
+
+### Filtering cells
+
+Selecting an appropriate cutoff can be somewhat arbitrary, and there is a risk of excluding meaningful cell populations. I suggest starting with lenient cutoffs, then later increasing the stringency after examining the clustering and cell types. We filter cells using the `subset` function, which works similarly to `dplyr::filter` but is a Seurat function. 
+
+```{r}
+#| label: filtering-cells
+# save plot for later plotting
+p3 <- VlnPlot(so,
+  features = c("nFeature_RNA"),
+  ncol = 1,
+  pt.size = 0.25,
+  combine = FALSE
+)
+
+# get # of cells before filtering
+n_cells_prefilter <- ncol(so)
+
+# Filter cells based on number of genes and percent mito UMIs
+so <- subset(
+  so,
+  nFeature_RNA > 250 & # Remove cells with <250 detected genes
+    nFeature_RNA < 2500 & # Remove cells with >2500 detected genes (could be doublets)
+    percent_mito < 10 # Remove cells with >10% mitochondrial reads
+)
+```
+
+```{r}
+# Add filtering cutoffs on original scatter plots
+p1 + geom_hline(yintercept = 10, linetype = 2)
+```
+
+```{r}
+p2 + geom_hline(yintercept = c(250, 2500), linetype = 2)
+```
+
+```{r}
+#| echo: false
+p3[[1]] + geom_hline(yintercept = c(250, 2500), linetype = 2)
+```
+
+
+How many cells did we remove?  
+
+```{r}
+n_cells_prefilter
+
+n_cells_prefilter - ncol(so)
+```
+
+## Extracting information for custom plotting/analysis
+
+How would we figure out the mean and standard deviation of `nFeature_RNA`? Knowing these values could help provide a more standardized approach to selecting cutoffs. 
+
+```{r}
+# figure out a cutoff for filtering by selecting values 3x standard deviations from mean
+so@meta.data |> # or so[[]]
+  summarize(
+    mean_val = mean(nFeature_RNA),
+    sd_val = sd(nFeature_RNA),
+    mean_plus_3sd = mean_val + (3 * sd_val)
+  )
+```
+
+Additional data attributes can also be extracted into a data.frame using `FetchData()`.
+
+```{r}
+fd <- FetchData(
+  so,
+  c(
+    "RPL24",
+    "CD8A",
+    "samples",
+    "nCount_RNA"
+  )
+)
+  
+fd[1:4, ]
+```
+
+### Analysis steps with relevant functions and data slots
+
+![](../img/block-rna/analysis-workflow-annotated.png)
+

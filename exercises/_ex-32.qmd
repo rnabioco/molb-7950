@@ -1,0 +1,585 @@
+---
+title: "Single cell RNA-seq II"
+author: "Kent Riemondy"
+---
+
+```{r}
+#| label: load-libs
+#| message: false
+#| echo: false
+library(tidyverse)
+library(cowplot)
+library(here)
+
+# New packages for sc-RNA-seq analysis
+library(Seurat)
+library(DropletUtils)
+library(tximport)
+library(Matrix)
+library(clustifyr)
+library(clustifyrdatahub)
+library(pheatmap)
+library(clustree)
+library(presto)
+```
+
+# Overview
+
+Today we will finish the two-course segment on single cell RNA-seq analysis. Today we will discuss how to cluster single cell data, discover marker genes in the data and annotate cell types.
+
+# Problem set
+
+The homework for today will involve continuing to process the AML dataset that we used in the first assignment. 
+
+1) Process the dataset to generate a UMAP projection and clusters
+
+2) Annotate cell types using a public reference dataset
+
+3) Interpret changes in cell populations between the AML samples
+
+# Workflow revisted
+
+![](../img/block-rna/standard_workflow_annotated_v2.png)
+
+# Simplified steps
+
+Seurat abstracts away many of the steps involved in processing the data into a set of succinct steps shown below. Much of our class today will be devoted to understanding the purpose of each of these steps and key parameters that can affect the results. 
+
+``` r
+seurat_object <- seurat_object |> 
+  NormalizeData() |> 
+  FindVariableFeatures() |> 
+  ScaleData() |> 
+  RunPCA() |> 
+  RunUMAP(dims = 1:30) |> 
+  FindNeighbors(dims = 1:30) |> 
+  FindClusters() 
+```
+
+# Dataset
+
+We will continue our analysis of the PBMC dataset that we began processing on Friday I have summarized the commands that we ran on Friday into a separate R script [filter_data.R](filter_data.R). Using the `source()` command we can execute the commands in this external script. With long-running analyses it is often helpful to store the final R object as an `.rds` file (using `saveRDS()`), which is a binary representation of the R object. The `.rds` can then be loaded into your current R session using `readRDS()`. Here we load an `.rds` file with the seurat object that we generated on class in Friday 
+
+```{r}
+prev_analysis_file <- here("data/block-rna/pbmc/pbmc_filtered.rds")
+so <- readRDS(prev_analysis_file)
+so
+```
+
+# Normalize Data
+
+We now Normalize the UMI count data to correct for differences in UMI counts and log transform the data to stabilize the variance. This is accomplished using the `NormalizeData()` function. 
+
+```{r}
+so <- NormalizeData(so)
+```
+
+The `NormalizeData` function puts the normalized values into a new slot called "data". The original counts are in a slot called "counts"
+
+![](../img/block-rna/Seurat_structure_2.png)
+
+**Question 1**
+
+Can you visualize the first 5 rows and columns of both the raw data and the normalized data?
+
+*Hint: use the function `GetAssayData`, remember you can learn about the arguments for a function using `?GetAssayData`*
+
+*Hint 2: the `GetAssayData` function will return a large matrix, be sure to subset this matrix to only the first 10 rows and columns*
+
+```{r}
+# visualize the first 5 rows and colums of the raw and normalized data
+GetAssayData(so, slot = "counts")[1:5, 1:5]
+GetAssayData(so, slot = "data")[1:5, 1:5]
+```
+
+We can visualize the normalized expression of genes using violin plots:
+
+```{r}
+VlnPlot(so, "CD3E", slot = "counts")
+VlnPlot(so, "CD3E", slot = "data")
+```
+
+**Question 2**
+
+Discussion: Is it easier to interpret the raw or normalized counts?
+
+The normalized data will be used for differential expression and for comparing to external datasets for cell type annotation. 
+
+# Identifying highly variable genes (aka feature selection)
+
+We will next select important features to use for dimensionality reduction, clustering and tSNE/UMAP projection. We can in theory use all ~20K genes in the dataset for these steps, however this is often computationally expensive and unnecessary. Most genes in a dataset are going to be expressed at relatively similar values across different cells, or are going to be so lowly expressed that they contribute more noise than signal to the analysis. For determining the relationships between cells, we want to focus on gene expression differences that are driven primarily by biological variation rather than technical variation.
+
+Seurat provides a function to help identify these genes, `FindVariableGenes()`. Ranking genes by their variance alone will bias towards selecting highly expressed genes. To help mitigate this Seurat uses a `vst` method to identify genes. Briefly, a curve is fit to model the mean and variance for each gene in log space. Variances are then standardized against this model, and ranked. The top 2,000 genes with the highest standardized variances are then called as highly variable, by default.
+
+```{r}
+so <- FindVariableFeatures(so, nfeatures = 2000, verbose = FALSE)
+so@assays$RNA@var.features[1:10]
+VariableFeatures(so)[1:10]
+```
+
+```{r}
+p <- VariableFeaturePlot(so)
+p
+```
+
+*Question 3*
+Can you find the top 3000 variable genes using `FindVariableFeatures`?
+
+```{r}
+# TODO find 3000 variable genes
+FindVariableFeatures(so, nfeatures = 3000)
+```
+
+# Scaling and centering
+
+Next, we will scale the normalized expression values. The scaled values will only be used for dimensionality reduction and clustering and not differential expression. The purpose of scaling is to set the expression values for each gene onto a similar numeric scale. This avoids issues of having a gene that is highly expressed being given more weight in the clustering simply because it has larger numbers. Scaling converts the normalized data into z-scores by default and the values are stored in the `scale.data` slot.
+
+``` r
+(x - mean(x)) / sd(x)
+```
+    
+Note that some workflows( [`SimpleSingleCell`](https://f1000research.com/articles/5-2122/v2) and [`Current best practices for single cell analysis`](https://www.embopress.org/doi/10.15252/msb.20188746) ) omit this scaling step, as it can upweight the contribution of noisy low-expressed genes. If you want to omit this step simply assign the log-normalized values into the `scale.data` slot for compatibility with downstream Seurat functionality. 
+
+```{r}
+#| label: scale
+# scale all of the data, useful if you want to make heatmaps later
+so <- ScaleData(so, features = rownames(so))
+```
+
+```{r}
+#| eval: false
+# for large data sets, just scale the variable genes:
+so <- ScaleData(
+  object = so,
+  features = VariableFeatures(so)
+)
+```
+
+## Performing dimensionality reduction and clustering: PCA
+
+Dimensionality reduction techniques are used in single cell data analysis generally for two purposes:
+
+1) Provide visualizations in 2 dimensions that convey information about relationships between cells.
+
+2) Reduce the computational burden of working with 20K dimensions to a smaller set of dimensions that capture signal. 
+
+By identifying the highly variable genes we've already reduced the dimensions from 20K to ~2,000. Next we will use [Principal Component Analysis](http://setosa.io/ev/principal-component-analysis/) to identify a smaller subset of dimensions (10-100) that will be used for clustering and visualization. 
+
+```{r}
+#| label: pca
+so <- RunPCA(
+  so,
+  features = VariableFeatures(so),
+  verbose = FALSE
+)
+
+PCAPlot(so)
+```
+
+The `RunPCA` function will calculate the top 50 principal components using a modified form of PCA (see `?irlba`) that doesn't need to compute all of the PCs. 
+
+**Question 4**
+Without this modified PCA, how many PCs would be computed?
+
+Plotting out a few of the top PCs can be informative to observe how the cells are segreated based on the dominant PCs.
+
+```{r}
+#| label: pc-plots
+pcs <- list(
+  c(1, 2),
+  c(1, 3),
+  c(1, 4),
+  c(2, 3),
+  c(2, 4),
+  c(3, 4)
+)
+
+pl <- purrr::map(pcs, ~ PCAPlot(so, dims = .x))
+plot_grid(plotlist = pl)
+```
+
+# Picking a set of PCs to use for clustering
+
+Performing PCA doesn't reduce the dimension of the data per se, rather it transforms the data into a new matrix. In order to reduce the dimensions we need to select the number of PCs that we would like to use for clustering. Deciding this value can be guided by examining an "elbow plot", which plots the variation explained by each PC. 
+
+```{r}
+ElbowPlot(so, ndims = 50)
+```
+
+Note how the top PCs capture a substantial amount of the variation, which then rapidly declines to a plateau value. Selecting values between 15-50 PCs is pretty common. More PCs generally are  selected as the size and complexity of the dataset increases. In practice picking fewer PCs will identify fewer subpopulations, and picking more PCs will find more subpopulations, at the expense of increased noise. Trying a few different settings is common. Here's we'll use the top 20.
+
+```{r}
+pcs_to_use <- 1:20
+```
+
+The PCA matrix can now be used for clustering using the top PCs selected, however it is helpful to first perform another type of dimensionality reduction to provide a 2-D visualization to assess the clustering. 
+
+## Dimensionality reduction for visualization
+
+### PCA
+
+Early single cell studies simply used PCA to visualize single cell data, and by plotting the data in scatterplots reduced the dimensionality of the data to 2D. This is a fine approach for simple datasets, but often there is much more information present in higher principal components as we saw above
+
+We plot the expression of genes (or numeric meta.data columns) using `FeaturePlot()`.
+
+```{r}
+FeaturePlot(so,
+  c("nFeature_RNA", "nCount_RNA"),
+  reduction = "pca"
+)
+# Color by CD8, marker of CD8 t-cells
+FeaturePlot(so,
+  "CD8A",
+  reduction = "pca"
+)
+```
+
+```{r}
+# or use ggplot directly if need more custom viz
+var_df <- FetchData(so, c("PC_1", "PC_2", "CD19", "CD8A")) |>
+  pivot_longer(cols = -c(PC_1, PC_2), names_to = "gene", values_to = "expr")
+
+ggplot(var_df, aes(PC_1, PC_2)) +
+  geom_point(aes(color = expr), size = 0.1) +
+  scale_color_gradientn(colours = RColorBrewer::brewer.pal(9, "Reds")) +
+  facet_grid(~gene) +
+  theme_cowplot()
+```
+
+
+### UMAP
+
+[`UMAP`](https://umap-learn.readthedocs.io/en/latest/parameters.html) is a newer algorithm for projecting data in 2D (or higher) and has become very popular for single cell visualization. The UMAP algorithm derives from topological methods for data analysis, and is nicely described by the authors in the UMAP [documentation](https://umap-learn.readthedocs.io/en/latest/how_umap_works.html).  
+
+We use the `RunUMAP()` function which will store the UMAP coordinates in the `so@reductions` slot. 
+
+```{r, fig.width = 7, fig.height= 4}
+so <- RunUMAP(so,
+  dims = pcs_to_use
+)
+
+FeaturePlot(so,
+  c("S100A8", "CD79A", "CD3G"),
+  reduction = "umap",
+  ncol = 3
+)
+```
+
+**Question 5**
+Make a UMAP plot colored by CD8A and CD19 expression like our PCA above
+```{r}
+# TODO UMAP colored by CD8A and CD19
+FeaturePlot(so,
+  c("CD8A", "CD19"),
+  reduction = "umap",
+  ncol = 2
+)
+```
+
+Key parameters are useful to change depending on the goals of the visualization. 
+
+`n.neighbors` higher values bias projection towards showing more 'global' differences. (i.e. a t-cell will be further separated from a neuron, but it will be harder to see t-cell subsets as they will be collapsed closer), default is 30
+
+
+```{r, fig.width = 7, fig.height= 4}
+set.seed(0)
+so <- RunUMAP(so,
+  dims = pcs_to_use,
+  n.neighbors = 100
+)
+
+FeaturePlot(so, c("S100A8", "CD79A", "CD3G"), reduction = "umap", ncol = 3)
+```
+
+`min.dist` The closest distance that cells can be placed. Higher values mean a more spread out visualization. Default is 0.3
+
+
+```{r, fig.width = 7, fig.height= 4}
+so <- RunUMAP(so,
+  dims = pcs_to_use,
+  min.dist = 0.1
+)
+
+FeaturePlot(so, c("S100A8", "CD79A", "CD3G"), reduction = "umap", ncol = 3)
+```
+
+
+```{r, fig.width = 7, fig.height= 4}
+so <- RunUMAP(so,
+  dims = pcs_to_use,
+  min.dist = 0.7
+)
+
+FeaturePlot(so, c("S100A8", "CD79A", "CD3G"), reduction = "umap", ncol = 3)
+```
+
+The # of PCs used can also change the visualization, with fewer PCs retain less subpopulation structure.
+
+```{r, fig.width = 7, fig.height= 4}
+so <- RunUMAP(so,
+  dims = 1:5
+)
+
+FeaturePlot(so, c("S100A8", "CD79A", "CD3G"), reduction = "umap", ncol = 3)
+```
+
+So many options, what to do? I generally recommend changing `min_dist` as a starting point. I try to keep the `n.neighbors` setting the same as the clustering, discussed later. 
+
+Hopefully I've now convinced you that 1) interpreting a UMAP should be done with caution as the density of and distance between points is somewhat arbitrary 2) There are many ways to represent data in 2 dimensions. Deciding what is best depends on what point you are trying to emphasize with the visualization. Often these visualizations are a convenient way to convey a lot information in a single plot but the actual UMAP coordinates are not very meaningful in a scientific sense. 
+
+
+```{r, fig.width = 7, fig.height= 4}
+so <- RunUMAP(so,
+  dims = pcs_to_use,
+  n.neighbors = 20
+)
+
+FeaturePlot(so, c("S100A8", "CD79A", "CD3G"), reduction = "umap", ncol = 3)
+```
+
+## Clustering single cell data
+
+The PCA/UMAP plots above indicate that there are likely different cell types present in the data as we can see clusters. Next we will formally cluster the dataset to assign cells to clusters. See this benchmarking paper for discussion of best clustering methods. [Duo et al, 2018 A systematic performance evaluation of clustering methods for single-cell RNA-seq data](https://f1000research.com/articles/7-1141)
+
+Graph based clustering methods are commonly used for single cell data, because they can scale to millions of cells, produce reasonable assignments, and have tuneable parameters. The approach that is implemented in Seurat is performed as follows:
+
+1) construct a K-nearest (KNN) neighbor matrix.
+2) calculate shared nearest neighbors (SNN) using the proportion of shared neighbors to weight the connections to cells. 
+3) use the [Louvain](https://en.wikipedia.org/wiki/Louvain_modularity) community detection algorithm to assign clusters. 
+
+This general approach was originally adopted in the single cell community in the PhenoGraph algorithm developed by [Levain et al 2015](https://doi.org/10.1016/j.cell.2015.05.047).
+
+In Seurat the clustering is done using two functions: `FindNeighbors()` which computes the KNN and SNN graphs, and `FindClusters()` which finds clusters.
+
+`FindNeighbors` calculates the KNN/SNN graphs using the PCA matrix as input 
+
+```{r}
+so <- FindNeighbors(so,
+  reduction = "pca",
+  dims = pcs_to_use
+)
+
+so <- FindClusters(so, verbose = FALSE)
+
+head(so@meta.data)
+```
+
+Note that the ident was changed to the clustering column
+```{r}
+so@active.ident[1:5]
+```
+
+```{r}
+UMAPPlot(so, label = TRUE)
+```
+
+**Question 6**
+What clusters are the genes S100A8, CD79A and CD3G most highly expressed in?
+
+*Hint try using `VlnPlot` like we used above. By default the violin plots will be separated by the active ident. If you want to learn more about plotting by specific aspects of the meta data, look at `?VlnPlot`*
+
+```{r}
+# TODO make violin plots of S100A8, CD79A, and CD3G
+VlnPlot(so, features = c("S100A8", "CD79A", "CD3G"))
+```
+
+We can tune the # of clusters in many ways, changing the `resolution` parameter tends to be very effective (default = 0.8), with higher values resulting in more clusters. Others upstream decisions will also change the # of clusters including the # of PCs, # of neighbors (k.param), # of variable genes.
+
+We can pass a vector of resolution settings to compare clustering results. 
+
+```{r}
+so <- FindClusters(so,
+  resolution = c(0.1, 0.8, 1.5),
+  verbose = FALSE
+)
+
+head(so@meta.data)
+```
+
+```{r, fig.width = 9, fig.height = 4}
+clustering_columns <- str_subset(colnames(so@meta.data), "RNA_snn_")
+
+pl <- purrr::map(
+  clustering_columns,
+  ~ UMAPPlot(so, group.by = .x, label = TRUE) +
+      labs(title = .x)
+)
+plot_grid(plotlist = pl, nrow = 1, ncol = 3)
+```
+
+How many clusters?
+
+Clustering algorithms produce clusters, even if there isn’t anything meaningfully different between cells. Determining the optimal number of clusters can be tricky and also dependent on the biological question.
+
+Some guidelines:
+
+1) Cluster the data into a small number of clusters to identify cell types, then recluster to generate additional clusters to define sub-populations of cell types.
+
+2) To determine if the data is overclustered examine differentially expressed genes between clusters. If the clusters have few or no differentially expressed genes then the data is likely  overclustered. Similar clusters can be merged post-hoc if necessary as sometimes it is difficult to use 1 clustering approach for many diverse cell populations. Using a reference-based approach to name cell types will also often merge similar clusters.
+
+3) A hybrid approach is to first annotate major cell types using a small # of clusters (e.g. B-cell, T-cell, Myeloid, etc.), then subset the Seurat object for each cluster and perform additional clustering to obtain 'subclusters' (e.g. b-cell-subset 1, b-cell-subset 2, t-cell-subset-1, etc.)
+
+
+## Assessing relationships between clusters
+
+Hierarchical clustering can be used to visualize the relationships between clusters. The average expression of each cluster is computed then the distances between the clusters are used for hierarchical clustering.
+
+```{r}
+Idents(so) <- "RNA_snn_res.0.8"
+so <- BuildClusterTree(so)
+PlotClusterTree(so)
+```
+
+The [`clustree`](https://lazappi.github.io/clustree/index.html) package provides a nice plotting utility to visualize the relationship of cells at different resolution settings. 
+
+```{r clustree, fig.height = 5}
+library(clustree)
+clustree(so)
+```
+
+
+Finally let's define a meta data column as `clusters` as those generated with a resolution of 0.5 with 30 neighbors. We will use this for downstream cell type annotation and marker gene discovery. 
+
+```{r}
+so$clusters <- so$RNA_snn_res.0.8
+Idents(so) <- "clusters"
+UMAPPlot(so)
+```
+
+~ 5-10 minute break ~
+
+# Finding marker genes for each cluster
+
+
+In Seurat we can use the `FindAllMarkers()` function, which will perform the `wilcox.test()` by default default. Specifically the function will iterate through each cluster, comparing the cells in 1 cluster to the cells in all of the other clusters. The test is run for every gene that is detectable above certain thresholds. The output is then filtered to identify significant genes with a positive fold-change (i.e. higher in abundance the cluster).
+
+We will instead use the `wilcoxauc()` function from the `presto` package (installed from github), which will do the same thing but in a (tiny) fraction of the time.
+
+Note that the p-values from these tests will be absurdly low (near or at 0). This is in part due to the large number of samples tested (e.g. each cell is considered a sample) but also due to the data being clustered based on the gene expression. Testing for differential expression between clusters will always result in some differntially expressed genes...because that's what makes them different clusters in the first place. Nevertheless we can use the p-values to rank the genes, but you shouldn't just blindly trust that a p-value < 0.05 is something meaningful in single cell data.
+
+```{r}
+library(presto)
+markers <- wilcoxauc(so, "clusters") # compute markers
+markers
+```
+
+(taken from the ?wilcoxauc help)
+The output is a table with the following columns:
+
+feature - feature name (e.g. gene name).
+group - group name.
+avgExpr - mean value of feature in group.
+logFC - log fold change between observations in group vs out. ### <- natural log not log2
+statistic - Wilcoxon rank sum U statistic.
+auc - area under the receiver operator curve.
+pval - nominal p value.
+padj - Benjamini-Hochberg adjusted p value.
+pct_in - Percent of observations in the group with non-zero feature value.
+pct_out - Percent of observations out of the group with non-zero feature value.
+
+**Question 7**
+What does the padj column mean in this output? What are we correcting for? Why even with this correction do we say that these p-values are inflated?
+
+We will filter the output to keep genes that are upregulated in the cluster versus other cells (logFC > 0), to require that the gene is expressed in at least 10% of the cells in the cluster, and that it has some signficance value. 
+
+```{r}
+top_markers <- markers |>
+  mutate(group = as.numeric(group)) |>
+  # filter for positive fold change and expressed in at least 10% of cells
+  filter(logFC > 0, padj < 0.05, pct_in > 10) |> 
+  group_by(group) |>
+  # rank by adjusted p-value then logFC
+  arrange(padj, desc(logFC), .by_group = TRUE) |>
+  # show top genes per group
+  slice_head()
+
+top_markers
+```
+Let's plot the top marker gene for each group. 
+
+```{r, fig.height = 12, fig.width=12}
+best_markers <- top_markers |>
+  slice_head(n = 1) |>
+  pull(feature)
+
+VlnPlot(so, best_markers)
+```
+
+# So how do we annotate each cluster as a cell type?
+
+1) In the early days of single cell sequencing, this was often done manually, by visual inspection of key genes (hopefully) using expertise in the lab.  
+2) As more references become availible, it is more common to compare your data to other single cell data (see [Seurat Integration Vignette](https://satijalab.org/seurat/v3.2/integration.html) if interested) 
+3) Compare your data to other cell type signature data (microarray, bulk rna-seq, marker gene lists). We use [`clustifyr`](https://rnabioco.github.io/clustifyr/) which was developed by a previous RBI fellow Rui Fu. There are many other methods but `clustifyr` is fast and it works.  
+
+`clustifyr` works by comparing the average gene expression in each cluster to a reference matrix that contains average gene signatures of reference cell types. The reference can be built from other single cell data, bulk-rna-seq, or other sources. Ranked Spearman correlation is used to compare the reference to the clusters. Only the variable genes are used for the correlation. 
+
+In order to compare our dataset we need to use a publicly available reference dataset. Thankfully Rui has already organized many datasets into a separate package: [clustifyrdatahub](https://github.com/rnabioco/clustifyrdatahub). This is an extension of the `ExperimentHub` package on bioconductor that allows you to easily download and cache external datasets. 
+
+```{r}
+library(clustifyr)
+library(clustifyrdatahub)
+
+ref_hema_microarray()[1:5, 1:5]
+```
+
+But you can download any dataset that characterizes cell populations that interest you.
+
+```{r}
+res <- clustify(
+  so, # seurat object
+  ref_mat = ref_hema_microarray(), # cell type reference data
+  cluster_col = "clusters", # column in metadata with clusters
+  # don't add to seurat object, just return results
+  obj_out = FALSE
+)
+
+res[1:12, ]
+```
+
+```{r}
+pheatmap(t(res))
+```
+
+
+```{r}
+cor_to_call(res) # assign cluster to highest correlation cell type (above a threshold). Cell types lower than a threshold will be assigned as unassigned.
+```
+
+We can insert the classification results into the seurat object directly which will be called `type`. 
+
+```{r}
+set.seed(42)
+so <- clustify(
+  so, # seurat object
+  ref_mat = ref_hema_microarray(), # cell type reference data
+  cluster_col = "clusters", # column in metadata with clusters
+  obj_out = TRUE
+)
+
+UMAPPlot(so, group.by = "type")
+```
+
+# Saving your data and distributing datasets
+
+1) You can share your seurat objects with collaborators by saving the object as an `.rds` file. 
+2) If you plan on publishing the data, then the best practices are to upload the UMI count matrix and your meta.data data.frame containing the cell type annotations. 
+
+To save the matrix (if it is a smaller dataset < 5-10k cells)
+
+``` r
+GetAssayData(so, "counts") |> 
+  as.matrix() |> 
+  as.data.frame() |> 
+  rownames_to_column("gene) |> 
+  write_csv("count_matrix.csv")
+``` 
+
+If the dataset is large then you can use a function from `scran` called `write10xcounts()` which will write the matrix as a sparseMatrix. 
+
+When saving the metadata it is also a nice gesture to include the UMAP coordinates that you used for the main visualizations in your manuscript. The clustering and UMAP coordinates are very hard to reproduce because of the non-determinstics elements of the algorithms. 
+
+``` r
+cbind(so@meta.data, Embeddings(so, "umap")) |> 
+  rownames_to_column("cell") |> ()
+  write_csv("cell-level-metadata.csv")
+```  
