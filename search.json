@@ -28,6 +28,20 @@
     "text": "These studies below laid the methodological groundwork for high throughput chromatin characterization by DNA sequencing. We’re not going to use them directly in class, but if you are going to do similar experiments, they’re worth a read. Some of the authors are here at CU Anschutz!\n\n\n\n\n\n\nTip\n\n\n\nData sets from these studies would be excellent choices as starting points for your final projects.\n\n\n\n\nHesselberth JR, Chen X, Zhang Z, Sabo PJ, Sandstrom R, Reynolds AP, Thurman RE, Neph S, Kuehn MS, Noble WS, Fields S, Stamatoyannopoulos JA. Global mapping of protein-DNA interactions in vivo by digital genomic footprinting. Nat Methods. 2009 19305407; PMCID: PMC2668528. [Link]\n\n\n\nBuenrostro JD, Giresi PG, Zaba LC, Chang HY, Greenleaf WJ. Transposition of native chromatin for fast and sensitive epigenomic profiling of open chromatin, DNA-binding proteins and nucleosome position. Nat Methods. 2013 PMID: 24097267; PMCID: PMC3959825. [Link]\n\n\n\nRamachandran S, Ahmad K, Henikoff S. Transcription and Remodeling Produce Asymmetrically Unwrapped Nucleosomal Intermediates. Mol Cell. 2017 PMID: 29225036; PMCID: PMC6421108. [Link]\n\n\n\nSkene PJ, Henikoff S. An efficient targeted nuclease strategy for high-resolution mapping of DNA binding sites. Elife. 2017 PMID: 28079019; PMCID: PMC5310842. [Link]\nKaya-Okur HS, Wu SJ, Codomo CA, Pledger ES, Bryson TD, Henikoff JG, Ahmad K, Henikoff S. CUT&Tag for efficient epigenomic profiling of small samples and single cells. Nat Commun. 2019 PMID: 31036827; PMCID: PMC6488672. [Link]"
   },
   {
+    "objectID": "resources/block-dna-resources.html#software-well-use-in-class",
+    "href": "resources/block-dna-resources.html#software-well-use-in-class",
+    "title": "Resources for the DNA block",
+    "section": "Software we’ll use in class",
+    "text": "Software we’ll use in class\n\nRead over the GViz vignette to understand how we’ll use it to vissualize genome-scale data on a reference sequence.\nRead over the valr vignette to understand how we’ll do BEDtools-like (see below) analysis within RStudio.\nLook over the ComplexHeatmap and EnrichedHeatmap documentation, especially XXX. These tools will help us make “meta-plots”: figures that plot genomic signals relative to features."
+  },
+  {
+    "objectID": "resources/block-dna-resources.html#other-important-tools",
+    "href": "resources/block-dna-resources.html#other-important-tools",
+    "title": "Resources for the DNA block",
+    "section": "Other important tools",
+    "text": "Other important tools\nThese are other tools I’ll mention in class. We’re not going to use them directly, but they are important tools in upstream data processing and analysis.\n\nAlignment software\nBowtie2 and BWA are popular choices for short read alignment. They are fast, free, and well-maintained.\n\n\nPeak calling\nMACS is the gold-standard in peak calling. It models read coverage as a Poisson process, straightforward identification of regions of higher than expected coverage (i.e., peaks) to be identified using a single parmaeter (lambda) that captures the mean and variance of read coverage.\n\n\nInterval analysis\n\nBEDtools is the “Swiss Army knife” of genome interval analysis. It provides a host of command-line tools that can be linked together for powerful genome signal manipulation."
+  },
+  {
     "objectID": "problem-sets/ps-16.html",
     "href": "problem-sets/ps-16.html",
     "title": "DNA Block - Problem Set 16",
@@ -707,6 +721,13 @@
     "text": "Interpreting meta-plots and heatmaps\nIt’s worth considering what meta-plots and heatmaps can and can’t tell you.\n\nWhat are the similarities and differences between heatmaps and meta-plots?\nWhat types of conclusions can you draw from each type of plot?\nWhat are some features of MNase-seq and ATAC-seq that become more clear when looking across many loci at the same time?\nWhat are some hypotheses you can generate based on these plots?"
   },
   {
+    "objectID": "exercises/ex-18.html#assessing-the-signfiicance-of-observed-patterns.",
+    "href": "exercises/ex-18.html#assessing-the-signfiicance-of-observed-patterns.",
+    "title": "Chromatin accessibility II",
+    "section": "Assessing the signfiicance of observed patterns.",
+    "text": "Assessing the signfiicance of observed patterns.\nOne approach for assessing the signifcance of a pattern (e.g., the density of nucleosomes around transcription start sites), is to randomize the reference points, and use those to remeasure density. This can be done by generating a random set of TSS like:\nn_tss &lt;- length(unique(yeast_tss$name))\nbed_random(genome, length = 1, n = n_tss)\nGiven enough random sites, you will be able to vizulaized what a null distribution of overlaps looks like. If you reframe your question around a response variable (i.e., “how many intact nucleosomes are within 500 bp of a TSS?”) then you can calcuate an empirical p-value using the approaches covered in the bootcamp."
+  },
+  {
     "objectID": "exercises/ex-18.html#utility-of-metaplots-and-heatmaps-in-practice",
     "href": "exercises/ex-18.html#utility-of-metaplots-and-heatmaps-in-practice",
     "title": "Chromatin accessibility II",
@@ -718,21 +739,21 @@
     "href": "exercises/ex-16.html",
     "title": "Mapping chromatin structure and transactions",
     "section": "",
-    "text": "library(valr)\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\nx &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 25, 50,\n  \"chr1\", 100, 125\n)\n\ny &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 30,     75\n)"
+    "text": "library(valr)\n\nWarning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by\n'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'\n\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\nx &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 25, 50,\n  \"chr1\", 100, 125\n)\n\ny &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 30,     75\n)"
   },
   {
     "objectID": "exercises/ex-16.html#bed_intersect-example",
     "href": "exercises/ex-16.html#bed_intersect-example",
     "title": "Mapping chromatin structure and transactions",
     "section": "",
-    "text": "library(valr)\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\nx &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 25, 50,\n  \"chr1\", 100, 125\n)\n\ny &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 30,     75\n)"
+    "text": "library(valr)\n\nWarning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by\n'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'\n\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\nx &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 25, 50,\n  \"chr1\", 100, 125\n)\n\ny &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 30,     75\n)"
   },
   {
     "objectID": "exercises/ex-16.html#valr-example",
     "href": "exercises/ex-16.html#valr-example",
     "title": "Mapping chromatin structure and transactions",
     "section": "valr example",
-    "text": "valr example\nYou can use read_bed() and related functions to load genome annotations and signals.\n\nsnps &lt;- read_bed(\n  valr_example(\"hg19.snps147.chr22.bed.gz\"),\n  n_fields = 6\n)\n\ngenes &lt;- read_bed(\n  valr_example(\"genes.hg19.chr22.bed.gz\"),\n  n_fields = 6\n)"
+    "text": "valr example\nYou can use read_bed() and related functions to load genome annotations and signals.\n\nsnps &lt;- read_bed(\n  valr_example(\"hg19.snps147.chr22.bed.gz\"),\n  n_fields = 6\n)\n\nWarning: The `n_fields` argument of `read_bed()` is deprecated as of valr 0.6.9.\nℹ fields are now determined automatically from the file\n\ngenes &lt;- read_bed(\n  valr_example(\"genes.hg19.chr22.bed.gz\"),\n  n_fields = 6\n)"
   },
   {
     "objectID": "exercises/ex-16.html#what-is-in-snps-and-genes",
@@ -760,7 +781,7 @@
     "href": "exercises/ex-16.html#bed_map-example",
     "title": "Mapping chromatin structure and transactions",
     "section": "\nbed_map() example",
-    "text": "bed_map() example\nCopy / paste these into your console.\n\nx &lt;- tribble(\n ~chrom, ~start, ~end,\n 'chr1', 100,    250,\n 'chr2', 250,    500\n)\n\ny &lt;- tribble(\n ~chrom, ~start, ~end, ~value,\n 'chr1', 100,    250,  10,\n 'chr1', 150,    250,  20,\n 'chr2', 250,    500,  500\n)"
+    "text": "bed_map() example\nCopy / paste these into your console.\n\nx &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 100,    250,\n  \"chr2\", 250,    500\n)\n\ny &lt;- tribble(\n  ~chrom, ~start, ~end, ~value,\n  \"chr1\", 100,    250,  10,\n  \"chr1\", 150,    250,  20,\n  \"chr2\", 250,    500,  500\n)"
   },
   {
     "objectID": "exercises/ex-16.html#bed_map-example-continued",
@@ -3028,7 +3049,7 @@
     "href": "problem-set-keys/ps-key-16.html#question-3",
     "title": "DNA Block - Problem Set 16",
     "section": "Question 3",
-    "text": "Question 3\nWhich promoter has the highest DNase I accessibility?\n\nUse the create_tss() function to generate transcription start sites from the refGene annotations. How be are these intervals?\nGenerate some promoter regions with bed_slop(), adding 500 bp up- and downstream of the TSS. bed_slop() requires the genome file above.\nUse bed_map() to calculate the total (i.e., summed) DNase I signal in the promoters (the score column in the DNase file).\n\nWhich gene has the highest DNase I in the region you defined above?\n\ntss_tbl &lt;- create_tss(gene_tbl)\npromoter_tbl &lt;- bed_slop(tss_tbl, genome, both = 500)\n\nbed_map(\n  promoter_tbl,\n  dnase_tbl,\n  score_sum = sum(score)\n  ) |&gt;\n  arrange(desc(score_sum)) |&gt;\n  head(1)\n\n# A tibble: 1 × 7\n  chrom    start      end name      score strand score_sum\n  &lt;chr&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt; &lt;chr&gt;      &lt;dbl&gt;\n1 chr22 17082300 17083301 NR_001591 0     +            863"
+    "text": "Question 3\nWhich promoter has the highest DNase I accessibility?\n\nUse the create_tss() function to generate transcription start sites from the refGene annotations. How be are these intervals?\nGenerate some promoter regions with bed_slop(), adding 500 bp up- and downstream of the TSS. bed_slop() requires the genome file above.\nUse bed_map() to calculate the total (i.e., summed) DNase I signal in the promoters (the score column in the DNase file).\n\nWhich gene has the highest DNase I in the region you defined above?\n\ntss_tbl &lt;- create_tss(gene_tbl)\npromoter_tbl &lt;- bed_slop(tss_tbl, genome, both = 500)\n\nbed_map(\n  promoter_tbl,\n  dnase_tbl,\n  score_sum = sum(score)\n) |&gt;\n  arrange(desc(score_sum)) |&gt;\n  head(1)\n\n# A tibble: 1 × 7\n  chrom    start      end name      score strand score_sum\n  &lt;chr&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt; &lt;chr&gt;      &lt;dbl&gt;\n1 chr22 17082300 17083301 NR_001591 0     +            863"
   },
   {
     "objectID": "problem-set-keys/ps-key-16.html#submit",
