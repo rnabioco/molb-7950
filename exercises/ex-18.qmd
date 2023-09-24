@@ -1,6 +1,8 @@
 ---
 title: "Chromatin accessibility II"
 author: "Jay Hesselberth"
+execute: 
+  eval: false
 ---
 
 ## Genomewide chromatin analysis with metaplots and heatmaps
@@ -14,7 +16,7 @@ we'll discuss two approaches for this: metaplots and heatmaps.
 
 # Metaplots
 
-We will examine aggregated profiles (metaplots) of genomewisde data (e.g., MNase-seq) relative to 
+We will examine aggregated profiles (metaplots) of genomewide data (e.g., MNase-seq) relative to 
 recurrent features in a genome, like transcription start sites.
 
 ### Load libraries
@@ -43,9 +45,8 @@ First, we need to load relevant files:
 -   `yeast_tss_chrII.bed.gz` contains transcription start sites (TSS) for genes on yeast chromosome 2.
 -   `sacCer3.chrom.sizes` contains the sizes of all yeast chromosomes, needed for some of the calculations we'll do. We'll grab this from the UCSC download site.
 
-```{r}
+```{r, tidy=FALSE}
 #| label: load-data
-#| eval: false
 yeast_tss <- read_???(
   here("data/block-dna/yeast_tss_chrII.bed.gz")
 )
@@ -59,9 +60,8 @@ Next we'll load bigWigs for the ATAC and MNase experiments, containing either sh
 
 Recall that the information encoded in short and long fragments should be reflected in our interpretations.
 
-```{r}
+```{r, tidy=FALSE}
 #| label: load-bigwigs
-#| eval: false
 acc_tbl <-
   tibble(
     file_name = c(
@@ -124,9 +124,8 @@ of a set of reference points.
 
 ## Chromatin accessibility around transcription start sites (TSSs)
 
-```{r}
+```{r, tidy=FALSE}
 #| label: create-tss-coords
-#| eval: false
 region_size_total <- 1500
 region_size_half <- region_size_total / 2
 win_size <- 10
@@ -145,7 +144,6 @@ point (`bed_slop()`) and then break those windows into evenly spaced intervals
 
 ```{r}
 #| label: tss-slop-mw
-#| eval: false
 yeast_tss |>
   bed_???(genome, both = region_size_half) |>
   bed_???(win_size = win_size)
@@ -156,7 +154,6 @@ someone describe what the issue is here, based on the figure above?
 
 ```{r}
 #| label: create-tss-windows
-#| eval: false
 tss_win_tbl <-
   yeast_tss |>
   bed_slop(genome, both = region_size_half) |>
@@ -176,7 +173,6 @@ window by intersecting signals from the bigWig files.
 
 ```{r}
 #| label: map-signals
-#| eval: false
 acc_tbl <-
   acc_tbl |>
   mutate(
@@ -199,7 +195,6 @@ numbers represent a composite signal a the same position across all TSS.
 
 ```{r}
 #| label: calc-win-stats
-#| eval: false
 tss_meta_tbl <-
   select(acc_tbl, sample_type, tss_win_sum) |>
   unnest(cols = c(tss_win_sum)) |>
@@ -217,7 +212,6 @@ Finally, let's plot the data relative to TSS for each of the windows.
 
 ```{r}
 #| label: plot-meta-signals
-#| eval: false
 n_tss <- length(unique(yeast_tss$name))
 
 ggplot(
@@ -283,7 +277,6 @@ Or, using dplyr / tidyr:
 
 ```{r}
 #| label: heatmap-data-tidy
-#| eval: false
 mnase_tbl <-
   filter(
     acc_tbl,
@@ -295,9 +288,8 @@ mnase_tbl <-
 
 Either way, now we need to reformat the data.
 
-```{r}
+```{r, tidy=FALSE}
 #| label: pivot-heatmap-tbl
-#| eval: false
 mnase_tbl_wide <-
   mnase_tbl |>
   select(
@@ -320,9 +312,8 @@ mnase_tbl_wide <-
 Once we have the data reformatted, we just convert to a matrix and feed it to
 `ComplexHeatmap::Heatmap()`.
 
-```{r}
+```{r, tidy=FALSE}
 #| label: heatmap-matrix-plot
-#| eval: false
 # drop the name & convert to matrix
 mnase_mtx <-
   select(mnase_tbl_wide, -name) |>
