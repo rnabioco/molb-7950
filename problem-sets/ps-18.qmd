@@ -1,5 +1,7 @@
 ---
 title: "DNA Block - Problem Set 18"
+execute: 
+  eval: false
 ---
 
 ## Problem Set
@@ -48,7 +50,7 @@ max_idx <- which.max(frag_hist$n)
 ncp_max <- frag_hist$frag_len[max_idx]
 ```
 
-So this tells us that that the most abundant fragment size in the library is `r ncp_max` bp.
+So this tells us that that the most abundant fragment size in the library is ??? bp.
 
 ## Question 1 -- 7 points
 
@@ -68,14 +70,12 @@ Let's take a closer look at the some of the smaller fragments in the MNase exper
 
 ```{r}
 #| label: frag-hist-disome
-
 ```
 
 3.  Recreate the histogram using ggplot2 (using relevant code from class 17) and add the blue vertical lines at the peak positions you calculated, including the position of the disomes above.
 
 ```{r}
 #| label: plot-frag-hist
-
 ```
 
 ## Question 2 -- 13 points
@@ -91,9 +91,8 @@ So you'll make a metaplot, but instead of using transcription start sites as the
     -   a "genome" file, `sacCer3.chrom.sizes`
     -   a BED file, `yeast_p1_chrII.bed.gz` which contains the mid-points of the +1 nucleosomes on chromosome 22. Recall that the +1 nucleosome is the nucleosome downstream of the transcription start site.
 
-```{r}
+```{r tidy=FALSE}
 #| label: load-data-2
-#| eval: false
 genome <- read_???(here("data/block-dna/sacCer3.chrom.sizes"))
 p1_tbl <- read_???(here("data/block-dna/yeast_p1_chrII.bed.gz"))
 ```
@@ -110,9 +109,8 @@ p1_tbl <- read_???(here("data/block-dna/yeast_p1_chrII.bed.gz"))
 
         The output is a new tibble with columns `chrom`, `start`, and `end`.
 
-```{r}
+```{r, tidy=FALSE}
 #| label: calc-midpoints
-#| eval: false
 calc_mids <- function(tbl, min_len, max_len) {
   tbl |>
     mutate(
@@ -134,9 +132,8 @@ calc_mids <- function(tbl, min_len, max_len) {
 
 3.  Next, use that function to calculate midpoints, and expand these midpoints by 20 bp in each direction with `bed_slop()`.
 
-```{r}
+```{r, tidy=FALSE}
 #| label: nuc-mid-ivls
-#| eval: false
 ncp_mids_tbl <-
   # first calculate midpoints for nucleosome fragments within 3 bp length `ncp_max`
   calc_mids(mnase_tbl, ___ - 3, ___ + 3) |>
@@ -151,9 +148,8 @@ subnuc_mids_tbl <-
 
 4.  Next, we need to make the reference points for a metaplot. We'll look 100 bp up- and downstream of the +1 nucleosome positions, and make windows that are 1 bp in size.
 
-```{r}
+```{r, tidy=FALSE}
 #| label: p1-ivls
-#| eval: false
 p1_win_tbl <-
   bed_???(
     p1_tbl,
@@ -167,9 +163,8 @@ p1_win_tbl <-
 
     Use `bed_intersect()` to identify fragments that overlap, and then just count the number of fragments per `.win_id` (don't forget the suffix). Note you will do this separately for the short and long fragments.
 
-```{r}
+```{r, tidy=FALSE}
 #| label: count-windows
-#| eval: false
 ncp_mids_summary_tbl <-
   bed_intersect(
     p1_win_tbl,
@@ -189,9 +184,8 @@ subnuc_mids_summary_tbl <-
 
 6.  The following joins the tables you made together, and makes the x-axis more informative, by converting to relative genomic position rather than window ID.
 
-```{r}
+```{r, tidy=FALSE}
 #| label: window-pos
-#| eval: false
 win_ids <- seq(-100, 100, 1)
 
 all_tbl <- bind_rows(
@@ -203,9 +197,8 @@ all_tbl <- bind_rows(
 
 7.  Finally, we plot the data with position on the x-axis, and count on the y-axis.
 
-```{r}
+```{r, tidy=FALSE}
 #| label: plot-meta
-#| eval: false
 ggplot(
   all_tbl,
   aes(win_ids, n)
