@@ -103,12 +103,12 @@ We can get this relationships between *transcripts* and *genes* through `biomaRt
 #| eval: false
 library(biomaRt)
 
-# First we need to define a 'mart' to use.  
-# There are a handful of them that 
+# First we need to define a 'mart' to use.
+# There are a handful of them that
 # you can see here:
 listMarts(
-  mart = NULL, 
-  host = 'www.ensembl.org'
+  mart = NULL,
+  host = "www.ensembl.org"
 )
 ```
 
@@ -117,7 +117,7 @@ I encourage you to see what is in each mart, but for now we are only going to us
 ```{r choosemart, eval = TRUE}
 #| label: choose-mart
 #| eval: false
-mart <- biomaRt::useMart("ENSEMBL_MART_ENSEMBL", host='www.ensembl.org')
+mart <- biomaRt::useMart("ENSEMBL_MART_ENSEMBL", host = "www.ensembl.org")
 ```
 
 # Using biomaRt
@@ -134,7 +134,7 @@ gt(datasets)
 A lot of stuff for a lot of species! Perhaps we want to limit it to see which ones are relevant to mouse.
 
 ```{r mousedatasets, eval = FALSE}
-mousedatasets <- filter(datasets, grepl('mmusculus', dataset))
+mousedatasets <- filter(datasets, grepl("mmusculus", dataset))
 gt(mousedatasets)
 ```
 
@@ -145,9 +145,9 @@ Ah so we probably want the dataset called 'mmusculus_gene_ensembl'!
 ```{r}
 #| label: define-mart
 mart <- biomaRt::useMart(
-  "ENSEMBL_MART_ENSEMBL", 
-   dataset = "mmusculus_gene_ensembl",
-  host='www.ensembl.org'
+  "ENSEMBL_MART_ENSEMBL",
+  dataset = "mmusculus_gene_ensembl",
+  host = "www.ensembl.org"
 )
 ```
 
@@ -167,8 +167,8 @@ So there are 2885 rows of goodies about the mouse genome and its relationship to
 I'm going to through one more attribute in: external_gene_name. Those are usually more informative than ensembl IDs.
 
 ```{r maket2g, eval = FALSE, warning = FALSE}
-t2g <- biomaRt::getBM(attributes = c('ensembl_transcript_id', 'ensembl_gene_id', 'external_gene_name'), mart = mart)
-gt(t2g[1:20,])
+t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name"), mart = mart)
+gt(t2g[1:20, ])
 ```
 
 # Using biomaRt
@@ -198,12 +198,12 @@ library(here)
 library(glue)
 library(fs)
 
-#The directory where all of the sample-specific salmon subdirectories live
-base_dir <- 'data/salmonouts/'
+# The directory where all of the sample-specific salmon subdirectories live
+base_dir <- "data/salmonouts/"
 
 # The names of all the sample-specific salmon subdirectories
 samp <- c("minus8", "minus4", 0, 1, 7, 16, 21, 28)
-rep = 1:4
+rep <- 1:4
 
 crossing(samp, rep) |>
   mutate(
@@ -224,10 +224,10 @@ Now we are ready to run `tximport`!  `tximport` is going to want paths to all th
 library(tximport)
 txi <- tximport(
   salm_dirs,
-  type = 'salmon',
+  type = "salmon",
   tx2gene = t2g,
   dropInfReps = TRUE,
-  countsFromAbundance = 'lengthScaledTPM'
+  countsFromAbundance = "lengthScaledTPM"
 )
 ```
 
@@ -240,9 +240,9 @@ Notice how we chose *lengthscaledTPM* for our abundance measurement. This is goi
 #| eval: false
 tpms <- txi$abundance |>
   as.data.frame(.) |>
-  rownames_to_column(var = 'ensembl_gene_id')
+  rownames_to_column(var = "ensembl_gene_id")
 
-gt(tpms[1:50,])
+gt(tpms[1:50, ])
 ```
 
 # TPM as an expression metric
@@ -274,28 +274,28 @@ This notion that TPMs represent proportions of a whole also leads to another int
 # TPM as an expression metric
 
 ```{r txtpm, eval = FALSE}
-#Redefine for clarity in comparisons
+# Redefine for clarity in comparisons
 tpms.genes <- tpms
 
-#Make a new tximport object, but this time instead 
-#of giving gene expression values, give transcript expression values
-#This is controlled by the `txOut` argument
+# Make a new tximport object, but this time instead
+# of giving gene expression values, give transcript expression values
+# This is controlled by the `txOut` argument
 txi.transcripts <- tximport(
   salm_dirs,
-  type = 'salmon',
+  type = "salmon",
   tx2gene = t2g,
-  dropInfReps = TRUE, 
-  countsFromAbundance = 'lengthScaledTPM',
+  dropInfReps = TRUE,
+  countsFromAbundance = "lengthScaledTPM",
   txOut = TRUE
 )
 
-#Make a table of tpm values for every transcript
+# Make a table of tpm values for every transcript
 tpms.txs <- txi.transcripts$abundance |>
   as.data.frame(.) |>
-  rownames_to_column(var = 'ensembl_transcript_id') |>
-  inner_join(t2g, ., by = 'ensembl_transcript_id')
+  rownames_to_column(var = "ensembl_transcript_id") |>
+  inner_join(t2g, ., by = "ensembl_transcript_id")
 
-gt(tpms.txs[1:20,])
+gt(tpms.txs[1:20, ])
 ```
 
 OK so lets look at the expression of ENSMUSG00000020634 in the first sample (DIVminus8.Rep1).
@@ -306,14 +306,14 @@ OK so lets look at the expression of ENSMUSG00000020634 in the first sample (DIV
 .scroll-box-12[
 .code[
 ```{r txequalsgene, eval = FALSE}
-#Get sum of tpm values for transcripts that belong to ENSMUSG00000020634
-tpms.tx.ENSMUSG00000020634 <- filter(tpms.txs, ensembl_gene_id == 'ENSMUSG00000020634')
+# Get sum of tpm values for transcripts that belong to ENSMUSG00000020634
+tpms.tx.ENSMUSG00000020634 <- filter(tpms.txs, ensembl_gene_id == "ENSMUSG00000020634")
 sumoftxtpm <- sum(tpms.tx.ENSMUSG00000020634$DIVminus8.Rep1)
 
-#Get gene level tpm value of ENSMUSG00000020634
-genetpm <- filter(tpms.genes, ensembl_gene_id == 'ENSMUSG00000020634')$DIVminus8.Rep1
+# Get gene level tpm value of ENSMUSG00000020634
+genetpm <- filter(tpms.genes, ensembl_gene_id == "ENSMUSG00000020634")$DIVminus8.Rep1
 
-#Are they the same?
+# Are they the same?
 sumoftxtpm
 genetpm
 ```
@@ -338,21 +338,23 @@ A simple way to think about this is to simply correlate TPM values for genes bet
 ```{r}
 #| label: cor-to-samples
 #| eval: false
-#DIVminus8.Rep1 vs DIVminus8.Rep2
+# DIVminus8.Rep1 vs DIVminus8.Rep2
 
-#Since we are plotting log TPM values, we need to add a pseudocount to all samples.
-#log(0) is a problem.
+# Since we are plotting log TPM values, we need to add a pseudocount to all samples.
+# log(0) is a problem.
 
-#Add pseudocounts and take log within ggplot function call
+# Add pseudocounts and take log within ggplot function call
 r.spearman <- cor.test(
-  tpms$DIVminus8.Rep1, tpms$DIVminus8.Rep2, 
-  method = 'spearman')$estimate[[1]]
+  tpms$DIVminus8.Rep1, tpms$DIVminus8.Rep2,
+  method = "spearman"
+)$estimate[[1]]
 
 r.spearman <- signif(r.spearman, 2)
 
-ggplot(tpms, aes(x = log10(DIVminus8.Rep1 + 1e-3), y = log10(DIVminus8.Rep2 + 1e-3))) + 
-  geom_point() + theme_classic() +
-  annotate('text', x = 2, y = 0, label = paste0('R = ', r.spearman))
+ggplot(tpms, aes(x = log10(DIVminus8.Rep1 + 1e-3), y = log10(DIVminus8.Rep2 + 1e-3))) +
+  geom_point() +
+  theme_classic() +
+  annotate("text", x = 2, y = 0, label = paste0("R = ", r.spearman))
 ```
 
 # Hierarchical clustering
@@ -380,15 +382,17 @@ tpms.2samplecor <-
 
 # Add pseudocounts and take log within ggplot function call
 r.spearman <- cor.test(
-  tpms.2samplecor$DIVminus8.Rep1, 
+  tpms.2samplecor$DIVminus8.Rep1,
   tpms.2samplecor$DIVminus8.Rep2,
-  method = 'spearman')$estimate[[1]]
+  method = "spearman"
+)$estimate[[1]]
 
 r.spearman <- signif(r.spearman, 2)
 
-ggplot(tpms.2samplecor, aes(x = log10(DIVminus8.Rep1 + 1e-3), y = log10(DIVminus8.Rep2 + 1e-3))) + 
-  geom_point() + theme_classic() +
-  annotate('text', x = 2, y = 1, label = paste0('R = ', r.spearman))
+ggplot(tpms.2samplecor, aes(x = log10(DIVminus8.Rep1 + 1e-3), y = log10(DIVminus8.Rep2 + 1e-3))) +
+  geom_point() +
+  theme_classic() +
+  annotate("text", x = 2, y = 1, label = paste0("R = ", r.spearman))
 ```
 
 # Filtering lowly expressed genes
@@ -400,11 +404,11 @@ OK that's two samples compared to each other, but now we want to see how **all**
 #| eval: false
 # Make a new column in tpms that is the number of samples in which the value is at least 1
 tpms.cutoff <-
-  mutate(tpms, nSamples = rowSums(tpms[,2:31] > 1)) |>
-  #Now filter for rows where nSamples is at least 15
-  #Meaning that at least 15 samples passed the threshold
+  mutate(tpms, nSamples = rowSums(tpms[, 2:31] > 1)) |>
+  # Now filter for rows where nSamples is at least 15
+  # Meaning that at least 15 samples passed the threshold
   filter(nSamples >= 15) |>
-  #Get rid of the nSamples column
+  # Get rid of the nSamples column
   dplyr::select(-nSamples)
 
 nrow(tpms)
@@ -418,11 +422,11 @@ Now we can use the `cor` function to calculate pairwise correlations in a .red[*
 ```{r}
 #| label: make-matrix
 #| eval: false
-tpms.cutoff.matrix <- 
+tpms.cutoff.matrix <-
   dplyr::select(tpms.cutoff, -ensembl_gene_id) |>
   as.matrix()
 
-tpms.cor <- cor(tpms.cutoff.matrix, method = 'spearman')
+tpms.cor <- cor(tpms.cutoff.matrix, method = "spearman")
 head(tpms.cor)
 ```
 
@@ -440,9 +444,9 @@ library(pheatmap)
 annot <- tibble(
   row.names = colnames(tpms.cor),
   timepoint = c(
-    rep('DIVminus8', 4), rep('DIVminus4', 3),
-    rep('DIV0', 3), rep('DIV1', 4), rep('DIV7', 4),
-    rep('DIV16', 4), rep('DIV21', 4), rep('DIV28', 4)
+    rep("DIVminus8", 4), rep("DIVminus4", 3),
+    rep("DIV0", 3), rep("DIV1", 4), rep("DIV7", 4),
+    rep("DIV16", 4), rep("DIV21", 4), rep("DIV28", 4)
   )
 )
 
@@ -475,9 +479,9 @@ tpms.cutoff.matrix <-
   dplyr::select(tpms.cutoff, -ensembl_gene_id) |>
   as.matrix()
 
-#Add pseudocount
+# Add pseudocount
 tpms.cutoff.matrix <- tpms.cutoff.matrix + 1e-3
-#Take log of values
+# Take log of values
 tpms.cutoff.matrix <- log(tpms.cutoff.matrix)
 
 tpms.cutoff.matrix
@@ -538,7 +542,7 @@ ggplot(
   )
 ) +
   geom_point(size = 5) +
-  scale_color_brewer(palette = "Set1") + 
+  scale_color_brewer(palette = "Set1") +
   theme_classic(16) +
   labs(
     x = paste("PC1,", pc1var, "% explained var."),

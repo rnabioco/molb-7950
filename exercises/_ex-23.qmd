@@ -36,10 +36,10 @@ mart <- biomaRt::useMart(
 
 t2g <- biomaRt::getBM(
   attributes = c(
-    'ensembl_transcript_id',
-    'ensembl_gene_id',
-    'external_gene_name'
-    ),
+    "ensembl_transcript_id",
+    "ensembl_gene_id",
+    "external_gene_name"
+  ),
   mart = mart
 ) |>
   as_tibble()
@@ -52,28 +52,28 @@ gene_name_map <-
 
 Now we can read in the transcript-level data and collapse to gene-level data with `tximport`
 ```{r}
-#The names of all the sample-specific salmon subdirectories
+# The names of all the sample-specific salmon subdirectories
 sample_ids <- c(
-  'DIV0.Rep1', 'DIV0.Rep2', 'DIV0.Rep3',
-  'DIV7.Rep1', 'DIV7.Rep2', 'DIV7.Rep3', 'DIV7.Rep4'
+  "DIV0.Rep1", "DIV0.Rep2", "DIV0.Rep3",
+  "DIV7.Rep1", "DIV7.Rep2", "DIV7.Rep3", "DIV7.Rep4"
 )
 
-#So what we want to do now is create paths to each quant.sf file that is in each sample_id.
-#This can be done by combining the base_dir, each sample_id directory, and 'quant.sf'
-#For example, the path to the first file will be data/salmonouts/DIVminus8.Rep1/quant.sf
+# So what we want to do now is create paths to each quant.sf file that is in each sample_id.
+# This can be done by combining the base_dir, each sample_id directory, and 'quant.sf'
+# For example, the path to the first file will be data/salmonouts/DIVminus8.Rep1/quant.sf
 
 salm_dirs <- fs::path(
-   here('data/block-rna/salmonouts/'),
-   sample_ids,
-   "quant.sf.gz"
+  here("data/block-rna/salmonouts/"),
+  sample_ids,
+  "quant.sf.gz"
 )
 
 txi <- tximport(
   salm_dirs,
-  type = 'salmon',
+  type = "salmon",
   tx2gene = t2g,
   dropInfReps = TRUE,
-  countsFromAbundance = 'lengthScaledTPM'
+  countsFromAbundance = "lengthScaledTPM"
 )
 ```
 
@@ -82,10 +82,10 @@ OK we are going to need to give `DESeq2` information about the samples like whic
 # must be a data.frame
 samples <- data.frame(
   row.names = c(
-    'DIV0.Rep1', 'DIV0.Rep2', 'DIV0.Rep3',
-    'DIV7.Rep1', 'DIV7.Rep2', 'DIV7.Rep3', 'DIV7.Rep4'
-    ),
-  timepoint = c(rep('DIV0', 3), rep('DIV7', 4))
+    "DIV0.Rep1", "DIV0.Rep2", "DIV0.Rep3",
+    "DIV7.Rep1", "DIV7.Rep2", "DIV7.Rep3", "DIV7.Rep4"
+  ),
+  timepoint = c(rep("DIV0", 3), rep("DIV7", 4))
 )
 
 head(samples)
@@ -96,7 +96,7 @@ There are essentially two steps to using `DESeq2`. The first involves creating a
 ddsTxi <- DESeqDataSetFromTximport(
   txi,
   colData = samples,
-  design = ~ timepoint
+  design = ~timepoint
 )
 ```
 
@@ -136,9 +136,9 @@ Another useful application of the `contrast` argument can be seen with more comp
 As we said before, with this formula, `DESeq2` will account for differences between replicates here to find differences between timepoints. However, what if we wanted to look at differences between replicate batches?  By supplying 'replicate' to `contrast` instead of 'timepoint', we could extract difference between these batches.
 
 ```{r}
-#For contrast, we give three strings: the factor we are interested in, the numerator, and the denominator
-#It makes the most sense (to me at least) to have DIV7 be the numerator
-results(dds, contrast = c('timepoint', 'DIV7', 'DIV0'))
+# For contrast, we give three strings: the factor we are interested in, the numerator, and the denominator
+# It makes the most sense (to me at least) to have DIV7 be the numerator
+results(dds, contrast = c("timepoint", "DIV7", "DIV0"))
 ```
 
 We can see here that this is a data frame where the rows are genes and the columns are interesting data.
@@ -153,17 +153,17 @@ Let's do a little work on this data frame to make it slightly cleaner and more i
 differentiation.results <-
   results(
     dds,
-    contrast = c('timepoint', 'DIV7', 'DIV0')
-    ) |>
+    contrast = c("timepoint", "DIV7", "DIV0")
+  ) |>
   # Change this into a dataframe
   as.data.frame() |>
   # Move ensembl gene IDs into their own column
-  rownames_to_column(var = 'ensembl_gene_id') |>
+  rownames_to_column(var = "ensembl_gene_id") |>
   # drop unused columns
   dplyr::select(-c(baseMean, lfcSE, stat, pvalue)) |>
   # Merge this with a table relating ensembl_gene_id with gene short names
   inner_join(gene_name_map) |>
-  #Rename external_gene_name column
+  # Rename external_gene_name column
   dplyr::rename(gene = external_gene_name) |>
   as_tibble()
 ```
@@ -184,16 +184,16 @@ nrow(filter(differentiation.results, padj < 0.01 & log2FoldChange < 0))
 Let's make a volcano plot of these results.
 
 ```{r}
-#We are going to add an extra column to differentiation.results that tells us whether or not a gene 
-#meets the FDR cutoff
+# We are going to add an extra column to differentiation.results that tells us whether or not a gene
+# meets the FDR cutoff
 differentiation.results.sig <-
   mutate(
     differentiation.results,
     sig = case_when(
-      padj < 0.01 ~ 'yes',
-      .default = 'no'
-      )
-    )|>
+      padj < 0.01 ~ "yes",
+      .default = "no"
+    )
+  ) |>
   # if a gene did not meet expression cutoffs that DESeq2 automatically does, it gets a pvalue of NA
   drop_na()
 
@@ -204,16 +204,16 @@ ggplot(
     y = -log10(padj),
     color = sig
   )
-) + 
+) +
   geom_point(alpha = 0.2) +
   labs(
-    x = 'DIV7 expression / DIV0 expression, log2',
-    y = '-log10(FDR)'
+    x = "DIV7 expression / DIV0 expression, log2",
+    y = "-log10(FDR)"
   ) +
   scale_color_manual(
-    values = c('gray', 'red'),
-    labels = c('NS', 'FDR < 0.01'),
-    name = ''
+    values = c("gray", "red"),
+    labels = c("NS", "FDR < 0.01"),
+    name = ""
   ) +
   theme_cowplot()
 ```
@@ -223,39 +223,39 @@ We can do this by asking for p values that incorporate the probability that the 
 This will of course be more conservative, but will probably give you a more confident set of genes.
 
 ```{r}
-#Is the expression of the gene at least 3-fold different?
+# Is the expression of the gene at least 3-fold different?
 differentiation.results.lfc <-
   results(
     dds,
-    contrast = c('timepoint', 'DIV7', 'DIV0'),
+    contrast = c("timepoint", "DIV7", "DIV0"),
     lfcThreshold = log(3, 2)
-    ) |>
+  ) |>
   # Change this into a dataframe
   as.data.frame() |>
   # Move ensembl gene IDs into their own column
-  rownames_to_column(var = 'ensembl_gene_id') |>
+  rownames_to_column(var = "ensembl_gene_id") |>
   # drop unused columns
   dplyr::select(-c(baseMean, lfcSE, stat, pvalue)) |>
   # Merge this with a table relating ensembl_gene_id with gene short names
   inner_join(gene_name_map) |>
-  #Rename external_gene_name column
+  # Rename external_gene_name column
   dplyr::rename(gene = external_gene_name) |>
   as_tibble()
 
-#number of upregulated genes
+# number of upregulated genes
 nrow(filter(differentiation.results.lfc, padj < 0.01 & log2FoldChange > 0))
 
-#number of downregulated genes
+# number of downregulated genes
 nrow(filter(differentiation.results.lfc, padj < 0.01 & log2FoldChange < 0))
 
 differentiation.results.lfc.sig <-
   mutate(
     differentiation.results.lfc,
     sig = case_when(
-      padj < 0.01 ~ 'yes',
-      .default = 'no'
-      )
-    )|>
+      padj < 0.01 ~ "yes",
+      .default = "no"
+    )
+  ) |>
   # if a gene did not meet expression cutoffs that DESeq2 automatically does, it gets a pvalue of NA
   drop_na()
 
@@ -266,19 +266,18 @@ ggplot(
     y = -log10(padj),
     color = sig
   )
-) + 
+) +
   geom_point(alpha = 0.2) +
   labs(
-    x = 'DIV7 expression / DIV0 expression, log2',
-    y = '-log10(FDR)'
+    x = "DIV7 expression / DIV0 expression, log2",
+    y = "-log10(FDR)"
   ) +
   scale_color_manual(
-    values = c('gray', 'red'),
-    labels = c('NS', 'FDR < 0.01'),
-    name = ''
+    values = c("gray", "red"),
+    labels = c("NS", "FDR < 0.01"),
+    name = ""
   ) +
   theme_cowplot()
-
 ```
 
 # Plotting the expression of single genes
@@ -290,20 +289,20 @@ So what is the value that we would plot? Probably the most correct value is the 
 A more interpretable value to plot might be TPM, since TPM is length-normalized.  Let's say a gene was expressed at 500 TPM. Right off the bat, I know generally what kind of expression that reflects (pretty high).
 
 ```{r}
-#If you are interested in getting normalized counts, here's how you do it
+# If you are interested in getting normalized counts, here's how you do it
 normcounts <- counts(dds, normalized = TRUE)
 ```
 
 Let's plot the expression of Klf4, Sox2, Bdnf, and Dlg4 in our samples.
 ```{r}
-#Get a table of tpms...remember txi is our tximport object
+# Get a table of tpms...remember txi is our tximport object
 tpms <- txi$abundance |>
   as.data.frame() |>
-  rownames_to_column(var = 'ensembl_gene_id') |>
+  rownames_to_column(var = "ensembl_gene_id") |>
   inner_join(gene_name_map) |>
   dplyr::rename(gene = external_gene_name) |>
-  #Filter for genes we are interested in
-  filter(gene %in% c('Klf4', 'Sox2', 'Bdnf', 'Dlg4'))
+  # Filter for genes we are interested in
+  filter(gene %in% c("Klf4", "Sox2", "Bdnf", "Dlg4"))
 
 tpms
 ```
@@ -318,7 +317,7 @@ head(tpms)
 Now add one more column that tells which condition each replicate belongs to.
 
 ```{r}
-tpms <- mutate(tpms, condition = ifelse(grepl('DIV0', name), 'DIV0', 'DIV7'))
+tpms <- mutate(tpms, condition = ifelse(grepl("DIV0", name), "DIV0", "DIV7"))
 head(tpms)
 ```
 
@@ -331,16 +330,16 @@ ggplot(
     x = condition,
     y = value,
     color = condition
-    )
-  ) +
-  geom_point(pch = 21, size = 4) + 
+  )
+) +
+  geom_point(pch = 21, size = 4) +
   labs(
     x = "",
     y = "TPM"
   ) +
   theme_cowplot() +
-  scale_color_manual(values = c('blue', 'red'), guide = FALSE) +
-  facet_wrap(~ gene, scales = 'free_y')
+  scale_color_manual(values = c("blue", "red"), guide = FALSE) +
+  facet_wrap(~gene, scales = "free_y")
 ```
 
 OK, but let's do something a little bigger. Say that instead of plotting individual genes we wanted to ask whether a whole class of genes are going up or down.  We can do that by retrieving all genes that belong to a particular gene ontology term.
@@ -355,23 +354,23 @@ We can use `biomaRt` to get all genes that belong to each of these categories.  
 
 ```{r}
 pluripotencygenes <- getBM(
-  attributes = c('ensembl_gene_id'),
-  filters = c('go_parent_term'), 
-  values = c('GO:0019827'),
+  attributes = c("ensembl_gene_id"),
+  filters = c("go_parent_term"),
+  values = c("GO:0019827"),
   mart = mart
 )
 
 cellcyclegenes <- getBM(
-  attributes = c('ensembl_gene_id'),
-  filters = c('go_parent_term'), 
-  values = c('GO:0045787'),
+  attributes = c("ensembl_gene_id"),
+  filters = c("go_parent_term"),
+  values = c("GO:0045787"),
   mart = mart
 )
 
 neurongenes <- getBM(
-  attributes = c('ensembl_gene_id'),
-  filters = c('go_parent_term'), 
-  values = c('GO:0030182'),
+  attributes = c("ensembl_gene_id"),
+  filters = c("go_parent_term"),
+  values = c("GO:0030182"),
   mart = mart
 )
 
@@ -385,18 +384,18 @@ differentiation.results.annot <-
   differentiation.results |>
   mutate(
     annot = case_when(
-      ensembl_gene_id %in% pluripotencygenes$ensembl_gene_id ~ 'pluripotency',
-      ensembl_gene_id %in% cellcyclegenes$ensembl_gene_id ~ 'cellcycle',
-      ensembl_gene_id %in% neurongenes$ensembl_gene_id ~ 'neurondiff',
-      .default = 'none'
+      ensembl_gene_id %in% pluripotencygenes$ensembl_gene_id ~ "pluripotency",
+      ensembl_gene_id %in% cellcyclegenes$ensembl_gene_id ~ "cellcycle",
+      ensembl_gene_id %in% neurongenes$ensembl_gene_id ~ "neurondiff",
+      .default = "none"
     )
   )
 
 # Reorder these for plotting purposes
 differentiation.results.annot$annot <-
   factor(
-    differentiation.results.annot$annot, 
-    levels = c('none', 'cellcycle', 'pluripotency', 'neurondiff')
+    differentiation.results.annot$annot,
+    levels = c("none", "cellcycle", "pluripotency", "neurondiff")
   )
 
 head(differentiation.results.annot)
@@ -409,8 +408,8 @@ You can tie yourself in knots worrying about what is the right test to use for a
 ```{r}
 p.pluripotency <- tidy(
   wilcox.test(
-    filter(differentiation.results.annot, annot == 'pluripotency')$log2FoldChange,
-    filter(differentiation.results.annot, annot == 'none')$log2FoldChange
+    filter(differentiation.results.annot, annot == "pluripotency")$log2FoldChange,
+    filter(differentiation.results.annot, annot == "none")$log2FoldChange
   )
 )
 
@@ -419,8 +418,8 @@ p.pluripotency <- signif(p.pluripotency, 2)
 
 p.cellcycle <- tidy(
   wilcox.test(
-    filter(differentiation.results.annot, annot == 'cellcycle')$log2FoldChange,
-    filter(differentiation.results.annot, annot == 'none')$log2FoldChange
+    filter(differentiation.results.annot, annot == "cellcycle")$log2FoldChange,
+    filter(differentiation.results.annot, annot == "none")$log2FoldChange
   )
 )
 
@@ -429,8 +428,9 @@ p.cellcycle <- signif(p.cellcycle, 2)
 
 p.neurondiff <- tidy(
   wilcox.test(
-    filter(differentiation.results.annot, annot == 'neurondiff')$log2FoldChange,
-    filter(differentiation.results.annot, annot == 'none')$log2FoldChange)
+    filter(differentiation.results.annot, annot == "neurondiff")$log2FoldChange,
+    filter(differentiation.results.annot, annot == "none")$log2FoldChange
+  )
 )
 
 p.neurondiff <- p.neurondiff$p.value
@@ -456,27 +456,26 @@ ggplot(
   ) +
   geom_hline(
     yintercept = 0,
-    color = 'gray',
-    linetype = 'dashed'
-    ) +
+    color = "gray",
+    linetype = "dashed"
+  ) +
   geom_boxplot(
     notch = TRUE,
     outlier.shape = NA
-    ) +
+  ) +
   theme_cowplot() +
-  scale_fill_manual(values = c('gray', 'red', 'blue', 'purple'), guide = F) +
+  scale_fill_manual(values = c("gray", "red", "blue", "purple"), guide = F) +
   scale_x_discrete(
     labels = c(
-      'none', 'Cell cycle', 'Pluripotency', 'Neuron\ndifferentiation'
+      "none", "Cell cycle", "Pluripotency", "Neuron\ndifferentiation"
     )
   ) +
   ylim(-5, 7) +
   # hacky significance bars
-  annotate('segment', x = 1, xend = 2, y = 4, yend = 4) +
-  annotate('segment', x = 1, xend = 3, y = 5, yend = 5) +
-  annotate('segment', x = 1, xend = 4, y = 6, yend = 6) +
-  annotate('text', x = 1.5, y = 4.4, label = paste0('p = ', p.cellcycle)) +
-  annotate('text', x = 2, y = 5.4, label = paste0('p = ', p.pluripotency)) +
-  annotate('text', x = 2.5, y = 6.4, label = paste0('p = ', p.neurondiff))
-
+  annotate("segment", x = 1, xend = 2, y = 4, yend = 4) +
+  annotate("segment", x = 1, xend = 3, y = 5, yend = 5) +
+  annotate("segment", x = 1, xend = 4, y = 6, yend = 6) +
+  annotate("text", x = 1.5, y = 4.4, label = paste0("p = ", p.cellcycle)) +
+  annotate("text", x = 2, y = 5.4, label = paste0("p = ", p.pluripotency)) +
+  annotate("text", x = 2.5, y = 6.4, label = paste0("p = ", p.neurondiff))
 ```
