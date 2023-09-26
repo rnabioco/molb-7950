@@ -402,7 +402,7 @@ clustering_columns <- str_subset(colnames(so@meta.data), "RNA_snn_")
 pl <- purrr::map(
   clustering_columns,
   ~ UMAPPlot(so, group.by = .x, label = TRUE) +
-      labs(title = .x)
+    labs(title = .x)
 )
 plot_grid(plotlist = pl, nrow = 1, ncol = 3)
 ```
@@ -486,7 +486,7 @@ We will filter the output to keep genes that are upregulated in the cluster vers
 top_markers <- markers |>
   mutate(group = as.numeric(group)) |>
   # filter for positive fold change and expressed in at least 10% of cells
-  filter(logFC > 0, padj < 0.05, pct_in > 10) |> 
+  filter(logFC > 0, padj < 0.05, pct_in > 10) |>
   group_by(group) |>
   # rank by adjusted p-value then logFC
   arrange(padj, desc(logFC), .by_group = TRUE) |>
