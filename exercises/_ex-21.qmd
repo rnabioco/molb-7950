@@ -3,23 +3,62 @@ title: "Factor-centric chromatin analysis"
 author: "Jay Hesselberth"
 ---
 
+# Where do transcription factors bind in the genome?
+
+Today we'll look at where two yeast transcription factors bind in the genome using CUT&RUN.
+
+Techniques like CUT&RUN require an affinity reagent (e.g., an antibody) that uniquely recognizes a transcription factor in the cell. This antibody is added to permeabilized cells, and the antibody associates with the epitope. A separate reagent, a fusion of Protein A (which binds IgG) and micrococcal nuclease (MNase) then associates with the antibody. Addition of calcium activates MNase, and nearby DNA is digested. These DNA fragments are then isolated and sequenced to identify sites of TF association in the genome.
+
+![Fig 1a, Skene et al.](../img/block-dna/skene-fig-1a.png)
+
+## Data download and pre-processing
+
+CUT&RUN data were downloaded from the [NCBI GEO page](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE84474) for Skene et al.
+
+I selected the 16 second time point for *S. cerevisiae* Abf1 and Reb1 (note the paper combined data from the 1-32 second time points).
+
+BED files containing mapped DNA fragments were separated by size and converted to bigWig with:
+
+``` bash
+# separate fragments by size
+awk '($3 - $2 <= 120)' Abf1.bed > CutRun_Abf1_lt120.bed
+awk '($3 - $2 => 150)' Abf1.bed > CutRun_Abf1_gt150.bed
+
+# for each file with the different sizes
+bedtools genomecov -i Abf1.bed -g sacCer3.chrom.sizes -bg > Abf1.bg
+bedGraphToBigWig Abf1.bg sacCer3.chrom.sizes Abf1.bw
+```
+
+The bigWig files are available here in the `data/` directory.
+
+## Analysis
 
 ```{r}
 #| label: load-libs
+#| message: false
 library(tidyverse)
 library(here)
 library(valr)
 
+# genome viz
 library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 library(Gviz)
 library(rtracklayer)
+
+# motif discovery
+library(BSgenome.Scerevisiae.UCSC.sacCer3)
+library(rGADEM)
+library(seqLogo)
 ```
 
+## Plot genome coverage
+
 ```{r}
-#| label: track-genes
-track_start <- 50000 
+#| label: make-tracks 
+track_start <- 90000 
 track_end <- 150000
 
+# genes track
 sgd_genes_trk <-
   GeneRegionTrack(
     TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,
@@ -28,22 +67,18 @@ sgd_genes_trk <-
     end = track_end,
   )
 
-sgd_genes_trk
-```
-
-```{r}
-#| label: track-cuttag
+# signal tracks
 track_info <-
   tibble(
     file_name = c(
       "CutRun_Reb1_lt120.bw",
-      "CutRun_Reb1_gt150.bw",
       "CutRun_Abf1_lt120.bw",
+      "CutRun_Reb1_gt150.bw",
       "CutRun_Abf1_gt150.bw"
     ),
     sample_type = c(
-      "Reb1_Short", "Reb1_Long",
-      "Abf1_Short", "Abf1_Long"
+      "Reb1_Short", "Abf1_Short",
+      "Reb1_Long", "Abf1_Long"
     )
   ) |>
   mutate(
@@ -56,16 +91,20 @@ track_info <-
     )
   ) |>
   dplyr::select(sample_type, big_wig, data_track)
+
+# x-axis track
+x_axis_trk <- GenomeAxisTrack()
 ```
+
+Now that we have tracks loaded, we can make a plot.
 
 ```{r}
 #| label: plot-tracks
-x_axis_trk <- GenomeAxisTrack()
-
 plotTracks(
   c(
     sgd_genes_trk,
-    track_info$data_track
+    track_info$data_track,
+    x_axis_trk
   ),
   from = track_start,
   to = track_end,
@@ -78,6 +117,47 @@ plotTracks(
 ```
 
 ## Peak calling
+
+A conceptually simple approach to identification of regions containing "peaks" where a transcription factor was bound is available in the MACS software ([paper](), [github]()). There's also a nice [blog post](https://hbctraining.github.io/Intro-to-ChIPseq/lessons/05_peak_calling_macs.html) covering the main ideas.
+
+### Theory
+
+The Poisson distribution is a discrete probability distribution of the form:
+
+$$ P_\lambda (X=k) = \frac{ \lambda^k }{ k! * e^{-\lambda} } $$
+
+where $\lambda$ captures both the mean and variance of the distribution.
+
+The R functions `dpois()`, `ppois()`, and `rpois()` provide access to the density, distribution, and random generation for the Poisson distribution. See `?dpois` for details.
+
+```{r}
+#| label: plot-poisson
+#| echo: false
+library(cowplot)
+library(ggtext)
+
+crossing(
+  k = 1:20,
+  lambda = c(1, 4, 10)
+) |>
+  mutate(p = dpois(k, lambda)) |>
+  ggplot(
+    aes(factor(k), p, color = factor(lambda), group = lambda)
+    ) +
+  geom_point(size = 3, alpha = 0.6) +
+  geom_line() +
+  theme_cowplot() +
+  scale_color_brewer(palette = "Set1") +
+  labs(x = "k", y = "Density", color = "&lambda;") + 
+  theme(
+    legend.position = "top",
+    legend.title = element_markdown()
+  )
+```
+
+Here, we model read coverage using the Poisson distribution. Given some genome size $G$ and and a number of reads collected $N$, we can approximate $\lambda$ from $N/G$, scaled by the size of the sequence read.
+
+### Practice
 
 ```{r}
 #| label: peak-calling
@@ -92,21 +172,79 @@ genome_lambda <- total_reads / genome_size / 200
 
 peak_calls <- 
   abf1_tbl |>
+    # define single-base sites
     mutate(
       midpoint = start + round((end - start) / 2),
       start = midpoint, 
-      end = start + 1
+      end = start + 1,
+      # use the poisson to calculate a p-value with the genome-wide lambda
+      pval = dpois(score, genome_lambda),
+      # convert p-values to FDR
+      fdr = p.adjust(pval, method = "fdr")
     ) |>
-    dplyr::select(chrom:score) |>
-    rowwise() |>
-    mutate(
-      pval = dpois(score, genome_lambda)
-    ) |>
-    ungroup() |>
-    mutate(
-      p.adj = p.adjust(pval, method = "BH")
-    )
+  # most stringent cut-off
+  filter(fdr == 0) |>
+  # collapse neighboring peak calls
+  bed_merge(max_dist = 20)
+```
 
-ggplot(filter(peak_calls, chrom == "chrII"), aes(start, -log10(p.adj))) + geom_line() + xlim(track_start, track_end) # + xlim(95000, 105000)
+How many peaks are called in this region?
+
+```{r}
+peak_calls |>
+  filter(
+    chrom == "chrII" &
+      start >= track_start &
+      end <= track_end
+  )
+```
+
+Let's visualize in the context of the genome.
+
+```{r}
+peak_calls_gr <- 
+  GRanges(
+    seqnames = peak_calls$chrom,
+    ranges = IRanges(peak_calls$start, peak_calls$end)
+  )
+  
+peak_calls_trk <-
+  AnnotationTrack(peak_calls_gr, name = "Peak calls")
+
+abf1_short_trk <- filter(track_info, sample_type == "Abf1_Short") |> pull(data_track)
+
+plotTracks(
+  c(
+    sgd_genes_trk,
+    abf1_short_trk,
+    peak_calls_trk,
+    x_axis_trk
+  ),
+  from = track_start,
+  to = track_end,
+  chromosome = "chrII",
+  transcriptAnnotation = "gene",
+  shape = "arrow",
+  type = "histogram"
+)
+
+```
+
+# Motif discovery
+
+```{r}
+#| label: motif-discovery
+peak_seqs <- getSeq(
+  Scerevisiae,
+  peak_calls_gr
+)
+
+gadem <- GADEM(peak_seqs, genome = Scerevisiae, verbose = 1)
+consensus(gadem)
+```
+```{r}
+#| label: plot-logo
+pwm <- gadem@motifList[[1]]@pwm
+seqLogo(pwm)
 ```
 
