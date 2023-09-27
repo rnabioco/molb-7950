@@ -1,0 +1,112 @@
+---
+title: "Factor-centric chromatin analysis"
+author: "Jay Hesselberth"
+---
+
+
+```{r}
+#| label: load-libs
+library(tidyverse)
+library(here)
+library(valr)
+
+library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
+library(Gviz)
+library(rtracklayer)
+```
+
+```{r}
+#| label: track-genes
+track_start <- 50000 
+track_end <- 150000
+
+sgd_genes_trk <-
+  GeneRegionTrack(
+    TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,
+    chromosome = "chrII",
+    start = track_start,
+    end = track_end,
+  )
+
+sgd_genes_trk
+```
+
+```{r}
+#| label: track-cuttag
+track_info <-
+  tibble(
+    file_name = c(
+      "CutRun_Reb1_lt120.bw",
+      "CutRun_Reb1_gt150.bw",
+      "CutRun_Abf1_lt120.bw",
+      "CutRun_Abf1_gt150.bw"
+    ),
+    sample_type = c(
+      "Reb1_Short", "Reb1_Long",
+      "Abf1_Short", "Abf1_Long"
+    )
+  ) |>
+  mutate(
+    file_path = here("data/block-dna", file_name),
+    big_wig = purrr::map(
+      file_path, ~ import.bw(.x, as = "GRanges")
+    ),
+    data_track = purrr::map2(
+      big_wig, sample_type, ~ DataTrack(.x, name = .y)
+    )
+  ) |>
+  dplyr::select(sample_type, big_wig, data_track)
+```
+
+```{r}
+#| label: plot-tracks
+x_axis_trk <- GenomeAxisTrack()
+
+plotTracks(
+  c(
+    sgd_genes_trk,
+    track_info$data_track
+  ),
+  from = track_start,
+  to = track_end,
+  chromosome = "chrII",
+  transcriptAnnotation = "gene",
+  shape = "arrow",
+  type = "histogram"
+)
+
+```
+
+## Peak calling
+
+```{r}
+#| label: peak-calling
+abf1_tbl <- read_bigwig(here("data/block-dna/CutRun_Abf1_lt120.bw"))
+
+total_reads <- sum(abf1_tbl$score)
+
+genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
+genome_size <- sum(genome$size)
+
+genome_lambda <- total_reads / genome_size / 200
+
+peak_calls <- 
+  abf1_tbl |>
+    mutate(
+      midpoint = start + round((end - start) / 2),
+      start = midpoint, 
+      end = start + 1
+    ) |>
+    dplyr::select(chrom:score) |>
+    rowwise() |>
+    mutate(
+      pval = dpois(score, genome_lambda)
+    ) |>
+    ungroup() |>
+    mutate(
+      p.adj = p.adjust(pval, method = "BH")
+    )
+
+ggplot(filter(peak_calls, chrom == "chrII"), aes(start, -log10(p.adj))) + geom_line() + xlim(track_start, track_end) # + xlim(95000, 105000)
+```
+
