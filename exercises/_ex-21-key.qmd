@@ -186,11 +186,11 @@ crossing(
 
 ### Practice
 
-Here, we model read coverage using the Poisson distribution. Given some genome size $G$ and and a number of reads collected $N$, we can approximate $\lambda$ from $N/G$, scaled by the size of the sequence read (about 100 bp).
+Here, we model read coverage using the Poisson distribution. Given some genome size $G$ and and a number of reads collected $N$, we can approximate $\lambda$ from $N/G$.
 
-MACS uses this value (the "genomic" lambda) and also calculates several "local" lambda values to account for variation among genomic regions. We'll just using the genomic lambda, which provides a conservative threshold for peak calling.
+MACS uses this value (the "genomewide" lambda) and also calculates several "local" lambda values to account for variation among genomic regions. We'll just use the genomewide lambda, which provides a conservative threshold for peak calling.
 
-Using genomic lambda, we can use the Poisson distribution to address the question: **How surprised should I be to see** $k$ reads at position X?
+Using the genomewide lambda, we can use the Poisson distribution to address the question: **How surprised should I be to see** $k$ reads at position X?
 
 ```{r}
 #| label: peak-calling
@@ -202,7 +202,7 @@ total_reads <- 16e6
 genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
 genome_size <- sum(genome$size)
 
-genome_lambda <- total_reads / genome_size / 100  
+genome_lambda <- total_reads / genome_size 
 
 peak_calls <-
   abf1_tbl |>
@@ -337,10 +337,17 @@ peak_seqs <- BSgenome::getSeq(
 )
 
 # takes ~2 minutes to run
-gadem <- GADEM(peak_seqs, genome = Scerevisiae, verbose = 1)
+gadem <- rGADEM::GADEM(
+  peak_seqs,
+  genome = Scerevisiae,
+  verbose = 1
+)
 
 # look at the consensus motifs
 consensus(gadem)
+
+# how many consensus motifs are there?
+nOccurrences(gadem)
 ```
 
 Now let's look at the sequence logo for the top hit.
@@ -348,7 +355,8 @@ Now let's look at the sequence logo for the top hit.
 ```{r}
 #| label: plot-logo
 pwm <- gadem@motifList[[1]]@pwm
-seqLogo(pwm)
+
+seqLogo::seqLogo(pwm)
 ```
 
 ### Questions

@@ -1,8 +1,6 @@
 ---
 title: "Factor-centric chromatin analysis"
 author: "Jay Hesselberth"
-execute: 
-  eval: false
 ---
 
 # Where do transcription factors bind in the genome?
@@ -39,7 +37,7 @@ The bigWig files are available here in the `data/` directory.
 
 1.  How do you ensure your antibody recognizes what you think it recognizes? What are important controls for ensuring it recognizes a specific epitope?
 
-2.  What are some good controls for CUT&RUN experiments?
+2.  What are important controls for CUT&RUN experiments?
 
 # CUT&RUN analysis
 
@@ -75,9 +73,10 @@ sgd_genes_trk <-
     chromosome = "chrII",
     start = track_start,
     end = track_end,
+    fill = "#009E73",
     background.title = "white",
     col.title = "black",
-    fontsize = 16
+    fontsize = 14
   )
 
 # signal tracks
@@ -107,7 +106,7 @@ track_info <-
           background.title = "white",
           col.title = "black",
           col.axis = "black",
-          fontsize = 16
+          fontsize = 12
       )
     )
   ) |>
@@ -171,7 +170,7 @@ crossing(
   k = 0:20,
   lambda = c(1, 4, 10)
 ) |>
-  mutate(p = ___(k, lambda)) |>
+  mutate(p = dpois(k, lambda)) |>
   ggplot(
     aes(factor(k), p, color = factor(lambda), group = lambda)
   ) +
@@ -198,6 +197,7 @@ Using genomic lambda, we can use the Poisson distribution to address the questio
 
 ```{r}
 #| label: peak-calling
+#| eval: false
 abf1_tbl <- read_bigwig(here("data/block-dna/CutRun_Abf1_lt120.bw"))
 
 # number of reads in the original Abf1 BED file
@@ -206,9 +206,8 @@ total_reads <- 16e6
 genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
 # how can we calculate genome size?
 genome_size <- ___ 
-read_len <- 100
 
-genome_lambda <- total_reads / genome_size / read_len
+genome_lambda <- total_reads / genome_size
 
 peak_calls <-
   abf1_tbl |>
@@ -228,9 +227,10 @@ Let's take a look at a plot of the p-value across a chromosome. What do you noti
 
 ```{r}
 #| label: plot-peak-sig
+#| eval: false
 ggplot(
   filter(peak_calls, chrom == "chrII"),
-  # convert p-vales to positive values for plotting
+  # convert p-values to positive values for plotting
   aes(start, ___)
 ) + 
   geom_line() +
@@ -242,6 +242,7 @@ How many peaks are called in this region?
 
 ```{r}
 #| label: n-peaks
+#| eval: false
 # most stringent cut-off
 peak_calls_sig <- 
   filter(
@@ -263,6 +264,7 @@ Let's visualize these peaks in the context of genomic CUT&RUN signal. We need to
 
 ```{r}
 #| label: plot-peaks
+#| eval: false
 # need a GRanges object to convert to an AnnotationTrack
 peak_calls_gr <-
   GRanges(
@@ -338,6 +340,7 @@ We'll use the [rGADEM](https://bioconductor.org/packages/release/bioc/html/rGADE
 
 ```{r}
 #| label: motif-discovery
+#| eval: false
 peak_seqs <- BSgenome::getSeq(
   # provided by BSgenome.Scerevisiae.UCSC.sacCer3
   Scerevisiae,
@@ -345,18 +348,27 @@ peak_seqs <- BSgenome::getSeq(
 )
 
 # takes ~2 minutes to run
-gadem <- GADEM(peak_seqs, genome = Scerevisiae, verbose = 1)
+gadem <- rGADEM::GADEM(
+  peak_seqs,
+  genome = Scerevisiae,
+  verbose = 1
+)
 
 # look at the consensus motifs
 consensus(gadem)
+
+# how many consensus motifs are there?
+nOccurrences(gadem)
 ```
 
 Now let's look at the sequence logo for the top hit.
 
 ```{r}
 #| label: plot-logo
+#| eval: false
 pwm <- gadem@motifList[[1]]@pwm
-seqLogo(pwm)
+
+seqLogo::seqLogo(pwm)
 ```
 
 ### Questions
