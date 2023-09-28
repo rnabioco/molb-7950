@@ -168,7 +168,7 @@ library(cowplot)
 library(ggtext)
 
 crossing(
-  k = 1:20,
+  k = 0:20,
   lambda = c(1, 4, 10)
 ) |>
   mutate(p = ___(k, lambda)) |>
@@ -179,7 +179,7 @@ crossing(
   geom_line() +
   theme_cowplot() +
   scale_color_brewer(palette = "Set1") +
-  labs(x = "k", y = "Density", color = "&lambda;") +
+  labs(x = "k", y = "Density of P(X=k)", color = "&lambda;") +
   theme(
     legend.position = "top",
     legend.title = element_markdown()
@@ -188,7 +188,9 @@ crossing(
 
 ### Practice
 
-Here, we model read coverage using the Poisson distribution. Given some genome size $G$ and and a number of reads collected $N$, we can approximate $\lambda$ from $N/G$, scaled by the size of the sequence read (about 100 bp).
+Here, we model read coverage using the Poisson distribution. Given a genome size $G$ and and a number of reads collected $N$, we can approximate $\lambda$ from $N/G$, scaled by the size of the sequence read (about 100 bp).
+
+The intuition here is: where are $N$ reads placed randomly on a genome of size $G$?
 
 MACS uses this value (the "genomic" lambda) and also calculates several "local" lambda values to account for variation among genomic regions. We'll just using the genomic lambda, which provides a conservative threshold for peak calling.
 
