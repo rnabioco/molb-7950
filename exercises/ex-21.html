@@ -318,7 +318,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="questions" class="level3"><h3 class="anchored" data-anchor-id="questions">Questions</h3>
 <ol type="1">
 <li><p>How do you ensure your antibody recognizes what you think it recognizes? What are important controls for ensuring it recognizes a specific epitope?</p></li>
-<li><p>What are some good controls for CUT&amp;RUN experiments?</p></li>
+<li><p>What are important controls for CUT&amp;RUN experiments?</p></li>
 </ol></section></section></section><section id="cutrun-analysis" class="level1"><h1>CUT&amp;RUN analysis</h1>
 <div class="cell">
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
@@ -347,9 +347,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>    chromosome <span class="op">=</span> <span class="st">"chrII"</span>,</span>
 <span>    start <span class="op">=</span> <span class="va">track_start</span>,</span>
 <span>    end <span class="op">=</span> <span class="va">track_end</span>,</span>
+<span>    fill <span class="op">=</span> <span class="st">"#009E73"</span>,</span>
 <span>    background.title <span class="op">=</span> <span class="st">"white"</span>,</span>
 <span>    col.title <span class="op">=</span> <span class="st">"black"</span>,</span>
-<span>    fontsize <span class="op">=</span> <span class="fl">16</span></span>
+<span>    fontsize <span class="op">=</span> <span class="fl">14</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># signal tracks</span></span>
@@ -379,7 +380,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>          background.title <span class="op">=</span> <span class="st">"white"</span>,</span>
 <span>          col.title <span class="op">=</span> <span class="st">"black"</span>,</span>
 <span>          col.axis <span class="op">=</span> <span class="st">"black"</span>,</span>
-<span>          fontsize <span class="op">=</span> <span class="fl">16</span></span>
+<span>          fontsize <span class="op">=</span> <span class="fl">12</span></span>
 <span>      <span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -407,6 +408,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>  shape <span class="op">=</span> <span class="st">"arrow"</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"histogram"</span></span>
 <span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-21_files/figure-html/plot-tracks-1.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 <section id="questions-1" class="level3"><h3 class="anchored" data-anchor-id="questions-1">Questions</h3>
 <ol type="1">
@@ -419,51 +423,63 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><span class="math display">\[ P_\lambda (X=k) = \frac{ \lambda^k }{ k! * e^{-\lambda} } \]</span></p>
 <p>where <span class="math inline">\(\lambda\)</span> captures both the mean and variance of the distribution.</p>
 <p>The R functions <code><a href="https://rdrr.io/r/stats/Poisson.html">dpois()</a></code>, <code><a href="https://rdrr.io/r/stats/Poisson.html">ppois()</a></code>, and <code><a href="https://rdrr.io/r/stats/Poisson.html">rpois()</a></code> provide access to the density, distribution, and random generation for the Poisson distribution. See <code><a href="https://rdrr.io/r/stats/Poisson.html">?dpois</a></code> for details.</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in text_info(label, fontkey, fontfamily, font, fontsize, cache): unable
+to translate '&lt;U+03BB&gt;quartz_off_screen114' to native encoding</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in text_info_cache[[key]] &lt;- info: unable to translate
+'&lt;U+03BB&gt;quartz_off_screen114' to native encoding</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="ex-21_files/figure-html/plot-poisson-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 </section><section id="practice" class="level3"><h3 class="anchored" data-anchor-id="practice">Practice</h3>
 <p>Here, we model read coverage using the Poisson distribution. Given a genome size <span class="math inline">\(G\)</span> and and a number of reads collected <span class="math inline">\(N\)</span>, we can approximate <span class="math inline">\(\lambda\)</span> from <span class="math inline">\(N/G\)</span>, scaled by the size of the sequence read (about 100 bp).</p>
 <p>The intuition here is: where are <span class="math inline">\(N\)</span> reads placed randomly on a genome of size <span class="math inline">\(G\)</span>?</p>
 <p>MACS uses this value (the “genomic” lambda) and also calculates several “local” lambda values to account for variation among genomic regions. We’ll just using the genomic lambda, which provides a conservative threshold for peak calling.</p>
 <p>Using genomic lambda, we can use the Poisson distribution to address the question: <strong>How surprised should I be to see</strong> <span class="math inline">\(k\)</span> reads at position X?</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>abf1_tbl <span class="ot">&lt;-</span> <span class="fu">read_bigwig</span>(<span class="fu">here</span>(<span class="st">"data/block-dna/CutRun_Abf1_lt120.bw"</span>))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># number of reads in the original Abf1 BED file</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>total_reads <span class="ot">&lt;-</span> <span class="fl">16e6</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>genome <span class="ot">&lt;-</span> <span class="fu">read_genome</span>(<span class="fu">here</span>(<span class="st">"data/block-dna/sacCer3.chrom.sizes"</span>))</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># how can we calculate genome size?</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>genome_size <span class="ot">&lt;-</span> ___ </span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>read_len <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>genome_lambda <span class="ot">&lt;-</span> total_reads <span class="sc">/</span> genome_size <span class="sc">/</span> read_len</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>peak_calls <span class="ot">&lt;-</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  abf1_tbl <span class="sc">|&gt;</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># define single-base sites</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">midpoint =</span> start <span class="sc">+</span> <span class="fu">round</span>((end <span class="sc">-</span> start) <span class="sc">/</span> <span class="dv">2</span>),</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">start =</span> midpoint,</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">end =</span> start <span class="sc">+</span> <span class="dv">1</span>,</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># use the poisson to calculate a p-value with the genome-wide lambda</span></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">pval =</span> <span class="fu">___</span>(score, genome_lambda),</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># convert p-values to FDR</span></span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">fdr =</span> <span class="fu">p.adjust</span>(pval, <span class="at">method =</span> <span class="st">"fdr"</span>)</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>abf1_tbl <span class="ot">&lt;-</span> <span class="fu">read_bigwig</span>(<span class="fu">here</span>(<span class="st">"data/block-dna/CutRun_Abf1_lt120.bw"</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># number of reads in the original Abf1 BED file</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>total_reads <span class="ot">&lt;-</span> <span class="fl">16e6</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>genome <span class="ot">&lt;-</span> <span class="fu">read_genome</span>(<span class="fu">here</span>(<span class="st">"data/block-dna/sacCer3.chrom.sizes"</span>))</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># how can we calculate genome size?</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>genome_size <span class="ot">&lt;-</span> ___ </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>genome_lambda <span class="ot">&lt;-</span> total_reads <span class="sc">/</span> genome_size</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>peak_calls <span class="ot">&lt;-</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  abf1_tbl <span class="sc">|&gt;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># define single-base sites</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">midpoint =</span> start <span class="sc">+</span> <span class="fu">round</span>((end <span class="sc">-</span> start) <span class="sc">/</span> <span class="dv">2</span>),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">start =</span> midpoint,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">end =</span> start <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># use the poisson to calculate a p-value with the genome-wide lambda</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">pval =</span> <span class="fu">___</span>(score, genome_lambda),</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># convert p-values to FDR</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">fdr =</span> <span class="fu">p.adjust</span>(pval, <span class="at">method =</span> <span class="st">"fdr"</span>)</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s take a look at a plot of the p-value across a chromosome. What do you notice about this plot, when compared to the coverage of the CUT&amp;RUN coverage above?</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(peak_calls, chrom <span class="sc">==</span> <span class="st">"chrII"</span>),</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># convert p-vales to positive values for plotting</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(start, ___)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span> </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(track_start, track_end) <span class="sc">+</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_cowplot</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(peak_calls, chrom <span class="sc">==</span> <span class="st">"chrII"</span>),</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># convert p-values to positive values for plotting</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(start, ___)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span> </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(track_start, track_end) <span class="sc">+</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_cowplot</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>How many peaks are called in this region?</p>
 <div class="cell">
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># most stringent cut-off</span></span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># most stringent cut-off</span></span>
 <span><span class="va">peak_calls_sig</span> <span class="op">&lt;-</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span></span>
 <span>    <span class="va">peak_calls</span>,</span>
@@ -481,7 +497,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Let’s visualize these peaks in the context of genomic CUT&amp;RUN signal. We need to define an <code>AnnotationTrack</code> with the peak intervals, which we can plot against the CUT&amp;RUN coverage we defined above.</p>
 <div class="cell">
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># need a GRanges object to convert to an AnnotationTrack</span></span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># need a GRanges object to convert to an AnnotationTrack</span></span>
 <span><span class="va">peak_calls_gr</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span></span>
 <span>    seqnames <span class="op">=</span> <span class="va">peak_calls_sig</span><span class="op">$</span><span class="va">chrom</span>,</span>
@@ -546,22 +562,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Examine the discovered motifs, and plot as a logo using <code><a href="https://rdrr.io/pkg/seqLogo/man/seqLogo.html">seqLogo::seqLogo()</a></code>.</li>
 </ol>
 <div class="cell">
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">peak_seqs</span> <span class="op">&lt;-</span> <span class="fu">BSgenome</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html">getSeq</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">peak_seqs</span> <span class="op">&lt;-</span> <span class="fu">BSgenome</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html">getSeq</a></span><span class="op">(</span></span>
 <span>  <span class="co"># provided by BSgenome.Scerevisiae.UCSC.sacCer3</span></span>
 <span>  <span class="va">Scerevisiae</span>,</span>
 <span>  <span class="va">peak_calls_gr</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># takes ~2 minutes to run</span></span>
-<span><span class="va">gadem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/GADEM.html">GADEM</a></span><span class="op">(</span><span class="va">peak_seqs</span>, genome <span class="op">=</span> <span class="va">Scerevisiae</span>, verbose <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">gadem</span> <span class="op">&lt;-</span> <span class="fu">rGADEM</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/GADEM.html">GADEM</a></span><span class="op">(</span></span>
+<span>  <span class="va">peak_seqs</span>,</span>
+<span>  genome <span class="op">=</span> <span class="va">Scerevisiae</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># look at the consensus motifs</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/gadem-class.html">consensus</a></span><span class="op">(</span><span class="va">gadem</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/gadem-class.html">consensus</a></span><span class="op">(</span><span class="va">gadem</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># how many consensus motifs are there?</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/gadem-class.html">nOccurrences</a></span><span class="op">(</span><span class="va">gadem</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now let’s look at the sequence logo for the top hit.</p>
 <div class="cell">
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pwm</span> <span class="op">&lt;-</span> <span class="va">gadem</span><span class="op">@</span><span class="va">motifList</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">pwm</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/seqLogo/man/seqLogo.html">seqLogo</a></span><span class="op">(</span><span class="va">pwm</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pwm</span> <span class="op">&lt;-</span> <span class="va">gadem</span><span class="op">@</span><span class="va">motifList</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">pwm</span></span>
+<span></span>
+<span><span class="fu">seqLogo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/seqLogo/man/seqLogo.html">seqLogo</a></span><span class="op">(</span><span class="va">pwm</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section><section id="questions-3" class="level3"><h3 class="anchored" data-anchor-id="questions-3">Questions</h3>
 <ol type="1">
