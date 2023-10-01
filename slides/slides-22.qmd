@@ -1,0 +1,468 @@
+---
+title: "class 22"
+subtitle: "RNA-sequencing intro"
+author: "Neelanjan Mukherjee"
+---
+
+```{r}
+#| echo: false
+#| include: false
+library(tximport)
+library(DESeq2)
+library(matrixStats)
+library(tidyverse)
+library(cowplot)
+library(here)
+```
+
+## Lecture Overview
+
+-   mRNA life cycle
+-   RNA-seq
+-   Alignment
+-   Transcript quantification
+-   DESeq model
+-   Additional statistical considerations
+
+## RNA in the cell
+
+![](/img/block-rna/rrna.png)
+
+## life fo an mRNA
+
+Messenger RNA (mRNA) carries genetic information encoded in DNA required for making proteins.
+
+![](/img/block-rna/RNA_life_cycle.png){width="5in"}
+
+## Steps of RNA regulation {.smaller}
+
+-   **Transcription**: A pre-mRNA still containing intron sequences is transcribed from DNA.
+-   **Capping**: A 7-methyl-guanosine "cap" is attached the 5' end of the nascent RNA.
+-   **Splicing**: The excision intronic sequences.
+-   **Cleavage**: The nascent RNA is cleaved from DNA.
+-   **Polyadenylation**: The addition of a polyA tail to the 3' end of the now RNA.
+-   **Export**: The mature mRNA is transported from the nucleus to the cytoplasm.
+-   **Localization**: The mRNA is localized to specific sub-regions or organelles within the cell.
+-   **Translation**: The production of specific protein based on the codons present within the mRNA.
+-   **Decay**: The enzymatic degradation of mRNA molecules.
+
+## RNA-seq {.smaller}
+
+Typically refers to "long" RNAs i.e. mRNA and long non-coding RNA (lncRNA). Specifically, we capture the steady-state pool of mature mRNA and to a lesser degree pre-mRNA. Thus, we can easily assess the abundance and isoforms expressed in the sample of interest. Of course, long read RNA sequencing (Nanopore, PacBio) enable better detection of continuity of exons and full-length isoforms.
+
+![](https://raw.githubusercontent.com/Sydney-Informatics-Hub/training-RNAseq-slides/master/01_IntroductionToRNASeq/assets/tracy1.png)
+
+
+
+## Selecting RNA populations for sequencing {.smaller}
+
+Need to determine which population of RNA you are interested in sequencing. The vast majority (\~80%) of RNA in the cell is from ribosomal RNA. Smaller regulatory non-coding RNA are typically excluded due to size selection (snRNA, snoRNA, tRNA, miRNA).
+
+::: columns
+::: {.column width="50%"}
+-   **polyA selection**: uses oligo dT to hybridize to poly A tails of mRNA (and many long non-coding RNA)
+
+-   **depletion of rRNA**: uses DNA oligos complementary to portions of rRNA to either remove (purification) or degrade (RNaseH) to avoid rRNA getting into the library.
+
+-   **size selection**: sequence a population of RNAs that have a specific length such as microRNAs, which are \~21 nt regulatory non-coding RNAs.
+:::
+
+::: {.column width="50%"}
+![](/img/block-rna/polyA_rRNA_size.png)
+:::
+:::
+
+## Importance of stand-specificity {.smaller}
+
+::: columns
+::: {.column width="60%"}
+![](/img/block-rna/strandedness.png)
+:::
+
+::: {.column width="40%"}
+...and the genome has complex organization.
+
+strand-specificity is crucial
+
+![](/img/block-rna/overlapping_genes.png)
+:::
+:::
+
+## Achieving strand-specificity
+
+![](/img/block-rna/strand_protocol.png)
+
+## RNA-seq read alignment {.smaller}
+
+You get your data back and align the reads to the genome, right? Nope, we need to deal with reads that will need to be "split" - spliced exons - to properly align. There are two strategies to deal with this: **1) Spliced alignments** and **2) Pseudoalignment (transcripts)**.
+
+![](https://upload.wikimedia.org/wikipedia/commons/0/01/RNA-Seq-alignment.png)
+
+## Spliced alignment workflow {.smaller}
+
+::: columns
+::: {.column width="60%"}
+![](https://github.com/hbctraining/Intro-to-rnaseq-hpc-salmon/blob/master/img/RNAseqWorkflow.png?raw=true){width="75%"}
+:::
+
+::: {.column .nonincremental width="40%"}
+Splice-aware aligners:
+
+-   [HiSat2](http://daehwankimlab.github.io/hisat2/)
+
+-   [Tophat2](http://ccb.jhu.edu/software/tophat/index.shtml)
+
+-   [STAR](https://github.com/alexdobin/STAR) *\<- use this*
+:::
+:::
+
+## How does STAR work? {.smaller}
+
+::: columns
+::: {.column .incremental width="50%"}
+![](/img/block-rna/alignment_STAR_step1.png)
+
+![](/img/block-rna/alignment_STAR_step2.png)
+:::
+
+::: {.column .incremental width="50%"}
+![](/img/block-rna/alignment_STAR_step5.png)
+:::
+:::
+
+## Pseudoalignment and transcript quantification {.smaller}
+
+OR align/quantify in the same step. Fast and accurate...but you need to provide the transcripts (cannot discover new isoforms).
+
+::: columns
+::: {.column width="50%"}
+![](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/img/rnaseq_salmon_workflow.png)
+:::
+
+::: {.column .nonincremental width="50%"}
+![](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/img/salmon_workflow_subset.png)
+
+Software:\
+[Salmon](https://combine-lab.github.io/salmon/) *\<- use this*.\
+[Kallisto](https://pachterlab.github.io/kallisto/about).
+:::
+:::
+
+## How does Salmon work? {.smaller}
+
+Create an index to evaluate the sequences for all possible unique sequences of length k (k-mer) in the transcriptome from known transcripts (splice isoforms for all genes).
+
+::: columns
+::: {.column width="50%"}
+The Salmon index has two components:
+
+-   a suffix array (SA) of the reference transcriptome
+-   a hash table to map each transcript in the reference transcriptome to it's location in the SA
+
+The quasi-mapping approach estimates where the reads best map to on the transcriptome through identifying where informative sequences within the read map to instead of performing base-by-base alignment.
+:::
+
+::: {.column .nonincremental width="50%"}
+![](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/img/salmon_quasialignment.png)
+:::
+:::
+
+## How does Salmon work? (cont.) {.smaller}
+
+::: columns
+::: {.column width="50%"}
+1.  The read is scanned from left to right until a k-mer that appears in the hash table is discovered.
+2.  The k-mer is looked up in the hash table and the SA intervals are retrieved, giving all suffixes containing that k-mer
+3.  Similar to STAR, the maximal matching prefix (MMP) is identified by finding the longest read sequence that exactly matches the reference suffixes.
+:::
+
+::: {.column .nonincremental width="50%"}
+![](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/img/salmon_quasialignment.png)
+:::
+:::
+
+## How does Salmon work? (cont.) {.smaller}
+
+::: columns
+::: {.column width="50%"}
+4.  We could search for the next MMP at the position following the MMP, but often natural variation or a sequencing error in the read is the cause of the mismatch from the reference, so the beginning the search at this position would likely return the same set of transcripts. Therefore, Salmon identifies the next informative position (NIP), by skipping ahead 1 k-mer.
+5.  This process is repeated until the end of the read.
+6.  The final mappings are generated by determining the set of transcripts appearing in all MMPs for the read. The transcripts, orientation and transcript location are output for each read.
+:::
+
+::: {.column .incremental width="50%"}
+![](https://hbctraining.github.io/Intro-to-rnaseq-hpc-salmon/img/salmon_quasialignment.png)
+
+After determining the best mapping for each read/fragment, salmon will generate the final transcript abundance estimates after modeling sample-specific parameters and biases. Note that reads/fragments that map equally well to more than one transcript will have the count divided between all of the mappings; thereby not losing information for the various gene isoforms.
+:::
+:::
+
+## Accounting for biases
+
+Salmon and Kallisto account for:
+
+-   GC bias
+
+-   positional coverage biases
+
+-   sequence biases at 5' and 3' ends of the fragments
+
+-   fragment length distribution
+
+-   strand-specificity
+
+
+## Transcript quantification metrics {.smaller}
+
+Need to deal with systematic differences within/between samples such as:
+
+-   sequencing depth
+-   gene/transcript length
+-   composition
+
+## Sequencing Depth {.smaller}
+
+![](https://hbctraining.github.io/DGE_workshop/img/normalization_methods_depth.png){width=50%}
+
+## Gene length {.smaller}  
+
+![](https://hbctraining.github.io/DGE_workshop/img/normalization_methods_length.png){width=50%}
+
+## Composition {.smaller}
+
+![](https://hbctraining.github.io/DGE_workshop/img/normalization_methods_composition.png){width=50%}
+
+
+## Popular metrics: {.smaller} 
+
+::: columns
+::: {.column width="60%"}
+
+
+CPM — (read) Counts Per Million: $$CPM = 	\displaystyle \frac {\#\ reads\ mapped\ to\ gene*10^6}{Total\ \#\ mapped\ reads}$$ 
+
+[F|R]PKM — [Fragments|Reads] Per Kilobase per Million: $$FPKM = 	\displaystyle \frac {\#\ fragments\ mapped\ to\ gene*10^6}{Total\ \#\ mapped\ reads*transcript\ length}$$ 
+
+TPM — Transcripts Per Million: $$TPM = 	\displaystyle A* \frac {1}{\sum_{}A}$$
+$$A = \displaystyle \frac {\#\ fragments\ mapped\ to\ gene*10^6}{transcript\ length}$$
+::: 
+::: {.column width="40%"}
+
+* RPKM and FPKM are pretty much the same thing. FPKM is for fragments (paired-ends), not reads (single-end).
+
+* TPM and [F|R]PKM account for length differences between transcripts.
+
+* The sum of all [F|R]PKMs may not be the same across samples.
+
+* TPM normalizes to gene length first and then normalize for sequencing depth. **Thus the sum of all TPMs is the same across samples**. A better measure of relative transcript "concentration" in your sample than [F|R]PKM.
+
+
+::: 
+::: 
+
+## Appropriate use and caveats {.smaller}
+
+Can I compare TPM / *PKM / CPM across samples?
+
+> It depends what you mean by “compare”.  Because these measures are purely relative, you cannot reliably use a metric like TPM to directly assess differences in transcript abundance across samples. Specifically, changes in the composition (e.g. polyA vs rRNA-depleted) of a sample can lead to changes in TPM, even if transcripts are, in reality, expressed at the same true level across samples.  Metrics like this can be useful for “high-level” comparisons (e.g. visualizing samples etc.).  However, whenever using a relative metric like this, one should be aware of its relative nature and the potential caveats that go along with interpreting them between samples.
+
+**We do NOT use TPM differences for differential expression.**
+
+[The RNA-seq abundance zoo](http://robpatro.com/blog/?p=235)
+
+[Misuse of RPKM or TPM normalization when comparing across samples and sequencing protocols](https://rnajournal.cshlp.org/content/26/8/903.full)
+
+[RPKM, FPKM and TPM, Clearly Explained!!!](https://www.youtube.com/watch?v=TTUrtCY2k-w)
+
+## Differential expression analysis {.smaller}
+
+
+::: columns
+::: {.column width="50%"}
+DO NOT USE TPM (or anything we just talked about) to perform differential expression analysis.
+
+RNA-seq data are discrete non-negative integers (counts per  transcripts).
+
+Remember the reads are (pseudo-)aligned and we **COUNT** how many are assigned to a specific transcript in a given sample.  
+
+:::
+::: {.column width="50%"}
+
+![](/img/block-rna/de_workflow_salmon.png)
+
+:::
+:::
+
+## Distributions for count data {.smaller}
+
+> Reads are count based and not normally distributed. Two distributions for count based data are poisson (which presumes the variance and mean are equal) or negative binomial (which does not). This is especially a problem when the number of biological replicates are low because it is hard to accurately model variance of count based data if you are looking at only that gene and making the assumptions of normally distributed continuous data (ie a t-test).
+
+## Overdispersion {.smaller}
+
+> **Overdispersion** the variance of counts is generally greater than their mean, especially for genes expressed at a higher level.  
+
+::: columns
+::: {.column width="50%"}
+
+
+![](/img/block-rna/nb_mean_var.png)
+
+::: 
+::: {.column width="50%"}
+
+The total number of reads for each sample tends to be in the millions, while the counts per gene are much lower (many zeros, tens/hundreds) and vary considerably. While the Poisson distribution seems appropriate for sampling out of a large pool with low probability. Poisson does not handle **overdispersion**, enter the Negative Binomial distribution.
+
+:::
+:::
+
+
+## Examine count data {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+
+d <- read_csv(here("data","unfilt_counts.csv.gz")) |> as.matrix()
+
+
+df <- tibble(variance=rowVars(d),
+                mean=rowMeans(d))
+
+ggplot(df) +
+        geom_point(aes(x=mean, y=variance)) + 
+        scale_y_log10(limits = c(1,1e9)) +
+        scale_x_log10(limits = c(1,1e9)) +
+        geom_abline(intercept = 0, slope = 1, color="red") +
+  theme_cowplot()
+
+```
+
+
+* data points do not fall on the diagonal, *mean* != *var*
+
+* for highly expressed genes, *var* > *mean*  
+
+* lowly expressed genes have more scatter i.e. “heteroscedasticity”.
+
+
+[Why do we use the negative binomial distribution for analysing RNAseq data?](http://bridgeslab.sph.umich.edu/posts/why-do-we-use-the-negative-binomial-distribution-for-rnaseq)
+ 
+ 
+[Why sequencing data is modeled as a negative binomial](https://bioramble.wordpress.com/2016/01/30/why-sequencing-data-is-modeled-as-negative-binomial/) 
+
+## DEseq Model {.smaller}
+
+![](https://hbctraining.github.io/DGE_workshop/img/NB_model_formula.png)
+
+
+where counts $K_{ij}$ for gene `i`, sample `j` are modeled using a negative binomial distribution with fitted mean $\mu_{ij}$ and a gene-specific dispersion parameter $\alpha_i$. The fitted mean is composed of a sample-specific size factor $s_{j}$ and a parameter $q_{ij}$ proportional to the expected true concentration of fragments for sample `j`. 
+
+## DESeq2 {.smaller}
+
+
+::: columns
+::: {.column width="50%"}
+
+$$\log_2(q_{ij}) = x_{j.} \beta_i$$
+The coefficients $\beta_{i}$ give log2 fold changes for gene `i` `for each column of the model matrix X. Note that the model can be generalized to use sample- and gene-dependent normalization factors $s_{ij}$.
+
+
+
+:::
+::: {.column width="50%"}
+
+![](https://hbctraining.github.io/DGE_workshop/img/deseq2_workflow_separate.png)
+
+:::
+:::
+
+## Scaling between samples {.smaller}
+
+
+::: columns
+::: {.column width="50%"}
+
+The counts divided by sample-specific size factors determined by median ratio of gene counts relative to geometric mean per gene.
+
+* Step 1: creates a pseudo-reference sample (row-wise geometric mean)  
+
+* Step 2: calculates ratio of each sample to the reference  
+
+* Step 3: calculate the normalization factor for each sample (size factor)
+
+
+
+:::
+::: {.column width="50%"}
+
+![](https://hbctraining.github.io/DGE_workshop/img/normalization_methods_composition.png)
+:::
+:::
+
+
+## estimateSizeFactors {.smaller}
+
+
+```{r}
+#| echo: true
+#| output-location: fragment
+
+d <- read_csv(here("data","unfilt_counts.csv.gz")) |> as.matrix()
+
+
+estimateSizeFactorsForMatrix(counts = d) 
+
+```
+
+
+
+## Gene-wise dispersion {.smaller}
+
+We need to generate accurate estimates of within-group variation for each gene...but usually have only 3 replicates making it hard to estimate reliably.
+
+DESeq2 shares information across genes to generate more accurate estimates of variation based on the mean expression level of the gene using a method called ‘shrinkage’. DESeq2 assumes that genes with similar expression levels have similar dispersion.
+
+Estimating the dispersion for each gene separately:
+
+To model the dispersion based on expression level (mean counts of replicates), the dispersion for each gene is estimated using maximum likelihood estimation. In other words, given the count values of the replicates, the most likely estimate of dispersion is calculated.
+
+
+[Count normalization](https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html)
+
+[Comprehensive explanation of DESeq2 steps](https://hbctraining.github.io/DGE_workshop/lessons/04_DGE_DESeq2_analysis.html)
+
+
+## Design considerations
+
+![](/img/block-rna/auer.jpg)
+
+ 
+ 
+## Remember ENCODE {.smaller}
+
+A study compared mRNA expression profiles of many human and mouse tissues. One of their key findings:
+
+> GENE EXPRESSION IS MORE SIMILAR AMONG TISSUES WITHIN A SPECIES THAN BETWEEN CORRESPONDING TISSUES OF THE TWO SPECIES
+
+![](https://f1000researchdata.s3.amazonaws.com/manuscripts/7019/9f5f4330-d81d-46b8-9a3f-d8cb7aaf577e_figure1.gif)
+
+
+## Power: depth vs reps {.smaller}
+
+::: columns
+::: {.column width="50%" .nonincremental}
+Replicates allow us to:
+
+* estimate variation for each gene
+* randomize out unknown covariates
+* spot outliers
+* improve precision of expression and fold-change estimates
+
+[RNA-seq power calculation](https://cqs-vumc.shinyapps.io/rnaseqsamplesizeweb/)  
+
+:::
+::: {.column width="50%"}
+![](/img/block-rna/de_replicates_img2)
+:::
+:::
+
