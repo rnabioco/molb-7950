@@ -1,0 +1,257 @@
+---
+title: "RNA Block - Problem Set 24"
+---
+
+## Problem Set
+
+Total points: 20. Q1 - 10 pts, Q2,3 - 5 points each.
+
+1. Perform differential expression analysis comparing DIV28 vs DIV0 (10 pts)
+
+2. Are axonogenesis and cell cycle genes significantly differentially expressed? If so, in what direction (up/down-regulated)?
+
+2. Perform GSEA analysis using the Hallmark gene set. Make enrichment plot of `HALLMARK_G2M_CHECKPOINT` geneset.
+
+
+## Load libraries and generate gene information files (0 pts)
+
+Make sure to run the code chunk below to load required libraries and generate `t2g` (file for `tximport`) and gene id to symbol mapping file.
+
+
+```{r}
+#| label: load-libs
+
+library(biomaRt)
+library(tximport)
+library(tidyverse)
+library(DESeq2)
+library(ggrepel)
+library(here)
+library(cowplot)
+library(rstatix)
+library(clusterProfiler)
+library(enrichplot)
+library(msigdbr)
+# run the code below to generate t2g file and gene id-symbol mapping file
+mart <- biomaRt::useMart(
+  "ENSEMBL_MART_ENSEMBL",
+  dataset = "mmusculus_gene_ensembl"
+)
+
+t2g <- biomaRt::getBM(
+  attributes = c(
+    "ensembl_transcript_id",
+    "ensembl_gene_id",
+    "external_gene_name"
+  ),
+  mart = mart
+) |>
+  as_tibble()
+
+# maps systematic to common gene names
+gene_name_map <- t2g |>
+  dplyr::select(-ensembl_transcript_id) |>
+  unique()
+
+```
+
+
+## Q1 Perform differential expression analysis comparing DIV28 vs DIV0
+
+### Prepare `metadata` and use `tximport` {.smaller}
+
+```{r}
+#| echo: true
+#| eval: false
+
+
+metadata <- data.frame(
+  sample_id = list.files(here("??"),
+                         pattern = "^DIV"),
+  salmon_dirs = list.files(here("??"),
+                           recursive = ??,
+                           pattern = ".gz$",
+                           full.names = ??)
+  ) |>
+  separate(col = sample_id, into = c("timepoint","rep"), sep = "\\.", remove = F)
+
+metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep) 
+
+rownames(metadata) <- metadata$sample_id
+
+metadata <- metadata |> 
+  filter(timepoint %in% c("??","??")) 
+
+salmdir <- metadata$salmon_dirs
+names(salmdir) <- metadata$sample_id
+
+txi <- tximport(
+  files = salmdir,
+  type = "salmon",
+  tx2gene = t2g,
+  dropInfReps = TRUE,
+  countsFromAbundance = "lengthScaledTPM"
+)
+```
+
+### Filter genes and perform `DESeq2` {.smaller}
+
+```{r}
+#| echo: true
+#| eval: false
+
+
+# examine distribution of TPMs
+hist(log2(1 + rowSums(txi$??)), breaks = 40)
+
+# decide a cutoff
+keepG <- txi$abundance[log2(1 + rowSums(txi$abundance)) > ??,] |>
+  rownames()
+
+ddsTxi <- DESeqDataSetFromTximport(
+  ??,
+  colData = metadata,
+  design = ~??
+)
+
+# keep genes with sufficient expession
+ddsTxi <- ??
+
+# run DESeq2
+dds <- ??
+
+# create a dataframe containing results and join w/gene symbols
+diff <-
+  results(
+    dds,
+    contrast = c("timepoint", "??", "??")
+  ) |>
+  # Change this into a dataframe
+  as.data.frame() |>
+  # Move ensembl gene IDs into their own column
+  rownames_to_column(var = "ensembl_gene_id") |>
+  # drop unused columns
+  dplyr::select(-c(baseMean, lfcSE, stat, pvalue)) |>
+  # Merge this with a table relating ensembl_gene_id with gene short names
+  inner_join(gene_name_map) |>
+  # Rename external_gene_name column
+  dplyr::rename(gene = external_gene_name) |>
+  as_tibble()
+```
+
+## Q2. Are axonogenesis and cell cycle genes significantly differentially expressed? If so, in what direction (up/down-regulated)?
+
+```{r}
+#| echo: true
+#| eval: false
+#| label: pathway-defined
+
+cellcyclegenes <- ??(
+  attributes = c("ensembl_gene_id"),
+  filters = c("go_parent_term"),
+  values = c("GO:0045787"),
+  mart = mart
+)
+
+
+axongenes <- ??(
+  attributes = c("ensembl_gene_id"),
+  filters = c("go_parent_term"),
+  values = c("GO:0007409"),
+  mart = mart
+)
+
+diff_paths <-
+  diff |>
+  mutate(
+    annot = case_when(
+      ensembl_gene_id %in% axongenes$ensembl_gene_id ~ "??",
+      ensembl_gene_id %in% cellcyclegenes$ensembl_gene_id ~ "??",
+      .default = "none"
+    )
+  ) |>
+  drop_na() # drop na
+
+# Reorder these for plotting purposes
+diff_paths$annot <-
+  factor(
+    diff_paths$annot,
+    levels = c("none",
+               "axonogenesis",
+               "cellcycle")
+  )
+
+# calculate and report p-value using wilcox test
+pvals <- wilcox_test(data = diff_paths,
+                     ?? ~ ??,
+                     ref.group = "??")
+
+# make a plot of the LFC (y-axis) ~ pathways (x-axis)
+ggplot(
+  diff_paths,
+  aes(
+    x = ??,
+    y = ??,
+    fill = ??
+  )
+) +
+  labs(
+    x = "Gene class",
+    y = "DIV28/DIV0, log2"
+  ) +
+  geom_hline(
+    yintercept = 0,
+    color = "gray",
+    linetype = "dashed"
+  ) +
+  geom_boxplot(
+    notch = TRUE,
+    outlier.shape = NA
+  ) +
+  ylim(-5,5) +
+  theme_cowplot() 
+```
+
+
+
+## Q3. Perform GSEA analysis using the Hallmark gene set.
+
+```{r}
+#| echo: true
+#| eval: false
+#| label: gsea
+
+
+# retrieve mouse hallmark gene set from msigdb
+mouse_hallmark <- msigdbr(species = "??") %>%
+  filter(gs_cat == "??") %>% 
+  dplyr::select(gs_name, gene_symbol)
+
+
+# create a list of gene LFCs
+rankedgenes <- diff %>% pull(??)
+
+# add symbols as names of the list
+names(rankedgenes) <- diff$??
+
+# sort by LFC
+rankedgenes <- sort(??, decreasing = TRUE)
+
+# deduplicate
+rankedgenes <- rankedgenes[!duplicated(names(rankedgenes))]
+
+
+# run gsea
+?? <- GSEA(geneList = ??,
+                      eps = 0,
+                     pAdjustMethod = "fdr",
+                     pvalueCutoff = .05,
+                     minGSSize = 20,
+                     maxGSSize = 1000,
+                     TERM2GENE = ??)
+
+
+# plot "HALLMARK_G2M_CHECKPOINT"
+gseaplot(x = ??, geneSetID = "??")
+```
+

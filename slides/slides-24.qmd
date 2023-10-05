@@ -22,17 +22,24 @@ library(DESeq2)
 library(pheatmap)
 library(biomaRt)
 library(gt)
+
+library(rstatix)
+library(clusterProfiler)
+library(enrichplot)
+library(msigdbr)
+
 ```
 
 ## Overview {.smaller}
 
 Last time we took RNAseq data from an *in vitro* differentiation timecourse from mouse ESCs to glutaminergic neurons [(Hubbard et al, F1000 Research (2013))](10.12688/f1000research.2-35.v1). We took in transcript-level quantifications produced by `salmon` and collapsed them to gene-level quantifications using `tximport`. We then inspected the quality of the data by relating distances between samples using two methods: hierarchical clustering and principal components analysis. We found that the data was of high quality, as evidenced by the fact that replicates from a given timepoint were highly similar to other replicates for the same timepoint, and the distances between samples made sense with what we know about how the experiment was conducted.
 
-Today, we are going to pretend that this isn't a timecourse.  For the sake of simplicity, we are going to imagine that we have only two conditions: DIV0 and DIV7. We will use `DESeq2` to identify genes that are differentially expressed between these two timepoints.  We will then plot changes in expression for both individual genes and groups of genes that we already know going in might be interesting to look at. Finally, we will look at some features of transcripts and genes that are differentially expressed between these two timepoints.
+Today, we are going to pretend that this isn't a timecourse. For the sake of simplicity, we are going to imagine that we have only two conditions: DIV0 and DIV7. We will use `DESeq2` to identify genes that are differentially expressed between these two timepoints. We will then plot changes in expression for both individual genes and groups of genes that we already know going in might be interesting to look at. Finally, we will look at some features of transcripts and genes that are differentially expressed between these two timepoints.
 
 ## Prepare `t2g` {.smaller}
 
 The first thing we need to do is read in the data again and move from transcript-level expression values to gene-level expression values with `tximport`. Let's use `biomaRt` to get a table that relates gene and transcript IDs.
+
 ```{r}
 #| echo: true
 #| eval: true
@@ -63,6 +70,7 @@ gene_name_map <- t2g |>
 ## Prepare `metdata` and import {.smaller}
 
 Now we can read in the transcript-level data and collapse to gene-level data with `tximport`
+
 ```{r}
 #| echo: true
 #| eval: true
@@ -97,6 +105,23 @@ txi <- tximport(
 )
 ```
 
+## Filter lowly expressed genes
+
+```{r}
+#| echo: true
+#| eval: true
+#| label: remove low genes
+
+# examine distribution of TPMs
+hist(log2(1 + rowSums(txi$abundance)), breaks = 40)
+
+# decide a cutoff
+keepG <- txi$abundance[log2(1 + rowSums(txi$abundance)) > 4.5,] |>
+  rownames()
+
+
+```
+
 ## Create DESeq object {.smaller}
 
 There are essentially two steps to using `DESeq2`. The first involves creating a `DESeqDataSet` from your data. Luckily, if you have a `tximport` object, which we do in the form of `txi`, then this becomes easy.
@@ -114,21 +139,27 @@ ddsTxi <- DESeqDataSetFromTximport(
   design = ~timepoint
 )
 
+# keep genes with sufficient expession
+ddsTxi <- ddsTxi[keepG,]
+
 
 ```
 
 ## Design formula {.smaller}
 
-You can see that `DESeqDataSetFromTximport` wants three things. The first is our `tximport` object. The second is the dataframe we made that relates samples and conditions (or in this case timepoints). The last is something called a **design formula**. A design formula contains all of the variables that will go into `DESeq2`'s model. The formula starts with a tilde and then has variables separated by a plus sign think `lm()`. It is common practice, and in fact basically required with `DESeq2`, to put the variable of interest last.  In our case, that's trivial because we only have one: timepoint. So our design formula is very simple:
+You can see that `DESeqDataSetFromTximport` wants three things. The first is our `tximport` object. The second is the dataframe we made that relates samples and conditions (or in this case timepoints). The last is something called a **design formula**. A design formula contains all of the variables that will go into `DESeq2`'s model. The formula starts with a tilde and then has variables separated by a plus sign think `lm()`. It is common practice, and in fact basically required with `DESeq2`, to put the variable of interest last. In our case, that's trivial because we only have one: timepoint. So our design formula is very simple:
 
-    design = ~ timepoint
-    
-Your design formula should ideally include **all of the sources of variation in your data**.  For example, let's say that here we thought there was a batch effect with the replicates.  Maybe all of the Rep1 samples were prepped and sequenced on a different day than the Rep2 samples and so on. We could potentially account for this in `DESeq2`'s model with the following forumula:
+```         
+design = ~ timepoint
+```
 
-    design = ~ rep + timepoint
-    
-Here, timepoint is still the variable of interest, but we are controlling for differences that arise due to differences in replicates. 
-  
+Your design formula should ideally include **all of the sources of variation in your data**. For example, let's say that here we thought there was a batch effect with the replicates. Maybe all of the Rep1 samples were prepped and sequenced on a different day than the Rep2 samples and so on. We could potentially account for this in `DESeq2`'s model with the following forumula:
+
+```         
+design = ~ rep + timepoint
+```
+
+Here, timepoint is still the variable of interest, but we are controlling for differences that arise due to differences in replicates.
 
 ## Run `DESeq2` {.smaller}
 
@@ -139,7 +170,9 @@ We can see here that `DESeq2` is taking the counts produced by `tximport` for ge
 #| eval: true
 #| label: deseq
 
+#create DESeq object
 dds <- DESeq(ddsTxi)
+
 ```
 
 There are many useful things in this `dds` object. Take a look at the [vignette](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html) for a full explanation. Including info on many more tests and analyses that can be done with `DESeq2`.
@@ -148,8 +181,10 @@ The results can be accessed using the `results()` function. We will use the `con
 
 The lexographically first condition will be the numerator. I find it easier to explicitly specify what the numerator and denominator of this ratio are using the `contrast` argument. The `contrast` argument can be used to implement more complicated design formula. Remember our design formula that accounted for potential differences due to Replicate batch effects:
 
-    ~ replicate + timepoint
-    
+```         
+~ replicate + timepoint
+```
+
 `DESeq2` will account for differences between replicates here to find differences between timepoints.
 
 ## Contrasts to get results {.smaller}
@@ -196,8 +231,7 @@ diff <-
 
 ## How many are significant {.smaller}
 
-OK now we have a table of gene expression results. How many genes are significantly up/down regulated between these two timepoints?
-We will use 0.01 as an FDR (p.adj) cutoff.
+OK now we have a table of gene expression results. How many genes are significantly up/down regulated between these two timepoints? We will use 0.01 as an FDR (p.adj) cutoff.
 
 ```{r}
 #| echo: true
@@ -355,14 +389,13 @@ ggplot(
   theme_cowplot()
 ```
 
-
 ## Plotting the expression of single genes {.smaller}
 
 Sometimes we will have particular marker genes that we might want to highlight to give confidence that the experiment worked as expected. We can plot the expression of these genes in each replicate. Let's plot the expression of two pluripotency genes (which we expect to decrease) and two neuronal genes (which we expect to increase).
 
 So what is the value that we would plot? We could use the 'normalized counts' value provided by `DESeq2`. However, remember there is not length calculation so it is difficult to compare accross genes.
 
-A more interpretable value to plot might be TPM, since TPM is length-normalized.  Let's say a gene was expressed at 500 TPM. Right off the bat, I know generally what kind of expression that reflects (pretty high).
+A more interpretable value to plot might be TPM, since TPM is length-normalized. Let's say a gene was expressed at 500 TPM. Right off the bat, I know generally what kind of expression that reflects (pretty high).
 
 ```{r}
 #| echo: false
@@ -375,6 +408,7 @@ normcounts <- counts(dds, normalized = TRUE)
 ```
 
 ## Get TPMs {.smaller}
+
 Let's plot the expression of Klf4, Sox2, Bdnf, and Dlg4 in our samples.
 
 ```{r}
@@ -396,7 +430,6 @@ tpms <- txi$abundance |>
 
 gt(tpms)
 ```
-
 
 ## Now plot {.smaller}
 
@@ -424,19 +457,19 @@ ggplot(
   facet_wrap(~gene, scales = "free_y")
 ```
 
-
 ## How about pathways? {.smaller}
 
-Say that instead of plotting individual genes we wanted to ask whether a whole class of genes are going up or down.  We can do that by retrieving all genes that belong to a particular gene ontology term.
+Say that instead of plotting individual genes we wanted to ask whether a whole class of genes are going up or down. We can do that by retrieving all genes that belong to a particular gene ontology term.
 
-There are three classes of genes we will look at here: 
+There are three classes of genes we will look at here:
 
- - Maintenance of pluripotency (GO:0019827)
- - Positive regulation of the cell cycle (GO:0045787)
- - Neuronal differentitaion (GO:0030182)
+-   Maintenance of pluripotency (GO:0019827)
+-   Positive regulation of the cell cycle (GO:0045787)
+-   Neuronal differentitaion (GO:0030182)
 
-##  Retrieve pathway information {.smaller}
-We can use `biomaRt` to get all genes that belong to each of these categories.  Think of it like doing a gene ontology enrichment analysis in reverse.
+## Retrieve pathway information {.smaller}
+
+We can use `biomaRt` to get all genes that belong to each of these categories. Think of it like doing a gene ontology enrichment analysis in reverse.
 
 ```{r}
 #| echo: true
@@ -479,10 +512,9 @@ neurongenes <- getBM(
 # write_csv(x = pathway, file = here("data","block-rna","pathwaygenes.csv.gz"))
 ```
 
+## Add pathway information to results {.smaller}
 
-##  Add pathway information to results {.smaller}
-
-You can see that these items are one-column dataframes that have the column name 'ensembl_gene_id'.  We can now go through our results dataframe and add an annotation column that marks whether the gene is in any of these categories.
+You can see that these items are one-column dataframes that have the column name 'ensembl_gene_id'. We can now go through our results dataframe and add an annotation column that marks whether the gene is in any of these categories.
 
 ```{r}
 #| echo: true
@@ -512,11 +544,9 @@ diff_paths$annot <-
 
 ```
 
-
 ## Are there significant differences? {.smaller}
 
-OK we've got our table, now we are going to ask if the log2FoldChange values for the genes in each of these classes are different that what we would expect.  So what is the expected value?  Well, we have a distribution of log2 fold changes for all the genes that are **not** in any of these categories.  So we will ask if the distribution of log2 fold changes for each gene category is different than that null distribution.
-
+OK we've got our table, now we are going to ask if the log2FoldChange values for the genes in each of these classes are different that what we would expect. So what is the expected value? Well, we have a distribution of log2 fold changes for all the genes that are **not** in any of these categories. So we will ask if the distribution of log2 fold changes for each gene category is different than that null distribution.
 
 ```{r}
 #| echo: true
@@ -541,8 +571,6 @@ p.neurondiff <- pvals |>
 
 
 ```
-
-
 
 ## plot pathway differences {.smaller}
 
@@ -589,4 +617,84 @@ ggplot(
   annotate("text", x = 1.5, y = 4.4, label = paste0("p = ", p.cellcycle)) +
   annotate("text", x = 2, y = 5.4, label = paste0("p = ", p.pluripotency)) +
   annotate("text", x = 2.5, y = 6.4, label = paste0("p = ", p.neurondiff))
+```
+
+## What if we want to look at pathways in an unbiased way? {.smaller}
+
+We will use Gene Set Enrichment Analysis (GSEA) to determine if pre-defined gene sets (pathways, GO terms, experimentally defined genes) are coordinately up-regulated or down-regulated between the two conditions you are comparing. To run gsea you need 2 things. 1. You list of expressed genes ranked by fold change. 2. Pre-defined gene sets. See [MSigDb](https://www.gsea-msigdb.org/gsea/msigdb/index.jsp)
+
+![](/img/block-rna/gsea_overview.png)
+
+PMID: 12808457, 16199517
+
+## GSEA examples {.smaller}
+Top = upregulated
+
+![](/img/block-rna/gsea_examples.png){width="3in"}
+
+Bottom = downregulated
+
+## Prep GSEA {.smaller}
+
+1.  We need to make a list of all genes and their LFC.
+
+2.  We need to find interesting gene sets.
+
+3.  Run GSEA
+
+```{r}
+#| echo: true
+#| eval: true
+#| label: prep-gsea
+#| output-location: slide
+
+# retrieve hallmark gene set from msigdb
+mouse_hallmark <- msigdbr(species = "Mus musculus") %>%
+  filter(gs_cat == "H") %>% 
+  dplyr::select(gs_name, gene_symbol)
+
+# create a list of gene LFCs
+rankedgenes <- diff_lfc %>% pull(log2FoldChange)
+
+# add symbols as names of the list
+names(rankedgenes) <- diff$gene
+
+# sort by LFC
+rankedgenes <- sort(rankedgenes, decreasing = TRUE)
+
+# deduplicate
+rankedgenes <- rankedgenes[!duplicated(names(rankedgenes))]
+```
+
+## Run GSEA {.smaller}
+
+```{r}
+#| echo: true
+#| eval: true
+#| label: run-gsea
+#| output-location: slide
+
+# run gsea
+div7vs0 <- GSEA(geneList = rankedgenes,
+                      eps = 0,
+                     pAdjustMethod = "fdr",
+                     pvalueCutoff = .05,
+                     minGSSize = 20,
+                     maxGSSize = 1000,
+                     TERM2GENE = mouse_hallmark)
+
+div7vs0@result |> 
+  select(ID,NES,p.adjust) |>
+  gt()
+```
+
+## Plot GSEA {.smaller}
+
+```{r}
+#| echo: true
+#| eval: true
+#| label: plot-gsea
+
+# plot "HALLMARK_G2M_CHECKPOINT"
+gseaplot(x = div7vs0, geneSetID = "HALLMARK_G2M_CHECKPOINT")
 ```

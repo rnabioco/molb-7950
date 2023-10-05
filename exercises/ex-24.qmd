@@ -19,6 +19,10 @@ library(DESeq2)
 library(pheatmap)
 library(biomaRt)
 library(gt)
+library(rstatix)
+library(clusterProfiler)
+library(enrichplot)
+library(msigdbr)
 ```
 
 
@@ -91,9 +95,28 @@ txi <- tximport(
 )
 ```
 
+## Filter lowly expressed genes
+
+```{r}
+#| echo: true
+#| eval: false
+#| label: remove low genes
+
+# examine distribution of TPMs
+hist(log2(1 + rowSums(txi$abundance)), breaks = 40)
+
+# decide a cutoff
+keepG <- txi$abundance[log2(1 + rowSums(txi$abundance)) > 4.5,] |>
+  rownames()
+
+
+```
+
 ## Create DESeq object {.smaller}
 
 There are essentially two steps to using `DESeq2`. The first involves creating a `DESeqDataSet` from your data. Luckily, if you have a `tximport` object, which we do in the form of `txi`, then this becomes easy.
+
+
 
 ```{r}
 #| echo: true
@@ -108,6 +131,8 @@ ddsTxi <- DESeqDataSetFromTximport(
   design = ~??
 )
 
+# keep genes with sufficient expession
+ddsTxi <- ddsTxi[??,]
 
 ```
 
@@ -583,4 +608,85 @@ ggplot(
   annotate("text", x = 1.5, y = 4.4, label = paste0("p = ", p.cellcycle)) +
   annotate("text", x = 2, y = 5.4, label = paste0("p = ", p.pluripotency)) +
   annotate("text", x = 2.5, y = 6.4, label = paste0("p = ", p.neurondiff))
+```
+
+
+## What if we want to look at pathways in an unbiased way? {.smaller}
+
+We will use Gene Set Enrichment Analysis (GSEA) to determine if pre-defined gene sets (pathways, GO terms, experimentally defined genes) are coordinately up-regulated or down-regulated between the two conditions you are comparing. To run gsea you need 2 things. 1. You list of expressed genes ranked by fold change. 2. Pre-defined gene sets. See [MSigDb](https://www.gsea-msigdb.org/gsea/msigdb/index.jsp)
+
+![](/img/block-rna/gsea_overview.png)
+
+PMID: 12808457, 16199517
+
+## GSEA examples {.smaller}
+Top = upregulated
+
+![](/img/block-rna/gsea_examples.png){width="3in"}
+
+Bottom = downregulated
+
+## Prep GSEA {.smaller}
+
+1.  We need to make a list of all genes and their LFC.
+
+2.  We need to find interesting gene sets.
+
+3.  Run GSEA
+
+```{r}
+#| echo: true
+#| eval: false
+#| label: prep-gsea
+#| output-location: slide
+
+# retrieve hallmark gene set from msigdb
+mouse_hallmark <- msigdbr(species = "??") %>%
+  filter(gs_cat == "?") %>% ## halmark
+  dplyr::select(gs_name, gene_symbol)
+
+# create a list of gene LFCs
+rankedgenes <- diff_lfc %>% pull(??)
+
+# add symbols as names of the list
+names(rankedgenes) <- diff$??
+
+# sort by LFC
+rankedgenes <- sort(rankedgenes, decreasing = TRUE)
+
+# deduplicate
+rankedgenes <- rankedgenes[!duplicated(names(rankedgenes))]
+```
+
+## Run GSEA {.smaller}
+
+```{r}
+#| echo: true
+#| eval: false
+#| label: run-gsea
+#| output-location: slide
+
+# run gsea
+div7vs0 <- GSEA(geneList = ??,
+                      eps = 0,
+                     pAdjustMethod = "fdr",
+                     pvalueCutoff = .05,
+                     minGSSize = 20,
+                     maxGSSize = 1000,
+                     TERM2GENE = ??)
+
+div7vs0@result |> 
+  select(??,??,??) |>
+  gt()
+```
+
+## Plot GSEA {.smaller}
+
+```{r}
+#| echo: true
+#| eval: false
+#| label: plot-gsea
+
+# plot "HALLMARK_G2M_CHECKPOINT"
+gseaplot(x = div7vs0, geneSetID = "HALLMARK_G2M_CHECKPOINT")
 ```
