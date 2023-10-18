@@ -1,0 +1,248 @@
+---
+title: "RNA Block - Problem Set 29"
+---
+
+
+```{r}
+#| echo: false
+#| include: false
+#| message: false
+#| warning: false
+#| label: load-libs
+
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(org.Hs.eg.db)
+library(annotatr)
+library(ggrepel)
+library(tidyverse)
+library(cowplot)
+library(scales) 
+library(gt)
+library(here)
+library(Hmisc)
+library(broom)
+
+```
+
+
+## Problem Set
+
+Total points: 20. Q1 - 10 pts, Q2 - 10 points each.
+
+Exercises: We want to visualize 1) if RNAs that have HuR binding sites introns, 3' UTRs, or both exhibit different degrees of stabilization upon HuR knockdown **AND** 2) which of those categories have a statistically significant different LFC than non-targeted RNAs.
+
+The model we were tesing is that HuR binds to AU-rich elements (ARE) in 3’ UTRs of mRNAs to promote mRNA stability.
+
+![](/img/block-rna/hur_mechanism.png)
+
+This model makes a few specific prediction:  
+
+1. HuR binds to the 3' UTR *and introns*.
+2. HuR binds to AU-rich sequences (AUUUA) *and U-rich sequences*.  
+3. **HuR binding promotes target RNA stabilization (and binding by the other RBPs to the ARE promotes destabilization).**  
+
+More specifically, we have been exploring the following questions  about the relationship between HuR binding sites and change expression:  
+
+~~Does HuR promote the stability of its mRNA targets?~~ 
+
+~~Does the number of HuR binding influence the degree of stabilization?~~  
+
+**Does the region of HuR binding influence stabilization?** and **Which regions are statistically significant?**  
+
+We want to visualize 1) if RNAs that have HuR binding sites introns, 3' UTRs, or both exhibit different degrees of stabilization upon HuR knockdown **AND** 2) which of those categories have a statistically significant different LFC than non-targeted RNAs. For simplicity, you will categorize genes as either:
+1. intron (but not 3' UTR, ignore other annotation categories)   
+2. utr3  (but not 3' intron, ignore other annotation categories)   
+3. intron and utr3 (ignore other annotation categories)
+4. other (genes w/binding sites but none in intron either 3' UTR)  
+5. not a target (this is the reference comparison)
+
+
+
+## 1. Annotate HuR binding sites.
+
+## 1a. Build annotation database  
+
+```{r}
+#| eval: true
+#| echo: true
+
+# What annotation categories are available?
+possible_annotations <- builtin_annotations()
+
+# Keep only those containing "hg19"
+hg19_annots <- grep("hg19_genes", possible_annotations, value = T)
+
+# let's keep 5' utr, cds, intron, 3' utr and intergenic
+my_hg19_annots <- hg19_annots[c(3,4,7,10,11)]
+
+
+# build the annotation database
+annotations <- build_annotations(genome = 'hg19', annotations = my_hg19_annots)
+
+```
+
+
+## 1b. Annotate the HuR binding sites
+
+```{r}
+#| eval: true
+#| echo: true
+
+# read hur binding sites
+hur_regions <- read_regions(con = "https://raw.githubusercontent.com/BIMSBbioinfo/RCAS_meta-analysis/master/rbp-binding-sites/SRR248532.clusters.bed",
+                     genome = 'hg19', format = 'bed')
+
+# let's annotate
+hur_annot <- annotate_regions(
+    regions = hur_regions,
+    annotations = annotations,
+    ignore.strand = FALSE,
+    quiet = FALSE) %>%
+  data.frame()
+
+# keep only columns we need
+myInfo <- c("seqnames","start","end","width","strand","annot.symbol","annot.type")
+
+hur_annot <- hur_annot[,myInfo] %>%
+  unique() 
+
+# getting rid of the "hg19_genes_" string to simplify `annot.type`
+hur_annot$annot.type <- gsub("hg19_genes_","",hur_annot$annot.type)
+
+```
+
+## 1c. Calculate a summary table for HuR binding sites per gene per region.
+
+Now we want to assemble the # of HuR binding sites per region per gene.
+
+
+```{r}
+#| eval: true
+#| echo: true
+
+# count the # sites per gene and annotation cat
+hur_gene_clip <- hur_annot %>%
+  filter(annot.type!="intergenic") %>%
+  group_by(annot.symbol,annot.type) %>%
+  dplyr::count() %>%
+  pivot_wider(names_from = annot.type, values_from = n)
+
+hur_gene_clip <- hur_gene_clip %>% mutate_if(is.numeric , replace_na, replace = 0)
+
+# new column w/total # sites
+hur_gene_clip$total <- rowSums(hur_gene_clip[,-1]) 
+
+# remove symbols that are NA
+hur_gene_clip <- hur_gene_clip %>%
+  filter(annot.symbol != "NA")
+
+# rename cols
+colnames(hur_gene_clip)[1] <- "Symbol"
+colnames(hur_gene_clip)[3:4] <- c("utr3","utr5")
+
+
+# how many genes have both intron and/or 3' UTR sites
+site_combo <- hur_gene_clip %>%
+  mutate(
+    type = case_when(
+      introns > 0 & utr3 > 0     ~ "intron_utr3",
+      introns > 0 & utr3 ==  0 ~ "intron",
+      introns == 0 & utr3 >  0 ~ "utr3",
+      TRUE ~ "other")
+    ) 
+
+```
+
+## 1c. import kd data and join w/clip data
+
+```{r}
+#| eval: true
+#| echo: true
+
+# load object called HuR.R
+
+# HuR siRNA RNAseq
+load(here("data/block-rna/HuR.R"))
+
+
+# gene information
+gene_info <- read_csv(here("data/block-rna/geneInfo.csv.zip"))
+
+HuR$Gene <- rownames(HuR) # new column gene ids
+
+HuR <- left_join(HuR, gene_info[c(2,11)], by="Gene") # Symbol
+
+# Filter for expression
+hur_filt_rnaseq <- HuR %>%
+  dplyr::filter(rowMeans(HuR[,1:4]) > 1) %>%
+  dplyr::select(-Gene)
+
+kd_clip <- left_join(hur_filt_rnaseq, site_combo,  by = "Symbol") 
+
+# convert all NA to 0
+kd_clip$type[is.na(kd_clip$type)] <- "not_target"
+
+# calculate log fold changes for mature
+kd_clip <- kd_clip %>%
+  mutate(
+    lfc_mature = log2(Mature_siGFP) - log2(Mature_siHuR)
+    )
+
+# relevel so "not_target" is ref
+
+kd_clip$type <- relevel(x = factor(kd_clip$type), ref = "not_target")
+```
+
+## 1d. Visualize binding region types and LFC
+
+
+```{r}
+#| eval: true
+#| echo: true
+
+ggplot(kd_clip, aes(lfc_mature, color = type)) +
+  stat_ecdf() +
+  xlim(-2,2) +
+  theme_cowplot() 
+
+
+```
+
+
+![](/img/block-rna/hur_region_kd.png)
+
+## 2. Statistical test
+
+Is there a statistically significant different in LFC for the different binding region categories compared tonon-targeted RNAs. 
+
+
+
+```{r }
+#| eval: true
+#| echo: true
+
+# keep only finite values for lfc_mature and lfc_primary
+kd_clip <- kd_clip[is.finite(kd_clip$lfc_mature),]
+
+# calculate fit using `lm`
+fit_bins <- lm(data = kd_clip,
+   formula = lfc_mature ~ type)
+
+
+# examine estimates and p-vals
+p <- tidy(fit_bins) %>%
+  ggplot(data=.,
+         aes(x=term,
+             y=estimate,
+             fill=-log10(p.value)
+             )
+         ) +
+  geom_bar(stat="identity") +
+  coord_flip() +
+  geom_hline(yintercept = ref_mean,
+             color = "red") +
+  theme_cowplot()
+
+```
+
+![](/img/block-rna/hur_region_kd_estimates.png)
