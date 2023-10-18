@@ -444,9 +444,35 @@ Neelanjan Mukherjee
 <span id="cb1-9"><a href="#cb1-9"></a>my_hg19_annots <span class="ot">&lt;-</span> hg19_annots[<span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">7</span>,<span class="dv">10</span>,<span class="dv">11</span>)]</span>
 <span id="cb1-10"><a href="#cb1-10"></a></span>
 <span id="cb1-11"><a href="#cb1-11"></a><span class="co"># build the annotation database</span></span>
-<span id="cb1-12"><a href="#cb1-12"></a>annotations <span class="ot">&lt;-</span> <span class="fu">build_annotations</span>(<span class="at">genome =</span> <span class="st">'hg19'</span>, <span class="at">annotations =</span> my_hg19_annots)</span>
-<span id="cb1-13"><a href="#cb1-13"></a></span>
-<span id="cb1-14"><a href="#cb1-14"></a>annotations</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-12"><a href="#cb1-12"></a>annotations <span class="ot">&lt;-</span> <span class="fu">build_annotations</span>(<span class="at">genome =</span> <span class="st">'hg19'</span>, <span class="at">annotations =</span> my_hg19_annots)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>'select()' returned 1:1 mapping between keys and columns</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Building promoters...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Building 1to5kb upstream of TSS...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Building intergenic...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Building cds...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Building 5UTRs...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Building 3UTRs...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Building exons...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Building introns...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a>annotations</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 1446460 ranges and 5 metadata columns:
                   seqnames        ranges strand |               id       tx_id
@@ -484,28 +510,52 @@ Neelanjan Mukherjee
 <h2>Annotate PAR-CLIP data</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>hur_regions <span class="ot">&lt;-</span> <span class="fu">read_regions</span>(<span class="at">con =</span> <span class="st">"https://raw.githubusercontent.com/BIMSBbioinfo/RCAS_meta-analysis/master/rbp-binding-sites/SRR248532.clusters.bed"</span>,</span>
-<span id="cb3-2"><a href="#cb3-2"></a>                     <span class="at">genome =</span> <span class="st">'hg19'</span>, <span class="at">format =</span> <span class="st">'bed'</span>)</span>
-<span id="cb3-3"><a href="#cb3-3"></a></span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="co"># let's annotate</span></span>
-<span id="cb3-5"><a href="#cb3-5"></a>hur_annot <span class="ot">&lt;-</span> <span class="fu">annotate_regions</span>(</span>
-<span id="cb3-6"><a href="#cb3-6"></a>    <span class="at">regions =</span> hur_regions,</span>
-<span id="cb3-7"><a href="#cb3-7"></a>    <span class="at">annotations =</span> annotations,</span>
-<span id="cb3-8"><a href="#cb3-8"></a>    <span class="at">ignore.strand =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb3-9"><a href="#cb3-9"></a>    <span class="at">quiet =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-10"><a href="#cb3-10"></a>  <span class="fu">data.frame</span>()</span>
-<span id="cb3-11"><a href="#cb3-11"></a></span>
-<span id="cb3-12"><a href="#cb3-12"></a><span class="co"># keep only columns we need</span></span>
-<span id="cb3-13"><a href="#cb3-13"></a>myInfo <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"seqnames"</span>,<span class="st">"start"</span>,<span class="st">"end"</span>,<span class="st">"width"</span>,<span class="st">"strand"</span>,<span class="st">"annot.symbol"</span>,<span class="st">"annot.type"</span>)</span>
-<span id="cb3-14"><a href="#cb3-14"></a></span>
-<span id="cb3-15"><a href="#cb3-15"></a>hur_annot <span class="ot">&lt;-</span> hur_annot[,myInfo] <span class="sc">%&gt;%</span></span>
-<span id="cb3-16"><a href="#cb3-16"></a>  <span class="fu">unique</span>() </span>
-<span id="cb3-17"><a href="#cb3-17"></a></span>
-<span id="cb3-18"><a href="#cb3-18"></a><span class="co"># getting rid of the "hg19_genes_" string to simplify `annot.type`</span></span>
-<span id="cb3-19"><a href="#cb3-19"></a>hur_annot<span class="sc">$</span>annot.type <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"hg19_genes_"</span>,<span class="st">""</span>,hur_annot<span class="sc">$</span>annot.type)</span>
-<span id="cb3-20"><a href="#cb3-20"></a></span>
-<span id="cb3-21"><a href="#cb3-21"></a><span class="fu">table</span>(hur_annot<span class="sc">$</span>annot.type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>hur_regions <span class="ot">&lt;-</span> <span class="fu">read_regions</span>(<span class="at">con =</span> <span class="st">"https://raw.githubusercontent.com/BIMSBbioinfo/RCAS_meta-analysis/master/rbp-binding-sites/SRR248532.clusters.bed"</span>,</span>
+<span id="cb13-2"><a href="#cb13-2"></a>                     <span class="at">genome =</span> <span class="st">'hg19'</span>, <span class="at">format =</span> <span class="st">'bed'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'XVector'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:purrr':
+
+    compact</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'Biostrings'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:Hmisc':
+
+    mask, translate</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:base':
+
+    strsplit</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a><span class="co"># let's annotate</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a>hur_annot <span class="ot">&lt;-</span> <span class="fu">annotate_regions</span>(</span>
+<span id="cb19-3"><a href="#cb19-3"></a>    <span class="at">regions =</span> hur_regions,</span>
+<span id="cb19-4"><a href="#cb19-4"></a>    <span class="at">annotations =</span> annotations,</span>
+<span id="cb19-5"><a href="#cb19-5"></a>    <span class="at">ignore.strand =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb19-6"><a href="#cb19-6"></a>    <span class="at">quiet =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-7"><a href="#cb19-7"></a>  <span class="fu">data.frame</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Annotating...</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># keep only columns we need</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a>myInfo <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"seqnames"</span>,<span class="st">"start"</span>,<span class="st">"end"</span>,<span class="st">"width"</span>,<span class="st">"strand"</span>,<span class="st">"annot.symbol"</span>,<span class="st">"annot.type"</span>)</span>
+<span id="cb21-3"><a href="#cb21-3"></a></span>
+<span id="cb21-4"><a href="#cb21-4"></a>hur_annot <span class="ot">&lt;-</span> hur_annot[,myInfo] <span class="sc">%&gt;%</span></span>
+<span id="cb21-5"><a href="#cb21-5"></a>  <span class="fu">unique</span>() </span>
+<span id="cb21-6"><a href="#cb21-6"></a></span>
+<span id="cb21-7"><a href="#cb21-7"></a><span class="co"># getting rid of the "hg19_genes_" string to simplify `annot.type`</span></span>
+<span id="cb21-8"><a href="#cb21-8"></a>hur_annot<span class="sc">$</span>annot.type <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"hg19_genes_"</span>,<span class="st">""</span>,hur_annot<span class="sc">$</span>annot.type)</span>
+<span id="cb21-9"><a href="#cb21-9"></a></span>
+<span id="cb21-10"><a href="#cb21-10"></a><span class="fu">table</span>(hur_annot<span class="sc">$</span>annot.type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
      3UTRs      5UTRs        cds intergenic    introns 
@@ -519,27 +569,29 @@ Neelanjan Mukherjee
 <p>Now we want to get the following info: 1. The # of HuR binding sites per gene. 2. The # of HuR binding sites per region per gene.</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># count the # sites per gene and annotation cat</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a>hur_gene_clip <span class="ot">&lt;-</span> hur_annot <span class="sc">%&gt;%</span></span>
-<span id="cb5-3"><a href="#cb5-3"></a>  <span class="fu">filter</span>(annot.type<span class="sc">!=</span><span class="st">"intergenic"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb5-4"><a href="#cb5-4"></a>  <span class="fu">group_by</span>(annot.symbol,annot.type) <span class="sc">%&gt;%</span></span>
-<span id="cb5-5"><a href="#cb5-5"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> annot.type, <span class="at">values_from =</span> n)</span>
-<span id="cb5-7"><a href="#cb5-7"></a></span>
-<span id="cb5-8"><a href="#cb5-8"></a>hur_gene_clip <span class="ot">&lt;-</span> hur_gene_clip <span class="sc">%&gt;%</span> <span class="fu">mutate_if</span>(is.numeric , replace_na, <span class="at">replace =</span> <span class="dv">0</span>)</span>
-<span id="cb5-9"><a href="#cb5-9"></a></span>
-<span id="cb5-10"><a href="#cb5-10"></a><span class="co"># new column w/total # sites</span></span>
-<span id="cb5-11"><a href="#cb5-11"></a>hur_gene_clip<span class="sc">$</span>total <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(hur_gene_clip[,<span class="sc">-</span><span class="dv">1</span>]) </span>
-<span id="cb5-12"><a href="#cb5-12"></a></span>
-<span id="cb5-13"><a href="#cb5-13"></a><span class="co"># remove symbols that are NA</span></span>
-<span id="cb5-14"><a href="#cb5-14"></a>hur_gene_clip <span class="ot">&lt;-</span> hur_gene_clip <span class="sc">%&gt;%</span></span>
-<span id="cb5-15"><a href="#cb5-15"></a>  <span class="fu">filter</span>(annot.symbol <span class="sc">!=</span> <span class="st">"NA"</span>)</span>
-<span id="cb5-16"><a href="#cb5-16"></a></span>
-<span id="cb5-17"><a href="#cb5-17"></a><span class="co"># rename cols</span></span>
-<span id="cb5-18"><a href="#cb5-18"></a><span class="fu">colnames</span>(hur_gene_clip)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"Symbol"</span></span>
-<span id="cb5-19"><a href="#cb5-19"></a><span class="fu">colnames</span>(hur_gene_clip)[<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"utr3"</span>,<span class="st">"utr5"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># count the # sites per gene and annotation cat</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a>hur_gene_clip <span class="ot">&lt;-</span> hur_annot <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3"></a>  <span class="fu">filter</span>(annot.type<span class="sc">!=</span><span class="st">"intergenic"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-4"><a href="#cb23-4"></a>  <span class="fu">group_by</span>(annot.symbol,annot.type) <span class="sc">%&gt;%</span></span>
+<span id="cb23-5"><a href="#cb23-5"></a>  dplyr<span class="sc">::</span><span class="fu">count</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb23-6"><a href="#cb23-6"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> annot.type, <span class="at">values_from =</span> n)</span>
+<span id="cb23-7"><a href="#cb23-7"></a></span>
+<span id="cb23-8"><a href="#cb23-8"></a>hur_gene_clip <span class="ot">&lt;-</span> hur_gene_clip <span class="sc">%&gt;%</span> <span class="fu">mutate_if</span>(is.numeric , replace_na, <span class="at">replace =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
-
+<div class="cell-output cell-output-stderr">
+<pre><code>`mutate_if()` ignored the following grouping variables:
+• Column `annot.symbol`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a><span class="co"># new column w/total # sites</span></span>
+<span id="cb25-2"><a href="#cb25-2"></a>hur_gene_clip<span class="sc">$</span>total <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(hur_gene_clip[,<span class="sc">-</span><span class="dv">1</span>]) </span>
+<span id="cb25-3"><a href="#cb25-3"></a></span>
+<span id="cb25-4"><a href="#cb25-4"></a><span class="co"># remove symbols that are NA</span></span>
+<span id="cb25-5"><a href="#cb25-5"></a>hur_gene_clip <span class="ot">&lt;-</span> hur_gene_clip <span class="sc">%&gt;%</span></span>
+<span id="cb25-6"><a href="#cb25-6"></a>  <span class="fu">filter</span>(annot.symbol <span class="sc">!=</span> <span class="st">"NA"</span>)</span>
+<span id="cb25-7"><a href="#cb25-7"></a></span>
+<span id="cb25-8"><a href="#cb25-8"></a><span class="co"># rename cols</span></span>
+<span id="cb25-9"><a href="#cb25-9"></a><span class="fu">colnames</span>(hur_gene_clip)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"Symbol"</span></span>
+<span id="cb25-10"><a href="#cb25-10"></a><span class="fu">colnames</span>(hur_gene_clip)[<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"utr3"</span>,<span class="st">"utr5"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </section>
@@ -547,18 +599,27 @@ Neelanjan Mukherjee
 <h2>Binding sites per gene</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>hur_gene_clip_long  <span class="ot">&lt;-</span> hur_gene_clip <span class="sc">%&gt;%</span> </span>
-<span id="cb6-2"><a href="#cb6-2"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>Symbol) </span>
-<span id="cb6-3"><a href="#cb6-3"></a></span>
-<span id="cb6-4"><a href="#cb6-4"></a><span class="fu">colnames</span>(hur_gene_clip_long)  <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">"symbol"</span>,<span class="st">"region"</span>,<span class="st">"sites"</span>)</span>
-<span id="cb6-5"><a href="#cb6-5"></a></span>
-<span id="cb6-6"><a href="#cb6-6"></a><span class="fu">ggplot</span>(hur_gene_clip_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(region <span class="sc">!=</span> <span class="st">"total"</span>), <span class="fu">aes</span>(sites, <span class="at">fill=</span>region)) <span class="sc">+</span></span>
-<span id="cb6-7"><a href="#cb6-7"></a>  <span class="fu">geom_histogram</span>() <span class="sc">+</span></span>
-<span id="cb6-8"><a href="#cb6-8"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
-<span id="cb6-9"><a href="#cb6-9"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>hur_gene_clip_long  <span class="ot">&lt;-</span> hur_gene_clip <span class="sc">%&gt;%</span> </span>
+<span id="cb26-2"><a href="#cb26-2"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>Symbol) </span>
+<span id="cb26-3"><a href="#cb26-3"></a></span>
+<span id="cb26-4"><a href="#cb26-4"></a><span class="fu">colnames</span>(hur_gene_clip_long)  <span class="ot">&lt;-</span>  <span class="fu">c</span>(<span class="st">"symbol"</span>,<span class="st">"region"</span>,<span class="st">"sites"</span>)</span>
+<span id="cb26-5"><a href="#cb26-5"></a></span>
+<span id="cb26-6"><a href="#cb26-6"></a><span class="fu">ggplot</span>(hur_gene_clip_long <span class="sc">%&gt;%</span> <span class="fu">filter</span>(region <span class="sc">!=</span> <span class="st">"total"</span>), <span class="fu">aes</span>(sites, <span class="at">fill=</span>region)) <span class="sc">+</span></span>
+<span id="cb26-7"><a href="#cb26-7"></a>  <span class="fu">geom_histogram</span>() <span class="sc">+</span></span>
+<span id="cb26-8"><a href="#cb26-8"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
+<span id="cb26-9"><a href="#cb26-9"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Transformation introduced infinite values in continuous x-axis</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 23098 rows containing non-finite values (`stat_bin()`).</code></pre>
+</div>
 <div class="cell-output-display">
-<p><img data-src="slides-29_files/figure-revealjs/explore-gene-1.png" width="960"></p>
+<p><img data-src="slides-29_files/figure-html/explore-gene-1.png" width="672"></p>
 </div>
 </div>
 </div>
@@ -567,22 +628,22 @@ Neelanjan Mukherjee
 <h2>Explore intron vs 3’ UTR sites</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># how many genes have both intron and/or 3' UTR sites</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a>site_combo <span class="ot">&lt;-</span> hur_gene_clip[,<span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>] <span class="sc">%&gt;%</span></span>
-<span id="cb7-3"><a href="#cb7-3"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb7-4"><a href="#cb7-4"></a>    <span class="at">type =</span> <span class="fu">case_when</span>(</span>
-<span id="cb7-5"><a href="#cb7-5"></a>      introns <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> utr3 <span class="sc">&gt;</span> <span class="dv">0</span>     <span class="sc">~</span> <span class="st">"intron_utr3"</span>,</span>
-<span id="cb7-6"><a href="#cb7-6"></a>      introns <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> utr3 <span class="sc">==</span>  <span class="dv">0</span> <span class="sc">~</span> <span class="st">"intron"</span>,</span>
-<span id="cb7-7"><a href="#cb7-7"></a>      introns <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> utr3 <span class="sc">&gt;</span>  <span class="dv">0</span> <span class="sc">~</span> <span class="st">"utr3"</span>,</span>
-<span id="cb7-8"><a href="#cb7-8"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"other"</span>)</span>
-<span id="cb7-9"><a href="#cb7-9"></a>    ) </span>
-<span id="cb7-10"><a href="#cb7-10"></a></span>
-<span id="cb7-11"><a href="#cb7-11"></a><span class="fu">ggplot</span>(site_combo, <span class="fu">aes</span>(type)) <span class="sc">+</span></span>
-<span id="cb7-12"><a href="#cb7-12"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"count"</span>) <span class="sc">+</span></span>
-<span id="cb7-13"><a href="#cb7-13"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a><span class="co"># how many genes have both intron and/or 3' UTR sites</span></span>
+<span id="cb30-2"><a href="#cb30-2"></a>site_combo <span class="ot">&lt;-</span> hur_gene_clip[,<span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>] <span class="sc">%&gt;%</span></span>
+<span id="cb30-3"><a href="#cb30-3"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb30-4"><a href="#cb30-4"></a>    <span class="at">type =</span> <span class="fu">case_when</span>(</span>
+<span id="cb30-5"><a href="#cb30-5"></a>      introns <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> utr3 <span class="sc">&gt;</span> <span class="dv">0</span>     <span class="sc">~</span> <span class="st">"intron_utr3"</span>,</span>
+<span id="cb30-6"><a href="#cb30-6"></a>      introns <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;</span> utr3 <span class="sc">==</span>  <span class="dv">0</span> <span class="sc">~</span> <span class="st">"intron"</span>,</span>
+<span id="cb30-7"><a href="#cb30-7"></a>      introns <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> utr3 <span class="sc">&gt;</span>  <span class="dv">0</span> <span class="sc">~</span> <span class="st">"utr3"</span>,</span>
+<span id="cb30-8"><a href="#cb30-8"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"other"</span>)</span>
+<span id="cb30-9"><a href="#cb30-9"></a>    ) </span>
+<span id="cb30-10"><a href="#cb30-10"></a></span>
+<span id="cb30-11"><a href="#cb30-11"></a><span class="fu">ggplot</span>(site_combo, <span class="fu">aes</span>(type)) <span class="sc">+</span></span>
+<span id="cb30-12"><a href="#cb30-12"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"count"</span>) <span class="sc">+</span></span>
+<span id="cb30-13"><a href="#cb30-13"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
-<p><img data-src="slides-29_files/figure-revealjs/intron-utr3-clip-1.png" width="960"></p>
+<p><img data-src="slides-29_files/figure-html/intron-utr3-clip-1.png" width="672"></p>
 </div>
 </div>
 </div>
@@ -599,25 +660,34 @@ Neelanjan Mukherjee
 </ol>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># load object called HuR.R</span></span>
-<span id="cb8-2"><a href="#cb8-2"></a></span>
-<span id="cb8-3"><a href="#cb8-3"></a><span class="co"># HuR siRNA RNAseq</span></span>
-<span id="cb8-4"><a href="#cb8-4"></a><span class="fu">load</span>(<span class="fu">here</span>(<span class="st">"data/block-rna/HuR.R"</span>))</span>
-<span id="cb8-5"><a href="#cb8-5"></a></span>
-<span id="cb8-6"><a href="#cb8-6"></a></span>
-<span id="cb8-7"><a href="#cb8-7"></a><span class="co"># gene information</span></span>
-<span id="cb8-8"><a href="#cb8-8"></a>gene_info <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data/block-rna/geneInfo.csv.zip"</span>))</span>
-<span id="cb8-9"><a href="#cb8-9"></a></span>
-<span id="cb8-10"><a href="#cb8-10"></a>HuR<span class="sc">$</span>Gene <span class="ot">&lt;-</span> <span class="fu">rownames</span>(HuR) <span class="co"># new column gene ids</span></span>
-<span id="cb8-11"><a href="#cb8-11"></a></span>
-<span id="cb8-12"><a href="#cb8-12"></a>HuR <span class="ot">&lt;-</span> <span class="fu">left_join</span>(HuR, gene_info[<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">11</span>)], <span class="at">by=</span><span class="st">"Gene"</span>) <span class="co"># Symbol</span></span>
-<span id="cb8-13"><a href="#cb8-13"></a></span>
-<span id="cb8-14"><a href="#cb8-14"></a><span class="co"># Filter for expression</span></span>
-<span id="cb8-15"><a href="#cb8-15"></a>hur_filt_rnaseq <span class="ot">&lt;-</span> HuR <span class="sc">%&gt;%</span></span>
-<span id="cb8-16"><a href="#cb8-16"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">rowMeans</span>(HuR[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]) <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb8-17"><a href="#cb8-17"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Gene)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a><span class="co"># load object called HuR.R</span></span>
+<span id="cb31-2"><a href="#cb31-2"></a></span>
+<span id="cb31-3"><a href="#cb31-3"></a><span class="co"># HuR siRNA RNAseq</span></span>
+<span id="cb31-4"><a href="#cb31-4"></a><span class="fu">load</span>(<span class="fu">here</span>(<span class="st">"data/block-rna/HuR.R"</span>))</span>
+<span id="cb31-5"><a href="#cb31-5"></a></span>
+<span id="cb31-6"><a href="#cb31-6"></a></span>
+<span id="cb31-7"><a href="#cb31-7"></a><span class="co"># gene information</span></span>
+<span id="cb31-8"><a href="#cb31-8"></a>gene_info <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">"data/block-rna/geneInfo.csv.zip"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
+<div class="cell-output cell-output-stderr">
+<pre><code>Multiple files in zip: reading 'geneInfo.csv'
+Rows: 63568 Columns: 13
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (6): Gene, Cat, Annotation, chr, Symbol, strand
+dbl (7): row, Exons, Introns, Transcripts, start, end, lengths
 
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>HuR<span class="sc">$</span>Gene <span class="ot">&lt;-</span> <span class="fu">rownames</span>(HuR) <span class="co"># new column gene ids</span></span>
+<span id="cb33-2"><a href="#cb33-2"></a></span>
+<span id="cb33-3"><a href="#cb33-3"></a>HuR <span class="ot">&lt;-</span> <span class="fu">left_join</span>(HuR, gene_info[<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">11</span>)], <span class="at">by=</span><span class="st">"Gene"</span>) <span class="co"># Symbol</span></span>
+<span id="cb33-4"><a href="#cb33-4"></a></span>
+<span id="cb33-5"><a href="#cb33-5"></a><span class="co"># Filter for expression</span></span>
+<span id="cb33-6"><a href="#cb33-6"></a>hur_filt_rnaseq <span class="ot">&lt;-</span> HuR <span class="sc">%&gt;%</span></span>
+<span id="cb33-7"><a href="#cb33-7"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">rowMeans</span>(HuR[,<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]) <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb33-8"><a href="#cb33-8"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>Gene)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </section>
@@ -625,18 +695,18 @@ Neelanjan Mukherjee
 <h2>integrate siRNA and clip-seq data</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">#join kd and clip data</span></span>
-<span id="cb9-2"><a href="#cb9-2"></a>kd_clip <span class="ot">&lt;-</span> <span class="fu">left_join</span>(hur_filt_rnaseq, hur_gene_clip,  <span class="at">by =</span> <span class="st">"Symbol"</span>) </span>
-<span id="cb9-3"><a href="#cb9-3"></a></span>
-<span id="cb9-4"><a href="#cb9-4"></a><span class="co"># convert all NA to 0</span></span>
-<span id="cb9-5"><a href="#cb9-5"></a>kd_clip <span class="ot">&lt;-</span> kd_clip <span class="sc">%&gt;%</span> <span class="fu">mutate_if</span>(is.numeric , replace_na, <span class="at">replace =</span> <span class="dv">0</span>)</span>
-<span id="cb9-6"><a href="#cb9-6"></a></span>
-<span id="cb9-7"><a href="#cb9-7"></a><span class="co"># calculate log fold changes</span></span>
-<span id="cb9-8"><a href="#cb9-8"></a>kd_clip <span class="ot">&lt;-</span> kd_clip <span class="sc">%&gt;%</span></span>
-<span id="cb9-9"><a href="#cb9-9"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb9-10"><a href="#cb9-10"></a>    <span class="at">lfc_mature =</span> <span class="fu">log2</span>(Mature_siGFP) <span class="sc">-</span> <span class="fu">log2</span>(Mature_siHuR),</span>
-<span id="cb9-11"><a href="#cb9-11"></a>    <span class="at">lfc_primary=</span> <span class="fu">log2</span>(Primary_siGFP) <span class="sc">-</span> <span class="fu">log2</span>(Primary_siHuR)</span>
-<span id="cb9-12"><a href="#cb9-12"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a><span class="co">#join kd and clip data</span></span>
+<span id="cb34-2"><a href="#cb34-2"></a>kd_clip <span class="ot">&lt;-</span> <span class="fu">left_join</span>(hur_filt_rnaseq, hur_gene_clip,  <span class="at">by =</span> <span class="st">"Symbol"</span>) </span>
+<span id="cb34-3"><a href="#cb34-3"></a></span>
+<span id="cb34-4"><a href="#cb34-4"></a><span class="co"># convert all NA to 0</span></span>
+<span id="cb34-5"><a href="#cb34-5"></a>kd_clip <span class="ot">&lt;-</span> kd_clip <span class="sc">%&gt;%</span> <span class="fu">mutate_if</span>(is.numeric , replace_na, <span class="at">replace =</span> <span class="dv">0</span>)</span>
+<span id="cb34-6"><a href="#cb34-6"></a></span>
+<span id="cb34-7"><a href="#cb34-7"></a><span class="co"># calculate log fold changes</span></span>
+<span id="cb34-8"><a href="#cb34-8"></a>kd_clip <span class="ot">&lt;-</span> kd_clip <span class="sc">%&gt;%</span></span>
+<span id="cb34-9"><a href="#cb34-9"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb34-10"><a href="#cb34-10"></a>    <span class="at">lfc_mature =</span> <span class="fu">log2</span>(Mature_siGFP) <span class="sc">-</span> <span class="fu">log2</span>(Mature_siHuR),</span>
+<span id="cb34-11"><a href="#cb34-11"></a>    <span class="at">lfc_primary=</span> <span class="fu">log2</span>(Primary_siGFP) <span class="sc">-</span> <span class="fu">log2</span>(Primary_siHuR)</span>
+<span id="cb34-12"><a href="#cb34-12"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 
 </div>
@@ -652,25 +722,28 @@ Neelanjan Mukherjee
 <h2>To target or not to target?</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># create new column for target or not target</span></span>
-<span id="cb10-2"><a href="#cb10-2"></a></span>
-<span id="cb10-3"><a href="#cb10-3"></a>kd_clip<span class="sc">$</span>target <span class="ot">&lt;-</span> <span class="fu">case_when</span>(</span>
-<span id="cb10-4"><a href="#cb10-4"></a>  kd_clip<span class="sc">$</span>total <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">~</span>  <span class="st">"target"</span>,</span>
-<span id="cb10-5"><a href="#cb10-5"></a>  <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"not target"</span>) </span>
-<span id="cb10-6"><a href="#cb10-6"></a></span>
-<span id="cb10-7"><a href="#cb10-7"></a></span>
-<span id="cb10-8"><a href="#cb10-8"></a><span class="fu">ggplot</span>(kd_clip, <span class="fu">aes</span>(lfc_mature, <span class="at">color =</span> target)) <span class="sc">+</span></span>
-<span id="cb10-9"><a href="#cb10-9"></a>  <span class="fu">stat_ecdf</span>() <span class="sc">+</span></span>
-<span id="cb10-10"><a href="#cb10-10"></a>  <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">2</span>,<span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb10-11"><a href="#cb10-11"></a>  <span class="fu">theme_cowplot</span>() <span class="sc">+</span></span>
-<span id="cb10-12"><a href="#cb10-12"></a>  <span class="fu">ylab</span>(<span class="st">"cumulative fraction of LFC"</span>) <span class="sc">+</span></span>
-<span id="cb10-13"><a href="#cb10-13"></a>  <span class="fu">ggtitle</span>(<span class="st">"HuR Target vs Not Target"</span>) <span class="sc">+</span></span>
-<span id="cb10-14"><a href="#cb10-14"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">75</span>, <span class="at">color=</span><span class="st">"grey"</span>) <span class="sc">+</span></span>
-<span id="cb10-15"><a href="#cb10-15"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">5</span>, <span class="at">color=</span><span class="st">"grey"</span>) <span class="sc">+</span></span>
-<span id="cb10-16"><a href="#cb10-16"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">25</span>, <span class="at">color=</span><span class="st">"grey"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a><span class="co"># create new column for target or not target</span></span>
+<span id="cb35-2"><a href="#cb35-2"></a></span>
+<span id="cb35-3"><a href="#cb35-3"></a>kd_clip<span class="sc">$</span>target <span class="ot">&lt;-</span> <span class="fu">case_when</span>(</span>
+<span id="cb35-4"><a href="#cb35-4"></a>  kd_clip<span class="sc">$</span>total <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">~</span>  <span class="st">"target"</span>,</span>
+<span id="cb35-5"><a href="#cb35-5"></a>  <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"not target"</span>) </span>
+<span id="cb35-6"><a href="#cb35-6"></a></span>
+<span id="cb35-7"><a href="#cb35-7"></a></span>
+<span id="cb35-8"><a href="#cb35-8"></a><span class="fu">ggplot</span>(kd_clip, <span class="fu">aes</span>(lfc_mature, <span class="at">color =</span> target)) <span class="sc">+</span></span>
+<span id="cb35-9"><a href="#cb35-9"></a>  <span class="fu">stat_ecdf</span>() <span class="sc">+</span></span>
+<span id="cb35-10"><a href="#cb35-10"></a>  <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">2</span>,<span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb35-11"><a href="#cb35-11"></a>  <span class="fu">theme_cowplot</span>() <span class="sc">+</span></span>
+<span id="cb35-12"><a href="#cb35-12"></a>  <span class="fu">ylab</span>(<span class="st">"cumulative fraction of LFC"</span>) <span class="sc">+</span></span>
+<span id="cb35-13"><a href="#cb35-13"></a>  <span class="fu">ggtitle</span>(<span class="st">"HuR Target vs Not Target"</span>) <span class="sc">+</span></span>
+<span id="cb35-14"><a href="#cb35-14"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">75</span>, <span class="at">color=</span><span class="st">"grey"</span>) <span class="sc">+</span></span>
+<span id="cb35-15"><a href="#cb35-15"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">5</span>, <span class="at">color=</span><span class="st">"grey"</span>) <span class="sc">+</span></span>
+<span id="cb35-16"><a href="#cb35-16"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">25</span>, <span class="at">color=</span><span class="st">"grey"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 247 rows containing non-finite values (`stat_ecdf()`).</code></pre>
+</div>
 <div class="cell-output-display">
-<p><img data-src="slides-29_files/figure-revealjs/target-not-1.png" width="960"></p>
+<p><img data-src="slides-29_files/figure-html/target-not-1.png" width="672"></p>
 </div>
 </div>
 </div>
@@ -680,36 +753,39 @@ Neelanjan Mukherjee
 <p><strong>Does the number of HuR binding influence the degree of stabilization?</strong></p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># hist(kd_clip$utr3)</span></span>
-<span id="cb11-2"><a href="#cb11-2"></a><span class="co"># let's make bins for # of sites per  3' UTR</span></span>
-<span id="cb11-3"><a href="#cb11-3"></a></span>
-<span id="cb11-4"><a href="#cb11-4"></a>kd_clip<span class="sc">$</span>utr3_bin <span class="ot">&lt;-</span> <span class="fu">cut2</span>(<span class="at">x =</span> kd_clip<span class="sc">$</span>utr3, <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">8</span>,<span class="dv">1000</span>))</span>
-<span id="cb11-5"><a href="#cb11-5"></a></span>
-<span id="cb11-6"><a href="#cb11-6"></a><span class="co"># table(kd_clip$utr3_bin)</span></span>
-<span id="cb11-7"><a href="#cb11-7"></a></span>
-<span id="cb11-8"><a href="#cb11-8"></a><span class="co"># let's make bins for UTR</span></span>
-<span id="cb11-9"><a href="#cb11-9"></a>kd_clip<span class="sc">$</span>utr3_bin <span class="ot">&lt;-</span> <span class="fu">recode_factor</span>(kd_clip<span class="sc">$</span>utr3_bin,</span>
-<span id="cb11-10"><a href="#cb11-10"></a>               <span class="st">"   0"</span> <span class="ot">=</span> <span class="st">"0"</span>,</span>
-<span id="cb11-11"><a href="#cb11-11"></a>               <span class="st">"   1"</span> <span class="ot">=</span> <span class="st">"1"</span>,</span>
-<span id="cb11-12"><a href="#cb11-12"></a>               <span class="st">"[   2,   4)"</span> <span class="ot">=</span> <span class="st">"2-3"</span>,</span>
-<span id="cb11-13"><a href="#cb11-13"></a>               <span class="st">"[   4,   8)"</span> <span class="ot">=</span> <span class="st">"4-7"</span>,</span>
-<span id="cb11-14"><a href="#cb11-14"></a>               <span class="st">"[   8,1000]"</span> <span class="ot">=</span> <span class="st">"8+"</span></span>
-<span id="cb11-15"><a href="#cb11-15"></a>               )</span>
-<span id="cb11-16"><a href="#cb11-16"></a></span>
-<span id="cb11-17"><a href="#cb11-17"></a></span>
-<span id="cb11-18"><a href="#cb11-18"></a><span class="fu">ggplot</span>(<span class="at">data =</span> kd_clip, <span class="fu">aes</span>(<span class="at">x =</span> lfc_mature, <span class="at">color =</span> utr3_bin)) <span class="sc">+</span></span>
-<span id="cb11-19"><a href="#cb11-19"></a>  <span class="fu">stat_ecdf</span>() <span class="sc">+</span></span>
-<span id="cb11-20"><a href="#cb11-20"></a>  <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">2</span>,<span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb11-21"><a href="#cb11-21"></a>  <span class="fu">theme_cowplot</span>() <span class="sc">+</span></span>
-<span id="cb11-22"><a href="#cb11-22"></a>  <span class="fu">ylab</span>(<span class="st">"cumulative fraction- LFCs"</span>) <span class="sc">+</span></span>
-<span id="cb11-23"><a href="#cb11-23"></a>  <span class="fu">ggtitle</span>(<span class="st">"# of HuR binding sites in 3' UTR"</span>) <span class="sc">+</span></span>
-<span id="cb11-24"><a href="#cb11-24"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">75</span>, <span class="at">color=</span><span class="st">"grey"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb11-25"><a href="#cb11-25"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">5</span>, <span class="at">color=</span><span class="st">"grey"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb11-26"><a href="#cb11-26"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">25</span>, <span class="at">color=</span><span class="st">"grey"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb11-27"><a href="#cb11-27"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">xend =</span> <span class="dv">0</span>, <span class="at">yend =</span> .<span class="dv">5</span>, <span class="at">colour =</span> <span class="st">"segment"</span>), <span class="at">color=</span><span class="st">"black"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a><span class="co"># hist(kd_clip$utr3)</span></span>
+<span id="cb37-2"><a href="#cb37-2"></a><span class="co"># let's make bins for # of sites per  3' UTR</span></span>
+<span id="cb37-3"><a href="#cb37-3"></a></span>
+<span id="cb37-4"><a href="#cb37-4"></a>kd_clip<span class="sc">$</span>utr3_bin <span class="ot">&lt;-</span> <span class="fu">cut2</span>(<span class="at">x =</span> kd_clip<span class="sc">$</span>utr3, <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">8</span>,<span class="dv">1000</span>))</span>
+<span id="cb37-5"><a href="#cb37-5"></a></span>
+<span id="cb37-6"><a href="#cb37-6"></a><span class="co"># table(kd_clip$utr3_bin)</span></span>
+<span id="cb37-7"><a href="#cb37-7"></a></span>
+<span id="cb37-8"><a href="#cb37-8"></a><span class="co"># let's make bins for UTR</span></span>
+<span id="cb37-9"><a href="#cb37-9"></a>kd_clip<span class="sc">$</span>utr3_bin <span class="ot">&lt;-</span> <span class="fu">recode_factor</span>(kd_clip<span class="sc">$</span>utr3_bin,</span>
+<span id="cb37-10"><a href="#cb37-10"></a>               <span class="st">"   0"</span> <span class="ot">=</span> <span class="st">"0"</span>,</span>
+<span id="cb37-11"><a href="#cb37-11"></a>               <span class="st">"   1"</span> <span class="ot">=</span> <span class="st">"1"</span>,</span>
+<span id="cb37-12"><a href="#cb37-12"></a>               <span class="st">"[   2,   4)"</span> <span class="ot">=</span> <span class="st">"2-3"</span>,</span>
+<span id="cb37-13"><a href="#cb37-13"></a>               <span class="st">"[   4,   8)"</span> <span class="ot">=</span> <span class="st">"4-7"</span>,</span>
+<span id="cb37-14"><a href="#cb37-14"></a>               <span class="st">"[   8,1000]"</span> <span class="ot">=</span> <span class="st">"8+"</span></span>
+<span id="cb37-15"><a href="#cb37-15"></a>               )</span>
+<span id="cb37-16"><a href="#cb37-16"></a></span>
+<span id="cb37-17"><a href="#cb37-17"></a></span>
+<span id="cb37-18"><a href="#cb37-18"></a><span class="fu">ggplot</span>(<span class="at">data =</span> kd_clip, <span class="fu">aes</span>(<span class="at">x =</span> lfc_mature, <span class="at">color =</span> utr3_bin)) <span class="sc">+</span></span>
+<span id="cb37-19"><a href="#cb37-19"></a>  <span class="fu">stat_ecdf</span>() <span class="sc">+</span></span>
+<span id="cb37-20"><a href="#cb37-20"></a>  <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">2</span>,<span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb37-21"><a href="#cb37-21"></a>  <span class="fu">theme_cowplot</span>() <span class="sc">+</span></span>
+<span id="cb37-22"><a href="#cb37-22"></a>  <span class="fu">ylab</span>(<span class="st">"cumulative fraction- LFCs"</span>) <span class="sc">+</span></span>
+<span id="cb37-23"><a href="#cb37-23"></a>  <span class="fu">ggtitle</span>(<span class="st">"# of HuR binding sites in 3' UTR"</span>) <span class="sc">+</span></span>
+<span id="cb37-24"><a href="#cb37-24"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">75</span>, <span class="at">color=</span><span class="st">"grey"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb37-25"><a href="#cb37-25"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">5</span>, <span class="at">color=</span><span class="st">"grey"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb37-26"><a href="#cb37-26"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept=</span>.<span class="dv">25</span>, <span class="at">color=</span><span class="st">"grey"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb37-27"><a href="#cb37-27"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">xend =</span> <span class="dv">0</span>, <span class="at">yend =</span> .<span class="dv">5</span>, <span class="at">colour =</span> <span class="st">"segment"</span>), <span class="at">color=</span><span class="st">"black"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 247 rows containing non-finite values (`stat_ecdf()`).</code></pre>
+</div>
 <div class="cell-output-display">
-<p><img data-src="slides-29_files/figure-revealjs/target-quant-1.png" width="960"></p>
+<p><img data-src="slides-29_files/figure-html/target-quant-1.png" width="672"></p>
 </div>
 </div>
 </div>
@@ -719,40 +795,40 @@ Neelanjan Mukherjee
 <p><strong>TEST: Does the number of HuR binding influence the degree of stabilization?</strong></p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="co"># keep only finite values for lfc_mature and lfc_primary</span></span>
-<span id="cb12-2"><a href="#cb12-2"></a>kd_clip_targets <span class="ot">&lt;-</span> kd_clip[<span class="fu">is.finite</span>(kd_clip<span class="sc">$</span>lfc_mature),]</span>
-<span id="cb12-3"><a href="#cb12-3"></a></span>
-<span id="cb12-4"><a href="#cb12-4"></a><span class="co"># IMPORTANT relevel indicating what everything will be compared to</span></span>
-<span id="cb12-5"><a href="#cb12-5"></a>kd_clip_targets<span class="sc">$</span>utr3_bin <span class="ot">&lt;-</span> <span class="fu">relevel</span>(<span class="fu">factor</span>(kd_clip_targets<span class="sc">$</span>utr3_bin), <span class="at">ref =</span> <span class="st">"0"</span>)</span>
-<span id="cb12-6"><a href="#cb12-6"></a></span>
-<span id="cb12-7"><a href="#cb12-7"></a></span>
-<span id="cb12-8"><a href="#cb12-8"></a><span class="co"># calculate fit using `lm`</span></span>
-<span id="cb12-9"><a href="#cb12-9"></a>fit_bins <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">data =</span> kd_clip_targets,</span>
-<span id="cb12-10"><a href="#cb12-10"></a>   <span class="at">formula =</span> lfc_mature <span class="sc">~</span> utr3_bin)</span>
-<span id="cb12-11"><a href="#cb12-11"></a></span>
-<span id="cb12-12"><a href="#cb12-12"></a><span class="co"># examine estimates and p-vals</span></span>
-<span id="cb12-13"><a href="#cb12-13"></a><span class="fu">tidy</span>(fit_bins) <span class="sc">%&gt;%</span></span>
-<span id="cb12-14"><a href="#cb12-14"></a>  <span class="fu">gt</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a><span class="co"># keep only finite values for lfc_mature and lfc_primary</span></span>
+<span id="cb39-2"><a href="#cb39-2"></a>kd_clip_targets <span class="ot">&lt;-</span> kd_clip[<span class="fu">is.finite</span>(kd_clip<span class="sc">$</span>lfc_mature),]</span>
+<span id="cb39-3"><a href="#cb39-3"></a></span>
+<span id="cb39-4"><a href="#cb39-4"></a><span class="co"># IMPORTANT relevel indicating what everything will be compared to</span></span>
+<span id="cb39-5"><a href="#cb39-5"></a>kd_clip_targets<span class="sc">$</span>utr3_bin <span class="ot">&lt;-</span> <span class="fu">relevel</span>(<span class="fu">factor</span>(kd_clip_targets<span class="sc">$</span>utr3_bin), <span class="at">ref =</span> <span class="st">"0"</span>)</span>
+<span id="cb39-6"><a href="#cb39-6"></a></span>
+<span id="cb39-7"><a href="#cb39-7"></a></span>
+<span id="cb39-8"><a href="#cb39-8"></a><span class="co"># calculate fit using `lm`</span></span>
+<span id="cb39-9"><a href="#cb39-9"></a>fit_bins <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">data =</span> kd_clip_targets,</span>
+<span id="cb39-10"><a href="#cb39-10"></a>   <span class="at">formula =</span> lfc_mature <span class="sc">~</span> utr3_bin)</span>
+<span id="cb39-11"><a href="#cb39-11"></a></span>
+<span id="cb39-12"><a href="#cb39-12"></a><span class="co"># examine estimates and p-vals</span></span>
+<span id="cb39-13"><a href="#cb39-13"></a><span class="fu">tidy</span>(fit_bins) <span class="sc">%&gt;%</span></span>
+<span id="cb39-14"><a href="#cb39-14"></a>  <span class="fu">gt</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 
-<div id="xwsemebdwx" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#xwsemebdwx table {
+<div id="thtbshypvn" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#thtbshypvn table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#xwsemebdwx thead, #xwsemebdwx tbody, #xwsemebdwx tfoot, #xwsemebdwx tr, #xwsemebdwx td, #xwsemebdwx th {
+#thtbshypvn thead, #thtbshypvn tbody, #thtbshypvn tfoot, #thtbshypvn tr, #thtbshypvn td, #thtbshypvn th {
   border-style: none;
 }
 
-#xwsemebdwx p {
+#thtbshypvn p {
   margin: 0;
   padding: 0;
 }
 
-#xwsemebdwx .gt_table {
+#thtbshypvn .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -778,12 +854,12 @@ Neelanjan Mukherjee
   border-left-color: #D3D3D3;
 }
 
-#xwsemebdwx .gt_caption {
+#thtbshypvn .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#xwsemebdwx .gt_title {
+#thtbshypvn .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -795,7 +871,7 @@ Neelanjan Mukherjee
   border-bottom-width: 0;
 }
 
-#xwsemebdwx .gt_subtitle {
+#thtbshypvn .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -807,7 +883,7 @@ Neelanjan Mukherjee
   border-top-width: 0;
 }
 
-#xwsemebdwx .gt_heading {
+#thtbshypvn .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -819,13 +895,13 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#xwsemebdwx .gt_bottom_border {
+#thtbshypvn .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#xwsemebdwx .gt_col_headings {
+#thtbshypvn .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -840,7 +916,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#xwsemebdwx .gt_col_heading {
+#thtbshypvn .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -860,7 +936,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#xwsemebdwx .gt_column_spanner_outer {
+#thtbshypvn .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -872,15 +948,15 @@ Neelanjan Mukherjee
   padding-right: 4px;
 }
 
-#xwsemebdwx .gt_column_spanner_outer:first-child {
+#thtbshypvn .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#xwsemebdwx .gt_column_spanner_outer:last-child {
+#thtbshypvn .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#xwsemebdwx .gt_column_spanner {
+#thtbshypvn .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -892,11 +968,11 @@ Neelanjan Mukherjee
   width: 100%;
 }
 
-#xwsemebdwx .gt_spanner_row {
+#thtbshypvn .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#xwsemebdwx .gt_group_heading {
+#thtbshypvn .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -922,7 +998,7 @@ Neelanjan Mukherjee
   text-align: left;
 }
 
-#xwsemebdwx .gt_empty_group_heading {
+#thtbshypvn .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -937,15 +1013,15 @@ Neelanjan Mukherjee
   vertical-align: middle;
 }
 
-#xwsemebdwx .gt_from_md > :first-child {
+#thtbshypvn .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#xwsemebdwx .gt_from_md > :last-child {
+#thtbshypvn .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#xwsemebdwx .gt_row {
+#thtbshypvn .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -964,7 +1040,7 @@ Neelanjan Mukherjee
   overflow-x: hidden;
 }
 
-#xwsemebdwx .gt_stub {
+#thtbshypvn .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -977,7 +1053,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#xwsemebdwx .gt_stub_row_group {
+#thtbshypvn .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -991,15 +1067,15 @@ Neelanjan Mukherjee
   vertical-align: top;
 }
 
-#xwsemebdwx .gt_row_group_first td {
+#thtbshypvn .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#xwsemebdwx .gt_row_group_first th {
+#thtbshypvn .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#xwsemebdwx .gt_summary_row {
+#thtbshypvn .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1009,16 +1085,16 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#xwsemebdwx .gt_first_summary_row {
+#thtbshypvn .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#xwsemebdwx .gt_first_summary_row.thick {
+#thtbshypvn .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#xwsemebdwx .gt_last_summary_row {
+#thtbshypvn .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1028,7 +1104,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#xwsemebdwx .gt_grand_summary_row {
+#thtbshypvn .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1038,7 +1114,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#xwsemebdwx .gt_first_grand_summary_row {
+#thtbshypvn .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1048,7 +1124,7 @@ Neelanjan Mukherjee
   border-top-color: #D3D3D3;
 }
 
-#xwsemebdwx .gt_last_grand_summary_row_top {
+#thtbshypvn .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1058,11 +1134,11 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#xwsemebdwx .gt_striped {
+#thtbshypvn .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#xwsemebdwx .gt_table_body {
+#thtbshypvn .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1071,7 +1147,7 @@ Neelanjan Mukherjee
   border-bottom-color: #D3D3D3;
 }
 
-#xwsemebdwx .gt_footnotes {
+#thtbshypvn .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1085,7 +1161,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#xwsemebdwx .gt_footnote {
+#thtbshypvn .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1094,7 +1170,7 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#xwsemebdwx .gt_sourcenotes {
+#thtbshypvn .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1108,7 +1184,7 @@ Neelanjan Mukherjee
   border-right-color: #D3D3D3;
 }
 
-#xwsemebdwx .gt_sourcenote {
+#thtbshypvn .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1116,63 +1192,63 @@ Neelanjan Mukherjee
   padding-right: 5px;
 }
 
-#xwsemebdwx .gt_left {
+#thtbshypvn .gt_left {
   text-align: left;
 }
 
-#xwsemebdwx .gt_center {
+#thtbshypvn .gt_center {
   text-align: center;
 }
 
-#xwsemebdwx .gt_right {
+#thtbshypvn .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#xwsemebdwx .gt_font_normal {
+#thtbshypvn .gt_font_normal {
   font-weight: normal;
 }
 
-#xwsemebdwx .gt_font_bold {
+#thtbshypvn .gt_font_bold {
   font-weight: bold;
 }
 
-#xwsemebdwx .gt_font_italic {
+#thtbshypvn .gt_font_italic {
   font-style: italic;
 }
 
-#xwsemebdwx .gt_super {
+#thtbshypvn .gt_super {
   font-size: 65%;
 }
 
-#xwsemebdwx .gt_footnote_marks {
+#thtbshypvn .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#xwsemebdwx .gt_asterisk {
+#thtbshypvn .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#xwsemebdwx .gt_indent_1 {
+#thtbshypvn .gt_indent_1 {
   text-indent: 5px;
 }
 
-#xwsemebdwx .gt_indent_2 {
+#thtbshypvn .gt_indent_2 {
   text-indent: 10px;
 }
 
-#xwsemebdwx .gt_indent_3 {
+#thtbshypvn .gt_indent_3 {
   text-indent: 15px;
 }
 
-#xwsemebdwx .gt_indent_4 {
+#thtbshypvn .gt_indent_4 {
   text-indent: 20px;
 }
 
-#xwsemebdwx .gt_indent_5 {
+#thtbshypvn .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
@@ -1227,29 +1303,29 @@ Neelanjan Mukherjee
 <p><strong>TEST: Does the number of HuR binding influence the degree of stabilization?</strong></p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># mean lfc of mRNAs with no 3' UTR binding sites</span></span>
-<span id="cb13-2"><a href="#cb13-2"></a>ref_mean <span class="ot">&lt;-</span> kd_clip_targets <span class="sc">%&gt;%</span></span>
-<span id="cb13-3"><a href="#cb13-3"></a>  <span class="fu">filter</span>(utr3_bin <span class="sc">==</span> <span class="st">"0"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb13-4"><a href="#cb13-4"></a>  <span class="fu">pull</span>(lfc_mature) <span class="sc">%&gt;%</span></span>
-<span id="cb13-5"><a href="#cb13-5"></a>  <span class="fu">mean</span>()</span>
-<span id="cb13-6"><a href="#cb13-6"></a></span>
-<span id="cb13-7"><a href="#cb13-7"></a></span>
-<span id="cb13-8"><a href="#cb13-8"></a><span class="co"># examine estimates and p-vals</span></span>
-<span id="cb13-9"><a href="#cb13-9"></a><span class="fu">tidy</span>(fit_bins) <span class="sc">%&gt;%</span></span>
-<span id="cb13-10"><a href="#cb13-10"></a>  <span class="fu">ggplot</span>(<span class="at">data=</span>.,</span>
-<span id="cb13-11"><a href="#cb13-11"></a>         <span class="fu">aes</span>(<span class="at">x=</span>term,</span>
-<span id="cb13-12"><a href="#cb13-12"></a>             <span class="at">y=</span>estimate,</span>
-<span id="cb13-13"><a href="#cb13-13"></a>             <span class="at">fill=</span><span class="sc">-</span><span class="fu">log10</span>(p.value)</span>
-<span id="cb13-14"><a href="#cb13-14"></a>             )</span>
-<span id="cb13-15"><a href="#cb13-15"></a>         ) <span class="sc">+</span></span>
-<span id="cb13-16"><a href="#cb13-16"></a>  <span class="fu">geom_bar</span>(<span class="at">stat=</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
-<span id="cb13-17"><a href="#cb13-17"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
-<span id="cb13-18"><a href="#cb13-18"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> ref_mean,</span>
-<span id="cb13-19"><a href="#cb13-19"></a>             <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb13-20"><a href="#cb13-20"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a><span class="co"># mean lfc of mRNAs with no 3' UTR binding sites</span></span>
+<span id="cb40-2"><a href="#cb40-2"></a>ref_mean <span class="ot">&lt;-</span> kd_clip_targets <span class="sc">%&gt;%</span></span>
+<span id="cb40-3"><a href="#cb40-3"></a>  <span class="fu">filter</span>(utr3_bin <span class="sc">==</span> <span class="st">"0"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb40-4"><a href="#cb40-4"></a>  <span class="fu">pull</span>(lfc_mature) <span class="sc">%&gt;%</span></span>
+<span id="cb40-5"><a href="#cb40-5"></a>  <span class="fu">mean</span>()</span>
+<span id="cb40-6"><a href="#cb40-6"></a></span>
+<span id="cb40-7"><a href="#cb40-7"></a></span>
+<span id="cb40-8"><a href="#cb40-8"></a><span class="co"># examine estimates and p-vals</span></span>
+<span id="cb40-9"><a href="#cb40-9"></a><span class="fu">tidy</span>(fit_bins) <span class="sc">%&gt;%</span></span>
+<span id="cb40-10"><a href="#cb40-10"></a>  <span class="fu">ggplot</span>(<span class="at">data=</span>.,</span>
+<span id="cb40-11"><a href="#cb40-11"></a>         <span class="fu">aes</span>(<span class="at">x=</span>term,</span>
+<span id="cb40-12"><a href="#cb40-12"></a>             <span class="at">y=</span>estimate,</span>
+<span id="cb40-13"><a href="#cb40-13"></a>             <span class="at">fill=</span><span class="sc">-</span><span class="fu">log10</span>(p.value)</span>
+<span id="cb40-14"><a href="#cb40-14"></a>             )</span>
+<span id="cb40-15"><a href="#cb40-15"></a>         ) <span class="sc">+</span></span>
+<span id="cb40-16"><a href="#cb40-16"></a>  <span class="fu">geom_bar</span>(<span class="at">stat=</span><span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb40-17"><a href="#cb40-17"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb40-18"><a href="#cb40-18"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> ref_mean,</span>
+<span id="cb40-19"><a href="#cb40-19"></a>             <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb40-20"><a href="#cb40-20"></a>  <span class="fu">theme_cowplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
-<p><img data-src="slides-29_files/figure-revealjs/target-quant-viz-1.png" width="960"></p>
+<p><img data-src="slides-29_files/figure-html/target-quant-viz-1.png" width="672"></p>
 </div>
 </div>
 </div>
@@ -1471,44 +1547,6 @@ Neelanjan Mukherjee
         ]
       });
     </script>
-    
-    <script>
-      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
-      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
-      // slide changes (different for each slide format).
-      (function () {
-        // dispatch for htmlwidgets
-        function fireSlideEnter() {
-          const event = window.document.createEvent("Event");
-          event.initEvent("slideenter", true, true);
-          window.document.dispatchEvent(event);
-        }
-
-        function fireSlideChanged(previousSlide, currentSlide) {
-          fireSlideEnter();
-
-          // dispatch for shiny
-          if (window.jQuery) {
-            if (previousSlide) {
-              window.jQuery(previousSlide).trigger("hidden");
-            }
-            if (currentSlide) {
-              window.jQuery(currentSlide).trigger("shown");
-            }
-          }
-        }
-
-        // hookup for slidy
-        if (window.w3c_slidy) {
-          window.w3c_slidy.add_observer(function (slide_num) {
-            // slide_num starts at position 1
-            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
-          });
-        }
-
-      })();
-    </script>
-
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
       const toggleBodyColorMode = (bsSheetEl) => {
