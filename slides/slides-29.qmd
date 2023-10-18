@@ -1,0 +1,390 @@
+---
+title: "RBP-RNA part 2"
+author: "Neelanjan Mukherjee"
+---
+
+```{r packages}
+#| echo: false
+#| include: false
+#| message: false
+#| warning: false
+
+
+# library(BSgenome.Hsapiens.UCSC.hg19)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(org.Hs.eg.db)
+library(annotatr)
+library(ggrepel)
+library(tidyverse)
+library(cowplot)
+library(scales) 
+library(gt)
+library(here)
+library(Hmisc)
+library(broom)
+
+```
+
+
+
+## mature mRNA regulatory decisions {.smaller}
+
+Just a review of how RBPs control the fate of mRNAs in  the cytoplasm. 
+
+![Mayya and Duchaine](https://www.frontiersin.org/files/Articles/423825/fgene-10-00006-HTML-r1/image_m/fgene-10-00006-g001.jpg)
+
+## HuR and ARE decay {.smaller}
+
+Remember our analysis of HuR PAR-CLIP data from last class. The model we were testing is that HuR binds to AU-rich elements (ARE) in 3’ UTRs of mRNAs to promote mRNA stability.
+
+![](/img/block-rna/hur_mechanism.png)
+Model predictions:  
+
+1. HuR binds to the 3' UTR *and introns*.
+2. HuR binds to AU-rich sequences (AUUUA) *and U-rich sequences*.  
+3. **HuR binding promotes target RNA stabilization (and binding by the other RBPs to the ARE promotes destabilization).**  
+
+
+## Set up annotation database {.smaller}
+
+```{r annotation categories}
+#| eval: true
+#| echo: true
+#| label: annot-intro
+
+possible_annotations <- builtin_annotations()
+
+# grep to keep those containing "hg19"
+hg19_annots <- grep("hg19_genes", possible_annotations, value = T)
+
+# WHY DID WE PICK hg19?
+
+# let's keep 5' utr, cds, intron, 3' utr and intergenic
+my_hg19_annots <- hg19_annots[c(3,4,7,10,11)]
+
+# build the annotation database
+annotations <- build_annotations(genome = 'hg19', annotations = my_hg19_annots)
+
+annotations
+```
+
+
+
+## Annotate PAR-CLIP data {.smaller}  
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: annotate-clip
+#| output-location: column-fragment
+
+hur_regions <- read_regions(con = "https://raw.githubusercontent.com/BIMSBbioinfo/RCAS_meta-analysis/master/rbp-binding-sites/SRR248532.clusters.bed",
+                     genome = 'hg19', format = 'bed')
+
+# let's annotate
+hur_annot <- annotate_regions(
+    regions = hur_regions,
+    annotations = annotations,
+    ignore.strand = FALSE,
+    quiet = FALSE) %>%
+  data.frame()
+
+# keep only columns we need
+myInfo <- c("seqnames","start","end","width","strand","annot.symbol","annot.type")
+
+hur_annot <- hur_annot[,myInfo] %>%
+  unique() 
+
+# getting rid of the "hg19_genes_" string to simplify `annot.type`
+hur_annot$annot.type <- gsub("hg19_genes_","",hur_annot$annot.type)
+
+table(hur_annot$annot.type)
+
+```
+
+
+## Summarize PAR-CLIP data to gene level {.smaller}  
+
+Now we want to get the following info:
+1. The # of HuR binding sites per gene.
+2. The # of HuR binding sites per region per gene.
+
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: summarize-clip
+#| output-location: column-fragment
+
+# count the # sites per gene and annotation cat
+hur_gene_clip <- hur_annot %>%
+  filter(annot.type!="intergenic") %>%
+  group_by(annot.symbol,annot.type) %>%
+  dplyr::count() %>%
+  pivot_wider(names_from = annot.type, values_from = n)
+
+hur_gene_clip <- hur_gene_clip %>% mutate_if(is.numeric , replace_na, replace = 0)
+
+# new column w/total # sites
+hur_gene_clip$total <- rowSums(hur_gene_clip[,-1]) 
+
+# remove symbols that are NA
+hur_gene_clip <- hur_gene_clip %>%
+  filter(annot.symbol != "NA")
+
+# rename cols
+colnames(hur_gene_clip)[1] <- "Symbol"
+colnames(hur_gene_clip)[3:4] <- c("utr3","utr5")
+```
+
+
+## Binding sites per gene {.smaller} 
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: explore-gene
+#| output-location: column-fragment
+
+
+hur_gene_clip_long  <- hur_gene_clip %>% 
+  pivot_longer(-Symbol) 
+
+colnames(hur_gene_clip_long)  <-  c("symbol","region","sites")
+
+ggplot(hur_gene_clip_long %>% filter(region != "total"), aes(sites, fill=region)) +
+  geom_histogram() +
+  scale_x_log10() +
+  theme_cowplot()
+
+```
+
+## Explore intron vs 3' UTR sites {.smaller} 
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: intron-utr3-clip
+#| output-location: column-fragment
+
+
+# how many genes have both intron and/or 3' UTR sites
+site_combo <- hur_gene_clip[,2:5] %>%
+  mutate(
+    type = case_when(
+      introns > 0 & utr3 > 0     ~ "intron_utr3",
+      introns > 0 & utr3 ==  0 ~ "intron",
+      introns == 0 & utr3 >  0 ~ "utr3",
+      TRUE ~ "other")
+    ) 
+
+ggplot(site_combo, aes(type)) +
+  geom_bar(stat = "count") +
+  theme_cowplot()
+
+```
+
+**HuR binds to both introns and 3' UTRs.**  
+
+**Genes more often have intronic and 3' UTR binding sites than either alone.**
+
+## Load HuR knockdown RNA-seq data {.smaller} 
+
+1. primary (unspliced precursor) transcripts in `siGFP` treated cells.
+2. mature transcripts in `siGFP` treated cells.
+3. primary (unspliced precursor) transcripts in `siHuR` treated cells.
+4. mature transcripts in `siHuR` treated cells.
+
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: hur-kd-tidy
+#| output-location: column-fragment
+
+# load object called HuR.R
+
+# HuR siRNA RNAseq
+load(here("data/block-rna/HuR.R"))
+
+
+# gene information
+gene_info <- read_csv(here("data/block-rna/geneInfo.csv.zip"))
+
+HuR$Gene <- rownames(HuR) # new column gene ids
+
+HuR <- left_join(HuR, gene_info[c(2,11)], by="Gene") # Symbol
+
+# Filter for expression
+hur_filt_rnaseq <- HuR %>%
+  dplyr::filter(rowMeans(HuR[,1:4]) > 1) %>%
+  dplyr::select(-Gene)
+
+```
+
+## integrate siRNA and clip-seq data {.smaller}
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: join-clip-sirna
+#| output-location: column-fragment
+
+#join kd and clip data
+kd_clip <- left_join(hur_filt_rnaseq, hur_gene_clip,  by = "Symbol") 
+
+# convert all NA to 0
+kd_clip <- kd_clip %>% mutate_if(is.numeric , replace_na, replace = 0)
+
+# calculate log fold changes
+kd_clip <- kd_clip %>%
+  mutate(
+    lfc_mature = log2(Mature_siGFP) - log2(Mature_siHuR),
+    lfc_primary= log2(Primary_siGFP) - log2(Primary_siHuR)
+    )
+
+
+```
+
+
+
+## What is the relationship between HuR binding sites and change expression? {.smaller}
+
+**Does HuR promote the stability of its mRNA targets?**  
+
+**Does the number of HuR binding influence the degree of stabilization?**  
+
+**Does the region of HuR binding influence stabilization?**  
+
+
+
+## To target or not to target? {.smaller}
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: target-not
+#| output-location: column-fragment
+
+# create new column for target or not target
+
+kd_clip$target <- case_when(
+  kd_clip$total > 0 ~  "target",
+  TRUE ~ "not target") 
+
+
+ggplot(kd_clip, aes(lfc_mature, color = target)) +
+  stat_ecdf() +
+  xlim(-2,2) +
+  theme_cowplot() +
+  ylab("cumulative fraction of LFC") +
+  ggtitle("HuR Target vs Not Target") +
+  geom_hline(yintercept=.75, color="grey") +
+    geom_hline(yintercept=.5, color="grey") +
+    geom_hline(yintercept=.25, color="grey")
+
+
+```
+
+## To target a little or a lot? {.smaller}
+
+**Does the number of HuR binding influence the degree of stabilization?**  
+
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: target-quant
+#| output-location: column-fragment
+
+# hist(kd_clip$utr3)
+# let's make bins for # of sites per  3' UTR
+
+kd_clip$utr3_bin <- cut2(x = kd_clip$utr3, c(0,1,2,4,8,1000))
+
+# table(kd_clip$utr3_bin)
+
+# let's make bins for UTR
+kd_clip$utr3_bin <- recode_factor(kd_clip$utr3_bin,
+               "   0" = "0",
+               "   1" = "1",
+               "[   2,   4)" = "2-3",
+               "[   4,   8)" = "4-7",
+               "[   8,1000]" = "8+"
+               )
+
+
+ggplot(data = kd_clip, aes(x = lfc_mature, color = utr3_bin)) +
+  stat_ecdf() +
+  xlim(-2,2) +
+  theme_cowplot() +
+  ylab("cumulative fraction- LFCs") +
+  ggtitle("# of HuR binding sites in 3' UTR") +
+  geom_hline(yintercept=.75, color="grey", linetype = "dashed") +
+  geom_hline(yintercept=.5, color="grey", linetype = "dashed") +
+  geom_hline(yintercept=.25, color="grey", linetype = "dashed") +
+  geom_segment(aes(x = 0, y = 0, xend = 0, yend = .5, colour = "segment"), color="black", linetype = "dashed")
+
+```
+
+
+## More binding -> more stabilization? {.smaller}
+
+**TEST: Does the number of HuR binding influence the degree of stabilization?**  
+
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: target-quant-test
+#| output-location: column-fragment
+
+# keep only finite values for lfc_mature and lfc_primary
+kd_clip_targets <- kd_clip[is.finite(kd_clip$lfc_mature),]
+
+# IMPORTANT relevel indicating what everything will be compared to
+kd_clip_targets$utr3_bin <- relevel(factor(kd_clip_targets$utr3_bin), ref = "0")
+
+
+# calculate fit using `lm`
+fit_bins <- lm(data = kd_clip_targets,
+   formula = lfc_mature ~ utr3_bin)
+
+# examine estimates and p-vals
+tidy(fit_bins) %>%
+  gt() 
+```
+
+## More binding -> more stabilization? {.smaller}
+
+**TEST: Does the number of HuR binding influence the degree of stabilization?** 
+
+```{r}
+#| eval: true
+#| echo: true
+#| label: target-quant-viz
+#| output-location: column-fragment
+
+# mean lfc of mRNAs with no 3' UTR binding sites
+ref_mean <- kd_clip_targets %>%
+  filter(utr3_bin == "0") %>%
+  pull(lfc_mature) %>%
+  mean()
+
+
+# examine estimates and p-vals
+tidy(fit_bins) %>%
+  ggplot(data=.,
+         aes(x=term,
+             y=estimate,
+             fill=-log10(p.value)
+             )
+         ) +
+  geom_bar(stat="identity") +
+  coord_flip() +
+  geom_hline(yintercept = ref_mean,
+             color = "red") +
+  theme_cowplot()
+
+  
+```
