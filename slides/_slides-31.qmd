@@ -1,0 +1,544 @@
+---
+title: "Single cell RNA-Seq"
+subtitle: "Introduction and Quality Control"
+author: "Kent Riemondy"
+---
+
+
+```{r packages}
+#| echo: false
+#| include: false
+#| message: false
+#| warning: false
+
+library(here)
+library(ggplot2)
+library(DiagrammeR)
+library(SingleCellExperiment)
+library(scater)
+library(AnnotationHub)
+library(Matrix)
+
+img_dir <- "../img/block-rna"
+```
+
+
+## Contact Info 
+
+Greetings experimentalist humans `r emo::ji("wave")`
+
+<i class="fa fa-envelope"></i> &nbsp; [kent.riemondy@cuanschutz.edu](mailto:kent.riemondy@cuanschutz.edu) <br>
+
+RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/training-and-education/rbi-office-hours)
+
+<i class="fa fa-envelope"></i> &nbsp; [rbi.fellows@cuanschutz.edu](mailto:rbi.fellows@cuanschutz.edu) 
+<br>
+
+
+
+## Learning Objectives
+
+:::: {.columns}
+
+::: {.column .nonincremental}
+### Lecture 1
+- Identify key quality control issues with single cell RNA-seq data and perform filtering onto exclude poor quality cells 
+- Interact with single cell data using Bioconductor 
+
+::: 
+ 
+::: {.column .nonincremental}
+### Lecture 2 
+- Perform analysis to identify cell types in single cell data by using unsupervised clustering methods and comparing to public datasets
+- Describe the importance and reasoning for conducting each step of the analysis
+
+::: 
+
+::::
+
+## Single cell sequencing {.smaller}
+
+:::: {.columns}
+
+::: {.column}
+
+![](../img/block-rna/10x_bead_example.jpg)
+
+![](../img/block-rna/cb-umi-scheme.jpg)
+::: 
+
+::: {.column}
+
+![](../img/block-rna/drop-generation.png)
+
+::: 
+
+::::
+
+## Library prep
+
+![](../img/block-rna/10x-library-scheme.jpg)
+
+
+
+## Other single cell methods  
+  
+   droplet-based scRNA-seq: e.g. 10x Genomics or Drop-Seq  
+
+Smart-seq based scRNA-seq: (bulk-RNA-seq on single cells in individual wells/tubes)  
+  
+[CITE-Seq](http://cite-seq.com/): gene expression + cell surface protein abundance  
+  
+[VDJ-Seq](https://www.10xgenomics.com/products/single-cell-immune-profiling): Gene expression + targeted sequencing of T-Cell and B-Cell receptors   
+  
+Many others: ATAC, spatial transcriptomics, DNA sequencing, etc. (see [Integrative Single cell analysis](https://www.nature.com/articles/s41576-019-0093-7))  
+
+
+
+## Overview of analysis steps
+
+```{r}
+#| out-height: '50%'
+#| out-width: '60%'
+grViz("
+digraph workflow {
+  graph [layout = dot,
+         rankdir = TB]
+
+  node [shape = cicle,
+        style = filled,
+        fontcolor = black,
+        fontname = 'Helvetica']
+
+  # green
+  node [fillcolor = '#009E73']
+  cr [label = 'Process FASTQ to UMI count matrix\n(Cellranger, Alevin, or STARsolo)']
+  
+  # blue
+  node [fillcolor = '#56B4E9']
+  cell_qc [label = 'QC cells\n (using percent mitochondria,\n# of UMIs/Genes,\nremove empty droplets)']
+  norm [label = 'Normalize UMI counts\n(Normalize by deconvolution)']
+
+  # yellow
+  node [fillcolor = '#F0E442']
+  feature [label = 'Identify variable genes\n(a.k.a Feature selection)']
+  dim_red [label = 'Dimensionality reduction (PCA)']
+  cluster [label = 'Clustering\n (using Shared Nearest Neighbors)']
+  viz [label = 'Make 2D-Visualization\n(PCA, UMAP, tSNE\nForce-directed graph)']
+  traj [label = 'Trajectory Inference\n(Slingshot,\nPAGA, scVelo)']
+  
+  # blue
+  node [fillcolor = '#56B4E9']
+  
+  markers [label = 'Discover cell type markers']
+  annot [label = 'Annotate cell types']
+  
+  # orange
+  node [fillcolor = '#E69F00']
+  downstream  [label = 'Downstream analysis\n(Differential expression,\nShifts in cell type composition,\n Find new cell-types/states']
+
+  edge [color = black
+        fontname = 'Helvetica']
+
+  cr -> cell_qc [label = 'Load into \nSingleCellExperiment']
+  cell_qc -> norm
+  norm -> feature
+  norm -> markers
+  feature -> dim_red
+  dim_red -> cluster
+  dim_red -> traj 
+  dim_red -> viz
+  cluster -> markers
+  markers -> annot
+
+  edge [color = 'grey'
+        style = 'dashed']
+  annot -> cell_qc [label = 'Repeat\n as needed']
+  annot -> feature
+  annot -> dim_red
+  annot -> cluster
+  annot -> downstream
+}")
+```
+
+
+
+
+## From raw reads to a UMI count matrix
+
+:::: {.columns}
+
+::: {.column}
+
+- [`cellranger`](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) from 10x Genomics (STAR)
+- [`alevin`](https://salmon.readthedocs.io/en/latest/alevin.html) (Salmon)
+- [`STAR-solo`](https://github.com/alexdobin/STAR/blob/master/docs/STARsolo.md) (From the STAR developers)
+ 
+:::
+
+::: {.column}
+
+![](../img/block-rna/count-matrix.png)
+
+::: 
+
+::::
+
+## Alevin
+
+```bash
+$ salmon -h
+salmon v1.3.0
+
+Usage:  salmon -h|--help or
+        salmon -v|--version or
+        salmon -c|--cite or
+        salmon [--no-version-check] <COMMAND> [-h | options]
+
+Commands:
+     index      : create a salmon index
+     quant      : quantify a sample
+     alevin     : single cell analysis # <------
+     swim       : perform super-secret operation
+     quantmerge : merge multiple quantifications into a single file  
+```
+
+
+
+## Alevin
+
+```bash
+$ salmon index ...
+$ salmon alevin 
+   -l ISR                    # library type
+   -1 read1.fastq.gz         # reads 
+   -2 read2.fastq.gz         # reads
+   --chromiumv3              # chemistry
+   -i /path/to/salmon/index  # index path
+   -o /path/to/output        # output
+   --tgMap transcript_to_gene.tsv 
+```
+
+## Alevin output files
+
+```bash
+$ls alevin/
+alevin.log          # run info
+featureDump.txt     # info on each cell barcode
+quants_mat.gz       # binary file with UMI counts 
+quants_mat_cols.txt # genes in count matrix
+quants_mat_rows.txt # cell barcodes in count matrix
+quants_tier_mat.gz  # info about mapping for each gene
+whitelist.txt       # valid barcodes discovered by alevin
+```
+
+
+## AlevinQC
+
+Can generate interactive QC reports using [alevinQC](https://csoneson.github.io/alevinQC/)
+
+[PBMC QC report](../data/block-rna/scrna/qc/pbmc/alevinReport.html)
+
+## Raw data: the UMI count matrix
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+- scRNA-seq libraries produce reads from 100,000 - 1,000,000 cell barcodes
+
+- A matrix of 20,000 genes x 1,000,000 barcodes is 20 billion values (!). 
+
+- \>95% are zeros due to empty droplets and the low efficiency of the library prep (< 10-20% of RNA captured).
+
+:::
+
+::: {.column}
+
+```{r}
+#| echo: true
+vals <- c(0, 0, 0, 0, 0,
+          1, 0, 0, 0, 0,
+          0, 0, 1, 0, 1,
+          0, 0, 0, 0, 0)
+
+sm <- Matrix(vals, nrow = 4)
+sm
+
+summary(sm)
+```
+
+::: 
+
+::::
+
+
+
+## Data import into R
+
+```{r io}
+#| echo: true
+library(tximport)
+data_dir <- here("data/block-rna/scrna/pbmc")
+tx <- tximport(file.path(data_dir, "alevin/quants_mat.gz"), 
+               type = 'alevin')
+names(tx)
+
+dim(tx$counts)
+
+tx$counts[5:10, 1:3]
+```
+
+## QC: cell or empty droplet? {.smaller}
+
+:::: {.columns}
+
+::: {.column width="50%"} 
+
+- In a typical droplet scRNA-seq experiment 100k - 1M cell barcodes are 
+detected, but only 1-10k cells are loaded
+
+- Most of these droplets are "empty" and contain very few reads. 
+
+- What is the source of these reads in the "empty" droplets?
+
+- How do we determine if the data from a particular cell barcode is derived from a single cell?
+
+::: 
+
+::: {.column width="50%"} 
+
+```{r cb-umi-plot}
+#| fig-width: 9
+#| fig-height: 9
+library(alevinQC)
+alevin <- readAlevinQC(baseDir = here("data/block-rna/scrna/pbmc"))
+cell_counts <- alevin$cbTable
+
+ggplot(cell_counts, aes(ranking, originalFreq)) +
+  geom_point(size = 0.1) +
+  scale_x_log10(labels = scales::comma, breaks = c(10, 1000, 10000, 100000)) +
+  scale_y_log10() + 
+  labs(x = "Barcode rank",
+       y = "Barcode frequency")
+```
+
+:::
+
+::::
+
+## QC: cell or empty droplet?  {.smaller}
+
+:::: {.columns}
+
+::: {.column width="50%"} 
+
+```{r}
+#| fig-width: 9
+#| fig-height: 9
+frst_dev <- max(cell_counts$ranking[cell_counts$inFirstWhiteList])
+ggplot(cell_counts, aes(ranking, originalFreq)) +
+  geom_point(size = 0.1) +
+  scale_x_log10(labels = scales::comma, breaks = c(10, 1000, 10000, 100000)) +
+  scale_y_log10() + 
+  geom_vline(xintercept = frst_dev) + 
+  labs(x = "Barcode rank",
+       y = "Barcode frequency")
+```
+
+::: 
+
+::: {.column width="50%"} 
+
+- Fit a curve to the observed data and identify point where first derivative is minimized.
+
+- Any barcodes less than the "knee", test sequences for off-by-one errors against the barcodes above the knee.
+
+- Take top half of cells above the knee and train a classifier using multiple criteria (% mapping, % mitochondrial and rRNA reads, duplicate rate, ...)
+
+- Classify ambiguous cells in lower half into likely cells or not.
+:::
+
+::::
+
+
+
+## QC: Cell or empty droplet? 
+
+:::: {.columns}
+
+::: {.column} 
+
+#### Good data
+
+```{r plot-label}
+#| fig-width: 9
+#| fig-height: 9
+ggplot(cell_counts, aes(ranking, originalFreq)) +
+  geom_point(aes(color = inFinalWhiteList), size = 0.1) +
+  scale_x_log10(labels = scales::comma, breaks = c(10, 1000, 10000, 100000)) +
+  scale_y_log10() + 
+   labs(x = "Barcode rank",
+        y = "Barcode frequency",
+        color = "Cell")
+```
+
+::: 
+
+::: {.column} 
+
+#### Bad data
+
+![](../img/block-rna/bad_data.png)
+
+:::
+
+::::
+
+
+## Doublets and Multiplets {.smaller}
+
+:::: {.columns}
+
+::: {.column width="50%"} 
+
+
+![](../img/block-rna/10x-barnyard.png)
+
+:::
+
+::: {.column width="50%"} 
+
+- Doublets are not clearly identifiable using simple QC metrics, so cannot be reliably removed with filtering with # of UMIs or genes detected. 
+
+- `scran::doublet_cluster` : Compare each cluster to an in silico mix of two other clusters. Get per cluster score of likelihood of being a doublet.
+
+- `scran::doublet_cell` : Compare each cell to a mix of two other randomly selected cells. Get per cell score of likelihood of being a doublet.
+
+- Doublets can also arise due to sample prep, e.g. incomplete generations of a single cell suspension. These doublets are difficult to exclude from the data
+
+:::
+
+::::  
+  
+
+  
+## Filtering low quality cells
+
+
+```{r}
+sce <- SingleCellExperiment(list(counts = tx$counts))
+ah <- AnnotationHub()
+ens_db <- ah[["AH113665"]]
+
+gene_names <- mapIds(ens_db, 
+                     keys=rownames(sce), 
+                     keytype = "GENEID",
+                     column="SYMBOL")
+
+rowData(sce)$gene <- gene_names
+rowData(sce)$gene_id <- rownames(sce)
+is_mito <- which(startsWith(rowData(sce)$gene, "MT-"))
+sce <- addPerCellQCMetrics(sce, subsets = list(Mito = is_mito))
+
+plotColData(sce, "subsets_Mito_percent", "sum") +
+  geom_hline(yintercept = 25, linetype = "dashed") + 
+  labs(x = "# of UMIs",
+       y = "Percent of UMIs from Mitochondrial RNAs")
+```
+
+## Filtering low quality cells
+
+```{r}
+plotColData(sce, "sum") +
+  geom_hline(yintercept = c(20000, 2500), linetype = "dashed") + 
+  labs(y = "# of UMIs")
+```
+
+
+## Single cell analysis packages
+
+- Key resource for single cell analysis in Bioconductor:
+[Orchestrating Single Cell Analysis](https://bioconductor.org/books/release/OSCA/)
+
+- [`SingleCellExperiment`](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) is the core datastructure for storing single cell data.
+
+- [`scran`](https://bioconductor.org/packages/release/bioc/html/scran.html) provides algorithms for low-level processing of single cell data.
+
+- [`scater`](https://bioconductor.org/packages/release/bioc/html/scater.html) provides plotting, data transformation, and quality control functionality
+
+## SingleCellExperiment
+
+![](../img/block-rna/sce.png)
+
+## Analysis workflow
+
+```{r}
+#| out-height: '100%'
+#| out-width: '100%'
+grViz("
+digraph workflow {
+  graph [layout = dot,
+         rankdir = LR]
+
+  node [shape = cicle,
+        style = filled,
+        fontcolor = black,
+        fontname = 'Helvetica']
+
+  # green
+  node [fillcolor = '#009E73']
+  load [label= 'Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()']
+  
+  # blue
+  node [fillcolor = '#56B4E9']
+  cell_qc [label = 'QC cells\n addPerCellQCMetrics()\n plotColData()']
+  norm [label = 'Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()']
+
+  # yellow
+  node [fillcolor = '#F0E442']
+  feature [label = 'Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()']
+  dim_red [label = 'Dimensionality reduction via PCA \n runPCA()']
+  cluster [label = 'Clustering\n clusterCells()']
+  viz [label = 'Make 2D-Visualization\nrunUMAP()']
+  
+  # blue
+  node [fillcolor = '#56B4E9']
+  
+  markers [label = 'Discover cell type markers \nscoreMarkers()']
+  annot [label = 'Annotate cell types\nclustifyr and SingleR']
+
+  edge [color = black
+        fontname = 'Helvetica']
+
+  load -> cell_qc 
+  cell_qc -> norm
+  norm -> feature
+  norm -> markers
+  feature -> dim_red
+  dim_red -> cluster
+  dim_red -> viz
+  cluster -> markers
+  markers -> annot
+
+  edge [color = 'grey'
+        style = 'dashed']
+  annot -> cell_qc [label = 'Repeat\n as needed']
+  annot -> feature
+  annot -> dim_red
+  annot -> cluster
+}")
+```
+
+  
+## Further Reading 
+
+eBook: Orchestrating single cell analyses with Bioconductor [eBook](https://osca.bioconductor.org/) [Publication](https://doi.org/10.1038/s41592-019-0654-x)
+
+Review: [Current best practices for analysis](https://www.embopress.org/doi/full/10.15252/msb.20188746) 
+
+Blog: [Single Cell Thoughts](https://ltla.github.io/SingleCellThoughts/)  
+
+Blog: [What do you mean "heterogeneity"](http://www.nxn.se/)  
+
+
