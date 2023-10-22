@@ -168,7 +168,7 @@ digraph workflow {
 
 :::: {.columns}
 
-::: {.column}
+::: {.column .nonincremental}
 
 - [`cellranger`](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) from 10x Genomics (STAR)
 - [`alevin`](https://salmon.readthedocs.io/en/latest/alevin.html) (Salmon)
@@ -239,61 +239,13 @@ Can generate interactive QC reports using [alevinQC](https://csoneson.github.io/
 
 [PBMC QC report](../data/block-rna/scrna/qc/pbmc/alevinReport.html)
 
-## Raw data: the UMI count matrix
 
-:::: {.columns}
-
-::: {.column width="50%"}
-
-- scRNA-seq libraries produce reads from 100,000 - 1,000,000 cell barcodes
-
-- A matrix of 20,000 genes x 1,000,000 barcodes is 20 billion values (!). 
-
-- \>95% are zeros due to empty droplets and the low efficiency of the library prep (< 10-20% of RNA captured).
-
-:::
-
-::: {.column}
-
-```{r}
-#| echo: true
-vals <- c(0, 0, 0, 0, 0,
-          1, 0, 0, 0, 0,
-          0, 0, 1, 0, 1,
-          0, 0, 0, 0, 0)
-
-sm <- Matrix(vals, nrow = 4)
-sm
-
-summary(sm)
-```
-
-::: 
-
-::::
-
-
-
-## Data import into R
-
-```{r io}
-#| echo: true
-library(tximport)
-data_dir <- here("data/block-rna/scrna/pbmc")
-tx <- tximport(file.path(data_dir, "alevin/quants_mat.gz"), 
-               type = 'alevin')
-names(tx)
-
-dim(tx$counts)
-
-tx$counts[5:10, 1:3]
-```
 
 ## QC: cell or empty droplet? {.smaller}
 
 :::: {.columns}
 
-::: {.column width="50%"} 
+::: {.column .nonincremental width="50%"} 
 
 - In a typical droplet scRNA-seq experiment 100k - 1M cell barcodes are 
 detected, but only 1-10k cells are loaded
@@ -420,9 +372,54 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
 :::
 
 ::::  
-  
+
+## Data import into R
+
+```{r io}
+#| echo: true
+library(tximport)
+data_dir <- here("data/block-rna/scrna/pbmc")
+tx <- tximport(file.path(data_dir, "alevin/quants_mat.gz"), 
+               type = 'alevin')
+names(tx)
+
+dim(tx$counts)
+
+tx$counts[5:10, 1:3]
+```
 
   
+## Raw data: the UMI count matrix
+
+:::: {.columns}
+
+::: {.column .nonincremental width="50%"}
+
+- scRNA-seq libraries produce reads from 100,000 - 1,000,000 cell barcodes
+
+- A matrix of 20,000 genes x 1,000,000 barcodes is 20 billion values (!). 
+
+- \>95% are zeros due to empty droplets and the low efficiency of the library prep (< 10-20% of RNA captured).
+
+:::
+
+::: {.column}
+
+```{r}
+#| echo: true
+vals <- c(0, 0, 0, 0, 0,
+          2, 0, 0, 0, 0,
+          0, 0, 1, 0, 1)
+sm <- Matrix(vals, nrow = 3)
+sm
+summary(sm)
+```
+
+::: 
+
+::::
+
+
 ## Filtering low quality cells
 
 
@@ -458,14 +455,16 @@ plotColData(sce, "sum") +
 
 ## Single cell analysis packages
 
-- Key resource for single cell analysis in Bioconductor:
+
+Key resource for single cell analysis in Bioconductor:
 [Orchestrating Single Cell Analysis](https://bioconductor.org/books/release/OSCA/)
 
-- [`SingleCellExperiment`](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) is the core datastructure for storing single cell data.
+[`SingleCellExperiment`](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html) is the core datastructure for storing single cell data.
 
-- [`scran`](https://bioconductor.org/packages/release/bioc/html/scran.html) provides algorithms for low-level processing of single cell data.
+[`scran`](https://bioconductor.org/packages/release/bioc/html/scran.html) provides algorithms for low-level processing of single cell data.
 
-- [`scater`](https://bioconductor.org/packages/release/bioc/html/scater.html) provides plotting, data transformation, and quality control functionality
+[`scater`](https://bioconductor.org/packages/release/bioc/html/scater.html) provides plotting, data transformation, and quality control functionality
+
 
 ## SingleCellExperiment
 
