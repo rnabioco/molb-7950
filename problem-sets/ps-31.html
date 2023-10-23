@@ -5,8 +5,8 @@
 <meta name="generator" content="quarto-1.3.450">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Yor name here">
-<meta name="dcterms.date" content="2023-10-22">
-<title>MOLB 7950 - Single-cell RNA-seq Problem Set I</title>
+<meta name="dcterms.date" content="2023-10-23">
+<title>MOLB 7950 - Single-cell RNA-seq Problem Set</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -91,10 +91,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-<meta property="og:title" content="MOLB 7950 - Single-cell RNA-seq Problem Set I">
+<meta property="og:title" content="MOLB 7950 - Single-cell RNA-seq Problem Set">
 <meta property="og:description" content="">
 <meta property="og:site-name" content="MOLB 7950">
-<meta name="twitter:title" content="MOLB 7950 - Single-cell RNA-seq Problem Set I">
+<meta name="twitter:title" content="MOLB 7950 - Single-cell RNA-seq Problem Set">
 <meta name="twitter:description" content="">
 <meta name="twitter:image" content="https://rnabioco.github.io/molb-7950/problem-sets/images/twitter-card.png">
 <meta name="twitter:creator" content="@rnabioco">
@@ -107,7 +107,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Single-cell RNA-seq Problem Set I</li></ol></nav>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Single-cell RNA-seq Problem Set</li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -231,7 +231,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
-<h1 class="title">Single-cell RNA-seq Problem Set I</h1>
+<h1 class="title">Single-cell RNA-seq Problem Set</h1>
 </div>
 
 
@@ -248,7 +248,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 22, 2023</p>
+      <p class="date">October 23, 2023</p>
     </div>
   </div>
   
@@ -259,14 +259,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header><p>Grade (out of 20):</p>
 <p>For this problem set we will be reanalyzing some public single cell RNA-seq data (<a href="https://doi.org/10.1038/s41591-018-0233-1">publication</a>). The dataset contains PBMCs from a patient with Acute Myeloid Leukemia (AML). The data we will be analyzing consists of two samples, one taken 2 days (day2) after treatment with a chemotherapeutic (Venetoclax and Azacitidine) or one taken prior to treatment (day0).</p>
 <p>The datasets have been processed with <code>alevin</code>, and the output is here <code>aml/alevin/</code>.</p>
+<p>A common strategy to analyze multiple samples is to combine them into a single matrix prior to downstream processing. This simplifies the data analysis because the clustering values and PCA/UMAP coordinates are comparable between the samples.</p>
 <p>Each question is worth 2 points</p>
 <p>1: Load the matrices for each sample into R separately using <code>tximport</code>. How many cells are in each sample?</p>
 <div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">tximport</span><span class="op">(</span><span class="va">...</span><span class="op">)</span> </span>
 <span><span class="fu">tximport</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>A common strategy to analyze multiple samples is to combine them into a single matrix prior to downstream processing. This simplifies the data analysis because the clustering values and PCA/UMAP coordinates are comparable between the samples. To accomplish this we will need to combine the matrices from the two samples.</p>
-<p>2: Rename the cell barcodes for each sample, appending a sample identifier to the cell barcode. Print the first 5 renamed cell barcodes from each sample.</p>
+<p>2: Rename the cell barcodes for each sample, appending a sample identifier to the cell barcode. This ensures that the cell barcodes are unique for each sample. Print the first 5 renamed cell barcodes from each sample.</p>
 <p>A common approach is to add a sample identifier as a prefix to the cell barcode, e.g.:</p>
 <p><code>sample1_ATCGTAGCTAGTG</code> <code>sample2_GTCGATGCTGATG</code></p>
 <div class="cell">
@@ -277,17 +277,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="va">...</span>              <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"another_identifier_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">d2_mat</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>3: Combine the two count matrices into 1. See ?cbind for help.</p>
-<pre><code>#| eval: false
-...</code></pre>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>4: Create a SingleCellExperiment object from this new combined matrix.</p>
 <div class="cell">
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">SingleCellExperiment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">d0_d2_mat</span><span class="op">)</span><span class="op">)</span> <span class="co"># Fill in the ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">SingleCellExperiment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">...</span><span class="op">)</span><span class="op">)</span> <span class="co"># Fill in the ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>5: Assign a new column into the colData that indicates the sample treatment day (e.g.&nbsp;day0 or day2). <em>Hint: functions from stringr may be helpful here</em></p>
 <div class="cell">
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">day</span> <span class="op">&lt;-</span> <span class="va">...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>6: Next we will want to convert the ensembl gene ids into something more interpretable, such as gene symblols. Obtain gene symbols from ensembDb and store these in the rowData(). Make the gene symbols unique and assign them to the rownames of the SingleExperiment.</p>
+<p>6: Next we will want to convert the ensembl gene ids into something more interpretable, such as gene symblols. Obtain gene symbols from ensembDb and store these in the rowData(). Make the gene symbols unique and assign them to the rownames of the SingleCellExperiment.</p>
 <div class="cell">
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">AnnotationHub</span><span class="op">)</span></span>
 <span><span class="va">ens_db</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="st">"AH113665"</span><span class="op">]</span><span class="op">]</span></span>
@@ -302,7 +303,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">addPerCellQCMetrics</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>8: Plot this % of UMIs that are derived from mitochondrial genes against the # of UMIs per cell. Color each point by the sample treatment day</p>
+<p>8: Plot this % of UMIs that are derived from mitochondrial genes against the # of UMIs per cell. Color each point by the sample treatment day.</p>
 <div class="cell">
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotColData</span><span class="op">(</span><span class="va">sce</span>, <span class="va">...</span>, <span class="va">...</span>, <span class="va">...</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -312,7 +313,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span></span>
 <span><span class="fu">plotColData</span><span class="op">(</span><span class="va">sce</span>, <span class="va">...</span>, <span class="va">...</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>10: Based on these plots, select cutoffs to exclude low-quality cells and filter your SingleCellExperiment object Report the # of cells remaining after filtering for each sample.</p>
+<p>10: Based on these plots, select cutoffs to exclude low-quality cells and filter your SingleCellExperiment object. Provide an explanation of your reasons for selecting the cutoffs chosen and report the # of cells remaining in each sample after filtering.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pass_qc <span class="ot">&lt;-</span> sce<span class="sc">$</span>... <span class="sc">&lt;</span> X <span class="sc">&amp;</span> sce<span class="sc">$</span>... <span class="sc">&gt;</span> Y ...</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>sce[, ...]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
