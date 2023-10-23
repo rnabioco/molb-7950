@@ -66,7 +66,7 @@ How can we extract the first 2 rows and first 3 columns of the sparse matrix `sm
 ```{r}
 #| eval: false
 # print subset of sm
-...
+sm[1:2, 1:3]
 ```
 
 How can we calculate the sum of the columns of `sm`?
@@ -74,8 +74,80 @@ How can we calculate the sum of the columns of `sm`?
 ```{r}
 #| eval: false
 # find column sums of sparse
-...
+colSums(sm)
 ```
+
+### Base R subsetting
+
+To work with single cell data it will be helpful to know some base R concepts in such as
+subsetting with brackets `[` and referencing and generating columns with `$`.
+
+Vectors in R can be subset by vector index (position), a logical vector (c(TRUE, FALSE)), or name (if the vector is named). 
+
+Consider the following character vector `letters`.
+
+```{r}
+letters
+
+# extract 2nd, 4th, and 6th entry
+letters[c(2, 4, 6)]
+
+# subset by creating logical vector
+vowels <- c("a", "e", "i", "o", "u")
+is_a_vowel <- letters %in% vowels
+
+letters[is_a_vowel]
+
+# name the letters vector with uppercase LETTERS
+names(letters) <- LETTERS
+
+# subset by name
+letters[c("A", "Z")]
+
+```
+
+Matrices are 2 dimensional vectors and have similar subsetting rules except there are two dimensions, rows and columns.
+
+`matrix[rows_to_subset, columns_to_subset]`
+
+```{r}
+m <- matrix(1:24, nrow = 6)
+
+# extract 2nd, 4th, and 6th row
+m[c(2, 4, 6), ]
+
+# extract 2nd and 4th column
+m[, c(2, 4)]
+
+# first 3 rows and 2nd and 4th column
+m[1:3, c(2, 4)]
+
+# extract rows with totals > 50
+m[rowSums(m) > 50, ]
+
+# extract columns with minimum values < 8
+m[, colMins(m) < 8]
+
+```
+
+The base R `data.frame` and Bioconductor `DataFrame` can also be subset with the `[` and we can reference individual vectors in a data.frame using `$`. 
+
+```{r}
+# first 3 rows and columns of mtcars data.frame
+mtcars[1:3, 1:3]
+
+# columns can be referenced using $, which extracts a vector
+mtcars$mpg
+
+# columns can be generated or overwritten using $ with assignment
+mtcars$new_column_name <- "Hello!"
+mtcars$wt <- mtcars$wt * 1000
+
+# We can subset using logical vectors
+# E.g. filter for rows (cars) with mpg > 20
+mtcars[mtcars$mpg > 20, ]
+```
+
 
 ### Reading alevin output into R with tximport
 
@@ -107,14 +179,16 @@ How many barcodes are in `tx$counts`? How many genes?
 ```{r}
 #| eval: false
 # TODO Find number of barcodes and genes in tx$counts
-...
+dim(mat)
 ```
 
 What fraction of the matrix is non-zero? We can use the `nnzero `function from the `Matrix` package check
 
 ```{r}
 #| eval: false
-...
+nnzero(mat) / length(mat) # (length = # of rows X # of columns)
+# similarily
+sum(mat > 0) / length(mat)
 ```
 
 ## The SingleCellExperiment class
@@ -178,16 +252,14 @@ rowData(sce)
 To get familiar with SingleCellExperiment objects let's *calculate the total number of counts in each cell and store these counts in the `colData().*
 
 ```{r}
-#| eval: false
-colSums(_)
+sce$total_counts <- colSums(counts(sce))
 ```
 
-Next let's calculate *the total number of counts for each gene, summed across cells* and *the number of cells with > 0 counts per gene*, and store both of these values in the rowData().
-
+Next let's calculate *the total number of counts for each gene, summed across cells* and *the number of cells with > 0 counts per gene*, and store both of these values in the rowData(). 
 ```{r}
-#| eval: false
-rowSums(_)
-...
+rowData(sce)$total_gene_counts <- rowSums(counts(sce))
+rowData(sce)$n_cells_expr <- rowSums(counts(sce) > 0)
+rowData(sce)
 ```
 
 We can subset the SingleCellExperiment using the same syntax used to subset base R data.frames and matrices. Note that `dplyr` verbs do not work with `SingleCellExperiment` (see alternative [tidySingleCellExperiment](https://bioconductor.org/packages/release/bioc/html/tidySingleCellExperiment.html)).
@@ -322,8 +394,7 @@ Selecting an appropriate cutoff can be somewhat arbitrary, and there is a risk o
 Let's define high quality cell as those with less than 20% counts from mitocondrial RNAs, greater than 500 genes detected, and greater than 1000 total counts. *How many cells pass these criteria?*
 
 ```{r}
-#| eval: false
-pass_qc <- sce$... ... ...
+pass_qc <- sce$subsets_Mito_percent < 20 & sce$detected > 500 & sce$sum > 1000
 sum(pass_qc)
 ```
 
@@ -352,8 +423,7 @@ sum(pass_qc)
 Labeling the qc failed cells in plots can be helpful. 
 
 ```{r}
-#| echo: false
-sce$pass_qc <-  sce$subsets_Mito_percent < 20 & sce$sum > 1000 & sce$detected > 500
+sce$pass_qc <- sce$subsets_Mito_percent < 20 & sce$detected > 500 & sce$sum > 1000
 
 plotColData(sce, y = "subsets_Mito_percent", 
             x = "sum", 

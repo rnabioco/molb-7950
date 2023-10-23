@@ -1,0 +1,137 @@
+---
+title: "Single-cell RNA-seq Problem Set"
+author: "Yor name here"
+---
+
+Grade (out of 20):
+
+
+For this problem set we will be reanalyzing some public single cell RNA-seq data ([publication](https://doi.org/10.1038/s41591-018-0233-1)). The dataset contains PBMCs from a patient with Acute Myeloid Leukemia (AML). The data we will be analyzing consists of two samples, one taken 2 days (day2) after treatment with a chemotherapeutic (Venetoclax and Azacitidine) or one taken prior to treatment (day0). 
+
+The datasets have been processed with `alevin`, and the output is here `aml/alevin/`. 
+
+A common strategy to analyze multiple samples is to combine them into a single matrix prior to downstream processing. This simplifies the data analysis because the clustering values and PCA/UMAP coordinates are comparable between the samples. 
+
+Each question is worth 2 points
+
+1: Load the matrices for each sample into R separately using `tximport`. How many cells are in each sample?
+
+```{r}
+library(tximport)
+library(here)
+day0 <- tximport(here("aml/alevin/day0/alevin/quants_mat.gz"), type = "alevin") 
+day2 <- tximport(here("aml/alevin/day2/alevin/quants_mat.gz"), type = "alevin")
+
+ncol(day0$counts)
+ncol(day2$counts)
+```
+
+2: Rename the cell barcodes for each sample, appending a sample identifier to the cell barcode. This ensures that the cell barcodes are unique for each sample. Print the first 5 renamed cell barcodes from each sample.
+
+A common approach is to add a sample identifier as a prefix to the cell barcode, e.g.:
+
+`sample1_ATCGTAGCTAGTG`
+`sample2_GTCGATGCTGATG`
+
+```{r}
+# assume that d0_mat is the day 0 count matrix
+# assume that d2_mat is the day 2 count matrix
+d0_mat <- day0$counts
+d2_mat <- day2$counts
+colnames(d0_mat) <- paste0("day0_", colnames(d0_mat))
+colnames(d2_mat) <- paste0("day2_", colnames(d2_mat))
+
+colnames(d0_mat)[1:5]
+colnames(d2_mat)[1:5]
+```
+
+
+3: Combine the two count matrices into 1. See ?cbind for help.
+
+```{r}
+library(Matrix)
+mat <- cbind(d0_mat, d2_mat)
+```
+
+4: Create a SingleCellExperiment object from this new combined matrix. 
+
+```{r}
+library(SingleCellExperiment)
+sce <- SingleCellExperiment(list(counts = mat)) 
+```
+
+
+5: Assign a new column into the colData that indicates the sample treatment day (e.g. day0 or day2). *Hint: functions from stringr may be helpful here*
+
+```{r}
+# many options to do this
+sce$day <- stringr::str_split(colnames(sce), "_", simplify = TRUE)[, 1]
+sce$day <- sapply(strsplit(colnames(sce), "_"), "[", 1)
+sce$day <- c(rep("day0", ncol(d0_mat)), rep("day2", ncol(d2_mat)))
+```
+
+
+6: Next we will want to convert the ensembl gene ids into something more interpretable, such as gene symblols. Obtain gene symbols from ensembDb and store these in the rowData().  Make the gene symbols unique and assign them to the rownames of the SingleCellExperiment. 
+
+```{r}
+library(AnnotationHub)
+library(scater)
+ah <- AnnotationHub()
+ens_db <- ah[["AH113665"]]
+genes <- mapIds(ens_db,
+              keys = rownames(sce), 
+              keytype = "GENEID",
+              column = "SYMBOL")
+
+
+rowData(sce)$gene <- genes
+rowData(sce)$gene_id <- rownames(sce)
+rownames(sce) <- uniquifyFeatureNames(rowData(sce)$gene_id, 
+                                      rowData(sce)$gene)
+```
+
+7: Next calculate the % of UMIs that are derived from mitochondrial genes and store it in the colData. 
+
+```{r}
+
+is_mito <- startsWith(rowData(sce)$gene, "MT-")
+# alternatively
+is_mito <- stringr::str_detect(rowData(sce)$gene, "^MT-")
+# or 
+is_mito <- grepl("^MT-", rowData(sce)$gene)
+
+sce <- addPerCellQCMetrics(sce, subsets=list(Mito=is_mito))
+```
+
+8: Plot this % of UMIs that are derived from mitochondrial genes against the # of UMIs per cell. Color each point by the sample treatment day.
+
+```{r}
+#| eval: false
+plotColData(sce, y = "subsets_Mito_percent", x = "sum", colour_by = "day")
+```
+
+9: Plot the # of UMIs and # of genes detected as violin plots. Plot each sample as separate groups on the x-axis.
+
+```{r}
+plotColData(sce, y = "sum", x = "day")
+
+plotColData(sce, y = "detected", x = "day")
+```
+
+
+
+10: Based on these plots, select cutoffs to exclude low-quality cells and filter your SingleCellExperiment object. Provide an explanation of your reasons for selecting the cutoffs chosen and report the # of cells remaining in each sample after filtering. 
+
+```{r}
+pass_qc <- sce$subsets_Mito_percent < 10 & sce$sum > 500 & sce$detected > 500
+sce <- sce[, pass_qc]
+
+ncol(sce[, sce$day == "day0"])
+ncol(sce[, sce$day == "day2"])
+```
+
+*A justification is needed for the values chosen for this question but there isn't a right answer, as long as they defend their choices with some observation of the data.*
+
+I chose a maximum 10% mitochondial percentage as this looked like a value that exclude most of the cells with low UMI count and high mitochondrial percentage. I dropped cells with fewer than 500 genes or UMIs detected, as cells with less than this amount are likely to be low-quality or not have enough information to be useful.
+
+
