@@ -1,5 +1,5 @@
 ---
-title: "Single-cell RNA-seq Problem Set I"
+title: "Single-cell RNA-seq Problem Set"
 author: "Yor name here"
 ---
 
@@ -9,6 +9,8 @@ Grade (out of 20):
 For this problem set we will be reanalyzing some public single cell RNA-seq data ([publication](https://doi.org/10.1038/s41591-018-0233-1)). The dataset contains PBMCs from a patient with Acute Myeloid Leukemia (AML). The data we will be analyzing consists of two samples, one taken 2 days (day2) after treatment with a chemotherapeutic (Venetoclax and Azacitidine) or one taken prior to treatment (day0). 
 
 The datasets have been processed with `alevin`, and the output is here `aml/alevin/`. 
+
+A common strategy to analyze multiple samples is to combine them into a single matrix prior to downstream processing. This simplifies the data analysis because the clustering values and PCA/UMAP coordinates are comparable between the samples. 
 
 Each question is worth 2 points
 
@@ -20,10 +22,7 @@ tximport(...)
 tximport(...)
 ```
 
-
-A common strategy to analyze multiple samples is to combine them into a single matrix prior to downstream processing. This simplifies the data analysis because the clustering values and PCA/UMAP coordinates are comparable between the samples. To accomplish this we will need to combine the matrices from the two samples. 
-
-2: Rename the cell barcodes for each sample, appending a sample identifier to the cell barcode. Print the first 5 renamed cell barcodes from each sample.
+2: Rename the cell barcodes for each sample, appending a sample identifier to the cell barcode. This ensures that the cell barcodes are unique for each sample. Print the first 5 renamed cell barcodes from each sample.
 
 A common approach is to add a sample identifier as a prefix to the cell barcode, e.g.:
 
@@ -42,7 +41,7 @@ colnames(d0_mat) <- paste0("sample_identifier_", colnames(d0_mat))
 
 3: Combine the two count matrices into 1. See ?cbind for help.
 
-```{}
+```{r}
 #| eval: false
 ...
 ```
@@ -51,7 +50,7 @@ colnames(d0_mat) <- paste0("sample_identifier_", colnames(d0_mat))
 
 ```{r}
 #| eval: false
-sce <- SingleCellExperiment(list(counts = d0_d2_mat)) # Fill in the ...
+sce <- SingleCellExperiment(list(counts = ...)) # Fill in the ...
 ```
 
 
@@ -63,7 +62,7 @@ sce$day <- ...
 ```
 
 
-6: Next we will want to convert the ensembl gene ids into something more interpretable, such as gene symblols. Obtain gene symbols from ensembDb and store these in the rowData().  Make the gene symbols unique and assign them to the rownames of the SingleExperiment. 
+6: Next we will want to convert the ensembl gene ids into something more interpretable, such as gene symblols. Obtain gene symbols from ensembDb and store these in the rowData().  Make the gene symbols unique and assign them to the rownames of the SingleCellExperiment. 
 
 ```{r}
 #| eval: false
@@ -86,7 +85,7 @@ sce <- addPerCellQCMetrics(...)
 
 ```
 
-8: Plot this % of UMIs that are derived from mitochondrial genes against the # of UMIs per cell. Color each point by the sample treatment day
+8: Plot this % of UMIs that are derived from mitochondrial genes against the # of UMIs per cell. Color each point by the sample treatment day.
 
 ```{r}
 #| eval: false
@@ -104,8 +103,7 @@ plotColData(sce, ..., ...)
 
 
 
-10: Based on these plots, select cutoffs to exclude low-quality cells and filter your SingleCellExperiment object Report the # of cells remaining after filtering for each sample. 
-
+10: Based on these plots, select cutoffs to exclude low-quality cells and filter your SingleCellExperiment object. Provide an explanation of your reasons for selecting the cutoffs chosen and report the # of cells remaining in each sample after filtering. 
 
 ```{r}
 #| eval: false

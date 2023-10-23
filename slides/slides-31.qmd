@@ -42,8 +42,8 @@ RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/trai
 
 ::: {.column .nonincremental}
 ### Lecture 1
-- Identify key quality control issues with single cell RNA-seq data and perform filtering onto exclude poor quality cells 
-- Interact with single cell data using Bioconductor 
+- Identify key quality control issues with single cell RNA-seq data and perform filtering to exclude poor quality cells 
+- Interact with single cell data using Bioconductor tools
 
 ::: 
  
@@ -116,7 +116,7 @@ digraph workflow {
   
   # blue
   node [fillcolor = '#56B4E9']
-  cell_qc [label = 'QC cells\n (using percent mitochondria,\n# of UMIs/Genes,\nremove empty droplets)']
+  cell_qc [label = 'QC cells\n (% mitochondrial UMIs,\n# of UMIs/Genes,\nremove empty droplets)']
   norm [label = 'Normalize UMI counts\n(Normalize by deconvolution)']
 
   # yellow
@@ -135,7 +135,7 @@ digraph workflow {
   
   # orange
   node [fillcolor = '#E69F00']
-  downstream  [label = 'Downstream analysis\n(Differential expression,\nShifts in cell type composition,\n Find new cell-types/states']
+  downstream  [label = 'Downstream analysis\n(Differential expression,\nShifts in cell type composition,\n Find new cell-types/states)']
 
   edge [color = black
         fontname = 'Helvetica']
@@ -168,6 +168,13 @@ digraph workflow {
 
 :::: {.columns}
 
+::: {.column}
+
+![](../img/block-rna/count-matrix.png)
+
+::: 
+
+
 ::: {.column .nonincremental}
 
 - [`cellranger`](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) from 10x Genomics (STAR)
@@ -176,11 +183,6 @@ digraph workflow {
  
 :::
 
-::: {.column}
-
-![](../img/block-rna/count-matrix.png)
-
-::: 
 
 ::::
 
@@ -410,7 +412,7 @@ tx$counts[5:10, 1:3]
 vals <- c(0, 0, 0, 0, 0,
           2, 0, 0, 0, 0,
           0, 0, 1, 0, 1)
-sm <- Matrix(vals, nrow = 3)
+sm <- Matrix(vals, ncol = 5)
 sm
 summary(sm)
 ```
@@ -422,6 +424,13 @@ summary(sm)
 
 ## Filtering low quality cells
 
+```{r}
+plotColData(sce, "sum") +
+  geom_hline(yintercept = c(20000, 2500), linetype = "dashed") + 
+  labs(y = "# of UMIs")
+```
+
+## Filtering low quality cells
 
 ```{r}
 sce <- SingleCellExperiment(list(counts = tx$counts))
@@ -444,13 +453,7 @@ plotColData(sce, "subsets_Mito_percent", "sum") +
        y = "Percent of UMIs from Mitochondrial RNAs")
 ```
 
-## Filtering low quality cells
 
-```{r}
-plotColData(sce, "sum") +
-  geom_hline(yintercept = c(20000, 2500), linetype = "dashed") + 
-  labs(y = "# of UMIs")
-```
 
 
 ## Single cell analysis packages
