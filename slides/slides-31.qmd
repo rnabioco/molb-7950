@@ -425,14 +425,6 @@ summary(sm)
 ## Filtering low quality cells
 
 ```{r}
-plotColData(sce, "sum") +
-  geom_hline(yintercept = c(20000, 2500), linetype = "dashed") + 
-  labs(y = "# of UMIs")
-```
-
-## Filtering low quality cells
-
-```{r}
 sce <- SingleCellExperiment(list(counts = tx$counts))
 ah <- AnnotationHub()
 ens_db <- ah[["AH113665"]]
@@ -447,14 +439,20 @@ rowData(sce)$gene_id <- rownames(sce)
 is_mito <- which(startsWith(rowData(sce)$gene, "MT-"))
 sce <- addPerCellQCMetrics(sce, subsets = list(Mito = is_mito))
 
+plotColData(sce, "sum") +
+  geom_hline(yintercept = c(20000, 2500), linetype = "dashed") + 
+  labs(y = "# of UMIs")
+```
+
+
+## Filtering low quality cells
+
+```{r}
 plotColData(sce, "subsets_Mito_percent", "sum") +
   geom_hline(yintercept = 25, linetype = "dashed") + 
   labs(x = "# of UMIs",
        y = "Percent of UMIs from Mitochondrial RNAs")
 ```
-
-
-
 
 ## Single cell analysis packages
 
