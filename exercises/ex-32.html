@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Kent Riemondy">
+<meta name="dcterms.date" content="2023-10-24">
+<title>MOLB 7950 - Single cell RNA-seq class 2</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script src="../site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script><script src="../site_libs/viz-1.8.2/viz.js"></script><link href="../site_libs/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
+<script src="../site_libs/grViz-binding-1.0.10/grViz.js"></script>
+<meta property="og:title" content="MOLB 7950 - Single cell RNA-seq class 2">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://rnabioco.github.io/molb-7950/exercises/ex-32_files/figure-html/unnamed-chunk-7-1.png">
+<meta property="og:site-name" content="MOLB 7950">
+<meta property="og:image:height" content="960">
+<meta property="og:image:width" content="1344">
+<meta name="twitter:title" content="MOLB 7950 - Single cell RNA-seq class 2">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="https://rnabioco.github.io/molb-7950/exercises/images/twitter-card.png">
+<meta name="twitter:creator" content="@rnabioco">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Single cell RNA-seq class 2</li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto"><div class="pt-lg-2 mt-2 text-center sidebar-header">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../img/logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none"></a>
+      <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/rnabioco/molb-7950" rel="" title="Course GitHub page" class="quarto-navigation-tool px-1" aria-label="Course GitHub page"><i class="bi bi-github"></i></a>
+    <a href="https://sso.posit.cloud/cu-anschutz" rel="" title="Posit Cloud SSO login" class="quarto-navigation-tool px-1" aria-label="Posit Cloud SSO login"><i class="bi bi-cloud"></i></a>
+    <a href="https://calendly.com/molb7950" rel="" title="Office hours scheduling" class="quarto-navigation-tool px-1" aria-label="Office hours scheduling"><i class="bi bi-calendar"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Course information</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Schedule</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/syllabus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Syllabus</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/support.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/team.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Teaching team</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="px-0"><hr class="sidebar-divider hi "></li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Resources</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/bootcamp-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bootcamp resources</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/block-dna-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DNA Block resources</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/block-rna-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RNA Block resources</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="px-0"><hr class="sidebar-divider hi "></li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Assignments</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/problem-sets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Problet Set Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/final-projects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Final Project Overview</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#analysis-steps-continued" id="toc-analysis-steps-continued" class="nav-link active" data-scroll-target="#analysis-steps-continued">Analysis steps continued</a></li>
+  <li><a href="#simplified-steps" id="toc-simplified-steps" class="nav-link" data-scroll-target="#simplified-steps">Simplified steps</a></li>
+  <li>
+<a href="#rerun-steps-from-previous-class" id="toc-rerun-steps-from-previous-class" class="nav-link" data-scroll-target="#rerun-steps-from-previous-class">Rerun steps from previous class</a>
+  <ul class="collapse">
+<li><a href="#normalizing-data" id="toc-normalizing-data" class="nav-link" data-scroll-target="#normalizing-data">Normalizing data</a></li>
+  <li><a href="#get-variable-genes" id="toc-get-variable-genes" class="nav-link" data-scroll-target="#get-variable-genes">Get variable genes</a></li>
+  <li><a href="#pca" id="toc-pca" class="nav-link" data-scroll-target="#pca">PCA</a></li>
+  <li>
+<a href="#dimensionality-reduction-for-visualization" id="toc-dimensionality-reduction-for-visualization" class="nav-link" data-scroll-target="#dimensionality-reduction-for-visualization">Dimensionality reduction for visualization</a>
+  <ul class="collapse">
+<li><a href="#pca-1" id="toc-pca-1" class="nav-link" data-scroll-target="#pca-1">PCA</a></li>
+  <li><a href="#umap" id="toc-umap" class="nav-link" data-scroll-target="#umap">UMAP</a></li>
+  </ul>
+</li>
+  <li><a href="#clustering-single-cell-data" id="toc-clustering-single-cell-data" class="nav-link" data-scroll-target="#clustering-single-cell-data">Clustering single cell data</a></li>
+  <li><a href="#how-many-clusters" id="toc-how-many-clusters" class="nav-link" data-scroll-target="#how-many-clusters">How many clusters?</a></li>
+  </ul>
+</li>
+  <li><a href="#finding-marker-genes-for-each-cluster" id="toc-finding-marker-genes-for-each-cluster" class="nav-link" data-scroll-target="#finding-marker-genes-for-each-cluster">Finding marker genes for each cluster</a></li>
+  <li><a href="#so-how-do-we-annotate-each-cluster-as-a-cell-type" id="toc-so-how-do-we-annotate-each-cluster-as-a-cell-type" class="nav-link" data-scroll-target="#so-how-do-we-annotate-each-cluster-as-a-cell-type">So how do we annotate each cluster as a cell type?</a></li>
+  <li><a href="#saving-your-data-and-distributing-datasets" id="toc-saving-your-data-and-distributing-datasets" class="nav-link" data-scroll-target="#saving-your-data-and-distributing-datasets">Saving your data and distributing datasets</a></li>
+  </ul><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action">Report an issue</a></p><p><a href="https://github.com/rnabioco/molb-7950/edit/main/exercises/ex-32.qmd" class="toc-action">Edit this page</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">Single cell RNA-seq class 2</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Kent Riemondy </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 24, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header><section id="analysis-steps-continued" class="level2"><h2 class="anchored" data-anchor-id="analysis-steps-continued">Analysis steps continued</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-c6ce9402bccde7d612dc" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-c6ce9402bccde7d612dc">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = TD]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  load [label= \"Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()\"]\n  \n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n addPerCellQCMetrics()\n plotColData()\"]\n  norm [label = \"Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()\"]\n  dim_red [label = \"Dimensionality reduction via PCA \n runPCA()\"]\n  cluster [label = \"Clustering\n clusterCells()\"]\n  viz [label = \"Make 2D-Visualization\nrunUMAP()\"]\n  \n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  \n  markers [label = \"Discover cell type markers \nscoreMarkers()\"]\n  annot [label = \"Annotate cell types\nclustifyr and SingleR\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  load -> cell_qc \n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section><section id="simplified-steps" class="level1"><h1>Simplified steps</h1>
+<p>Many of the steps involved in processing the data are executed using a succinct set of steps shown below. Much of our class today will be devoted to understanding the purpose of each of these steps and key parameters that can affect the results.</p>
+<p>Note that for many of these functions take a SingleCellExperiment as input, modify the SingleCellExperiment, and return a SingleCellExperiment. Others return a vector or data.frame.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># normalize data</span></span>
+<span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu">quickCluster</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">computeSumFactors</span><span class="op">(</span><span class="va">sce</span>, clusters<span class="op">=</span><span class="va">clusters</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">logNormCounts</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># get variable genes</span></span>
+<span><span class="va">dec</span> <span class="op">&lt;-</span> <span class="fu">modelGeneVarByPoisson</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
+<span><span class="va">top</span> <span class="op">&lt;-</span> <span class="fu">getTopHVGs</span><span class="op">(</span><span class="va">dec</span>, prop<span class="op">=</span><span class="fl">0.1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># get PCA and UMAP</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">runPCA</span><span class="op">(</span><span class="va">sce</span>, subset_row <span class="op">=</span> <span class="va">top</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">runUMAP</span><span class="op">(</span><span class="va">sce</span>, dimred <span class="op">=</span> <span class="st">"PCA"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># cluster cells</span></span>
+<span><span class="va">sce</span><span class="op">$</span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu">clusterCells</span><span class="op">(</span><span class="va">sce</span>, use.dimred <span class="op">=</span> <span class="st">"PCA"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># get markers</span></span>
+<span><span class="va">mrks</span> <span class="op">&lt;-</span> <span class="fu">scoreMarkers</span><span class="op">(</span><span class="va">sce</span>, <span class="va">sce</span><span class="op">$</span><span class="va">clusters</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section><section id="rerun-steps-from-previous-class" class="level1"><h1>Rerun steps from previous class</h1>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># load data</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mikelove/tximport">tximport</a></span><span class="op">)</span></span>
+<span><span class="va">tx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/tximport/man/tximport.html">tximport</a></span><span class="op">(</span></span>
+<span>  <span class="fu">here</span><span class="op">(</span><span class="st">"data/block-rna/scrna/pbmc/alevin/quants_mat.gz"</span><span class="op">)</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"alevin"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># setup gene ids</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">SingleCellExperiment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">tx</span><span class="op">$</span><span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">ah</span> <span class="op">&lt;-</span> <span class="fu">AnnotationHub</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">ens_db</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="st">"AH113665"</span><span class="op">]</span><span class="op">]</span></span>
+<span></span>
+<span><span class="va">gene_names</span> <span class="op">&lt;-</span> <span class="fu">mapIds</span><span class="op">(</span><span class="va">ens_db</span>, </span>
+<span>                     keys<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, </span>
+<span>                     keytype <span class="op">=</span> <span class="st">"GENEID"</span>,</span>
+<span>                     column<span class="op">=</span><span class="st">"SYMBOL"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">gene</span> <span class="op">&lt;-</span> <span class="va">gene_names</span></span>
+<span><span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">gene_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">uniquifyFeatureNames</span><span class="op">(</span><span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">gene_id</span>, </span>
+<span>                                      <span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">gene</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># drop non/low expressed genes</span></span>
+<span><span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">n_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="fu">counts</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span><span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">n_cells</span> <span class="op">&gt;=</span> <span class="fl">10</span>, <span class="op">]</span></span>
+<span></span>
+<span><span class="co"># basic QC</span></span>
+<span><span class="va">is_mito</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/startsWith.html">startsWith</a></span><span class="op">(</span><span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">gene</span>, <span class="st">"MT-"</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">addPerCellQCMetrics</span><span class="op">(</span><span class="va">sce</span>, subsets<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>Mito<span class="op">=</span><span class="va">is_mito</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">sce</span><span class="op">$</span><span class="va">pass_qc</span> <span class="op">&lt;-</span>  <span class="va">sce</span><span class="op">$</span><span class="va">subsets_Mito_percent</span> <span class="op">&lt;</span> <span class="fl">20</span> <span class="op">&amp;</span> <span class="va">sce</span><span class="op">$</span><span class="va">sum</span> <span class="op">&gt;</span> <span class="fl">1000</span> <span class="op">&amp;</span> <span class="va">sce</span><span class="op">$</span><span class="va">detected</span> <span class="op">&gt;</span> <span class="fl">500</span></span>
+<span></span>
+<span><span class="co"># subset data</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span>, <span class="va">sce</span><span class="op">$</span><span class="va">pass_qc</span><span class="op">]</span></span>
+<span><span class="va">sce</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class: SingleCellExperiment 
+dim: 20858 4565 
+metadata(0):
+assays(1): counts
+rownames(20858): DDX11L2_ENSG00000290825 WASH7P ... MT-ND6 MT-CYB
+rowData names(3): gene gene_id n_cells
+colnames(4565): GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG ... CTGGATCCACCGTACG
+  TACAACGGTCTCGCGC
+colData names(7): sum detected ... total pass_qc
+reducedDimNames(0):
+mainExpName: NULL
+altExpNames(0):</code></pre>
+</div>
+</div>
+<section id="normalizing-data" class="level2"><h2 class="anchored" data-anchor-id="normalizing-data">Normalizing data</h2>
+<p>To normalize we will use 3 functions from the scran package. The normalization entails crude clustering to group related cells, identifying a cell-specific normalization factor (size factor), then scaling the counts by this factor and log transforming the data (with a pseudocount). The algorithm is described in detail in the following paper and in the R documentation (<code><a href="https://rdrr.io/pkg/scuttle/man/computePooledFactors.html">?scuttle::computePooledFactors</a></code>)</p>
+<blockquote class="blockquote">
+<p>Lun AT, Bach K, Marioni JC. Pooling across cells to normalize single-cell RNA sequencing data with many zero counts. Genome Biol. 2016 Apr 27;17:75. doi: 10.1186/s13059-016-0947-7. PMID: 27122128; PMCID: PMC4848819.</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># set seed to obtain the same result on each execution of quickCluster</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">20231023</span><span class="op">)</span> </span>
+<span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu">quickCluster</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>   <span class="co"># returns vector of cluster assignments</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">computeSumFactors</span><span class="op">(</span><span class="va">sce</span>, clusters<span class="op">=</span><span class="va">clusters</span><span class="op">)</span> <span class="co"># add "sizeFactor" to colData</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">logNormCounts</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="co"># adds new assay called logcounts</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">logcounts</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">[</span><span class="fl">50</span><span class="op">:</span><span class="fl">60</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>11 x 4 sparse Matrix of class "dgCMatrix"
+           GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG ATTTCTGTCTCTATGT TATCTGTAGGTGATAT
+CPTP              .                0.2645668        .                .        
+TAS1R3            .                .                .                .        
+DVL1              .                0.2645668        .                .        
+MXRA8             .                .                .                .        
+AURKAIP1          0.3500082        1.9327619        0.2923841        0.7922116
+CCNL2             0.6314635        .                0.7432885        0.5731981
+MRPL20-AS1        0.3500082        0.2645668        0.2923841        .        
+MRPL20            0.8668712        1.1425125        0.9249737        0.7922116
+RN7SL657P         .                .                .                .        
+MRPL20-DT         .                .                .                0.3148810
+ATAD3C            .                .                .                .        </code></pre>
+</div>
+</div>
+</section><section id="get-variable-genes" class="level2"><h2 class="anchored" data-anchor-id="get-variable-genes">Get variable genes</h2>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">00010101</span><span class="op">)</span> <span class="co"># set seed to obtain the same result on each execution of modelGeneVarByPoisson</span></span>
+<span></span>
+<span><span class="va">dec</span> <span class="op">&lt;-</span> <span class="fu">modelGeneVarByPoisson</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="co"># returns data.frame of statistics</span></span>
+<span></span>
+<span><span class="va">top</span> <span class="op">&lt;-</span> <span class="fu">getTopHVGs</span><span class="op">(</span><span class="va">dec</span>, prop<span class="op">=</span><span class="fl">0.1</span><span class="op">)</span> <span class="co"># return vector of top 10% most variable genes</span></span>
+<span><span class="va">top</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "LYZ"     "S100A9"  "S100A8"  "HLA-DRA"</code></pre>
+</div>
+</div>
+<p>We can plot the mean expression against variance to see the trend, and visualize the top variable genes. These genes are often marker genes that are uniquely expressed in specifi cell populations.</p>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">top_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">dec</span><span class="op">[</span><span class="va">top</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">top_genes</span><span class="op">$</span><span class="va">genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">top_genes</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">dec</span><span class="op">)</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">mean</span>, <span class="va">total</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">geom_text</span><span class="op">(</span>data <span class="op">=</span> <span class="va">top_genes</span>, </span>
+<span>             <span class="fu">aes</span><span class="op">(</span>label <span class="op">=</span> <span class="va">genes</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu">stat_function</span><span class="op">(</span>fun <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">dec</span><span class="op">)</span><span class="op">$</span><span class="fu">trend</span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>How many variable genes to use? Depends on the data, generally use more variable genes with more complex and heterogeneous data. 1,000 - 2,000 is a reasonable starting point. Explore the impact of changing the getTopHVGs() arguments <code>n</code> or <code>prop</code> on the PCA, UMAP, and clustering.</p>
+</section><section id="pca" class="level2"><h2 class="anchored" data-anchor-id="pca">PCA</h2>
+<p>We next perform PCA, but only on the normalized data from the <code>top</code> variable genes. By default <code>runPCA</code> will return the top 50 PCs, this can be changed with the <code>ncomponents</code> argument.</p>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">101010011</span><span class="op">)</span> <span class="co"># runPCA uses a specialize form of PCA that has a random component</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">runPCA</span><span class="op">(</span><span class="va">sce</span>, subset_row<span class="op">=</span><span class="va">top</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can plot the PCA using <code>plotPCA()</code>. Here I’ve colored the PCA by the expression of the <code>CD3D</code> gene, a general marker of T-cells</p>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotPCA</span><span class="op">(</span><span class="va">sce</span>, color_by <span class="op">=</span> <span class="st">"CD3D"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>PCs beyond 1 and 2 show additional patterns in the data.</p>
+<div class="cell">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotPCA</span><span class="op">(</span><span class="va">sce</span>, ncomponents<span class="op">=</span><span class="fl">4</span>, colour_by <span class="op">=</span> <span class="st">"CD3D"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The amount of variation captured in each PC is a useful metric to examine.</p>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">percent.var</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="st">"percentVar"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">percent.var</span>, log<span class="op">=</span><span class="st">"y"</span>, xlab<span class="op">=</span><span class="st">"PC"</span>, ylab<span class="op">=</span><span class="st">"Variance explained (%)"</span>, pch <span class="op">=</span> <span class="fl">16</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>In general the # of PCs to use for downstream steps depends on the complexity and heterogeneity in the data, as well as the biological question. For this analysis we will retain the top 30, but you should explore how the downstream steps are affected by including fewer or more PCs.</p>
+<p>In practice picking fewer PCs will identify fewer subpopulations, and picking more PCs will find more subpopulations, at the expense of potentially increased noise and longer runtime.</p>
+<div class="cell">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">sce</span>, <span class="st">"PCA"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="co"># the PCA is stored in the reducedDim() slot</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                         PC1       PC2       PC3        PC4
+GCTGCAGTCCGATCTC -17.7865879 -5.494428 -3.609731 -2.2119402
+ACTATGGAGGTCCCTG  -0.0933944  7.195291  2.840164  0.0138008
+ATTTCTGTCTCTATGT -17.8824692 -1.533912 -3.546737  0.5637093
+TATCTGTAGGTGATAT -16.7533963 -2.843034 -5.289824 -1.3747961</code></pre>
+</div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># we can subset the PCA to fewer dimensions, e.g. 30 </span></span>
+<span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">sce</span>, <span class="st">"PCA"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">reducedDim</span><span class="op">(</span><span class="va">sce</span>, <span class="st">"PCA"</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="dimensionality-reduction-for-visualization" class="level2"><h2 class="anchored" data-anchor-id="dimensionality-reduction-for-visualization">Dimensionality reduction for visualization</h2>
+<section id="pca-1" class="level3"><h3 class="anchored" data-anchor-id="pca-1">PCA</h3>
+<p>Early single cell studies simply used PCA to visualize single cell data. This is a fine approach for simple datasets, but often there is much more information present in higher principal components as we saw above</p>
+</section><section id="umap" class="level3"><h3 class="anchored" data-anchor-id="umap">UMAP</h3>
+<p>The UMAP algorithm is popular, as it does a good job of preserving local differences between cells (e.g.&nbsp;differences in T-cell subtypes), while balancing global differences (e.g.&nbsp;a Neuron will be far away from a T-cell).</p>
+<p>I usually don’t make too many changes to the parameters for UMAP, but these can be customized. The <code>n_neighbors</code> and <code>min_dist</code> arguments can have a large impact of the density and spread of the visualization.</p>
+<div class="cell">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1234323523</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">runUMAP</span><span class="op">(</span><span class="va">sce</span>, dimred<span class="op">=</span><span class="st">"PCA"</span><span class="op">)</span> <span class="co"># adds another reducedDim()</span></span>
+<span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of length 2
+names(2): PCA UMAP</code></pre>
+</div>
+</div>
+<p><code>plotUMAP</code> is the plotting function for UMAPs.</p>
+<div class="cell">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"CD3D"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"CD79A"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-14-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1234323523</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">runUMAP</span><span class="op">(</span><span class="va">sce</span>, dimred<span class="op">=</span><span class="st">"PCA"</span>, n_neighbors <span class="op">=</span> <span class="fl">100</span>, min_dist <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> </span>
+<span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"CD3D"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"CD79A"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-15-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Hopefully these plots have convinced you that 1) interpreting a UMAP should be done with caution as the density of and distance between points is somewhat arbitrary 2) There are many ways to represent data in 2 dimensions. Deciding what is best depends on what point you are trying to emphasize with the visualization.</p>
+<p>Often these visualizations are a convenient way to convey a lot information in a single plot but the actual UMAP coordinates are not very meaningful in a scientific sense.</p>
+</section></section><section id="clustering-single-cell-data" class="level2"><h2 class="anchored" data-anchor-id="clustering-single-cell-data">Clustering single cell data</h2>
+<p>The PCA/UMAP plots above indicate that there are likely different cell types present in the data as we can see clusters. Next we will formally cluster the dataset to assign cells to clusters.</p>
+<p>Graph based clustering methods are commonly used for single cell data, because they can scale to millions of cells, produce reasonable assignments, and have tuneable parameters. We can cluster the data using … <code>clusterCells()</code> from scran.</p>
+<p><strong>Note that the clustering is performed on the PCA matrix not the 2D UMAP plot</strong></p>
+<div class="cell">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">10101010</span><span class="op">)</span></span>
+<span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu">clusterCells</span><span class="op">(</span><span class="va">sce</span>, use.dimred <span class="op">=</span> <span class="st">"PCA"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">clusters</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>clusters
+   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16 
+ 766  257  552  122  369  211  141 1409   52   74   55   63   44   47  103   97 
+  17   18   19 
+ 163   24   16 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="va">clusters</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The parameters of the clustering can be changed by changing the <code>NNGraphParam</code>. Here are the defaults:</p>
+<div class="cell">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">bluster</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">10101010</span><span class="op">)</span></span>
+<span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu">clusterCells</span><span class="op">(</span><span class="va">sce</span>, use.dimred<span class="op">=</span><span class="st">"PCA"</span>, </span>
+<span>    BLUSPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/bluster/man/NNGraphParam-class.html">NNGraphParam</a></span><span class="op">(</span>k <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>                             type <span class="op">=</span> <span class="st">"rank"</span>, </span>
+<span>                             cluster.fun <span class="op">=</span> <span class="st">"walktrap"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">clusters</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>clusters
+   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16 
+ 766  257  552  122  369  211  141 1409   52   74   55   63   44   47  103   97 
+  17   18   19 
+ 163   24   16 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="va">clusters</span></span>
+<span></span>
+<span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"clusters"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Generally increasing the # of neighbors will decrease the number of clusters and vice versa.</p>
+<div class="cell">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">12121212</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu">clusterCells</span><span class="op">(</span><span class="va">sce</span>, use.dimred<span class="op">=</span><span class="st">"PCA"</span>, </span>
+<span>    BLUSPARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/bluster/man/NNGraphParam-class.html">NNGraphParam</a></span><span class="op">(</span>k <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>                             type <span class="op">=</span> <span class="st">"rank"</span>, </span>
+<span>                             cluster.fun <span class="op">=</span> <span class="st">"walktrap"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sce</span><span class="op">$</span><span class="va">coarse_clusters</span> <span class="op">&lt;-</span> <span class="va">clusters</span></span>
+<span></span>
+<span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"coarse_clusters"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>What clusters are the genes S100A8, CD79A and CD3G most highly expressed in? We can use the <code>plotExpression()</code> function to visualize the expression data in each cluster.</p>
+<div class="cell">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotExpression</span><span class="op">(</span><span class="va">sce</span>, features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"S100A8"</span>, <span class="st">"CD79A"</span>, <span class="st">"CD3G"</span><span class="op">)</span>, x <span class="op">=</span> <span class="st">"clusters"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section><section id="how-many-clusters" class="level2"><h2 class="anchored" data-anchor-id="how-many-clusters">How many clusters?</h2>
+<p>Clustering algorithms produce clusters, even if there isn’t anything meaningfully different between cells. Determining the optimal number of clusters can be tricky and also dependent on the biological question.</p>
+<p>Some guidelines:</p>
+<ol type="1">
+<li><p>Cluster the data into a small number of clusters to identify cell types, then recluster to generate additional clusters to define sub-populations of cell types.</p></li>
+<li><p>To determine if the data is overclustered examine differentially expressed genes between clusters. If the clusters have few or no differentially expressed genes then the data is likely overclustered. Similar clusters can be merged post-hoc if necessary as sometimes it is difficult to use 1 clustering approach for many diverse cell populations. Using a reference-based approach to name cell types will also often merge similar clusters.</p></li>
+<li><p>A hybrid approach is to first annotate major cell types using a small # of clusters (e.g.&nbsp;B-cell, T-cell, Myeloid, etc.), then subset the SingleCellExperiment object for each cluster and perform additional clustering to obtain ‘subclusters’ (e.g.&nbsp;b-cell-subset 1, b-cell-subset 2, t-cell-subset-1, etc.)</p></li>
+</ol></section></section><section id="finding-marker-genes-for-each-cluster" class="level1"><h1>Finding marker genes for each cluster</h1>
+<p>Marker genes are genes that are specifically expressed in a cell type. We can identify these genes by performing differential expression analysis between clusters. We will use <code>scoreMarkers()</code> which will:</p>
+<ul>
+<li><p>Compare many metrics for each gene between a pair of clusters</p></li>
+<li><p>Perform these pairwise comparisons between every pair of clusters in the data</p></li>
+<li><p>Summarize the metrics across all pairwise comparisons into a data frame, 1 for each cluster</p></li>
+</ul>
+<p>The approach implemented by scoreMarkers() does <strong>not</strong> return any p-values for reasons described <a href="https://bioconductor.org/books/3.17/OSCA.advanced/marker-detection-redux.html#p-value-invalidity">here</a>. Statistical testing is invalidated because we clustered the data into groups based on the data itself, rather than by using an a priori group assignment. When we perform statistical testing on this group we are essentially testing the data again, which greatly inflates the significance of the pvalues.</p>
+<p><code>scoreMarkers()</code> will return a list of DataFrames, one for each cluster tested.</p>
+<div class="cell">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mrks</span> <span class="op">&lt;-</span> <span class="fu">scoreMarkers</span><span class="op">(</span><span class="va">sce</span>, <span class="va">sce</span><span class="op">$</span><span class="va">clusters</span><span class="op">)</span></span>
+<span><span class="va">mrks</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of length 19
+names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
+</div>
+</div>
+<p>To identify marker genes we will need to decide of cutoffs based on effect sizes. There are many reported by scoreMarkers().</p>
+<div class="cell">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">mrks</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "self.average"          "other.average"         "self.detected"        
+ [4] "other.detected"        "mean.logFC.cohen"      "min.logFC.cohen"      
+ [7] "median.logFC.cohen"    "max.logFC.cohen"       "rank.logFC.cohen"     
+[10] "mean.AUC"              "min.AUC"               "median.AUC"           
+[13] "max.AUC"               "rank.AUC"              "mean.logFC.detected"  
+[16] "min.logFC.detected"    "median.logFC.detected" "max.logFC.detected"   
+[19] "rank.logFC.detected"  </code></pre>
+</div>
+</div>
+<p>Why are there so many columns of data and how does one decide what is a marker gene?</p>
+<p>The problem is how do we define a marker gene. Is a marker gene a gene that is differentially expressed between 1 cluster and all other clusters? That could be too strict depending on the data, and could miss important gene expression differences between subtypes of cells.</p>
+<p>Perhaps a marker gene should be differentially expressed between some, or at the extreme any of the clusters.</p>
+<p>The output of scoreMarkers() allows you to filter the data in many different ways depending on what type of marker you want to identify. Importantly it doesn’t hide the complexity of this data. I highly recommend reading the chapter on <a href="https://bioconductor.org/books/3.17/OSCA.basic/marker-detection.html#motivation-2">marker gene detection</a> from the OSCA book to understand how best to identify markers depending on the dataset you are analyzing.</p>
+<p>We will use the <code>AUC</code> effect to rank markers. The AUC represents the probability that a randomly chosen observation from our cluster of interest is greater than a randomly chosen observation from the other cluster. A value of 1 means that the gene is upregulated in the cluster of interest and a value of 0 means that the gene is downregulated. 0.5 indicates no difference.</p>
+<p>One can also rank on standardized log fold changes or the fold change in the detection rate.</p>
+<p>We can either choose the <code>mean</code>, <code>min</code>, <code>median</code>, <code>max</code>, or <code>rank</code> AUC as a potential ranking, which all will select for marker genes with different patterns:</p>
+<p>Paraphrasing from the OSCA book:</p>
+<ul>
+<li><p>The most obvious summary statistic is the mean. For cluster X, a large mean effect size (&gt;0.5 for the AUCs) indicates that the gene is upregulated in X compared to the average of the other groups.</p></li>
+<li><p>Another summary statistic is the median, where a large value indicates that the gene is upregulated in X compared to most (&gt;50%) other clusters.</p></li>
+<li><p>The minimum value (min.*) is the most stringent summary for identifying upregulated genes, as a large value indicates that the gene is upregulated in X compared to all other clusters.</p></li>
+<li><p>The maximum value (max.*) is the least stringent summary for identifying upregulated genes, as a large value can be obtained if there is strong upregulation in X compared to any other cluster.</p></li>
+<li><p>The minimum rank, a.k.a., “min-rank” (rank.*) is the smallest rank of each gene across all pairwise comparisons. Specifically, genes are ranked within each pairwise comparison based on decreasing effect size, and then the smallest rank across all comparisons is reported for each gene. If a gene has a small min-rank, we can conclude that it is one of the top upregulated genes in at least one comparison of X to another cluster.</p></li>
+</ul>
+<p>Here we will plot top genes ranked by <code>mean.AUC</code> for cluster 1.</p>
+<div class="cell">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cluster1_markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">mrks</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/rownames.html">rownames_to_column</a></span><span class="op">(</span><span class="st">"gene"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ordered</span> <span class="op">&lt;-</span> <span class="va">cluster1_markers</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">mean.AUC</span> <span class="op">&gt;</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">mean.AUC</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">plotExpression</span><span class="op">(</span><span class="va">sce</span>, </span>
+<span>               features<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">ordered</span><span class="op">$</span><span class="va">gene</span><span class="op">)</span>, </span>
+<span>               x<span class="op">=</span><span class="st">"clusters"</span>, </span>
+<span>               colour_by<span class="op">=</span><span class="st">"clusters"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Next we will extract the top N markers from each cluster, ranked on <code>mean.AUC</code>, then plot the average expression of these markers in each cluster as a heatmap.</p>
+<div class="cell">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">n_top_markers</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
+<span></span>
+<span><span class="va">top_markers</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html">map_dfr</a></span><span class="op">(</span><span class="va">mrks</span>, <span class="op">~</span><span class="op">{</span></span>
+<span>  <span class="va">.x</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/rownames.html">rownames_to_column</a></span><span class="op">(</span><span class="st">"gene"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">mean.AUC</span> <span class="op">&gt;</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">mean.AUC</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html">slice</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">n_top_markers</span><span class="op">)</span></span>
+<span><span class="op">}</span>, .id <span class="op">=</span> <span class="st">"cluster"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">top_markers</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   cluster      gene
+1        1    S100A9
+2        1    S100A8
+3        1       LYZ
+4        1      MNDA
+5        1      FCN1
+6        2     BANK1
+7        2     CD79A
+8        2     MS4A1
+9        2 TNFRSF13C
+10       2   RALGPS2</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotGroupedHeatmap</span><span class="op">(</span><span class="va">sce</span>, </span>
+<span>                   features<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">top_markers</span><span class="op">$</span><span class="va">gene</span><span class="op">)</span>, </span>
+<span>                   group<span class="op">=</span><span class="st">"clusters"</span>,</span>
+<span>                   center<span class="op">=</span><span class="cn">TRUE</span>, </span>
+<span>                   zlim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="864"></p>
+</div>
+</div>
+</section><section id="so-how-do-we-annotate-each-cluster-as-a-cell-type" class="level1"><h1>So how do we annotate each cluster as a cell type?</h1>
+<p>In the early days of single cell sequencing, this was often done manually, by visual inspection of key genes (hopefully) using expertise in the lab. As more single cell datasets have become available, it is more common to compare your data to other single cell data or to reference cell type expression profiles.</p>
+<p>We we use <a href="https://rnabioco.github.io/clustifyr/"><code>clustifyr</code></a> which was developed by a previous RBI fellow Rui Fu. There are also many other methods (e.g.&nbsp;<code>SingleR</code>)</p>
+<p><code>clustifyr</code> works by comparing the average gene expression in each cluster to a reference matrix that contains average gene signatures of reference cell types. The reference can be built from other single cell data, bulk-rna-seq, or other sources. Ranked spearman correlation is used to compare the reference to the clusters. Only the variable genes are used for the correlation.</p>
+<p>In order to compare our dataset we need to use a publicly available reference dataset. Thankfully many datasets have been organized into a separate package: <a href="https://github.com/rnabioco/clustifyrdatahub">clustifyrdatahub</a>. This is an extension of the <code>ExperimentHub</code> package on bioconductor that allows you to easily download and cache external datasets.</p>
+<div class="cell">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rnabioco/clustifyr">clustifyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rnabioco.github.io/clustifyrdatahub/">clustifyrdatahub</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: ExperimentHub</code></pre>
+</div>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># get reference dataset derived from a microarray experiment of sorted immune cell types</span></span>
+<span><span class="fu"><a href="https://rnabioco.github.io/clustifyrdatahub/reference/ref_hema_microarray.html">ref_hema_microarray</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>see ?clustifyrdatahub and browseVignettes('clustifyrdatahub') for documentation</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>downloading 1 resources</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>retrieving 1 resource</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>loading from cache</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Basophils CD4+ Central Memory CD4+ Effector Memory CD8+ Central Memory
+DDR1    6.084244            5.967502             5.933039            6.005278
+RFC2    6.280044            6.028615             6.047005            5.992979
+HSPA6   6.535444            5.811475             5.746326            5.928349
+PAX8    6.669153            5.896401             6.118577            6.270870
+GUCA1A  5.239230            5.232116             5.206960            5.227415
+       CD8+ Effector Memory
+DDR1               5.895926
+RFC2               5.942426
+HSPA6              5.942670
+PAX8               6.323922
+GUCA1A             5.090882</code></pre>
+</div>
+</div>
+<p>But you can download any dataset that characterizes cell populations that interest you.</p>
+<div class="cell">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://rnabioco.github.io/clustifyr/reference/clustify.html">clustify</a></span><span class="op">(</span></span>
+<span>  <span class="va">sce</span>, <span class="co"># SingleCellExperiment object</span></span>
+<span>  ref_mat <span class="op">=</span> <span class="fu"><a href="https://rnabioco.github.io/clustifyrdatahub/reference/ref_hema_microarray.html">ref_hema_microarray</a></span><span class="op">(</span><span class="op">)</span>, <span class="co"># cell type reference data</span></span>
+<span>  cluster_col <span class="op">=</span> <span class="st">"clusters"</span>, <span class="co"># column in metadata with clusters</span></span>
+<span>  <span class="co"># don't add to SingleCellExperiment object, just return results</span></span>
+<span>  obj_out <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>  <span class="co"># use variable genes for comparison</span></span>
+<span>  query_genes <span class="op">=</span> <span class="va">top</span>,</span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>object data retrieval complete, moving to similarity computation</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>see ?clustifyrdatahub and browseVignettes('clustifyrdatahub') for documentation</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>loading from cache</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>using # of genes: 1075</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>similarity computation completed, matrix of 19 x 38, preparing output</code></pre>
+</div>
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">res</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">12</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Basophils CD4+ Central Memory CD4+ Effector Memory CD8+ Central Memory
+1  0.5370093           0.4111325            0.4176017           0.3936302
+10 0.5945973           0.4591039            0.4655590           0.4433302
+11 0.4386922           0.7151960            0.7115503           0.6798845
+12 0.6333579           0.5402749            0.5289964           0.5160502
+13 0.3935435           0.6535071            0.6516310           0.6321161
+14 0.4656631           0.6099487            0.6324938           0.6493463
+15 0.6258199           0.5493260            0.5378138           0.5284327
+16 0.4883762           0.7668150            0.7549072           0.7346618
+17 0.6277840           0.5580115            0.5459105           0.5343926
+18 0.5650205           0.5267830            0.5237343           0.5021841
+19 0.3379409           0.3154402            0.3177152           0.3003928
+2  0.6210041           0.5744730            0.5678439           0.5518513</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/ComplexHeatmap">ComplexHeatmap</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/ComplexHeatmap/man/Heatmap.html">Heatmap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="864"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="http://rnabioco.github.io/clustifyr/reference/cor_to_call.html">cor_to_call</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="co"># assign cluster to highest correlation cell type (above a threshold). Cell types lower than a threshold will be assigned as unassigned.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 19 × 3
+# Groups:   cluster [19]
+   cluster type                                r
+   &lt;chr&gt;   &lt;chr&gt;                           &lt;dbl&gt;
+ 1 11      CD4+ Central Memory             0.715
+ 2 13      CD4+ Central Memory             0.654
+ 3 5       CD4+ Effector Memory            0.769
+ 4 3       CD8+ Effector Memory            0.747
+ 5 2       Mature B-cell class switched    0.772
+ 6 14      Mature NK cell_CD56- CD16- CD3- 0.715
+ 7 6       Mature NK cell_CD56+ CD16+ CD3- 0.729
+ 8 7       Mature NK cell_CD56+ CD16+ CD3- 0.735
+ 9 19      Megakaryocyte                   0.462
+10 1       Monocyte                        0.756
+11 4       Monocyte                        0.713
+12 10      Myeloid Dendritic Cell          0.743
+13 9       Myeloid Dendritic Cell          0.641
+14 12      Naïve B-cells                   0.778
+15 15      Naïve B-cells                   0.794
+16 17      Naïve B-cells                   0.797
+17 16      Naive CD4+ T-cell               0.781
+18 8       Naive CD4+ T-cell               0.765
+19 18      Plasmacytoid Dendritic Cell     0.673</code></pre>
+</div>
+</div>
+<p>We can insert the classification results into the SingleCellExperiment object directly which will be called <code>type</code>.</p>
+<div class="cell">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://rnabioco.github.io/clustifyr/reference/clustify.html">clustify</a></span><span class="op">(</span></span>
+<span>  <span class="va">sce</span>, <span class="co"># seurat object</span></span>
+<span>  ref_mat <span class="op">=</span> <span class="fu"><a href="https://rnabioco.github.io/clustifyrdatahub/reference/ref_hema_microarray.html">ref_hema_microarray</a></span><span class="op">(</span><span class="op">)</span>, <span class="co"># cell type reference data</span></span>
+<span>  cluster_col <span class="op">=</span> <span class="st">"clusters"</span>, <span class="co"># column in metadata with clusters</span></span>
+<span>  obj_out <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="co"># use variable genes for comparison</span></span>
+<span>  query_genes <span class="op">=</span> <span class="va">top</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>object data retrieval complete, moving to similarity computation</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>see ?clustifyrdatahub and browseVignettes('clustifyrdatahub') for documentation</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>loading from cache</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>using # of genes: 1075</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>similarity computation completed, matrix of 19 x 38, preparing output</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>using threshold of 0.6</code></pre>
+</div>
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"type"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="ex-32_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section><section id="saving-your-data-and-distributing-datasets" class="level1"><h1>Saving your data and distributing datasets</h1>
+<ol type="1">
+<li><p>You can share your SingleCellExperiment objects with collaborators by saving the object as an <code>.rds</code> file.</p></li>
+<li><p>If you plan on publishing the data, then the best practices are to upload the UMI count matrix and your colData() data.frame containing the cell type annotations.</p></li>
+</ol>
+<p>To save the UMI count matrix use write10xcounts() from the DropletUtils Bioconductor package.</p>
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat</span> <span class="op">&lt;-</span> <span class="fu">counts</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> </span>
+<span><span class="fu">write10xCounts</span><span class="op">(</span><span class="st">"path/to/output"</span>, <span class="va">mat</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When saving the <code>colData()</code> it is also a nice gesture to include the UMAP coordinates that you used for the main visualizations in your manuscript. The clustering and UMAP coordinates are very hard to reproduce because of the non-deterministic elements of the algorithms.</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="fu">colData</span>(sce), <span class="fu">reducedDim</span>(sce, <span class="st">"UMAP"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"cell"</span>) <span class="sc">|&gt;</span> ()</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_csv</span>(<span class="st">"cell-level-metadata.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">This page is built with <a href="https://quarto.org/">Quarto</a>.</div>
+  </div>
+</footer>
+
+
+</body></html>
