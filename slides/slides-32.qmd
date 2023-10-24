@@ -1,0 +1,751 @@
+---
+title: "Single cell RNA-Seq:"
+subtitle: "Clustering, Dimensionality reduction, and cell-type annotation"
+author: "Kent Riemondy"
+---
+
+```{r packages}
+#| echo: false
+#| include: false
+#| message: false
+#| warning: false
+
+library(here)
+library(ggplot2)
+library(DiagrammeR)
+library(SingleCellExperiment)
+library(scater)
+library(scran)
+library(AnnotationHub)
+library(Matrix)
+library(cowplot)
+
+```
+
+
+## Contact Info 
+
+Greetings experimentalist humans `r emo::ji("wave")`
+
+<i class="fa fa-envelope"></i> &nbsp; [kent.riemondy@cuanschutz.edu](mailto:kent.riemondy@cuanschutz.edu) <br>
+
+RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/training-and-education/rbi-office-hours)
+
+<i class="fa fa-envelope"></i> &nbsp; [rbi.fellows@cuanschutz.edu](mailto:rbi.fellows@cuanschutz.edu) 
+<br>
+
+
+## Learning Objectives
+
+:::: {.columns}
+
+::: {.column .nonincremental}
+### Lecture 1
+- Identify key quality control issues with single cell RNA-seq data and perform filtering onto exclude poor quality cells 
+- Interact with single cell data using Bioconductor 
+
+::: 
+ 
+::: {.column .nonincremental}
+### Lecture 2 
+- Perform analysis to identify cell types in single cell data by using unsupervised clustering methods and comparing to public datasets
+- Describe the importance and reasoning for conducting each step of the analysis
+
+::: 
+
+::::
+
+## Analysis steps revisited {.smaller}
+
+:::: {.columns}
+
+::: {.column width="50%}
+
+```{r}
+#| echo: false
+#| out-height: '70%'
+#| out-width: '70%'
+
+library(DiagrammeR)
+grViz("
+digraph workflow {
+  graph [layout = dot,
+         rankdir = TD]
+
+  node [shape = cicle,
+        style = filled,
+        fontcolor = black,
+        fontname = 'Helvetica']
+
+  # green
+  node [fillcolor = '#009E73']
+  load [label= 'Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()']
+  
+  # blue
+  node [fillcolor = '#56B4E9']
+  cell_qc [label = 'QC cells\n addPerCellQCMetrics()\n plotColData()']
+  norm [label = 'Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()']
+
+  # yellow
+  node [fillcolor = '#F0E442']
+  feature [label = 'Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()']
+  dim_red [label = 'Dimensionality reduction via PCA \n runPCA()']
+  cluster [label = 'Clustering\n clusterCells()']
+  viz [label = 'Make 2D-Visualization\nrunUMAP()']
+  
+  # blue
+  node [fillcolor = '#56B4E9']
+  
+  markers [label = 'Discover cell type markers \nscoreMarkers()']
+  annot [label = 'Annotate cell types\nclustifyr and SingleR']
+
+  edge [color = black
+        fontname = 'Helvetica']
+
+  load -> cell_qc 
+  cell_qc -> norm
+  norm -> feature
+  norm -> markers
+  feature -> dim_red
+  dim_red -> cluster
+  dim_red -> viz
+  cluster -> markers
+  markers -> annot
+
+  edge [color = 'grey'
+        style = 'dashed']
+  annot -> cell_qc [label = 'Repeat\n as needed']
+  annot -> feature
+  annot -> dim_red
+  annot -> cluster
+}")
+```
+
+::: 
+
+::: {.column width="50%}
+
+- Normalize and log transform UMI counts to correct for sequencing depth. 
+
+- Select genes with high variance to use for clustering and UMAP generation
+
+- Use PCA to reduce the size of the dataset to ~20-50 dimensions
+
+- Use UMAP or tSNE to further reduce the PCA matrix into 2D for visualization
+
+- Use clustering on PCA matrix to identify clusters of related cells.
+
+- Find `marker genes` that are specifically expressed in each cluster. 
+
+- Compare the gene expression profile of each cluster to public data to help annotate the cell type.
+
+:::
+
+::::
+
+
+# TL;DR
+
+```r
+# normalize data
+clusters <- quickCluster(sce)
+sce <- computeSumFactors(sce, clusters=clusters)
+sce <- logNormCounts(sce)
+
+# get variable genes
+dec <- modelGeneVarByPoisson(sce)
+top <- getTopHVGs(dec, prop=0.1)
+
+# get PCA and UMAP
+sce <- runPCA(sce, subset_row = top)
+sce <- runUMAP(sce, dimred = "PCA")
+
+# cluster cells
+sce$clusters <- clusterCells(sce, use.dimred = "PCA")
+
+# get marker genes
+mrks <- scoreMarkers(sce, sce$clusters)
+
+...
+```
+
+```{r prep-sce}
+#| echo: false
+#| warning: false
+#| message: false
+
+# load data
+library(tximport)
+tx <- tximport(
+  here("data/block-rna/scrna/pbmc/alevin/quants_mat.gz"),
+  type = "alevin"
+)
+
+# setup gene ids
+sce <- SingleCellExperiment(list(counts = tx$counts))
+ah <- AnnotationHub()
+ens_db <- ah[["AH113665"]]
+
+gene_names <- mapIds(ens_db, 
+                     keys=rownames(sce), 
+                     keytype = "GENEID",
+                     column="SYMBOL")
+
+rowData(sce)$gene <- gene_names
+rowData(sce)$gene_id <- rownames(sce)
+rownames(sce) <- uniquifyFeatureNames(rowData(sce)$gene_id, 
+                                      rowData(sce)$gene)
+
+# drop non/low expressed genes
+rowData(sce)$n_cells <- rowSums(counts(sce) > 0)
+sce <- sce[rowData(sce)$n_cells >= 10, ]
+
+# basic QC
+is_mito <- startsWith(rowData(sce)$gene, "MT-")
+sce <- addPerCellQCMetrics(sce, subsets=list(Mito=is_mito))
+sce$pass_qc <-  sce$subsets_Mito_percent < 20 & sce$sum > 1000 & sce$detected > 500
+sce <- sce[, sce$pass_qc]
+```
+
+
+
+
+
+## Normalization {.smaller}
+
+:::: {.columns }
+
+::: {.column }
+
+Normalization attempts to correct for technical biases that will distort biological signal in the data. 
+
+A large source of variation arises due to differences in sequencing depth between cells. See PCA perform on unnormalized counts on right ->  
+
+We also have the same mean expression and variance relationship as seen in bulk-RNA-seq. More abundant RNAs have more variance, which means they will contribute more to the clustering than lower abundance RNAs unless corrected. 
+
+:::
+
+
+::: {.column }
+
+```{r}
+# set seed for functions with a randomized component 
+# to obtain the same result each execution
+set.seed(20231023)
+sce <- runPCA(sce, exprs_values = "counts", name = "count_PCA")
+plotReducedDim(sce, "count_PCA", colour_by = "sum")
+```
+
+
+```{r}
+plot_df <- makePerCellDF(sce, c("count_PCA", "sum"))
+
+ggplot(plot_df, aes(count_PCA.1, sum)) + 
+  geom_point()
+```
+
+
+:::
+
+::::
+
+## Normalization {.smaller}
+
+:::: {.columns }
+
+::: {.column }
+
+`quickCluster()`: Crude clustering to group related cells into groups with similar expression profiles
+
+`computeSumFactors()`: Pool counts across clusters to establish an average cell profile for each cluster. Then use deconvolution to estimate a cell-specific scaling factor for
+normalization
+
+`logNormCounts()`: Apply scaling factors (size factors) to counts and log transform
+with a pseudocount.
+
+:::
+
+::: {.column }
+
+```{r}
+#| warning: false
+set.seed(20231023)
+clusters <- quickCluster(sce)
+sce <- computeSumFactors(sce, clusters=clusters)
+sce <- logNormCounts(sce)
+
+set.seed(20231023)
+sce <- runPCA(sce, exprs_values = "logcounts", name = "PCA")
+
+plotReducedDim(sce, "PCA", colour_by = "sum")
+
+plot_df <- makePerCellDF(sce, c("PCA", "sum"))
+ggplot(plot_df, aes(PCA.1, sum)) + 
+  geom_point()
+```
+
+:::
+
+::::
+
+
+## Variable gene selection {.smaller}
+
+:::: {.columns }
+
+::: {.column }
+
+- Genes that have high variance across cells are genes that tend to be differentially expressed between cell types
+
+- Low variance genes are usually low-expressed or "house-keeping" genes whose expression will not help us distinguish between cell populations
+
+- Including these genes could potentially introduce more technical variation rather then helpful biological variation. 
+
+- Keeping uninteresting genes will increase the computational burden and likely either not improve or be deleterious to the clustering. 
+
+:::
+
+::: {.column }
+
+```{r}
+#| echo: false
+#| fig-width: 9
+#| fig-height: 9 
+set.seed(00010101)
+dec <- modelGeneVarByPoisson(sce)
+top <- getTopHVGs(dec, prop=0.1)
+
+top_genes <- as.data.frame(dec[top[1:10], ])
+top_genes$genes <- rownames(top_genes)
+
+ggplot(as.data.frame(dec), aes(mean, total)) + 
+  geom_point() + 
+  geom_text(data = top_genes, 
+             aes(label = genes)) + 
+  stat_function(fun = function(x) metadata(dec)$trend(x))
+```
+
+::: 
+
+::::
+
+## Variable gene selection {.smaller}
+
+:::: {.columns }
+
+::: {.column }
+
+`modelGeneVarByPoisson()`: Fit curve, using Poisson distribution, to variance against the mean expression distribution. Estimate technical (Poisson estimate) and biological (the residuals from the Poisson) variance for each gene.
+
+`getTopHVGs()`: Filter output from `modelGeneVarByPoisson` to select top variable genes.
+
+:::
+
+::: {.column }
+
+```{r}
+#| echo: false
+#| fig-width: 9
+#| fig-height: 9 
+
+dec_df <- as.data.frame(dec)
+dec_df$genes <- rownames(dec_df)
+dec_df$variable_gene <- dec_df$genes %in% top
+
+ggplot(dec_df, aes(mean, total)) + 
+  geom_point(aes(color = variable_gene),
+             size = 0.75) +
+  stat_function(fun = function(x) metadata(dec)$trend(x),
+                linetype = "dashed")
+```
+
+::: 
+
+::::
+
+
+## Dimensionality reduction {.smaller}
+
+
+Dimensionality reduction is the concept of transforming high dimensional data and representing it with a smaller set of dimensions.
+
+We can reduce the # of dimensions without loosing much information because many features (genes) are highly correlated which can be approximated with fewer dimensions. 
+
+This is analogous to reducing the gene expression data into a set of metagenes that represents the expression of many correlated genes.
+
+Using fewer dimensions makes computation much quicker and as we will see will reorder the data in a manner that captures the heterogeneity in the data
+
+## Dimensionality reduction via PCA {.smaller}
+
+We will use PCA to reduce the dimensionality of the data from 20,000 genes to ~10-50 principle components.
+
+[PCA](http://setosa.io/ev/principal-component-analysis/) takes a matrix of features (genes) and samples (cells) and transforms the matrix into a new set of features known as a principal components. A principal component is a linear combination of the original genes that is oriented to capture variance in the dataset. 
+
+`PC1` is a vector through the dataset oriented in a direction that spans the most variation in the data.  The second component is another linear combination of the original variables but is uncorrelated to the first component (points in an orthogonal direction).
+
+In a geometric sense, PCA produces a new coordinate system whereby instead of the axes being each gene, the axes are each a PC and the first axis points through the largest spread in the data. 
+
+## PCA in 2 dimensions {.smaller}
+
+
+```{r pca-intro}
+#| echo: false
+library(MASS)
+library(ggrepel)
+library(dplyr)
+# generate some correlated variables, scale, and make tidy 
+set.seed(42)
+sim <- MASS::mvrnorm(100,
+                     c(0, 0),
+                     matrix(c(1, 0.95, 0.95, 1),
+                     2,
+                     2)) %>% 
+  scale() %>% 
+  as.data.frame() %>% 
+  tibble::rownames_to_column("id") %>% 
+  arrange(V1, V2) %>% 
+  rename(gene_1 = V1, gene_2 = V2) %>% 
+  as_tibble() %>% 
+  mutate(id = row_number())
+
+# select points to label for visualization
+max_min_points <- slice(sim, c(1:5, 95:100))
+
+# make a plot
+og_plt <- ggplot(sim, aes(gene_1, gene_2)) +
+  geom_point() +
+  geom_text_repel(data = max_min_points, 
+                  aes(label = id)) +
+  # scale y axis to same as x
+  ylim(min(sim$gene_1),
+       max(sim$gene_2))
+
+# run pca
+pc <- prcomp(sim[, c(2:3)], 
+             center = FALSE, 
+             scale. = FALSE)
+
+# function to make a pretty labeled plot
+plot_labeled_pca <- function(input_data, 
+                             pca_obj){
+  
+  #tidy the pc matrix
+  pc_x <- pca_obj$x %>% 
+    as.data.frame() %>% 
+    mutate(id = input_data$id) 
+ 
+  # select points to label
+  max_min_points <- slice(pc_x, c(1:5, 95:100))
+  # compute variance explained
+  percent_var <- (100 * pca_obj$sdev^2 / 
+                    sum(pca_obj$sdev^2))  %>% 
+    signif(3)
+  #plot the data
+  pca_plt <- ggplot(pc_x, aes(PC1, PC2)) +
+    geom_point() +
+    geom_text_repel(data = max_min_points, 
+                  aes(label = id)) +
+    labs(x = paste("PC1 ", percent_var[1], "%"),
+         y = paste("PC2 ", percent_var[2], "%")) +
+    # make axes symmetric
+    ylim(c(min(pc_x$PC1), 
+           max(pc_x$PC1)))
+  
+  pca_plt 
+}
+
+pca_plt <- plot_labeled_pca(sim, pc)
+
+plot_grid(og_plt, pca_plt)
+```
+
+## PCA with more dimensions {.smaller}
+
+
+What if we had more dimensions that are uninteresting variance/noise? How does this impact the PCA? 
+
+:::: {.columns}
+
+::: {.column width="60%"}
+
+```{r}
+#| echo: false
+#| 
+# generate a matrix of random numbers 
+# drawn from a normal dist. to simulate noise
+set.seed(20181214)
+more_genes <- matrix(rnorm(1000, 
+                           mean = 0, 
+                           sd = 0.25), 
+                     nrow = 100, 
+                     ncol = 10)
+# add column names
+colnames(more_genes) <- paste0("gene_noise_",
+                              1:ncol(more_genes))
+# add the matrix to the simulation data_frame by column
+sim_2 <- cbind(sim, more_genes) 
+tmp <- sim_2[1:5, 2:6]
+colnames(tmp)[5] <- "..."
+tmp
+```
+:::
+
+::: {.column width="40%"}
+
+```{r}
+#| fig.height: 7
+#| fig.width: 7
+#| echo: false
+plot(sim_2[, 2:7])
+```
+:::
+
+::::
+
+## PCA as dimensional reduction {.smaller}
+
+```{r}
+#| echo: false
+pc2 <- prcomp(sim_2[, 2:ncol(sim_2)], 
+              center = FALSE, 
+              scale. = FALSE)
+
+pca_plt <- pca_plt + labs(subtitle ="2 correlated dimensions")
+pc2_plt <- plot_labeled_pca(sim_2, pc2) + labs(subtitle = "2 correlated dimensions, 10 noise dimensions")
+plot_grid(pca_plt, pc2_plt)
+```
+
+
+## computing PCA with scater {.smaller}
+
+::: {.columns}
+
+::: {.column}
+
+`runPCA()`: computes an approximate truncated PCA, returning 50 PCs by default. 
+
+`reducedDim(sce, "PCA")`: function to access or assign reduced dimensionality results
+
+`plotPCA()`: plot 2 or more PC components
+
+`plotReducedDim()`: plot 2 or more dimensions or arbitrary `reducedDim()` matrix 
+
+:::
+
+::: {.column}
+
+```{r}
+#| fig.width: 9
+#| fig.height: 9 
+sce <- runPCA(sce)
+plotPCA(sce, ncomponents = 3)
+```
+
+:::
+
+::::
+
+## How many PCs to retain? {.smaller}
+
+```{r}
+percent.var <- attr(reducedDim(sce), "percentVar")
+plot(percent.var, log="y", xlab="PC", ylab="Variance explained (%)", pch = 16)
+```
+
+## Projecting PCs into 2 dimensions (UMAP, tSNE, etc.) {.smaller}
+
+:::: {.columns}
+
+::: {.column}
+
+Non-linear dimensionallty reductions are commonly used to project the PCA matrix into 2 dimensions for visualization
+
+This entails trying to reduce the ~10-50 PCA dimensions into a 2 dimensional space. 
+
+To do this the algorithm performs non-linear transformations that distort the true distances between cells
+
+Attempts to balance global and local differences to produce visualization that capture variation in data. 
+
+`runUMAP()` and `runTSNE()`
+
+:::
+
+::: {.column}
+
+```{r}
+set.seed(101010101)
+sce <- runUMAP(sce, dimred = "PCA")
+plotUMAP(sce)
+```
+
+:::
+
+::::
+
+## Parameters affect the visualization  {.smaller}
+
+
+:::: {.columns}
+
+::: {.column}
+
+```{r}
+set.seed(101010101)
+plotUMAP(sce) + labs(subtitle = "spread = 1, min_dist = 0.01")
+```
+:::
+
+::: {.column}
+
+```{r}
+set.seed(101010101)
+sce <- runUMAP(sce, dimred = "PCA", spread = 2)
+plotUMAP(sce) + labs(subtitle = "spread = 2, min_dist = 0.01")
+```
+
+:::
+
+
+::: {.column}
+
+```{r}
+set.seed(101010101)
+sce <- runUMAP(sce, dimred = "PCA", spread = 1, min_dist = 0.5)
+plotUMAP(sce) + labs(subtitle = "spread = 1, min_dist = 0.5")
+```
+
+:::
+
+::: {.column}
+
+```{r}
+set.seed(101010101)
+sce <- runUMAP(sce, dimred = "PCA", spread = 1, min_dist = 0.01, n_neighbors = 3)
+plotUMAP(sce) + labs(subtitle = "spread = 1, min_dist = 0.5, k =3")
+```
+
+:::
+::::
+
+
+## Clustering {.smaller}
+
+We use clustering to assign cells to discrete cell populations. This is a simplification of the true complexity of the underlying data.
+
+Clustering is a data analysis tool rather than a result. We can increase, decrease, merge, or subset clusters at our whim by changing clustering parameters, the # of PCs used, the # of variable genes, and the particular cell subsets analyzed. 
+
+There is no correct or valid number of clusters. It depends on what biological question you are trying to explore and at what granularity you want to ask the question. 
+
+>[A]sking for an unqualified “best” clustering is akin to asking for the best magnification on a microscope without any context - OSCA book
+ 
+
+## Clustering {.smaller}
+
+:::: {.columns}
+
+::: {.column}
+
+Approach:
+
+- identify the K nearest neighbors of each cell in the PCA matrix (e.g. k = 10)
+- weight the connection between cells based on "connectivity" of shared nearest neighbors (total number, proportion, average rank of neighbors, etc.)
+- apply a community detection algorithm to cluster the shared nearest neighbor graph (walktrap, louvain, leiden, etc.)
+- `clusterCells()` 
+
+:::
+
+::: {.column}
+
+```{r clustering}
+#| echo: false
+#| fig.width: 9
+#| fig.height: 9
+library(igraph)
+snn_clusters <- clusterCells(sce, 
+                             use.dimred = "PCA", 
+                             full = TRUE)
+sce$clusters <- snn_clusters$clusters
+v_size <- 1
+
+# use snn graph for the layout
+set.seed(11000)
+lo <- layout_with_fr(snn_clusters$objects$graph)
+
+col_pal <- scater:::.get_palette("tableau20")
+snn_graph <- snn_clusters$objects$graph
+V(snn_graph)$color <- col_pal[as.integer(sce$clusters)]
+plot.igraph(snn_graph, 
+            layout = lo,  
+            edge.width = E(snn_clusters$objects$graph)$weight * 0.01,
+            vertex.label = NA,
+            vertex.size = v_size,
+            vertex.frame.color = NA)
+```
+
+
+:::
+
+::::
+
+
+
+## Identifying marker genes using scoreMarkers() {.smaller}
+
+
+:::: {.columns}
+
+::: {.column}
+Compare many metrics for each gene between a pair of clusters
+
+Perform these pairwise comparisons between every pair of clusters in the data
+
+Summarize the metrics across all pairwise comparisons into a data frame, 1 for each cluster
+
+Select markers based on desired type of "marker" gene and effect size. 
+
+
+:::
+
+::: {.column}
+
+```{r}
+#| echo: false
+mrks <- scoreMarkers(sce, sce$clusters)
+
+c1_mrks <- mrks[[1]]
+ordered <- c1_mrks[order(c1_mrks$mean.AUC, decreasing=TRUE),]
+```
+
+```r
+self.average
+other.average
+self.detected
+other.detected
+mean.logFC.cohen
+min.logFC.cohen
+median.logFC.cohen
+max.logFC.cohen
+rank.logFC.cohen
+mean.AUC
+min.AUC
+median.AUC
+max.AUC
+rank.AUC
+mean.logFC.detected
+min.logFC.detected
+median.logFC.detected
+max.logFC.detected
+rank.logFC.detected
+```
+:::
+
+::::
+
+
+## Annotating cell types
+
+How do we confidently identify a known cell type? Is looking at a list of marker genes sufficient?
+
+We can compare the expression profiles of each cluster (or cell) to databases of cell type specific gene expression profiles and derive a score for how similar each cluster is to the reference. 
+
+Check out `clustifyr` and `SingleR` bioconductor packages
