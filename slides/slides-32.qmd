@@ -135,7 +135,7 @@ digraph workflow {
 
 - Use clustering on PCA matrix to identify clusters of related cells.
 
-- Find `marker genes` that are specifically expressed in each cluster. 
+- Find marker genes that are specifically expressed in each cluster. 
 
 - Compare the gene expression profile of each cluster to public data to help annotate the cell type.
 
@@ -219,7 +219,7 @@ sce <- sce[, sce$pass_qc]
 
 Normalization attempts to correct for technical biases that will distort biological signal in the data. 
 
-A large source of variation arises due to differences in sequencing depth between cells. See PCA perform on unnormalized counts on right ->  
+A large source of variation arises due to differences in sequencing depth between cells. See PCA performed on unnormalized counts on right ->  
 
 We also have the same mean expression and variance relationship as seen in bulk-RNA-seq. More abundant RNAs have more variance, which means they will contribute more to the clustering than lower abundance RNAs unless corrected. 
 
@@ -322,7 +322,9 @@ ggplot(as.data.frame(dec), aes(mean, total)) +
   geom_point() + 
   geom_text(data = top_genes, 
              aes(label = genes)) + 
-  stat_function(fun = function(x) metadata(dec)$trend(x))
+  stat_function(fun = function(x) metadata(dec)$trend(x),
+                linetype = "dashed",
+                colour  = "blue")
 ```
 
 ::: 
@@ -356,7 +358,8 @@ ggplot(dec_df, aes(mean, total)) +
   geom_point(aes(color = variable_gene),
              size = 0.75) +
   stat_function(fun = function(x) metadata(dec)$trend(x),
-                linetype = "dashed")
+                linetype = "dashed",
+                colour  = "blue")
 ```
 
 ::: 
@@ -373,7 +376,7 @@ We can reduce the # of dimensions without loosing much information because many 
 
 This is analogous to reducing the gene expression data into a set of metagenes that represents the expression of many correlated genes.
 
-Using fewer dimensions makes computation much quicker and as we will see will reorder the data in a manner that captures the heterogeneity in the data
+Using fewer dimensions makes computation much quicker and as we will see will reorder the data in a manner that still captures the heterogeneity in the data.
 
 ## Dimensionality reduction via PCA {.smaller}
 
@@ -484,9 +487,7 @@ colnames(more_genes) <- paste0("gene_noise_",
                               1:ncol(more_genes))
 # add the matrix to the simulation data_frame by column
 sim_2 <- cbind(sim, more_genes) 
-tmp <- sim_2[1:5, 2:6]
-colnames(tmp)[5] <- "..."
-tmp
+sim_2[1:5, 2:6]
 ```
 :::
 
@@ -639,9 +640,9 @@ There is no correct or valid number of clusters. It depends on what biological q
 >[A]sking for an unqualified “best” clustering is akin to asking for the best magnification on a microscope without any context - OSCA book
  
 
-## Clustering {.smaller}
+## Graph based clustering {.smaller .nonincremental}
 
-:::: {.columns}
+:::: {.columns} 
 
 ::: {.column}
 
@@ -658,8 +659,9 @@ Approach:
 
 ```{r clustering}
 #| echo: false
-#| fig.width: 9
-#| fig.height: 9
+#| fig.width: 12
+#| fig.height: 12
+#| 
 library(igraph)
 snn_clusters <- clusterCells(sce, 
                              use.dimred = "PCA", 
