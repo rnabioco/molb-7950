@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.3.450">
 
   <meta name="author" content="Kent Riemondy">
-  <meta name="dcterms.date" content="2023-10-24">
+  <meta name="dcterms.date" content="2023-10-25">
   <title>MOLB 7950 - Single cell RNA-Seq:</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -419,7 +419,7 @@ Kent Riemondy
     </div>
 </div>
 
-  <p class="date">2023-10-24</p>
+  <p class="date">2023-10-25</p>
 </section>
 <section id="contact-info" class="slide level2">
 <h2>Contact Info</h2>
@@ -452,8 +452,8 @@ Kent Riemondy
 <div class="column" style="width:&quot;50%;">
 <div class="cell">
 <div class="cell-output-display">
-<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-dc04601881f2a2381fc5" style="width:70%;height:70%;"></div>
-<script type="application/json" data-for="htmlwidget-dc04601881f2a2381fc5">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = TD]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  load [label= \"Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()\"]\n  \n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n addPerCellQCMetrics()\n plotColData()\"]\n  norm [label = \"Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()\"]\n  dim_red [label = \"Dimensionality reduction via PCA \n runPCA()\"]\n  cluster [label = \"Clustering\n clusterCells()\"]\n  viz [label = \"Make 2D-Visualization\nrunUMAP()\"]\n  \n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  \n  markers [label = \"Discover cell type markers \nscoreMarkers()\"]\n  annot [label = \"Annotate cell types\nclustifyr and SingleR\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  load -> cell_qc \n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-510ca93567bb48c78abc" style="width:70%;height:70%;"></div>
+<script type="application/json" data-for="htmlwidget-510ca93567bb48c78abc">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = TD]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  load [label= \"Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()\"]\n  \n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n addPerCellQCMetrics()\n plotColData()\"]\n  norm [label = \"Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()\"]\n  dim_red [label = \"Dimensionality reduction via PCA \n runPCA()\"]\n  cluster [label = \"Clustering\n clusterCells()\"]\n  viz [label = \"Make 2D-Visualization\nrunUMAP()\"]\n  \n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  \n  markers [label = \"Discover cell type markers \nscoreMarkers()\"]\n  annot [label = \"Annotate cell types\nclustifyr and SingleR\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  load -> cell_qc \n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </div><div class="column" style="width:&quot;50%;">
@@ -463,7 +463,7 @@ Kent Riemondy
 <li class="fragment"><p>Use PCA to reduce the size of the dataset to ~20-50 dimensions</p></li>
 <li class="fragment"><p>Use UMAP or tSNE to further reduce the PCA matrix into 2D for visualization</p></li>
 <li class="fragment"><p>Use clustering on PCA matrix to identify clusters of related cells.</p></li>
-<li class="fragment"><p>Find <code>marker genes</code> that are specifically expressed in each cluster.</p></li>
+<li class="fragment"><p>Find marker genes that are specifically expressed in each cluster.</p></li>
 <li class="fragment"><p>Compare the gene expression profile of each cluster to public data to help annotate the cell type.</p></li>
 </ul>
 </div>
@@ -498,7 +498,7 @@ Kent Riemondy
 <div class="columns">
 <div class="column">
 <p>Normalization attempts to correct for technical biases that will distort biological signal in the data.</p>
-<p>A large source of variation arises due to differences in sequencing depth between cells. See PCA perform on unnormalized counts on right -&gt;</p>
+<p>A large source of variation arises due to differences in sequencing depth between cells. See PCA performed on unnormalized counts on right -&gt;</p>
 <p>We also have the same mean expression and variance relationship as seen in bulk-RNA-seq. More abundant RNAs have more variance, which means they will contribute more to the clustering than lower abundance RNAs unless corrected.</p>
 </div><div class="column">
 <div class="cell">
@@ -572,7 +572,7 @@ Kent Riemondy
 <p>Dimensionality reduction is the concept of transforming high dimensional data and representing it with a smaller set of dimensions.</p>
 <p>We can reduce the # of dimensions without loosing much information because many features (genes) are highly correlated which can be approximated with fewer dimensions.</p>
 <p>This is analogous to reducing the gene expression data into a set of metagenes that represents the expression of many correlated genes.</p>
-<p>Using fewer dimensions makes computation much quicker and as we will see will reorder the data in a manner that captures the heterogeneity in the data</p>
+<p>Using fewer dimensions makes computation much quicker and as we will see will reorder the data in a manner that still captures the heterogeneity in the data.</p>
 </section>
 <section id="dimensionality-reduction-via-pca" class="slide level2 smaller">
 <h2>Dimensionality reduction via PCA</h2>
@@ -592,12 +592,12 @@ Kent Riemondy
 <div class="column" style="width:60%;">
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>     gene_1    gene_2 gene_noise_1 gene_noise_2         ...
-1 -2.995217 -2.123704  0.089215287  -0.40819808 -0.48037882
-2 -2.821900 -2.933205 -0.339377410  -0.03582506  0.41886793
-3 -2.278693 -2.375272  0.131539067  -0.42624492  0.28643147
-4 -2.167279 -2.535480  0.098178061  -0.20509451 -0.06692551
-5 -1.528019 -1.310610  0.007170167   0.04159706  0.03533156</code></pre>
+<pre><code>     gene_1    gene_2 gene_noise_1 gene_noise_2 gene_noise_3
+1 -2.995217 -2.123704  0.089215287  -0.40819808  -0.48037882
+2 -2.821900 -2.933205 -0.339377410  -0.03582506   0.41886793
+3 -2.278693 -2.375272  0.131539067  -0.42624492   0.28643147
+4 -2.167279 -2.535480  0.098178061  -0.20509451  -0.06692551
+5 -1.528019 -1.310610  0.007170167   0.04159706   0.03533156</code></pre>
 </div>
 </div>
 </div><div class="column" style="width:40%;">
@@ -691,8 +691,8 @@ Kent Riemondy
 <p>[A]sking for an unqualified “best” clustering is akin to asking for the best magnification on a microscope without any context - OSCA book</p>
 </blockquote>
 </section>
-<section id="clustering-1" class="slide level2 smaller">
-<h2>Clustering</h2>
+<section id="graph-based-clustering" class="slide level2 smaller nonincremental">
+<h2>Graph based clustering</h2>
 <div class="columns">
 <div class="column">
 <p>Approach:</p>
@@ -705,7 +705,7 @@ Kent Riemondy
 </div><div class="column">
 <div class="cell">
 <div class="cell-output-display">
-<p><img data-src="slides-32_files/figure-revealjs/clustering-1.png" width="864"></p>
+<p><img data-src="slides-32_files/figure-revealjs/clustering-1.png" width="1152"></p>
 </div>
 </div>
 </div>
