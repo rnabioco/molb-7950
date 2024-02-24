@@ -1,5 +1,7 @@
 # molb-7950
 
+[![quarto build](https://github.com/rnabioco/molb-7950/actions/workflows/quarto.yaml/badge.svg)](https://github.com/rnabioco/molb-7950/actions/workflows/quarto.yaml)
+
 Course materials for "MOLB 7950: Informatics and Statistics for Molecular Biology".
 
 ## Installing local packages
