@@ -1,8 +1,8 @@
 on:
-  push:
+  pull_request:
     branches: main
     
-name: quarto build 
+name: quarto pr 
 
 permissions: read-all
 
@@ -38,11 +38,22 @@ jobs:
         uses: r-lib/actions/setup-renv@v2
         with:
           cache-version: 1
-          
-      - name: 🚀 Publish to GitHub Pages (and render)
-        uses: quarto-dev/quarto-actions/publish@v2
+
+      - name: Render Quarto Project
+        uses: quarto-dev/quarto-actions/render@v2
+                
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3.0
         with:
-          target: gh-pages
+          publish-dir: './_site'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message:
+            'Deploy from GHA: ${{ github.event.pull_request.title || github.event.head_commit.message }} (${{ github.sha }})'
+          # these default to 'true'
+          enable-commit-comment: false
+          enable-github-deployment: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # this secret is always available for github actions
-      
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          
