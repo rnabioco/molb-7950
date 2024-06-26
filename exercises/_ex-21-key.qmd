@@ -100,12 +100,12 @@ track_info <-
     data_track = purrr::map2(
       big_wig, sample_type,
       ~ DataTrack(
-          .x,
-          name = .y,
-          background.title = "white",
-          col.title = "black",
-          col.axis = "black",
-          fontsize = 16
+        .x,
+        name = .y,
+        background.title = "white",
+        col.title = "black",
+        col.axis = "black",
+        fontsize = 16
       )
     )
   ) |>
@@ -202,7 +202,7 @@ total_reads <- 16e6
 genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
 genome_size <- sum(genome$size)
 
-genome_lambda <- total_reads / genome_size 
+genome_lambda <- total_reads / genome_size
 
 peak_calls <-
   abf1_tbl |>
@@ -224,10 +224,10 @@ Let's take a look at a plot of the p-value across a chromosome. What do you noti
 ggplot(
   filter(peak_calls, chrom == "chrII"),
   aes(start, -log10(pval))
-) + 
+) +
   geom_line() +
   xlim(track_start, track_end) +
-  theme_cowplot() 
+  theme_cowplot()
 ```
 
 How many peaks are called in this region?
@@ -235,13 +235,13 @@ How many peaks are called in this region?
 ```{r}
 #| label: n-peaks
 # most stringent cut-off
-peak_calls_sig <- 
+peak_calls_sig <-
   filter(
     peak_calls,
     fdr == 0
-    ) |>
-    # collapse neighboring, significant sites
-    bed_merge(max_dist = 20)
+  ) |>
+  # collapse neighboring, significant sites
+  bed_merge(max_dist = 20)
 
 filter(
   peak_calls_sig,

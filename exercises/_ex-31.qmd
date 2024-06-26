@@ -103,7 +103,6 @@ names(letters) <- LETTERS
 
 # subset by name
 letters[c("A", "Z")]
-
 ```
 
 Matrices are 2 dimensional vectors and have similar subsetting rules except there are two dimensions, rows and columns.
@@ -127,7 +126,6 @@ m[rowSums(m) > 50, ]
 
 # extract columns with minimum values < 8
 m[, colMins(m) < 8]
-
 ```
 
 The base R `data.frame` and Bioconductor `DataFrame` can also be subset with the `[` and we can reference individual vectors in a data.frame using `$`. 
@@ -286,7 +284,6 @@ sce[genes_to_keep, ]
 
 cells_to_keep <- c("ACTATGGAGGTCCCTG", "GCTGCAGTCCGATCTC", "TCTCAGCTCGCCGAAC")
 sce[, cells_to_keep]
-
 ```
 
 
@@ -311,10 +308,11 @@ ah <- AnnotationHub()
 # download ensembl database
 ens_db <- ah[["AH113665"]]
 
-gene_names <- mapIds(ens_db, 
-                     keys=rownames(sce), 
-                     keytype = "GENEID",
-                     column="SYMBOL")
+gene_names <- mapIds(ens_db,
+  keys = rownames(sce),
+  keytype = "GENEID",
+  column = "SYMBOL"
+)
 
 rowData(sce)$gene <- gene_names
 rowData(sce)$gene_id <- rownames(sce)
@@ -324,8 +322,10 @@ rowData(sce)
 We'd like to set the rownames of the object to symbols, but some of these are ` `, `NA` or duplicated which will cause problems. `uniquifyFeatureNames()` is a convenience function that will rename gene symbols that are `NA` or duplicated values to the ensembl ID or a combination of gene symbol and ensembl ID.
 
 ```{r}
-rownames(sce) <- uniquifyFeatureNames(rowData(sce)$gene_id, 
-                                      rowData(sce)$gene)
+rownames(sce) <- uniquifyFeatureNames(
+  rowData(sce)$gene_id,
+  rowData(sce)$gene
+)
 head(rownames(sce))
 ```
 
@@ -357,7 +357,7 @@ To calculate these metrics we can use `addPerCellQCMetrics` from scater. Mitocho
 ```{r}
 # identify subset of genes that are from mitochondrial genome
 is_mito <- startsWith(rowData(sce)$gene, "MT-")
-sce <- addPerCellQCMetrics(sce, subsets=list(Mito=is_mito))
+sce <- addPerCellQCMetrics(sce, subsets = list(Mito = is_mito))
 colData(sce)
 ```
 
@@ -376,7 +376,7 @@ plotColData(sce, y = "detected", x = "sum", colour_by = "subsets_Mito_percent")
 ```
 
 ```{r}
-plotColData(sce, y = "subsets_Mito_percent", x = "sum") + 
+plotColData(sce, y = "subsets_Mito_percent", x = "sum") +
   labs(x = "# of counts")
 ```
 
@@ -384,7 +384,7 @@ Also note that you can easily extract the `colData()` as a data.frame to use wit
 
 ```{r}
 cell_info <- as.data.frame(colData(sce))
-ggplot(cell_info, aes(sum, subsets_Mito_percent )) +
+ggplot(cell_info, aes(sum, subsets_Mito_percent)) +
   geom_point()
 ```
 
@@ -425,11 +425,12 @@ Labeling the qc failed cells in plots can be helpful.
 ```{r}
 sce$pass_qc <- sce$subsets_Mito_percent < 20 & sce$detected > 500 & sce$sum > 1000
 
-plotColData(sce, y = "subsets_Mito_percent", 
-            x = "sum", 
-            colour_by = "pass_qc") + 
+plotColData(sce,
+  y = "subsets_Mito_percent",
+  x = "sum",
+  colour_by = "pass_qc"
+) +
   labs(x = "# of counts")
-
 ```
 
 Lastly we can subset the `SingleCellExperiment` to exclude the low-quality cells. 
@@ -467,7 +468,7 @@ digraph workflow {
   # green
   node [fillcolor = '#009E73']
   load [label= 'Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()']
-  
+
   # blue
   node [fillcolor = '#56B4E9']
   cell_qc [label = 'QC cells\n addPerCellQCMetrics()\n plotColData()']
@@ -479,17 +480,17 @@ digraph workflow {
   dim_red [label = 'Dimensionality reduction via PCA \n runPCA()']
   cluster [label = 'Clustering\n clusterCells()']
   viz [label = 'Make 2D-Visualization\nrunUMAP()']
-  
+
   # blue
   node [fillcolor = '#56B4E9']
-  
+
   markers [label = 'Discover cell type markers \nscoreMarkers()']
   annot [label = 'Annotate cell types\nclustifyr and SingleR']
 
   edge [color = black
         fontname = 'Helvetica']
 
-  load -> cell_qc 
+  load -> cell_qc
   cell_qc -> norm
   norm -> feature
   norm -> markers
@@ -513,7 +514,7 @@ digraph workflow {
 Normalization attempts to correct for technical biases that will distort biological signal in the data. A large source of variation arises due to differences in sequencing depth between cells. This can be seen by performing PCA on the unnormalized counts. We will use `runPCA` from scater to perform PCA. 
 
 ```{r}
-# set seed for functions with a randomized component 
+# set seed for functions with a randomized component
 # to obtain the same result each execution
 set.seed(20231023)
 sce <- runPCA(sce, exprs_values = "counts", name = "count_PCA")
@@ -529,7 +530,7 @@ Note that PC1 is correlated with the total UMI counts (`sum`), meaning that the 
 ```{r}
 plot_df <- makePerCellDF(sce, c("count_PCA", "sum"))
 
-ggplot(plot_df, aes(count_PCA.1, sum)) + 
+ggplot(plot_df, aes(count_PCA.1, sum)) +
   geom_point()
 ```
 
@@ -541,7 +542,7 @@ To normalize we will use 3 functions from the scran package. The normalization e
 #| warning: false
 set.seed(20231023)
 clusters <- quickCluster(sce)
-sce <- computeSumFactors(sce, clusters=clusters)
+sce <- computeSumFactors(sce, clusters = clusters)
 sce <- logNormCounts(sce)
 ```
 
@@ -557,7 +558,7 @@ plotReducedDim(sce, "PCA", colour_by = "sum")
 
 ```{r}
 plot_df <- makePerCellDF(sce, c("PCA", "sum"))
-ggplot(plot_df, aes(PCA.1, sum)) + 
+ggplot(plot_df, aes(PCA.1, sum)) +
   geom_point()
 ```
 

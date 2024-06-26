@@ -37,8 +37,8 @@ Next, load the coverage tracks for CUT&RUN data.
 
 ```{r}
 #| label: make-tracks
-track_start <- 1e5 
-track_end <- 2e5 
+track_start <- 1e5
+track_end <- 2e5
 
 # genes track
 sgd_genes_trk <-
@@ -75,12 +75,12 @@ track_info <-
     data_track = purrr::map2(
       big_wig, sample_type,
       ~ DataTrack(
-          .x,
-          name = .y,
-          background.title = "white",
-          col.title = "black",
-          col.axis = "black",
-          fontsize = 12
+        .x,
+        name = .y,
+        background.title = "white",
+        col.title = "black",
+        col.axis = "black",
+        fontsize = 12
       )
     )
   ) |>
@@ -194,11 +194,11 @@ ggplot(
   filter(peak_calls, chrom == "chrII"),
   # convert p-values to positive values for plotting
   aes(start, -log10(pval))
-) + 
+) +
   geom_line() +
   xlim(track_start, track_end) +
   theme_cowplot() +
-  geom_hline(yintercept = 20, color = 'red')
+  geom_hline(yintercept = 20, color = "red")
 ```
 ### Question 4
 
@@ -206,7 +206,7 @@ How many peaks are called in this region? Use the cutoff you defined above to id
 "peaks" of Reb1 binding.
 
 ```{r}
-peak_calls |> 
+peak_calls |>
   filter(-log10(pval) >= 20) |>
   filter(start >= track_start & end <= track_end) |>
   bed_merge(max_dist = 20) |>
@@ -216,7 +216,7 @@ peak_calls |>
 How many *total* peaks are identified in the genome using this cutoff?
 
 ```{r}
-peak_calls |> 
+peak_calls |>
   filter(-log10(pval) >= 20) |>
   bed_merge(max_dist = 20) |>
   nrow()
@@ -225,13 +225,13 @@ peak_calls |>
 ```{r}
 #| label: n-peaks
 # most stringent cut-off
-peak_calls_sig <- 
+peak_calls_sig <-
   filter(
     peak_calls,
-    -log10(pval) >= 20, 
-    ) |>
-    # collapse neighboring, significant sites
-    bed_merge(max_dist = 20)
+    -log10(pval) >= 20,
+  ) |>
+  # collapse neighboring, significant sites
+  bed_merge(max_dist = 20)
 
 filter(
   peak_calls_sig,
