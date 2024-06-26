@@ -1,5 +1,6 @@
 ---
 title: "MOLB 7950: Informatics and Statistics for Molecular Biology"
+
 format:
   html:
     theme:
@@ -9,6 +10,7 @@ format:
     code-copy: true
     code-overflow: wrap
     toc: true
+    
 ---
 
 This page contains an outline of the topics, content, and assignments for the semester. Note that this schedule will be updated as the semester progresses, with all changes documented here.
@@ -24,9 +26,9 @@ library(glue)
 library(gt)
 library(here)
 library(emo)
+library(yaml)
 
-room <- "TBD"
-time <- "9:00-10:30am"
+params <- yaml::read_yaml(here("_variables.yml"))
 
 qmd_exists <- function(path) {
   path <- path_ext_set(here(path), ".qmd")
@@ -105,8 +107,8 @@ gt(
   rowname_col = "class_num"
 ) |>
   tab_header(
-    title = md("**MOLB 7950 - {{< var semester >}} Schedule**"),
-    subtitle = glue("Classes held in-person in {room}, {time}")
+    title = md(glue("**MOLB 7950 - {params$course$semester} Schedule**")),
+    subtitle = glue("Classes held in-person in {params$course$room}, {params$course$time}")
   ) |>
   fmt_date(
     columns = date,
