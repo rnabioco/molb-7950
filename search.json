@@ -7,207 +7,201 @@
     "text": "dummy file so that downlit ends up\n\n\nin the renv lock file.\n\nlibrary(downlit)"
   },
   {
-    "objectID": "resources/plot-competition.html",
-    "href": "resources/plot-competition.html",
-    "title": "Plot competition entries",
+    "objectID": "resources/bootcamp-resources.html",
+    "href": "resources/bootcamp-resources.html",
+    "title": "Bootcamp resources",
     "section": "",
-    "text": "Vote for your favorites at Google Form.\n\nPlot 1\n\n\nCode\nlibrary(tidyverse)\nlibrary(palmerpenguins)\ntst=penguins\n# View(tst)\ntstpp=drop_na(tst)\n# View(tstpp)\nggplot(data=tstpp,aes(x=body_mass_g/6350.29,                 y=flipper_length_mm))+geom_point(aes(shape=sex, color=species),alpha=0.4, shape= 8)+ labs(title=\" Stones & Flippers in Penguins\",x=\"Stones is a totally normal unit\", y=\"aQuAtIc LoCoMoTiOn ApPeNdAgE (mm)\")+theme(panel.background = element_rect(fill = \"magenta\"))+theme(panel.grid.major = element_line(linewidth = 5, color = \"#ff1493\"))+theme(panel.grid.minor = element_line(linewidth = 5, color = \"#ffd700\"))+theme(legend.background = element_rect(fill = \"yellow\"))+theme(legend.title = element_text(angle = 310, face = \"bold\", color = \"#FFFACD\", size = 56))+theme(axis.text.y = element_text(face = \"bold\", color = \"#EEE685\", size = 5, angle = 67))+theme(axis.text.x = element_text(face = \"italic\", color = \"#8B8970\", size = 5, angle = 67))+theme( legend.text = element_text(face=\"italic\",color = \"red\", size = 36))+theme( legend.key = element_rect(color = \"white\", fill = \"olivedrab1\"))+theme(axis.title.y = element_text(color = \"#ffd700\", angle = 90, size = 9))+ theme(axis.title.x = element_text(size = 16, color = \"magenta\", angle = 0))+theme(plot.background = element_rect(fill = \"red\"))+theme(plot.title = element_text(face = \"plain\", color = \"magenta\", size = 24, angle = 0))\n\n\n\n\n\n\n\n\n\n\n\nPlot 2\n\n\nCode\nlibrary(tidyverse)\nlibrary(knitr)\nlibrary(here)\n\nlibrary(cowplot) # to make panels of plots\nlibrary(ggridges) # ridge plots\n\n#HOW GOOD IS THE SIMPSON\nsimpson_tibble &lt;- read_csv(here(\"data/plot-competition/simpsons_episodes.csv.gz\"))\nsimpson_tibble_cleaned &lt;- simpson_tibble |&gt; select(-image_url, -video_url)\n\nsimpson_tibble_cleaned_1.1 &lt;- simpson_tibble_cleaned |&gt; \n  group_by(season, us_viewers_in_millions) |&gt;\n  summarise(season, us_viewers_in_millions)\n\nsimpson_plot_ugly &lt;- ggplot(\n  simpson_tibble_cleaned,\n  aes(x = season,\n      y = us_viewers_in_millions,\n      color = imdb_rating,\n      size = imdb_votes\n      )\n  ) +\n  geom_point(alpha = 0.1) +\n  facet_wrap (\n    ~ imdb_rating,\n    nrow = 1\n  ) +\n   labs(\n    title = \"istheSiMpSoNsSTILLPOPULAR!!!!!!!!!!!!\",\n    subtitle = \"D'OOOOOOOOOHHHHHHHHHHH?\",\n    y = \"THEPPLWHOWATCH\",\n    x = \"SIMIPSONS OVER THE YEARS\",\n  ) +\n  theme(\n    plot.background = element_rect(fill = \"limegreen\"),\n    axis.text.x = element_text( color = \"purple\", size = 18, angle = 156), \n    axis.text.y = element_text( color = \"red\", size = 18, angle = 135), \n    plot.title = element_text( color = \"green\", size = 10, angle = 263), \n    plot.caption = element_text(color = \"gray\", size = 22), \n    axis.title.x = element_text(size = 22, color = \"hotpink\", angle = 66), \n    axis.title.y = element_text(color = \"maroon\", angle = 473, size = 17),\n    legend.background = element_rect(fill = \"yellow\"), \n    legend.title = element_text(angle = 71, face = \"bold\", color = \"blue\", size = 12), \n    legend.key = element_rect(color = \"green\", fill = \"lightblue\"), \n    legend.text = element_text(color = \"cyan\", size = 14)\n    ) \nsimpson_plot_ugly\n\n\n\n\n\n\n\n\n\n\n\nPlot 3\n\n\nCode\nlibrary(tidyverse)\n\nggplot(starwars,\n       aes(\n         x = height,\n         y = birth_year,\n         color = homeworld\n       )) +\n  geom_point() +\n  labs(\n    title = \"starwars?\"\n  ) +\n  theme(\n    plot.title = element_text(face = \"italic\", color = \"yellow\", size = 16, angle = -45),\n    plot.background = element_rect(fill = 'green'),\n    panel.background = element_rect(fill = 'tomato1'),\n    plot.caption = element_text(),\n    legend.position = \"none\",\n    axis.title = element_text(),\n    axis.text = element_blank(),\n    axis.ticks = element_blank()) +\n  coord_polar()\n\n\n\n\n\n\n\n\n\n\n\nPlot 4\n\n\nCode\nlibrary(tidyverse)\nlibrary(palmerpenguins)\npenguins_tbl = as_tibble(penguins)\n\npenguin2 &lt;- drop_na(penguins_tbl)\n\nggplot(\n  penguin2,\n  aes(\n    x = bill_length_mm,\n    y = flipper_length_mm,\n    color = species,\n    shape = sex\n  )\n) +\n  geom_point(alpha = .65, size = 10) +\n  xlim(30,61) +\n  ylim(150,250) +\n  labs(\n    x = \"Choose ur fighter\",\n    y = \"How big that flipper?\",\n    title = \"What penguin wins in a fight?\",\n    caption = \"Fight club: antarctica edition\"\n    ) + \n  theme(\n    axis.text.x = element_text(family = \"serif\", face = \"bold\", color = \"purple\", size = 20, angle = 11),\n    axis.text.y = element_text(family = \"luminari\", face = \"bold.italic\", color = \"yellow\", size = 24, angle = 135),\n    plot.background = element_rect(fill = \"#8c510a\"),\n    plot.title = element_text(family = \"luminari\", face = \"bold\", color = \"green\", size = 20, angle = 1, line= -5 ), \n    plot.caption = element_text(family = \"short\", face = \"italic\", color = \"#35978f\", size = 26, angle = 8), \n    axis.title.x = element_text(family = \"mono\", size = 30, color = \"blue\", angle = 183), \n    axis.title.y = element_text(color = \"darkorange\", angle = 275, size = 17),\n    legend.background = element_rect(fill = \"#dfc27d\"),\n     legend.title = element_text(family = \"short\", angle = 11, face = \"bold\", color = \"hotpink\", size = 9), \n    legend.key = element_rect(color = \"darkgreen\", fill = \"red\"), \n    legend.text = element_text(color = \"yellow\", size = 10, angle = 187, face = \"italic\"), \n    panel.background = element_rect(fill = \"brown\"), \n    panel.grid.major.x = element_line(linewidth = 5, color = \"yellow\"),\n      panel.grid.minor = element_line(linewidth = 3, color = \"red\"),\n    panel.grid.major.y = element_line(color = \"green\", linewidth = 4),\n    \n   \n  )\n\n\n\n\n\n\n\n\n\n\n\nPlot 5\n\n\nCode\nggplot(\n  quakes,\n  aes(\n    x = lat,\n    y = long,\n    fill = mag,\n  )\n) +\n  geom_hex(fill = \"orange2\") +\n  geom_rug(sides = \"trbl\", alpha = 1/2, position = \"jitter\", fill = \"sienna1\") +\n  geom_violin(fill = \"yellow2\") +\n  scale_y_reverse() + \n  scale_x_continuous() +\n  labs(\n    x = \"the higher the latittude, the higher the altitude\",\n    y = \"totally longitudinal\",\n    title = \"DroP THaT a$$ Like an &lt;ce&gt;&lt;b5&gt;&lt;ce&gt;&lt;b1&gt;&lt;cf&gt;&lt;81&gt;&lt;cf&gt;&lt;84&gt;&lt;ce&gt;&lt;b7&gt;QUAKE\"\n  ) + \n  theme(\n    axis.text.x = element_text(family = \"Impact\",face = \"bold\", color = \"darkgoldenrod2\", size = 15, angle = 183, debug = TRUE), \n    axis.text.y = element_text(family = \"Courier New\", face = \"bold\", color = \"darkgoldenrod3\", size = 15, angle = 290, debug = TRUE), \n    axis.title.x = element_text(family=\"Comic Sans MS\", face = \"bold\", color = \"blanchedalmond\", size = 22, debug = TRUE),\n    axis.title.y = element_text(family=\"Comic Sans MS\", face = \"bold\", color = \"bisque1\", size = 22, debug = TRUE),\n    panel.background = element_rect(fill = \"burlywood1\", color = \"chocolate1\", linewidth = 4), \n    plot.background = element_rect(fill = \"khaki1\"),\n    panel.grid.major = element_line(linewidth = 1, color = \"tan1\"),\n    panel.grid.minor = element_line(linewidth = 4, color = \"lightgoldenrod1\"),\n    plot.title = element_text(face = \"bold\", color = \"darkgoldenrod1\", size = 20)\n  )\n\n\n\n\n\nPlot 6\n\n\nCode\nlibrary(ggpubr)\nlibrary(jpeg)\nurl &lt;- \"https://i.imgur.com/qtPINjN.jpg\"\ndownload.file(url, destfile = here(\"data/plot-competition/trees.jpg\"))\nimg &lt;- jpeg::readJPEG(here(\"data/plot-competition/trees.jpg\"))\n\nggplot(\n data = trees,\n  mapping = aes(\n    x = Height,\n    y = Girth,\n    color = count(x),\n    size = 10\n  )\n) +\n  background_image(img) +\n  annotate(\"rect\", \n           xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf,\n           fill = \"green\", alpha = .8) +\n  geom_jitter(\n    aes(\n    fill = Volume,\n    size = Height\n  ), \n  alpha = 0.9,\n  shape = 24,\n  color = \"magenta\"\n) +\n  theme(\n    plot.background = element_rect(fill = \"magenta\"),\n    axis.text.x = element_text(face = \"bold\", color = \"orange\", size = 12, angle = 200),\n    axis.text.y = element_text(face = \"bold\", color = \"yellow\", size = 18, angle = 179),\n    axis.title.x = element_text(size = 34, color = \"grey\", angle = 90), \n    axis.title.y = element_text(color = \"maroon\", angle = 180, size = 17),\n  ) +\n  labs(\n    title = \"nature \\U1F600\",\n    x = \"tall\",\n    y = \"beefy\"\n  ) +\ntheme(legend.position = \"none\")\n\n\n\n\n\nPlot 7\n\n\nCode\nlibrary(tidyverse)\nlibrary(here)\nlibrary(knitr)\nlibrary(palmerpenguins)\nlibrary(cowplot)\nlibrary(ggridges)\nlibrary(datasets)\n\nchk_tbl &lt;- as_tibble(ChickWeight)\n\nggplot(\n  chk_tbl,\n  aes(\n    x = Time,\n    y = weight,\n    color = Diet,\n    size = weight\n  )\n) + \n  geom_point(\n  ) + \n  labs(\n    title = \"how much chonk can a little chick chonk if a\\nlittle chick could chomp chomp?\",\n    subtitle = \"cheep! cheep!                                       chomp!\",\n    x = \"time\",\n    y = \"chick chonk\",\n    legend = \"dr. chomp's\\nexperimental diet programs\",\n    Diet = \"dr. chomp's\\nexperimental diet programs\"\n  ) +\n  xlim(\n    -3, 25\n  )  + \n  theme(\n    axis.text.x = element_text(face = \"bold.italic\", color = \"#FFE70F\", size = 18, angle = 180),\n    axis.text.y = element_text(face = \"bold\", color = \"#FFE70F\", size = 25, angle = 290),\n    axis.title.x = element_text(face = \"bold\", color = \"lightgoldenrod3\", size = 26, angle = 358), \n    axis.title.y = element_text(face = \"bold\", color = \"lightgoldenrod3\", size = 12, angle = 275),\n    plot.background = element_rect(fill = \"#C4C254\"),\n    plot.title = element_text(face = \"bold\", color = \"gold2\", size = 16, angle = 1),\n    legend.background = element_rect(fill = \"yellow\"),\n    legend.title = element_text(face = \"bold\", color = \"palevioletred4\", size = 10, angle = 156), \n    legend.text = element_text(color = \"lightgoldenrod3\", size = 14),\n    panel.background = element_rect(fill = \"khaki4\"),\n    panel.grid.major.y = element_line(color = \"rosybrown3\"), \n    panel.grid.major.x = element_line(color = \"cadetblue4\"),\n    panel.grid.minor = element_line(color = \"khaki4\")\n  ) +\n  scale_color_manual(\n    breaks = c(\"1\", \"2\", \"3\", \"4\"),\n    values = c(\"thistle1\", \"darkslategray4\", \"lightcyan\", \"yellowgreen\")\n  ) \n\n\n\n\n\n\n\n\n\n\n\nPlot 8\n\n\nCode\nlibrary(tidyverse)\nlibrary(palmerpenguins)\nlibrary(cowplot)\n\npenguins &lt;- drop_na(penguins)\n\nggplot(penguins,\n       aes(x = log2(bill_depth_mm),\n           y = flipper_length_mm/log2(bill_length_mm),\n           shape = (species))) +\n    geom_point(aes(color = body_mass_g/333), size = 8) +\n    scale_color_gradient2(low = \"magenta\", mid = \"yellow\", high = \"chartreuse4\", midpoint = 14) +\n    facet_grid(~ year) +\n    theme_minimal_grid() +\n    labs(\n        title = \"Fun penguin facts - by year (as inspired by a watermelon)\",\n        x = \"thick beak with log2?\",\n        y = \"long flipper/long bill? if long bill still long when log2\",\n        caption = \"Wut do u mean these data mean nothing to you?\"\n    ) +\n#Ugly theme inspired by Yunus Ozekin\n      theme(\n    axis.text.x = element_text(face = \"bold.italic\", color = \"#993333\", size = 29, angle = 330), \n    axis.text.y = element_text(face = \"bold\", color = \"orange\", size = 23, angle = 186), \n    plot.background = element_rect(fill = \"chartreuse4\"), \n    plot.title = element_text(face = \"bold\", color = \"chartreuse\", size = 65, angle = 1),\n    panel.background = element_rect(fill = \"brown1\"), \n    panel.grid.major.y = element_line(color = \"chartreuse1\", linetype = \"dotdash\", linewidth = 1.2), \n    panel.grid.major.x = element_line(color = \"magenta3\", linewidth = 3, linetype = \"twodash\"), \n    axis.title.x = element_text(face = \"italic\", size = 37, color = \"purple4\", angle = 12), \n    axis.title.y = element_text(face = \"bold\", color = \"yellow3\", angle = 273, size = 28),\n    plot.caption = element_text(size = 33, color = \"brown3\", angle = 4)\n)\n\n\n\n\n\n\n\n\n\n\n\nPlot 9\n\n\nCode\nlibrary(tidyverse)\nlibrary(ggplot2)\n\nlyrics &lt;- c(\"I was tired of my lady wed been together too long Like a worn-out recording of a favorite song So while she lay there sleepin I read the paper in bed And in the personal columns there was this letter I read If you like Pina Coladas and getting caught in the rain If youre not into yoga if you have half a brain If you like making love at midnight in the dunes on the cape Then Im the love that youve looked for write to me and escape\")\n\n# Process lyrics into vector\nlyrics &lt;- lyrics %&gt;%\n  tolower() %&gt;%\n  str_split(pattern = \" \") %&gt;%\n  unlist() %&gt;%\n  unique()\n\n# Create tibble\ncolada_tbl &lt;- tibble(song_lyrics_1 = lyrics)\n\n# Add values for similarity of each given word in the song to each other given word\nfor (num_x in 1:length(lyrics)){\n  new_vector &lt;- c()\n  for (num_y in 1:length(lyrics)){\n    characters_1 &lt;- str_split(lyrics[num_x], \"\")[[1]]\n    characters_2 &lt;- str_split(lyrics[num_y], \"\")[[1]]\n    similarity &lt;- sum(characters_1 %in% characters_2)/((length(characters_1)+length(characters_2))/2)\n    new_vector &lt;- c(new_vector,similarity)}\n  colada_tbl[lyrics[num_x]] &lt;- new_vector\n}\n\n# Function to add an beach scene\nocean &lt;- function(tbl,disp_word){\n  disp_word &lt;- unlist(str_split(disp_word,pattern = \"\"))\n    for (i in 1:length(disp_word)){\n      sea &lt;- sample(30:35,1)\n      foam &lt;- sample(2:6,1)\n      sand &lt;- 64 - sea - foam\n      tbl &lt;- tbl %&gt;%\n      rbind(c(disp_word[i],rep(1, sea), rep(0.2, foam), rep(-1, sand)))\n    }\n  return(tbl)\n}\n\n# Add in a beach scene with some random row names\ncolada_tbl &lt;- ocean(colada_tbl,'QWERTYUOPASDFGHJKLZXCVBNM1234567890')\n\n# Make into long tbl\ncolada_long &lt;- pivot_longer(colada_tbl, cols = lyrics,names_to = \"song_lyrics_2\", values_to = \"Similarity\")\n\n# Order tibble correctly for visualization\ncolada_long$song_lyrics_1 &lt;- factor(colada_long$song_lyrics_1, \n                                   levels = c(rev(unlist(str_split('QWERTYUOPASDFGHJKLZXCVBNM1234567890',pattern=\"\"))),rev(lyrics)))\n  \ncolada_long$song_lyrics_2 &lt;- factor(colada_long$song_lyrics_2, \n                                   levels = lyrics)\n\n# Make similarity values numeric\ncolada_long$Similarity &lt;- as.numeric(colada_long$Similarity)\n\n# Plot the Pi&lt;c3&gt;&lt;b1&gt;a Colada Art\nggplot(colada_long, aes(x = song_lyrics_2, y = song_lyrics_1)) +\n  geom_tile(aes(fill = Similarity)) + # Fill based on word similarity values\n  theme_minimal() +\n  theme(axis.text.x = element_text(angle = 45, hjust = 1, # Font, color, size, and orientation of axis labels\n                                   color = 'darkgrey',family = \"Comic Sans MS\"),\n        axis.text.y = element_text(angle = 0, hjust = 1, \n                                   color = 'darkgrey',family = \"Comic Sans MS\")) +\n  scale_fill_gradient2(low = \"#F0E68C\", high = \"skyblue\", mid = \"white\", midpoint = 0.2) + # Add scale of heatmap\n  geom_boxplot(aes(x = song_lyrics_2, y = Similarity*8-8, color = song_lyrics_2)) + # Add rainbow boxplots\n  scale_color_discrete() +\n  theme(legend.position = \"none\") + # Remove legend\n  theme(text = element_text(size = 6)) +\n  labs(title = \"DUNES ON THE CAPE\", # Add title and axis labels\n       x= 'Getting Caught in the Rain', \n       y = 'Pi&lt;c3&gt;&lt;b1&gt;a Coladas') +\n  theme(plot.title = element_text(size = 25,family = \"Times New Roman\",color='lavender', \n                                  face = 'bold', hjust = 0.5),\n        axis.title.x = element_text(size = 15,family = \"Comic Sans MS\",color='salmon'),\n        axis.title.y = element_text(size = 15,family = \"Comic Sans MS\",color='pink')) + # Add in \"Margaritaville\" text\n            geom_text(aes(x = 'like', y = 'like', label = 'Pi&lt;c3&gt;&lt;b1&gt;a Colada'),size = 3, \n                      color = 'skyblue') +\n            geom_text(aes(x = 'while', y = 'while', label = 'Pi&lt;c3&gt;&lt;b1&gt;a Colada'),size = 5, \n                      color = 'skyblue') +\n            geom_text(aes(x = 'columns', y = 'columns', label = 'Pi&lt;c3&gt;&lt;b1&gt;a Colada'),size = 8, \n                      color = 'skyblue') +\n            geom_text(aes(x = 'midnight', y = 'midnight', label = 'Pi&lt;c3&gt;&lt;b1&gt;a Colada'),size = 10, \n                      color = 'skyblue')\n\n\n\n\n\nPlot 10\n\n\nCode\nlibrary(tidyverse)\nlibrary(gganimate)\nlibrary(gifski)\nlibrary(cowplot)\n\n#Plot stacked columns with lengths as percent of world population per year\n# Pipe that assigns output as df and starts with the world population dataset\ndf &lt;- population |&gt;\n        mutate(percent_population=(population/max(population)*100)) |&gt;\n          filter(percent_population&gt;5) |&gt;\n            arrange(population)\np &lt;-  ggplot(data=df) +       \n      geom_col(aes(country, percent_population)) +\n      labs(title = 'Percent of World Population of Countries in {frame_time}', x='', y='') +\n      theme_cowplot() +\n      transition_time(as.integer(year)) +\n      ease_aes('linear') \n# Animate graphs and save animation\nsuppressWarnings(animate(p, renderer=gifski_renderer(), file_renderer=\"data/out/animation\"))\nanim_save(\"data/out/animation/gg_anim_wc.gif\")\n\n\n\n\n\nPlot 11\n\n\nCode\nlibrary(tidyverse)\nlibrary(gapminder)\n\nggplot(\n  gapminder,\n  aes(\n    x = lifeExp,\n    y = gdpPercap,\n    color = year,\n    shape = continent,\n    size = pop\n  )\n) +\n\n  geom_jitter(\n    color = \"#edfd07\", \n    fill = \"white\", \n    size = 10,\n    alpha = 0.2\n  ) +\n  scale_x_log10() +\n  scale_y_sqrt() +\n  labs(\n    x = \"When die?\",\n    y = \"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\",\n    title = \"money made x age\",\n    ) + \n  scale_x_discrete(position = \"top\") + \n  theme(\n    axis.text.x = element_text(face = \"bold.italic\", color = \"purple\", size = 18, angle = 180), \n    axis.text.y = element_text(face = \"italic\", color = \"white\", size = 12, angle = 90), \n    plot.title = element_text(face = \"bold.italic\", color = \"#6ef710\", size = 15, angle = 90), \n    axis.title.x = element_text(size = 10, color = \"pink\", angle = 270), \n    axis.title.y = element_text(color = \"white\", angle = 120, size = 20),\n    plot.background = element_rect(fill = \"#10f7ed\"), \n    legend.background = element_rect(fill = \"#6ef710\"), \n    legend.title = element_text(angle = 95, face = \"italic\", color = \"#edfd07\", size = 7), \n    legend.key = element_rect(color = \"magenta\", fill = \"#10f7ed\"), \n    legend.text = element_text(color = \"#10f7ed\", size = 8), \n    panel.background = element_rect(fill = \"magenta\"), \n    legend.position = \"right\",\n    panel.grid = element_blank()\n  )\n\n\n\n\n\nPlot 12\n\n\nCode\nlibrary(ggplot2)\nlibrary(dplyr)\n\ndata(\"starwars\")\nstarwars_data &lt;- starwars %&gt;%\n  select(name, height, mass, species)\n\ndat &lt;- data.frame(\n  x0 = rep(0, nrow(starwars_data)),\n  y0 = rep(0, nrow(starwars_data)),\n  x1 = runif(nrow(starwars_data)),\n  y1 = runif(nrow(starwars_data)),\n  shade = seq(1, nrow(starwars_data)),\n  size = 0.6\n)\n\nggplot(dat, aes(x = x0, y = y0, xend = x1, yend = y1, colour = shade, size = size)) +\n  geom_segment(show.legend = FALSE) +\n  coord_polar() +\n  scale_y_continuous(expand = c(0, 0)) +\n  scale_x_continuous(expand = c(0, 0)) + \n  scale_color_gradient(low = \"blue\", high = \"white\") + \n  scale_size(range = c(2, 10)) + \n  theme_void() +\n  theme(plot.background = element_rect(fill = \"black\"))\n\n\n\n\n\n\n\n\n\n\n\nPlot 13\n\n\nCode\nlibrary(readr)\nlibrary(tidyverse)\nlibrary(ggplot2)\nbfro_reports_geocoded &lt;- read_csv(here(\"data/plot-competition/bfro_reports_geocoded.csv.gz\"))\n\ncobigfoot = filter(\n  bfro_reports_geocoded,\n  state == \"Colorado\"\n)\n\nggplot(\n  cobigfoot,\n  aes(\n    x = conditions,\n    y = temperature_high\n  )\n) +\n  geom_point(\n    aes(\n      color = season,\n      size = wind_speed\n    ),\n    shape = 8,\n  ) +\n  coord_polar() +\n  labs(\n    x = \"Hows that sky?\",\n    y = \"Hot or Not: Temperature\",\n    title = \"Will YOU see Bigf00t?\",\n    subtitle = \"Colorado edition\",\n    caption = \"ItS BiGf00t SeAsON\"\n  ) +\n  scale_x_discrete(position = \"top\") +\n  theme(axis.title.x = element_text(family = \"mono\", color = \"lightblue\", face = \"bold\", size = 15)) +\n   theme(axis.title.y = element_text(family = \"sans\", color = \"blue\", face = \"bold\", size = 13)) +\n   theme(plot.caption = element_text(color = \"purple\", size = 22, angle = 20, family = \"mono\")) +\n   theme(plot.title = element_text(family = \"mono\",color = \"red\", hjust = 0.5, line = -10, size = 30))  +\n  theme(plot.subtitle = element_text(family = \"serif\",hjust = 0.75, angle = 5, line = -2, color = \"pink\", size = 25)) +\n  theme(plot.background = element_rect(fill = \"darkblue\")) +\n  theme(panel.background = element_rect(fill = \"yellow\")) +\n  theme(panel.grid.major = element_blank()) +\n  theme(legend.title = element_text(face = \"bold\", color = \"purple\", size = 5)) +\n  theme(legend.text = element_text(color = \"magenta\", size = 5)) +\n  theme(axis.text.x = element_text(family = \"mono\", color = \"lightblue\", face = \"bold\")) +\ntheme(axis.text.y = element_text(family = \"serif\", color = \"white\", face = \"bold\", size = 10)) + \n  geom_jitter(\n    color = \"green\",\n    shape = 12\n  )\n\n\n\n\n\n\n\n\n\n\n\nPlot 14\n\n\nCode\nlibrary(tidyverse)\nggplot(data = Orange,\n       mapping = aes(\n         x = age,\n         y =  circumference,\n         color = Tree,\n       )\n) +\n  geom_point() +\n  theme(panel.background = element_rect(fill = \"green\")) +\n  labs(\n    x = \"age\",\n    y = \"CIRCUMFERENCE\",\n    title = \"orange trees\",\n    ) +\n  theme(legend.position = \"bottom\") +\n  theme(plot.background = element_rect(fill = \"red\"))\n\n\n\n\n\n\n\n\n\n\n\nPlot 15\n\n\nCode\nlibrary(tidyverse)\nlibrary(DAAG)\n\ngreatLakes &lt;- as_tibble(greatLakes) %&gt;%\n  mutate(Michigan = michHuron, year = 1918:2009) %&gt;%\n  #, puddle_in_my_backyard = Ontario\n  #mutate(puddle_in_my_backyard = 0) %&gt;%\n  select(year, Huron = michHuron, everything()) %&gt;%\n  pivot_longer(cols = 2:6, names_to = \"lake\", values_to = \"heights\")\ngreatLakes$heights[552] = 2\n\nggplot(data = greatLakes, aes(x = year, y = heights^3, color = lake)) + \n  geom_point() + geom_line(alpha = 0.9, linewidth = 4) +\n  geom_vline(aes(xintercept = 1965), color = \"white\") +\n  geom_text(aes(label = \"lake level\", angle = 100), size = 2) +\n  theme(plot.background = element_rect(fill = \"mediumspringgreen\"),\n        plot.title = element_text(color = \"greenyellow\", size = 17, angle = 1), \n        plot.caption = element_text(color = \"white\", size = 22),#not in use\n        axis.title.x = element_text(size = 12, color = \"pink\", angle = 1), \n        axis.title.y = element_text(color = \"pink\", size = 12, angle = 92), \n        axis.ticks = element_line(color = \"pink\", linewidth = 13),\n        axis.text = element_text(color = \"green2\", face = \"bold\"),\n        legend.background = element_rect(fill = \"black\"), \n        legend.title = element_text(color = \"mediumorchid4\", size = 10, angle = 359), \n        legend.key = element_rect(color = \"orange\", fill = \"yellow\"), \n        legend.text = element_text(color = \"red\", size = 6, face = \"bold\"), \n        panel.background = element_rect(fill = \"red\"), \n        panel.grid.major.y = element_line(color = \"yellow\", linewidth = 10, linetype = \"dashed\"), \n        panel.grid.major.x = element_line(color = \"yellow\", linewidth = 0.1), \n        panel.grid.minor = element_line(color = \"green\", linewidth = 0.2)\n        #legend.position = \"bottom\"\n) +\n  labs(x = \"year\", y = \"heights (cubed)\",\n       title = \"gr8 lakes\") +\n  annotate(x = 1975, y = 3000000, label = \"1975: Edmund Fitzgerald sinks\", size = 2.5,  vjust = 3.5, geom=\"label\")\n\n\n\n\n\nPlot 16\n\n\nCode\nlibrary(tidyverse)\nlibrary(cowplot)\nlibrary(RColorBrewer)\nlibrary(Rtsne)\n\nsetup_coords &lt;- function(groups = 3, n = 100, sd = .05) {\n  tibble(\n    x = rep(1:groups, each = n) + rnorm(groups*n, sd = sd),\n    y = rep(seq(from = 0, to = 10, length.out = n), groups) + \n          rnorm(groups*n, sd = sd),\n    group = rep(letters[1:groups], each = n)\n  )\n}\n\ndo_tsne &lt;- function(coords, perplexity = 5) {\n  tsne_fit &lt;- coords %&gt;%\n    select(x, y) %&gt;%\n    scale() %&gt;%\n    Rtsne(perplexity = perplexity, max_iter = 500, check_duplicates = FALSE)\n  \n    tsne_fit$Y %&gt;%\n      as.data.frame() %&gt;%\n      cbind(select(coords, -x, -y))\n}\n\nfinal_plot &lt;- function(groups = 24, n = 800, sd = 4, perplexity = 100) {\n  setup_coords(groups = groups, n = n, sd = sd) %&gt;%\n    do_tsne(perplexity) %&gt;%\n    ggplot(aes(V1, V2, color = group)) + \n    geom_point(show.legend = FALSE) +\n    coord_fixed() + theme_void() + \n    ggtitle(\"It is a flower\")+\n    scale_color_brewer(palette='PiYG', type=\"seq\")+\n    theme(\n      plot.margin = margin(20, 20, 20, 20),\n      panel.border = element_rect(color = \"white\", fill = NA),\n      plot.title = element_text(family = \"serif\", hjust = 0.5, face = \"italic\")\n      )\n}\n\nfinal_plot(groups = 15, sd = 40)\n\n\n\n\n\nPlot 17\n\n\nCode\nlibrary(tidyverse)\nlibrary(knitr)\nlibrary(here)\nlibrary(ggridges)\nlibrary(viridis)\n\nggplot(\n  diamonds,\n  aes(\n    x = carat,\n    y = log10(depth) + sin(carat)\n  )\n) + \n  stat_density2d(\n    aes(fill = after_stat(density)), \n    geom = 'tile', \n    contour = F,\n    size = 0.22,\n    bins = 20,\n    linetype = 5,\n    show.legend = FALSE\n  ) +\n  scale_fill_viridis()+\n  geom_density2d(\n    aes(fill = ..level..), \n    geom = \"polygon\", \n    colour= \"white\",\n   linewidth = 0.25, \n   bins = 10\n  ) +\n  theme_void()+\n  xlim(0,2.5)+\n  ylim(1.9,2.9)\n\n\n\n\n\n\n\n\n\n\n\nPlot 18\n\n\nCode\nlibrary(tidyverse)\nlibrary(ggplot2)\nlibrary(RColorBrewer)\n\ncustom_colors&lt;-c(\"tan4\",\"olivedrab4\",\"orange3\")\n\nggplot(\n  data=iris,\n  mapping=aes(\n    x=Petal.Width,\n    y=Petal.Length,\n    fill=Species\n  )\n)+\n  geom_boxplot()+\n  labs(\n    x=\"Error\",\n    y=\"errors per error\",\n    color=\"error\",\n    title = \"Teefs\",\n    subtitle=\"ERROR codes COLLECTED infinity gauntlet style I am Thanos but better (or WORSE?????)\",\n  )+\n  theme_cowplot()+\n  scale_fill_manual(values=custom_colors)+\n  theme(\n    axis.text.x=element_text(color=\"pink4\",size = 18),\n    axis.text.y=element_text(color=\"purple4\",size=9),\n    panel.background = element_rect(fill=\"magenta\")\n  )\n\n\n\n\n\n\n\n\n\n\n\nPlot 19\n\n\nCode\nlibrary(tidyverse)\nlibrary(knitr)\nlibrary(here)\nlibrary(ggplot2)\nlibrary(tidyquant)\nlibrary(cowplot)\nlibrary(dplyr)\n\noptions(\"getSymbols.warning4.0\"=FALSE)\noptions(\"getSymbols.yahoo.warning\"=FALSE)\n\ntickers = c(\"BBBYQ\", \"GME\")\n\nprices &lt;- tq_get(tickers,\n                 from = \"2017-01-01\",\n                 to = \"2017-12-31\",\n                 get = \"stock.prices\")\n\nmeme_stocks &lt;- prices %&gt;%\n  group_by(symbol)\n\np2 &lt;- meme_stocks %&gt;%\n  ggplot(aes(x = date, y = adjusted, color = symbol)) +\n  geom_line(linewidth = 2) +\n  geom_point(shape=23, fill=\"blue\", color=\"yellow\", size=3) +\n  geom_smooth() +\n  geom_polygon() +\n  facet_grid(symbol ~ ., scales = \"free_y\") +\n  theme_cowplot(font_size = 20) +\n  labs(x = 'Date',\n       y = \"Adjusted Price\",\n       title = \"Before the Meme Stocks Era: Gamestop (GME) and Bed, Bath & Beyond (BBBYQ)\",\n       caption = \"Data Source from CodingFinance\") +\n  scale_x_date(date_breaks = \"month\",\n               date_labels = \"%b\\n%y\") +\n  theme(axis.text.x = element_text(face = \"bold\", color = \"#993333\", \n                           size = 12, angle = 45), plot.caption = element_text(color = \"red\", face = \"italic\", size = 15)) +\n  xlab(\"\\nDate\") + ylab(\"Adjusted Price\\n\")\n   #+\n  #geom_density(alpha = 0.5) #+\n  #transition_reveal(date, keep_last = TRUE) +\n  #view_follow(fixed_y=T)\n\nx &lt;- ggdraw() +\n  draw_image(\"https://i.kym-cdn.com/entries/icons/facebook/000/033/559/cover1.jpg\") +\n  draw_plot(p2) +\n  theme(rect = element_rect(fill = \"transparent\"))\nx\n\n\n\n\n\nPlot 20\n\n\nCode\nstorms1 &lt;- drop_na(storms)\nstorms2 &lt;- sample_n(storms1,100)\n\nstorms3 &lt;- ggplot(\n  storms2, \n  aes(\n    x = pressure,\n    y = wind,\n)\n) +\n  geom_point(\n    aes(\n       fill = pressure,\n      size = category\n      ),\n    alpha = 0.8,\n    shape = 25,\n    color = \"green\"\n  ) + coord_flip()+\n  theme_cowplot()+\n  labs(y =\"Wind speed\",\n       x =\" # Waffle Homes open\",\n       title = \"Is wafflehouse open?\")+\n  geom_jitter(\n    color = \"pink\",\n    shape = 17\n  )+ \n  theme(plot.background = element_rect(fill = \"magenta\")) +\n  theme(plot.title = element_text(color = \"orange\"))\n\nstorms3 + geom_line()\n\n\n\n\n\n\n\n\n\n\n\nPlot 21\n\n\nCode\nlibrary(tidyverse)\nlibrary(palmerpenguins)\nlibrary(cowplot)\n\npenguins_clean &lt;- drop_na(penguins)\n\npenguin_subset1 &lt;- penguins_clean |&gt;\n  sample_n(size = 40)\n\npenguin_subset2 &lt;- penguins_clean |&gt;\n  sample_n(size = 40)\n\npenguin_subset3 &lt;- penguins_clean |&gt;\n  sample_n(size = 40)\n\npenguin_subset4 &lt;- penguins_clean |&gt;\n  sample_n(size = 40)\n\nggplot(\n  penguins_clean,\n  aes(\n    x = body_mass_g,\n    y = species\n  )\n) +\n  geom_jitter(alpha=0.2)+\n  geom_jitter(\n    data = penguin_subset1,\n    color = \"black\",\n    aes(\n      show.legend = \"confused by the concept of weight\"\n    )\n  )+\n  geom_jitter(\n    data = penguin_subset2,\n    color = \"red\"\n  )+\n  geom_jitter(\n    data = penguin_subset3,\n    color = \"green\"\n  )+\n  geom_jitter(\n    data = penguin_subset4,\n    color = \"blue\"\n  )+\n    labs(\n      x = \"Fatness\",\n      y = \"\",\n      title = \"Name the Fattest Penguin\",\n      caption = \"be nice.\"\n    ) +\n  theme_bw()+\n  theme(\n    plot.caption = element_text(face = \"bold\", color = \"black\", size = 25),\n    plot.background = element_rect(fill = \"white\"),\n    legend.position = \"right\",\n    legend\n  )\n\n\n\n\n\nPlot 22\n\n\nCode\nlibrary(tidyverse)\nlibrary(palmerpenguins)\nlibrary(cowplot)\n\npenguins_clean &lt;- drop_na(penguins)\n\nggplot(\n  penguins_clean,\n  aes(\n    x = body_mass_g / 1000,\n    y = bill_length_mm)\n  )  +\n  geom_point(alpha = 1, shape = 21, colour = \"pink\", fill = \"orange\", size = 5, stroke = 5)"
-  },
-  {
-    "objectID": "resources/block-rna-resources.html",
-    "href": "resources/block-rna-resources.html",
-    "title": "Resources for the RNA block",
-    "section": "",
-    "text": "The paper describing salmon and its approach to transcriptome quantification\nThe documentation for salmon\nThe documentation for tximport",
+    "text": "Installing R\nInstalling RStudio\n\n\n\n\n\nAdvanced R\nComputational Genomics with R\nR for Data Science (R4DS)\nFundamentals of Data Visualization\n\nQuick reference:\n\nData tidying\nYour labels are too small.. Use cowplot themes to automatically adjust.\n\n\n\n\n\nThe Tidyverse is a collection of libaries implementing a principled approach to data analysis.\nBioconductor is a collection of libraries focused on biological data analysis.\nggplot2\ncowplot\nggthemes\n\n\n\n\nThe tidyverse cheat sheets are indispensible references.\nQuick reference:\n\nRStudio\nRmarkdown\ntidyr\ndplyr\nggplot2",
     "crumbs": [
       "Resources",
-      "RNA Block resources"
+      "Bootcamp resources"
     ]
   },
   {
-    "objectID": "resources/block-rna-resources.html#software",
-    "href": "resources/block-rna-resources.html#software",
-    "title": "Resources for the RNA block",
+    "objectID": "resources/bootcamp-resources.html#r-rstudio",
+    "href": "resources/bootcamp-resources.html#r-rstudio",
+    "title": "Bootcamp resources",
     "section": "",
-    "text": "The paper describing salmon and its approach to transcriptome quantification\nThe documentation for salmon\nThe documentation for tximport",
+    "text": "Installing R\nInstalling RStudio\n\n\n\n\n\nAdvanced R\nComputational Genomics with R\nR for Data Science (R4DS)\nFundamentals of Data Visualization\n\nQuick reference:\n\nData tidying\nYour labels are too small.. Use cowplot themes to automatically adjust.\n\n\n\n\n\nThe Tidyverse is a collection of libaries implementing a principled approach to data analysis.\nBioconductor is a collection of libraries focused on biological data analysis.\nggplot2\ncowplot\nggthemes\n\n\n\n\nThe tidyverse cheat sheets are indispensible references.\nQuick reference:\n\nRStudio\nRmarkdown\ntidyr\ndplyr\nggplot2",
     "crumbs": [
       "Resources",
-      "RNA Block resources"
+      "Bootcamp resources"
     ]
   },
   {
-    "objectID": "problem-sets/ps-01.html",
-    "href": "problem-sets/ps-01.html",
-    "title": "R Bootcamp Problem Set 1",
+    "objectID": "resources/bootcamp-resources.html#statistics",
+    "href": "resources/bootcamp-resources.html#statistics",
+    "title": "Bootcamp resources",
+    "section": "Statistics",
+    "text": "Statistics\n\nPractical Statistics for Data Scientists covers several fundamental concepts with code for both R and Python.\nModern Statistics for Modern Biology is written by two leading figures in computational biology and contains several examples using Bioconductor.\nStatistics for Biologists is a collection of articles on statistical topic.",
+    "crumbs": [
+      "Resources",
+      "Bootcamp resources"
+    ]
+  },
+  {
+    "objectID": "resources/bootcamp-resources.html#miscellaneous",
+    "href": "resources/bootcamp-resources.html#miscellaneous",
+    "title": "Bootcamp resources",
+    "section": "Miscellaneous",
+    "text": "Miscellaneous\n\nOrganizing projects\nHappy Git with R",
+    "crumbs": [
+      "Resources",
+      "Bootcamp resources"
+    ]
+  },
+  {
+    "objectID": "resources/block-dna-resources.html",
+    "href": "resources/block-dna-resources.html",
+    "title": "Resources for the DNA block",
     "section": "",
-    "text": "Each problem below is worth 10 points.\nThe problem set is due 12pm on Aug 30.\n\n\nEverything is good: 10 points\nPartially correct answers: 6-8 points\nReasonable attempt: 4 points"
+    "text": "These studies below laid the methodological groundwork for high throughput chromatin characterization by DNA sequencing. Some of the authors are here at CU Anschutz!\n\n\n\n\n\n\nTip\n\n\n\nData sets from these studies would be excellent choices as starting points for your final projects.\n\n\n\n\nHesselberth JR, Chen X, Zhang Z, Sabo PJ, Sandstrom R, Reynolds AP, Thurman RE, Neph S, Kuehn MS, Noble WS, Fields S, Stamatoyannopoulos JA. Global mapping of protein-DNA interactions in vivo by digital genomic footprinting. Nat Methods. 2009 19305407; PMCID: PMC2668528. [Link]\n\n\n\nBuenrostro JD, Giresi PG, Zaba LC, Chang HY, Greenleaf WJ. Transposition of native chromatin for fast and sensitive epigenomic profiling of open chromatin, DNA-binding proteins and nucleosome position. Nat Methods. 2013 PMID: 24097267; PMCID: PMC3959825. [Link]\n\n\n\nRamachandran S, Ahmad K, Henikoff S. Transcription and Remodeling Produce Asymmetrically Unwrapped Nucleosomal Intermediates. Mol Cell. 2017 PMID: 29225036; PMCID: PMC6421108. [Link]\n\n\n\nSkene PJ, Henikoff S. An efficient targeted nuclease strategy for high-resolution mapping of DNA binding sites. Elife. 2017 PMID: 28079019; PMCID: PMC5310842. [Link]\nKaya-Okur HS, Wu SJ, Codomo CA, Pledger ES, Bryson TD, Henikoff JG, Ahmad K, Henikoff S. CUT&Tag for efficient epigenomic profiling of small samples and single cells. Nat Commun. 2019 PMID: 31036827; PMCID: PMC6488672. [Link]",
+    "crumbs": [
+      "Resources",
+      "DNA Block resources"
+    ]
   },
   {
-    "objectID": "problem-sets/ps-01.html#problem-set",
-    "href": "problem-sets/ps-01.html#problem-set",
-    "title": "R Bootcamp Problem Set 1",
+    "objectID": "resources/block-dna-resources.html#foundational-work",
+    "href": "resources/block-dna-resources.html#foundational-work",
+    "title": "Resources for the DNA block",
     "section": "",
-    "text": "Each problem below is worth 10 points.\nThe problem set is due 12pm on Aug 30.\n\n\nEverything is good: 10 points\nPartially correct answers: 6-8 points\nReasonable attempt: 4 points"
+    "text": "These studies below laid the methodological groundwork for high throughput chromatin characterization by DNA sequencing. Some of the authors are here at CU Anschutz!\n\n\n\n\n\n\nTip\n\n\n\nData sets from these studies would be excellent choices as starting points for your final projects.\n\n\n\n\nHesselberth JR, Chen X, Zhang Z, Sabo PJ, Sandstrom R, Reynolds AP, Thurman RE, Neph S, Kuehn MS, Noble WS, Fields S, Stamatoyannopoulos JA. Global mapping of protein-DNA interactions in vivo by digital genomic footprinting. Nat Methods. 2009 19305407; PMCID: PMC2668528. [Link]\n\n\n\nBuenrostro JD, Giresi PG, Zaba LC, Chang HY, Greenleaf WJ. Transposition of native chromatin for fast and sensitive epigenomic profiling of open chromatin, DNA-binding proteins and nucleosome position. Nat Methods. 2013 PMID: 24097267; PMCID: PMC3959825. [Link]\n\n\n\nRamachandran S, Ahmad K, Henikoff S. Transcription and Remodeling Produce Asymmetrically Unwrapped Nucleosomal Intermediates. Mol Cell. 2017 PMID: 29225036; PMCID: PMC6421108. [Link]\n\n\n\nSkene PJ, Henikoff S. An efficient targeted nuclease strategy for high-resolution mapping of DNA binding sites. Elife. 2017 PMID: 28079019; PMCID: PMC5310842. [Link]\nKaya-Okur HS, Wu SJ, Codomo CA, Pledger ES, Bryson TD, Henikoff JG, Ahmad K, Henikoff S. CUT&Tag for efficient epigenomic profiling of small samples and single cells. Nat Commun. 2019 PMID: 31036827; PMCID: PMC6488672. [Link]",
+    "crumbs": [
+      "Resources",
+      "DNA Block resources"
+    ]
   },
   {
-    "objectID": "problem-sets/ps-01.html#setup",
-    "href": "problem-sets/ps-01.html#setup",
-    "title": "R Bootcamp Problem Set 1",
-    "section": "Setup",
-    "text": "Setup\nStart by loading libraries you need analysis in the code chunk below. When in doubt, start by loading the tidyverse package."
+    "objectID": "resources/block-dna-resources.html#software-well-use-in-class",
+    "href": "resources/block-dna-resources.html#software-well-use-in-class",
+    "title": "Resources for the DNA block",
+    "section": "Software we’ll use in class",
+    "text": "Software we’ll use in class\n\nRead over the GViz vignette to understand how we’ll use it to vissualize genome-scale data on a reference sequence.\nRead over the valr vignette to understand how we’ll do BEDtools-like (see below) analysis within RStudio.\nLook over the ComplexHeatmap and EnrichedHeatmap documentation, especially XXX. These tools will help us make “meta-plots”: figures that plot genomic signals relative to features.",
+    "crumbs": [
+      "Resources",
+      "DNA Block resources"
+    ]
   },
   {
-    "objectID": "problem-sets/ps-01.html#question-1",
-    "href": "problem-sets/ps-01.html#question-1",
-    "title": "R Bootcamp Problem Set 1",
-    "section": "Question 1",
-    "text": "Question 1\nCreate 3 different vectors called x, y, and z:\n\n\nx should be character vector of length 5\n\ny should be a numerica vector of length 5\n\nz should be a logical vector of length 5\n\nUse length() to calculate the length of each vector."
+    "objectID": "resources/block-dna-resources.html#other-important-tools",
+    "href": "resources/block-dna-resources.html#other-important-tools",
+    "title": "Resources for the DNA block",
+    "section": "Other important tools",
+    "text": "Other important tools\nThese are other tools I’ll mention in class. We’re not going to use them directly, but they are important tools in upstream data processing and analysis.\n\nAlignment software\nBowtie2 and BWA are popular choices for short read alignment. They are fast, free, and well-maintained.\n\n\nPeak calling\nMACS is the gold-standard in peak calling. It models read coverage as a Poisson process, straightforward identification of regions of higher than expected coverage (i.e., peaks) to be identified using a single parmaeter (lambda) that captures the mean and variance of read coverage.\n\n\nInterval analysis\n\nBEDtools is the “Swiss Army knife” of genome interval analysis. It provides a host of command-line tools that can be linked together for powerful genome signal manipulation.",
+    "crumbs": [
+      "Resources",
+      "DNA Block resources"
+    ]
   },
   {
-    "objectID": "problem-sets/ps-01.html#question-2",
-    "href": "problem-sets/ps-01.html#question-2",
-    "title": "R Bootcamp Problem Set 1",
-    "section": "Question 2",
-    "text": "Question 2\nUsing the vectors you created above, create a new tibble with column names x, y, and z.\nUse nrow() and ncol() to calculate the number of rows and columns.\nWhat do you notice about the length of the vectors and the number of rows?\nAnswer here"
+    "objectID": "resources/block-dna-resources.html#experimental-rigor-in-chromatin-analysis",
+    "href": "resources/block-dna-resources.html#experimental-rigor-in-chromatin-analysis",
+    "title": "Resources for the DNA block",
+    "section": "Experimental rigor in chromatin analysis",
+    "text": "Experimental rigor in chromatin analysis\nThese studies identified pervasive artifacts in genomewide chromatin analysis and provide recommendations and solutions to the issues.\nTeytelman L, Thurtle DM, Rine J, van Oudenaarden A. Highly expressed loci are vulnerable to misleading ChIP localization of multiple unrelated proteins. Proc Natl Acad Sci U S A. 2013 Nov 12;110(46):18602-7. doi: 10.1073/pnas.1316064110. Epub 2013 Oct 30. PMID: 24173036; PMCID: PMC3831989.\nShah RN, Grzybowski AT, Cornett EM, Johnstone AL, Dickson BM, Boone BA, Cheek MA, Cowles MW, Maryanski D, Meiners MJ, Tiedemann RL, Vaughan RM, Arora N, Sun ZW, Rothbart SB, Keogh MC, Ruthenburg AJ. Examining the Roles of H3K4 Methylation States with Systematically Characterized Antibodies. Mol Cell. 2018 Oct 4;72(1):162-177.e7. doi: 10.1016/j.molcel.2018.08.015. Epub 2018 Sep 20. PMID: 30244833; PMCID: PMC6173622.",
+    "crumbs": [
+      "Resources",
+      "DNA Block resources"
+    ]
   },
   {
-    "objectID": "problem-sets/ps-01.html#submit",
-    "href": "problem-sets/ps-01.html#submit",
-    "title": "R Bootcamp Problem Set 1",
-    "section": "Submit",
-    "text": "Submit\nBe sure to click the “Render” button to render the HTML output.\nThen paste the URL of this Posit Cloud project into the problem set on Canvas."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "MOLB 7950: Informatics and Statistics for Molecular Biology",
+    "objectID": "prepare/prepare-01.html",
+    "href": "prepare/prepare-01.html",
+    "title": "R Bootcamp",
     "section": "",
-    "text": "This page contains an outline of the topics, content, and assignments for the semester. Note that this schedule will be updated as the semester progresses, with all changes documented here.\n\n\n\n\n\n\n\n\nMOLB 7950 - Fall 2024 Schedule\n\n\nClasses held in-person in TBD, 9:00-10:30am\n\n\n\nDate\nBlock\nTopic\nInstructor\nTitle\nLinks\n\n\nPrepare\nSlides\nExercises\nHW\nKey\n\n\n\n\nWeek 1\n\n\n01\nMon, Aug 26, 2024\nBootcamp\nR\nTaliaferro\nIntro to R & RStudio\n📖\n📄\n💪\n🧠\n.\n\n\n02\nTue, Aug 27, 2024\nBootcamp\nR\nTaliaferro\nTidy data & tidyr\n.\n.\n.\n.\n.\n\n\n03\nWed, Aug 28, 2024\nBootcamp\nR\nTaliaferro\ndplyr\n.\n.\n.\n.\n.\n\n\n04\nThu, Aug 29, 2024\nBootcamp\nR\nTaliaferro\nggplot2\n.\n.\n.\n.\n.\n\n\n05\nFri, Aug 30, 2024\nBootcamp\nR\nTaliaferro\nggplot2\n.\n.\n.\n.\n.\n\n\nWeek 2\n\n\n06\nMon, Sep 2, 2024\n-\n-\n-\nNO CLASS: LABOR DAY\n.\n.\n.\n.\n.\n\n\n07\nTue, Sep 3, 2024\nBootcamp\nR\nTaliaferro\ntidyverse odds & ends\n.\n.\n.\n.\n.\n\n\n08\nWed, Sep 4, 2024\nBootcamp\nR\nTaliaferro\nputting it all together\n.\n.\n.\n.\n.\n\n\n09\nThu, Sep 5, 2024\nBootcamp\nR\nTaliaferro\nputting it all together\n.\n.\n.\n.\n.\n\n\n10\nFri, Sep 6, 2024\nBootcamp\nStatistics\nRamachandran\nStats intro and history\n.\n.\n.\n.\n.\n\n\nWeek 3\n\n\n11\nMon, Sep 9, 2024\nBootcamp\nStatistics\nRamachandran\nProbability and descriptive stats\n.\n.\n.\n.\n.\n\n\n12\nTue, Sep 10, 2024\nBootcamp\nStatistics\nRamachandran\nHypothesis testing\n.\n.\n.\n.\n.\n\n\n13\nWed, Sep 11, 2024\nBootcamp\nStatistics\nRamachandran\nHypothesis testing\n.\n.\n.\n.\n.\n\n\n14\nThu, Sep 12, 2024\nBootcamp\nStatistics\nRamachandran\nExploratory data analysis\n.\n.\n.\n.\n.\n\n\n15\nFri, Sep 13, 2024\nBootcamp\nStatistics\nRamachandran\nBig data concerns\n.\n.\n.\n.\n.\n\n\nWeek 4\n\n\n16\nMon, Sep 16, 2024\nDNA\nMapping chromatin structure and transactions\nRamachandran\nExperimental overview\n.\n.\n.\n.\n.\n\n\n17\nWed, Sep 18, 2024\nDNA\nChromatin-centric methods\nRamachandran\nInformation from fragment length distributions\n.\n.\n.\n.\n.\n\n\n18\nFri, Sep 20, 2024\nDNA\nChromatin-centric methods\nRamachandran\nMeta-plots and heatmaps\n.\n.\n.\n.\n.\n\n\nWeek 5\n\n\n19\nMon, Sep 23, 2024\nDNA\nWhere do proteins bind in the genome?\nRamachandran\nExperimental overview\n.\n.\n.\n.\n.\n\n\n20\nWed, Sep 25, 2024\nDNA\nFactor-centric methods\nRamachandran\nPeak calling\n.\n.\n.\n.\n.\n\n\n21\nFri, Sep 27, 2024\nDNA\nFactor-centric methods\nRamachandran\nSequence motif analysis\n.\n.\n.\n.\n.\n\n\nWeek 6\n\n\n22\nMon, Sep 30, 2024\nRNA\nRNA-seq Overview\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n23\nWed, Oct 2, 2024\nRNA\nDifferential Gene Expression\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n24\nFri, Oct 4, 2024\nRNA\nDifferential Gene Expression\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\nWeek 7\n\n\n25\nMon, Oct 7, 2024\nRNA\nAlternative Splicing\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n26\nWed, Oct 9, 2024\nRNA\nVignette\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n27\nFri, Oct 11, 2024\n-\n-\n-\nNO CLASS: CSDV RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 8\n\n\n28\nMon, Oct 14, 2024\nRNA\nRBP\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n29\nWed, Oct 16, 2024\nRNA\nRBP\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n30\nFri, Oct 18, 2024\nRNA\nLong-read sequencing\nHesselberth\n-\n.\n.\n.\n.\n.\n\n\nWeek 9\n\n\n31\nMon, Oct 21, 2024\nRNA\nSingle-cell\nRiemondy\n-\n.\n.\n.\n.\n.\n\n\n32\nWed, Oct 23, 2024\nRNA\nSingle-cell\nRiemondy\n-\n.\n.\n.\n.\n.\n\n\n33\nFri, Oct 25, 2024\n-\n-\n-\nNO CLASS: MOLB RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 10\n\n\n34\nMon, Oct 28, 2024\nFinal\n-\n-\nFinal project presentations\n.\n.\n.\n.\n.\n\n\n35\nWed, Oct 30, 2024\nFinal\n-\n-\nFinal project presentations\n.\n.\n.\n.\n.",
-    "crumbs": [
-      "Course information",
-      "Schedule"
-    ]
+    "text": "Important\n\n\n\nBefore class begins, login with your CU credentials at Posit Cloud: https://sso.posit.cloud/cu-anschutz"
   },
   {
-    "objectID": "course-info/team.html",
-    "href": "course-info/team.html",
-    "title": "MOLB 7950 — Teaching Team",
+    "objectID": "prepare/prepare-01.html#prepare",
+    "href": "prepare/prepare-01.html#prepare",
+    "title": "R Bootcamp",
+    "section": "Prepare",
+    "text": "Prepare\n📖 Read the syllabus\n📖 Read the support resources\n📖 Look over the RStudio cheatsheet"
+  },
+  {
+    "objectID": "exercises/ex-01.html",
+    "href": "exercises/ex-01.html",
+    "title": "R Bootcamp - Day 1",
     "section": "",
-    "text": "Instructor\nE-mail\nSchedule a meeting\n\n\n\n\n\nJay Hesselberth\n\n\n\n\n\nNeel Mukherjee\n\n\n\n\n\nKent Riemondy\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\nSchedule a meeting\n\n\n\n\n\nKathryn Walters\n\n\n\n\n\nBrandon Buck",
-    "crumbs": [
-      "Course information",
-      "Teaching team"
-    ]
+    "text": "We are using RStudio through Posit Cloud for the class.\nLook at RStudio panels one at a time.\nEnvironment, History, Console, Files, Plots, Packages, Help, etc.\n\nSee menu:\nHelp &gt; Cheat Sheets &gt; RStudio IDE Cheat Sheet"
   },
   {
-    "objectID": "course-info/team.html#teaching-team-and-office-hours",
-    "href": "course-info/team.html#teaching-team-and-office-hours",
-    "title": "MOLB 7950 — Teaching Team",
+    "objectID": "exercises/ex-01.html#rstudio---exercise-1",
+    "href": "exercises/ex-01.html#rstudio---exercise-1",
+    "title": "R Bootcamp - Day 1",
     "section": "",
-    "text": "Instructor\nE-mail\nSchedule a meeting\n\n\n\n\n\nJay Hesselberth\n\n\n\n\n\nNeel Mukherjee\n\n\n\n\n\nKent Riemondy\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\nSchedule a meeting\n\n\n\n\n\nKathryn Walters\n\n\n\n\n\nBrandon Buck",
-    "crumbs": [
-      "Course information",
-      "Teaching team"
-    ]
+    "text": "We are using RStudio through Posit Cloud for the class.\nLook at RStudio panels one at a time.\nEnvironment, History, Console, Files, Plots, Packages, Help, etc.\n\nSee menu:\nHelp &gt; Cheat Sheets &gt; RStudio IDE Cheat Sheet"
   },
   {
-    "objectID": "course-info/support.html",
-    "href": "course-info/support.html",
-    "title": "MOLB 7950 — Getting help",
-    "section": "",
-    "text": "Course discussion will be through the Slack MOLB7950 organization.\nGuidelines for using Slack:\n\nUse dedicated channels for discussion in #class, questions about your #problem-sets, and your #final-project\nYou can ask for help by tagging the TAs in the #class channel. If you post @ta help, someone will start a thread where you can ask a question.\nIf needed, we can talk face-to-face via the /zoom integration.\n\n\n\n\n\nOur TAs will be available Mon-Fri afternoons from 1-3pm.",
-    "crumbs": [
-      "Course information",
-      "Support"
-    ]
+    "objectID": "exercises/ex-01.html#r-as-a-calculator---exercise-2",
+    "href": "exercises/ex-01.html#r-as-a-calculator---exercise-2",
+    "title": "R Bootcamp - Day 1",
+    "section": "R as a calculator - Exercise 2",
+    "text": "R as a calculator - Exercise 2\n\nR can function like an advanced calculator\n\n\nTry simple math.\nAssign a numeric value to an object.\n\n\n&lt;- and = are assignment operators.\nBy convention, R programmers use &lt;-.\n\nx &lt;- 1 reads “set the value of x to 1”.\n\n. . .\n= and == are two different operators.\n\na = is used for assignment (e.g., x = 1)\na == tests for equivalence (e.g. x == 1 says “does x equal 1?”)"
   },
   {
-    "objectID": "course-info/support.html#how-to-get-help",
-    "href": "course-info/support.html#how-to-get-help",
-    "title": "MOLB 7950 — Getting help",
-    "section": "",
-    "text": "Course discussion will be through the Slack MOLB7950 organization.\nGuidelines for using Slack:\n\nUse dedicated channels for discussion in #class, questions about your #problem-sets, and your #final-project\nYou can ask for help by tagging the TAs in the #class channel. If you post @ta help, someone will start a thread where you can ask a question.\nIf needed, we can talk face-to-face via the /zoom integration.\n\n\n\n\n\nOur TAs will be available Mon-Fri afternoons from 1-3pm.",
-    "crumbs": [
-      "Course information",
-      "Support"
-    ]
+    "objectID": "exercises/ex-01.html#functions-and-arguments---exercise-3",
+    "href": "exercises/ex-01.html#functions-and-arguments---exercise-3",
+    "title": "R Bootcamp - Day 1",
+    "section": "Functions and arguments - Exercise 3",
+    "text": "Functions and arguments - Exercise 3"
   },
   {
-    "objectID": "course-info/final-projects.html",
-    "href": "course-info/final-projects.html",
-    "title": "MOLB 7950 – Final Projects",
-    "section": "",
-    "text": "Please submit a short proposal for your final projects with the following information.\n\nthe names of people you are working with\na description of the data set you will be working worth. This can refer to a publication and/or contain a link to public data available at NCBI GEO.\na hypothesis (tentative) you will be testing\na few bullets on your planned analysis approach.\n\nPlease include this information in a quarto document in a new Posit cloud project.",
-    "crumbs": [
-      "Assignments",
-      "Final Project Overview"
-    ]
+    "objectID": "exercises/ex-01.html#writing-a-simple-function---exercise-4",
+    "href": "exercises/ex-01.html#writing-a-simple-function---exercise-4",
+    "title": "R Bootcamp - Day 1",
+    "section": "Writing a simple function - Exercise 4",
+    "text": "Writing a simple function - Exercise 4"
   },
   {
-    "objectID": "course-info/final-projects.html#short-proposal",
-    "href": "course-info/final-projects.html#short-proposal",
-    "title": "MOLB 7950 – Final Projects",
-    "section": "",
-    "text": "Please submit a short proposal for your final projects with the following information.\n\nthe names of people you are working with\na description of the data set you will be working worth. This can refer to a publication and/or contain a link to public data available at NCBI GEO.\na hypothesis (tentative) you will be testing\na few bullets on your planned analysis approach.\n\nPlease include this information in a quarto document in a new Posit cloud project.",
-    "crumbs": [
-      "Assignments",
-      "Final Project Overview"
-    ]
+    "objectID": "exercises/ex-01.html#data-types---exercise-5",
+    "href": "exercises/ex-01.html#data-types---exercise-5",
+    "title": "R Bootcamp - Day 1",
+    "section": "Data types - Exercise 5",
+    "text": "Data types - Exercise 5\n\nThere are many data types in R.\nWe’ll mainly use numeric, character, and logical."
   },
   {
-    "objectID": "course-info/final-projects.html#overview",
-    "href": "course-info/final-projects.html#overview",
-    "title": "MOLB 7950 – Final Projects",
-    "section": "Overview",
-    "text": "Overview\n\nFinal projects can involve groups of 1-3 people.\nProjects are choose your own adventure:\n\nThe resource documents contain data sets in from human S. cerevisiae. For example, sub-nucleosomal fragments provide a DNA-based signal to understand chromatin transactions that lead to transcription.\nYou could find a data set on NCBI GEO of interest (e.g., relevant to your thesis work), and work it up with salmon, DEseq, and exploratory analysis. We are happy to help you work through the pseudo-alignment steps.\nYou can start with your own sequencing data (bulk/single-cell RNA seq, DNA sequencing).",
-    "crumbs": [
-      "Assignments",
-      "Final Project Overview"
-    ]
+    "objectID": "exercises/ex-01.html#vectors---exercise-6",
+    "href": "exercises/ex-01.html#vectors---exercise-6",
+    "title": "R Bootcamp - Day 1",
+    "section": "Vectors - Exercise 6",
+    "text": "Vectors - Exercise 6\nLet’s create some vectors.\n\nThe c function combines values together (e.g., c(1,2,3))\n\n. . ."
   },
   {
-    "objectID": "course-info/final-projects.html#deliverables",
-    "href": "course-info/final-projects.html#deliverables",
-    "title": "MOLB 7950 – Final Projects",
-    "section": "Deliverables",
-    "text": "Deliverables\n\nA Quarto document with code, plots, interpretations, and next steps.\nIf you work in a group, list the members of the group at the top of the document, and make it clear which parts are your work by adding your initials to code chunks.\nShort presentations (5-8 minutes) by the groups the week of Nov 1. Presentations should include 1-2 slides of background, a hypothesis for the approach, code output (table or graph) that addresses the hypothesis, and one or more tests of the statistical significance of the observation.",
-    "crumbs": [
-      "Assignments",
-      "Final Project Overview"
-    ]
+    "objectID": "exercises/ex-01.html#data-frames",
+    "href": "exercises/ex-01.html#data-frames",
+    "title": "R Bootcamp - Day 1",
+    "section": "Data frames",
+    "text": "Data frames\n\nA data.frame is a rectangle, where each column is a vector, and each row is a slice across vectors.\ndata.frame columns are vectors, and can have different types (numeric, character, factor, etc.).\nA data.frame is constructed with data.frame()."
   },
   {
-    "objectID": "course-info/final-projects.html#grading-and-rubric",
-    "href": "course-info/final-projects.html#grading-and-rubric",
-    "title": "MOLB 7950 – Final Projects",
-    "section": "Grading and rubric",
-    "text": "Grading and rubric\nThe final project will be worth 20% of your grade and we will use the grading scheme outlined in the grading rubric.\nEach individual in a group will be evaluated separately, so contributions must be clearly marked in the document, using e.g. using chunk labels:\n\n```{r}\n#| label: plotting-code-by-jay-h\n#| eval: false\nggplot(mtcars, aes(hp, mpg)) + geom_point()\n```",
-    "crumbs": [
-      "Assignments",
-      "Final Project Overview"
-    ]
+    "objectID": "exercises/ex-01.html#data-frames-tibbles---exercise-7",
+    "href": "exercises/ex-01.html#data-frames-tibbles---exercise-7",
+    "title": "R Bootcamp - Day 1",
+    "section": "Data frames & tibbles - Exercise 7",
+    "text": "Data frames & tibbles - Exercise 7\nCreate a data.frame and tibble.\nNow echo the contents of df and tbl to the console and inspect"
   },
   {
-    "objectID": "course-info/problem-sets.html",
-    "href": "course-info/problem-sets.html",
-    "title": "MOLB 7950 — Problem Sets",
-    "section": "",
-    "text": "We reinforce concepts with problem sets assigned at the end of each class. During the main blocks, problem sets on Mon and Wed should take ~60 minutes to complete. Problems sets assigned on Friday will be more substantial, requiring ~1-2 hours to complete. Together the problem sets constitute 60% of your grade.\n\n\n\nProblem sets are distributed as Posit Cloud assignments. You will work on problem sets in an Rmarkdown document in the assignment. When complete, complete your assignment by submitting the URL from your Posit Cloud assignment into the assignment submission on Canvas. We will grade your problem directly in the Posit Cloud assignment.\n\n\n\n\n\n\n\n\n\n\nAssigned\nDue\nGrades By\nWho grades\nTime to complete (approx)\n\n\n\n\nMon @ 12pm\nTues @ 5pm\nWed @ 5pm\nInstructors / TAs\n60 min\n\n\nTue @ 12pm\nWed @ 5pm\nThurs @ 5pm\nInstructors / TAs\n60 min\n\n\nWed @ 12pm\nThurs @ 5pm\nFri @ 5pm\nInstructors / TAs\n60 min\n\n\nThurs @ 12pm\nFri @ 5pm\nTues @ 5pm\nInstructors / TAs\n60 min\n\n\nFri @ 12pm\nMon @ 5pm\nWed @ 5pm\nInstructors / TAs\n1-2 hr\n\n\n\n\n\n\nProblem sets are worth 60% of your grade. Values in parentheses represent point values for each level from 20 points total. This rubric will be assessed at the end of the semester.\n\n\n\n\n\n\n\n\n\nCriteria\nExpert\nCompetent\nNeeds Improvement\n\n\n\n\nCoding style\nStudent has gone beyond what was expected and required, coding manual is followed, code is well commented\nCoding style lacks refinement and has some errors, but code is readable and has some comments\nMany errors in coding style, little attention paid to making the code human readable\n\n\nCoding strategy\nComplicated problem broken down into sub-problems that are individually much simpler. Code is efficient, correct, and minimal. Code uses appropriate data structure (list, data frame, vector/matrix/array). Code checks for common errors\nCode is correct, but could be edited down to leaner code. Some “hacking” instead of using suitable data structure. Some checks for errors.\nCode tackles complicated problem in one big chunk. Code is repetitive and could easily be functionalized. No anticipation of errors.\n\n\nPresentation: graphs\nGraph(s) carefully tuned for desired purpose. One graph illustrates one point\nGraph(s) well chosen, but with a few minor problems: inappropriate aspect ratios, poor labels.\nGraph(s) poorly chosen to support questions.\n\n\nPresentation: tables\nTable(s) carefully constructed to make it easy to perform important comparisons. Careful styling highlights important features.\nTable(s) generally appropriate but possibly some minor formatting deficiencies.\nTable(s) with too many, or inconsistent, decimal places. Table(s) not appropriate for questions and findings. Major display problems.\n\n\nAchievement, mastery, cleverness, creativity\nStudent has gone beyond what was expected and required, e.g., extraordinary effort, additional tools not addressed by this course, unusually sophisticated application of tools from course.\nTools and techniques from the course are applied very competently and, perhaps,somewhat creatively. Chosen task was acceptable, but fairly conservative in ambition.\nStudent does not display the expected level of mastery of the tools and techniques in this course. Chosen task was too limited in scope.\n\n\nEase of access for instructor, compliance with course conventions for submitted work\nAccess as easy as possible, code runs!\nSatisfactory\nNot an earnest effort to reduce friction and comply with conventions and/or code does not run",
-    "crumbs": [
-      "Assignments",
-      "Problet Set Overview"
-    ]
+    "objectID": "exercises/ex-01.html#r-packages---exercise-8",
+    "href": "exercises/ex-01.html#r-packages---exercise-8",
+    "title": "R Bootcamp - Day 1",
+    "section": "R packages - Exercise 8",
+    "text": "R packages - Exercise 8\nLet’s do the following to explore R packages:\n\nLook at the “Environment” panel in Rstudio\nExplore Global Environment\nExplore the contents of a package"
   },
   {
-    "objectID": "course-info/problem-sets.html#problem-set-overview",
-    "href": "course-info/problem-sets.html#problem-set-overview",
-    "title": "MOLB 7950 — Problem Sets",
-    "section": "",
-    "text": "We reinforce concepts with problem sets assigned at the end of each class. During the main blocks, problem sets on Mon and Wed should take ~60 minutes to complete. Problems sets assigned on Friday will be more substantial, requiring ~1-2 hours to complete. Together the problem sets constitute 60% of your grade.\n\n\n\nProblem sets are distributed as Posit Cloud assignments. You will work on problem sets in an Rmarkdown document in the assignment. When complete, complete your assignment by submitting the URL from your Posit Cloud assignment into the assignment submission on Canvas. We will grade your problem directly in the Posit Cloud assignment.\n\n\n\n\n\n\n\n\n\n\nAssigned\nDue\nGrades By\nWho grades\nTime to complete (approx)\n\n\n\n\nMon @ 12pm\nTues @ 5pm\nWed @ 5pm\nInstructors / TAs\n60 min\n\n\nTue @ 12pm\nWed @ 5pm\nThurs @ 5pm\nInstructors / TAs\n60 min\n\n\nWed @ 12pm\nThurs @ 5pm\nFri @ 5pm\nInstructors / TAs\n60 min\n\n\nThurs @ 12pm\nFri @ 5pm\nTues @ 5pm\nInstructors / TAs\n60 min\n\n\nFri @ 12pm\nMon @ 5pm\nWed @ 5pm\nInstructors / TAs\n1-2 hr\n\n\n\n\n\n\nProblem sets are worth 60% of your grade. Values in parentheses represent point values for each level from 20 points total. This rubric will be assessed at the end of the semester.\n\n\n\n\n\n\n\n\n\nCriteria\nExpert\nCompetent\nNeeds Improvement\n\n\n\n\nCoding style\nStudent has gone beyond what was expected and required, coding manual is followed, code is well commented\nCoding style lacks refinement and has some errors, but code is readable and has some comments\nMany errors in coding style, little attention paid to making the code human readable\n\n\nCoding strategy\nComplicated problem broken down into sub-problems that are individually much simpler. Code is efficient, correct, and minimal. Code uses appropriate data structure (list, data frame, vector/matrix/array). Code checks for common errors\nCode is correct, but could be edited down to leaner code. Some “hacking” instead of using suitable data structure. Some checks for errors.\nCode tackles complicated problem in one big chunk. Code is repetitive and could easily be functionalized. No anticipation of errors.\n\n\nPresentation: graphs\nGraph(s) carefully tuned for desired purpose. One graph illustrates one point\nGraph(s) well chosen, but with a few minor problems: inappropriate aspect ratios, poor labels.\nGraph(s) poorly chosen to support questions.\n\n\nPresentation: tables\nTable(s) carefully constructed to make it easy to perform important comparisons. Careful styling highlights important features.\nTable(s) generally appropriate but possibly some minor formatting deficiencies.\nTable(s) with too many, or inconsistent, decimal places. Table(s) not appropriate for questions and findings. Major display problems.\n\n\nAchievement, mastery, cleverness, creativity\nStudent has gone beyond what was expected and required, e.g., extraordinary effort, additional tools not addressed by this course, unusually sophisticated application of tools from course.\nTools and techniques from the course are applied very competently and, perhaps,somewhat creatively. Chosen task was acceptable, but fairly conservative in ambition.\nStudent does not display the expected level of mastery of the tools and techniques in this course. Chosen task was too limited in scope.\n\n\nEase of access for instructor, compliance with course conventions for submitted work\nAccess as easy as possible, code runs!\nSatisfactory\nNot an earnest effort to reduce friction and comply with conventions and/or code does not run",
-    "crumbs": [
-      "Assignments",
-      "Problet Set Overview"
-    ]
+    "objectID": "exercises/ex-01.html#quarto-exercise---exercise-9",
+    "href": "exercises/ex-01.html#quarto-exercise---exercise-9",
+    "title": "R Bootcamp - Day 1",
+    "section": "Quarto Exercise - Exercise 9",
+    "text": "Quarto Exercise - Exercise 9\nLet’s do the following to explore Quarto documents:\n\nCreate a new Quarto document\nRender the document to see the output"
+  },
+  {
+    "objectID": "exercises/ex-01.html#problem-sets-and-submission",
+    "href": "exercises/ex-01.html#problem-sets-and-submission",
+    "title": "R Bootcamp - Day 1",
+    "section": "Problem sets and submission",
+    "text": "Problem sets and submission\nYour first problem set is in problem-sets/ps-01.qmd"
   },
   {
     "objectID": "course-info/syllabus.html",
@@ -320,200 +314,199 @@
     ]
   },
   {
-    "objectID": "exercises/ex-01.html",
-    "href": "exercises/ex-01.html",
-    "title": "R Bootcamp - Day 1",
+    "objectID": "course-info/problem-sets.html",
+    "href": "course-info/problem-sets.html",
+    "title": "MOLB 7950 — Problem Sets",
     "section": "",
-    "text": "We are using RStudio through Posit Cloud for the class.\nLook at RStudio panels one at a time.\nEnvironment, History, Console, Files, Plots, Packages, Help, etc.\n\nSee menu:\nHelp &gt; Cheat Sheets &gt; RStudio IDE Cheat Sheet"
+    "text": "We reinforce concepts with problem sets assigned at the end of each class. During the main blocks, problem sets on Mon and Wed should take ~60 minutes to complete. Problems sets assigned on Friday will be more substantial, requiring ~1-2 hours to complete. Together the problem sets constitute 60% of your grade.\n\n\n\nProblem sets are distributed as Posit Cloud assignments. You will work on problem sets in an Rmarkdown document in the assignment. When complete, complete your assignment by submitting the URL from your Posit Cloud assignment into the assignment submission on Canvas. We will grade your problem directly in the Posit Cloud assignment.\n\n\n\n\n\n\n\n\n\n\nAssigned\nDue\nGrades By\nWho grades\nTime to complete (approx)\n\n\n\n\nMon @ 12pm\nTues @ 5pm\nWed @ 5pm\nInstructors / TAs\n60 min\n\n\nTue @ 12pm\nWed @ 5pm\nThurs @ 5pm\nInstructors / TAs\n60 min\n\n\nWed @ 12pm\nThurs @ 5pm\nFri @ 5pm\nInstructors / TAs\n60 min\n\n\nThurs @ 12pm\nFri @ 5pm\nTues @ 5pm\nInstructors / TAs\n60 min\n\n\nFri @ 12pm\nMon @ 5pm\nWed @ 5pm\nInstructors / TAs\n1-2 hr\n\n\n\n\n\n\nProblem sets are worth 60% of your grade. Values in parentheses represent point values for each level from 20 points total. This rubric will be assessed at the end of the semester.\n\n\n\n\n\n\n\n\n\nCriteria\nExpert\nCompetent\nNeeds Improvement\n\n\n\n\nCoding style\nStudent has gone beyond what was expected and required, coding manual is followed, code is well commented\nCoding style lacks refinement and has some errors, but code is readable and has some comments\nMany errors in coding style, little attention paid to making the code human readable\n\n\nCoding strategy\nComplicated problem broken down into sub-problems that are individually much simpler. Code is efficient, correct, and minimal. Code uses appropriate data structure (list, data frame, vector/matrix/array). Code checks for common errors\nCode is correct, but could be edited down to leaner code. Some “hacking” instead of using suitable data structure. Some checks for errors.\nCode tackles complicated problem in one big chunk. Code is repetitive and could easily be functionalized. No anticipation of errors.\n\n\nPresentation: graphs\nGraph(s) carefully tuned for desired purpose. One graph illustrates one point\nGraph(s) well chosen, but with a few minor problems: inappropriate aspect ratios, poor labels.\nGraph(s) poorly chosen to support questions.\n\n\nPresentation: tables\nTable(s) carefully constructed to make it easy to perform important comparisons. Careful styling highlights important features.\nTable(s) generally appropriate but possibly some minor formatting deficiencies.\nTable(s) with too many, or inconsistent, decimal places. Table(s) not appropriate for questions and findings. Major display problems.\n\n\nAchievement, mastery, cleverness, creativity\nStudent has gone beyond what was expected and required, e.g., extraordinary effort, additional tools not addressed by this course, unusually sophisticated application of tools from course.\nTools and techniques from the course are applied very competently and, perhaps,somewhat creatively. Chosen task was acceptable, but fairly conservative in ambition.\nStudent does not display the expected level of mastery of the tools and techniques in this course. Chosen task was too limited in scope.\n\n\nEase of access for instructor, compliance with course conventions for submitted work\nAccess as easy as possible, code runs!\nSatisfactory\nNot an earnest effort to reduce friction and comply with conventions and/or code does not run",
+    "crumbs": [
+      "Assignments",
+      "Problet Set Overview"
+    ]
   },
   {
-    "objectID": "exercises/ex-01.html#rstudio---exercise-1",
-    "href": "exercises/ex-01.html#rstudio---exercise-1",
-    "title": "R Bootcamp - Day 1",
+    "objectID": "course-info/problem-sets.html#problem-set-overview",
+    "href": "course-info/problem-sets.html#problem-set-overview",
+    "title": "MOLB 7950 — Problem Sets",
     "section": "",
-    "text": "We are using RStudio through Posit Cloud for the class.\nLook at RStudio panels one at a time.\nEnvironment, History, Console, Files, Plots, Packages, Help, etc.\n\nSee menu:\nHelp &gt; Cheat Sheets &gt; RStudio IDE Cheat Sheet"
+    "text": "We reinforce concepts with problem sets assigned at the end of each class. During the main blocks, problem sets on Mon and Wed should take ~60 minutes to complete. Problems sets assigned on Friday will be more substantial, requiring ~1-2 hours to complete. Together the problem sets constitute 60% of your grade.\n\n\n\nProblem sets are distributed as Posit Cloud assignments. You will work on problem sets in an Rmarkdown document in the assignment. When complete, complete your assignment by submitting the URL from your Posit Cloud assignment into the assignment submission on Canvas. We will grade your problem directly in the Posit Cloud assignment.\n\n\n\n\n\n\n\n\n\n\nAssigned\nDue\nGrades By\nWho grades\nTime to complete (approx)\n\n\n\n\nMon @ 12pm\nTues @ 5pm\nWed @ 5pm\nInstructors / TAs\n60 min\n\n\nTue @ 12pm\nWed @ 5pm\nThurs @ 5pm\nInstructors / TAs\n60 min\n\n\nWed @ 12pm\nThurs @ 5pm\nFri @ 5pm\nInstructors / TAs\n60 min\n\n\nThurs @ 12pm\nFri @ 5pm\nTues @ 5pm\nInstructors / TAs\n60 min\n\n\nFri @ 12pm\nMon @ 5pm\nWed @ 5pm\nInstructors / TAs\n1-2 hr\n\n\n\n\n\n\nProblem sets are worth 60% of your grade. Values in parentheses represent point values for each level from 20 points total. This rubric will be assessed at the end of the semester.\n\n\n\n\n\n\n\n\n\nCriteria\nExpert\nCompetent\nNeeds Improvement\n\n\n\n\nCoding style\nStudent has gone beyond what was expected and required, coding manual is followed, code is well commented\nCoding style lacks refinement and has some errors, but code is readable and has some comments\nMany errors in coding style, little attention paid to making the code human readable\n\n\nCoding strategy\nComplicated problem broken down into sub-problems that are individually much simpler. Code is efficient, correct, and minimal. Code uses appropriate data structure (list, data frame, vector/matrix/array). Code checks for common errors\nCode is correct, but could be edited down to leaner code. Some “hacking” instead of using suitable data structure. Some checks for errors.\nCode tackles complicated problem in one big chunk. Code is repetitive and could easily be functionalized. No anticipation of errors.\n\n\nPresentation: graphs\nGraph(s) carefully tuned for desired purpose. One graph illustrates one point\nGraph(s) well chosen, but with a few minor problems: inappropriate aspect ratios, poor labels.\nGraph(s) poorly chosen to support questions.\n\n\nPresentation: tables\nTable(s) carefully constructed to make it easy to perform important comparisons. Careful styling highlights important features.\nTable(s) generally appropriate but possibly some minor formatting deficiencies.\nTable(s) with too many, or inconsistent, decimal places. Table(s) not appropriate for questions and findings. Major display problems.\n\n\nAchievement, mastery, cleverness, creativity\nStudent has gone beyond what was expected and required, e.g., extraordinary effort, additional tools not addressed by this course, unusually sophisticated application of tools from course.\nTools and techniques from the course are applied very competently and, perhaps,somewhat creatively. Chosen task was acceptable, but fairly conservative in ambition.\nStudent does not display the expected level of mastery of the tools and techniques in this course. Chosen task was too limited in scope.\n\n\nEase of access for instructor, compliance with course conventions for submitted work\nAccess as easy as possible, code runs!\nSatisfactory\nNot an earnest effort to reduce friction and comply with conventions and/or code does not run",
+    "crumbs": [
+      "Assignments",
+      "Problet Set Overview"
+    ]
   },
   {
-    "objectID": "exercises/ex-01.html#r-as-a-calculator---exercise-2",
-    "href": "exercises/ex-01.html#r-as-a-calculator---exercise-2",
-    "title": "R Bootcamp - Day 1",
-    "section": "R as a calculator - Exercise 2",
-    "text": "R as a calculator - Exercise 2\n\nR can function like an advanced calculator\n\n\nTry simple math.\nAssign a numeric value to an object.\n\n\n&lt;- and = are assignment operators.\nBy convention, R programmers use &lt;-.\n\nx &lt;- 1 reads “set the value of x to 1”.\n\n. . .\n= and == are two different operators.\n\na = is used for assignment (e.g., x = 1)\na == tests for equivalence (e.g. x == 1 says “does x equal 1?”)"
-  },
-  {
-    "objectID": "exercises/ex-01.html#functions-and-arguments---exercise-3",
-    "href": "exercises/ex-01.html#functions-and-arguments---exercise-3",
-    "title": "R Bootcamp - Day 1",
-    "section": "Functions and arguments - Exercise 3",
-    "text": "Functions and arguments - Exercise 3"
-  },
-  {
-    "objectID": "exercises/ex-01.html#writing-a-simple-function---exercise-4",
-    "href": "exercises/ex-01.html#writing-a-simple-function---exercise-4",
-    "title": "R Bootcamp - Day 1",
-    "section": "Writing a simple function - Exercise 4",
-    "text": "Writing a simple function - Exercise 4"
-  },
-  {
-    "objectID": "exercises/ex-01.html#data-types---exercise-5",
-    "href": "exercises/ex-01.html#data-types---exercise-5",
-    "title": "R Bootcamp - Day 1",
-    "section": "Data types - Exercise 5",
-    "text": "Data types - Exercise 5\n\nThere are many data types in R.\nWe’ll mainly use numeric, character, and logical."
-  },
-  {
-    "objectID": "exercises/ex-01.html#vectors---exercise-6",
-    "href": "exercises/ex-01.html#vectors---exercise-6",
-    "title": "R Bootcamp - Day 1",
-    "section": "Vectors - Exercise 6",
-    "text": "Vectors - Exercise 6\nLet’s create some vectors.\n\nThe c function combines values together (e.g., c(1,2,3))\n\n. . ."
-  },
-  {
-    "objectID": "exercises/ex-01.html#data-frames",
-    "href": "exercises/ex-01.html#data-frames",
-    "title": "R Bootcamp - Day 1",
-    "section": "Data frames",
-    "text": "Data frames\n\nA data.frame is a rectangle, where each column is a vector, and each row is a slice across vectors.\ndata.frame columns are vectors, and can have different types (numeric, character, factor, etc.).\nA data.frame is constructed with data.frame()."
-  },
-  {
-    "objectID": "exercises/ex-01.html#data-frames-tibbles---exercise-7",
-    "href": "exercises/ex-01.html#data-frames-tibbles---exercise-7",
-    "title": "R Bootcamp - Day 1",
-    "section": "Data frames & tibbles - Exercise 7",
-    "text": "Data frames & tibbles - Exercise 7\nCreate a data.frame and tibble.\nNow echo the contents of df and tbl to the console and inspect"
-  },
-  {
-    "objectID": "exercises/ex-01.html#r-packages---exercise-8",
-    "href": "exercises/ex-01.html#r-packages---exercise-8",
-    "title": "R Bootcamp - Day 1",
-    "section": "R packages - Exercise 8",
-    "text": "R packages - Exercise 8\nLet’s do the following to explore R packages:\n\nLook at the “Environment” panel in Rstudio\nExplore Global Environment\nExplore the contents of a package"
-  },
-  {
-    "objectID": "exercises/ex-01.html#quarto-exercise---exercise-9",
-    "href": "exercises/ex-01.html#quarto-exercise---exercise-9",
-    "title": "R Bootcamp - Day 1",
-    "section": "Quarto Exercise - Exercise 9",
-    "text": "Quarto Exercise - Exercise 9\nLet’s do the following to explore Quarto documents:\n\nCreate a new Quarto document\nRender the document to see the output"
-  },
-  {
-    "objectID": "exercises/ex-01.html#problem-sets-and-submission",
-    "href": "exercises/ex-01.html#problem-sets-and-submission",
-    "title": "R Bootcamp - Day 1",
-    "section": "Problem sets and submission",
-    "text": "Problem sets and submission\nYour first problem set is in problem-sets/ps-01.qmd"
-  },
-  {
-    "objectID": "prepare/prepare-01.html",
-    "href": "prepare/prepare-01.html",
-    "title": "R Bootcamp",
+    "objectID": "course-info/final-projects.html",
+    "href": "course-info/final-projects.html",
+    "title": "MOLB 7950 – Final Projects",
     "section": "",
-    "text": "Important\n\n\n\nBefore class begins, login with your CU credentials at Posit Cloud: https://sso.posit.cloud/cu-anschutz"
+    "text": "Please submit a short proposal for your final projects with the following information.\n\nthe names of people you are working with\na description of the data set you will be working worth. This can refer to a publication and/or contain a link to public data available at NCBI GEO.\na hypothesis (tentative) you will be testing\na few bullets on your planned analysis approach.\n\nPlease include this information in a quarto document in a new Posit cloud project.",
+    "crumbs": [
+      "Assignments",
+      "Final Project Overview"
+    ]
   },
   {
-    "objectID": "prepare/prepare-01.html#prepare",
-    "href": "prepare/prepare-01.html#prepare",
-    "title": "R Bootcamp",
-    "section": "Prepare",
-    "text": "Prepare\n📖 Read the syllabus\n📖 Read the support resources\n📖 Look over the RStudio cheatsheet"
-  },
-  {
-    "objectID": "resources/block-dna-resources.html",
-    "href": "resources/block-dna-resources.html",
-    "title": "Resources for the DNA block",
+    "objectID": "course-info/final-projects.html#short-proposal",
+    "href": "course-info/final-projects.html#short-proposal",
+    "title": "MOLB 7950 – Final Projects",
     "section": "",
-    "text": "These studies below laid the methodological groundwork for high throughput chromatin characterization by DNA sequencing. Some of the authors are here at CU Anschutz!\n\n\n\n\n\n\nTip\n\n\n\nData sets from these studies would be excellent choices as starting points for your final projects.\n\n\n\n\nHesselberth JR, Chen X, Zhang Z, Sabo PJ, Sandstrom R, Reynolds AP, Thurman RE, Neph S, Kuehn MS, Noble WS, Fields S, Stamatoyannopoulos JA. Global mapping of protein-DNA interactions in vivo by digital genomic footprinting. Nat Methods. 2009 19305407; PMCID: PMC2668528. [Link]\n\n\n\nBuenrostro JD, Giresi PG, Zaba LC, Chang HY, Greenleaf WJ. Transposition of native chromatin for fast and sensitive epigenomic profiling of open chromatin, DNA-binding proteins and nucleosome position. Nat Methods. 2013 PMID: 24097267; PMCID: PMC3959825. [Link]\n\n\n\nRamachandran S, Ahmad K, Henikoff S. Transcription and Remodeling Produce Asymmetrically Unwrapped Nucleosomal Intermediates. Mol Cell. 2017 PMID: 29225036; PMCID: PMC6421108. [Link]\n\n\n\nSkene PJ, Henikoff S. An efficient targeted nuclease strategy for high-resolution mapping of DNA binding sites. Elife. 2017 PMID: 28079019; PMCID: PMC5310842. [Link]\nKaya-Okur HS, Wu SJ, Codomo CA, Pledger ES, Bryson TD, Henikoff JG, Ahmad K, Henikoff S. CUT&Tag for efficient epigenomic profiling of small samples and single cells. Nat Commun. 2019 PMID: 31036827; PMCID: PMC6488672. [Link]",
+    "text": "Please submit a short proposal for your final projects with the following information.\n\nthe names of people you are working with\na description of the data set you will be working worth. This can refer to a publication and/or contain a link to public data available at NCBI GEO.\na hypothesis (tentative) you will be testing\na few bullets on your planned analysis approach.\n\nPlease include this information in a quarto document in a new Posit cloud project.",
     "crumbs": [
-      "Resources",
-      "DNA Block resources"
+      "Assignments",
+      "Final Project Overview"
     ]
   },
   {
-    "objectID": "resources/block-dna-resources.html#foundational-work",
-    "href": "resources/block-dna-resources.html#foundational-work",
-    "title": "Resources for the DNA block",
+    "objectID": "course-info/final-projects.html#overview",
+    "href": "course-info/final-projects.html#overview",
+    "title": "MOLB 7950 – Final Projects",
+    "section": "Overview",
+    "text": "Overview\n\nFinal projects can involve groups of 1-3 people.\nProjects are choose your own adventure:\n\nThe resource documents contain data sets in from human S. cerevisiae. For example, sub-nucleosomal fragments provide a DNA-based signal to understand chromatin transactions that lead to transcription.\nYou could find a data set on NCBI GEO of interest (e.g., relevant to your thesis work), and work it up with salmon, DEseq, and exploratory analysis. We are happy to help you work through the pseudo-alignment steps.\nYou can start with your own sequencing data (bulk/single-cell RNA seq, DNA sequencing).",
+    "crumbs": [
+      "Assignments",
+      "Final Project Overview"
+    ]
+  },
+  {
+    "objectID": "course-info/final-projects.html#deliverables",
+    "href": "course-info/final-projects.html#deliverables",
+    "title": "MOLB 7950 – Final Projects",
+    "section": "Deliverables",
+    "text": "Deliverables\n\nA Quarto document with code, plots, interpretations, and next steps.\nIf you work in a group, list the members of the group at the top of the document, and make it clear which parts are your work by adding your initials to code chunks.\nShort presentations (5-8 minutes) by the groups the week of Nov 1. Presentations should include 1-2 slides of background, a hypothesis for the approach, code output (table or graph) that addresses the hypothesis, and one or more tests of the statistical significance of the observation.",
+    "crumbs": [
+      "Assignments",
+      "Final Project Overview"
+    ]
+  },
+  {
+    "objectID": "course-info/final-projects.html#grading-and-rubric",
+    "href": "course-info/final-projects.html#grading-and-rubric",
+    "title": "MOLB 7950 – Final Projects",
+    "section": "Grading and rubric",
+    "text": "Grading and rubric\nThe final project will be worth 20% of your grade and we will use the grading scheme outlined in the grading rubric.\nEach individual in a group will be evaluated separately, so contributions must be clearly marked in the document, using e.g. using chunk labels:\n\n```{r}\n#| label: plotting-code-by-jay-h\n#| eval: false\nggplot(mtcars, aes(hp, mpg)) + geom_point()\n```",
+    "crumbs": [
+      "Assignments",
+      "Final Project Overview"
+    ]
+  },
+  {
+    "objectID": "course-info/support.html",
+    "href": "course-info/support.html",
+    "title": "MOLB 7950 — Getting help",
     "section": "",
-    "text": "These studies below laid the methodological groundwork for high throughput chromatin characterization by DNA sequencing. Some of the authors are here at CU Anschutz!\n\n\n\n\n\n\nTip\n\n\n\nData sets from these studies would be excellent choices as starting points for your final projects.\n\n\n\n\nHesselberth JR, Chen X, Zhang Z, Sabo PJ, Sandstrom R, Reynolds AP, Thurman RE, Neph S, Kuehn MS, Noble WS, Fields S, Stamatoyannopoulos JA. Global mapping of protein-DNA interactions in vivo by digital genomic footprinting. Nat Methods. 2009 19305407; PMCID: PMC2668528. [Link]\n\n\n\nBuenrostro JD, Giresi PG, Zaba LC, Chang HY, Greenleaf WJ. Transposition of native chromatin for fast and sensitive epigenomic profiling of open chromatin, DNA-binding proteins and nucleosome position. Nat Methods. 2013 PMID: 24097267; PMCID: PMC3959825. [Link]\n\n\n\nRamachandran S, Ahmad K, Henikoff S. Transcription and Remodeling Produce Asymmetrically Unwrapped Nucleosomal Intermediates. Mol Cell. 2017 PMID: 29225036; PMCID: PMC6421108. [Link]\n\n\n\nSkene PJ, Henikoff S. An efficient targeted nuclease strategy for high-resolution mapping of DNA binding sites. Elife. 2017 PMID: 28079019; PMCID: PMC5310842. [Link]\nKaya-Okur HS, Wu SJ, Codomo CA, Pledger ES, Bryson TD, Henikoff JG, Ahmad K, Henikoff S. CUT&Tag for efficient epigenomic profiling of small samples and single cells. Nat Commun. 2019 PMID: 31036827; PMCID: PMC6488672. [Link]",
+    "text": "Course discussion will be through the Slack MOLB7950 organization.\nGuidelines for using Slack:\n\nUse dedicated channels for discussion in #class, questions about your #problem-sets, and your #final-project\nYou can ask for help by tagging the TAs in the #class channel. If you post @ta help, someone will start a thread where you can ask a question.\nIf needed, we can talk face-to-face via the /zoom integration.\n\n\n\n\n\nOur TAs will be available Mon-Fri afternoons from 1-3pm.",
     "crumbs": [
-      "Resources",
-      "DNA Block resources"
+      "Course information",
+      "Support"
     ]
   },
   {
-    "objectID": "resources/block-dna-resources.html#software-well-use-in-class",
-    "href": "resources/block-dna-resources.html#software-well-use-in-class",
-    "title": "Resources for the DNA block",
-    "section": "Software we’ll use in class",
-    "text": "Software we’ll use in class\n\nRead over the GViz vignette to understand how we’ll use it to vissualize genome-scale data on a reference sequence.\nRead over the valr vignette to understand how we’ll do BEDtools-like (see below) analysis within RStudio.\nLook over the ComplexHeatmap and EnrichedHeatmap documentation, especially XXX. These tools will help us make “meta-plots”: figures that plot genomic signals relative to features.",
-    "crumbs": [
-      "Resources",
-      "DNA Block resources"
-    ]
-  },
-  {
-    "objectID": "resources/block-dna-resources.html#other-important-tools",
-    "href": "resources/block-dna-resources.html#other-important-tools",
-    "title": "Resources for the DNA block",
-    "section": "Other important tools",
-    "text": "Other important tools\nThese are other tools I’ll mention in class. We’re not going to use them directly, but they are important tools in upstream data processing and analysis.\n\nAlignment software\nBowtie2 and BWA are popular choices for short read alignment. They are fast, free, and well-maintained.\n\n\nPeak calling\nMACS is the gold-standard in peak calling. It models read coverage as a Poisson process, straightforward identification of regions of higher than expected coverage (i.e., peaks) to be identified using a single parmaeter (lambda) that captures the mean and variance of read coverage.\n\n\nInterval analysis\n\nBEDtools is the “Swiss Army knife” of genome interval analysis. It provides a host of command-line tools that can be linked together for powerful genome signal manipulation.",
-    "crumbs": [
-      "Resources",
-      "DNA Block resources"
-    ]
-  },
-  {
-    "objectID": "resources/block-dna-resources.html#experimental-rigor-in-chromatin-analysis",
-    "href": "resources/block-dna-resources.html#experimental-rigor-in-chromatin-analysis",
-    "title": "Resources for the DNA block",
-    "section": "Experimental rigor in chromatin analysis",
-    "text": "Experimental rigor in chromatin analysis\nThese studies identified pervasive artifacts in genomewide chromatin analysis and provide recommendations and solutions to the issues.\nTeytelman L, Thurtle DM, Rine J, van Oudenaarden A. Highly expressed loci are vulnerable to misleading ChIP localization of multiple unrelated proteins. Proc Natl Acad Sci U S A. 2013 Nov 12;110(46):18602-7. doi: 10.1073/pnas.1316064110. Epub 2013 Oct 30. PMID: 24173036; PMCID: PMC3831989.\nShah RN, Grzybowski AT, Cornett EM, Johnstone AL, Dickson BM, Boone BA, Cheek MA, Cowles MW, Maryanski D, Meiners MJ, Tiedemann RL, Vaughan RM, Arora N, Sun ZW, Rothbart SB, Keogh MC, Ruthenburg AJ. Examining the Roles of H3K4 Methylation States with Systematically Characterized Antibodies. Mol Cell. 2018 Oct 4;72(1):162-177.e7. doi: 10.1016/j.molcel.2018.08.015. Epub 2018 Sep 20. PMID: 30244833; PMCID: PMC6173622.",
-    "crumbs": [
-      "Resources",
-      "DNA Block resources"
-    ]
-  },
-  {
-    "objectID": "resources/bootcamp-resources.html",
-    "href": "resources/bootcamp-resources.html",
-    "title": "Bootcamp resources",
+    "objectID": "course-info/support.html#how-to-get-help",
+    "href": "course-info/support.html#how-to-get-help",
+    "title": "MOLB 7950 — Getting help",
     "section": "",
-    "text": "Installing R\nInstalling RStudio\n\n\n\n\n\nAdvanced R\nComputational Genomics with R\nR for Data Science (R4DS)\nFundamentals of Data Visualization\n\nQuick reference:\n\nData tidying\nYour labels are too small.. Use cowplot themes to automatically adjust.\n\n\n\n\n\nThe Tidyverse is a collection of libaries implementing a principled approach to data analysis.\nBioconductor is a collection of libraries focused on biological data analysis.\nggplot2\ncowplot\nggthemes\n\n\n\n\nThe tidyverse cheat sheets are indispensible references.\nQuick reference:\n\nRStudio\nRmarkdown\ntidyr\ndplyr\nggplot2",
+    "text": "Course discussion will be through the Slack MOLB7950 organization.\nGuidelines for using Slack:\n\nUse dedicated channels for discussion in #class, questions about your #problem-sets, and your #final-project\nYou can ask for help by tagging the TAs in the #class channel. If you post @ta help, someone will start a thread where you can ask a question.\nIf needed, we can talk face-to-face via the /zoom integration.\n\n\n\n\n\nOur TAs will be available Mon-Fri afternoons from 1-3pm.",
     "crumbs": [
-      "Resources",
-      "Bootcamp resources"
+      "Course information",
+      "Support"
     ]
   },
   {
-    "objectID": "resources/bootcamp-resources.html#r-rstudio",
-    "href": "resources/bootcamp-resources.html#r-rstudio",
-    "title": "Bootcamp resources",
+    "objectID": "course-info/team.html",
+    "href": "course-info/team.html",
+    "title": "MOLB 7950 — Teaching Team",
     "section": "",
-    "text": "Installing R\nInstalling RStudio\n\n\n\n\n\nAdvanced R\nComputational Genomics with R\nR for Data Science (R4DS)\nFundamentals of Data Visualization\n\nQuick reference:\n\nData tidying\nYour labels are too small.. Use cowplot themes to automatically adjust.\n\n\n\n\n\nThe Tidyverse is a collection of libaries implementing a principled approach to data analysis.\nBioconductor is a collection of libraries focused on biological data analysis.\nggplot2\ncowplot\nggthemes\n\n\n\n\nThe tidyverse cheat sheets are indispensible references.\nQuick reference:\n\nRStudio\nRmarkdown\ntidyr\ndplyr\nggplot2",
+    "text": "Instructor\nE-mail\nSchedule a meeting\n\n\n\n\n\nJay Hesselberth\n\n\n\n\n\nNeel Mukherjee\n\n\n\n\n\nKent Riemondy\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\nSchedule a meeting\n\n\n\n\n\nKathryn Walters\n\n\n\n\n\nBrandon Buck",
     "crumbs": [
-      "Resources",
-      "Bootcamp resources"
+      "Course information",
+      "Teaching team"
     ]
   },
   {
-    "objectID": "resources/bootcamp-resources.html#statistics",
-    "href": "resources/bootcamp-resources.html#statistics",
-    "title": "Bootcamp resources",
-    "section": "Statistics",
-    "text": "Statistics\n\nPractical Statistics for Data Scientists covers several fundamental concepts with code for both R and Python.\nModern Statistics for Modern Biology is written by two leading figures in computational biology and contains several examples using Bioconductor.\nStatistics for Biologists is a collection of articles on statistical topic.",
+    "objectID": "course-info/team.html#teaching-team-and-office-hours",
+    "href": "course-info/team.html#teaching-team-and-office-hours",
+    "title": "MOLB 7950 — Teaching Team",
+    "section": "",
+    "text": "Instructor\nE-mail\nSchedule a meeting\n\n\n\n\n\nJay Hesselberth\n\n\n\n\n\nNeel Mukherjee\n\n\n\n\n\nKent Riemondy\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\nSchedule a meeting\n\n\n\n\n\nKathryn Walters\n\n\n\n\n\nBrandon Buck",
     "crumbs": [
-      "Resources",
-      "Bootcamp resources"
+      "Course information",
+      "Teaching team"
     ]
   },
   {
-    "objectID": "resources/bootcamp-resources.html#miscellaneous",
-    "href": "resources/bootcamp-resources.html#miscellaneous",
-    "title": "Bootcamp resources",
-    "section": "Miscellaneous",
-    "text": "Miscellaneous\n\nOrganizing projects\nHappy Git with R",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "MOLB 7950: Informatics and Statistics for Molecular Biology",
+    "section": "",
+    "text": "This page contains an outline of the topics, content, and assignments for the semester. Note that this schedule will be updated as the semester progresses, with all changes documented here.\n\n\n\n\n\n\n\n\nMOLB 7950 - Fall 2024 Schedule\n\n\nClasses held in-person in TBD, 9:00-10:30am\n\n\n\nDate\nBlock\nTopic\nInstructor\nTitle\nLinks\n\n\nPrepare\nSlides\nExercises\nHW\nKey\n\n\n\n\nWeek 1\n\n\n01\nMon, Aug 26, 2024\nBootcamp\nR\nTaliaferro\nIntro to R & RStudio\n📖\n📄\n💪\n🧠\n.\n\n\n02\nTue, Aug 27, 2024\nBootcamp\nR\nTaliaferro\nTidy data & tidyr\n.\n.\n.\n.\n.\n\n\n03\nWed, Aug 28, 2024\nBootcamp\nR\nTaliaferro\ndplyr\n.\n.\n.\n.\n.\n\n\n04\nThu, Aug 29, 2024\nBootcamp\nR\nTaliaferro\nggplot2\n.\n.\n.\n.\n.\n\n\n05\nFri, Aug 30, 2024\nBootcamp\nR\nTaliaferro\nggplot2\n.\n.\n.\n.\n.\n\n\nWeek 2\n\n\n06\nMon, Sep 2, 2024\n-\n-\n-\nNO CLASS: LABOR DAY\n.\n.\n.\n.\n.\n\n\n07\nTue, Sep 3, 2024\nBootcamp\nR\nTaliaferro\ntidyverse odds & ends\n.\n.\n.\n.\n.\n\n\n08\nWed, Sep 4, 2024\nBootcamp\nR\nTaliaferro\nputting it all together\n.\n.\n.\n.\n.\n\n\n09\nThu, Sep 5, 2024\nBootcamp\nR\nTaliaferro\nputting it all together\n.\n.\n.\n.\n.\n\n\n10\nFri, Sep 6, 2024\nBootcamp\nStatistics\nRamachandran\nStats intro and history\n.\n.\n.\n.\n.\n\n\nWeek 3\n\n\n11\nMon, Sep 9, 2024\nBootcamp\nStatistics\nRamachandran\nProbability and descriptive stats\n.\n.\n.\n.\n.\n\n\n12\nTue, Sep 10, 2024\nBootcamp\nStatistics\nRamachandran\nHypothesis testing\n.\n.\n.\n.\n.\n\n\n13\nWed, Sep 11, 2024\nBootcamp\nStatistics\nRamachandran\nHypothesis testing\n.\n.\n.\n.\n.\n\n\n14\nThu, Sep 12, 2024\nBootcamp\nStatistics\nRamachandran\nExploratory data analysis\n.\n.\n.\n.\n.\n\n\n15\nFri, Sep 13, 2024\nBootcamp\nStatistics\nRamachandran\nBig data concerns\n.\n.\n.\n.\n.\n\n\nWeek 4\n\n\n16\nMon, Sep 16, 2024\nDNA\nMapping chromatin structure and transactions\nRamachandran\nExperimental overview\n.\n.\n.\n.\n.\n\n\n17\nWed, Sep 18, 2024\nDNA\nChromatin-centric methods\nRamachandran\nInformation from fragment length distributions\n.\n.\n.\n.\n.\n\n\n18\nFri, Sep 20, 2024\nDNA\nChromatin-centric methods\nRamachandran\nMeta-plots and heatmaps\n.\n.\n.\n.\n.\n\n\nWeek 5\n\n\n19\nMon, Sep 23, 2024\nDNA\nWhere do proteins bind in the genome?\nRamachandran\nExperimental overview\n.\n.\n.\n.\n.\n\n\n20\nWed, Sep 25, 2024\nDNA\nFactor-centric methods\nRamachandran\nPeak calling\n.\n.\n.\n.\n.\n\n\n21\nFri, Sep 27, 2024\nDNA\nFactor-centric methods\nRamachandran\nSequence motif analysis\n.\n.\n.\n.\n.\n\n\nWeek 6\n\n\n22\nMon, Sep 30, 2024\nRNA\nRNA-seq Overview\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n23\nWed, Oct 2, 2024\nRNA\nDifferential Gene Expression\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n24\nFri, Oct 4, 2024\nRNA\nDifferential Gene Expression\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\nWeek 7\n\n\n25\nMon, Oct 7, 2024\nRNA\nAlternative Splicing\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n26\nWed, Oct 9, 2024\nRNA\nVignette\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n27\nFri, Oct 11, 2024\n-\n-\n-\nNO CLASS: CSDV RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 8\n\n\n28\nMon, Oct 14, 2024\nRNA\nRBP\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n29\nWed, Oct 16, 2024\nRNA\nRBP\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n30\nFri, Oct 18, 2024\nRNA\nLong-read sequencing\nHesselberth\n-\n.\n.\n.\n.\n.\n\n\nWeek 9\n\n\n31\nMon, Oct 21, 2024\nRNA\nSingle-cell\nRiemondy\n-\n.\n.\n.\n.\n.\n\n\n32\nWed, Oct 23, 2024\nRNA\nSingle-cell\nRiemondy\n-\n.\n.\n.\n.\n.\n\n\n33\nFri, Oct 25, 2024\n-\n-\n-\nNO CLASS: MOLB RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 10\n\n\n34\nMon, Oct 28, 2024\nFinal\n-\n-\nFinal project presentations\n.\n.\n.\n.\n.\n\n\n35\nWed, Oct 30, 2024\nFinal\n-\n-\nFinal project presentations\n.\n.\n.\n.\n.",
+    "crumbs": [
+      "Course information",
+      "Schedule"
+    ]
+  },
+  {
+    "objectID": "problem-sets/ps-01.html",
+    "href": "problem-sets/ps-01.html",
+    "title": "R Bootcamp Problem Set 1",
+    "section": "",
+    "text": "Each problem below is worth 10 points.\nThe problem set is due 12pm on Aug 30.\n\n\nEverything is good: 10 points\nPartially correct answers: 6-8 points\nReasonable attempt: 4 points"
+  },
+  {
+    "objectID": "problem-sets/ps-01.html#problem-set",
+    "href": "problem-sets/ps-01.html#problem-set",
+    "title": "R Bootcamp Problem Set 1",
+    "section": "",
+    "text": "Each problem below is worth 10 points.\nThe problem set is due 12pm on Aug 30.\n\n\nEverything is good: 10 points\nPartially correct answers: 6-8 points\nReasonable attempt: 4 points"
+  },
+  {
+    "objectID": "problem-sets/ps-01.html#setup",
+    "href": "problem-sets/ps-01.html#setup",
+    "title": "R Bootcamp Problem Set 1",
+    "section": "Setup",
+    "text": "Setup\nStart by loading libraries you need analysis in the code chunk below. When in doubt, start by loading the tidyverse package."
+  },
+  {
+    "objectID": "problem-sets/ps-01.html#question-1",
+    "href": "problem-sets/ps-01.html#question-1",
+    "title": "R Bootcamp Problem Set 1",
+    "section": "Question 1",
+    "text": "Question 1\nCreate 3 different vectors called x, y, and z:\n\n\nx should be character vector of length 5\n\ny should be a numerica vector of length 5\n\nz should be a logical vector of length 5\n\nUse length() to calculate the length of each vector."
+  },
+  {
+    "objectID": "problem-sets/ps-01.html#question-2",
+    "href": "problem-sets/ps-01.html#question-2",
+    "title": "R Bootcamp Problem Set 1",
+    "section": "Question 2",
+    "text": "Question 2\nUsing the vectors you created above, create a new tibble with column names x, y, and z.\nUse nrow() and ncol() to calculate the number of rows and columns.\nWhat do you notice about the length of the vectors and the number of rows?\nAnswer here"
+  },
+  {
+    "objectID": "problem-sets/ps-01.html#submit",
+    "href": "problem-sets/ps-01.html#submit",
+    "title": "R Bootcamp Problem Set 1",
+    "section": "Submit",
+    "text": "Submit\nBe sure to click the “Render” button to render the HTML output.\nThen paste the URL of this Posit Cloud project into the problem set on Canvas."
+  },
+  {
+    "objectID": "resources/block-rna-resources.html",
+    "href": "resources/block-rna-resources.html",
+    "title": "Resources for the RNA block",
+    "section": "",
+    "text": "The paper describing salmon and its approach to transcriptome quantification\nThe documentation for salmon\nThe documentation for tximport",
     "crumbs": [
       "Resources",
-      "Bootcamp resources"
+      "RNA Block resources"
+    ]
+  },
+  {
+    "objectID": "resources/block-rna-resources.html#software",
+    "href": "resources/block-rna-resources.html#software",
+    "title": "Resources for the RNA block",
+    "section": "",
+    "text": "The paper describing salmon and its approach to transcriptome quantification\nThe documentation for salmon\nThe documentation for tximport",
+    "crumbs": [
+      "Resources",
+      "RNA Block resources"
     ]
   }
 ]
