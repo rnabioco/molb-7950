@@ -16,8 +16,6 @@ library(ggrepel)
 library(pheatmap)
 library(gt)
 library(RColorBrewer)
-
-
 ```
 
 ## Overview {.smaller}
@@ -425,8 +423,8 @@ The numbers from `[S|I]JC_SAMPLE_X ` could be useful for filtering events based 
 #| label: read-rmats
 
 psis <- read.table(here("data/block-rna/rMATS/SE.MATS.JC.txt.gz"), header = T) %>%
-  #Get rid of columns we aren't really going to use.
-  dplyr::select(., c('ID', 'geneSymbol', 'IJC_SAMPLE_1', 'SJC_SAMPLE_1', 'IJC_SAMPLE_2', 'SJC_SAMPLE_2', 'FDR', 'IncLevel1', 'IncLevel2', 'IncLevelDifference'))
+  # Get rid of columns we aren't really going to use.
+  dplyr::select(., c("ID", "geneSymbol", "IJC_SAMPLE_1", "SJC_SAMPLE_1", "IJC_SAMPLE_2", "SJC_SAMPLE_2", "FDR", "IncLevel1", "IncLevel2", "IncLevelDifference"))
 
 head(psis)
 ```
@@ -443,14 +441,13 @@ We will only consider events where there are *at least* 20 informative reads tha
 #| label: tidy-rmats
 
 psis <- psis %>%
-  #Split the replicate read counts that are separated by commas into different columns
-  separate(., col = IJC_SAMPLE_1, into = c('IJC_S1R1', 'IJC_S1R2', 'IJC_S1R3', 'IJC_S1R4'), sep = ',', remove = T, convert = T) %>%
-  separate(., col = SJC_SAMPLE_1, into = c('SJC_S1R1', 'SJC_S1R2', 'SJC_S1R3', 'SJC_S1R4'), sep = ',', remove = T, convert = T) %>%
-  separate(., col = IJC_SAMPLE_2, into = c('IJC_S2R1', 'IJC_S2R2', 'IJC_S2R3', 'IJC_S2R4'), sep = ',', remove = T, convert = T) %>%
-  separate(., col = SJC_SAMPLE_2, into = c('SJC_S2R1', 'SJC_S2R2', 'SJC_S2R3', 'SJC_S2R4'), sep = ',', remove = T, convert = T)
+  # Split the replicate read counts that are separated by commas into different columns
+  separate(., col = IJC_SAMPLE_1, into = c("IJC_S1R1", "IJC_S1R2", "IJC_S1R3", "IJC_S1R4"), sep = ",", remove = T, convert = T) %>%
+  separate(., col = SJC_SAMPLE_1, into = c("SJC_S1R1", "SJC_S1R2", "SJC_S1R3", "SJC_S1R4"), sep = ",", remove = T, convert = T) %>%
+  separate(., col = IJC_SAMPLE_2, into = c("IJC_S2R1", "IJC_S2R2", "IJC_S2R3", "IJC_S2R4"), sep = ",", remove = T, convert = T) %>%
+  separate(., col = SJC_SAMPLE_2, into = c("SJC_S2R1", "SJC_S2R2", "SJC_S2R3", "SJC_S2R4"), sep = ",", remove = T, convert = T)
 
 head(psis)
-
 ```
 
 
@@ -471,12 +468,11 @@ psis_filt <- psis %>%
   mutate(., S2R2counts = IJC_S2R2 + SJC_S2R2) %>%
   mutate(., S2R3counts = IJC_S2R3 + SJC_S2R3) %>%
   mutate(., S2R4counts = IJC_S2R4 + SJC_S2R4) %>%
-  #Filter on read counts
+  # Filter on read counts
   filter(., S1R1counts >= 20 & S1R2counts >= 20 & S1R3counts >= 20 & S1R4counts >= 20 &
-           S2R1counts >= 20 & S2R2counts >= 20 & S2R3counts >= 20 & S2R4counts >= 20)
+    S2R1counts >= 20 & S2R2counts >= 20 & S2R3counts >= 20 & S2R4counts >= 20)
 
 head(psis_filt)
-
 ```
 
 
@@ -491,32 +487,32 @@ Exons whose inclusion is not regulated tend to have PSI values that are either v
 #| output-location: slide
 
 psis_filt_psi <- psis_filt %>%
-  #Separate psi value replicates into individual columns
-  separate(., col = IncLevel1, into = c('PSI_S1R1', 'PSI_S1R2', 'PSI_S1R3', 'PSI_S1R4'), sep = ',', remove = T, convert = T) %>%
-  separate(., col = IncLevel2, into = c('PSI_S2R1', 'PSI_S2R2', 'PSI_S2R3', 'PSI_S2R4'), sep = ',', remove = T, convert = T) %>%
-  #Select the columns we want
-  dplyr::select(., c(contains('PSI'), FDR))
+  # Separate psi value replicates into individual columns
+  separate(., col = IncLevel1, into = c("PSI_S1R1", "PSI_S1R2", "PSI_S1R3", "PSI_S1R4"), sep = ",", remove = T, convert = T) %>%
+  separate(., col = IncLevel2, into = c("PSI_S2R1", "PSI_S2R2", "PSI_S2R3", "PSI_S2R4"), sep = ",", remove = T, convert = T) %>%
+  # Select the columns we want
+  dplyr::select(., c(contains("PSI"), FDR))
 
-#Turn data from wide format into long format for plotting purposes
+# Turn data from wide format into long format for plotting purposes
 
 psis_filt_psi_long <- gather(psis_filt_psi, key = sample, value = psi, PSI_S1R1:PSI_S2R4) %>%
-  #For each row, mark whether that replicate came from Condition 1 (RBFOXkd) or Condition2 (Controlkd)
-  #We can tell that by asking if the substring 'S1' is somewhere in 'sample'
-  mutate(., condition = ifelse(grepl('S1', sample), 'RBFOX2kd', 'Controlkd')) %>%
-  #Make a column indicating whether the FDR in this row is significant
-  mutate(., sig = ifelse(FDR < 0.05, 'yes', 'no'))
+  # For each row, mark whether that replicate came from Condition 1 (RBFOXkd) or Condition2 (Controlkd)
+  # We can tell that by asking if the substring 'S1' is somewhere in 'sample'
+  mutate(., condition = ifelse(grepl("S1", sample), "RBFOX2kd", "Controlkd")) %>%
+  # Make a column indicating whether the FDR in this row is significant
+  mutate(., sig = ifelse(FDR < 0.05, "yes", "no"))
 
-#Plot
-colors <- c('DarkOrange', 'DarkViolet')
+# Plot
+colors <- c("DarkOrange", "DarkViolet")
 
-ggplot(psis_filt_psi_long,
-       aes(x = psi, linetype = condition, color = sig)) +
+ggplot(
+  psis_filt_psi_long,
+  aes(x = psi, linetype = condition, color = sig)
+) +
   geom_density() +
   theme_cowplot() +
   facet_wrap(~sig, scales = "free_y", nrow = 2) +
   scale_color_manual(values = colors)
-
-
 ```
 
 
@@ -530,27 +526,27 @@ Just as we did with gene expression values, we can monitor the quality of this d
 #| label: pca-psis
 #| output-location: slide
 
-#Make a matrix of psi values
+# Make a matrix of psi values
 psis.matrix <- dplyr::select(psis_filt_psi, -FDR) %>% na.omit(.)
 
-#Use prcomp() to derive principle component coordinants of PSI values
+# Use prcomp() to derive principle component coordinants of PSI values
 psi.pca <- prcomp(t(psis.matrix))
 
-#Add annotations of the conditions to the samples
+# Add annotations of the conditions to the samples
 psi.pca.pc <- data.frame(psi.pca$x, sample = colnames(psis.matrix)) %>%
-  mutate(., condition = ifelse(grepl('S1', sample), 'RBFOX2kd', 'Controlkd'))
+  mutate(., condition = ifelse(grepl("S1", sample), "RBFOX2kd", "Controlkd"))
 
-#Get the amount of variances contained within PC1 and PC2
+# Get the amount of variances contained within PC1 and PC2
 psi.pca.summary <- summary(psi.pca)$importance
-pc1var = round(psi.pca.summary[2,1] * 100, 1)
-pc2var = round(psi.pca.summary[2,2] * 100, 1)
+pc1var <- round(psi.pca.summary[2, 1] * 100, 1)
+pc2var <- round(psi.pca.summary[2, 2] * 100, 1)
 
-#Plot PCA data
+# Plot PCA data
 ggplot(psi.pca.pc, aes(x = PC1, y = PC2, shape = condition, color = condition)) +
-  geom_point(size = 5)  +
+  geom_point(size = 5) +
   scale_color_manual(values = colors) +
-  xlab(paste('PC1,', pc1var, '% explained var.')) + 
-  ylab(paste('PC2,', pc2var, '% explained var.')) +
+  xlab(paste("PC1,", pc1var, "% explained var.")) +
+  ylab(paste("PC2,", pc2var, "% explained var.")) +
   theme_cowplot()
 ```
 
@@ -565,15 +561,15 @@ ggplot(psi.pca.pc, aes(x = PC1, y = PC2, shape = condition, color = condition)) 
 #| output-location: slide
 
 # Filter only significant events
-psi_sig <- psis_filt_psi %>% 
+psi_sig <- psis_filt_psi %>%
   filter(FDR < 0.05) %>%
   select(-FDR)
 
 # row scaled heatmap
-pheatmap(mat = psi_sig,
-         clustering_method = "ward.D2",
-         scale = "row",
-         show_rownames = F
-          )
-
+pheatmap(
+  mat = psi_sig,
+  clustering_method = "ward.D2",
+  scale = "row",
+  show_rownames = F
+)
 ```

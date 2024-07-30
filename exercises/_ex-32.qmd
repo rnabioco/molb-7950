@@ -38,7 +38,7 @@ digraph workflow {
   # green
   node [fillcolor = '#009E73']
   load [label= 'Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()']
-  
+
   # blue
   node [fillcolor = '#56B4E9']
   cell_qc [label = 'QC cells\n addPerCellQCMetrics()\n plotColData()']
@@ -50,17 +50,17 @@ digraph workflow {
   dim_red [label = 'Dimensionality reduction via PCA \n runPCA()']
   cluster [label = 'Clustering\n clusterCells()']
   viz [label = 'Make 2D-Visualization\nrunUMAP()']
-  
+
   # blue
   node [fillcolor = '#56B4E9']
-  
+
   markers [label = 'Discover cell type markers \nscoreMarkers()']
   annot [label = 'Annotate cell types\nclustifyr and SingleR']
 
   edge [color = black
         fontname = 'Helvetica']
 
-  load -> cell_qc 
+  load -> cell_qc
   cell_qc -> norm
   norm -> feature
   norm -> markers
@@ -127,15 +127,18 @@ sce <- SingleCellExperiment(list(counts = tx$counts))
 ah <- AnnotationHub()
 ens_db <- ah[["AH113665"]]
 
-gene_names <- mapIds(ens_db, 
-                     keys=rownames(sce), 
-                     keytype = "GENEID",
-                     column="SYMBOL")
+gene_names <- mapIds(ens_db,
+  keys = rownames(sce),
+  keytype = "GENEID",
+  column = "SYMBOL"
+)
 
 rowData(sce)$gene <- gene_names
 rowData(sce)$gene_id <- rownames(sce)
-rownames(sce) <- uniquifyFeatureNames(rowData(sce)$gene_id, 
-                                      rowData(sce)$gene)
+rownames(sce) <- uniquifyFeatureNames(
+  rowData(sce)$gene_id,
+  rowData(sce)$gene
+)
 
 # drop non/low expressed genes
 rowData(sce)$n_cells <- rowSums(counts(sce) > 0)
@@ -143,8 +146,8 @@ sce <- sce[rowData(sce)$n_cells >= 10, ]
 
 # basic QC
 is_mito <- startsWith(rowData(sce)$gene, "MT-")
-sce <- addPerCellQCMetrics(sce, subsets=list(Mito=is_mito))
-sce$pass_qc <-  sce$subsets_Mito_percent < 20 & sce$sum > 1000 & sce$detected > 500
+sce <- addPerCellQCMetrics(sce, subsets = list(Mito = is_mito))
+sce$pass_qc <- sce$subsets_Mito_percent < 20 & sce$sum > 1000 & sce$detected > 500
 
 # subset data
 sce <- sce[, sce$pass_qc]
@@ -162,9 +165,9 @@ To normalize we will use 3 functions from the scran package. The normalization e
 #| warning: false
 
 # set seed to obtain the same result on each execution of quickCluster
-set.seed(20231023) 
-clusters <- quickCluster(sce)   # returns vector of cluster assignments
-sce <- computeSumFactors(sce, clusters=clusters) # add "sizeFactor" to colData
+set.seed(20231023)
+clusters <- quickCluster(sce) # returns vector of cluster assignments
+sce <- computeSumFactors(sce, clusters = clusters) # add "sizeFactor" to colData
 sce <- logNormCounts(sce) # adds new assay called logcounts
 ```
 
@@ -180,7 +183,7 @@ set.seed(00010101) # set seed to obtain the same result on each execution of mod
 
 dec <- modelGeneVarByPoisson(sce) # returns data.frame of statistics
 
-top <- getTopHVGs(dec, prop=0.1) # return vector of top 10% most variable genes
+top <- getTopHVGs(dec, prop = 0.1) # return vector of top 10% most variable genes
 top[1:4]
 ```
 
@@ -190,10 +193,12 @@ We can plot the mean expression against variance to see the trend, and visualize
 top_genes <- as.data.frame(dec[top[1:10], ])
 top_genes$genes <- rownames(top_genes)
 
-ggplot(as.data.frame(dec), aes(mean, total)) + 
-  geom_point() + 
-  geom_text(data = top_genes, 
-             aes(label = genes)) + 
+ggplot(as.data.frame(dec), aes(mean, total)) +
+  geom_point() +
+  geom_text(
+    data = top_genes,
+    aes(label = genes)
+  ) +
   stat_function(fun = function(x) metadata(dec)$trend(x))
 ```
 
@@ -206,7 +211,7 @@ We next perform PCA, but only on the normalized data from the `top` variable gen
 
 ```{r}
 set.seed(101010011) # runPCA uses a specialize form of PCA that has a random component
-sce <- runPCA(sce, subset_row=top)
+sce <- runPCA(sce, subset_row = top)
 ```
 
 We can plot the PCA using `plotPCA()`. Here I've colored the PCA by the expression of the `CD3D` gene, a general marker of T-cells
@@ -219,14 +224,14 @@ PCs beyond 1 and 2 show additional patterns in the data.
 
 
 ```{r}
-plotPCA(sce, ncomponents=4, colour_by = "CD3D")
+plotPCA(sce, ncomponents = 4, colour_by = "CD3D")
 ```
 
 The amount of variation captured in each PC is a useful metric to examine. 
 
 ```{r}
 percent.var <- attr(reducedDim(sce), "percentVar")
-plot(percent.var, log="y", xlab="PC", ylab="Variance explained (%)", pch = 16)
+plot(percent.var, log = "y", xlab = "PC", ylab = "Variance explained (%)", pch = 16)
 ```
 
 In general the # of PCs to use for downstream steps depends on the complexity and heterogeneity in the data, as well as the biological question. For this analysis we will retain the top 30, but you should explore how the downstream steps are affected by including fewer or more PCs.  
@@ -236,7 +241,7 @@ In general the # of PCs to use for downstream steps depends on the complexity an
 ```{r}
 reducedDim(sce, "PCA")[1:4, 1:4] # the PCA is stored in the reducedDim() slot
 
-# we can subset the PCA to fewer dimensions, e.g. 30 
+# we can subset the PCA to fewer dimensions, e.g. 30
 reducedDim(sce, "PCA") <- reducedDim(sce, "PCA")[, 1:30]
 ```
 ## Dimensionality reduction for visualization
@@ -253,9 +258,8 @@ I usually don't make too many changes to the parameters for UMAP, but these can 
 
 ```{r}
 set.seed(1234323523)
-sce <- runUMAP(sce, dimred="PCA") # adds another reducedDim()
+sce <- runUMAP(sce, dimred = "PCA") # adds another reducedDim()
 reducedDims(sce)
-
 ```
 
 `plotUMAP` is the plotting function for UMAPs. 
@@ -267,7 +271,7 @@ plotUMAP(sce, colour_by = "CD79A")
 
 ```{r}
 set.seed(1234323523)
-sce <- runUMAP(sce, dimred="PCA", n_neighbors = 100, min_dist = 0.5) 
+sce <- runUMAP(sce, dimred = "PCA", n_neighbors = 100, min_dist = 0.5)
 plotUMAP(sce, colour_by = "CD3D")
 plotUMAP(sce, colour_by = "CD79A")
 ```
@@ -300,10 +304,14 @@ The parameters of the clustering can be changed by changing the `NNGraphParam`. 
 ```{r}
 library(bluster)
 set.seed(10101010)
-clusters <- clusterCells(sce, use.dimred="PCA", 
-    BLUSPARAM = NNGraphParam(k = 10,
-                             type = "rank", 
-                             cluster.fun = "walktrap"))
+clusters <- clusterCells(sce,
+  use.dimred = "PCA",
+  BLUSPARAM = NNGraphParam(
+    k = 10,
+    type = "rank",
+    cluster.fun = "walktrap"
+  )
+)
 table(clusters)
 ```
 
@@ -318,10 +326,14 @@ Generally increasing the # of neighbors will decrease the number of clusters and
 ```{r}
 set.seed(12121212)
 
-clusters <- clusterCells(sce, use.dimred="PCA", 
-    BLUSPARAM = NNGraphParam(k = 100,
-                             type = "rank", 
-                             cluster.fun = "walktrap"))
+clusters <- clusterCells(sce,
+  use.dimred = "PCA",
+  BLUSPARAM = NNGraphParam(
+    k = 100,
+    type = "rank",
+    cluster.fun = "walktrap"
+  )
+)
 
 sce$coarse_clusters <- clusters
 
@@ -363,7 +375,7 @@ The approach implemented by scoreMarkers() does **not** return any p-values for 
 
 ```{r}
 mrks <- scoreMarkers(sce, sce$clusters)
-mrks 
+mrks
 ```
 
 
@@ -403,14 +415,15 @@ Here we will plot top genes ranked by `mean.AUC` for cluster 1.
 ```{r}
 cluster1_markers <- as.data.frame(mrks[[1]]) |> tibble::rownames_to_column("gene")
 
-ordered <- cluster1_markers |> 
-  dplyr::filter(mean.AUC > 0.5) |> 
+ordered <- cluster1_markers |>
+  dplyr::filter(mean.AUC > 0.5) |>
   dplyr::arrange(desc(mean.AUC))
 
-plotExpression(sce, 
-               features=head(ordered$gene), 
-               x="clusters", 
-               colour_by="clusters")
+plotExpression(sce,
+  features = head(ordered$gene),
+  x = "clusters",
+  colour_by = "clusters"
+)
 ```
 
 Next we will extract the top N markers from each cluster, ranked on `mean.AUC`, then plot the average expression of these markers in each cluster as a heatmap.
@@ -418,12 +431,12 @@ Next we will extract the top N markers from each cluster, ranked on `mean.AUC`, 
 ```{r}
 n_top_markers <- 5
 
-top_markers <- purrr::map_dfr(mrks, ~{
-  .x |> 
-    as.data.frame() |> 
-    tibble::rownames_to_column("gene") |> 
-    dplyr::filter(mean.AUC > 0.5) |> 
-    dplyr::arrange(desc(mean.AUC)) |> 
+top_markers <- purrr::map_dfr(mrks, ~ {
+  .x |>
+    as.data.frame() |>
+    tibble::rownames_to_column("gene") |>
+    dplyr::filter(mean.AUC > 0.5) |>
+    dplyr::arrange(desc(mean.AUC)) |>
     dplyr::slice(1:n_top_markers)
 }, .id = "cluster")
 
@@ -435,11 +448,12 @@ top_markers[1:10, 1:2]
 ```{r}
 #| fig.width: 9
 #| fig.height: 9
-plotGroupedHeatmap(sce, 
-                   features=unique(top_markers$gene), 
-                   group="clusters",
-                   center=TRUE, 
-                   zlim=c(-3, 3))
+plotGroupedHeatmap(sce,
+  features = unique(top_markers$gene),
+  group = "clusters",
+  center = TRUE,
+  zlim = c(-3, 3)
+)
 ```
 
 # So how do we annotate each cluster as a cell type?
@@ -468,7 +482,7 @@ res <- clustify(
   ref_mat = ref_hema_microarray(), # cell type reference data
   cluster_col = "clusters", # column in metadata with clusters
   # don't add to SingleCellExperiment object, just return results
-  obj_out = FALSE, 
+  obj_out = FALSE,
   # use variable genes for comparison
   query_genes = top,
 )

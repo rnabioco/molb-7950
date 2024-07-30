@@ -2,7 +2,7 @@
 #
 # for some reason, some Bioconductor packages end up with Source: "Repository"
 # and an undefined "Repository" field.
-# 
+#
 # this just identifies those packages, sets Source: "Bioconductor", and then
 # re-writes the lock file
 
@@ -25,7 +25,7 @@ pkgs_fix <-
   purrr::map_lgl(
     pkgs,
     ~ wrong_source(.x)
-  ) |> 
+  ) |>
   which() |>
   purrr::map_at(
     .x = pkgs,

@@ -17,12 +17,11 @@ library(annotatr)
 library(ggrepel)
 library(tidyverse)
 library(cowplot)
-library(scales) 
+library(scales)
 library(gt)
 library(here)
 library(Hmisc)
 library(broom)
-
 ```
 
 
@@ -60,10 +59,10 @@ hg19_annots <- grep("hg19_genes", possible_annotations, value = T)
 # WHY DID WE PICK hg19?
 
 # let's keep 5' utr, cds, intron, 3' utr and intergenic
-my_hg19_annots <- hg19_annots[c(3,4,7,10,11)]
+my_hg19_annots <- hg19_annots[c(3, 4, 7, 10, 11)]
 
 # build the annotation database
-annotations <- build_annotations(genome = 'hg19', annotations = my_hg19_annots)
+annotations <- build_annotations(genome = "hg19", annotations = my_hg19_annots)
 
 annotations
 ```
@@ -78,28 +77,30 @@ annotations
 #| label: annotate-clip
 #| output-location: column-fragment
 
-hur_regions <- read_regions(con = "https://raw.githubusercontent.com/BIMSBbioinfo/RCAS_meta-analysis/master/rbp-binding-sites/SRR248532.clusters.bed",
-                     genome = 'hg19', format = 'bed')
+hur_regions <- read_regions(
+  con = "https://raw.githubusercontent.com/BIMSBbioinfo/RCAS_meta-analysis/master/rbp-binding-sites/SRR248532.clusters.bed",
+  genome = "hg19", format = "bed"
+)
 
 # let's annotate
 hur_annot <- annotate_regions(
-    regions = hur_regions,
-    annotations = annotations,
-    ignore.strand = FALSE,
-    quiet = FALSE) %>%
+  regions = hur_regions,
+  annotations = annotations,
+  ignore.strand = FALSE,
+  quiet = FALSE
+) %>%
   data.frame()
 
 # keep only columns we need
-myInfo <- c("seqnames","start","end","width","strand","annot.symbol","annot.type")
+myInfo <- c("seqnames", "start", "end", "width", "strand", "annot.symbol", "annot.type")
 
-hur_annot <- hur_annot[,myInfo] %>%
-  unique() 
+hur_annot <- hur_annot[, myInfo] %>%
+  unique()
 
 # getting rid of the "hg19_genes_" string to simplify `annot.type`
-hur_annot$annot.type <- gsub("hg19_genes_","",hur_annot$annot.type)
+hur_annot$annot.type <- gsub("hg19_genes_", "", hur_annot$annot.type)
 
 table(hur_annot$annot.type)
-
 ```
 
 
@@ -118,15 +119,15 @@ Now we want to get the following info:
 
 # count the # sites per gene and annotation cat
 hur_gene_clip <- hur_annot %>%
-  filter(annot.type!="intergenic") %>%
-  group_by(annot.symbol,annot.type) %>%
+  filter(annot.type != "intergenic") %>%
+  group_by(annot.symbol, annot.type) %>%
   dplyr::count() %>%
   pivot_wider(names_from = annot.type, values_from = n)
 
-hur_gene_clip <- hur_gene_clip %>% mutate_if(is.numeric , replace_na, replace = 0)
+hur_gene_clip <- hur_gene_clip %>% mutate_if(is.numeric, replace_na, replace = 0)
 
 # new column w/total # sites
-hur_gene_clip$total <- rowSums(hur_gene_clip[,-1]) 
+hur_gene_clip$total <- rowSums(hur_gene_clip[, -1])
 
 # remove symbols that are NA
 hur_gene_clip <- hur_gene_clip %>%
@@ -134,7 +135,7 @@ hur_gene_clip <- hur_gene_clip %>%
 
 # rename cols
 colnames(hur_gene_clip)[1] <- "Symbol"
-colnames(hur_gene_clip)[3:4] <- c("utr3","utr5")
+colnames(hur_gene_clip)[3:4] <- c("utr3", "utr5")
 ```
 
 
@@ -147,16 +148,15 @@ colnames(hur_gene_clip)[3:4] <- c("utr3","utr5")
 #| output-location: column-fragment
 
 
-hur_gene_clip_long  <- hur_gene_clip %>% 
-  pivot_longer(-Symbol) 
+hur_gene_clip_long <- hur_gene_clip %>%
+  pivot_longer(-Symbol)
 
-colnames(hur_gene_clip_long)  <-  c("symbol","region","sites")
+colnames(hur_gene_clip_long) <- c("symbol", "region", "sites")
 
-ggplot(hur_gene_clip_long %>% filter(region != "total"), aes(sites, fill=region)) +
+ggplot(hur_gene_clip_long %>% filter(region != "total"), aes(sites, fill = region)) +
   geom_histogram() +
   scale_x_log10() +
   theme_cowplot()
-
 ```
 
 ## Explore intron vs 3' UTR sites {.smaller} 
@@ -169,19 +169,19 @@ ggplot(hur_gene_clip_long %>% filter(region != "total"), aes(sites, fill=region)
 
 
 # how many genes have both intron and/or 3' UTR sites
-site_combo <- hur_gene_clip[,2:5] %>%
+site_combo <- hur_gene_clip[, 2:5] %>%
   mutate(
     type = case_when(
-      introns > 0 & utr3 > 0     ~ "intron_utr3",
-      introns > 0 & utr3 ==  0 ~ "intron",
-      introns == 0 & utr3 >  0 ~ "utr3",
-      TRUE ~ "other")
-    ) 
+      introns > 0 & utr3 > 0 ~ "intron_utr3",
+      introns > 0 & utr3 == 0 ~ "intron",
+      introns == 0 & utr3 > 0 ~ "utr3",
+      TRUE ~ "other"
+    )
+  )
 
 ggplot(site_combo, aes(type)) +
   geom_bar(stat = "count") +
   theme_cowplot()
-
 ```
 
 **HuR binds to both introns and 3' UTRs.**  
@@ -213,13 +213,12 @@ gene_info <- read_csv(here("data/block-rna/geneInfo.csv.zip"))
 
 HuR$Gene <- rownames(HuR) # new column gene ids
 
-HuR <- left_join(HuR, gene_info[c(2,11)], by="Gene") # Symbol
+HuR <- left_join(HuR, gene_info[c(2, 11)], by = "Gene") # Symbol
 
 # Filter for expression
 hur_filt_rnaseq <- HuR %>%
-  dplyr::filter(rowMeans(HuR[,1:4]) > 1) %>%
+  dplyr::filter(rowMeans(HuR[, 1:4]) > 1) %>%
   dplyr::select(-Gene)
-
 ```
 
 ## integrate siRNA and clip-seq data {.smaller}
@@ -230,20 +229,18 @@ hur_filt_rnaseq <- HuR %>%
 #| label: join-clip-sirna
 #| output-location: column-fragment
 
-#join kd and clip data
-kd_clip <- left_join(hur_filt_rnaseq, hur_gene_clip,  by = "Symbol") 
+# join kd and clip data
+kd_clip <- left_join(hur_filt_rnaseq, hur_gene_clip, by = "Symbol")
 
 # convert all NA to 0
-kd_clip <- kd_clip %>% mutate_if(is.numeric , replace_na, replace = 0)
+kd_clip <- kd_clip %>% mutate_if(is.numeric, replace_na, replace = 0)
 
 # calculate log fold changes
 kd_clip <- kd_clip %>%
   mutate(
     lfc_mature = log2(Mature_siGFP) - log2(Mature_siHuR),
-    lfc_primary= log2(Primary_siGFP) - log2(Primary_siHuR)
-    )
-
-
+    lfc_primary = log2(Primary_siGFP) - log2(Primary_siHuR)
+  )
 ```
 
 
@@ -269,21 +266,20 @@ kd_clip <- kd_clip %>%
 # create new column for target or not target
 
 kd_clip$target <- case_when(
-  kd_clip$total > 0 ~  "target",
-  TRUE ~ "not target") 
+  kd_clip$total > 0 ~ "target",
+  TRUE ~ "not target"
+)
 
 
 ggplot(kd_clip, aes(lfc_mature, color = target)) +
   stat_ecdf() +
-  xlim(-2,2) +
+  xlim(-2, 2) +
   theme_cowplot() +
   ylab("cumulative fraction of LFC") +
   ggtitle("HuR Target vs Not Target") +
-  geom_hline(yintercept=.75, color="grey") +
-    geom_hline(yintercept=.5, color="grey") +
-    geom_hline(yintercept=.25, color="grey")
-
-
+  geom_hline(yintercept = .75, color = "grey") +
+  geom_hline(yintercept = .5, color = "grey") +
+  geom_hline(yintercept = .25, color = "grey")
 ```
 
 ## To target a little or a lot? {.smaller}
@@ -300,31 +296,30 @@ ggplot(kd_clip, aes(lfc_mature, color = target)) +
 # hist(kd_clip$utr3)
 # let's make bins for # of sites per  3' UTR
 
-kd_clip$utr3_bin <- cut2(x = kd_clip$utr3, c(0,1,2,4,8,1000))
+kd_clip$utr3_bin <- cut2(x = kd_clip$utr3, c(0, 1, 2, 4, 8, 1000))
 
 # table(kd_clip$utr3_bin)
 
 # let's make bins for UTR
 kd_clip$utr3_bin <- recode_factor(kd_clip$utr3_bin,
-               "   0" = "0",
-               "   1" = "1",
-               "[   2,   4)" = "2-3",
-               "[   4,   8)" = "4-7",
-               "[   8,1000]" = "8+"
-               )
+  "   0" = "0",
+  "   1" = "1",
+  "[   2,   4)" = "2-3",
+  "[   4,   8)" = "4-7",
+  "[   8,1000]" = "8+"
+)
 
 
 ggplot(data = kd_clip, aes(x = lfc_mature, color = utr3_bin)) +
   stat_ecdf() +
-  xlim(-2,2) +
+  xlim(-2, 2) +
   theme_cowplot() +
   ylab("cumulative fraction- LFCs") +
   ggtitle("# of HuR binding sites in 3' UTR") +
-  geom_hline(yintercept=.75, color="grey", linetype = "dashed") +
-  geom_hline(yintercept=.5, color="grey", linetype = "dashed") +
-  geom_hline(yintercept=.25, color="grey", linetype = "dashed") +
-  geom_segment(aes(x = 0, y = 0, xend = 0, yend = .5, colour = "segment"), color="black", linetype = "dashed")
-
+  geom_hline(yintercept = .75, color = "grey", linetype = "dashed") +
+  geom_hline(yintercept = .5, color = "grey", linetype = "dashed") +
+  geom_hline(yintercept = .25, color = "grey", linetype = "dashed") +
+  geom_segment(aes(x = 0, y = 0, xend = 0, yend = .5, colour = "segment"), color = "black", linetype = "dashed")
 ```
 
 
@@ -340,19 +335,21 @@ ggplot(data = kd_clip, aes(x = lfc_mature, color = utr3_bin)) +
 #| output-location: column-fragment
 
 # keep only finite values for lfc_mature and lfc_primary
-kd_clip_targets <- kd_clip[is.finite(kd_clip$lfc_mature),]
+kd_clip_targets <- kd_clip[is.finite(kd_clip$lfc_mature), ]
 
 # IMPORTANT relevel indicating what everything will be compared to
 kd_clip_targets$utr3_bin <- relevel(factor(kd_clip_targets$utr3_bin), ref = "0")
 
 
 # calculate fit using `lm`
-fit_bins <- lm(data = kd_clip_targets,
-   formula = lfc_mature ~ utr3_bin)
+fit_bins <- lm(
+  data = kd_clip_targets,
+  formula = lfc_mature ~ utr3_bin
+)
 
 # examine estimates and p-vals
 tidy(fit_bins) %>%
-  gt() 
+  gt()
 ```
 
 ## More binding -> more stabilization? {.smaller}
@@ -374,17 +371,19 @@ ref_mean <- kd_clip_targets %>%
 
 # examine estimates and p-vals
 tidy(fit_bins) %>%
-  ggplot(data=.,
-         aes(x=term,
-             y=estimate,
-             fill=-log10(p.value)
-             )
-         ) +
-  geom_bar(stat="identity") +
+  ggplot(
+    data = .,
+    aes(
+      x = term,
+      y = estimate,
+      fill = -log10(p.value)
+    )
+  ) +
+  geom_bar(stat = "identity") +
   coord_flip() +
-  geom_hline(yintercept = ref_mean,
-             color = "red") +
+  geom_hline(
+    yintercept = ref_mean,
+    color = "red"
+  ) +
   theme_cowplot()
-
-  
 ```

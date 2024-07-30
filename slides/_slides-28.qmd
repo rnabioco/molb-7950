@@ -21,10 +21,8 @@ library(tidyverse)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
 library(cowplot)
-library(scales) 
+library(scales)
 library(gt)
-
-
 ```
 
 ## Learning Objectives {.smaller}
@@ -207,10 +205,10 @@ hg19_annots <- grep("hg19_genes", possible_annotations, value = T)
 # WHY DID WE PICK hg19?
 
 # let's keep 5' utr, cds, intron, 3' utr and intergenic
-my_hg19_annots <- hg19_annots[c(3,4,7,10,11)]
+my_hg19_annots <- hg19_annots[c(3, 4, 7, 10, 11)]
 
 # build the annotation database
-annotations <- build_annotations(genome = 'hg19', annotations = my_hg19_annots)
+annotations <- build_annotations(genome = "hg19", annotations = my_hg19_annots)
 
 annotations
 ```
@@ -237,7 +235,7 @@ annotation_introns <- GenomicRanges::reduce(annotation_introns)
 # length of each intron interval
 length_introns <- width(annotation_introns)
 
-#get cds
+# get cds
 annotation_cds <- annotations[annotations$type == my_hg19_annots[1]]
 
 # collapsing cds
@@ -245,7 +243,6 @@ annotation_cds <- GenomicRanges::reduce(annotation_cds)
 
 # length of each cds interval
 length_cds <- width(annotation_cds)
-
 ```
 
 
@@ -262,23 +259,35 @@ length_cds <- width(annotation_cds)
 #| output-location: column-fragment
 
 all_length <- bind_rows(
-  tibble(nt=length_introns,
-       cat=rep("intron",
-               length(length_introns))),
-  tibble(nt=length_cds,
-       cat=rep("cds",
-               length(length_cds)))
+  tibble(
+    nt = length_introns,
+    cat = rep(
+      "intron",
+      length(length_introns)
+    )
+  ),
+  tibble(
+    nt = length_cds,
+    cat = rep(
+      "cds",
+      length(length_cds)
+    )
+  )
 )
 
-ggplot(all_length, aes(x=nt, color=cat)) +
+ggplot(all_length, aes(x = nt, color = cat)) +
   geom_density() +
-  scale_x_log10(breaks = trans_breaks("log10",
-                                      function(x) 10^x),
-                labels = trans_format("log10",
-                                      math_format(10^.x))) +
+  scale_x_log10(
+    breaks = trans_breaks(
+      "log10",
+      function(x) 10^x
+    ),
+    labels = trans_format(
+      "log10",
+      math_format(10^.x)
+    )
+  ) +
   theme_cowplot()
-
-
 ```
 
 The typical* human intron is way longer than a CDS exon. 
@@ -316,9 +325,11 @@ We are looking for an ELAVL1 PAR-CLIP corresponding to this SRA (short-read arch
 #| label: read-filter-clip
 #| output-location: column-fragment
 
-hur_regions <- read_regions(con = "https://raw.githubusercontent.com/BIMSBbioinfo/RCAS_meta-analysis/master/rbp-binding-sites/SRR248532.clusters.bed",
-                            genome = 'hg19',
-                            format = 'bed')
+hur_regions <- read_regions(
+  con = "https://raw.githubusercontent.com/BIMSBbioinfo/RCAS_meta-analysis/master/rbp-binding-sites/SRR248532.clusters.bed",
+  genome = "hg19",
+  format = "bed"
+)
 
 
 
@@ -342,28 +353,28 @@ hur_regions
 
 # let's annotate
 hur_annot <- annotate_regions(
-    regions = hur_regions,
-    annotations = annotations,
-    ignore.strand = FALSE,
-    quiet = FALSE) %>%
+  regions = hur_regions,
+  annotations = annotations,
+  ignore.strand = FALSE,
+  quiet = FALSE
+) %>%
   data.frame()
-  
+
 
 # we put in ~20K and got ~50K??
 
 # redundant info due to transcript_id
 
 # keep only columns we need
-myInfo <- c("seqnames","start","end","width","strand","annot.symbol","annot.type")
+myInfo <- c("seqnames", "start", "end", "width", "strand", "annot.symbol", "annot.type")
 
-hur_annot <- hur_annot[,myInfo] %>%
-  unique() 
+hur_annot <- hur_annot[, myInfo] %>%
+  unique()
 
 # getting rid of the "hg19_genes_" string to simplify `annot.type`
-hur_annot$annot.type <- gsub("hg19_genes_","",hur_annot$annot.type)
+hur_annot$annot.type <- gsub("hg19_genes_", "", hur_annot$annot.type)
 
 table(hur_annot$annot.type)
-
 ```
 
 
@@ -397,15 +408,11 @@ mylengths <- vector()
 
 for (i in 1:length(my_hg19_annots)) {
   mylengths[i] <- sum(width(GenomicRanges::reduce(annotations[annotations$type %in% my_hg19_annots[i]])))
-  
-  names(mylengths)[i] <- gsub("hg19_genes_","",my_hg19_annots[i])
-  
-  
+
+  names(mylengths)[i] <- gsub("hg19_genes_", "", my_hg19_annots[i])
 }
 
-barplot(mylengths[1:4], las=2, main = "total bases per category", log="y")
-
-
+barplot(mylengths[1:4], las = 2, main = "total bases per category", log = "y")
 ```
 
 
@@ -426,26 +433,27 @@ What if we were to take our HuR binding and randomize their position and then re
 random_sites <- randomize_regions(
   regions = hur_regions,
   allow.overlaps = TRUE,
-  per.chromosome = TRUE)
+  per.chromosome = TRUE
+)
 
 # annotate  randomize regions
 random_sites_annot <- annotate_regions(
   regions = random_sites,
   annotations = annotations,
   ignore.strand = FALSE,
-  quiet = FALSE) %>%
+  quiet = FALSE
+) %>%
   data.frame()
 
 # select cols, keep unique
-random_sites_annot <- random_sites_annot[,myInfo] %>%
-  unique() 
+random_sites_annot <- random_sites_annot[, myInfo] %>%
+  unique()
 
 # clean names
-random_sites_annot$annot.type <- gsub("hg19_genes_","",random_sites_annot$annot.type)
+random_sites_annot$annot.type <- gsub("hg19_genes_", "", random_sites_annot$annot.type)
 
 
 table(random_sites_annot$annot.type)
-
 ```
 
 ## Compare HuR vs Random {.smaller}
@@ -459,18 +467,18 @@ table(random_sites_annot$annot.type)
 
 # create a new tibble with the annotation counts for hur (observed) and random (expected) binding sties
 site_dist <- bind_cols(
-  region=names(table(hur_annot$annot.type)),
-  observed=table(hur_annot$annot.type),
-  expected=table(random_sites_annot$annot.type)
-          ) %>%
-  mutate(enrichment = observed/expected) # calculate enrichment
+  region = names(table(hur_annot$annot.type)),
+  observed = table(hur_annot$annot.type),
+  expected = table(random_sites_annot$annot.type)
+) %>%
+  mutate(enrichment = observed / expected) # calculate enrichment
 
 
 site_dist_long <- pivot_longer(site_dist,
-                               cols = c(observed,expected,enrichment)
-                               )
+  cols = c(observed, expected, enrichment)
+)
 
-colnames(site_dist_long) <- c("region","type","value")
+colnames(site_dist_long) <- c("region", "type", "value")
 
 # plot counts for parclip vs random barplot
 # ggplot(site_dist_long %>% filter(type!="enrichment"),
@@ -480,11 +488,10 @@ colnames(site_dist_long) <- c("region","type","value")
 #   theme_cowplot()
 
 # plot enrichment barplot
-ggplot(site_dist_long %>% filter(type=="enrichment"), aes(y = value, x = region)) +
-  geom_bar(stat="identity") +
+ggplot(site_dist_long %>% filter(type == "enrichment"), aes(y = value, x = region)) +
+  geom_bar(stat = "identity") +
   ylab("Observed vs Expected") +
   theme_cowplot()
-
 ```
 
 
@@ -527,8 +534,8 @@ Since HuR preferentially binds to 3' UTRs, that is the region we will focus on.
 #| label: hur-seqs
 #| output-location: slide
 
-# create a Grange for 3' UTRs 
-hur_3utr <- makeGRangesFromDataFrame(df = hur_annot %>% filter(annot.type=="3UTRs"), ignore.strand = F, seqnames.field = "seqnames", start.field = "start", end.field = "end", strand.field = "strand", keep.extra.columns = T)
+# create a Grange for 3' UTRs
+hur_3utr <- makeGRangesFromDataFrame(df = hur_annot %>% filter(annot.type == "3UTRs"), ignore.strand = F, seqnames.field = "seqnames", start.field = "start", end.field = "end", strand.field = "strand", keep.extra.columns = T)
 
 # get  sequencees for those coordinates
 hur_3utr_seqs <- getSeq(BSgenome.Hsapiens.UCSC.hg19, hur_3utr)
@@ -538,15 +545,15 @@ hur_utr3_6mer <- oligonucleotideFrequency(
   x = hur_3utr_seqs,
   width = 6,
   as.prob = F,
-  simplify.as="matrix") %>%
+  simplify.as = "matrix"
+) %>%
   colSums(.) %>%
   as.data.frame()
 
 colnames(hur_utr3_6mer) <- "hur_utr_count"
 
-# calc freq 
-hur_utr3_6mer$hur_utr_freq <- hur_utr3_6mer$hur_utr_count/sum(hur_utr3_6mer$hur_utr_count)
-
+# calc freq
+hur_utr3_6mer$hur_utr_freq <- hur_utr3_6mer$hur_utr_count / sum(hur_utr3_6mer$hur_utr_count)
 ```
 
 
@@ -559,7 +566,7 @@ Next, we will calculate 6mer frequencies in 3' UTRs. This will serve as a null m
 #| echo: true
 #| label: utr-seqs
 
-# create a Grange for 3' UTRs 
+# create a Grange for 3' UTRs
 threeUTR <- GenomicRanges::reduce(annotations[annotations$type %in% my_hg19_annots[4]])
 
 # get sequences for those coordinates
@@ -570,15 +577,15 @@ utr3_6mer <- oligonucleotideFrequency(
   x = threeUTR_seqs,
   width = 6,
   as.prob = F,
-  simplify.as="matrix") %>%
+  simplify.as = "matrix"
+) %>%
   colSums(.) %>%
   as.data.frame()
 
 colnames(utr3_6mer) <- "utr_count"
 
 # calc freq
-utr3_6mer$utr_freq <- utr3_6mer$utr_count/sum(utr3_6mer$utr_count)
-
+utr3_6mer$utr_freq <- utr3_6mer$utr_count / sum(utr3_6mer$utr_count)
 ```
 
 ## Sequences enriched in hur sites vs 3utr {.smaller}  
@@ -591,31 +598,34 @@ utr3_6mer$utr_freq <- utr3_6mer$utr_count/sum(utr3_6mer$utr_count)
 #| output-location: slide
 
 # check if rownames are identical and stop if they are  not
-stopifnot(identical(rownames(hur_utr3_6mer),rownames(utr3_6mer)))
+stopifnot(identical(rownames(hur_utr3_6mer), rownames(utr3_6mer)))
 
 # bind_cols
-utr3_df <- bind_cols(hur_utr3_6mer,
-                     utr3_6mer)
+utr3_df <- bind_cols(
+  hur_utr3_6mer,
+  utr3_6mer
+)
 # Calc enrichment
-utr3_df$hur_enrich <- utr3_df$hur_utr_freq/utr3_df$utr_freq
+utr3_df$hur_enrich <- utr3_df$hur_utr_freq / utr3_df$utr_freq
 
 
 # plot coloring and labeling all > 8 fold enriched
-ggplot(data = utr3_df,
-       aes(y = hur_utr_freq,
-           x = utr_freq)
-       ) +
+ggplot(
+  data = utr3_df,
+  aes(
+    y = hur_utr_freq,
+    x = utr_freq
+  )
+) +
   geom_point(color = ifelse(utr3_df$hur_enrich > 8, "red", "black")) +
   ylab("kmers: HuR 3'UTR sites") +
   xlab("kmers: 3'UTR") +
   geom_abline(intercept = 0, slope = 1) +
-  geom_text_repel(aes(label=ifelse(hur_enrich > 8,
-                                   rownames(utr3_df),
-                                   ""))) +
+  geom_text_repel(aes(label = ifelse(hur_enrich > 8,
+    rownames(utr3_df),
+    ""
+  ))) +
   theme_cowplot()
-
-
-
 ```
 
 
@@ -631,7 +641,5 @@ Not just AU-rich...
 utr3_df %>%
   rownames_to_column(var = "6mer") %>%
   arrange(-hur_enrich) %>%
-  gt() 
-
-
+  gt()
 ```

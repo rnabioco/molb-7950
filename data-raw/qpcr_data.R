@@ -2,10 +2,10 @@
 library(tidyverse)
 library(here)
 
-sample <- c('wt', 'mut')
-gene <- c('IFN', 'ACTIN')
+sample <- c("wt", "mut")
+gene <- c("IFN", "ACTIN")
 time <- c(0, 12, 24, 48)
-rt <- c('+', '-') # reverse transcriptase added?
+rt <- c("+", "-") # reverse transcriptase added?
 rep <- 1:3
 
 set.seed(42)
@@ -13,10 +13,18 @@ sample_data <- crossing(sample, time, gene, rep, rt)
 
 plus_rts <- filter(sample_data, rt == "+")
 
-t0 <- filter(plus_rts, time == 0) %>% rowwise() %>% mutate(exp = sample(5:15, 1))
-t12 <- filter(plus_rts, time == 12) %>% rowwise() %>% mutate(exp = sample(45:55, 1))
-t24 <- filter(plus_rts, time == 24) %>% rowwise() %>% mutate(exp = sample(95:100, 1))
-t48 <- filter(plus_rts, time == 48) %>% rowwise() %>% mutate(exp = sample(350:600, 1))
+t0 <- filter(plus_rts, time == 0) %>%
+  rowwise() %>%
+  mutate(exp = sample(5:15, 1))
+t12 <- filter(plus_rts, time == 12) %>%
+  rowwise() %>%
+  mutate(exp = sample(45:55, 1))
+t24 <- filter(plus_rts, time == 24) %>%
+  rowwise() %>%
+  mutate(exp = sample(95:100, 1))
+t48 <- filter(plus_rts, time == 48) %>%
+  rowwise() %>%
+  mutate(exp = sample(350:600, 1))
 
 plus_rts <- bind_rows(t0, t12, t24, t48)
 

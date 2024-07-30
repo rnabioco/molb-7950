@@ -2,8 +2,8 @@
 library(tidyverse)
 library(here)
 
-gt <- c('wt', 'TF-mutant', 'RL-mutant')
-gene <- c('IFN-beta', 'GAPDH')
+gt <- c("wt", "TF-mutant", "RL-mutant")
+gene <- c("IFN-beta", "GAPDH")
 time <- c(0, 4, 8, 12, 24, 48)
 rep_bio <- 1:3
 rep_tech <- 1:3
@@ -18,9 +18,9 @@ sample_data <-
   mutate(
     exp = case_when(
       gene == "GAPDH" ~ exp * runif(1),
-      gene == 'IFN-beta' ~ exp * runif(1, 4, 6)
+      gene == "IFN-beta" ~ exp * runif(1, 4, 6)
     )
-  ) |> 
+  ) |>
   mutate(
     exp = case_when(
       gt == "wt" ~ exp * 0.2,

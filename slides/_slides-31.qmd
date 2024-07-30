@@ -113,7 +113,7 @@ digraph workflow {
   # green
   node [fillcolor = '#009E73']
   cr [label = 'Process FASTQ to UMI count matrix\n(Cellranger, Alevin, or STARsolo)']
-  
+
   # blue
   node [fillcolor = '#56B4E9']
   cell_qc [label = 'QC cells\n (% mitochondrial UMIs,\n# of UMIs/Genes,\nremove empty droplets)']
@@ -126,13 +126,13 @@ digraph workflow {
   cluster [label = 'Clustering\n (using Shared Nearest Neighbors)']
   viz [label = 'Make 2D-Visualization\n(PCA, UMAP, tSNE\nForce-directed graph)']
   traj [label = 'Trajectory Inference\n(Slingshot,\nPAGA, scVelo)']
-  
+
   # blue
   node [fillcolor = '#56B4E9']
-  
+
   markers [label = 'Discover cell type markers']
   annot [label = 'Annotate cell types']
-  
+
   # orange
   node [fillcolor = '#E69F00']
   downstream  [label = 'Downstream analysis\n(Differential expression,\nShifts in cell type composition,\n Find new cell-types/states)']
@@ -146,7 +146,7 @@ digraph workflow {
   norm -> markers
   feature -> dim_red
   dim_red -> cluster
-  dim_red -> traj 
+  dim_red -> traj
   dim_red -> viz
   cluster -> markers
   markers -> annot
@@ -272,9 +272,11 @@ cell_counts <- alevin$cbTable
 ggplot(cell_counts, aes(ranking, originalFreq)) +
   geom_point(size = 0.1) +
   scale_x_log10(labels = scales::comma, breaks = c(10, 1000, 10000, 100000)) +
-  scale_y_log10() + 
-  labs(x = "Barcode rank",
-       y = "Barcode frequency")
+  scale_y_log10() +
+  labs(
+    x = "Barcode rank",
+    y = "Barcode frequency"
+  )
 ```
 
 :::
@@ -294,10 +296,12 @@ frst_dev <- max(cell_counts$ranking[cell_counts$inFirstWhiteList])
 ggplot(cell_counts, aes(ranking, originalFreq)) +
   geom_point(size = 0.1) +
   scale_x_log10(labels = scales::comma, breaks = c(10, 1000, 10000, 100000)) +
-  scale_y_log10() + 
-  geom_vline(xintercept = frst_dev) + 
-  labs(x = "Barcode rank",
-       y = "Barcode frequency")
+  scale_y_log10() +
+  geom_vline(xintercept = frst_dev) +
+  labs(
+    x = "Barcode rank",
+    y = "Barcode frequency"
+  )
 ```
 
 ::: 
@@ -331,10 +335,12 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
 ggplot(cell_counts, aes(ranking, originalFreq)) +
   geom_point(aes(color = inFinalWhiteList), size = 0.1) +
   scale_x_log10(labels = scales::comma, breaks = c(10, 1000, 10000, 100000)) +
-  scale_y_log10() + 
-   labs(x = "Barcode rank",
-        y = "Barcode frequency",
-        color = "Cell")
+  scale_y_log10() +
+  labs(
+    x = "Barcode rank",
+    y = "Barcode frequency",
+    color = "Cell"
+  )
 ```
 
 ::: 
@@ -381,8 +387,9 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
 #| echo: true
 library(tximport)
 data_dir <- here("data/block-rna/scrna/pbmc")
-tx <- tximport(file.path(data_dir, "alevin/quants_mat.gz"), 
-               type = 'alevin')
+tx <- tximport(file.path(data_dir, "alevin/quants_mat.gz"),
+  type = "alevin"
+)
 names(tx)
 
 dim(tx$counts)
@@ -409,9 +416,11 @@ tx$counts[5:10, 1:3]
 
 ```{r}
 #| echo: true
-vals <- c(0, 0, 0, 0, 0,
-          2, 0, 0, 0, 0,
-          0, 0, 1, 0, 1)
+vals <- c(
+  0, 0, 0, 0, 0,
+  2, 0, 0, 0, 0,
+  0, 0, 1, 0, 1
+)
 sm <- Matrix(vals, ncol = 5)
 sm
 summary(sm)
@@ -429,10 +438,11 @@ sce <- SingleCellExperiment(list(counts = tx$counts))
 ah <- AnnotationHub()
 ens_db <- ah[["AH113665"]]
 
-gene_names <- mapIds(ens_db, 
-                     keys=rownames(sce), 
-                     keytype = "GENEID",
-                     column="SYMBOL")
+gene_names <- mapIds(ens_db,
+  keys = rownames(sce),
+  keytype = "GENEID",
+  column = "SYMBOL"
+)
 
 rowData(sce)$gene <- gene_names
 rowData(sce)$gene_id <- rownames(sce)
@@ -440,7 +450,7 @@ is_mito <- which(startsWith(rowData(sce)$gene, "MT-"))
 sce <- addPerCellQCMetrics(sce, subsets = list(Mito = is_mito))
 
 plotColData(sce, "sum") +
-  geom_hline(yintercept = c(20000, 2500), linetype = "dashed") + 
+  geom_hline(yintercept = c(20000, 2500), linetype = "dashed") +
   labs(y = "# of UMIs")
 ```
 
@@ -449,9 +459,11 @@ plotColData(sce, "sum") +
 
 ```{r}
 plotColData(sce, "subsets_Mito_percent", "sum") +
-  geom_hline(yintercept = 25, linetype = "dashed") + 
-  labs(x = "# of UMIs",
-       y = "Percent of UMIs from Mitochondrial RNAs")
+  geom_hline(yintercept = 25, linetype = "dashed") +
+  labs(
+    x = "# of UMIs",
+    y = "Percent of UMIs from Mitochondrial RNAs"
+  )
 ```
 
 ## Single cell analysis packages
@@ -489,7 +501,7 @@ digraph workflow {
   # green
   node [fillcolor = '#009E73']
   load [label= 'Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()']
-  
+
   # blue
   node [fillcolor = '#56B4E9']
   cell_qc [label = 'QC cells\n addPerCellQCMetrics()\n plotColData()']
@@ -501,17 +513,17 @@ digraph workflow {
   dim_red [label = 'Dimensionality reduction via PCA \n runPCA()']
   cluster [label = 'Clustering\n clusterCells()']
   viz [label = 'Make 2D-Visualization\nrunUMAP()']
-  
+
   # blue
   node [fillcolor = '#56B4E9']
-  
+
   markers [label = 'Discover cell type markers \nscoreMarkers()']
   annot [label = 'Annotate cell types\nclustifyr and SingleR']
 
   edge [color = black
         fontname = 'Helvetica']
 
-  load -> cell_qc 
+  load -> cell_qc
   cell_qc -> norm
   norm -> feature
   norm -> markers

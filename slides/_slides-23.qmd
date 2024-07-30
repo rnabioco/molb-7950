@@ -15,7 +15,6 @@ library(pheatmap)
 library(gt)
 library(ggrepel)
 library(cowplot)
-
 ```
 
 
@@ -182,7 +181,7 @@ mart <- biomaRt::useMart(
 ```{r}
 #| label: list-attrs
 goodies <- listAttributes(mart)
-gt(goodies[1:20,])
+gt(goodies[1:20, ])
 ```
 
 ## Using biomaRt {.smaller}
@@ -226,18 +225,15 @@ First, we have to tell it where the salmon quantification files (the `quant.sf.g
 
 # The directory where all of the sample-specific salmon subdirectories live
 
-metadata <- data.frame(sample_id = list.files(here("data/block-rna/salmonouts"), pattern = "^DIV"),
-                   salmon_dirs = list.files(here("data/block-rna/salmonouts"),recursive = T,pattern = ".gz$", full.names = T)
+metadata <- data.frame(
+  sample_id = list.files(here("data/block-rna/salmonouts"), pattern = "^DIV"),
+  salmon_dirs = list.files(here("data/block-rna/salmonouts"), recursive = T, pattern = ".gz$", full.names = T)
+) |>
+  separate(col = sample_id, into = c("samp", "rep"), sep = "\\.", remove = F)
 
-                   ) |>
-  separate(col = sample_id, into = c("samp","rep"), sep = "\\.", remove = F)
-
-metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep) 
+metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep)
 
 rownames(metadata) <- metadata$sample_id
-
-
-
 ```
 
 ## Gene expression data with `tximport` {.smaller}
@@ -255,7 +251,8 @@ salmdir <- metadata$salmon_dirs
 names(salmdir) <- metadata$sample_id
 
 
-txi <- tximport(files = salmdir,
+txi <- tximport(
+  files = salmdir,
   type = "salmon",
   tx2gene = t2g,
   dropInfReps = TRUE,
@@ -481,7 +478,7 @@ We will use `pheatmap` to do this.
 # let's pull information that we want to add as categories
 pheatmap(
   tpms.cor,
-  annotation_col = metadata[,2:3],
+  annotation_col = metadata[, 2:3],
   fontsize = 7,
   show_colnames = FALSE
 )
@@ -514,8 +511,6 @@ tpms.cutoff.matrix <- log2(tpms.cutoff.matrix + 1e-3)
 
 # scale - annoying double transpose
 tpms.cutoff.matrix <- t(scale(t(tpms.cutoff.matrix)))
-
-
 ```
 
 ## PCA analysis {.smaller}
@@ -538,7 +533,7 @@ tpms.pca <- prcomp(t(tpms.cutoff.matrix))
 tpms.pca.pc <- tpms.pca$x %>%
   as.data.frame() %>%
   rownames_to_column(var = "sample_id") %>%
-  left_join(., metadata[,1:3], by = "sample_id")
+  left_join(., metadata[, 1:3], by = "sample_id")
 
 
 
@@ -564,7 +559,8 @@ tpms.pca.pc$samp <-
   )
 
 # Plot results
-ggplot(data = tpms.pca.pc,
+ggplot(
+  data = tpms.pca.pc,
   aes(
     x = PC1, y = PC2,
     color = samp, label = sample_id

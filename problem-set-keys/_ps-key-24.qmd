@@ -52,7 +52,6 @@ t2g <- biomaRt::getBM(
 gene_name_map <- t2g |>
   dplyr::select(-ensembl_transcript_id) |>
   unique()
-
 ```
 
 
@@ -67,20 +66,22 @@ gene_name_map <- t2g |>
 
 metadata <- data.frame(
   sample_id = list.files(here("data/block-rna/salmonouts"),
-                         pattern = "^DIV"),
+    pattern = "^DIV"
+  ),
   salmon_dirs = list.files(here("data/block-rna/salmonouts"),
-                           recursive = T,
-                           pattern = ".gz$",
-                           full.names = T)
-  ) |>
-  separate(col = sample_id, into = c("timepoint","rep"), sep = "\\.", remove = F)
+    recursive = T,
+    pattern = ".gz$",
+    full.names = T
+  )
+) |>
+  separate(col = sample_id, into = c("timepoint", "rep"), sep = "\\.", remove = F)
 
-metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep) 
+metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep)
 
 rownames(metadata) <- metadata$sample_id
 
-metadata <- metadata |> 
-  filter(timepoint %in% c("DIV0","DIV28")) 
+metadata <- metadata |>
+  filter(timepoint %in% c("DIV0", "DIV28"))
 
 salmdir <- metadata$salmon_dirs
 names(salmdir) <- metadata$sample_id
@@ -105,7 +106,7 @@ txi <- tximport(
 hist(log2(1 + rowSums(txi$abundance)), breaks = 40)
 
 # decide a cutoff
-keepG <- txi$abundance[log2(1 + rowSums(txi$abundance)) > 4.5,] |>
+keepG <- txi$abundance[log2(1 + rowSums(txi$abundance)) > 4.5, ] |>
   rownames()
 
 ddsTxi <- DESeqDataSetFromTximport(
@@ -115,7 +116,7 @@ ddsTxi <- DESeqDataSetFromTximport(
 )
 
 # keep genes with sufficient expession
-ddsTxi <- ddsTxi[keepG,]
+ddsTxi <- ddsTxi[keepG, ]
 
 # run DESeq2
 dds <- DESeq(ddsTxi)
@@ -176,13 +177,15 @@ diff_paths <-
 diff_paths$annot <-
   factor(
     diff_paths$annot,
-    levels = c("none", "axonogenesis","cellcycle")
+    levels = c("none", "axonogenesis", "cellcycle")
   )
 
 # calculate and report p-value using wilcox test
-pvals <- wilcox_test(data = diff_paths,
-                     log2FoldChange ~ annot,
-                     ref.group = "none")
+pvals <- wilcox_test(
+  data = diff_paths,
+  log2FoldChange ~ annot,
+  ref.group = "none"
+)
 
 # make a plot of the LFC (y-axis) ~ pathways (x-axis)
 ggplot(
@@ -206,8 +209,8 @@ ggplot(
     notch = TRUE,
     outlier.shape = NA
   ) +
-  ylim(-5,5) +
-  theme_cowplot() 
+  ylim(-5, 5) +
+  theme_cowplot()
 ```
 
 
@@ -222,7 +225,7 @@ ggplot(
 
 # retrieve mouse hallmark gene set from msigdb
 mouse_hallmark <- msigdbr(species = "Mus musculus") %>%
-  filter(gs_cat == "H") %>% 
+  filter(gs_cat == "H") %>%
   dplyr::select(gs_name, gene_symbol)
 
 
@@ -240,13 +243,15 @@ rankedgenes <- rankedgenes[!duplicated(names(rankedgenes))]
 
 
 # run gsea
-div28vs0 <- GSEA(geneList = rankedgenes,
-                      eps = 0,
-                     pAdjustMethod = "fdr",
-                     pvalueCutoff = .05,
-                     minGSSize = 20,
-                     maxGSSize = 1000,
-                     TERM2GENE = mouse_hallmark)
+div28vs0 <- GSEA(
+  geneList = rankedgenes,
+  eps = 0,
+  pAdjustMethod = "fdr",
+  pvalueCutoff = .05,
+  minGSSize = 20,
+  maxGSSize = 1000,
+  TERM2GENE = mouse_hallmark
+)
 
 
 # plot "HALLMARK_G2M_CHECKPOINT"

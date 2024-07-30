@@ -20,7 +20,6 @@ library(pheatmap)
 library(gt)
 library(ggrepel)
 library(cowplot)
-
 ```
 
 
@@ -37,9 +36,9 @@ The salmon data lives in `data/block-rna/salmon_tdp43`. In that directory, you w
 ```{r}
 #| echo: true
 #| eval: true
-#There are some hints to help you get started
+# There are some hints to help you get started
 
-#Use biomaRt to get a table of transcript/gene relationships
+# Use biomaRt to get a table of transcript/gene relationships
 mart <- biomaRt::useMart(
   "ENSEMBL_MART_ENSEMBL",
   dataset = "mmusculus_gene_ensembl",
@@ -50,35 +49,36 @@ t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "ensembl_gene_id",
 
 
 
-#Read in salmon quantification files
+# Read in salmon quantification files
 
 
 
-metadata <- data.frame(sample_id = list.files(here("data/block-rna/salmon_tdp43")),
-                   salmon_dirs = list.files(here("data/block-rna/salmon_tdp43"),recursive = T,pattern = ".gz$", full.names = T)
+metadata <- data.frame(
+  sample_id = list.files(here("data/block-rna/salmon_tdp43")),
+  salmon_dirs = list.files(here("data/block-rna/salmon_tdp43"), recursive = T, pattern = ".gz$", full.names = T)
+) |>
+  separate(col = sample_id, into = c("cell", "loc", "geno", "rep"), sep = "_", remove = F)
 
-                   ) |> 
-  separate(col = sample_id, into = c("cell","loc","geno","rep"), sep = "_", remove = F)
-
-metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep) 
+metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep)
 
 rownames(metadata) <- metadata$sample_id
 
 
-#Get gene-level TPM values with tximport
+# Get gene-level TPM values with tximport
 
 salmdir <- metadata$salmon_dirs
 names(salmdir) <- metadata$sample_id
 
 
-txi <- tximport(files = salmdir,
+txi <- tximport(
+  files = salmdir,
   type = "salmon",
   tx2gene = t2g,
   dropInfReps = TRUE,
   countsFromAbundance = "lengthScaledTPM"
 )
 
-#Filter genes to remove those that are not expressed at at least 1 TPM in EVERY sample
+# Filter genes to remove those that are not expressed at at least 1 TPM in EVERY sample
 tpms <- txi$abundance |>
   as.data.frame() |>
   rownames_to_column(var = "ensembl_gene_id")
@@ -91,9 +91,6 @@ tpms.cutoff <-
   filter(nSamples >= 12) |>
   # Get rid of the nSamples column
   dplyr::select(-nSamples)
-
-
-
 ```
 
 
@@ -105,18 +102,16 @@ tpms.cutoff <-
 #| eval: true
 
 
-#Use cor() to get a matrix of pairwise correlations between samples
-tpms.cor <- cor(tpms.cutoff[,-1], method = "spearman")
+# Use cor() to get a matrix of pairwise correlations between samples
+tpms.cor <- cor(tpms.cutoff[, -1], method = "spearman")
 
-#Use pheatmap() to plot correlation matrix
+# Use pheatmap() to plot correlation matrix
 pheatmap(
   tpms.cor,
-  annotation_col = metadata[,3:5],
+  annotation_col = metadata[, 3:5],
   fontsize = 7,
   show_colnames = FALSE
 )
-
-
 ```
 
 > Provide 1-2 sentences of interpretation of the similarity of the samples based on the heatmap.
@@ -131,36 +126,37 @@ The biggest differences are betweent soma and neurite. Then the WT vs KO. The re
 #| echo: true
 #| eval: true
 
-#Start with the filtered TPM table from above
+# Start with the filtered TPM table from above
 tpms.cutoff.matrix <-
   dplyr::select(tpms.cutoff, -ensembl_gene_id) |>
   as.matrix()
 
 
-#Use prcomp() to derive principle component coordinants of *LOGGED*  and *Scaled* TPM values
+# Use prcomp() to derive principle component coordinants of *LOGGED*  and *Scaled* TPM values
 tpms.cutoff.matrix <- log2(tpms.cutoff.matrix + 1e-3)
 
 tpms.cutoff.matrix <- t(scale(t(tpms.cutoff.matrix)))
 
 tpms.pca <- prcomp(t(tpms.cutoff.matrix))
-#Add annotations of the cell compartment (soma / neurite) and TDP-43 status (WT / KO) of the samples
+# Add annotations of the cell compartment (soma / neurite) and TDP-43 status (WT / KO) of the samples
 tpms.pca.pc <- tpms.pca$x %>%
   as.data.frame() %>%
-  rownames_to_column(var = "sample_id") %>% 
-  left_join(., metadata[,c(1,3:5)], by = "sample_id")
+  rownames_to_column(var = "sample_id") %>%
+  left_join(., metadata[, c(1, 3:5)], by = "sample_id")
 
-## 
+##
 
 tpms.pca.summary <- summary(tpms.pca)$importance
 pc1var <- round(tpms.pca.summary[2, 1] * 100, 1)
 pc2var <- round(tpms.pca.summary[2, 2] * 100, 1)
 
-#Plot PCA data
+# Plot PCA data
 
-ggplot(data = tpms.pca.pc,
+ggplot(
+  data = tpms.pca.pc,
   aes(
     x = PC1, y = PC2,
-    color = paste(loc,geno), label = sample_id
+    color = paste(loc, geno), label = sample_id
   )
 ) +
   geom_point(size = 5) +
@@ -171,7 +167,6 @@ ggplot(data = tpms.pca.pc,
     y = paste("PC2,", pc2var, "% explained var.")
   ) +
   geom_text_repel()
-
 ```
 
 > Provide 1-2 sentences of interpretation of the similarity of the samples based on the heatmap.

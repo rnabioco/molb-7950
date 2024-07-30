@@ -19,7 +19,6 @@ library(scran)
 library(AnnotationHub)
 library(Matrix)
 library(cowplot)
-
 ```
 
 
@@ -80,7 +79,7 @@ digraph workflow {
   # green
   node [fillcolor = '#009E73']
   load [label= 'Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()']
-  
+
   # blue
   node [fillcolor = '#56B4E9']
   cell_qc [label = 'QC cells\n addPerCellQCMetrics()\n plotColData()']
@@ -92,17 +91,17 @@ digraph workflow {
   dim_red [label = 'Dimensionality reduction via PCA \n runPCA()']
   cluster [label = 'Clustering\n clusterCells()']
   viz [label = 'Make 2D-Visualization\nrunUMAP()']
-  
+
   # blue
   node [fillcolor = '#56B4E9']
-  
+
   markers [label = 'Discover cell type markers \nscoreMarkers()']
   annot [label = 'Annotate cell types\nclustifyr and SingleR']
 
   edge [color = black
         fontname = 'Helvetica']
 
-  load -> cell_qc 
+  load -> cell_qc
   cell_qc -> norm
   norm -> feature
   norm -> markers
@@ -186,15 +185,18 @@ sce <- SingleCellExperiment(list(counts = tx$counts))
 ah <- AnnotationHub()
 ens_db <- ah[["AH113665"]]
 
-gene_names <- mapIds(ens_db, 
-                     keys=rownames(sce), 
-                     keytype = "GENEID",
-                     column="SYMBOL")
+gene_names <- mapIds(ens_db,
+  keys = rownames(sce),
+  keytype = "GENEID",
+  column = "SYMBOL"
+)
 
 rowData(sce)$gene <- gene_names
 rowData(sce)$gene_id <- rownames(sce)
-rownames(sce) <- uniquifyFeatureNames(rowData(sce)$gene_id, 
-                                      rowData(sce)$gene)
+rownames(sce) <- uniquifyFeatureNames(
+  rowData(sce)$gene_id,
+  rowData(sce)$gene
+)
 
 # drop non/low expressed genes
 rowData(sce)$n_cells <- rowSums(counts(sce) > 0)
@@ -202,8 +204,8 @@ sce <- sce[rowData(sce)$n_cells >= 10, ]
 
 # basic QC
 is_mito <- startsWith(rowData(sce)$gene, "MT-")
-sce <- addPerCellQCMetrics(sce, subsets=list(Mito=is_mito))
-sce$pass_qc <-  sce$subsets_Mito_percent < 20 & sce$sum > 1000 & sce$detected > 500
+sce <- addPerCellQCMetrics(sce, subsets = list(Mito = is_mito))
+sce$pass_qc <- sce$subsets_Mito_percent < 20 & sce$sum > 1000 & sce$detected > 500
 sce <- sce[, sce$pass_qc]
 ```
 
@@ -229,7 +231,7 @@ We also have the same mean expression and variance relationship as seen in bulk-
 ::: {.column }
 
 ```{r}
-# set seed for functions with a randomized component 
+# set seed for functions with a randomized component
 # to obtain the same result each execution
 set.seed(20231023)
 sce <- runPCA(sce, exprs_values = "counts", name = "count_PCA")
@@ -240,7 +242,7 @@ plotReducedDim(sce, "count_PCA", colour_by = "sum")
 ```{r}
 plot_df <- makePerCellDF(sce, c("count_PCA", "sum"))
 
-ggplot(plot_df, aes(count_PCA.1, sum)) + 
+ggplot(plot_df, aes(count_PCA.1, sum)) +
   geom_point()
 ```
 
@@ -271,7 +273,7 @@ with a pseudocount.
 #| warning: false
 set.seed(20231023)
 clusters <- quickCluster(sce)
-sce <- computeSumFactors(sce, clusters=clusters)
+sce <- computeSumFactors(sce, clusters = clusters)
 sce <- logNormCounts(sce)
 
 set.seed(20231023)
@@ -280,7 +282,7 @@ sce <- runPCA(sce, exprs_values = "logcounts", name = "PCA")
 plotReducedDim(sce, "PCA", colour_by = "sum")
 
 plot_df <- makePerCellDF(sce, c("PCA", "sum"))
-ggplot(plot_df, aes(PCA.1, sum)) + 
+ggplot(plot_df, aes(PCA.1, sum)) +
   geom_point()
 ```
 
@@ -310,21 +312,25 @@ ggplot(plot_df, aes(PCA.1, sum)) +
 ```{r}
 #| echo: false
 #| fig-width: 9
-#| fig-height: 9 
+#| fig-height: 9
 set.seed(00010101)
 dec <- modelGeneVarByPoisson(sce)
-top <- getTopHVGs(dec, prop=0.1)
+top <- getTopHVGs(dec, prop = 0.1)
 
 top_genes <- as.data.frame(dec[top[1:10], ])
 top_genes$genes <- rownames(top_genes)
 
-ggplot(as.data.frame(dec), aes(mean, total)) + 
-  geom_point() + 
-  geom_text(data = top_genes, 
-             aes(label = genes)) + 
-  stat_function(fun = function(x) metadata(dec)$trend(x),
-                linetype = "dashed",
-                colour  = "blue")
+ggplot(as.data.frame(dec), aes(mean, total)) +
+  geom_point() +
+  geom_text(
+    data = top_genes,
+    aes(label = genes)
+  ) +
+  stat_function(
+    fun = function(x) metadata(dec)$trend(x),
+    linetype = "dashed",
+    colour = "blue"
+  )
 ```
 
 ::: 
@@ -348,18 +354,21 @@ ggplot(as.data.frame(dec), aes(mean, total)) +
 ```{r}
 #| echo: false
 #| fig-width: 9
-#| fig-height: 9 
+#| fig-height: 9
 
 dec_df <- as.data.frame(dec)
 dec_df$genes <- rownames(dec_df)
 dec_df$variable_gene <- dec_df$genes %in% top
 
-ggplot(dec_df, aes(mean, total)) + 
+ggplot(dec_df, aes(mean, total)) +
   geom_point(aes(color = variable_gene),
-             size = 0.75) +
-  stat_function(fun = function(x) metadata(dec)$trend(x),
-                linetype = "dashed",
-                colour  = "blue")
+    size = 0.75
+  ) +
+  stat_function(
+    fun = function(x) metadata(dec)$trend(x),
+    linetype = "dashed",
+    colour = "blue"
+  )
 ```
 
 ::: 
@@ -396,19 +405,23 @@ In a geometric sense, PCA produces a new coordinate system whereby instead of th
 library(MASS)
 library(ggrepel)
 library(dplyr)
-# generate some correlated variables, scale, and make tidy 
+# generate some correlated variables, scale, and make tidy
 set.seed(42)
-sim <- MASS::mvrnorm(100,
-                     c(0, 0),
-                     matrix(c(1, 0.95, 0.95, 1),
-                     2,
-                     2)) %>% 
-  scale() %>% 
-  as.data.frame() %>% 
-  tibble::rownames_to_column("id") %>% 
-  arrange(V1, V2) %>% 
-  rename(gene_1 = V1, gene_2 = V2) %>% 
-  as_tibble() %>% 
+sim <- MASS::mvrnorm(
+  100,
+  c(0, 0),
+  matrix(
+    c(1, 0.95, 0.95, 1),
+    2,
+    2
+  )
+) %>%
+  scale() %>%
+  as.data.frame() %>%
+  tibble::rownames_to_column("id") %>%
+  arrange(V1, V2) %>%
+  rename(gene_1 = V1, gene_2 = V2) %>%
+  as_tibble() %>%
   mutate(id = row_number())
 
 # select points to label for visualization
@@ -417,44 +430,54 @@ max_min_points <- slice(sim, c(1:5, 95:100))
 # make a plot
 og_plt <- ggplot(sim, aes(gene_1, gene_2)) +
   geom_point() +
-  geom_text_repel(data = max_min_points, 
-                  aes(label = id)) +
+  geom_text_repel(
+    data = max_min_points,
+    aes(label = id)
+  ) +
   # scale y axis to same as x
-  ylim(min(sim$gene_1),
-       max(sim$gene_2))
+  ylim(
+    min(sim$gene_1),
+    max(sim$gene_2)
+  )
 
 # run pca
-pc <- prcomp(sim[, c(2:3)], 
-             center = FALSE, 
-             scale. = FALSE)
+pc <- prcomp(sim[, c(2:3)],
+  center = FALSE,
+  scale. = FALSE
+)
 
 # function to make a pretty labeled plot
-plot_labeled_pca <- function(input_data, 
-                             pca_obj){
-  
-  #tidy the pc matrix
-  pc_x <- pca_obj$x %>% 
-    as.data.frame() %>% 
-    mutate(id = input_data$id) 
- 
+plot_labeled_pca <- function(input_data,
+                             pca_obj) {
+  # tidy the pc matrix
+  pc_x <- pca_obj$x %>%
+    as.data.frame() %>%
+    mutate(id = input_data$id)
+
   # select points to label
   max_min_points <- slice(pc_x, c(1:5, 95:100))
   # compute variance explained
-  percent_var <- (100 * pca_obj$sdev^2 / 
-                    sum(pca_obj$sdev^2))  %>% 
+  percent_var <- (100 * pca_obj$sdev^2 /
+    sum(pca_obj$sdev^2)) %>%
     signif(3)
-  #plot the data
+  # plot the data
   pca_plt <- ggplot(pc_x, aes(PC1, PC2)) +
     geom_point() +
-    geom_text_repel(data = max_min_points, 
-                  aes(label = id)) +
-    labs(x = paste("PC1 ", percent_var[1], "%"),
-         y = paste("PC2 ", percent_var[2], "%")) +
+    geom_text_repel(
+      data = max_min_points,
+      aes(label = id)
+    ) +
+    labs(
+      x = paste("PC1 ", percent_var[1], "%"),
+      y = paste("PC2 ", percent_var[2], "%")
+    ) +
     # make axes symmetric
-    ylim(c(min(pc_x$PC1), 
-           max(pc_x$PC1)))
-  
-  pca_plt 
+    ylim(c(
+      min(pc_x$PC1),
+      max(pc_x$PC1)
+    ))
+
+  pca_plt
 }
 
 pca_plt <- plot_labeled_pca(sim, pc)
@@ -473,20 +496,25 @@ What if we had more dimensions that are uninteresting variance/noise? How does t
 
 ```{r}
 #| echo: false
-#| 
-# generate a matrix of random numbers 
+#|
+# generate a matrix of random numbers
 # drawn from a normal dist. to simulate noise
 set.seed(20181214)
-more_genes <- matrix(rnorm(1000, 
-                           mean = 0, 
-                           sd = 0.25), 
-                     nrow = 100, 
-                     ncol = 10)
+more_genes <- matrix(
+  rnorm(1000,
+    mean = 0,
+    sd = 0.25
+  ),
+  nrow = 100,
+  ncol = 10
+)
 # add column names
-colnames(more_genes) <- paste0("gene_noise_",
-                              1:ncol(more_genes))
+colnames(more_genes) <- paste0(
+  "gene_noise_",
+  1:ncol(more_genes)
+)
 # add the matrix to the simulation data_frame by column
-sim_2 <- cbind(sim, more_genes) 
+sim_2 <- cbind(sim, more_genes)
 sim_2[1:5, 2:6]
 ```
 :::
@@ -507,11 +535,12 @@ plot(sim_2[, 2:7])
 
 ```{r}
 #| echo: false
-pc2 <- prcomp(sim_2[, 2:ncol(sim_2)], 
-              center = FALSE, 
-              scale. = FALSE)
+pc2 <- prcomp(sim_2[, 2:ncol(sim_2)],
+  center = FALSE,
+  scale. = FALSE
+)
 
-pca_plt <- pca_plt + labs(subtitle ="2 correlated dimensions")
+pca_plt <- pca_plt + labs(subtitle = "2 correlated dimensions")
 pc2_plt <- plot_labeled_pca(sim_2, pc2) + labs(subtitle = "2 correlated dimensions, 10 noise dimensions")
 plot_grid(pca_plt, pc2_plt)
 ```
@@ -537,7 +566,7 @@ plot_grid(pca_plt, pc2_plt)
 
 ```{r}
 #| fig.width: 9
-#| fig.height: 9 
+#| fig.height: 9
 sce <- runPCA(sce)
 plotPCA(sce, ncomponents = 3)
 ```
@@ -550,7 +579,7 @@ plotPCA(sce, ncomponents = 3)
 
 ```{r}
 percent.var <- attr(reducedDim(sce), "percentVar")
-plot(percent.var, log="y", xlab="PC", ylab="Variance explained (%)", pch = 16)
+plot(percent.var, log = "y", xlab = "PC", ylab = "Variance explained (%)", pch = 16)
 ```
 
 ## Projecting PCs into 2 dimensions (UMAP, tSNE, etc.) {.smaller}
@@ -661,11 +690,12 @@ Approach:
 #| echo: false
 #| fig.width: 12
 #| fig.height: 12
-#| 
+#|
 library(igraph)
-snn_clusters <- clusterCells(sce, 
-                             use.dimred = "PCA", 
-                             full = TRUE)
+snn_clusters <- clusterCells(sce,
+  use.dimred = "PCA",
+  full = TRUE
+)
 sce$clusters <- snn_clusters$clusters
 v_size <- 1
 
@@ -676,12 +706,13 @@ lo <- layout_with_fr(snn_clusters$objects$graph)
 col_pal <- scater:::.get_palette("tableau20")
 snn_graph <- snn_clusters$objects$graph
 V(snn_graph)$color <- col_pal[as.integer(sce$clusters)]
-plot.igraph(snn_graph, 
-            layout = lo,  
-            edge.width = E(snn_clusters$objects$graph)$weight * 0.01,
-            vertex.label = NA,
-            vertex.size = v_size,
-            vertex.frame.color = NA)
+plot.igraph(snn_graph,
+  layout = lo,
+  edge.width = E(snn_clusters$objects$graph)$weight * 0.01,
+  vertex.label = NA,
+  vertex.size = v_size,
+  vertex.frame.color = NA
+)
 ```
 
 
@@ -715,7 +746,7 @@ Select markers based on desired type of "marker" gene and effect size.
 mrks <- scoreMarkers(sce, sce$clusters)
 
 c1_mrks <- mrks[[1]]
-ordered <- c1_mrks[order(c1_mrks$mean.AUC, decreasing=TRUE),]
+ordered <- c1_mrks[order(c1_mrks$mean.AUC, decreasing = TRUE), ]
 ```
 
 ```r

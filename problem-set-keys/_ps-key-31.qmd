@@ -19,7 +19,7 @@ Each question is worth 2 points
 ```{r}
 library(tximport)
 library(here)
-day0 <- tximport(here("aml/alevin/day0/alevin/quants_mat.gz"), type = "alevin") 
+day0 <- tximport(here("aml/alevin/day0/alevin/quants_mat.gz"), type = "alevin")
 day2 <- tximport(here("aml/alevin/day2/alevin/quants_mat.gz"), type = "alevin")
 
 ncol(day0$counts)
@@ -57,7 +57,7 @@ mat <- cbind(d0_mat, d2_mat)
 
 ```{r}
 library(SingleCellExperiment)
-sce <- SingleCellExperiment(list(counts = mat)) 
+sce <- SingleCellExperiment(list(counts = mat))
 ```
 
 
@@ -79,28 +79,30 @@ library(scater)
 ah <- AnnotationHub()
 ens_db <- ah[["AH113665"]]
 genes <- mapIds(ens_db,
-              keys = rownames(sce), 
-              keytype = "GENEID",
-              column = "SYMBOL")
+  keys = rownames(sce),
+  keytype = "GENEID",
+  column = "SYMBOL"
+)
 
 
 rowData(sce)$gene <- genes
 rowData(sce)$gene_id <- rownames(sce)
-rownames(sce) <- uniquifyFeatureNames(rowData(sce)$gene_id, 
-                                      rowData(sce)$gene)
+rownames(sce) <- uniquifyFeatureNames(
+  rowData(sce)$gene_id,
+  rowData(sce)$gene
+)
 ```
 
 7: Next calculate the % of UMIs that are derived from mitochondrial genes and store it in the colData. 
 
 ```{r}
-
 is_mito <- startsWith(rowData(sce)$gene, "MT-")
 # alternatively
 is_mito <- stringr::str_detect(rowData(sce)$gene, "^MT-")
-# or 
+# or
 is_mito <- grepl("^MT-", rowData(sce)$gene)
 
-sce <- addPerCellQCMetrics(sce, subsets=list(Mito=is_mito))
+sce <- addPerCellQCMetrics(sce, subsets = list(Mito = is_mito))
 ```
 
 8: Plot this % of UMIs that are derived from mitochondrial genes against the # of UMIs per cell. Color each point by the sample treatment day.

@@ -13,10 +13,9 @@ library(org.Hs.eg.db)
 library(ggrepel)
 library(tidyverse)
 library(cowplot)
-library(scales) 
+library(scales)
 library(gt)
 library(here)
-
 ```
 
 
@@ -50,12 +49,11 @@ hg19_annots <- grep("hg19_genes", possible_annotations, value = T)
 
 
 # let's keep 5' utr, cds, intron, 3' utr and intergenic
-my_hg19_annots <- hg19_annots[c(3,4,7,10,11)]
+my_hg19_annots <- hg19_annots[c(3, 4, 7, 10, 11)]
 
 
 # build the annotation database
-annotations <- build_annotations(genome = 'hg19', annotations = my_hg19_annots)
-
+annotations <- build_annotations(genome = "hg19", annotations = my_hg19_annots)
 ```
 
 
@@ -66,8 +64,10 @@ annotations <- build_annotations(genome = 'hg19', annotations = my_hg19_annots)
 #| echo: true
 
 # We are importing a bed file directly from github for zfp36 binding sites
-zfp36_regions <- read_regions(con = "https://raw.githubusercontent.com/BIMSBbioinfo/RCAS_meta-analysis/master/rbp-binding-sites/SRR1046759.clusters.bed",
-                     genome = 'hg19', format = 'bed')
+zfp36_regions <- read_regions(
+  con = "https://raw.githubusercontent.com/BIMSBbioinfo/RCAS_meta-analysis/master/rbp-binding-sites/SRR1046759.clusters.bed",
+  genome = "hg19", format = "bed"
+)
 
 
 # annotate zfp36 binding sites and convert to df
@@ -76,17 +76,18 @@ zfp36_annot <-
     regions = zfp36_regions,
     annotations = annotations,
     ignore.strand = FALSE,
-    quiet = FALSE) %>%
+    quiet = FALSE
+  ) %>%
   data.frame()
 
 # We will keep only columns we need and collapse the redundant info
-myInfo <- c("seqnames","start","end","width","strand","annot.symbol","annot.type")
+myInfo <- c("seqnames", "start", "end", "width", "strand", "annot.symbol", "annot.type")
 
-zfp36_annot <- zfp36_annot[,myInfo] %>%
-  unique() 
+zfp36_annot <- zfp36_annot[, myInfo] %>%
+  unique()
 
 # Just getting rid of the "hg19_genes_" string to simplify `annot.type`
-zfp36_annot$annot.type <- gsub("hg19_genes_","",zfp36_annot$annot.type)
+zfp36_annot$annot.type <- gsub("hg19_genes_", "", zfp36_annot$annot.type)
 
 table(zfp36_annot$annot.type)
 ```
@@ -100,17 +101,17 @@ table(zfp36_annot$annot.type)
 random_regions <- randomize_regions(regions = zfp36_regions, allow.overlaps = TRUE, per.chromosome = TRUE)
 
 random_annot <- annotate_regions(
-    regions = random_regions,
-    annotations = annotations,
-    ignore.strand = FALSE,
-    quiet = FALSE) %>%
+  regions = random_regions,
+  annotations = annotations,
+  ignore.strand = FALSE,
+  quiet = FALSE
+) %>%
   data.frame()
 
-random_annot <- random_annot[,myInfo] %>%
-  unique() 
+random_annot <- random_annot[, myInfo] %>%
+  unique()
 
-random_annot$annot.type <- gsub("hg19_genes_","",random_annot$annot.type)
-
+random_annot$annot.type <- gsub("hg19_genes_", "", random_annot$annot.type)
 ```
 
 ## 1d. Determine which regions exhibit more  than expected ZFP36 binding sites.
@@ -121,23 +122,21 @@ random_annot$annot.type <- gsub("hg19_genes_","",random_annot$annot.type)
 
 
 site_dist <- bind_cols(
-  region=names(table(zfp36_annot$annot.type)),
-  observed=table(zfp36_annot$annot.type),
-  expected=table(random_annot$annot.type)
-          )
+  region = names(table(zfp36_annot$annot.type)),
+  observed = table(zfp36_annot$annot.type),
+  expected = table(random_annot$annot.type)
+)
 
-site_dist$enrichment <- site_dist$observed/site_dist$expected
+site_dist$enrichment <- site_dist$observed / site_dist$expected
 
 
-site_dist_long <- pivot_longer(site_dist,cols = c(observed,expected,enrichment))
-colnames(site_dist_long) <- c("region","type","value")
+site_dist_long <- pivot_longer(site_dist, cols = c(observed, expected, enrichment))
+colnames(site_dist_long) <- c("region", "type", "value")
 
-ggplot(site_dist_long %>% filter(type=="enrichment"), aes(y = value, x = region)) +
-  geom_bar(stat="identity") +
+ggplot(site_dist_long %>% filter(type == "enrichment"), aes(y = value, x = region)) +
+  geom_bar(stat = "identity") +
   ylab("Observed vs Expected") +
   theme_cowplot()
-
-
 ```
 
 ![](/img/block-rna/zfp36_enrich.png)
@@ -164,9 +163,9 @@ Remember the workflow for determine k-mer composition (**USING 5mers**) for any 
 #| eval: true
 #| echo: true
 
-# create a Grange for 3' UTRs 
+# create a Grange for 3' UTRs
 
-zfp36_3utr <- makeGRangesFromDataFrame(df = zfp36_annot %>% filter(annot.type=="3UTRs"), ignore.strand = F, seqnames.field = "seqnames", start.field = "start", end.field = "end", strand.field = "strand", keep.extra.columns = T)
+zfp36_3utr <- makeGRangesFromDataFrame(df = zfp36_annot %>% filter(annot.type == "3UTRs"), ignore.strand = F, seqnames.field = "seqnames", start.field = "start", end.field = "end", strand.field = "strand", keep.extra.columns = T)
 
 
 # get sequencees for those coordinates
@@ -174,12 +173,13 @@ zfp36_3utr_seqs <- getSeq(BSgenome.Hsapiens.UCSC.hg19, zfp36_3utr)
 
 # count  all 5mer instances per sequence, add all instances, and turn into a dataframe with column name counts
 
-zfp36_3utr_5mer <- oligonucleotideFrequency(x = zfp36_3utr_seqs, width = 5, as.prob = F, simplify.as="matrix") %>% colSums(.) %>% as.data.frame()
+zfp36_3utr_5mer <- oligonucleotideFrequency(x = zfp36_3utr_seqs, width = 5, as.prob = F, simplify.as = "matrix") %>%
+  colSums(.) %>%
+  as.data.frame()
 
 colnames(zfp36_3utr_5mer) <- "zfp36_utr_count"
 
-zfp36_3utr_5mer$zfp36_utr_freq <- zfp36_3utr_5mer$zfp36_utr_count/sum(zfp36_3utr_5mer$zfp36_utr_count)
-
+zfp36_3utr_5mer$zfp36_utr_freq <- zfp36_3utr_5mer$zfp36_utr_count / sum(zfp36_3utr_5mer$zfp36_utr_count)
 ```
 
 
@@ -190,21 +190,20 @@ zfp36_3utr_5mer$zfp36_utr_freq <- zfp36_3utr_5mer$zfp36_utr_count/sum(zfp36_3utr
 #| eval: true
 #| echo: true
 
-# create a Grange for 3' UTRs 
+# create a Grange for 3' UTRs
 threeUTR <- GenomicRanges::reduce(annotations[annotations$type %in% my_hg19_annots[4]])
 
 # get  sequencees for those coordinates
 threeUTR_seqs <- getSeq(BSgenome.Hsapiens.UCSC.hg19, threeUTR)
 
 # count  all 5mer instances per sequence, add all instances, and turn into a dataframe with column name counts
-utr3_5mer <- oligonucleotideFrequency(x = threeUTR_seqs, width = 5, as.prob = F, simplify.as="matrix") %>% colSums(.) %>% as.data.frame()
+utr3_5mer <- oligonucleotideFrequency(x = threeUTR_seqs, width = 5, as.prob = F, simplify.as = "matrix") %>%
+  colSums(.) %>%
+  as.data.frame()
 
 colnames(utr3_5mer) <- "utr_count"
 
-utr3_5mer$utr_freq <- utr3_5mer$utr_count/sum(utr3_5mer$utr_count)
-
-
-  
+utr3_5mer$utr_freq <- utr3_5mer$utr_count / sum(utr3_5mer$utr_count)
 ```
 
 # 2c. Compare 5mer frequencies in ZFP36 binding sites vs background.
@@ -217,31 +216,31 @@ Label 5mers that are 8x, **remember log2(8) = 3**, enriched above  background.
 #| echo: true
 
 # check if rownames are identical and stop if they are  not
-stopifnot(identical(rownames(zfp36_3utr_5mer),rownames(utr3_5mer)))
+stopifnot(identical(rownames(zfp36_3utr_5mer), rownames(utr3_5mer)))
 
 utr3_df <- bind_cols(zfp36_3utr_5mer, utr3_5mer)
 
-utr3_df$zfp36_enrich <- utr3_df$zfp36_utr_freq/utr3_df$utr_freq
+utr3_df$zfp36_enrich <- utr3_df$zfp36_utr_freq / utr3_df$utr_freq
 
 
 # scatter plot
 p_scat <- ggplot(data = utr3_df, aes(y = zfp36_utr_freq, x = utr_freq)) +
   geom_point(color = ifelse(utr3_df$zfp36_enrich > 8, "red", "black")) +
-  ylab("ZFP36 3'UTR") + xlab("3'UTR") +
+  ylab("ZFP36 3'UTR") +
+  xlab("3'UTR") +
   geom_abline(intercept = 0, slope = 1) +
-  geom_text_repel(aes(label=ifelse(zfp36_enrich > 8,
-                                   rownames(utr3_df),
-                             ""))) +
-  theme_cowplot()  
+  geom_text_repel(aes(label = ifelse(zfp36_enrich > 8,
+    rownames(utr3_df),
+    ""
+  ))) +
+  theme_cowplot()
 
-# print top 10 
+# print top 10
 utr3_df %>%
   rownames_to_column(var = "5mer") %>%
   arrange(-zfp36_enrich) %>%
   top_n(n = 10) %>%
   gt()
-
-
 ```
 
 ![](/img/block-rna/zfp36_scatter.png)

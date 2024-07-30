@@ -27,7 +27,6 @@ library(rstatix)
 library(clusterProfiler)
 library(enrichplot)
 library(msigdbr)
-
 ```
 
 ## Overview {.smaller}
@@ -78,20 +77,22 @@ Now we can read in the transcript-level data and collapse to gene-level data wit
 
 metadata <- data.frame(
   sample_id = list.files(here("data/block-rna/salmonouts"),
-                         pattern = "^DIV"),
+    pattern = "^DIV"
+  ),
   salmon_dirs = list.files(here("data/block-rna/salmonouts"),
-                           recursive = T,
-                           pattern = ".gz$",
-                           full.names = T)
-  ) |>
-  separate(col = sample_id, into = c("timepoint","rep"), sep = "\\.", remove = F)
+    recursive = T,
+    pattern = ".gz$",
+    full.names = T
+  )
+) |>
+  separate(col = sample_id, into = c("timepoint", "rep"), sep = "\\.", remove = F)
 
-metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep) 
+metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep)
 
 rownames(metadata) <- metadata$sample_id
 
-metadata <- metadata |> 
-  filter(timepoint %in% c("DIV0","DIV7")) 
+metadata <- metadata |>
+  filter(timepoint %in% c("DIV0", "DIV7"))
 
 salmdir <- metadata$salmon_dirs
 names(salmdir) <- metadata$sample_id
@@ -116,10 +117,8 @@ txi <- tximport(
 hist(log2(1 + rowSums(txi$abundance)), breaks = 40)
 
 # decide a cutoff
-keepG <- txi$abundance[log2(1 + rowSums(txi$abundance)) > 4.5,] |>
+keepG <- txi$abundance[log2(1 + rowSums(txi$abundance)) > 4.5, ] |>
   rownames()
-
-
 ```
 
 ## Create DESeq object {.smaller}
@@ -140,9 +139,7 @@ ddsTxi <- DESeqDataSetFromTximport(
 )
 
 # keep genes with sufficient expession
-ddsTxi <- ddsTxi[keepG,]
-
-
+ddsTxi <- ddsTxi[keepG, ]
 ```
 
 ## Design formula {.smaller}
@@ -170,9 +167,8 @@ We can see here that `DESeq2` is taking the counts produced by `tximport` for ge
 #| eval: true
 #| label: deseq
 
-#create DESeq object
+# create DESeq object
 dds <- DESeq(ddsTxi)
-
 ```
 
 There are many useful things in this `dds` object. Take a look at the [vignette](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html) for a full explanation. Including info on many more tests and analyses that can be done with `DESeq2`.
@@ -303,7 +299,7 @@ diff_lfc <-
   results(dds,
     contrast = c("timepoint", "DIV7", "DIV0"),
     lfcThreshold = log(3, 2)
-    ) |>
+  ) |>
   # Change this into a dataframe
   as.data.frame() |>
   # Move ensembl gene IDs into their own column
@@ -320,16 +316,15 @@ diff_lfc <-
 nrow(
   filter(
     diff_lfc, padj < 0.01 & log2FoldChange > 0
-    )
   )
+)
 
 # number of downregulated genes
 nrow(
   filter(
     diff_lfc, padj < 0.01 & log2FoldChange < 0
-    )
   )
-
+)
 ```
 
 ## Change the LFC threshold {.smaller}
@@ -356,7 +351,7 @@ diff_lfc_sig <-
 
 diff_lfc_sig |>
   filter(gene %in%
-c("Bdnf","Dlg4","Klf4","Sox2")) |>
+    c("Bdnf", "Dlg4", "Klf4", "Sox2")) |>
   gt()
 ```
 
@@ -424,9 +419,9 @@ tpms <- txi$abundance |>
   inner_join(gene_name_map) |>
   dplyr::rename(gene = external_gene_name) |>
   # Filter for genes we are interested in
-  filter(gene %in% c("Klf4", "Sox2", "Bdnf", "Dlg4"))  |>
+  filter(gene %in% c("Klf4", "Sox2", "Bdnf", "Dlg4")) |>
   pivot_longer(-c(ensembl_gene_id, gene)) |>
-  separate(col = name, into = c("condition","rep"), sep = "\\.")
+  separate(col = name, into = c("condition", "rep"), sep = "\\.")
 
 gt(tpms)
 ```
@@ -502,13 +497,13 @@ neurongenes <- getBM(
 #           cellcyclegenes,
 #           neurongenes
 #           )
-# 
+#
 # pathway$path <- c(
 #   rep("pluri",nrow(pluripotencygenes)),
 #   rep("cellcycle",nrow(cellcyclegenes)),
 #   rep("neuron",nrow(neurongenes))
 #                   )
-# 
+#
 # write_csv(x = pathway, file = here("data","block-rna","pathwaygenes.csv.gz"))
 ```
 
@@ -537,11 +532,11 @@ diff_paths <-
 diff_paths$annot <-
   factor(
     diff_paths$annot,
-    levels = c("none", "cellcycle",
-               "pluripotency", "neurondiff")
+    levels = c(
+      "none", "cellcycle",
+      "pluripotency", "neurondiff"
+    )
   )
-
-
 ```
 
 ## Are there significant differences? {.smaller}
@@ -568,8 +563,6 @@ p.cellcycle <- pvals |>
 p.neurondiff <- pvals |>
   filter(group2 == "neurondiff") |>
   pull(p.adj)
-
-
 ```
 
 ## plot pathway differences {.smaller}
@@ -650,7 +643,7 @@ Bottom = downregulated
 
 # retrieve hallmark gene set from msigdb
 mouse_hallmark <- msigdbr(species = "Mus musculus") %>%
-  filter(gs_cat == "H") %>% 
+  filter(gs_cat == "H") %>%
   dplyr::select(gs_name, gene_symbol)
 
 # create a list of gene LFCs
@@ -675,16 +668,18 @@ rankedgenes <- rankedgenes[!duplicated(names(rankedgenes))]
 #| output-location: slide
 
 # run gsea
-div7vs0 <- GSEA(geneList = rankedgenes,
-                      eps = 0,
-                     pAdjustMethod = "fdr",
-                     pvalueCutoff = .05,
-                     minGSSize = 20,
-                     maxGSSize = 1000,
-                     TERM2GENE = mouse_hallmark)
+div7vs0 <- GSEA(
+  geneList = rankedgenes,
+  eps = 0,
+  pAdjustMethod = "fdr",
+  pvalueCutoff = .05,
+  minGSSize = 20,
+  maxGSSize = 1000,
+  TERM2GENE = mouse_hallmark
+)
 
-div7vs0@result |> 
-  select(ID,NES,p.adjust) |>
+div7vs0@result |>
+  select(ID, NES, p.adjust) |>
   gt()
 ```
 
