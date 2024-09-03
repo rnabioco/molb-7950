@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.5.57">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<meta name="author" content="Your Name Here">
+<meta name="author" content="Neelanjan Mukherjee">
 <meta name="dcterms.date" content="2024-09-03">
-<title>R Bootcamp Problem Set 9 – MOLB 7950</title>
+<title>Problem Set Stats Bootcamp - class 10 – MOLB 7950</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -18,6 +18,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -64,11 +98,11 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
-<meta property="og:title" content="R Bootcamp Problem Set 9 – MOLB 7950">
-<meta property="og:description" content="Informatics and Statistics for Molecular Biology, Fall 2023.">
+<meta property="og:title" content="Problem Set Stats Bootcamp - class 10 – MOLB 7950">
+<meta property="og:description" content="Stats intro and history">
 <meta property="og:site_name" content="MOLB 7950">
-<meta name="twitter:title" content="R Bootcamp Problem Set 9 – MOLB 7950">
-<meta name="twitter:description" content="Informatics and Statistics for Molecular Biology, Fall 2023.">
+<meta name="twitter:title" content="Problem Set Stats Bootcamp - class 10 – MOLB 7950">
+<meta name="twitter:description" content="Stats intro and history">
 <meta name="twitter:image" content="https://rnabioco.github.io/molb-7950/problem-sets/images/twitter-card.png">
 <meta name="twitter:creator" content="@rnabioco">
 <meta name="twitter:card" content="summary_large_image">
@@ -80,7 +114,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">R Bootcamp Problem Set 9</li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Problem Set Stats Bootcamp - class 10</li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -203,31 +237,15 @@ ul.task-list li input[type="checkbox"] {
         <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
    
   <ul>
-<li><a href="#problem-set" id="toc-problem-set" class="nav-link active" data-scroll-target="#problem-set">Problem Set</a></li>
-  <li>
-<a href="#a-quantitative-pcr-experiment" id="toc-a-quantitative-pcr-experiment" class="nav-link" data-scroll-target="#a-quantitative-pcr-experiment">A quantitative PCR experiment</a>
-  <ul class="collapse">
-<li>
-<a href="#libraries" id="toc-libraries" class="nav-link" data-scroll-target="#libraries">Libraries</a>
-  <ul class="collapse">
-<li><a href="#load-the-data" id="toc-load-the-data" class="nav-link" data-scroll-target="#load-the-data">Load the data</a></li>
-  <li><a href="#tidy-the-data-4-points" id="toc-tidy-the-data-4-points" class="nav-link" data-scroll-target="#tidy-the-data-4-points">Tidy the data (4 points)</a></li>
-  </ul>
-</li>
-  <li><a href="#question-1-4-points" id="toc-question-1-4-points" class="nav-link" data-scroll-target="#question-1-4-points">Question 1 (4 points)</a></li>
-  <li><a href="#question-2-4-points" id="toc-question-2-4-points" class="nav-link" data-scroll-target="#question-2-4-points">Question 2 (4 points)</a></li>
-  <li><a href="#question-3-4-points" id="toc-question-3-4-points" class="nav-link" data-scroll-target="#question-3-4-points">Question 3 (4 points)</a></li>
-  <li><a href="#question-4-4-points" id="toc-question-4-4-points" class="nav-link" data-scroll-target="#question-4-4-points">Question 4 (4 points)</a></li>
-  <li><a href="#question-5-4-points" id="toc-question-5-4-points" class="nav-link" data-scroll-target="#question-5-4-points">Question 5 (4 points)</a></li>
-  <li><a href="#grading-rubric" id="toc-grading-rubric" class="nav-link" data-scroll-target="#grading-rubric">Grading rubric</a></li>
-  <li><a href="#submit" id="toc-submit" class="nav-link" data-scroll-target="#submit">Submit</a></li>
-  </ul>
-</li>
-  </ul><div class="toc-actions"><ul><li><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li><li><a href="https://github.com/rnabioco/molb-7950/edit/main/problem-sets/ps-09.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li></ul></div></nav>
+<li><a href="#explore-coin-flip-distribution-characteristics" id="toc-explore-coin-flip-distribution-characteristics" class="nav-link active" data-scroll-target="#explore-coin-flip-distribution-characteristics">Explore coin flip distribution characteristics</a></li>
+  <li><a href="#problem-1" id="toc-problem-1" class="nav-link" data-scroll-target="#problem-1">Problem # 1</a></li>
+  <li><a href="#problem-2" id="toc-problem-2" class="nav-link" data-scroll-target="#problem-2">Problem # 2</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li><li><a href="https://github.com/rnabioco/molb-7950/edit/main/problem-sets/ps-10.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
-<h1 class="title">R Bootcamp Problem Set 9</h1>
+<h1 class="title">Problem Set Stats Bootcamp - class 10</h1>
+<p class="subtitle lead">Stats intro and history</p>
 </div>
 
 
@@ -237,7 +255,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Your Name Here </p>
+             <p>Neelanjan Mukherjee </p>
           </div>
   </div>
     
@@ -253,108 +271,77 @@ ul.task-list li input[type="checkbox"] {
   
 
 
-</header><section id="problem-set" class="level2"><h2 class="anchored" data-anchor-id="problem-set">Problem Set</h2>
-<p>Use the data files in the <code>data/</code> directory to answer the questions.</p>
-<p>For this problem set, you are allowed to help each other, but you are not allowed to post correct answers in slack.</p>
-<p><strong>The problem set is due 5pm on Sept 11.</strong></p>
-</section><section id="a-quantitative-pcr-experiment" class="level1"><h1>A quantitative PCR experiment</h1>
-<p>This problem set is a more complex version of the qPCR experiment we discussed in class.</p>
-<p>Here is the experimental setup:</p>
-<ul>
-<li><p>Three cell lines (<code>wt</code>, <code>TF-mutant</code>, <code>RL-mutant</code>) were treated with a drug that induces interferon expression.</p></li>
-<li><p>After specific time points (0, 4, 8, 12, 24 hours), cells were harvested and actin and interferon mRNA were analyzed by quantitative PCR (with 3 biological replicates, and 3 technical replicates).</p></li>
-</ul>
-<p>Data for the Biological replicates come from three independent cultures and RNA samples.</p>
-<p>Data for the technical replicates come the same RNA sample, measured in 3 independent qPCR reactions.</p>
-<p>The data are in <code>data/</code>:</p>
-<ul>
-<li><code>data/qpcr_names_ps.tsv.gz</code></li>
-<li><code>data/qpcr_data.tsv.gz</code></li>
-</ul>
-<section id="libraries" class="level2"><h2 class="anchored" data-anchor-id="libraries">Libraries</h2>
-<p>Load the libraries you need for analysis below.</p>
-<section id="load-the-data" class="level3"><h3 class="anchored" data-anchor-id="load-the-data">Load the data</h3>
-<p>Load the data sets and inspect.</p>
-</section><section id="tidy-the-data-4-points" class="level3"><h3 class="anchored" data-anchor-id="tidy-the-data-4-points">Tidy the data (4 points)</h3>
-<p>Given the experimental setup and the shape of the tibbles, you should be able to answer: <strong>Are these data tidy?</strong></p>
-<ul>
-<li>What are the variables in the data?</li>
-</ul>
-<blockquote class="blockquote">
-<p>Answer</p>
-</blockquote>
-<ul>
-<li>Are the variables the column names?</li>
-</ul>
-<blockquote class="blockquote">
-<p>Answer</p>
-</blockquote>
-<p>The names are encoded in the following order:</p>
-<p><code>gt</code>, <code>time</code>, <code>gene</code>, <code>rep_tech</code>, <code>rep_bio</code>.</p>
-</section></section><section id="question-1-4-points" class="level2"><h2 class="anchored" data-anchor-id="question-1-4-points">Question 1 (4 points)</h2>
-<p>Calculate summary statistics for the experiment.</p>
+</header><div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors
+
+Attaching package: 'cowplot'
+
+
+The following object is masked from 'package:lubridate':
+
+    stamp</code></pre>
+</div>
+</div>
+<section id="explore-coin-flip-distribution-characteristics" class="level2"><h2 class="anchored" data-anchor-id="explore-coin-flip-distribution-characteristics">Explore coin flip distribution characteristics</h2>
+<p>When we flip a fair coin multiple times (<code>numFlips</code>) in a row, we expect to get heads (or tails) 50% of the time on average. This is not always the case for a single round of flipping, but if we do multiple rounds with (<code>numRounds</code>) that average should be 50%.</p>
+</section><section id="problem-1" class="level2"><h2 class="anchored" data-anchor-id="problem-1">Problem # 1</h2>
+<p>In class, we simulated coin flip experiments using two different coins that were either fair (0.5 prob of head) or unfair (0.9 prob of head). We varied the number of flips in a single round (<code>numFlips</code>) and the number of rounds of flipping (<code>numRounds</code>). For this assignment, use the same to coins and use all possible combinations of <code>numFlips</code> and <code>numRounds</code> from the table below. Make sure to <code>set.seed(9)</code> if you want to get the same results as in the answer key.</p>
+<table class="caption-top table">
+<caption>parameters to explore</caption>
+<thead><tr class="header">
+<th><code>numFlips</code></th>
+<th><code>numRounds</code></th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>5</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td>500</td>
+<td>100</td>
+</tr>
+</tbody>
+</table>
 <ol type="1">
-<li><p>Calculate the mean of the technical replicates within each group of genotype, time, gene, and biological replicate.</p></li>
-<li><p>Calculate the mean and standard deviation of the biolgical replicates (which is the mean of technical replicates, above).</p></li>
+<li>Create a function called <code>flippy</code> that allows your to set <code>numFlips</code>, <code>numRounds</code>, and <code>prob</code> of H.</li>
 </ol>
-<p>You should have a tibble that looks like this:</p>
-<pre><code># A tibble: 36 × 5
-   gt         time gene     bio_mean bio_sd
-   &lt;chr&gt;     &lt;int&gt; &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;
- 1 RL-mutant     0 GAPDH       0.444 0.0759
- 2 RL-mutant     0 IFN-beta    3.32  0.188 
- 3 RL-mutant     4 GAPDH       1.61  0.487 
- 4 RL-mutant     4 IFN-beta   18.4   1.15  
- 5 RL-mutant     8 GAPDH       3.25  1.06  
- 6 RL-mutant     8 IFN-beta   32.2   1.82  
- 7 RL-mutant    12 GAPDH       3.90  0.911 
- 8 RL-mutant    12 IFN-beta   47.5   3.78  
- 9 RL-mutant    24 GAPDH       7.93  3.41  
-10 RL-mutant    24 IFN-beta   76.7   4.75  
-# ℹ 26 more rows
-# ℹ Use `print(n = ...)` to see more rows</code></pre>
-</section><section id="question-2-4-points" class="level2"><h2 class="anchored" data-anchor-id="question-2-4-points">Question 2 (4 points)</h2>
-<ol type="1">
-<li><p>Create a plot of expression by time from the data, using the mean of the biological replicates as the <code>y</code> value.</p></li>
-<li><p>Color the plot by genes.</p></li>
-<li><p>Use <code><a href="https://ggplot2.tidyverse.org/reference/geom_linerange.html">ggplot2::geom_pointrange()</a></code> do represent the standard deviation of the data. Alternatively, use <code>ggplot2::geom_errobar()</code> with <code>geom_point()</code>.</p></li>
-<li><p>Draw a line through the points with <code>geom_line()</code>.</p></li>
-<li><p>Facet the plot by genotype.</p></li>
-<li><p>Change the colors of the of the plot with a <code>scale</code> function.</p></li>
-<li><p>Update the labels on the plot (“time (hours)”, etc.).</p></li>
-</ol></section><section id="question-3-4-points" class="level2"><h2 class="anchored" data-anchor-id="question-3-4-points">Question 3 (4 points)</h2>
-<ul>
-<li>What can you say about the expression of GAPDH and IFN in the different cell types?</li>
-</ul>
-<blockquote class="blockquote">
-<p>Answer.</p>
-</blockquote>
-<ul>
-<li>Can you come up with a simple molecular mechanism to explain the results?</li>
-</ul>
-<blockquote class="blockquote">
-<p>Answer.</p>
-</blockquote>
-</section><section id="question-4-4-points" class="level2"><h2 class="anchored" data-anchor-id="question-4-4-points">Question 4 (4 points)</h2>
-<p>Reformat the data from Question 2 such that you calculate a ratio of IFN to GAPDH. Start with the data Question 1.2, above.</p>
-<p>Re-plot the data as in Question 2, but leave out the color as you have collapsed the two genes into one value.</p>
-</section><section id="question-5-4-points" class="level2"><h2 class="anchored" data-anchor-id="question-5-4-points">Question 5 (4 points)</h2>
-<p>Is there more spread across the technical replicates, or across the biological replicates (across the whole experiment)?</p>
-<p>To get at this question, calculate the standard deviations across the two sets of replicates separately. Which one has a greater spread (max - min)? And what might this mean?</p>
-<blockquote class="blockquote">
-<p>Answer.</p>
-</blockquote>
-</section><section id="grading-rubric" class="level2"><h2 class="anchored" data-anchor-id="grading-rubric">Grading rubric</h2>
-<ul>
-<li>Everything is good: full points</li>
-<li>Partially correct answer: depends on how many steps are correct</li>
-<li>Reasonable attempt: half points</li>
-</ul></section><section id="submit" class="level2"><h2 class="anchored" data-anchor-id="submit">Submit</h2>
-<p>Be sure to click the “Render” button to render the HTML output.</p>
-<p>Then paste the URL of this Posit Cloud project into the problem set on Canvas.</p>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">flippy</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">nFlip</span>, <span class="va">nRound</span>, <span class="va">myProb</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol start="2" type="1">
+<li>Plot your result. There should be 4 plots total. Create a 2x2 grid by using <code>faceting</code>.</li>
+</ol>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># we want 5 and 500 flips</span></span>
+<span></span>
+<span><span class="co"># we want to do 10 rounds</span></span>
+<span></span>
+<span><span class="co"># we want to do 100 rounds</span></span>
+<span></span>
+<span><span class="co"># combine data and tidy</span></span>
+<span></span>
+<span><span class="co"># plot and facet</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Describe (couple sentences) how increasing <code>numFlips</code> and <code>numRounds</code> alters:</p>
+<p>3. The estimation of the true mean.</p>
+<p>4. The spread around the true mean.</p>
+</section><section id="problem-2" class="level2"><h2 class="anchored" data-anchor-id="problem-2">Problem # 2</h2>
+<p>We have seen that scientists played a major role in the eugenics movement, which greatly influenced society through policies. Explore the [eugenics archive](https://www.eugenicsarchive.ca/), pick on event from the <code>timeline</code> or the <code>connections</code> section. Describe what happened in a couple sentences and your thoughts on the matter in another couple sentences. Alternatively, you can identify events in Colorado history to describe and comment on. Obviously, there is no wrong answer here. I may pick some of your responses and anonymously share them with the rest of the class.</p>
 
 
-</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -925,7 +912,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
       &nbsp;
-    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li><li><a href="https://github.com/rnabioco/molb-7950/edit/main/problem-sets/ps-09.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li></ul></div></div>
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li><li><a href="https://github.com/rnabioco/molb-7950/edit/main/problem-sets/ps-10.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
 <p>This page is built with <a href="https://quarto.org/">Quarto</a>.</p>
 </div>
