@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Jay Hesselberth">
+<meta name="dcterms.date" content="2024-09-09">
+<title>Chromatin accessibility I – MOLB 7950</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<meta property="og:title" content="Chromatin accessibility I – MOLB 7950">
+<meta property="og:description" content="Chromatin-centric measurement of genomic features">
+<meta property="og:site_name" content="MOLB 7950">
+<meta name="twitter:title" content="Chromatin accessibility I – MOLB 7950">
+<meta name="twitter:description" content="Chromatin-centric measurement of genomic features">
+<meta name="twitter:image" content="https://rnabioco.github.io/molb-7950/exercises/images/twitter-card.png">
+<meta name="twitter:creator" content="@rnabioco">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Chromatin accessibility I</li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto"><div class="pt-lg-2 mt-2 text-center sidebar-header">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../img/logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none"></a>
+      <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/rnabioco/molb-7950" title="Course GitHub page" class="quarto-navigation-tool px-1" aria-label="Course GitHub page"><i class="bi bi-github"></i></a>
+    <a href="https://sso.posit.cloud/cu-anschutz" title="Posit Cloud SSO login" class="quarto-navigation-tool px-1" aria-label="Posit Cloud SSO login"><i class="bi bi-cloud"></i></a>
+    <a href="https://calendly.com/molb7950" title="Office hours scheduling" class="quarto-navigation-tool px-1" aria-label="Office hours scheduling"><i class="bi bi-calendar"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Course information</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Schedule</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/syllabus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Syllabus</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/support.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/team.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Teaching team</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="px-0"><hr class="sidebar-divider hi "></li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Resources</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/bootcamp-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bootcamp resources</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/block-dna-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DNA Block resources</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/block-rna-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RNA Block resources</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="px-0"><hr class="sidebar-divider hi "></li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Assignments</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/problem-sets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Problet Set Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/final-projects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Final Project Overview</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#chromatin-accessbility-patterns-and-genome-function" id="toc-chromatin-accessbility-patterns-and-genome-function" class="nav-link active" data-scroll-target="#chromatin-accessbility-patterns-and-genome-function">Chromatin accessbility patterns and genome function</a></li>
+  <li><a href="#load-the-libraries" id="toc-load-the-libraries" class="nav-link" data-scroll-target="#load-the-libraries">Load the libraries</a></li>
+  <li>
+<a href="#load-the-data" id="toc-load-the-data" class="nav-link" data-scroll-target="#load-the-data">Load the data</a>
+  <ul class="collapse">
+<li><a href="#experimental-consideration" id="toc-experimental-consideration" class="nav-link" data-scroll-target="#experimental-consideration">Experimental consideration</a></li>
+  </ul>
+</li>
+  <li><a href="#fragment-size-distributions-are-informative" id="toc-fragment-size-distributions-are-informative" class="nav-link" data-scroll-target="#fragment-size-distributions-are-informative">Fragment size distributions are informative</a></li>
+  <li>
+<a href="#expectations-for-chromatin-fragment-lengths" id="toc-expectations-for-chromatin-fragment-lengths" class="nav-link" data-scroll-target="#expectations-for-chromatin-fragment-lengths">Expectations for chromatin fragment lengths</a>
+  <ul class="collapse">
+<li><a href="#mnase-seq-1" id="toc-mnase-seq-1" class="nav-link" data-scroll-target="#mnase-seq-1">MNase-seq</a></li>
+  <li><a href="#atac-seq-1" id="toc-atac-seq-1" class="nav-link" data-scroll-target="#atac-seq-1">ATAC-seq</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#length-distributions-of-chromatin-derived-dna-fragments" id="toc-length-distributions-of-chromatin-derived-dna-fragments" class="nav-link" data-scroll-target="#length-distributions-of-chromatin-derived-dna-fragments">Length distributions of chromatin-derived DNA fragments</a>
+  <ul class="collapse">
+<li><a href="#interpreations" id="toc-interpreations" class="nav-link" data-scroll-target="#interpreations">Interpreations</a></li>
+  </ul>
+</li>
+  <li><a href="#periodicity-in-the-fragment-lengths" id="toc-periodicity-in-the-fragment-lengths" class="nav-link" data-scroll-target="#periodicity-in-the-fragment-lengths">Periodicity in the fragment lengths</a></li>
+  <li>
+<a href="#visualize-read-density-in-genomic-region" id="toc-visualize-read-density-in-genomic-region" class="nav-link" data-scroll-target="#visualize-read-density-in-genomic-region">Visualize read density in genomic region</a>
+  <ul class="collapse">
+<li><a href="#load-tracks" id="toc-load-tracks" class="nav-link" data-scroll-target="#load-tracks">Load tracks</a></li>
+  </ul>
+</li>
+  <li><a href="#load-the-remaining-data" id="toc-load-the-remaining-data" class="nav-link" data-scroll-target="#load-the-remaining-data">Load the remaining data</a></li>
+  <li><a href="#interpretations" id="toc-interpretations" class="nav-link" data-scroll-target="#interpretations">Interpretations</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li><li><a href="https://github.com/rnabioco/molb-7950/edit/main/exercises/ex_17.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">Chromatin accessibility I</h1>
+<p class="subtitle lead">Chromatin-centric measurement of genomic features</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jay Hesselberth </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 9, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header><section id="chromatin-accessbility-patterns-and-genome-function" class="level2"><h2 class="anchored" data-anchor-id="chromatin-accessbility-patterns-and-genome-function">Chromatin accessbility patterns and genome function</h2>
+<p>This class we’ll examine chormatin accessibility patterns and begin to get a sense of what they mean, both at the fine-scale (single base-pair) and genomewide.</p>
+</section><section id="load-the-libraries" class="level2"><h2 class="anchored" data-anchor-id="load-the-libraries">Load the libraries</h2>
+<p>These are libraries we’ve used before. patchwork is a library for composing groups of plots.</p>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://wilkelab.org/cowplot/">cowplot</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/">here</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com">patchwork</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>These are new libraries specifically for genome analysis. You learned about valr and Gviz for your homework.</p>
+<p>rtracklayer provides a few utility functions we’ll use today, and TxDb.Scerevisiae.UCSC.sacCer3.sgdGene provides gene annotations for the S. cerevisiae genome.</p>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rnabioco/valr/">valr</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
+'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'</code></pre>
+</div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ivanek/Gviz">Gviz</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">rtracklayer</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TxDb.Scerevisiae.UCSC.sacCer3.sgdGene</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="load-the-data" class="level2"><h2 class="anchored" data-anchor-id="load-the-data">Load the data</h2>
+<p>In this and the next class we will analyze ATAC-seq and MNase-seq data sets from budding yeast. Here are the references for the two data set:</p>
+<section id="atac-seq" class="level4"><h4 class="anchored" data-anchor-id="atac-seq">ATAC-seq</h4>
+<blockquote class="blockquote">
+<p>Schep AN, Buenrostro JD, Denny SK, Schwartz K, Sherlock G, Greenleaf WJ. Structured nucleosome fingerprints enable high-resolution mapping of chromatin architecture within regulatory regions. Genome Res. 2015 PMID: 26314830; PMCID: PMC4617971. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4617971/">[Link]</a> <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE66386">[Data]</a></p>
+</blockquote>
+</section><section id="mnase-seq" class="level4"><h4 class="anchored" data-anchor-id="mnase-seq">MNase-seq</h4>
+<blockquote class="blockquote">
+<p>Zentner GE, Henikoff S. Mot1 redistributes TBP from TATA-containing to TATA-less promoters. Mol Cell Biol. 2013 PMID: 24144978; PMCID: PMC3889552. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3889552/">[Link]</a> <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE44200">[Data]</a></p>
+</blockquote>
+</section><section id="experimental-consideration" class="level3"><h3 class="anchored" data-anchor-id="experimental-consideration">Experimental consideration</h3>
+<p>In a standard MNase-seq experiment, DNA around ~150 bp is extracted to look closely at nucleosome occupancy &amp; positioning. However, the above study <em>did not</em> perform size selection. This is important as now we can look at both transcription factor binding sites and nucleosome positions.</p>
+</section></section><section id="fragment-size-distributions-are-informative" class="level2"><h2 class="anchored" data-anchor-id="fragment-size-distributions-are-informative">Fragment size distributions are informative</h2>
+<p>First, we will determine the fragment size distributions obtained from the two experiments. These sizes are the fingerprints of particles that were protecting nuclear DNA from digestion.</p>
+<p>I have performed the alignment of paired-end reads and converted all reads into a bed file where each line of the bed file denotes a single fragment from start to end.</p>
+<p>First, load the ATAC-seq reads:</p>
+<div class="cell" data-output-location="column">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">atac_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rnabioco.github.io/valr/reference/read_bed.html">read_bed</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://here.r-lib.org//reference/here.html">here</a></span><span class="op">(</span><span class="st">"data/block-dna/yeast_atac_chrII.bed.gz"</span><span class="op">)</span>,</span>
+<span><span class="op">)</span></span>
+<span><span class="va">atac_tbl</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 409,870 × 3
+   chrom start   end
+   &lt;chr&gt; &lt;int&gt; &lt;int&gt;
+ 1 chrII     0    42
+ 2 chrII     0    52
+ 3 chrII     0    71
+ 4 chrII     0    75
+ 5 chrII     0    82
+ 6 chrII     0    83
+ 7 chrII     0    83
+ 8 chrII     0    83
+ 9 chrII     0   122
+10 chrII     0   135
+# ℹ 409,860 more rows</code></pre>
+</div>
+</div>
+<p>Next, load the MNase reads.</p>
+<div class="cell" data-output-location="column">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mnase_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rnabioco.github.io/valr/reference/read_bed.html">read_bed</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://here.r-lib.org//reference/here.html">here</a></span><span class="op">(</span><span class="st">"data/block-dna/yeast_mnase_chrII.bed.gz"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">mnase_tbl</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1,236,334 × 3
+   chrom start   end
+   &lt;chr&gt; &lt;int&gt; &lt;int&gt;
+ 1 chrII     1   228
+ 2 chrII     2    80
+ 3 chrII     3   226
+ 4 chrII     4    60
+ 5 chrII     4    66
+ 6 chrII     4    77
+ 7 chrII     4    81
+ 8 chrII     5    56
+ 9 chrII     5    60
+10 chrII     5    60
+# ℹ 1,236,324 more rows</code></pre>
+</div>
+</div>
+<p>Working with a small genome is a huge advantage – we can study the whole chromosome in this class. For <em>Drosophila</em> and human data we dealt with before, we were looking at a subsection of the chromosome.</p>
+</section><section id="expectations-for-chromatin-fragment-lengths" class="level2"><h2 class="anchored" data-anchor-id="expectations-for-chromatin-fragment-lengths">Expectations for chromatin fragment lengths</h2>
+<p>Let’s remind ourselves of the expectations for chromatin fragment lengths from MNase-seq and ATAC-seq experiments.</p>
+<section id="mnase-seq-1" class="level3"><h3 class="anchored" data-anchor-id="mnase-seq-1">MNase-seq</h3>
+<p><img src="../img/block-dna/mnase-overview.png" class="img-fluid"></p>
+</section><section id="atac-seq-1" class="level3"><h3 class="anchored" data-anchor-id="atac-seq-1">ATAC-seq</h3>
+<p><img src="../img/block-dna/atac-explain.png" class="img-fluid"></p>
+</section></section><section id="length-distributions-of-chromatin-derived-dna-fragments" class="level2"><h2 class="anchored" data-anchor-id="length-distributions-of-chromatin-derived-dna-fragments">Length distributions of chromatin-derived DNA fragments</h2>
+<p>For the MNase-seq BED file, you see that there are only three columns: <code>chrom</code>, <code>start</code>, and <code>end</code>. Calculating fragment length is very simple:</p>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span><span class="va">mnase_tbl</span>, frag_len <span class="op">=</span> <span class="va">end</span> <span class="op">-</span> <span class="va">start</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1,236,334 × 4
+   chrom start   end frag_len
+   &lt;chr&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;
+ 1 chrII     1   228      227
+ 2 chrII     2    80       78
+ 3 chrII     3   226      223
+ 4 chrII     4    60       56
+ 5 chrII     4    66       62
+ 6 chrII     4    77       73
+ 7 chrII     4    81       77
+ 8 chrII     5    56       51
+ 9 chrII     5    60       55
+10 chrII     5    60       55
+# ℹ 1,236,324 more rows</code></pre>
+</div>
+</div>
+<p>Let’s use this approach to examine the fragment length distribution.</p>
+<div class="cell" data-output-location="column">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">acc_tbl</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html">bind_rows</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span><span class="va">mnase_tbl</span>, type <span class="op">=</span> <span class="st">"mnase"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span><span class="va">atac_tbl</span>, type <span class="op">=</span> <span class="st">"atac"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span></span>
+<span>  <span class="va">acc_tbl</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">end</span> <span class="op">-</span> <span class="va">start</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html">geom_histogram</a></span><span class="op">(</span></span>
+<span>    <span class="co"># single base-pair resolution</span></span>
+<span>    binwidth <span class="op">=</span> <span class="fl">1</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html">facet_grid</a></span><span class="op">(</span></span>
+<span>    rows <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/vars.html">vars</a></span><span class="op">(</span><span class="va">type</span><span class="op">)</span>,</span>
+<span>    scales <span class="op">=</span> <span class="st">"free_y"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html">xlim</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">500</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"fragment length (bp)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Histogram of fragment lengths from\naccessibility measurements"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://wilkelab.org/cowplot/reference/theme_cowplot.html">theme_cowplot</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ex_17_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="interpreations" class="level3"><h3 class="anchored" data-anchor-id="interpreations">Interpreations</h3>
+<ol type="1">
+<li><p>How would you describe the two distributions? Are they similar?</p></li>
+<li><p>Can you make any biological conclusions based on the length distributions?</p></li>
+</ol></section></section><section id="periodicity-in-the-fragment-lengths" class="level2"><h2 class="anchored" data-anchor-id="periodicity-in-the-fragment-lengths">Periodicity in the fragment lengths</h2>
+<p>The ATAC data seems to be periodic. How can we test that hypothesis? We can calculate the autocorrelation of the length distribution. Can someone explain what <a href="https://en.wikipedia.org/wiki/Autocorrelation">autocorrelation</a> means?</p>
+<p>We’ll use the base <code>hist</code> function to calculate the densities of the above histogram. Let’s write a function we can use to analyze fragment lengths.</p>
+<div class="cell">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fragment_len_hist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tbl</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">frag_lens</span> <span class="op">&lt;-</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span></span>
+<span>      <span class="va">tbl</span>,</span>
+<span>      frag_len <span class="op">=</span> <span class="va">end</span> <span class="op">-</span> <span class="va">start</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span></span>
+<span>      <span class="va">frag_len</span> <span class="op">&gt;=</span> <span class="fl">30</span> <span class="op">&amp;</span></span>
+<span>        <span class="va">frag_len</span> <span class="op">&lt;=</span> <span class="fl">500</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">frag_len</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span></span>
+<span>    <span class="va">frag_lens</span>,</span>
+<span>    breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">500</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    plot <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">atac_frag_lens</span> <span class="op">&lt;-</span> <span class="fu">fragment_len_hist</span><span class="op">(</span><span class="va">atac_tbl</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>density</code> slot contains a vector of densities at base-pair resolution. We will use <code><a href="https://rdrr.io/r/stats/acf.html">acf()</a></code> to calculate the autocorrelation of these values, and will store the tidied result.</p>
+<div class="cell">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">atac_acf_tbl</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/acf.html">acf</a></span><span class="op">(</span></span>
+<span>    <span class="va">atac_frag_lens</span><span class="op">$</span><span class="va">density</span>,</span>
+<span>    lag.max <span class="op">=</span> <span class="fl">40</span>,</span>
+<span>    plot <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">broom</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html">tidy</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">atac_acf_tbl</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 41 × 2
+     lag   acf
+   &lt;dbl&gt; &lt;dbl&gt;
+ 1     0 1    
+ 2     1 0.975
+ 3     2 0.937
+ 4     3 0.916
+ 5     4 0.909
+ 6     5 0.902
+ 7     6 0.891
+ 8     7 0.882
+ 9     8 0.877
+10     9 0.887
+# ℹ 31 more rows</code></pre>
+</div>
+</div>
+<p>Now let’s plot the autocorrelation.</p>
+<div class="cell">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">plot_acf</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tbl</span>, <span class="va">title</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span></span>
+<span>    <span class="va">tbl</span>,</span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span><span class="va">lag</span>, <span class="va">acf</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://wilkelab.org/cowplot/reference/theme_minimal_grid.html">theme_minimal_grid</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">21</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="va">title</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">plot_atac_acf</span> <span class="op">&lt;-</span> <span class="fu">plot_acf</span><span class="op">(</span><span class="va">atac_acf_tbl</span>, title <span class="op">=</span> <span class="st">"ATAC ACF"</span><span class="op">)</span></span>
+<span><span class="va">plot_atac_acf</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ex_17_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>So, it looks like there significant bumps in autocorrelation at 10 and 21 bp positions, indicating that ATAC length distribution is periodic.</p>
+<p>How do we confirm these bumps are interesting? Let’s calculate the acf of a negative control – the length distribution of the MNase data.</p>
+<div class="cell" data-output-location="default">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mnase_frag_lens</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu">fragment_len_hist</span><span class="op">(</span><span class="va">mnase_tbl</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">mnase_acf_tbl</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/acf.html">acf</a></span><span class="op">(</span></span>
+<span>    <span class="va">mnase_frag_lens</span><span class="op">$</span><span class="va">density</span>,</span>
+<span>    lag.max <span class="op">=</span> <span class="fl">40</span>,</span>
+<span>    plot <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">broom</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html">tidy</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">plot_mnase_acf</span> <span class="op">&lt;-</span> <span class="fu">plot_acf</span><span class="op">(</span><span class="va">mnase_acf_tbl</span>, title <span class="op">=</span> <span class="st">"MNase ACF"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># patchwork plot</span></span>
+<span><span class="va">plot_atac_acf</span> <span class="op">/</span> <span class="va">plot_mnase_acf</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ex_17_files/figure-html/plot-acfs-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can see a monotonic decrease in the MNase-seq data, which confirms that the bumps we see are distinctive features of ATAC-seq data.</p>
+<p>What are these features? Consider that the specificity of binding of DNase, MNase, Tn5 is not completely generic. These enzymes have specificity of binding the minor groove of DNA, and there is an optimal geometry for the DNA substrate. You can see this in previous studies, where DNase-seq revealed high-resolution views of DNA:protein structures.</p>
+<p><strong>So what then, exactly is the ~10-11 bp periodicity?</strong> And why is this not present in MNase data?</p>
+<p><img src="../img/block-dna/dna-protein-structures.jpg" class="img-fluid"></p>
+</section><section id="visualize-read-density-in-genomic-region" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="visualize-read-density-in-genomic-region">Visualize read density in genomic region</h2>
+<p>We will use the Gviz library to visualize read densities relative to a reference.</p>
+<section id="load-tracks" class="level3"><h3 class="anchored" data-anchor-id="load-tracks">Load tracks</h3>
+<p>First, we load the gene annotations from the <a href="https://yeastgenome.org">Saccharomyces Genome Databases</a> (SGD).</p>
+<div class="cell" data-output-location="column">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sgd_genes</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/GeneRegionTrack-class.html">GeneRegionTrack</a></span><span class="op">(</span></span>
+<span>    <span class="va">TxDb.Scerevisiae.UCSC.sacCer3.sgdGene</span>,</span>
+<span>    chromosome <span class="op">=</span> <span class="st">"chrII"</span>,</span>
+<span>    start <span class="op">=</span> <span class="fl">530811</span>,</span>
+<span>    end <span class="op">=</span> <span class="fl">540885</span>,</span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="va">sgd_genes</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GeneRegionTrack 'GeneRegionTrack'
+| genome: sacCer3
+| active chromosome: chrII
+| annotation features: 7</code></pre>
+</div>
+</div>
+<p>Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using <code><a href="https://rdrr.io/pkg/rtracklayer/man/BigWigFile.html">rtracklayer::import.bw()</a></code>.</p>
+<p>Inspect the object. What is “GRanges”?</p>
+<div class="cell">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mnase_nuc_gr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rtracklayer/man/BigWigFile.html">import.bw</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://here.r-lib.org//reference/here.html">here</a></span><span class="op">(</span><span class="st">"data/block-dna/yeast_mnase_134_160.bw"</span><span class="op">)</span>,</span>
+<span>  as <span class="op">=</span> <span class="st">"GRanges"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">mnase_nuc_gr</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 81160 ranges and 1 metadata column:
+          seqnames        ranges strand |     score
+             &lt;Rle&gt;     &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;
+      [1]    chrII         10-19      * |   3.81086
+      [2]    chrII         20-29      * |   3.81086
+      [3]    chrII         30-39      * |   5.71629
+      [4]    chrII         40-49      * |   5.71629
+      [5]    chrII         50-59      * |   5.71629
+      ...      ...           ...    ... .       ...
+  [81156]    chrII 813130-813139      * |  15.24344
+  [81157]    chrII 813140-813149      * |   7.62172
+  [81158]    chrII 813150-813159      * |   7.62172
+  [81159]    chrII 813160-813169      * |   7.62172
+  [81160]    chrII 813170-813179      * |   5.71629
+  -------
+  seqinfo: 1 sequence from an unspecified genome</code></pre>
+</div>
+</div>
+<p>Next, load the GRanges object as a track for Gviz to plot:</p>
+<div class="cell">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mnase_nuc_trk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/DataTrack-class.html">DataTrack</a></span><span class="op">(</span></span>
+<span>  <span class="va">mnase_nuc_gr</span>,</span>
+<span>  name <span class="op">=</span> <span class="st">"MNase_nuc"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">mnase_nuc_trk</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DataTrack 'MNase_nuc'
+| genome: NA
+| active chromosome: chrII
+| positions: 81160
+| samples:1
+| strand: * </code></pre>
+</div>
+</div>
+<p>Now, we can make a plot for this particular region of chrII:</p>
+<div class="cell" data-output-location="column">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/plotTracks.html">plotTracks</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>    <span class="va">sgd_genes</span>,</span>
+<span>    <span class="va">mnase_nuc_trk</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  from <span class="op">=</span> <span class="fl">530811</span>,</span>
+<span>  to <span class="op">=</span> <span class="fl">540885</span>,</span>
+<span>  chromosome <span class="op">=</span> <span class="st">"chrII"</span>,</span>
+<span>  transcriptAnnotation <span class="op">=</span> <span class="st">"gene"</span>,</span>
+<span>  shape <span class="op">=</span> <span class="st">"arrow"</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"histogram"</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ex_17_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section></section><section id="load-the-remaining-data" class="level2"><h2 class="anchored" data-anchor-id="load-the-remaining-data">Load the remaining data</h2>
+<p>That looks great! Let’s load all the other data sets.</p>
+<ol type="1">
+<li>Load each bigWig as a GRanges object with <code><a href="https://rdrr.io/pkg/rtracklayer/man/BigWigFile.html">rtracklayer::import.bw()</a></code>
+</li>
+<li>Convert each to a <code><a href="https://rdrr.io/pkg/Gviz/man/DataTrack-class.html">Gviz::DataTrack()</a></code> for plotting</li>
+</ol>
+<p>We can do this one of two ways. We can do it one-by-one:</p>
+<div class="cell">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># do this for each of the four tracks</span></span>
+<span><span class="va">file_name</span> <span class="op">&lt;-</span> <span class="st">"yeast_mnase_lt50.bw"</span></span>
+<span><span class="va">track_name</span> <span class="op">&lt;-</span> <span class="st">"MNase_Short"</span></span>
+<span><span class="va">big_wig</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/rtracklayer/man/BigWigFile.html">import.bw</a></span><span class="op">(</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html">here</a></span><span class="op">(</span><span class="st">"data/block-dna"</span>, <span class="va">file_name</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">data_track</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/DataTrack-class.html">DataTrack</a></span><span class="op">(</span><span class="va">big_wig</span>, <span class="va">track_name</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Or we can create a tibble with file and track names, and use purrr to load and convert each one:</p>
+<div class="cell">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">track_info</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
+<span>    file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"yeast_mnase_lt50.bw"</span>,</span>
+<span>      <span class="st">"yeast_mnase_134_160.bw"</span>,</span>
+<span>      <span class="st">"yeast_atac_lt120.bw"</span>,</span>
+<span>      <span class="st">"yeast_atac_gt120.bw"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    track_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"MNase_Short"</span>, <span class="st">"MNase_Long"</span>,</span>
+<span>      <span class="st">"ATAC_Short"</span>, <span class="st">"ATAC_Long"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span></span>
+<span>    file_path <span class="op">=</span> <span class="fu"><a href="https://here.r-lib.org//reference/here.html">here</a></span><span class="op">(</span><span class="st">"data/block-dna"</span>, <span class="va">file_name</span><span class="op">)</span>,</span>
+<span>    big_wig <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span></span>
+<span>      <span class="va">file_path</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/rtracklayer/man/BigWigFile.html">import.bw</a></span><span class="op">(</span><span class="va">.x</span>, as <span class="op">=</span> <span class="st">"GRanges"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    data_track <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html">map2</a></span><span class="op">(</span></span>
+<span>      <span class="va">big_wig</span>, <span class="va">track_name</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/DataTrack-class.html">DataTrack</a></span><span class="op">(</span><span class="va">.x</span>, name <span class="op">=</span> <span class="va">.y</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we just have to make a list of tracks to plot and Gviz takes care of the rest.</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/plotTracks.html">plotTracks</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>    <span class="va">sgd_genes</span>,</span>
+<span>    <span class="va">track_info</span><span class="op">$</span><span class="va">data_track</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  from <span class="op">=</span> <span class="fl">530811</span>,</span>
+<span>  to <span class="op">=</span> <span class="fl">540885</span>,</span>
+<span>  chromosome <span class="op">=</span> <span class="st">"chrII"</span>,</span>
+<span>  transcriptAnnotation <span class="op">=</span> <span class="st">"gene"</span>,</span>
+<span>  shape <span class="op">=</span> <span class="st">"arrow"</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"histogram"</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ex_17_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="interpretations" class="level2"><h2 class="anchored" data-anchor-id="interpretations">Interpretations</h2>
+<p>Recall this plot:</p>
+<p><img src="../img/block-dna/mnase-overview.png" class="img-fluid"></p>
+<p>Some questions to think about as you look at the tracks:</p>
+<ol type="1">
+<li>What is each data set reporting on?</li>
+<li>What can you infer about genome function based on these tracks?</li>
+<li>What are the major differences between MNase-seq and ATAC-seq based on these tracks?</li>
+</ol>
+
+
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/rnabioco\.github\.io\/molb-7950\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li><li><a href="https://github.com/rnabioco/molb-7950/edit/main/exercises/ex_17.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This page is built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
