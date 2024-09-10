@@ -1,0 +1,101 @@
+---
+title: "Mapping chromatin structure and transactions"
+author: "Your Name Here"
+---
+
+## `bed_intersect()` example {.smaller}
+
+```{r}
+#| label: bed-intersect
+library(valr)
+library(dplyr)
+
+x <- tribble(
+  ~chrom, ~start, ~end,
+  "chr1", 25, 50,
+  "chr1", 100, 125
+)
+
+y <- tribble(
+  ~chrom, ~start, ~end,
+  "chr1", 30,     75
+)
+```
+
+## valr example
+
+You can use `read_bed()` and related functions to load genome annotations and signals.
+
+```{r}
+#| label: valr-example
+
+snps <- read_bed(
+  valr_example("hg19.snps147.chr22.bed.gz"),
+  n_fields = 6
+)
+
+genes <- read_bed(
+  valr_example("genes.hg19.chr22.bed.gz"),
+  n_fields = 6
+)
+```
+
+## What is in `snps` and `genes`? {.smaller}
+
+```{r}
+```
+
+```{r}
+```
+
+## Interval manipulation {.smaller}
+
+Let's find and characterize intergenic SNPs. We'll use the tools `bed_substract()` and `bed_closest()`. Take a look and their examples in the documentation to see what they do.
+
+```{r}
+```
+
+. . .
+
+Take a look at the `intergenic` and `nearby` objects in the console.
+
+## Interval manipulation {.smaller}
+
+Now that you have overlaps and distances between SNPs and genes, you can 
+go back to dplyr tools to generate reports.
+
+```{r}
+#| label: valr-dplyr
+```
+
+## `bed_map()` example {.smaller}
+
+Copy / paste these into your console.
+
+```{r}
+#| echo: true
+x <- tribble(
+  ~chrom, ~start, ~end,
+  "chr1", 100,    250,
+  "chr2", 250,    500
+)
+
+y <- tribble(
+  ~chrom, ~start, ~end, ~value,
+  "chr1", 100,    250,  10,
+  "chr1", 150,    250,  20,
+  "chr2", 250,    500,  500
+)
+```
+
+## `bed_map()` example continued {.smaller}
+
+First examine the intersecting intervals.
+
+```{r}
+```
+
+
+```{r}
+```
+
