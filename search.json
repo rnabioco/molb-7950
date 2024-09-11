@@ -490,6 +490,83 @@
     "text": "References\nLegal analogy\nStatQuest: P Values, clearly explained\nStatQuest: How to calculate p-values\nThe Curious Tale of William Sealy Gosset"
   },
   {
+    "objectID": "exercises/ex-17.html",
+    "href": "exercises/ex-17.html",
+    "title": "Chromatin accessibility I",
+    "section": "",
+    "text": "This class we’ll examine chromatin accessibility patterns and begin to get a sense of what they mean, both at the fine-scale (single base-pair) and across the genome."
+  },
+  {
+    "objectID": "exercises/ex-17.html#chromatin-accessbility-patterns-and-genome-function",
+    "href": "exercises/ex-17.html#chromatin-accessbility-patterns-and-genome-function",
+    "title": "Chromatin accessibility I",
+    "section": "",
+    "text": "This class we’ll examine chromatin accessibility patterns and begin to get a sense of what they mean, both at the fine-scale (single base-pair) and across the genome."
+  },
+  {
+    "objectID": "exercises/ex-17.html#load-the-libraries",
+    "href": "exercises/ex-17.html#load-the-libraries",
+    "title": "Chromatin accessibility I",
+    "section": "Load the libraries",
+    "text": "Load the libraries\nThese are libraries we’ve used before. patchwork is a library for composing groups of plots.\n\nlibrary(tidyverse)\nlibrary(cowplot)\nlibrary(here)\nlibrary(patchwork)\n\nThese are new libraries specifically for genome analysis. You learned about valr and Gviz for your homework.\nrtracklayer provides a few utility functions we’ll use today, and TxDb.Scerevisiae.UCSC.sacCer3.sgdGene provides gene annotations for the S. cerevisiae genome.\n\nlibrary(valr)\nlibrary(Gviz)\n\nlibrary(rtracklayer)\nlibrary(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)"
+  },
+  {
+    "objectID": "exercises/ex-17.html#load-the-data",
+    "href": "exercises/ex-17.html#load-the-data",
+    "title": "Chromatin accessibility I",
+    "section": "Load the data",
+    "text": "Load the data\nIn this and the next class we will analyze ATAC-seq and MNase-seq data sets from budding yeast. Here are the references for the two data set:\nATAC-seq\n\nSchep AN, Buenrostro JD, Denny SK, Schwartz K, Sherlock G, Greenleaf WJ. Structured nucleosome fingerprints enable high-resolution mapping of chromatin architecture within regulatory regions. Genome Res. 2015 PMID: 26314830; PMCID: PMC4617971. [Link] [Data]\n\nMNase-seq\n\nZentner GE, Henikoff S. Mot1 redistributes TBP from TATA-containing to TATA-less promoters. Mol Cell Biol. 2013 PMID: 24144978; PMCID: PMC3889552. [Link] [Data]\n\nExperimental consideration\nIn a standard MNase-seq experiment, DNA around ~150 bp is extracted to look closely at nucleosome occupancy & positioning. However, the above study did not perform size selection. This is important as now we can look at both transcription factor binding sites and nucleosome positions."
+  },
+  {
+    "objectID": "exercises/ex-17.html#fragment-size-distributions-are-informative",
+    "href": "exercises/ex-17.html#fragment-size-distributions-are-informative",
+    "title": "Chromatin accessibility I",
+    "section": "Fragment size distributions are informative",
+    "text": "Fragment size distributions are informative\nFirst, we will determine the fragment size distributions obtained from the two experiments. These sizes are the fingerprints of particles that were protecting nuclear DNA from digestion.\nI have performed the alignment of paired-end reads and converted all reads into a bed file where each line of the bed file denotes a single fragment from start to end.\nFirst, load the ATAC-seq reads:\n\natac_tbl &lt;- read_bed(\n  here(\"data/block-dna/yeast_atac_chrII.bed.gz\"),\n)\natac_tbl\n\n# A tibble: 409,870 × 3\n   chrom start   end\n   &lt;chr&gt; &lt;int&gt; &lt;int&gt;\n 1 chrII     0    42\n 2 chrII     0    52\n 3 chrII     0    71\n 4 chrII     0    75\n 5 chrII     0    82\n 6 chrII     0    83\n 7 chrII     0    83\n 8 chrII     0    83\n 9 chrII     0   122\n10 chrII     0   135\n# ℹ 409,860 more rows\n\n\nNext, load the MNase reads.\n\nmnase_tbl &lt;- read_bed(\n  here(\"data/block-dna/yeast_mnase_chrII.bed.gz\")\n)\nmnase_tbl\n\n# A tibble: 1,236,334 × 3\n   chrom start   end\n   &lt;chr&gt; &lt;int&gt; &lt;int&gt;\n 1 chrII     1   228\n 2 chrII     2    80\n 3 chrII     3   226\n 4 chrII     4    60\n 5 chrII     4    66\n 6 chrII     4    77\n 7 chrII     4    81\n 8 chrII     5    56\n 9 chrII     5    60\n10 chrII     5    60\n# ℹ 1,236,324 more rows\n\n\nWorking with a small genome is a huge advantage – we can study the whole chromosome in this class."
+  },
+  {
+    "objectID": "exercises/ex-17.html#expectations-for-chromatin-fragment-lengths",
+    "href": "exercises/ex-17.html#expectations-for-chromatin-fragment-lengths",
+    "title": "Chromatin accessibility I",
+    "section": "Expectations for chromatin fragment lengths",
+    "text": "Expectations for chromatin fragment lengths\nLet’s remind ourselves of the expectations for chromatin fragment lengths from MNase-seq and ATAC-seq experiments.\nMNase-seq\n\nATAC-seq"
+  },
+  {
+    "objectID": "exercises/ex-17.html#length-distributions-of-chromatin-derived-dna-fragments",
+    "href": "exercises/ex-17.html#length-distributions-of-chromatin-derived-dna-fragments",
+    "title": "Chromatin accessibility I",
+    "section": "Length distributions of chromatin-derived DNA fragments",
+    "text": "Length distributions of chromatin-derived DNA fragments\nFor the MNase-seq BED file, you see that there are only three columns: chrom, start, and end. Calculating fragment length is simple:\n\nmutate(mnase_tbl, frag_len = ??)\n\nLet’s use this approach to examine the fragment length distribution.\n\nacc_tbl &lt;-\n  bind_rows(\n    mutate(mnase_tbl, type = \"mnase\"),\n    mutate(atac_tbl, type = \"atac\")\n  )\n\nggplot(\n  acc_tbl,\n  aes(x = ??)\n) +\n  geom_histogram(\n    # single base-pair resolution\n    binwidth = 1\n  ) +\n  facet_grid(\n    rows = vars(type),\n    scales = \"free_y\"\n  ) +\n  xlim(30, 500) +\n  labs(\n    x = \"fragment length (bp)\",\n    title = \"Histogram of fragment lengths from\\naccessibility measurements\"\n  ) +\n  theme_cowplot()\n\nInterpretations\n\nHow would you describe the two fragment length distributions? Are they similar?\nCan you make any biological conclusions based on the length distributions?"
+  },
+  {
+    "objectID": "exercises/ex-17.html#periodicity-in-the-fragment-lengths",
+    "href": "exercises/ex-17.html#periodicity-in-the-fragment-lengths",
+    "title": "Chromatin accessibility I",
+    "section": "Periodicity in the fragment lengths",
+    "text": "Periodicity in the fragment lengths\nThe ATAC data seems to be periodic. How can we test that hypothesis? We can calculate the autocorrelation of the length distribution. Can someone explain what autocorrelation means?\nWe’ll use the base hist function to calculate the densities of the above histogram. Let’s write a function we can use to analyze fragment lengths.\n\nfragment_len_hist &lt;- function(tbl) {\n  frag_lens &lt;-\n    mutate(\n      tbl,\n      frag_len = ??\n    ) |&gt;\n    filter(\n      frag_len &gt;= 30 &\n        frag_len &lt;= 500\n    ) |&gt;\n    pull(frag_len)\n\n  hist(\n    frag_lens,\n    breaks = seq(30, 500, 1),\n    plot = FALSE\n  )\n}\n\n\natac_frag_lens &lt;- fragment_len_hist(atac_tbl)\n\nThe density slot contains a vector of densities at base-pair resolution. We will use acf() to calculate the autocorrelation of these values, and will store the tidied result.\n\natac_acf_tbl &lt;-\n  acf(\n    atac_frag_lens$??,\n    lag.max = 40,\n    plot = FALSE\n  ) |&gt;\n  broom::tidy()\n\natac_acf_tbl\n\nNow let’s plot the autocorrelation.\n\nplot_acf &lt;- function(tbl, title) {\n  ggplot(\n    tbl,\n    aes(??, ??)\n  ) +\n    geom_point(size = 2) +\n    geom_line() +\n    theme_minimal_grid() +\n    geom_vline(xintercept = c(10, 21), color = \"red\") +\n    labs(title = title)\n}\n\n\nplot_atac_acf &lt;- plot_acf(atac_acf_tbl, title = \"ATAC ACF\")\nplot_atac_acf\n\nSo, it looks like there significant bumps in autocorrelation at 10 and 21 bp positions, indicating that ATAC length distribution is periodic.\nHow do we confirm these bumps are interesting? Let’s calculate the acf of a negative control – the length distribution of the MNase data.\n\nmnase_frag_lens &lt;-\n  fragment_len_hist(??)\n\nmnase_acf_tbl &lt;-\n  acf(\n    mnase_frag_lens$??,\n    lag.max = 40,\n    plot = FALSE\n  ) |&gt;\n  broom::tidy()\n\nplot_mnase_acf &lt;- plot_acf(??, title = \"MNase ACF\")\n\n# patchwork plot\nplot_atac_acf / plot_mnase_acf\n\nWe can see a monotonic decrease in the MNase-seq data, which confirms that the bumps we see are distinctive features of ATAC-seq data.\nWhat are these features? Consider that the specificity of binding of DNase, MNase, and Tn5 is not completely generic. These enzymes have specificity for the minor groove of DNA, and there is an optimal substrate geometry for cleavage. You can see this in previous studies, where DNase-seq revealed high-resolution views of DNA:protein structures.\nSo what then, exactly is the ~10-11 bp periodicity? And why is this not present in MNase data?"
+  },
+  {
+    "objectID": "exercises/ex-17.html#visualize-read-density-in-genomic-region",
+    "href": "exercises/ex-17.html#visualize-read-density-in-genomic-region",
+    "title": "Chromatin accessibility I",
+    "section": "Visualize read density in genomic region",
+    "text": "Visualize read density in genomic region\nWe will use Gviz to visualize read densities relative to a reference.\nLoad tracks\nFirst, we load the gene annotations from the Saccharomyces Genome Databases (SGD).\n\nsgd_genes &lt;-\n  GeneRegionTrack(\n    TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,\n    chromosome = \"chrII\",\n    start = 530811,\n    end = 540885,\n  )\n\nsgd_genes\n\nGeneRegionTrack 'GeneRegionTrack'\n| genome: sacCer3\n| active chromosome: chrII\n| annotation features: 7\n\n\nNext, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using rtracklayer::import.bw().\nInspect the object. What is “GRanges”?\n\nmnase_nuc_gr &lt;- import.bw(\n  here(\"data/block-dna/yeast_mnase_134_160.bw\"),\n  as = \"GRanges\"\n)\nmnase_nuc_gr\n\nGRanges object with 81160 ranges and 1 metadata column:\n          seqnames        ranges strand |     score\n             &lt;Rle&gt;     &lt;IRanges&gt;  &lt;Rle&gt; | &lt;numeric&gt;\n      [1]    chrII         10-19      * |   3.81086\n      [2]    chrII         20-29      * |   3.81086\n      [3]    chrII         30-39      * |   5.71629\n      [4]    chrII         40-49      * |   5.71629\n      [5]    chrII         50-59      * |   5.71629\n      ...      ...           ...    ... .       ...\n  [81156]    chrII 813130-813139      * |  15.24344\n  [81157]    chrII 813140-813149      * |   7.62172\n  [81158]    chrII 813150-813159      * |   7.62172\n  [81159]    chrII 813160-813169      * |   7.62172\n  [81160]    chrII 813170-813179      * |   5.71629\n  -------\n  seqinfo: 1 sequence from an unspecified genome\n\n\nNext, load the GRanges object as a track for Gviz to plot:\n\nmnase_nuc_trk &lt;- DataTrack(\n  mnase_nuc_gr,\n  name = \"MNase_nuc\"\n)\nmnase_nuc_trk\n\nDataTrack 'MNase_nuc'\n| genome: NA\n| active chromosome: chrII\n| positions: 81160\n| samples:1\n| strand: * \n\n\nNow, we can make a plot for this particular region of chrII:\n\n# special track for the x-axis\nx_axis &lt;- GenomeAxisTrack()\n\nplotTracks(\n  c(\n    sgd_genes,\n    mnase_nuc_trk,\n    x_axis\n  ),\n  from = 530811,\n  to = 540885,\n  chromosome = \"chrII\",\n  transcriptAnnotation = \"gene\",\n  shape = \"arrow\",\n  type = \"histogram\"\n)"
+  },
+  {
+    "objectID": "exercises/ex-17.html#load-the-remaining-data",
+    "href": "exercises/ex-17.html#load-the-remaining-data",
+    "title": "Chromatin accessibility I",
+    "section": "Load the remaining data",
+    "text": "Load the remaining data\nThat looks great! Let’s load all the other data sets.\n\nLoad each bigWig as a GRanges object with rtracklayer::import.bw()\n\nConvert each to a Gviz::DataTrack() for plotting\n\nWe can do this one of two ways. We can do it one-by-one:\n\n# complete the following steps for each of the four tracks\nfile_name &lt;- \"yeast_mnase_lt50.bw\"\ntrack_name &lt;- \"MNase_Short\"\nbig_wig &lt;- import.bw(here(\"data/block-dna\", file_name))\ndata_track &lt;- DataTrack(big_wig, track_name)\n\nOr we can create a tibble with file and track names, and use purrr to load and convert each one:\n\ntrack_info &lt;-\n  tibble(\n    file_name = c(\n      \"yeast_mnase_lt50.bw\",\n      \"yeast_mnase_134_160.bw\",\n      \"yeast_atac_lt120.bw\",\n      \"yeast_atac_gt120.bw\"\n    ),\n    file_path = here(\"data/block-dna\", file_name),\n    track_name = c(\n      \"MNase_Short\", \"MNase_Long\",\n      \"ATAC_Short\", \"ATAC_Long\"\n    )\n  )\n\n\ntrack_info &lt;-\n  mutate(\n    track_info,\n    big_wig = purrr::map(\n      file_path, ~ import.bw(.x, as = \"GRanges\")\n    ),\n    data_track = purrr::map2(\n      big_wig, track_name, ~ DataTrack(.x, name = .y)\n    )\n  )\n\nNow, we just have to make a list of tracks to plot and Gviz takes care of the rest.\n\nplotTracks(\n  c(\n    sgd_genes,\n    track_info$data_track\n  ),\n  from = 530811,\n  to = 540885,\n  chromosome = \"chrII\",\n  transcriptAnnotation = \"gene\",\n  shape = \"arrow\",\n  type = \"histogram\"\n)"
+  },
+  {
+    "objectID": "exercises/ex-17.html#interpretations-1",
+    "href": "exercises/ex-17.html#interpretations-1",
+    "title": "Chromatin accessibility I",
+    "section": "Interpretations",
+    "text": "Interpretations\nRecall this plot:\n\nSome questions to think about as you look at the tracks:\n\nWhat is each data set reporting on?\nWhat are the major differences between MNase-seq and ATAC-seq based on these tracks?\nWhat can you infer about gene regulation based on these tracks?"
+  },
+  {
     "objectID": "exercises/ex_17.html",
     "href": "exercises/ex_17.html",
     "title": "Chromatin accessibility I",
@@ -945,134 +1022,155 @@
     "text": "Let’s calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling\nIn order to do this, you will need to:\n\nIdentify which cluster is the most enriched for DUX4 targets.\n\nDetermine how many genes are in the cluster. You will need to know this to figure out how many genes to sample from the whole data set.\nDetermine how many of the genes in the cluster are DUX4 targets. This is the metric that you are interested in comparing between the null distribution and your observation.\n\n\nGenerate 1000 random sample of the proper size from all genes and find out how many of them are DUX4 targets.\nVisualize the distribution of DUX4 targets in these 1000 random (your null distribution) and overlay the number of DUX4 targets you observed in the cluster that was most enriched for DUX4 targets."
   },
   {
-    "objectID": "problem-sets/ps-18.html",
-    "href": "problem-sets/ps-18.html",
-    "title": "DNA Block - Problem Set 18",
+    "objectID": "problem-sets/ps-14.html",
+    "href": "problem-sets/ps-14.html",
+    "title": "Problem Set Stats Bootcamp - class 12",
     "section": "",
-    "text": "Total points: 20. First problem is worth 7 points, second problem is worth 13 points."
+    "text": "-- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\nv dplyr     1.1.3     v readr     2.1.4\nv forcats   1.0.0     v stringr   1.5.0\nv ggplot2   3.4.3     v tibble    3.2.1\nv lubridate 1.9.2     v tidyr     1.3.0\nv purrr     1.0.2     \n-- Conflicts ------------------------------------------ tidyverse_conflicts() --\nx dplyr::filter() masks stats::filter()\nx dplyr::lag()    masks stats::lag()\ni Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nAttaching package: 'rstatix'\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\n\nAttaching package: 'janitor'\n\n\nThe following object is masked from 'package:rstatix':\n\n    make_clean_names\n\n\nThe following objects are masked from 'package:stats':\n\n    chisq.test, fisher.test\n\n\nhere() starts at /Users/jayhesselberth/devel/rnabioco/molb-7950\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C4&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00D6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00DC&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E4&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00F6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00FC&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00DF&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00D8&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00F8&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C5&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E5&gt;' to native encoding\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]\nbiochem &lt;- biochem[, keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\", \"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename gender to sex\nb &lt;- inner_join(biochem, weight, by = \"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex = gender)"
   },
   {
-    "objectID": "problem-sets/ps-18.html#problem-set",
-    "href": "problem-sets/ps-18.html#problem-set",
-    "title": "DNA Block - Problem Set 18",
-    "section": "",
-    "text": "Total points: 20. First problem is worth 7 points, second problem is worth 13 points."
+    "objectID": "problem-sets/ps-14.html#problem-1",
+    "href": "problem-sets/ps-14.html#problem-1",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Problem # 1",
+    "text": "Problem # 1\nCan mouse sex explain mouse cholesterol? {.smaller}"
   },
   {
-    "objectID": "problem-sets/ps-18.html#load-libraries",
-    "href": "problem-sets/ps-18.html#load-libraries",
-    "title": "DNA Block - Problem Set 18",
-    "section": "Load libraries",
-    "text": "Load libraries\nStart by loading libraries you need analysis in the code chunk below.\n\nlibrary(tidyverse)\nlibrary(here)\nlibrary(cowplot)\nlibrary(valr)\n\nLoad the data from the MNase-seq experiment.\n\nmnase_tbl &lt;- read_bed(\n  here(\"data/block-dna/yeast_mnase_chrII.bed.gz\")\n)\n\nIn class we learned that MNase digestion yields nucleosomal “footprints” of ~150 bp in size. I’ve added blue vertical lines to emphasize positions of the major peak (intact nucleosomes) as well as smaller “sub-nucleosomal” peak.\n\nWe can calculate the counts for the histogram above and more precisely determine the maximum signal using which.max() to identify the index of the maximum value in a vector (not the value itself!):\n\nfrag_hist &lt;-\n  mnase_tbl |&gt;\n  mutate(frag_len = end - start) |&gt;\n  count(frag_len)\n\n# `which.max` takes a vector and gives us the index of the maximum value\nmax_idx &lt;- which.max(frag_hist$n)\n\n# now we can use index to find the abundant fragment size.\n# we'll use `ncp_max` later in question 2.\nncp_max &lt;- frag_hist$frag_len[max_idx]\n\nSo this tells us that that the most abundant fragment size in the library is ??? bp."
+    "objectID": "problem-sets/ps-14.html#step-1-null-hypothesis-and-variable-specification",
+    "href": "problem-sets/ps-14.html#step-1-null-hypothesis-and-variable-specification",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "STEP 1: Null hypothesis and variable specification",
+    "text": "STEP 1: Null hypothesis and variable specification\n\\(\\mathcal{H}_0:\\)\n\n?? is the response variable\n\n\n?? is the explanatory variable"
   },
   {
-    "objectID": "problem-sets/ps-18.html#question-1-7-points",
-    "href": "problem-sets/ps-18.html#question-1-7-points",
-    "title": "DNA Block - Problem Set 18",
-    "section": "Question 1 – 7 points",
-    "text": "Question 1 – 7 points\nLet’s take a closer look at the some of the smaller fragments in the MNase experiment. In particular, let’s zoom in on the populations of fragments that are smaller than 1 nucleosome in size, the peak between 85 and 95 bp (the left-most blue vertical line).\n\nUse the above strategy to precisely determine the peak of this smaller size range. How big are those fragments? These are called “sub-nucleosomal” fragments.\n\n\n# store the maximum value in `subnuc_max`. we'll use it later in question 2.\n\n\nThe maximum sub-nucleosomal fragments size is ??? bp.\n\n\nDo this one more time, and identify the position of maximum signal in the disome peak (i.e., the fragments protected by two nucleosomes).\n\n\nRecreate the histogram using ggplot2 (using relevant code from class 17) and add the blue vertical lines at the peak positions you calculated, including the position of the disomes above."
+    "objectID": "problem-sets/ps-14.html#step-2-fit-linear-model-and-examine-results",
+    "href": "problem-sets/ps-14.html#step-2-fit-linear-model-and-examine-results",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "STEP 2: Fit linear model and examine results",
+    "text": "STEP 2: Fit linear model and examine results\nFit summary:\nCoefficient summary:"
   },
   {
-    "objectID": "problem-sets/ps-18.html#question-2-13-points",
-    "href": "problem-sets/ps-18.html#question-2-13-points",
-    "title": "DNA Block - Problem Set 18",
-    "section": "Question 2 – 13 points",
-    "text": "Question 2 – 13 points\nNext we’re going to look at where these sub-sucleosomes are with respect to intact nucleosomes.\nOur strategy will be to compare the density of sub-nucleosomes relative to the mid-points of previously mapped nucleosomes. Specifically, our reference point will be the midpoints of the +1 nucleosomes.\nSo you’ll make a metaplot, but instead of using transcription start sites as the reference point, we’ll use the midpoints of the +1 nucleosome, and instead of MNase-seq signal density, you’ll count up the number of individual reads that intersect with windows around those midpoints.\n\n\nFirst, load the relevant data. We’ll re-use the yeast_mnase_chrII.bed.gz data you loaded above, plus you’ll need to load two other files:\n\na “genome” file, sacCer3.chrom.sizes\n\na BED file, yeast_p1_chrII.bed.gz which contains the mid-points of the +1 nucleosomes on chromosome 22. Recall that the +1 nucleosome is the nucleosome downstream of the transcription start site.\n\n\n\n\ngenome &lt;- read_???(here(\"data/block-dna/sacCer3.chrom.sizes\"))\np1_tbl &lt;- read_???(here(\"data/block-dna/yeast_p1_chrII.bed.gz\"))\n\n\n\nNext, we need the mid-points of nucleosomes for comparison. The following function needs fixing. The midpoint is the coordinate halfway between the start and end of a given interval.\nYou’re going to provide the mnase_tbl defined in question 1 to this function, which then:\n\ncalculates fragment lengths\nfilters them based on min_len and max_len\ncalculates the midpoints for each interval\n\nThe output is a new tibble with columns `chrom`, `start`, and `end`.\n\n\n\ncalc_mids &lt;- function(tbl, min_len, max_len) {\n  tbl |&gt;\n    mutate(\n      frag_len = ___ - ___\n    ) |&gt;\n    filter(\n      frag_len &gt;= ___ & frag_len &lt;= ___\n    ) |&gt;\n    mutate(\n      # calculate the half-size interval using `end` and `start,\n      # then add that value to `start`\n      midpoint = ___\n    ) |&gt;\n    select(chrom, midpoint) |&gt;\n    rename(start = midpoint) |&gt;\n    mutate(end = start + 1)\n}\n\n\nNext, use that function to calculate midpoints, and expand these midpoints by 20 bp in each direction with bed_slop().\n\n\nncp_mids_tbl &lt;-\n  # first calculate midpoints for nucleosome fragments within 3 bp length `ncp_max`\n  calc_mids(mnase_tbl, ___ - 3, ___ + 3) |&gt;\n  # expand those windows to get a larter window for intersection\n  bed_slop(genome, both = 20)\n\n# now, do the same for nucleosome fragments of length `subnuc_max`\nsubnuc_mids_tbl &lt;-\n  calc_mids(mnase_tbl, ___ - 3, ___ + 3) |&gt;\n  bed_slop(genome, both = 20)\n\n\nNext, we need to make the reference points for a metaplot. We’ll look 100 bp up- and downstream of the +1 nucleosome positions, and make windows that are 1 bp in size.\n\n\np1_win_tbl &lt;-\n  bed_???(\n    p1_tbl,\n    genome,\n    both = 100\n  ) |&gt;\n  bed_???(win_size = 1)\n\n\n\nAlmost there! Now you just need to identify the number of short and long nuclesome fragments (based on their midpoints) that intersect with the +1 nucleosomes you defined above.\nUse bed_intersect() to identify fragments that overlap, and then just count the number of fragments per .win_id (don’t forget the suffix). Note you will do this separately for the short and long fragments.\n\n\n\nncp_mids_summary_tbl &lt;-\n  bed_intersect(\n    p1_win_tbl,\n    ncp_mids_tbl\n  ) |&gt;\n  dplyr::count(___) |&gt;\n  mutate(type = \"Intact nucleosomes (~149 bp)\")\n\nsubnuc_mids_summary_tbl &lt;-\n  bed_intersect(\n    p1_win_tbl,\n    subnuc_mids_tbl\n  ) |&gt;\n  dplyr::count(___) |&gt;\n  mutate(type = \"Sub-nucleosomes (~90 bp)\")\n\n\nThe following joins the tables you made together, and makes the x-axis more informative, by converting to relative genomic position rather than window ID.\n\n\nwin_ids &lt;- seq(-100, 100, 1)\n\nall_tbl &lt;- bind_rows(\n  ncp_mids_summary_tbl,\n  subnuc_mids_summary_tbl\n) |&gt;\n  mutate(win_ids = win_ids, .by = \"type\")\n\n\nFinally, we plot the data with position on the x-axis, and count on the y-axis.\n\n\nggplot(\n  all_tbl,\n  aes(win_ids, n)\n) +\n  geom_???(color = \"red\") +\n  facet_wrap(\n    ~ type,\n    scales = \"free_y\"\n  ) +\n  theme_minimal_grid() +\n  labs(\n    x = \"Position relative to +1 nucleosome midpoints\",\n    y = \"Number of intersecting fragments\",\n    title = \"Fragment density around +1 nucleosome midpoints\"\n  )"
+    "objectID": "problem-sets/ps-14.html#collecting-residuals-and-other-information",
+    "href": "problem-sets/ps-14.html#collecting-residuals-and-other-information",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Collecting residuals and other information",
+    "text": "Collecting residuals and other information\nadd residuals and other information"
   },
   {
-    "objectID": "problem-sets/ps-18.html#output",
-    "href": "problem-sets/ps-18.html#output",
-    "title": "DNA Block - Problem Set 18",
-    "section": "Output",
-    "text": "Output\nYour plot should look like this.\n\n\nPlot output of step 7"
+    "objectID": "problem-sets/ps-14.html#step-4-visualize-the-error-around-fit",
+    "href": "problem-sets/ps-14.html#step-4-visualize-the-error-around-fit",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "STEP 4: Visualize the error around fit",
+    "text": "STEP 4: Visualize the error around fit\n\n# plot of data with mean and colored by residuals"
   },
   {
-    "objectID": "problem-sets/ps-18.html#interpretation",
-    "href": "problem-sets/ps-18.html#interpretation",
-    "title": "DNA Block - Problem Set 18",
-    "section": "Interpretation",
-    "text": "Interpretation\nHow do you interpret these plots?\nRationalize the pattern for intact nucleosomes. What pattern did you expect to see?\n\nAnswer.\n\nRationalize the pattern for sub-nucleosomes. How would you describe the positions of sub-nucleosomal fragments, relative to the +1 nucleosome midpoints? What might this mean with respect to gene transcription?\n\nAnswer.\n\nWhat do the differences between signal magnitudes (reflected by the y-axis) mean?\n\nAnswer."
+    "objectID": "problem-sets/ps-14.html#step-3-visualize-the-error-around-the-null-mean-weight",
+    "href": "problem-sets/ps-14.html#step-3-visualize-the-error-around-the-null-mean-weight",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "STEP 3: Visualize the error around the null (mean weight)",
+    "text": "STEP 3: Visualize the error around the null (mean weight)"
   },
   {
-    "objectID": "problem-sets/ps-18.html#submit",
-    "href": "problem-sets/ps-18.html#submit",
-    "title": "DNA Block - Problem Set 18",
-    "section": "Submit",
-    "text": "Submit\nBe sure to click the “Render” button to render the HTML output. Then paste the URL of this Posit Cloud project into the problem set on Canvas."
+    "objectID": "problem-sets/ps-14.html#plot-the-fit-error-and-the-null-error-as-2-panels",
+    "href": "problem-sets/ps-14.html#plot-the-fit-error-and-the-null-error-as-2-panels",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Plot the fit error and the null error as 2 panels",
+    "text": "Plot the fit error and the null error as 2 panels"
   },
   {
-    "objectID": "exercises/ex_18.html",
-    "href": "exercises/ex_18.html",
+    "objectID": "problem-sets/ps-14.html#calculate-r2",
+    "href": "problem-sets/ps-14.html#calculate-r2",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Calculate \\(R^2\\)\n",
+    "text": "Calculate \\(R^2\\)\n\n\\(R^2 = 1 - \\displaystyle \\frac {SS_{fit}}{SS_{null}}\\)\ncheck agains Rsq in your fit"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#compare-to-traditional-t-test",
+    "href": "problem-sets/ps-14.html#compare-to-traditional-t-test",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Compare to traditional t-test",
+    "text": "Compare to traditional t-test"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#provide-your-interpreation-of-the-result",
+    "href": "problem-sets/ps-14.html#provide-your-interpreation-of-the-result",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Provide your interpreation of the result",
+    "text": "Provide your interpreation of the result"
+  },
+  {
+    "objectID": "exercises/ex-18.html",
+    "href": "exercises/ex-18.html",
     "title": "Chromatin accessibility II",
     "section": "",
-    "text": "Last class we saw what the different methods to profile chromatin accessibility can tell us about general chromatin structure and possible regulation at specific regions in a small portion of a chromosome.\nWe also want to make sure these conclusions are valid throughout the genome, and today we’ll discuss two approaches for this: metaplots and heatmaps."
+    "text": "Last class we saw what the different methods to profile chromatin accessibility can tell us about general chromatin structure and possible regulation at specific regions in a small portion of a chromosome.\nWe also want to make sure these conclusions are valid throughout the genome. Since we want to keep the file sizes small, we will ask if they are valid across an entire chromosome.\n\nFirst we will plot the profiles of all our data sets relative to the transcription start site (TSS), where all the action seems to be happening:\n\nlibrary(tidyverse)\nlibrary(here)\nlibrary(cowplot)\n\n# `glue` is a handy library for plot annotations\nlibrary(glue)\n\nlibrary(valr)\nlibrary(ComplexHeatmap)\n\n\nFirst, we need to load relevant files:\n\n\nyeast_tss_chrII.bed.gz contains transcription start sites (TSS) for genes on yeast chromosome 2.\n\nsacCer3.chrom.sizes contains the sizes of all yeast chromosomes, needed for some of the calculations we’ll do. We’ll grab this from the UCSC download site.\n\n\nyeast_tss &lt;- read_???(\n  here(\"data/block-dna/yeast_tss_chrII.bed.gz\")\n)\n\ngenome &lt;- read_???(\"https://hgdownload.soe.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.chrom.sizes\")\n\n\nNext we’ll load bigWigs for the ATAC and MNase experiments, containing either short or long fragments.\nRecall that the information encoded in short and long fragments should be reflected in our interpretations.\n\nacc_tbl &lt;-\n  tibble(\n    file_name = c(\n      \"yeast_mnase_lt50.bw\",\n      \"yeast_mnase_134_160.bw\",\n      \"yeast_atac_lt120.bw\",\n      \"yeast_atac_gt120.bw\"\n    ),\n    sample_type = c(\n      \"MNase_Short\", \"MNase_Long\",\n      \"ATAC_Short\", \"ATAC_Long\"\n    )\n  ) |&gt;\n  mutate(\n    file_path = here(\"data/block-dna\", file_name),\n    big_wig = purrr::___(\n      file_path, ~ read_bigwig(.x)\n    )\n  ) |&gt;\n  select(sample_type, big_wig)"
   },
   {
-    "objectID": "exercises/ex_18.html#genomewide-chromatin-analysis-with-metaplots-and-heatmaps",
-    "href": "exercises/ex_18.html#genomewide-chromatin-analysis-with-metaplots-and-heatmaps",
+    "objectID": "exercises/ex-18.html#genomewide-chromatin-analysis-with-metaplots-and-heatmaps",
+    "href": "exercises/ex-18.html#genomewide-chromatin-analysis-with-metaplots-and-heatmaps",
     "title": "Chromatin accessibility II",
     "section": "",
-    "text": "Last class we saw what the different methods to profile chromatin accessibility can tell us about general chromatin structure and possible regulation at specific regions in a small portion of a chromosome.\nWe also want to make sure these conclusions are valid throughout the genome, and today we’ll discuss two approaches for this: metaplots and heatmaps."
+    "text": "Last class we saw what the different methods to profile chromatin accessibility can tell us about general chromatin structure and possible regulation at specific regions in a small portion of a chromosome.\nWe also want to make sure these conclusions are valid throughout the genome. Since we want to keep the file sizes small, we will ask if they are valid across an entire chromosome.\n\nFirst we will plot the profiles of all our data sets relative to the transcription start site (TSS), where all the action seems to be happening:\n\nlibrary(tidyverse)\nlibrary(here)\nlibrary(cowplot)\n\n# `glue` is a handy library for plot annotations\nlibrary(glue)\n\nlibrary(valr)\nlibrary(ComplexHeatmap)\n\n\nFirst, we need to load relevant files:\n\n\nyeast_tss_chrII.bed.gz contains transcription start sites (TSS) for genes on yeast chromosome 2.\n\nsacCer3.chrom.sizes contains the sizes of all yeast chromosomes, needed for some of the calculations we’ll do. We’ll grab this from the UCSC download site.\n\n\nyeast_tss &lt;- read_???(\n  here(\"data/block-dna/yeast_tss_chrII.bed.gz\")\n)\n\ngenome &lt;- read_???(\"https://hgdownload.soe.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.chrom.sizes\")\n\n\nNext we’ll load bigWigs for the ATAC and MNase experiments, containing either short or long fragments.\nRecall that the information encoded in short and long fragments should be reflected in our interpretations.\n\nacc_tbl &lt;-\n  tibble(\n    file_name = c(\n      \"yeast_mnase_lt50.bw\",\n      \"yeast_mnase_134_160.bw\",\n      \"yeast_atac_lt120.bw\",\n      \"yeast_atac_gt120.bw\"\n    ),\n    sample_type = c(\n      \"MNase_Short\", \"MNase_Long\",\n      \"ATAC_Short\", \"ATAC_Long\"\n    )\n  ) |&gt;\n  mutate(\n    file_path = here(\"data/block-dna\", file_name),\n    big_wig = purrr::___(\n      file_path, ~ read_bigwig(.x)\n    )\n  ) |&gt;\n  select(sample_type, big_wig)"
   },
   {
-    "objectID": "exercises/ex_18.html#setting-up-regions-for-a-meta-plot",
-    "href": "exercises/ex_18.html#setting-up-regions-for-a-meta-plot",
+    "objectID": "exercises/ex-18.html#setting-up-regions-for-a-meta-plot",
+    "href": "exercises/ex-18.html#setting-up-regions-for-a-meta-plot",
     "title": "Chromatin accessibility II",
     "section": "Setting up regions for a meta-plot",
-    "text": "Setting up regions for a meta-plot\nWe need to set up some windows for analyzing signal relative to each TSS. This is an important step that will ultimately impact our interpretations.\nIn genomic meta-plots, you first decide on a window size relevant to the some points of refernce in the genome you are measuring.\nThese reference points could be:\n\ntranscription start or end sites\nboundaries of exons and introns\nenhancers\ncentromeres and telomeres\n\nThe window size should be relevant the reference points, such that small- or large-scale features are emphasized in the plot. Moreover, the window typically spans some distance both up- and downstream of the reference points.\nOnce the window size has been decided, the next step is to make “sub-windows” around a reference point. If gene features are involved, we also need to take strand into account.\n(The state of genome annotation directly influences the quality of the meta-plot or heatmap.)\nFor small features like transcription factor binding sites (8-20 bp), you might set up smaller windows (maybe 1 bp) at a distance ~20 bp up- and downstream of a reference point.\nFor larger features like nucleosome positions or chromatin domains, you might set up larger windows (~200 bp) at distances up to ~10 kbp up- and downstream of a set of reference points."
+    "text": "Setting up regions for a meta-plot\nNext, we need to set up some windows for analyzing signal relative to each TSS. This is an important step that will ultimately impact our interpretations.\nIn genomic meta-plots, you first decide on a window size relevant to the features you are measuring, and then make “windows” around a reference point, spanning some distance both up- and downstream. If the features involve gene features, we also need to take strand into account.\nReference points could be:\n\ntranscription start or end sites\nboundaries of exons and introns\nenhancers\ncentromeres and telomeres\n\nThe window size should be relevant the reference points, such that small- or large-scale features are emphasized in the plot. Moreover, the window typically spans some distance both up- and downstream of the reference points.\nOnce the window size has been decided, the next step is to make “sub-windows” around a reference point. If gene features are involved, we also need to take strand into account.\n(The state of genome annotation directly influences the quality of the meta-plot or heatmap.)\nFor small features like transcription factor binding sites (8-20 bp), you might set up smaller windows (maybe 1 bp) at a distance ~20 bp up- and downstream of a reference point.\nFor larger features like nucleosome positions or chromatin domains, you might set up larger windows (~200 bp) at distances up to ~10 kbp up- and downstream of a set of reference points."
   },
   {
-    "objectID": "exercises/ex_18.html#metaplot-workflow",
-    "href": "exercises/ex_18.html#metaplot-workflow",
+    "objectID": "exercises/ex-18.html#metaplot-workflow",
+    "href": "exercises/ex-18.html#metaplot-workflow",
     "title": "Chromatin accessibility II",
     "section": "Metaplot workflow",
     "text": "Metaplot workflow\n\n\nMetaplot workflow overview"
   },
   {
-    "objectID": "exercises/ex_18.html#chromatin-accessibility-around-transcription-start-sites-tsss",
-    "href": "exercises/ex_18.html#chromatin-accessibility-around-transcription-start-sites-tsss",
+    "objectID": "exercises/ex-18.html#chromatin-accessibility-around-transcription-start-sites-tsss",
+    "href": "exercises/ex-18.html#chromatin-accessibility-around-transcription-start-sites-tsss",
     "title": "Chromatin accessibility II",
     "section": "Chromatin accessibility around transcription start sites (TSSs)",
     "text": "Chromatin accessibility around transcription start sites (TSSs)\n\nregion_size_total &lt;- 1500\nregion_size_half &lt;- region_size_total / 2\nwin_size &lt;- 10\n\n# need a function that generates a sequence of numbers\nwin_coords &lt;- ___(\n  -region_size_half,\n  region_size_half,\n  win_size\n)\n\nNext, we’ll use two valr functions to expand the window of the reference point (bed_slop()) and then break those windows into evenly spaced intervals (bed_makewindows()).\n\nyeast_tss |&gt;\n  bed_???(genome, both = region_size_half) |&gt;\n  bed_???(win_size = win_size)\n\nAt this point, we also address the fact that the TSS data are stranded. Can someone describe what the issue is here, based on the figure above?\n\ntss_win_tbl &lt;-\n  yeast_tss |&gt;\n  bed_slop(genome, both = region_size_half) |&gt;\n  bed_makewindows(win_size = win_size) |&gt;\n  mutate(\n    win_coord = case_when(\n      strand == \"-\" ~ rev(win_coords),\n      .default = win_coords\n    ),\n    .by = name\n  ) |&gt;\n  select(-.win_id, -score, -strand)\n\nThis next step uses valr bed_map(), to calculate the total signal for each window by intersecting signals from the bigWig files.\n\nacc_tbl &lt;-\n  acc_tbl |&gt;\n  mutate(\n    tss_win_sum = purrr::map(\n      big_wig,\n      ~ bed_map(\n        tss_win_tbl,\n        .x,\n        win_signal = sum(score)\n      )\n    )\n  )\n\nOnce we have the values from bed_map(), we can group by win_coord and calculate a summary statistic for each window.\nRemember that win_coord is the same relative position for each TSS, so these numbers represent a composite signal a the same position across all TSS.\n\ntss_meta_tbl &lt;-\n  select(acc_tbl, sample_type, tss_win_sum) |&gt;\n  unnest(cols = c(tss_win_sum)) |&gt;\n  summarize(\n    win_mean = mean(win_signal, na.rm = TRUE),\n    win_sd = sd(win_signal, na.rm = TRUE),\n    .by = c(win_coord, sample_type)\n  ) |&gt;\n  replace_na(list(win_mean = 0, win_sd = 0))"
   },
   {
-    "objectID": "exercises/ex_18.html#meta-plot-of-signals-around-tsss",
-    "href": "exercises/ex_18.html#meta-plot-of-signals-around-tsss",
+    "objectID": "exercises/ex-18.html#meta-plot-of-signals-around-tsss",
+    "href": "exercises/ex-18.html#meta-plot-of-signals-around-tsss",
     "title": "Chromatin accessibility II",
     "section": "Meta-plot of signals around TSSs",
     "text": "Meta-plot of signals around TSSs\nFinally, let’s plot the data relative to TSS for each of the windows.\n\nn_tss &lt;- length(unique(yeast_tss$name))\n\nggplot(\n  tss_meta_tbl,\n  aes(\n    x = win_coord,\n    y = win_mean\n  )\n) +\n  geom_line(linewidth = 1, color = \"red\") +\n  facet_wrap(\n    ~sample_type,\n    nrow = 2,\n    scales = \"free_y\"\n  ) +\n  theme_minimal_grid() +\n  theme(\n    axis.text.x = element_text(\n      angle = 45,\n      vjust = 1,\n      hjust = 1\n    )\n  ) +\n  labs(\n    x = \"Position relative to TSS (bp)\",\n    y = \"Signal (mean of window sums)\",\n    title = \"Chromatin accessibility around transcription start sites\",\n    subtitle = glue(\"{n_tss} features on S. cerevisiae chrII\")\n  )"
   },
   {
-    "objectID": "exercises/ex_18.html#interpreting-the-meta-plots",
-    "href": "exercises/ex_18.html#interpreting-the-meta-plots",
+    "objectID": "exercises/ex-18.html#interpreting-the-meta-plots",
+    "href": "exercises/ex-18.html#interpreting-the-meta-plots",
     "title": "Chromatin accessibility II",
     "section": "Interpreting the meta-plots",
     "text": "Interpreting the meta-plots\n\nWhat is the direction of transcription in these meta-plots?\nWhat are the features of chromatin near TSS measured by these different experimental conditions?\nHow do you interpret the increased signal of the +1 nucleosome in the “MNase_Long” condition, relative to e.g. -1, +2, +3, etc.?\nWhat are the differences in ATAC and MNase treatments that lead to these distinctive patterns?"
   },
   {
-    "objectID": "exercises/ex_18.html#heatmap-of-signals-around-tsss",
-    "href": "exercises/ex_18.html#heatmap-of-signals-around-tsss",
+    "objectID": "exercises/ex-18.html#heatmap-of-signals-around-tsss",
+    "href": "exercises/ex-18.html#heatmap-of-signals-around-tsss",
     "title": "Chromatin accessibility II",
     "section": "Heatmap of signals around TSSs",
     "text": "Heatmap of signals around TSSs\nTo generate a heatmap, we need to reformat our data slightly.\nTake a look at acc_tbl and think about how you might reorganize the following way:\n\nrows contain the data for individual loci (i.e., each TSS)\ncolumns are ordered positions relative to the TSS (i.e., most upstream to most downstream)\n\nWe’re going to plot a heatmap of the “MNase_Long” data. There are two ways to get these data.\n\nmnase_tbl &lt;- acc_tbl[acc_tbl$sample_type == \"MNase_Short\", ]$tss_win_sum[[1]]\n\nOr, using dplyr / tidyr:\n\nmnase_tbl &lt;-\n  filter(\n    acc_tbl,\n    sample_type == \"MNase_Long\"\n  ) |&gt;\n    select(-big_wig) |&gt;\n    unnest(cols = c(tss_win_sum))\n\nEither way, now we need to reformat the data.\n\nmnase_tbl_wide &lt;-\n  mnase_tbl |&gt;\n  select(\n    name,\n    win_coord,\n    win_signal\n  ) |&gt;\n  # this step is important to sort + and - windows correctly\n  arrange(name, win_coord) |&gt;\n  replace_na(\n    list(win_signal = 0)\n  ) |&gt;\n  pivot_???(\n    id_cols = name,\n    names_from = \"win_coord\",\n    values_from = \"win_signal\"\n  )\n\nOnce we have the data reformatted, we just convert to a matrix and feed it to ComplexHeatmap::Heatmap().\n\n# drop the name & convert to matrix\nmnase_mtx &lt;-\n  select(mnase_tbl_wide, -name) |&gt;\n  as.___()\n\nComplexHeatmap::___(\n  mnase_mtx,\n  cluster_columns = FALSE,\n  show_row_dend = FALSE,\n  show_column_names = FALSE,\n  show_heatmap_legend = FALSE\n)"
   },
   {
-    "objectID": "exercises/ex_18.html#interpreting-meta-plots-and-heatmaps",
-    "href": "exercises/ex_18.html#interpreting-meta-plots-and-heatmaps",
+    "objectID": "exercises/ex-18.html#interpreting-meta-plots-and-heatmaps",
+    "href": "exercises/ex-18.html#interpreting-meta-plots-and-heatmaps",
     "title": "Chromatin accessibility II",
     "section": "Interpreting meta-plots and heatmaps",
     "text": "Interpreting meta-plots and heatmaps\nIt’s worth considering what meta-plots and heatmaps can and can’t tell you.\n\nWhat are the similarities and differences between heatmaps and meta-plots?\nWhat types of conclusions can you draw from each type of plot?\nWhat are some features of MNase-seq and ATAC-seq that become more clear when looking across many loci at the same time?\nWhat are some hypotheses you can generate based on these plots?"
   },
   {
-    "objectID": "exercises/ex_18.html#assessing-the-signfiicance-of-observed-patterns.",
-    "href": "exercises/ex_18.html#assessing-the-signfiicance-of-observed-patterns.",
+    "objectID": "exercises/ex-18.html#assessing-the-signfiicance-of-observed-patterns.",
+    "href": "exercises/ex-18.html#assessing-the-signfiicance-of-observed-patterns.",
     "title": "Chromatin accessibility II",
     "section": "Assessing the signfiicance of observed patterns.",
     "text": "Assessing the signfiicance of observed patterns.\nOne approach for assessing the signifcance of a pattern (e.g., the density of nucleosomes around transcription start sites), is to randomize the reference points, and use those to remeasure density. This can be done by generating a random set of TSS like:\nn_tss &lt;- length(unique(yeast_tss$name))\nbed_random(genome, length = 1, n = n_tss)\nGiven enough random sites, you will be able to vizulaized what a null distribution of overlaps looks like. If you reframe your question around a response variable (i.e., “how many intact nucleosomes are within 500 bp of a TSS?”) then you can calcuate an empirical p-value using the approaches covered in the bootcamp."
   },
   {
-    "objectID": "exercises/ex_18.html#utility-of-metaplots-and-heatmaps-in-practice",
-    "href": "exercises/ex_18.html#utility-of-metaplots-and-heatmaps-in-practice",
+    "objectID": "exercises/ex-18.html#utility-of-metaplots-and-heatmaps-in-practice",
+    "href": "exercises/ex-18.html#utility-of-metaplots-and-heatmaps-in-practice",
     "title": "Chromatin accessibility II",
     "section": "Utility of metaplots and heatmaps in practice",
     "text": "Utility of metaplots and heatmaps in practice\nThere are a few specific cases when you should consider using the metaplot / heatmap strategy.\nIf you have data from two different conditions (i.e., plus/minus a transcription factor that might change the state of multiple promoters), you could make a metaplot for each of the plus and minus conditions, to see of common patterns manifest. You might also create a heatmap of the conditions, which might reveal smaller groups of affected genes that would be masked by the metaplot aggregation.\nThe approaches are also useful to compare patterns across types of reference points. For example, you might examine chromatin marks (measured by CUT&TAG) relative to the following: transcription starts, exon starts, exon ends, transcription ends."
@@ -1295,127 +1393,148 @@
     "text": "bed_map() example continued\nFirst examine the intersecting intervals."
   },
   {
-    "objectID": "exercises/ex-03.html",
-    "href": "exercises/ex-03.html",
-    "title": "R Bootcamp - Day 3 - Exercises",
+    "objectID": "exercises/ex-08.html",
+    "href": "exercises/ex-08.html",
+    "title": "Exercises 8",
     "section": "",
-    "text": "Explore these data sets:\n\ndplyr::starwars\n\ndplyr::band_members, dplyr::band_instruments, dplyr::band_instruments2"
+    "text": "Putting it all together\nFor the next two classes we’ll combine everything we’ve learned to process and visualize data from some some biological experiments. These exercises will illustrate a complete analysis pipeline – from data tidying to manipulation and visualization – using tools from the tidyverse.\n\nLibraries\nLoad the libraries you need for analysis below.\n\nlibrary(tidyverse)\nlibrary(here)\nlibrary(cowplot)\n\nA quantitative PCR experiment\nHere is the experimental setup:\n\nTwo cell lines (wt and mut) were treated with a drug that induces interferon expression\nAfter specific time points, cells were harvested and actin and interferon mRNA were analyzed by quantitative PCR (with 3 technical replicates), with a control containing no reverse transcriptase.\n\nLoad the data\nThese data are in two TSV files:\n\ndata/qpcr_names.tsv.gz\ndata/qpcr_data.tsv.gz\n\nLoad these data sets and inspect.\n\nqpcr_names &lt;- read_tsv(here(\"data/bootcamp/qpcr_names.tsv.gz\"))\n\nRows: 8 Columns: 13\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \"\\t\"\nchr (13): row, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\nqpcr_data &lt;- read_tsv(here(\"data/bootcamp/qpcr_data.tsv.gz\"))\n\nRows: 8 Columns: 13\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \"\\t\"\nchr  (1): row\ndbl (12): 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\n\nNote the shape of the data and the names of the rows and columns. Do they remind you of anything?\n\nTidy the data\nGiven the experimental setup and the shape of the tibbles, you should be able to answer: Are these data tidy?\n\nWhat are the variables in the data?\nAre the variables the column names?\n\n\nqpcr_data_long &lt;-\n  pivot_longer(qpcr_data, -row, names_to = \"col\")\n\nqpcr_names_long &lt;- \n  pivot_longer(qpcr_names, -row, names_to = \"col\") |&gt;\n  separate(\n    value,\n    into = c(\"gt\", \"time\", \"gene\", \"rt\", \"rep\"),\n    sep = \"_\"\n  )\n\nMerge the data\nNote the structure of the tidied data. What columns (variables) are shared by both tibbles?\nHow we can join the data from these two tibbles, linking the sample identifiers with their gene expression values?\n\nqpcr_tidy &lt;-\n  left_join(qpcr_names_long, qpcr_data_long) |&gt;\n  # we don't need row & col anymore.\n  # the -RT samples are all 0, so we can drop those, too\n  filter(rt == \"+\") |&gt;\n  select(-(row:col), -rt)\n\nJoining with `by = join_by(row, col)`\n\n\nSummarize the data\nCalculate the mean and standard deviation across replicates.\nDo this two ways:\n\nCalculate the statistics for each gene separately.\nCalculate a ratio of interferon to actin levels for each sample before calculating the mean and standard deviation of the ratios.\n\n\nqpcr_summary &lt;-\n  group_by(\n    qpcr_tidy,\n    gt, time, gene) |&gt;\n  summarize(\n    exp_mean = mean(value),\n    exp_sd = sd(value)\n  ) |&gt;\n  arrange(gt, time, gene)\n\n`summarise()` has grouped output by 'gt', 'time'. You can override using the\n`.groups` argument.\n\n\nPlot the data\nNow we can plot the summary statistics. We’ll use ggplot2::geom_pointrange() to represent the mean and standard deviation.\nYou’ll need to fill in the blanks (___) below.\n\nggplot(\n  qpcr_summary,\n  aes(\n    x = ___,\n    y = ___,\n    color = ___\n  ),\n) +\n  geom_pointrange(\n    aes(\n      ymin = ___,\n      ymax = ___ \n    ),\n    # position = ___\n  )\n\nInspect the above plot. How might you improve it?\nCopy the above chunk and add functions that modify the plot’s look and feel.\n\nFacet the plot to see differences between the genotypes.\nUpdate the theme using cowplot.\nUpdate the x, y, and title labels (ggplot2::labs()).\nUpdate the colors with a nicer palette (ggplot2::scale_*).\nFix the position of the geoms by updating their position aesthetic.\nInterpret the plot\n\nWhat can you say about the expression of ACTIN and IFN?\nWhat can you say about the mutant and wild-type cells?"
   },
   {
-    "objectID": "exercises/ex-03.html#todays-datasets---exercise-1",
-    "href": "exercises/ex-03.html#todays-datasets---exercise-1",
-    "title": "R Bootcamp - Day 3 - Exercises",
+    "objectID": "problem-sets/ps-16.html",
+    "href": "problem-sets/ps-16.html",
+    "title": "DNA Block - Problem Set 16",
     "section": "",
-    "text": "Explore these data sets:\n\ndplyr::starwars\n\ndplyr::band_members, dplyr::band_instruments, dplyr::band_instruments2"
+    "text": "You have two tasks for this problem set.\n\nRead the two papers in the preparation document before class on Wed.\nLook over the vignettes for the software in the preparation document. Use valr to complete the tasks below. These problems are due Wed at 5pm.\n\nEach problem below is worth 5 points."
   },
   {
-    "objectID": "exercises/ex-03.html#arrange---exercise-2",
-    "href": "exercises/ex-03.html#arrange---exercise-2",
-    "title": "R Bootcamp - Day 3 - Exercises",
-    "section": "arrange - Exercise 2",
-    "text": "arrange - Exercise 2"
-  },
-  {
-    "objectID": "exercises/ex-03.html#filter---exercise-3",
-    "href": "exercises/ex-03.html#filter---exercise-3",
-    "title": "R Bootcamp - Day 3 - Exercises",
-    "section": "filter - Exercise 3",
-    "text": "filter - Exercise 3\nfilter by membership\n\n# filter based on skin color\n\nConditions can be combined using & (and), | (or).\n\n# filter on skin and eye color\n\nselect - Exercise 4\nmutate (& pipe |&gt;)- Exercise 5\n\n# create a new column to display height in meters\n\n# using the pipe to feed data into multiple functions sequentially\n\n# mutate allows you to refer to columns that you’ve just created\n\n# output needs to be saved into a new dataframe since dplyr does not \"change\" the original dataframe\n\n# using if_else clauses with mutate\n\nrowwise operations (if time permits)\n\n# let's input data (same one used in yesterday's problem set)\n# data &lt;- read_csv(file = \"data/data_transcript_exp_subset.csv\")\n\n# calculate mean for each time point using mutate in a rowwise fashion!\n\nsummarise - Exercise 6\ngroup_by + summarize - Exercise 7"
-  },
-  {
-    "objectID": "problem-sets/ps-13.html",
-    "href": "problem-sets/ps-13.html",
-    "title": "Problem Set Stats Bootcamp - class 12",
+    "objectID": "problem-sets/ps-16.html#problem-set",
+    "href": "problem-sets/ps-16.html#problem-set",
+    "title": "DNA Block - Problem Set 16",
     "section": "",
-    "text": "-- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\nv dplyr     1.1.3     v readr     2.1.4\nv forcats   1.0.0     v stringr   1.5.0\nv ggplot2   3.4.3     v tibble    3.2.1\nv lubridate 1.9.2     v tidyr     1.3.0\nv purrr     1.0.2     \n-- Conflicts ------------------------------------------ tidyverse_conflicts() --\nx dplyr::filter() masks stats::filter()\nx dplyr::lag()    masks stats::lag()\ni Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nAttaching package: 'rstatix'\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\n\nAttaching package: 'janitor'\n\n\nThe following object is masked from 'package:rstatix':\n\n    make_clean_names\n\n\nThe following objects are masked from 'package:stats':\n\n    chisq.test, fisher.test\n\n\nhere() starts at /Users/jayhesselberth/devel/rnabioco/molb-7950\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C4&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00D6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00DC&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E4&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00F6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00FC&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00DF&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00D8&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00F8&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C5&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E5&gt;' to native encoding\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]\nbiochem &lt;- biochem[, keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\", \"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename gender to sex\nb &lt;- inner_join(biochem, weight, by = \"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex = gender)"
+    "text": "You have two tasks for this problem set.\n\nRead the two papers in the preparation document before class on Wed.\nLook over the vignettes for the software in the preparation document. Use valr to complete the tasks below. These problems are due Wed at 5pm.\n\nEach problem below is worth 5 points."
   },
   {
-    "objectID": "problem-sets/ps-13.html#problem-1",
-    "href": "problem-sets/ps-13.html#problem-1",
-    "title": "Problem Set Stats Bootcamp - class 12",
+    "objectID": "problem-sets/ps-16.html#setup",
+    "href": "problem-sets/ps-16.html#setup",
+    "title": "DNA Block - Problem Set 16",
+    "section": "Setup",
+    "text": "Setup\nLoad libraries you’ll need for analysis below.\n\nlibrary(tidyverse)\n\n-- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\nv dplyr     1.1.3     v readr     2.1.4\nv forcats   1.0.0     v stringr   1.5.0\nv ggplot2   3.4.3     v tibble    3.2.1\nv lubridate 1.9.2     v tidyr     1.3.0\nv purrr     1.0.2     \n-- Conflicts ------------------------------------------ tidyverse_conflicts() --\nx dplyr::filter() masks stats::filter()\nx dplyr::lag()    masks stats::lag()\ni Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nlibrary(valr)"
+  },
+  {
+    "objectID": "problem-sets/ps-16.html#question-1-5-points",
+    "href": "problem-sets/ps-16.html#question-1-5-points",
+    "title": "DNA Block - Problem Set 16",
+    "section": "Question 1 – 5 points",
+    "text": "Question 1 – 5 points\nWe’ll work with a few different files for the next questions.\n\n\nhg19.refGene.chr22.bed.gz is a BED12 file containing gene (mRNA) information for chr22.\n\nhg19.rmsk.chr22.bed.gz is a BED6 containing repetitive elements in the human genome.\n\nhg19.dnase1.bw is a bigWig file containing DNase-seq signal.\n\nYou can find the path to each with valr_example(). Load each one individually using the valr read_* functions.\nSome valr functions require a “genome” file, which is just a tibble of chromosome names and sizes.\nThe hg19 genome file is available at valr_example(\"hg19.chrom.sizes.gz\"). Use read_genome() to load it.\nInspect the tibble. How many columns does it have? What is the largest chromosome?"
+  },
+  {
+    "objectID": "problem-sets/ps-16.html#question-2-5-points",
+    "href": "problem-sets/ps-16.html#question-2-5-points",
+    "title": "DNA Block - Problem Set 16",
+    "section": "Question 2 – 5 points",
+    "text": "Question 2 – 5 points\nWhich repeat class covers the largest amount of chromosome 22? Use dplyr tools to analyze the repeats in hg19.rmsk.chr22.bed.gz."
+  },
+  {
+    "objectID": "problem-sets/ps-16.html#question-3-5-points",
+    "href": "problem-sets/ps-16.html#question-3-5-points",
+    "title": "DNA Block - Problem Set 16",
+    "section": "Question 3 – 5 points",
+    "text": "Question 3 – 5 points\nWhich promoter has the highest DNase I accessibility?\n\nUse the valr create_tss() function to generate transcription start sites from the BED12 refGene annotations. How big are these intervals?\nGenerate promoter regions from the TSS with bed_slop(), adding 500 bp up- and downstream (i.e., both sides). bed_slop() requires the genome file above. How big are the regions now?\nUse bed_map() to calculate the total (i.e., summed) DNase I signal in the promoters (using the score column in the DNase file).\n\nWhich gene has the highest DNase I in the regions you defined above?"
+  },
+  {
+    "objectID": "problem-sets/ps-16.html#submit",
+    "href": "problem-sets/ps-16.html#submit",
+    "title": "DNA Block - Problem Set 16",
+    "section": "Submit",
+    "text": "Submit\nBe sure to click the “Render” button to render the HTML output.\nThen paste the URL of this Posit Cloud project into the problem set on Canvas."
+  },
+  {
+    "objectID": "problem-sets/ps-11.html",
+    "href": "problem-sets/ps-11.html",
+    "title": "Problem Set Stats Bootcamp - class 11",
+    "section": "",
+    "text": "-- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\nv dplyr     1.1.3     v readr     2.1.4\nv forcats   1.0.0     v stringr   1.5.0\nv ggplot2   3.4.3     v tibble    3.2.1\nv lubridate 1.9.2     v tidyr     1.3.0\nv purrr     1.0.2     \n-- Conflicts ------------------------------------------ tidyverse_conflicts() --\nx dplyr::filter() masks stats::filter()\nx dplyr::lag()    masks stats::lag()\ni Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nAttaching package: 'rstatix'\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\n\nAttaching package: 'cowplot'\n\n\nThe following object is masked from 'package:lubridate':\n\n    stamp"
+  },
+  {
+    "objectID": "problem-sets/ps-11.html#problem-1",
+    "href": "problem-sets/ps-11.html#problem-1",
+    "title": "Problem Set Stats Bootcamp - class 11",
     "section": "Problem # 1",
-    "text": "Problem # 1\nIs there an association between mouse calcium and sodium levels?\n1. Make a scatterplot to inspect variable\n2. Are they normal (enough)?\nWhich test will you use and why?\n\n\n\n3. Declare null hypothesis \\(\\mathcal{H}_0\\)\n\n\\(\\mathcal{H}_0\\) is that there is no dependency/association between \\(calcium\\) and \\(sodium\\)\n4. Calculate and plot the correlation on a scatterplot"
+    "text": "Problem # 1\nAssume that the height jackalopes fit a normal distribution. Through careful field research measuring 1000 wild jackalopes, we have determined the mean height is 97 cm and the standard deviation is 10 cm. Your was camping and found a jackalope. Being a great friend and knowing your interest in jackalopes, they (harmlessly) subdued and measured the wild jackalope and found that it was 75 cm.\n\nSimulate a normal distribution of 1000 jackalope heights using the mean and sd you painstakingly measured.\n\n\nPlot the density of the jackalope height distribution. Indicate with a vertical line the height of the jackalope your friend measured.\n\n\nCalculate the probability of a jackalope being 75 cm or shorter.\n\n\nAre jackalope heights normally distributed?"
   },
   {
-    "objectID": "problem-sets/ps-13.html#problem-2",
-    "href": "problem-sets/ps-13.html#problem-2",
-    "title": "Problem Set Stats Bootcamp - class 12",
+    "objectID": "problem-sets/ps-11.html#explore-coin-flip-distribution-characteristics",
+    "href": "problem-sets/ps-11.html#explore-coin-flip-distribution-characteristics",
+    "title": "Problem Set Stats Bootcamp - class 11",
+    "section": "Explore coin flip distribution characteristics",
+    "text": "Explore coin flip distribution characteristics\nWhen we flip a fair coin multiple times (numFlips) in a row, we expect to get heads (or tails) 50% of the time on average. This is not always the case for a single round of flipping, but if we do multiple rounds with (numRounds) that average should be 50%."
+  },
+  {
+    "objectID": "problem-sets/ps-11.html#problem-2",
+    "href": "problem-sets/ps-11.html#problem-2",
+    "title": "Problem Set Stats Bootcamp - class 11",
     "section": "Problem # 2",
-    "text": "Problem # 2"
+    "text": "Problem # 2\nIn class, we simulated coin flip experiments using two different coins that were either fair (0.5 prob of head) or unfair (0.9 prob of head). We varied the number of flips in a single round (numFlips) and the number of rounds of flipping (numRounds). For this assignment, use the same to coins and use all possible combinations of numFlips and numRounds from the table below.\n\nparameters to explore\n\nnumFlips\nnumRounds\n\n\n\n5\n10\n\n\n500\n100\n\n\n\n\nCreate a tibble has all the combinations of numFlips, numRounds, and prob of getting heads.\n\n\n# hint for 8 flips and 12 rounds of a fair coin you could do\n# rbinom(n = 8, size = 12, prob = .5)/12\n\n\nPlot your result using faceting. I recommend faceting by numFlips (like in class describing both the number and fair v unfair) . Include the observed mean as a black diamond and the true mean as a dashed line.\n\n3. Report the means and sd of each pair of numFlips and numRounds\n4. Describe in a few sentences how increasing numFlips and numRounds alters:\nThe estimation of and spread around the true mean."
   },
   {
-    "objectID": "problem-sets/ps-13.html#do-mouse-calcium-levels-explain-mouse-sodium-levels-if-so-to-what-extent",
-    "href": "problem-sets/ps-13.html#do-mouse-calcium-levels-explain-mouse-sodium-levels-if-so-to-what-extent",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "Do mouse calcium levels explain mouse sodium levels? If so, to what extent?",
-    "text": "Do mouse calcium levels explain mouse sodium levels? If so, to what extent?\nUse a linear model to do the following:\n1. Specify the Response and Explanatory variables — (2 pts)\n\nThe response variable y is The explantory variable x is\n\n2. Declare the null hypothesis — (1 pts)\n\nThe null hypothesis is …\n\n3. Use the lm function to create a fit (linear model)\nalso save the slope and intercept for later\n4. Add residuals to the data and create a plot visualizing the residuals\n5. Calculate the \\(R^2\\) and compare to \\(R^2\\) from fit\n\\(R^2 = 1 - \\displaystyle \\frac {SS_{fit}}{SS_{null}}\\)\n\\(SS_{fit} = \\sum_{i=1}^{n} (data - line)^2 = \\sum_{i=1}^{n} (y_{i} - (\\beta_0 \\cdot 1+ \\beta_1 \\cdot x)^2\\)\n\\(SS_{null}\\) &lt;80&gt;&lt;94&gt; sum of squared errors around the mean of \\(y\\)\n\\(SS_{null} = \\sum_{i=1}^{n} (data - mean)^2 = \\sum_{i=1}^{n} (y_{i} - \\overline{y})^2\\)\n6. Using \\(R^2\\), describe the extent to which calcium explains sodium levels\n\n\n\n7. Report (do not calculate) the \\(p-value\\) and your decision on the null\n\nThe null hypothesis is …\n\nCalcium levels to predict sodium levels."
-  },
-  {
-    "objectID": "problem-sets/ps-13.html#problem-3",
-    "href": "problem-sets/ps-13.html#problem-3",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "Problem # 3",
-    "text": "Problem # 3\nWhat is the association between mouse weight and age levels for different sexes?\n1. Calculate the pearson correlation coefficient between weight and age for females and males\n2. Describe your observations\n\nThe relationship between weight and age…"
-  },
-  {
-    "objectID": "problem-sets/ps-07.html",
-    "href": "problem-sets/ps-07.html",
+    "objectID": "problem-set-keys/ps-key-07.html",
+    "href": "problem-set-keys/ps-key-07.html",
     "title": "R Bootcamp Problem Set 6",
     "section": "",
     "text": "Use the data files in the data/ directory to answer the questions.\nFor this problem set, you are allowed to help each other, but you are not allowed to post correct answers in slack.\nThe problem set is due 12pm on Sept 1."
   },
   {
-    "objectID": "problem-sets/ps-07.html#problem-set",
-    "href": "problem-sets/ps-07.html#problem-set",
+    "objectID": "problem-set-keys/ps-key-07.html#problem-set",
+    "href": "problem-set-keys/ps-key-07.html#problem-set",
     "title": "R Bootcamp Problem Set 6",
     "section": "",
     "text": "Use the data files in the data/ directory to answer the questions.\nFor this problem set, you are allowed to help each other, but you are not allowed to post correct answers in slack.\nThe problem set is due 12pm on Sept 1."
   },
   {
-    "objectID": "problem-sets/ps-07.html#grading-rubric",
-    "href": "problem-sets/ps-07.html#grading-rubric",
+    "objectID": "problem-set-keys/ps-key-07.html#grading-rubric",
+    "href": "problem-set-keys/ps-key-07.html#grading-rubric",
     "title": "R Bootcamp Problem Set 6",
     "section": "Grading rubric",
     "text": "Grading rubric\n\nEverything is good: full points\nPartially correct answer: depends on how many steps are correct\nReasonable attempt: half points"
   },
   {
-    "objectID": "problem-sets/ps-07.html#libraries",
-    "href": "problem-sets/ps-07.html#libraries",
+    "objectID": "problem-set-keys/ps-key-07.html#libraries",
+    "href": "problem-set-keys/ps-key-07.html#libraries",
     "title": "R Bootcamp Problem Set 6",
     "section": "Libraries",
-    "text": "Libraries\nLoad the libraries you need for analysis below."
+    "text": "Libraries\nLoad the libraries you need for analysis below.\n\nlibrary(tidyverse)\n\n-- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\nv dplyr     1.1.3     v readr     2.1.4\nv forcats   1.0.0     v stringr   1.5.0\nv ggplot2   3.4.3     v tibble    3.2.1\nv lubridate 1.9.2     v tidyr     1.3.0\nv purrr     1.0.2     \n-- Conflicts ------------------------------------------ tidyverse_conflicts() --\nx dplyr::filter() masks stats::filter()\nx dplyr::lag()    masks stats::lag()\ni Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nlibrary(here)\n\nhere() starts at /Users/jayhesselberth/devel/rnabioco/molb-7950\n\nlibrary(palmerpenguins)"
   },
   {
-    "objectID": "problem-sets/ps-07.html#question-1---5-points",
-    "href": "problem-sets/ps-07.html#question-1---5-points",
+    "objectID": "problem-set-keys/ps-key-07.html#question-1---5-points",
+    "href": "problem-set-keys/ps-key-07.html#question-1---5-points",
     "title": "R Bootcamp Problem Set 6",
     "section": "Question 1 - 5 points\n",
-    "text": "Question 1 - 5 points\n\nRun the following chunk:\n\nset.seed(42)\nx &lt;- sample(1000, replace = TRUE)\n\nNow use logical indexing to find the number of values &gt; 450 in x."
+    "text": "Question 1 - 5 points\n\nRun the following chunk:\n\nset.seed(42)\nx &lt;- sample(1000, replace = TRUE)\n\nNow use logical indexing to find the number of values &gt; 450 in x.\n\n# either are correct\nsum(x &gt; 450)\n\n[1] 566\n\nlength(x[x &gt; 450])\n\n[1] 566"
   },
   {
-    "objectID": "problem-sets/ps-07.html#question-2---5-points",
-    "href": "problem-sets/ps-07.html#question-2---5-points",
+    "objectID": "problem-set-keys/ps-key-07.html#question-2---5-points",
+    "href": "problem-set-keys/ps-key-07.html#question-2---5-points",
     "title": "R Bootcamp Problem Set 6",
     "section": "Question 2 - 5 points\n",
-    "text": "Question 2 - 5 points\n\nCount the number of species in the penguins tibble using forcats::fct_count()\nCount number of island + sex combinations using dplyr::count(), and sort the result by count."
+    "text": "Question 2 - 5 points\n\nCount the number of species in the penguins tibble using forcats::fct_count()\nCount number of island + sex combinations using dplyr::count(), and sort the result by count.\n\nforcats::fct_count(penguins$island)\n\n# A tibble: 3 x 2\n  f             n\n  &lt;fct&gt;     &lt;int&gt;\n1 Biscoe      168\n2 Dream       124\n3 Torgersen    52\n\n\n\ndplyr::count(penguins, island, sex, sort = TRUE)\n\n# A tibble: 9 x 3\n  island    sex        n\n  &lt;fct&gt;     &lt;fct&gt;  &lt;int&gt;\n1 Biscoe    male      83\n2 Biscoe    female    80\n3 Dream     male      62\n4 Dream     female    61\n5 Torgersen female    24\n6 Torgersen male      23\n7 Biscoe    &lt;NA&gt;       5\n8 Torgersen &lt;NA&gt;       5\n9 Dream     &lt;NA&gt;       1"
   },
   {
-    "objectID": "problem-sets/ps-07.html#question-3---5-points",
-    "href": "problem-sets/ps-07.html#question-3---5-points",
+    "objectID": "problem-set-keys/ps-key-07.html#question-3---5-points",
+    "href": "problem-set-keys/ps-key-07.html#question-3---5-points",
     "title": "R Bootcamp Problem Set 6",
     "section": "Question 3 - 5 points\n",
-    "text": "Question 3 - 5 points\n\nUse stringr::str_c() to combine upper and lowercase letters from letters and LETTERS with a slash.\nYour answer should look like: \"A/a\" \"B/b\" \"C/c\" etc.\nUse stringr::str_split() or one of its variants to split up the strings you made above and extract the letter after the slash."
+    "text": "Question 3 - 5 points\n\nUse stringr::str_c() to combine upper and lowercase letters from letters and LETTERS with a slash.\nYour answer should look like: \"A/a\" \"B/b\" \"C/c\" etc.\n\ncombined &lt;- str_c(LETTERS, \"/\", letters)\n\nUse stringr::str_split() or one of its variants to split up the strings you made above and extract the letter after the slash.\n\nstr_split_i(combined, \"/\", 2)\n\n [1] \"a\" \"b\" \"c\" \"d\" \"e\" \"f\" \"g\" \"h\" \"i\" \"j\" \"k\" \"l\" \"m\" \"n\" \"o\" \"p\" \"q\" \"r\" \"s\"\n[20] \"t\" \"u\" \"v\" \"w\" \"x\" \"y\" \"z\"\n\nstr_split(combined, \"/\") |&gt;\n  purrr::map(2) |&gt;\n  unlist()\n\n [1] \"a\" \"b\" \"c\" \"d\" \"e\" \"f\" \"g\" \"h\" \"i\" \"j\" \"k\" \"l\" \"m\" \"n\" \"o\" \"p\" \"q\" \"r\" \"s\"\n[20] \"t\" \"u\" \"v\" \"w\" \"x\" \"y\" \"z\""
   },
   {
-    "objectID": "problem-sets/ps-07.html#question-4---5-points",
-    "href": "problem-sets/ps-07.html#question-4---5-points",
+    "objectID": "problem-set-keys/ps-key-07.html#question-4---5-points",
+    "href": "problem-set-keys/ps-key-07.html#question-4---5-points",
     "title": "R Bootcamp Problem Set 6",
     "section": "Question 4 - 5 points\n",
-    "text": "Question 4 - 5 points\n\nCreate a ggplot using the diamonds data set.\n\nGenerate a ggridges::geom_density_ridges() for the prices, with a different fill color for each cut.\nRecolor the densities using ggplot2::scale_fill_brewer(), choosing a specific palette.\nmake the outline of the densities black, and change their alpha to 0.2.\nchange the theme to cowplot::theme_minimal_grid()\n\nremove the legend (google: “remove legend from ggplot2”)\nadd an informative title and subtitle using ggplot2::labs()."
+    "text": "Question 4 - 5 points\n\nCreate a ggplot using the diamonds data set.\n\nGenerate a ggridges::geom_density_ridges() for the prices, with a different fill color for each cut.\nRecolor the densities using ggplot2::scale_fill_brewer(), choosing a specific palette.\nmake the outline of the densities black, and change their alpha to 0.2.\nchange the theme to cowplot::theme_minimal_grid()\n\nremove the legend (google: “remove legend from ggplot2”)\nadd an informative title and subtitle using ggplot2::labs().\n\n\nlibrary(ggridges)\nlibrary(cowplot)\n\n\nAttaching package: 'cowplot'\n\n\nThe following object is masked from 'package:lubridate':\n\n    stamp\n\nggplot(\n  diamonds,\n  aes(\n    x = price,\n    y = cut,\n    fill = cut\n  )\n) +\n  geom_density_ridges(color = \"black\", alpha = 0.2) +\n  scale_fill_brewer(palette = \"Set2\") +\n  theme_minimal_grid() +\n  theme(legend.position = \"none\")\n\nPicking joint bandwidth of 458"
   },
   {
-    "objectID": "problem-sets/ps-07.html#submit",
-    "href": "problem-sets/ps-07.html#submit",
+    "objectID": "problem-set-keys/ps-key-07.html#submit",
+    "href": "problem-set-keys/ps-key-07.html#submit",
     "title": "R Bootcamp Problem Set 6",
     "section": "Submit",
     "text": "Submit\nBe sure to click the “Render” button to render the HTML output.\nThen paste the URL of this Posit Cloud project into the problem set on Canvas."
@@ -2087,7 +2206,7 @@
     "href": "index.html",
     "title": "MOLB 7950: Informatics and Statistics for Molecular Biology",
     "section": "",
-    "text": "This page contains an outline of the topics, content, and assignments for the semester. Note that this schedule will be updated as the semester progresses, with all changes documented here.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nMOLB 7950 - Fall 2024 Schedule\n\n\nClasses held in-person from 9:00-10:30am\n\n\n\nDate\nBlock\nTopic\nInstructor\nLocation\nTitle\n\nLinks\n\n\n\nPrepare\nSlides\nExercises\nHW\nKey\n\n\n\n\nWeek 1\n\n\n01\nMon, Aug 26, 2024\nBootcamp\nR\nTaliaferro\nEd2N 2106\nIntro to R & RStudio\n📖\n📃\n💪\n🧠\n🔑\n\n\n02\nTue, Aug 27, 2024\nBootcamp\nR\nTaliaferro\nEd1 1400\nTidy data & tidyr\n.\n📃\n💪\n🧠\n🔑\n\n\n03\nWed, Aug 28, 2024\nBootcamp\nR\nTaliaferro\nEd2N 2102\ndplyr\n.\n📃\n💪\n🧠\n🔑\n\n\n04\nThu, Aug 29, 2024\nBootcamp\nR\nTaliaferro\nAHSB 2200\nggplot2\n.\n📃\n💪\n🧠\n🔑\n\n\n05\nFri, Aug 30, 2024\nBootcamp\nR\nTaliaferro\nEd1 1400\nggplot2\n.\n📃\n💪\n🧠\n🔑\n\n\nWeek 2\n\n\n06\nMon, Sep 2, 2024\n-\n-\n-\nNA\nNO CLASS: LABOR DAY\n.\n.\n.\n.\n.\n\n\n07\nTue, Sep 3, 2024\nBootcamp\nR\nTaliaferro\nEd1 1400\ntidyverse odds & ends\n.\n📃\n💪\n🧠\n.\n\n\n08\nWed, Sep 4, 2024\nBootcamp\nR\nTaliaferro\nEd1 1400\nputting it all together\n.\n📃\n💪\n.\n.\n\n\n09\nThu, Sep 5, 2024\nBootcamp\nR\nTaliaferro\nEd1 1400\nputting it all together\n.\n.\n💪\n🧠\n.\n\n\n10\nFri, Sep 6, 2024\nBootcamp\nStatistics\nRamachandran\nAHSB 2200\nStats intro and history\n.\n📃\n💪\n.\n.\n\n\nWeek 3\n\n\n11\nMon, Sep 9, 2024\nBootcamp\nStatistics\nRamachandran\nAHSB 2201\nProbability and descriptive stats\n📖\n📃\n💪\n🧠\n.\n\n\n12\nTue, Sep 10, 2024\nBootcamp\nStatistics\nRamachandran\nEd1 1400\nHypothesis testing\n.\n📃\n💪\n🧠\n.\n\n\n13\nWed, Sep 11, 2024\nBootcamp\nStatistics\nRamachandran\nAHSB 2201\nHypothesis testing\n.\n📃\n💪\n🧠\n.\n\n\n14\nThu, Sep 12, 2024\nBootcamp\nStatistics\nMukherjee\nAHSB 2201\nExploratory data analysis\n.\n📃\n💪\n🧠\n.\n\n\n15\nFri, Sep 13, 2024\nBootcamp\nStatistics\nMukherjee\nAHSB 2201\nBig data concerns\n.\n📃\n💪\n🧠\n.\n\n\nWeek 4\n\n\n16\nMon, Sep 16, 2024\nDNA\nMapping chromatin structure and transactions\nRamachandran\nAHSB 2201\nExperimental overview\n📖\n📃\n.\n🧠\n.\n\n\n17\nWed, Sep 18, 2024\nDNA\nChromatin-centric methods\nRamachandran\nAHSB 2201\nInformation from fragment length distributions\n.\n.\n.\n.\n.\n\n\n18\nFri, Sep 20, 2024\nDNA\nChromatin-centric methods\nRamachandran\nAHSB 2201\nMeta-plots and heatmaps\n.\n.\n.\n🧠\n.\n\n\nWeek 5\n\n\n19\nMon, Sep 23, 2024\nDNA\nWhere do proteins bind in the genome?\nRamachandran\nAHSB 2201\nExperimental overview\n📖\n📃\n.\n.\n.\n\n\n20\nWed, Sep 25, 2024\nDNA\nFactor-centric methods\nRamachandran\nAHSB 2201\nPeak calling\n.\n.\n.\n.\n.\n\n\n21\nFri, Sep 27, 2024\nDNA\nFactor-centric methods\nRamachandran\nAHSB 2201\nSequence motif analysis\n.\n.\n.\n🧠\n.\n\n\nWeek 6\n\n\n22\nMon, Sep 30, 2024\nRNA\nRNA-seq Overview\nTaliaferro\nAHSB 2201\nConcepts and techniques\n📖\n.\n.\n.\n.\n\n\n23\nWed, Oct 2, 2024\nRNA\nImport, filtering, QC\nTaliaferro\nAHSB 2201\nmetrics and sample similarity\n.\n.\n.\n.\n.\n\n\n24\nFri, Oct 4, 2024\nRNA\nDifferential Gene Expression\nTaliaferro\nAHSB 2201\nDESeq2\n.\n.\n.\n.\n.\n\n\nWeek 7\n\n\n25\nMon, Oct 7, 2024\nRNA\nAlternative Splicing\nTaliaferro\nAHSB 2201\n-\n.\n.\n.\n.\n.\n\n\n26\nWed, Oct 9, 2024\nRNA\nReview Proposals\nTaliaferro\nAHSB 2201\nReview Proposals\n.\n.\n.\n.\n.\n\n\n27\nFri, Oct 11, 2024\n-\nRBP-RNA 1\nTaliaferro\nAHSB 2201\nCLIP-seq\n.\n.\n.\n.\n.\n\n\nWeek 8\n\n\n28\nMon, Oct 14, 2024\nRNA\nRBP-RNA 2\nTaliaferro\nAHSB 2201\nData integrations\n.\n.\n.\n.\n.\n\n\n29\nWed, Oct 16, 2024\nRNA\nLong-read sequencing\nHesselberth\nAHSB 2201\n-\n📖\n.\n.\n.\n.\n\n\n30\nFri, Oct 18, 2024\nRNA\n-\n-\nNA\nNO CLASS: CSDV RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 9\n\n\n31\nMon, Oct 21, 2024\nRNA\nSingle-cell\nRiemondy\nAHSB 2201\n-\n📖\n📃\n.\n.\n.\n\n\n32\nWed, Oct 23, 2024\nRNA\nSingle-cell\nRiemondy\nAHSB 2201\n-\n.\n📃\n.\n.\n.\n\n\n33\nFri, Oct 25, 2024\n-\n-\n-\nNA\nNO CLASS: MOLB RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 10\n\n\n34\nMon, Oct 28, 2024\nFinal\n-\n-\nAHSB 2201\nFinal project presentations\n.\n.\n.\n.\n.\n\n\n35\nWed, Oct 30, 2024\nFinal\n-\n-\nAHSB 2201\nFinal project presentations\n.\n.\n.\n.\n.",
+    "text": "This page contains an outline of the topics, content, and assignments for the semester. Note that this schedule will be updated as the semester progresses, with all changes documented here.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nMOLB 7950 - Fall 2024 Schedule\n\n\nClasses held in-person from 9:00-10:30am\n\n\n\nDate\nBlock\nTopic\nInstructor\nLocation\nTitle\n\nLinks\n\n\n\nPrepare\nSlides\nExercises\nHW\nKey\n\n\n\n\nWeek 1\n\n\n01\nMon, Aug 26, 2024\nBootcamp\nR\nTaliaferro\nEd2N 2106\nIntro to R & RStudio\n📖\n📃\n💪\n🧠\n🔑\n\n\n02\nTue, Aug 27, 2024\nBootcamp\nR\nTaliaferro\nEd1 1400\nTidy data & tidyr\n.\n📃\n💪\n🧠\n🔑\n\n\n03\nWed, Aug 28, 2024\nBootcamp\nR\nTaliaferro\nEd2N 2102\ndplyr\n.\n📃\n💪\n🧠\n🔑\n\n\n04\nThu, Aug 29, 2024\nBootcamp\nR\nTaliaferro\nAHSB 2200\nggplot2\n.\n📃\n💪\n🧠\n🔑\n\n\n05\nFri, Aug 30, 2024\nBootcamp\nR\nTaliaferro\nEd1 1400\nggplot2\n.\n📃\n💪\n🧠\n🔑\n\n\nWeek 2\n\n\n06\nMon, Sep 2, 2024\n-\n-\n-\nNA\nNO CLASS: LABOR DAY\n.\n.\n.\n.\n.\n\n\n07\nTue, Sep 3, 2024\nBootcamp\nR\nTaliaferro\nEd1 1400\ntidyverse odds & ends\n.\n📃\n💪\n🧠\n🔑\n\n\n08\nWed, Sep 4, 2024\nBootcamp\nR\nTaliaferro\nEd1 1400\nputting it all together\n.\n📃\n💪\n.\n.\n\n\n09\nThu, Sep 5, 2024\nBootcamp\nR\nTaliaferro\nEd1 1400\nputting it all together\n.\n.\n💪\n🧠\n.\n\n\n10\nFri, Sep 6, 2024\nBootcamp\nStatistics\nRamachandran\nAHSB 2200\nStats intro and history\n.\n📃\n💪\n.\n.\n\n\nWeek 3\n\n\n11\nMon, Sep 9, 2024\nBootcamp\nStatistics\nRamachandran\nAHSB 2201\nProbability and descriptive stats\n📖\n📃\n💪\n🧠\n.\n\n\n12\nTue, Sep 10, 2024\nBootcamp\nStatistics\nRamachandran\nEd1 1400\nHypothesis testing\n.\n📃\n💪\n🧠\n.\n\n\n13\nWed, Sep 11, 2024\nBootcamp\nStatistics\nRamachandran\nAHSB 2201\nHypothesis testing\n.\n📃\n💪\n🧠\n.\n\n\n14\nThu, Sep 12, 2024\nBootcamp\nStatistics\nMukherjee\nAHSB 2201\nExploratory data analysis\n.\n📃\n💪\n🧠\n.\n\n\n15\nFri, Sep 13, 2024\nBootcamp\nStatistics\nMukherjee\nAHSB 2201\nBig data concerns\n.\n📃\n💪\n🧠\n.\n\n\nWeek 4\n\n\n16\nMon, Sep 16, 2024\nDNA\nMapping chromatin structure and transactions\nRamachandran\nAHSB 2201\nExperimental overview\n📖\n📃\n💪\n🧠\n.\n\n\n17\nWed, Sep 18, 2024\nDNA\nChromatin-centric methods\nRamachandran\nAHSB 2201\nInformation from fragment length distributions\n.\n📃\n💪\n.\n.\n\n\n18\nFri, Sep 20, 2024\nDNA\nChromatin-centric methods\nRamachandran\nAHSB 2201\nMeta-plots and heatmaps\n.\n📃\n💪\n🧠\n.\n\n\nWeek 5\n\n\n19\nMon, Sep 23, 2024\nDNA\nWhere do proteins bind in the genome?\nRamachandran\nAHSB 2201\nExperimental overview\n📖\n📃\n.\n.\n.\n\n\n20\nWed, Sep 25, 2024\nDNA\nFactor-centric methods\nRamachandran\nAHSB 2201\nPeak calling\n.\n.\n.\n.\n.\n\n\n21\nFri, Sep 27, 2024\nDNA\nFactor-centric methods\nRamachandran\nAHSB 2201\nSequence motif analysis\n.\n.\n.\n🧠\n.\n\n\nWeek 6\n\n\n22\nMon, Sep 30, 2024\nRNA\nRNA-seq Overview\nTaliaferro\nAHSB 2201\nConcepts and techniques\n📖\n.\n.\n.\n.\n\n\n23\nWed, Oct 2, 2024\nRNA\nImport, filtering, QC\nTaliaferro\nAHSB 2201\nmetrics and sample similarity\n.\n.\n.\n.\n.\n\n\n24\nFri, Oct 4, 2024\nRNA\nDifferential Gene Expression\nTaliaferro\nAHSB 2201\nDESeq2\n.\n.\n.\n.\n.\n\n\nWeek 7\n\n\n25\nMon, Oct 7, 2024\nRNA\nAlternative Splicing\nTaliaferro\nAHSB 2201\n-\n.\n.\n.\n.\n.\n\n\n26\nWed, Oct 9, 2024\nRNA\nReview Proposals\nTaliaferro\nAHSB 2201\nReview Proposals\n.\n.\n.\n.\n.\n\n\n27\nFri, Oct 11, 2024\n-\nRBP-RNA 1\nTaliaferro\nAHSB 2201\nCLIP-seq\n.\n.\n.\n.\n.\n\n\nWeek 8\n\n\n28\nMon, Oct 14, 2024\nRNA\nRBP-RNA 2\nTaliaferro\nAHSB 2201\nData integrations\n.\n.\n.\n.\n.\n\n\n29\nWed, Oct 16, 2024\nRNA\nLong-read sequencing\nHesselberth\nAHSB 2201\n-\n📖\n.\n.\n.\n.\n\n\n30\nFri, Oct 18, 2024\nRNA\n-\n-\nNA\nNO CLASS: CSDV RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 9\n\n\n31\nMon, Oct 21, 2024\nRNA\nSingle-cell\nRiemondy\nAHSB 2201\n-\n📖\n📃\n.\n.\n.\n\n\n32\nWed, Oct 23, 2024\nRNA\nSingle-cell\nRiemondy\nAHSB 2201\n-\n.\n📃\n.\n.\n.\n\n\n33\nFri, Oct 25, 2024\n-\n-\n-\nNA\nNO CLASS: MOLB RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 10\n\n\n34\nMon, Oct 28, 2024\nFinal\n-\n-\nAHSB 2201\nFinal project presentations\n.\n.\n.\n.\n.\n\n\n35\nWed, Oct 30, 2024\nFinal\n-\n-\nAHSB 2201\nFinal project presentations\n.\n.\n.\n.\n.",
     "crumbs": [
       "Course information",
       "Schedule"
@@ -2400,88 +2519,186 @@
     "text": "Submit\nBe sure to click the “Render” button to render the HTML output.\nThen paste the URL of this Posit Cloud project into the problem set on Canvas."
   },
   {
-    "objectID": "problem-sets/ps-11.html",
-    "href": "problem-sets/ps-11.html",
-    "title": "Problem Set Stats Bootcamp - class 11",
+    "objectID": "problem-sets/ps-07.html",
+    "href": "problem-sets/ps-07.html",
+    "title": "R Bootcamp Problem Set 6",
     "section": "",
-    "text": "-- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\nv dplyr     1.1.3     v readr     2.1.4\nv forcats   1.0.0     v stringr   1.5.0\nv ggplot2   3.4.3     v tibble    3.2.1\nv lubridate 1.9.2     v tidyr     1.3.0\nv purrr     1.0.2     \n-- Conflicts ------------------------------------------ tidyverse_conflicts() --\nx dplyr::filter() masks stats::filter()\nx dplyr::lag()    masks stats::lag()\ni Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nAttaching package: 'rstatix'\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\n\nAttaching package: 'cowplot'\n\n\nThe following object is masked from 'package:lubridate':\n\n    stamp"
+    "text": "Use the data files in the data/ directory to answer the questions.\nFor this problem set, you are allowed to help each other, but you are not allowed to post correct answers in slack.\nThe problem set is due 12pm on Sept 1."
   },
   {
-    "objectID": "problem-sets/ps-11.html#problem-1",
-    "href": "problem-sets/ps-11.html#problem-1",
-    "title": "Problem Set Stats Bootcamp - class 11",
-    "section": "Problem # 1",
-    "text": "Problem # 1\nAssume that the height jackalopes fit a normal distribution. Through careful field research measuring 1000 wild jackalopes, we have determined the mean height is 97 cm and the standard deviation is 10 cm. Your was camping and found a jackalope. Being a great friend and knowing your interest in jackalopes, they (harmlessly) subdued and measured the wild jackalope and found that it was 75 cm.\n\nSimulate a normal distribution of 1000 jackalope heights using the mean and sd you painstakingly measured.\n\n\nPlot the density of the jackalope height distribution. Indicate with a vertical line the height of the jackalope your friend measured.\n\n\nCalculate the probability of a jackalope being 75 cm or shorter.\n\n\nAre jackalope heights normally distributed?"
-  },
-  {
-    "objectID": "problem-sets/ps-11.html#explore-coin-flip-distribution-characteristics",
-    "href": "problem-sets/ps-11.html#explore-coin-flip-distribution-characteristics",
-    "title": "Problem Set Stats Bootcamp - class 11",
-    "section": "Explore coin flip distribution characteristics",
-    "text": "Explore coin flip distribution characteristics\nWhen we flip a fair coin multiple times (numFlips) in a row, we expect to get heads (or tails) 50% of the time on average. This is not always the case for a single round of flipping, but if we do multiple rounds with (numRounds) that average should be 50%."
-  },
-  {
-    "objectID": "problem-sets/ps-11.html#problem-2",
-    "href": "problem-sets/ps-11.html#problem-2",
-    "title": "Problem Set Stats Bootcamp - class 11",
-    "section": "Problem # 2",
-    "text": "Problem # 2\nIn class, we simulated coin flip experiments using two different coins that were either fair (0.5 prob of head) or unfair (0.9 prob of head). We varied the number of flips in a single round (numFlips) and the number of rounds of flipping (numRounds). For this assignment, use the same to coins and use all possible combinations of numFlips and numRounds from the table below.\n\nparameters to explore\n\nnumFlips\nnumRounds\n\n\n\n5\n10\n\n\n500\n100\n\n\n\n\nCreate a tibble has all the combinations of numFlips, numRounds, and prob of getting heads.\n\n\n# hint for 8 flips and 12 rounds of a fair coin you could do\n# rbinom(n = 8, size = 12, prob = .5)/12\n\n\nPlot your result using faceting. I recommend faceting by numFlips (like in class describing both the number and fair v unfair) . Include the observed mean as a black diamond and the true mean as a dashed line.\n\n3. Report the means and sd of each pair of numFlips and numRounds\n4. Describe in a few sentences how increasing numFlips and numRounds alters:\nThe estimation of and spread around the true mean."
-  },
-  {
-    "objectID": "problem-sets/ps-16.html",
-    "href": "problem-sets/ps-16.html",
-    "title": "DNA Block - Problem Set 16",
+    "objectID": "problem-sets/ps-07.html#problem-set",
+    "href": "problem-sets/ps-07.html#problem-set",
+    "title": "R Bootcamp Problem Set 6",
     "section": "",
-    "text": "You have two tasks for this problem set.\n\nRead the two papers in the preparation document before class on Wed.\nLook over the vignettes for the software in the preparation document. Use valr to complete the tasks below. These problems are due Wed at 5pm.\n\nEach problem below is worth 5 points."
+    "text": "Use the data files in the data/ directory to answer the questions.\nFor this problem set, you are allowed to help each other, but you are not allowed to post correct answers in slack.\nThe problem set is due 12pm on Sept 1."
   },
   {
-    "objectID": "problem-sets/ps-16.html#problem-set",
-    "href": "problem-sets/ps-16.html#problem-set",
-    "title": "DNA Block - Problem Set 16",
-    "section": "",
-    "text": "You have two tasks for this problem set.\n\nRead the two papers in the preparation document before class on Wed.\nLook over the vignettes for the software in the preparation document. Use valr to complete the tasks below. These problems are due Wed at 5pm.\n\nEach problem below is worth 5 points."
+    "objectID": "problem-sets/ps-07.html#grading-rubric",
+    "href": "problem-sets/ps-07.html#grading-rubric",
+    "title": "R Bootcamp Problem Set 6",
+    "section": "Grading rubric",
+    "text": "Grading rubric\n\nEverything is good: full points\nPartially correct answer: depends on how many steps are correct\nReasonable attempt: half points"
   },
   {
-    "objectID": "problem-sets/ps-16.html#setup",
-    "href": "problem-sets/ps-16.html#setup",
-    "title": "DNA Block - Problem Set 16",
-    "section": "Setup",
-    "text": "Setup\nLoad libraries you’ll need for analysis below.\n\nlibrary(tidyverse)\n\n-- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\nv dplyr     1.1.3     v readr     2.1.4\nv forcats   1.0.0     v stringr   1.5.0\nv ggplot2   3.4.3     v tibble    3.2.1\nv lubridate 1.9.2     v tidyr     1.3.0\nv purrr     1.0.2     \n-- Conflicts ------------------------------------------ tidyverse_conflicts() --\nx dplyr::filter() masks stats::filter()\nx dplyr::lag()    masks stats::lag()\ni Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nlibrary(valr)"
+    "objectID": "problem-sets/ps-07.html#libraries",
+    "href": "problem-sets/ps-07.html#libraries",
+    "title": "R Bootcamp Problem Set 6",
+    "section": "Libraries",
+    "text": "Libraries\nLoad the libraries you need for analysis below."
   },
   {
-    "objectID": "problem-sets/ps-16.html#question-1-5-points",
-    "href": "problem-sets/ps-16.html#question-1-5-points",
-    "title": "DNA Block - Problem Set 16",
-    "section": "Question 1 – 5 points",
-    "text": "Question 1 – 5 points\nWe’ll work with a few different files for the next questions.\n\n\nhg19.refGene.chr22.bed.gz is a BED12 file containing gene (mRNA) information for chr22.\n\nhg19.rmsk.chr22.bed.gz is a BED6 containing repetitive elements in the human genome.\n\nhg19.dnase1.bw is a bigWig file containing DNase-seq signal.\n\nYou can find the path to each with valr_example(). Load each one individually using the valr read_* functions.\nSome valr functions require a “genome” file, which is just a tibble of chromosome names and sizes.\nThe hg19 genome file is available at valr_example(\"hg19.chrom.sizes.gz\"). Use read_genome() to load it.\nInspect the tibble. How many columns does it have? What is the largest chromosome?"
+    "objectID": "problem-sets/ps-07.html#question-1---5-points",
+    "href": "problem-sets/ps-07.html#question-1---5-points",
+    "title": "R Bootcamp Problem Set 6",
+    "section": "Question 1 - 5 points\n",
+    "text": "Question 1 - 5 points\n\nRun the following chunk:\n\nset.seed(42)\nx &lt;- sample(1000, replace = TRUE)\n\nNow use logical indexing to find the number of values &gt; 450 in x."
   },
   {
-    "objectID": "problem-sets/ps-16.html#question-2-5-points",
-    "href": "problem-sets/ps-16.html#question-2-5-points",
-    "title": "DNA Block - Problem Set 16",
-    "section": "Question 2 – 5 points",
-    "text": "Question 2 – 5 points\nWhich repeat class covers the largest amount of chromosome 22? Use dplyr tools to analyze the repeats in hg19.rmsk.chr22.bed.gz."
+    "objectID": "problem-sets/ps-07.html#question-2---5-points",
+    "href": "problem-sets/ps-07.html#question-2---5-points",
+    "title": "R Bootcamp Problem Set 6",
+    "section": "Question 2 - 5 points\n",
+    "text": "Question 2 - 5 points\n\nCount the number of species in the penguins tibble using forcats::fct_count()\nCount number of island + sex combinations using dplyr::count(), and sort the result by count."
   },
   {
-    "objectID": "problem-sets/ps-16.html#question-3-5-points",
-    "href": "problem-sets/ps-16.html#question-3-5-points",
-    "title": "DNA Block - Problem Set 16",
-    "section": "Question 3 – 5 points",
-    "text": "Question 3 – 5 points\nWhich promoter has the highest DNase I accessibility?\n\nUse the valr create_tss() function to generate transcription start sites from the BED12 refGene annotations. How big are these intervals?\nGenerate promoter regions from the TSS with bed_slop(), adding 500 bp up- and downstream (i.e., both sides). bed_slop() requires the genome file above. How big are the regions now?\nUse bed_map() to calculate the total (i.e., summed) DNase I signal in the promoters (using the score column in the DNase file).\n\nWhich gene has the highest DNase I in the regions you defined above?"
+    "objectID": "problem-sets/ps-07.html#question-3---5-points",
+    "href": "problem-sets/ps-07.html#question-3---5-points",
+    "title": "R Bootcamp Problem Set 6",
+    "section": "Question 3 - 5 points\n",
+    "text": "Question 3 - 5 points\n\nUse stringr::str_c() to combine upper and lowercase letters from letters and LETTERS with a slash.\nYour answer should look like: \"A/a\" \"B/b\" \"C/c\" etc.\nUse stringr::str_split() or one of its variants to split up the strings you made above and extract the letter after the slash."
   },
   {
-    "objectID": "problem-sets/ps-16.html#submit",
-    "href": "problem-sets/ps-16.html#submit",
-    "title": "DNA Block - Problem Set 16",
+    "objectID": "problem-sets/ps-07.html#question-4---5-points",
+    "href": "problem-sets/ps-07.html#question-4---5-points",
+    "title": "R Bootcamp Problem Set 6",
+    "section": "Question 4 - 5 points\n",
+    "text": "Question 4 - 5 points\n\nCreate a ggplot using the diamonds data set.\n\nGenerate a ggridges::geom_density_ridges() for the prices, with a different fill color for each cut.\nRecolor the densities using ggplot2::scale_fill_brewer(), choosing a specific palette.\nmake the outline of the densities black, and change their alpha to 0.2.\nchange the theme to cowplot::theme_minimal_grid()\n\nremove the legend (google: “remove legend from ggplot2”)\nadd an informative title and subtitle using ggplot2::labs()."
+  },
+  {
+    "objectID": "problem-sets/ps-07.html#submit",
+    "href": "problem-sets/ps-07.html#submit",
+    "title": "R Bootcamp Problem Set 6",
     "section": "Submit",
     "text": "Submit\nBe sure to click the “Render” button to render the HTML output.\nThen paste the URL of this Posit Cloud project into the problem set on Canvas."
   },
   {
-    "objectID": "exercises/ex-08.html",
-    "href": "exercises/ex-08.html",
-    "title": "Exercises 8",
+    "objectID": "problem-sets/ps-13.html",
+    "href": "problem-sets/ps-13.html",
+    "title": "Problem Set Stats Bootcamp - class 12",
     "section": "",
-    "text": "Putting it all together\nFor the next two classes we’ll combine everything we’ve learned to process and visualize data from some some biological experiments. These exercises will illustrate a complete analysis pipeline – from data tidying to manipulation and visualization – using tools from the tidyverse.\n\nLibraries\nLoad the libraries you need for analysis below.\n\nlibrary(tidyverse)\nlibrary(here)\nlibrary(cowplot)\n\nA quantitative PCR experiment\nHere is the experimental setup:\n\nTwo cell lines (wt and mut) were treated with a drug that induces interferon expression\nAfter specific time points, cells were harvested and actin and interferon mRNA were analyzed by quantitative PCR (with 3 technical replicates), with a control containing no reverse transcriptase.\n\nLoad the data\nThese data are in two TSV files:\n\ndata/qpcr_names.tsv.gz\ndata/qpcr_data.tsv.gz\n\nLoad these data sets and inspect.\n\nqpcr_names &lt;- read_tsv(here(\"data/bootcamp/qpcr_names.tsv.gz\"))\n\nRows: 8 Columns: 13\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \"\\t\"\nchr (13): row, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\nqpcr_data &lt;- read_tsv(here(\"data/bootcamp/qpcr_data.tsv.gz\"))\n\nRows: 8 Columns: 13\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \"\\t\"\nchr  (1): row\ndbl (12): 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\n\nNote the shape of the data and the names of the rows and columns. Do they remind you of anything?\n\nTidy the data\nGiven the experimental setup and the shape of the tibbles, you should be able to answer: Are these data tidy?\n\nWhat are the variables in the data?\nAre the variables the column names?\n\n\nqpcr_data_long &lt;-\n  pivot_longer(qpcr_data, -row, names_to = \"col\")\n\nqpcr_names_long &lt;- \n  pivot_longer(qpcr_names, -row, names_to = \"col\") |&gt;\n  separate(\n    value,\n    into = c(\"gt\", \"time\", \"gene\", \"rt\", \"rep\"),\n    sep = \"_\"\n  )\n\nMerge the data\nNote the structure of the tidied data. What columns (variables) are shared by both tibbles?\nHow we can join the data from these two tibbles, linking the sample identifiers with their gene expression values?\n\nqpcr_tidy &lt;-\n  left_join(qpcr_names_long, qpcr_data_long) |&gt;\n  # we don't need row & col anymore.\n  # the -RT samples are all 0, so we can drop those, too\n  filter(rt == \"+\") |&gt;\n  select(-(row:col), -rt)\n\nJoining with `by = join_by(row, col)`\n\n\nSummarize the data\nCalculate the mean and standard deviation across replicates.\nDo this two ways:\n\nCalculate the statistics for each gene separately.\nCalculate a ratio of interferon to actin levels for each sample before calculating the mean and standard deviation of the ratios.\n\n\nqpcr_summary &lt;-\n  group_by(\n    qpcr_tidy,\n    gt, time, gene) |&gt;\n  summarize(\n    exp_mean = mean(value),\n    exp_sd = sd(value)\n  ) |&gt;\n  arrange(gt, time, gene)\n\n`summarise()` has grouped output by 'gt', 'time'. You can override using the\n`.groups` argument.\n\n\nPlot the data\nNow we can plot the summary statistics. We’ll use ggplot2::geom_pointrange() to represent the mean and standard deviation.\nYou’ll need to fill in the blanks (___) below.\n\nggplot(\n  qpcr_summary,\n  aes(\n    x = ___,\n    y = ___,\n    color = ___\n  ),\n) +\n  geom_pointrange(\n    aes(\n      ymin = ___,\n      ymax = ___ \n    ),\n    # position = ___\n  )\n\nInspect the above plot. How might you improve it?\nCopy the above chunk and add functions that modify the plot’s look and feel.\n\nFacet the plot to see differences between the genotypes.\nUpdate the theme using cowplot.\nUpdate the x, y, and title labels (ggplot2::labs()).\nUpdate the colors with a nicer palette (ggplot2::scale_*).\nFix the position of the geoms by updating their position aesthetic.\nInterpret the plot\n\nWhat can you say about the expression of ACTIN and IFN?\nWhat can you say about the mutant and wild-type cells?"
+    "text": "-- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\nv dplyr     1.1.3     v readr     2.1.4\nv forcats   1.0.0     v stringr   1.5.0\nv ggplot2   3.4.3     v tibble    3.2.1\nv lubridate 1.9.2     v tidyr     1.3.0\nv purrr     1.0.2     \n-- Conflicts ------------------------------------------ tidyverse_conflicts() --\nx dplyr::filter() masks stats::filter()\nx dplyr::lag()    masks stats::lag()\ni Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nAttaching package: 'rstatix'\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\n\nAttaching package: 'janitor'\n\n\nThe following object is masked from 'package:rstatix':\n\n    make_clean_names\n\n\nThe following objects are masked from 'package:stats':\n\n    chisq.test, fisher.test\n\n\nhere() starts at /Users/jayhesselberth/devel/rnabioco/molb-7950\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C4&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00D6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00DC&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E4&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00F6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00FC&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00DF&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00D8&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00F8&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C5&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E5&gt;' to native encoding\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]\nbiochem &lt;- biochem[, keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\", \"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename gender to sex\nb &lt;- inner_join(biochem, weight, by = \"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex = gender)"
+  },
+  {
+    "objectID": "problem-sets/ps-13.html#problem-1",
+    "href": "problem-sets/ps-13.html#problem-1",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Problem # 1",
+    "text": "Problem # 1\nIs there an association between mouse calcium and sodium levels?\n1. Make a scatterplot to inspect variable\n2. Are they normal (enough)?\nWhich test will you use and why?\n\n\n\n3. Declare null hypothesis \\(\\mathcal{H}_0\\)\n\n\\(\\mathcal{H}_0\\) is that there is no dependency/association between \\(calcium\\) and \\(sodium\\)\n4. Calculate and plot the correlation on a scatterplot"
+  },
+  {
+    "objectID": "problem-sets/ps-13.html#problem-2",
+    "href": "problem-sets/ps-13.html#problem-2",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Problem # 2",
+    "text": "Problem # 2"
+  },
+  {
+    "objectID": "problem-sets/ps-13.html#do-mouse-calcium-levels-explain-mouse-sodium-levels-if-so-to-what-extent",
+    "href": "problem-sets/ps-13.html#do-mouse-calcium-levels-explain-mouse-sodium-levels-if-so-to-what-extent",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Do mouse calcium levels explain mouse sodium levels? If so, to what extent?",
+    "text": "Do mouse calcium levels explain mouse sodium levels? If so, to what extent?\nUse a linear model to do the following:\n1. Specify the Response and Explanatory variables — (2 pts)\n\nThe response variable y is The explantory variable x is\n\n2. Declare the null hypothesis — (1 pts)\n\nThe null hypothesis is …\n\n3. Use the lm function to create a fit (linear model)\nalso save the slope and intercept for later\n4. Add residuals to the data and create a plot visualizing the residuals\n5. Calculate the \\(R^2\\) and compare to \\(R^2\\) from fit\n\\(R^2 = 1 - \\displaystyle \\frac {SS_{fit}}{SS_{null}}\\)\n\\(SS_{fit} = \\sum_{i=1}^{n} (data - line)^2 = \\sum_{i=1}^{n} (y_{i} - (\\beta_0 \\cdot 1+ \\beta_1 \\cdot x)^2\\)\n\\(SS_{null}\\) &lt;80&gt;&lt;94&gt; sum of squared errors around the mean of \\(y\\)\n\\(SS_{null} = \\sum_{i=1}^{n} (data - mean)^2 = \\sum_{i=1}^{n} (y_{i} - \\overline{y})^2\\)\n6. Using \\(R^2\\), describe the extent to which calcium explains sodium levels\n\n\n\n7. Report (do not calculate) the \\(p-value\\) and your decision on the null\n\nThe null hypothesis is …\n\nCalcium levels to predict sodium levels."
+  },
+  {
+    "objectID": "problem-sets/ps-13.html#problem-3",
+    "href": "problem-sets/ps-13.html#problem-3",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Problem # 3",
+    "text": "Problem # 3\nWhat is the association between mouse weight and age levels for different sexes?\n1. Calculate the pearson correlation coefficient between weight and age for females and males\n2. Describe your observations\n\nThe relationship between weight and age…"
+  },
+  {
+    "objectID": "exercises/ex-03.html",
+    "href": "exercises/ex-03.html",
+    "title": "R Bootcamp - Day 3 - Exercises",
+    "section": "",
+    "text": "Explore these data sets:\n\ndplyr::starwars\n\ndplyr::band_members, dplyr::band_instruments, dplyr::band_instruments2"
+  },
+  {
+    "objectID": "exercises/ex-03.html#todays-datasets---exercise-1",
+    "href": "exercises/ex-03.html#todays-datasets---exercise-1",
+    "title": "R Bootcamp - Day 3 - Exercises",
+    "section": "",
+    "text": "Explore these data sets:\n\ndplyr::starwars\n\ndplyr::band_members, dplyr::band_instruments, dplyr::band_instruments2"
+  },
+  {
+    "objectID": "exercises/ex-03.html#arrange---exercise-2",
+    "href": "exercises/ex-03.html#arrange---exercise-2",
+    "title": "R Bootcamp - Day 3 - Exercises",
+    "section": "arrange - Exercise 2",
+    "text": "arrange - Exercise 2"
+  },
+  {
+    "objectID": "exercises/ex-03.html#filter---exercise-3",
+    "href": "exercises/ex-03.html#filter---exercise-3",
+    "title": "R Bootcamp - Day 3 - Exercises",
+    "section": "filter - Exercise 3",
+    "text": "filter - Exercise 3\nfilter by membership\n\n# filter based on skin color\n\nConditions can be combined using & (and), | (or).\n\n# filter on skin and eye color\n\nselect - Exercise 4\nmutate (& pipe |&gt;)- Exercise 5\n\n# create a new column to display height in meters\n\n# using the pipe to feed data into multiple functions sequentially\n\n# mutate allows you to refer to columns that you’ve just created\n\n# output needs to be saved into a new dataframe since dplyr does not \"change\" the original dataframe\n\n# using if_else clauses with mutate\n\nrowwise operations (if time permits)\n\n# let's input data (same one used in yesterday's problem set)\n# data &lt;- read_csv(file = \"data/data_transcript_exp_subset.csv\")\n\n# calculate mean for each time point using mutate in a rowwise fashion!\n\nsummarise - Exercise 6\ngroup_by + summarize - Exercise 7"
+  },
+  {
+    "objectID": "exercises/ex-16.html",
+    "href": "exercises/ex-16.html",
+    "title": "Mapping chromatin structure and transactions",
+    "section": "",
+    "text": "library(valr)\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\nx &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 25, 50,\n  \"chr1\", 100, 125\n)\n\ny &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 30,     75\n)"
+  },
+  {
+    "objectID": "exercises/ex-16.html#bed_intersect-example",
+    "href": "exercises/ex-16.html#bed_intersect-example",
+    "title": "Mapping chromatin structure and transactions",
+    "section": "",
+    "text": "library(valr)\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\nx &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 25, 50,\n  \"chr1\", 100, 125\n)\n\ny &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 30,     75\n)"
+  },
+  {
+    "objectID": "exercises/ex-16.html#valr-example",
+    "href": "exercises/ex-16.html#valr-example",
+    "title": "Mapping chromatin structure and transactions",
+    "section": "valr example",
+    "text": "valr example\nYou can use read_bed() and related functions to load genome annotations and signals.\n\nsnps &lt;- read_bed(\n  valr_example(\"hg19.snps147.chr22.bed.gz\"),\n  n_fields = 6\n)\n\nWarning: The `n_fields` argument of `read_bed()` is deprecated as of valr 0.6.9.\nℹ fields are now determined automatically from the file\n\ngenes &lt;- read_bed(\n  valr_example(\"genes.hg19.chr22.bed.gz\"),\n  n_fields = 6\n)"
+  },
+  {
+    "objectID": "exercises/ex-16.html#what-is-in-snps-and-genes",
+    "href": "exercises/ex-16.html#what-is-in-snps-and-genes",
+    "title": "Mapping chromatin structure and transactions",
+    "section": "What is in snps and genes?",
+    "text": "What is in snps and genes?"
+  },
+  {
+    "objectID": "exercises/ex-16.html#interval-manipulation",
+    "href": "exercises/ex-16.html#interval-manipulation",
+    "title": "Mapping chromatin structure and transactions",
+    "section": "Interval manipulation",
+    "text": "Interval manipulation\nLet’s find and characterize intergenic SNPs. We’ll use the tools bed_substract() and bed_closest(). Take a look and their examples in the documentation to see what they do.\n. . .\nTake a look at the intergenic and nearby objects in the console."
+  },
+  {
+    "objectID": "exercises/ex-16.html#interval-manipulation-1",
+    "href": "exercises/ex-16.html#interval-manipulation-1",
+    "title": "Mapping chromatin structure and transactions",
+    "section": "Interval manipulation",
+    "text": "Interval manipulation\nNow that you have overlaps and distances between SNPs and genes, you can go back to dplyr tools to generate reports."
+  },
+  {
+    "objectID": "exercises/ex-16.html#bed_map-example",
+    "href": "exercises/ex-16.html#bed_map-example",
+    "title": "Mapping chromatin structure and transactions",
+    "section": "\nbed_map() example",
+    "text": "bed_map() example\nCopy / paste these into your console.\n\nx &lt;- tribble(\n  ~chrom, ~start, ~end,\n  \"chr1\", 100,    250,\n  \"chr2\", 250,    500\n)\n\ny &lt;- tribble(\n  ~chrom, ~start, ~end, ~value,\n  \"chr1\", 100,    250,  10,\n  \"chr1\", 150,    250,  20,\n  \"chr2\", 250,    500,  500\n)"
+  },
+  {
+    "objectID": "exercises/ex-16.html#bed_map-example-continued",
+    "href": "exercises/ex-16.html#bed_map-example-continued",
+    "title": "Mapping chromatin structure and transactions",
+    "section": "\nbed_map() example continued",
+    "text": "bed_map() example continued\nFirst examine the intersecting intervals."
   },
   {
     "objectID": "problem-sets/ps-12.html",
@@ -2617,81 +2834,137 @@
     "text": "A yeast gene expression experiment\nNext, we’ll examine some gene expression data from the budding yeast S. cerevisiae. We’ll roughly follow the analysis strategy taken by David Robinson in his blog Variance Explained.\nThe data come from:\n\nBrauer MJ, Huttenhower C, Airoldi EM, Rosenstein R, Matese JC, Gresham D, Boer VM, Troyanskaya OG, Botstein D. Coordination of growth rate, cell cycle, stress response, and metabolic activity in yeast. Mol Biol Cell. 2008 [Link]\n\nThey used chemostats to control the growth rate of cells under different nutrient-limited conditions.\nIn this experiment, cells were grown in different media limited for (one of) glucose, uracil, leucine, sulfate, phosphate, or ammonia. Over a series of fixed, equilibrium growth rates (established by the dilution rate of fresh media), cells were harvested and gene expression was measured by genome-wide microarrays.\nThis is a well organized experiment (so it’s useuful for teaching / learning), but there’s nothing particularly special about the setup.\n\nWe could be measuring protein or metabolite levels instead of gene expression, or analyzing cell features from images taken of the cells.\nWe might be adding an increasing amount of a drug candidate instead of nutrient deprivation\nWe might be altering the growth density of mammalian cells (by plating) instead of controlling growth rate in a chemostat.\n\nLoad libraries\nLoad libraries you’ll need for the analysis below.\nLoad the data\nA raw version of the gene expression data are in:\n\ndata/brauer_gene_exp_wide.tsv.gz\n\nIn addition, another tibbles contains related information:\n\ndata/yeast_go_terms.tsv.gz\n\nLoad each of the above files and inspect.\n\nbrauer_gene_exp_wide &lt;- ___ \nyeast_go_terms &lt;- ___\n\nTidy the data\nAre these data tidy?\n\nbrauer_gene_exp_tidy &lt;-\n  pivot_longer(\n    data = ___,\n    cols = ___,\n    names_to = \"___\",\n    values_to = \"___\"\n  ) |&gt;\n  separate(\n    ___,\n    into = c(\"___\", \"___\"),\n    sep = 1,\n    convert = TRUE\n  )\n\nNext, we want to update the nutrient abbreviations so they’re easier to remember.\n\nnutrient_abbrs &lt;- tribble(\n  ~ nutrient_abbr, ~ nutrient,\n  \"G\", \"Glucose\",\n  \"L\", \"Leucine\",\n  \"P\", \"Phosphate\",\n  \"S\", \"Sulfate\",\n  \"N\", \"Ammonia\",\n  \"U\", \"Uracil\"\n)\n\n# now, we need to *join* the tibbles\nbrauer_gene_exp_tidy &lt;-\n  left_join(___, ___) |&gt;\n  # drop the nutrient abbreviation \n  select(___)\n\nNext, we want the common gene names, which contain useful information for filtering and grouping. These are in yeast_go_terms, so we need to join.\n\n# need a tibble that maps systematic\n# common names\nname_map &lt;- select(\n  yeast_go_terms,\n  ___, ___ \n)\n\n# we need to *join* again . . .\nbrauer_gene_exp_tidy &lt;-\n  left_join(___, ___) |&gt;\n  # reorganize so that systematic and common names come first\n  select(___)\n\nFinally, we’ll drop all rows with NA expression values, and arrange the tibble.\n\nbrauer_gene_exp_tidy &lt;-\n  # drop rows where `exp` is `NA`\n  drop_na(___, ___) |&gt;\n  # arrange by common name, nutrient, and rate\n  arrange(___) \n\nHeatmap of gene expression values\nHeatmaps are a useful approach to visualize thousands of data points, orgnaized by experimental variables to show patterns in the data.\nWe’ll use the ComplexHeatmap package from Bioconductor, which provides a flexible framework for generating heatmaps.\n\nbrauer_mat_dat &lt;-\n  brauer_gene_exp |&gt;\n  unite(___, ___) |&gt;\n  pivot_wider(\n    names_from = ___,\n    values_from = ___\n  )\n\nbrauer_mat &lt;-\n  # remove name columns, just need the data\n  select(___, ___) |&gt;\n  as.matrix()\n\n# Inspect the matrix above.\n\nComplexHeatmap::Heatmap(___)\n\nExpression of select genes associated with nutrient metabolism\nExamine the genes (common_name) that start with LEU.\n\nleu_genes_tbl &lt;- brauer_gene_exp_tidy |&gt;\n  filter(str_detect(___, \"___\"))\n\nggplot(\n  leu_genes_tbl,\n  aes(\n    x = ___,\n    y = ___,\n    color = ___ \n  )\n) +\n  geom_point() + \n  geom_smooth(method = 'lm', se = FALSE) +\n  facet_wrap(~ ___) +\n  theme_cowplot() +\n  scale_color_brewer(palette = \"Dark2\")\n\nModeling the relationship between gene expression and growth rate\nOne gene\nLet’s look specifically at a linear model of the data for LEU1 under leucine starvation.\n\nleu1_tbl &lt;- leu_genes_tbl |&gt;\n  filter(common_name == \"___\" & nutrient == \"___\")\n\nggplot(leu1_tbl, aes(___, ___)) +\n  geom_point(size = 3) +\n  theme_cowplot()\n\nLet’s take a look at the linear model of these data.\n\nmod &lt;- lm(exp ~ rate, data = leu1_tbl)\nsummary(mod)\n\nThe relevant information (rate, intercept, p.value) for the model is not easily accessed.\nWe can use the broom library to tidy the model information.\n\nlibrary(broom)\nbroom::tidy(mod)\n\nAll genes\nDoing this for one gene is interesting, but really we’d like models for all of the conditions so that we can compare between them to identify interesting patterns.\nThe following code chunk will do the following:\n\nnest data for model fitting into a new column data\n\nfit linear models to the data column using purrr::map()\n\ntidy the linear models using broom::tidy()\n\nunnest the model coefficients\n\n\nlinear_model_tbl &lt;-\n  brauer_gene_exp_tidy |&gt;\n  group_by(systematic_name, common_name, nutrient) |&gt;\n  nest() |&gt;\n  # look at the data up to the `nest()` call\n  mutate(\n    model = purrr::map(\n      data,\n      ~ lm(exp ~ rate, data = .)\n    )\n  ) |&gt;\n  mutate(\n    model_tidy = purrr::map(\n      model,\n      broom::tidy\n    )\n  ) |&gt;\n  select(-model, -data) |&gt;\n  unnest(cols = c(model_tidy))\n\nNote that we now have slope and intercept terms for each group we specified.\n\nthe intercept indicates how highly a gene is expressed when starved of a nutrient.\nthe rate indicates how much a gene’s expression responds to increasing nutrient (i.e., growth rate).\nFurther analysis\nAt this point, you can ask questions like the following:\n\nHow do other groups of metabolic genes respond to nutrient deprivation? Start with the ‘PHO’, ‘URA’, and ‘SUL’ genes. Comment on features that stand out, both within and across nutrient deprivation conditions.\nWhat if you include and group by the GO terms in the yeast_go_terms tibble instead of gene name? I.e., you could detect the string leucine in the biological process and group by those instead of gene name (you’d need to join the tidy tibble with the GO information first).\nAre there other genes that behave like LEU1 under leucine starvation? I.e., a strong negative slope in one condition, and positive slopes in the others?"
   },
   {
-    "objectID": "problem-sets/ps-14.html",
-    "href": "problem-sets/ps-14.html",
-    "title": "Problem Set Stats Bootcamp - class 12",
+    "objectID": "exercises/ex_18.html",
+    "href": "exercises/ex_18.html",
+    "title": "Chromatin accessibility II",
     "section": "",
-    "text": "-- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --\nv dplyr     1.1.3     v readr     2.1.4\nv forcats   1.0.0     v stringr   1.5.0\nv ggplot2   3.4.3     v tibble    3.2.1\nv lubridate 1.9.2     v tidyr     1.3.0\nv purrr     1.0.2     \n-- Conflicts ------------------------------------------ tidyverse_conflicts() --\nx dplyr::filter() masks stats::filter()\nx dplyr::lag()    masks stats::lag()\ni Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nAttaching package: 'rstatix'\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\n\nAttaching package: 'janitor'\n\n\nThe following object is masked from 'package:rstatix':\n\n    make_clean_names\n\n\nThe following objects are masked from 'package:stats':\n\n    chisq.test, fisher.test\n\n\nhere() starts at /Users/jayhesselberth/devel/rnabioco/molb-7950\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C4&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00D6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00DC&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E4&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00F6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00FC&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00DF&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E6&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00D8&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00F8&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00C5&gt;' to native encoding\n\n\nWarning in FUN(X[[i]], ...): unable to translate '&lt;U+00E5&gt;' to native encoding\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]\nbiochem &lt;- biochem[, keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\", \"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename gender to sex\nb &lt;- inner_join(biochem, weight, by = \"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex = gender)"
+    "text": "Last class we saw what the different methods to profile chromatin accessibility can tell us about general chromatin structure and possible regulation at specific regions in a small portion of a chromosome.\nWe also want to make sure these conclusions are valid throughout the genome, and today we’ll discuss two approaches for this: metaplots and heatmaps."
   },
   {
-    "objectID": "problem-sets/ps-14.html#problem-1",
-    "href": "problem-sets/ps-14.html#problem-1",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "Problem # 1",
-    "text": "Problem # 1\nCan mouse sex explain mouse cholesterol? {.smaller}"
+    "objectID": "exercises/ex_18.html#genomewide-chromatin-analysis-with-metaplots-and-heatmaps",
+    "href": "exercises/ex_18.html#genomewide-chromatin-analysis-with-metaplots-and-heatmaps",
+    "title": "Chromatin accessibility II",
+    "section": "",
+    "text": "Last class we saw what the different methods to profile chromatin accessibility can tell us about general chromatin structure and possible regulation at specific regions in a small portion of a chromosome.\nWe also want to make sure these conclusions are valid throughout the genome, and today we’ll discuss two approaches for this: metaplots and heatmaps."
   },
   {
-    "objectID": "problem-sets/ps-14.html#step-1-null-hypothesis-and-variable-specification",
-    "href": "problem-sets/ps-14.html#step-1-null-hypothesis-and-variable-specification",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "STEP 1: Null hypothesis and variable specification",
-    "text": "STEP 1: Null hypothesis and variable specification\n\\(\\mathcal{H}_0:\\)\n\n?? is the response variable\n\n\n?? is the explanatory variable"
+    "objectID": "exercises/ex_18.html#setting-up-regions-for-a-meta-plot",
+    "href": "exercises/ex_18.html#setting-up-regions-for-a-meta-plot",
+    "title": "Chromatin accessibility II",
+    "section": "Setting up regions for a meta-plot",
+    "text": "Setting up regions for a meta-plot\nWe need to set up some windows for analyzing signal relative to each TSS. This is an important step that will ultimately impact our interpretations.\nIn genomic meta-plots, you first decide on a window size relevant to the some points of refernce in the genome you are measuring.\nThese reference points could be:\n\ntranscription start or end sites\nboundaries of exons and introns\nenhancers\ncentromeres and telomeres\n\nThe window size should be relevant the reference points, such that small- or large-scale features are emphasized in the plot. Moreover, the window typically spans some distance both up- and downstream of the reference points.\nOnce the window size has been decided, the next step is to make “sub-windows” around a reference point. If gene features are involved, we also need to take strand into account.\n(The state of genome annotation directly influences the quality of the meta-plot or heatmap.)\nFor small features like transcription factor binding sites (8-20 bp), you might set up smaller windows (maybe 1 bp) at a distance ~20 bp up- and downstream of a reference point.\nFor larger features like nucleosome positions or chromatin domains, you might set up larger windows (~200 bp) at distances up to ~10 kbp up- and downstream of a set of reference points."
   },
   {
-    "objectID": "problem-sets/ps-14.html#step-2-fit-linear-model-and-examine-results",
-    "href": "problem-sets/ps-14.html#step-2-fit-linear-model-and-examine-results",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "STEP 2: Fit linear model and examine results",
-    "text": "STEP 2: Fit linear model and examine results\nFit summary:\nCoefficient summary:"
+    "objectID": "exercises/ex_18.html#metaplot-workflow",
+    "href": "exercises/ex_18.html#metaplot-workflow",
+    "title": "Chromatin accessibility II",
+    "section": "Metaplot workflow",
+    "text": "Metaplot workflow\n\n\nMetaplot workflow overview"
   },
   {
-    "objectID": "problem-sets/ps-14.html#collecting-residuals-and-other-information",
-    "href": "problem-sets/ps-14.html#collecting-residuals-and-other-information",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "Collecting residuals and other information",
-    "text": "Collecting residuals and other information\nadd residuals and other information"
+    "objectID": "exercises/ex_18.html#chromatin-accessibility-around-transcription-start-sites-tsss",
+    "href": "exercises/ex_18.html#chromatin-accessibility-around-transcription-start-sites-tsss",
+    "title": "Chromatin accessibility II",
+    "section": "Chromatin accessibility around transcription start sites (TSSs)",
+    "text": "Chromatin accessibility around transcription start sites (TSSs)\n\nregion_size_total &lt;- 1500\nregion_size_half &lt;- region_size_total / 2\nwin_size &lt;- 10\n\n# need a function that generates a sequence of numbers\nwin_coords &lt;- ___(\n  -region_size_half,\n  region_size_half,\n  win_size\n)\n\nNext, we’ll use two valr functions to expand the window of the reference point (bed_slop()) and then break those windows into evenly spaced intervals (bed_makewindows()).\n\nyeast_tss |&gt;\n  bed_???(genome, both = region_size_half) |&gt;\n  bed_???(win_size = win_size)\n\nAt this point, we also address the fact that the TSS data are stranded. Can someone describe what the issue is here, based on the figure above?\n\ntss_win_tbl &lt;-\n  yeast_tss |&gt;\n  bed_slop(genome, both = region_size_half) |&gt;\n  bed_makewindows(win_size = win_size) |&gt;\n  mutate(\n    win_coord = case_when(\n      strand == \"-\" ~ rev(win_coords),\n      .default = win_coords\n    ),\n    .by = name\n  ) |&gt;\n  select(-.win_id, -score, -strand)\n\nThis next step uses valr bed_map(), to calculate the total signal for each window by intersecting signals from the bigWig files.\n\nacc_tbl &lt;-\n  acc_tbl |&gt;\n  mutate(\n    tss_win_sum = purrr::map(\n      big_wig,\n      ~ bed_map(\n        tss_win_tbl,\n        .x,\n        win_signal = sum(score)\n      )\n    )\n  )\n\nOnce we have the values from bed_map(), we can group by win_coord and calculate a summary statistic for each window.\nRemember that win_coord is the same relative position for each TSS, so these numbers represent a composite signal a the same position across all TSS.\n\ntss_meta_tbl &lt;-\n  select(acc_tbl, sample_type, tss_win_sum) |&gt;\n  unnest(cols = c(tss_win_sum)) |&gt;\n  summarize(\n    win_mean = mean(win_signal, na.rm = TRUE),\n    win_sd = sd(win_signal, na.rm = TRUE),\n    .by = c(win_coord, sample_type)\n  ) |&gt;\n  replace_na(list(win_mean = 0, win_sd = 0))"
   },
   {
-    "objectID": "problem-sets/ps-14.html#step-4-visualize-the-error-around-fit",
-    "href": "problem-sets/ps-14.html#step-4-visualize-the-error-around-fit",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "STEP 4: Visualize the error around fit",
-    "text": "STEP 4: Visualize the error around fit\n\n# plot of data with mean and colored by residuals"
+    "objectID": "exercises/ex_18.html#meta-plot-of-signals-around-tsss",
+    "href": "exercises/ex_18.html#meta-plot-of-signals-around-tsss",
+    "title": "Chromatin accessibility II",
+    "section": "Meta-plot of signals around TSSs",
+    "text": "Meta-plot of signals around TSSs\nFinally, let’s plot the data relative to TSS for each of the windows.\n\nn_tss &lt;- length(unique(yeast_tss$name))\n\nggplot(\n  tss_meta_tbl,\n  aes(\n    x = win_coord,\n    y = win_mean\n  )\n) +\n  geom_line(linewidth = 1, color = \"red\") +\n  facet_wrap(\n    ~sample_type,\n    nrow = 2,\n    scales = \"free_y\"\n  ) +\n  theme_minimal_grid() +\n  theme(\n    axis.text.x = element_text(\n      angle = 45,\n      vjust = 1,\n      hjust = 1\n    )\n  ) +\n  labs(\n    x = \"Position relative to TSS (bp)\",\n    y = \"Signal (mean of window sums)\",\n    title = \"Chromatin accessibility around transcription start sites\",\n    subtitle = glue(\"{n_tss} features on S. cerevisiae chrII\")\n  )"
   },
   {
-    "objectID": "problem-sets/ps-14.html#step-3-visualize-the-error-around-the-null-mean-weight",
-    "href": "problem-sets/ps-14.html#step-3-visualize-the-error-around-the-null-mean-weight",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "STEP 3: Visualize the error around the null (mean weight)",
-    "text": "STEP 3: Visualize the error around the null (mean weight)"
+    "objectID": "exercises/ex_18.html#interpreting-the-meta-plots",
+    "href": "exercises/ex_18.html#interpreting-the-meta-plots",
+    "title": "Chromatin accessibility II",
+    "section": "Interpreting the meta-plots",
+    "text": "Interpreting the meta-plots\n\nWhat is the direction of transcription in these meta-plots?\nWhat are the features of chromatin near TSS measured by these different experimental conditions?\nHow do you interpret the increased signal of the +1 nucleosome in the “MNase_Long” condition, relative to e.g. -1, +2, +3, etc.?\nWhat are the differences in ATAC and MNase treatments that lead to these distinctive patterns?"
   },
   {
-    "objectID": "problem-sets/ps-14.html#plot-the-fit-error-and-the-null-error-as-2-panels",
-    "href": "problem-sets/ps-14.html#plot-the-fit-error-and-the-null-error-as-2-panels",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "Plot the fit error and the null error as 2 panels",
-    "text": "Plot the fit error and the null error as 2 panels"
+    "objectID": "exercises/ex_18.html#heatmap-of-signals-around-tsss",
+    "href": "exercises/ex_18.html#heatmap-of-signals-around-tsss",
+    "title": "Chromatin accessibility II",
+    "section": "Heatmap of signals around TSSs",
+    "text": "Heatmap of signals around TSSs\nTo generate a heatmap, we need to reformat our data slightly.\nTake a look at acc_tbl and think about how you might reorganize the following way:\n\nrows contain the data for individual loci (i.e., each TSS)\ncolumns are ordered positions relative to the TSS (i.e., most upstream to most downstream)\n\nWe’re going to plot a heatmap of the “MNase_Long” data. There are two ways to get these data.\n\nmnase_tbl &lt;- acc_tbl[acc_tbl$sample_type == \"MNase_Short\", ]$tss_win_sum[[1]]\n\nOr, using dplyr / tidyr:\n\nmnase_tbl &lt;-\n  filter(\n    acc_tbl,\n    sample_type == \"MNase_Long\"\n  ) |&gt;\n    select(-big_wig) |&gt;\n    unnest(cols = c(tss_win_sum))\n\nEither way, now we need to reformat the data.\n\nmnase_tbl_wide &lt;-\n  mnase_tbl |&gt;\n  select(\n    name,\n    win_coord,\n    win_signal\n  ) |&gt;\n  # this step is important to sort + and - windows correctly\n  arrange(name, win_coord) |&gt;\n  replace_na(\n    list(win_signal = 0)\n  ) |&gt;\n  pivot_???(\n    id_cols = name,\n    names_from = \"win_coord\",\n    values_from = \"win_signal\"\n  )\n\nOnce we have the data reformatted, we just convert to a matrix and feed it to ComplexHeatmap::Heatmap().\n\n# drop the name & convert to matrix\nmnase_mtx &lt;-\n  select(mnase_tbl_wide, -name) |&gt;\n  as.___()\n\nComplexHeatmap::___(\n  mnase_mtx,\n  cluster_columns = FALSE,\n  show_row_dend = FALSE,\n  show_column_names = FALSE,\n  show_heatmap_legend = FALSE\n)"
   },
   {
-    "objectID": "problem-sets/ps-14.html#calculate-r2",
-    "href": "problem-sets/ps-14.html#calculate-r2",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "Calculate \\(R^2\\)\n",
-    "text": "Calculate \\(R^2\\)\n\n\\(R^2 = 1 - \\displaystyle \\frac {SS_{fit}}{SS_{null}}\\)\ncheck agains Rsq in your fit"
+    "objectID": "exercises/ex_18.html#interpreting-meta-plots-and-heatmaps",
+    "href": "exercises/ex_18.html#interpreting-meta-plots-and-heatmaps",
+    "title": "Chromatin accessibility II",
+    "section": "Interpreting meta-plots and heatmaps",
+    "text": "Interpreting meta-plots and heatmaps\nIt’s worth considering what meta-plots and heatmaps can and can’t tell you.\n\nWhat are the similarities and differences between heatmaps and meta-plots?\nWhat types of conclusions can you draw from each type of plot?\nWhat are some features of MNase-seq and ATAC-seq that become more clear when looking across many loci at the same time?\nWhat are some hypotheses you can generate based on these plots?"
   },
   {
-    "objectID": "problem-sets/ps-14.html#compare-to-traditional-t-test",
-    "href": "problem-sets/ps-14.html#compare-to-traditional-t-test",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "Compare to traditional t-test",
-    "text": "Compare to traditional t-test"
+    "objectID": "exercises/ex_18.html#assessing-the-signfiicance-of-observed-patterns.",
+    "href": "exercises/ex_18.html#assessing-the-signfiicance-of-observed-patterns.",
+    "title": "Chromatin accessibility II",
+    "section": "Assessing the signfiicance of observed patterns.",
+    "text": "Assessing the signfiicance of observed patterns.\nOne approach for assessing the signifcance of a pattern (e.g., the density of nucleosomes around transcription start sites), is to randomize the reference points, and use those to remeasure density. This can be done by generating a random set of TSS like:\nn_tss &lt;- length(unique(yeast_tss$name))\nbed_random(genome, length = 1, n = n_tss)\nGiven enough random sites, you will be able to vizulaized what a null distribution of overlaps looks like. If you reframe your question around a response variable (i.e., “how many intact nucleosomes are within 500 bp of a TSS?”) then you can calcuate an empirical p-value using the approaches covered in the bootcamp."
   },
   {
-    "objectID": "problem-sets/ps-14.html#provide-your-interpreation-of-the-result",
-    "href": "problem-sets/ps-14.html#provide-your-interpreation-of-the-result",
-    "title": "Problem Set Stats Bootcamp - class 12",
-    "section": "Provide your interpreation of the result",
-    "text": "Provide your interpreation of the result"
+    "objectID": "exercises/ex_18.html#utility-of-metaplots-and-heatmaps-in-practice",
+    "href": "exercises/ex_18.html#utility-of-metaplots-and-heatmaps-in-practice",
+    "title": "Chromatin accessibility II",
+    "section": "Utility of metaplots and heatmaps in practice",
+    "text": "Utility of metaplots and heatmaps in practice\nThere are a few specific cases when you should consider using the metaplot / heatmap strategy.\nIf you have data from two different conditions (i.e., plus/minus a transcription factor that might change the state of multiple promoters), you could make a metaplot for each of the plus and minus conditions, to see of common patterns manifest. You might also create a heatmap of the conditions, which might reveal smaller groups of affected genes that would be masked by the metaplot aggregation.\nThe approaches are also useful to compare patterns across types of reference points. For example, you might examine chromatin marks (measured by CUT&TAG) relative to the following: transcription starts, exon starts, exon ends, transcription ends."
+  },
+  {
+    "objectID": "problem-sets/ps-18.html",
+    "href": "problem-sets/ps-18.html",
+    "title": "DNA Block - Problem Set 18",
+    "section": "",
+    "text": "Total points: 20. First problem is worth 7 points, second problem is worth 13 points."
+  },
+  {
+    "objectID": "problem-sets/ps-18.html#problem-set",
+    "href": "problem-sets/ps-18.html#problem-set",
+    "title": "DNA Block - Problem Set 18",
+    "section": "",
+    "text": "Total points: 20. First problem is worth 7 points, second problem is worth 13 points."
+  },
+  {
+    "objectID": "problem-sets/ps-18.html#load-libraries",
+    "href": "problem-sets/ps-18.html#load-libraries",
+    "title": "DNA Block - Problem Set 18",
+    "section": "Load libraries",
+    "text": "Load libraries\nStart by loading libraries you need analysis in the code chunk below.\n\nlibrary(tidyverse)\nlibrary(here)\nlibrary(cowplot)\nlibrary(valr)\n\nLoad the data from the MNase-seq experiment.\n\nmnase_tbl &lt;- read_bed(\n  here(\"data/block-dna/yeast_mnase_chrII.bed.gz\")\n)\n\nIn class we learned that MNase digestion yields nucleosomal “footprints” of ~150 bp in size. I’ve added blue vertical lines to emphasize positions of the major peak (intact nucleosomes) as well as smaller “sub-nucleosomal” peak.\n\nWe can calculate the counts for the histogram above and more precisely determine the maximum signal using which.max() to identify the index of the maximum value in a vector (not the value itself!):\n\nfrag_hist &lt;-\n  mnase_tbl |&gt;\n  mutate(frag_len = end - start) |&gt;\n  count(frag_len)\n\n# `which.max` takes a vector and gives us the index of the maximum value\nmax_idx &lt;- which.max(frag_hist$n)\n\n# now we can use index to find the abundant fragment size.\n# we'll use `ncp_max` later in question 2.\nncp_max &lt;- frag_hist$frag_len[max_idx]\n\nSo this tells us that that the most abundant fragment size in the library is ??? bp."
+  },
+  {
+    "objectID": "problem-sets/ps-18.html#question-1-7-points",
+    "href": "problem-sets/ps-18.html#question-1-7-points",
+    "title": "DNA Block - Problem Set 18",
+    "section": "Question 1 – 7 points",
+    "text": "Question 1 – 7 points\nLet’s take a closer look at the some of the smaller fragments in the MNase experiment. In particular, let’s zoom in on the populations of fragments that are smaller than 1 nucleosome in size, the peak between 85 and 95 bp (the left-most blue vertical line).\n\nUse the above strategy to precisely determine the peak of this smaller size range. How big are those fragments? These are called “sub-nucleosomal” fragments.\n\n\n# store the maximum value in `subnuc_max`. we'll use it later in question 2.\n\n\nThe maximum sub-nucleosomal fragments size is ??? bp.\n\n\nDo this one more time, and identify the position of maximum signal in the disome peak (i.e., the fragments protected by two nucleosomes).\n\n\nRecreate the histogram using ggplot2 (using relevant code from class 17) and add the blue vertical lines at the peak positions you calculated, including the position of the disomes above."
+  },
+  {
+    "objectID": "problem-sets/ps-18.html#question-2-13-points",
+    "href": "problem-sets/ps-18.html#question-2-13-points",
+    "title": "DNA Block - Problem Set 18",
+    "section": "Question 2 – 13 points",
+    "text": "Question 2 – 13 points\nNext we’re going to look at where these sub-sucleosomes are with respect to intact nucleosomes.\nOur strategy will be to compare the density of sub-nucleosomes relative to the mid-points of previously mapped nucleosomes. Specifically, our reference point will be the midpoints of the +1 nucleosomes.\nSo you’ll make a metaplot, but instead of using transcription start sites as the reference point, we’ll use the midpoints of the +1 nucleosome, and instead of MNase-seq signal density, you’ll count up the number of individual reads that intersect with windows around those midpoints.\n\n\nFirst, load the relevant data. We’ll re-use the yeast_mnase_chrII.bed.gz data you loaded above, plus you’ll need to load two other files:\n\na “genome” file, sacCer3.chrom.sizes\n\na BED file, yeast_p1_chrII.bed.gz which contains the mid-points of the +1 nucleosomes on chromosome 22. Recall that the +1 nucleosome is the nucleosome downstream of the transcription start site.\n\n\n\n\ngenome &lt;- read_???(here(\"data/block-dna/sacCer3.chrom.sizes\"))\np1_tbl &lt;- read_???(here(\"data/block-dna/yeast_p1_chrII.bed.gz\"))\n\n\n\nNext, we need the mid-points of nucleosomes for comparison. The following function needs fixing. The midpoint is the coordinate halfway between the start and end of a given interval.\nYou’re going to provide the mnase_tbl defined in question 1 to this function, which then:\n\ncalculates fragment lengths\nfilters them based on min_len and max_len\ncalculates the midpoints for each interval\n\nThe output is a new tibble with columns `chrom`, `start`, and `end`.\n\n\n\ncalc_mids &lt;- function(tbl, min_len, max_len) {\n  tbl |&gt;\n    mutate(\n      frag_len = ___ - ___\n    ) |&gt;\n    filter(\n      frag_len &gt;= ___ & frag_len &lt;= ___\n    ) |&gt;\n    mutate(\n      # calculate the half-size interval using `end` and `start,\n      # then add that value to `start`\n      midpoint = ___\n    ) |&gt;\n    select(chrom, midpoint) |&gt;\n    rename(start = midpoint) |&gt;\n    mutate(end = start + 1)\n}\n\n\nNext, use that function to calculate midpoints, and expand these midpoints by 20 bp in each direction with bed_slop().\n\n\nncp_mids_tbl &lt;-\n  # first calculate midpoints for nucleosome fragments within 3 bp length `ncp_max`\n  calc_mids(mnase_tbl, ___ - 3, ___ + 3) |&gt;\n  # expand those windows to get a larter window for intersection\n  bed_slop(genome, both = 20)\n\n# now, do the same for nucleosome fragments of length `subnuc_max`\nsubnuc_mids_tbl &lt;-\n  calc_mids(mnase_tbl, ___ - 3, ___ + 3) |&gt;\n  bed_slop(genome, both = 20)\n\n\nNext, we need to make the reference points for a metaplot. We’ll look 100 bp up- and downstream of the +1 nucleosome positions, and make windows that are 1 bp in size.\n\n\np1_win_tbl &lt;-\n  bed_???(\n    p1_tbl,\n    genome,\n    both = 100\n  ) |&gt;\n  bed_???(win_size = 1)\n\n\n\nAlmost there! Now you just need to identify the number of short and long nuclesome fragments (based on their midpoints) that intersect with the +1 nucleosomes you defined above.\nUse bed_intersect() to identify fragments that overlap, and then just count the number of fragments per .win_id (don’t forget the suffix). Note you will do this separately for the short and long fragments.\n\n\n\nncp_mids_summary_tbl &lt;-\n  bed_intersect(\n    p1_win_tbl,\n    ncp_mids_tbl\n  ) |&gt;\n  dplyr::count(___) |&gt;\n  mutate(type = \"Intact nucleosomes (~149 bp)\")\n\nsubnuc_mids_summary_tbl &lt;-\n  bed_intersect(\n    p1_win_tbl,\n    subnuc_mids_tbl\n  ) |&gt;\n  dplyr::count(___) |&gt;\n  mutate(type = \"Sub-nucleosomes (~90 bp)\")\n\n\nThe following joins the tables you made together, and makes the x-axis more informative, by converting to relative genomic position rather than window ID.\n\n\nwin_ids &lt;- seq(-100, 100, 1)\n\nall_tbl &lt;- bind_rows(\n  ncp_mids_summary_tbl,\n  subnuc_mids_summary_tbl\n) |&gt;\n  mutate(win_ids = win_ids, .by = \"type\")\n\n\nFinally, we plot the data with position on the x-axis, and count on the y-axis.\n\n\nggplot(\n  all_tbl,\n  aes(win_ids, n)\n) +\n  geom_???(color = \"red\") +\n  facet_wrap(\n    ~ type,\n    scales = \"free_y\"\n  ) +\n  theme_minimal_grid() +\n  labs(\n    x = \"Position relative to +1 nucleosome midpoints\",\n    y = \"Number of intersecting fragments\",\n    title = \"Fragment density around +1 nucleosome midpoints\"\n  )"
+  },
+  {
+    "objectID": "problem-sets/ps-18.html#output",
+    "href": "problem-sets/ps-18.html#output",
+    "title": "DNA Block - Problem Set 18",
+    "section": "Output",
+    "text": "Output\nYour plot should look like this.\n\n\nPlot output of step 7"
+  },
+  {
+    "objectID": "problem-sets/ps-18.html#interpretation",
+    "href": "problem-sets/ps-18.html#interpretation",
+    "title": "DNA Block - Problem Set 18",
+    "section": "Interpretation",
+    "text": "Interpretation\nHow do you interpret these plots?\nRationalize the pattern for intact nucleosomes. What pattern did you expect to see?\n\nAnswer.\n\nRationalize the pattern for sub-nucleosomes. How would you describe the positions of sub-nucleosomal fragments, relative to the +1 nucleosome midpoints? What might this mean with respect to gene transcription?\n\nAnswer.\n\nWhat do the differences between signal magnitudes (reflected by the y-axis) mean?\n\nAnswer."
+  },
+  {
+    "objectID": "problem-sets/ps-18.html#submit",
+    "href": "problem-sets/ps-18.html#submit",
+    "title": "DNA Block - Problem Set 18",
+    "section": "Submit",
+    "text": "Submit\nBe sure to click the “Render” button to render the HTML output. Then paste the URL of this Posit Cloud project into the problem set on Canvas."
   },
   {
     "objectID": "exercises/ex-01.html",
