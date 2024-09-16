@@ -96,7 +96,7 @@ In this command, our forward and reverse read fastq files are supplied to -1 and
 Let's take a look at what salmon spits out. The first file we will look at is a log that is found at **/logs/salmon_quant.log**. This file contains info about the quantification, but there's one line of this file in particular that we are interested in. It lets us know how many of the reads in the fastq file that salmon found a home for in the transcriptome fasta.
 
 ``` bash
-less data/block-rna/salmonouts/DIV0.Rep1/logs/salmon_quant.log
+less data/block-rna/differentiation_salmonouts/DIV0.Rep1/logs/salmon_quant.log
 ```
 
 There are a lot of lines in this file, but really only one that we are interested in. We want the one that tells us the "Mapping rate." How could we easily and efficiently look at the mapping rates of all our samples? **Grep!**
@@ -104,7 +104,7 @@ There are a lot of lines in this file, but really only one that we are intereste
 ``` bash
 #Get the mapping rates for all samples
 #In each log file, the line that we are interested in contains the string 'Mapping ' (notice the space)
-grep 'Mapping ' data/block-rna/salmonouts/*/logs/salmon_quant.log
+grep 'Mapping ' data/block-rna/differentiation_salmonouts/*/logs/salmon_quant.log
 ```
 
 ## Moving from transcript quantifications to gene quantifications {.smaller}
@@ -221,8 +221,8 @@ First, we have to tell it where the salmon quantification files (the `quant.sf.g
 # The directory where all of the sample-specific salmon subdirectories live
 
 metadata <- data.frame(
-  sample_id = list.files(here("data/block-rna/salmonouts"), pattern = "^DIV"),
-  salmon_dirs = list.files(here("data/block-rna/salmonouts"), recursive = T, pattern = "quant.sf", full.names = T)
+  sample_id = list.files(here("data/block-rna/differentiation_salmonouts"), pattern = "^DIV"),
+  salmon_dirs = list.files(here("data/block-rna/differentiation_salmonouts"), recursive = T, pattern = "quant.sf", full.names = T)
 ) |>
   separate(col = sample_id, into = c("samp", "rep"), sep = "\\.", remove = F)
 
