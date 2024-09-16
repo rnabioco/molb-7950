@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.5.57">
 
   <meta name="author" content="Jay Hesselberth">
-  <meta name="dcterms.date" content="2024-09-13">
+  <meta name="dcterms.date" content="2024-09-16">
   <title>MOLB 7950 – Chromatin accessibility I</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -418,7 +418,7 @@ Jay Hesselberth
     </div>
 </div>
 
-  <p class="date">2024-09-13</p>
+  <p class="date">2024-09-16</p>
 </section>
 <section id="chromatin-accessbility-patterns-and-genome-function" class="slide level2">
 <h2>Chromatin accessbility patterns and genome function</h2>
@@ -441,14 +441,18 @@ Jay Hesselberth
 <blockquote>
 <p>Zentner GE, Henikoff S. Mot1 redistributes TBP from TATA-containing to TATA-less promoters. Mol Cell Biol. 2013 PMID: 24144978; PMCID: PMC3889552. <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3889552/">[Link]</a> <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE44200">[Data]</a></p>
 </blockquote>
-<h3 id="experimental-consideration">Experimental consideration</h3>
+</section>
+<section id="experimental-consideration" class="slide level2">
+<h2>Experimental consideration</h2>
 <p>In a standard MNase-seq experiment, DNA around ~150 bp is extracted to look closely at nucleosome occupancy &amp; positioning. However, the above study <em>did not</em> perform size selection. This is important as now we can look at both transcription factor binding sites and nucleosome positions.</p>
 </section>
 <section id="fragment-size-distributions-are-informative" class="slide level2">
 <h2>Fragment size distributions are informative</h2>
 <p>First, we will determine the fragment size distributions obtained from the two experiments. These sizes are the fingerprints of particles that were protecting nuclear DNA from digestion.</p>
 <p>I have performed the alignment of paired-end reads and converted all reads into a bed file where each line of the bed file denotes a single fragment from start to end.</p>
-<p>First, load the ATAC-seq reads:</p>
+</section>
+<section id="first-load-the-atac-seq-reads" class="slide level2">
+<h2>First, load the ATAC-seq reads:</h2>
 <div class="cell columns column-output-location">
 <div class="column">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>atac_tbl <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
@@ -473,7 +477,9 @@ Jay Hesselberth
 # ℹ 409,860 more rows</code></pre>
 </div>
 </div></div>
-<p>Next, load the MNase reads.</p>
+</section>
+<section id="next-load-the-mnase-reads." class="slide level2">
+<h2>Next, load the MNase reads.</h2>
 <div class="cell columns column-output-location">
 <div class="column">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>mnase_tbl <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
@@ -503,11 +509,15 @@ Jay Hesselberth
 <section id="expectations-for-chromatin-fragment-lengths" class="slide level2">
 <h2>Expectations for chromatin fragment lengths</h2>
 <p>Let’s remind ourselves of the expectations for chromatin fragment lengths from MNase-seq and ATAC-seq experiments.</p>
-<h3 id="mnase-seq-1">MNase-seq</h3>
-<p><img data-src="../img/block-dna/mnase-overview.png"></p>
-<h3 id="atac-seq-1">ATAC-seq</h3>
-<p><img data-src="../img/block-dna/atac-explain.png"></p>
 </section>
+<section id="mnase-seq-1" class="slide level2">
+<h2>MNase-seq</h2>
+
+<img data-src="../img/block-dna/mnase-overview.png" class="r-stretch"></section>
+<section id="atac-seq-1" class="slide level2">
+<h2>ATAC-seq</h2>
+
+<img data-src="../img/block-dna/atac-explain.png" class="r-stretch"></section>
 <section id="length-distributions-of-chromatin-derived-dna-fragments" class="slide level2">
 <h2>Length distributions of chromatin-derived DNA fragments</h2>
 <p>For the MNase-seq BED file, you see that there are only three columns: <code>chrom</code>, <code>start</code>, and <code>end</code>. Calculating fragment length is simple:</p>
@@ -530,7 +540,9 @@ Jay Hesselberth
 # ℹ 1,236,324 more rows</code></pre>
 </div>
 </div>
-<p>Let’s use this approach to examine the fragment length distribution.</p>
+</section>
+<section id="lets-use-this-approach-to-examine-the-fragment-length-distribution." class="slide level2">
+<h2>Let’s use this approach to examine the fragment length distribution.</h2>
 <div class="cell columns column-output-location">
 <div class="column">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>acc_tbl <span class="ot">&lt;-</span></span>
@@ -566,7 +578,9 @@ Jay Hesselberth
 </div>
 </div>
 </div></div>
-<h3 id="interpretations">Interpretations</h3>
+</section>
+<section id="interpretations" class="slide level2">
+<h2>Interpretations</h2>
 <ol type="1">
 <li class="fragment"><p>How would you describe the two fragment length distributions? Are they similar?</p></li>
 <li class="fragment"><p>Can you make any biological conclusions based on the length distributions?</p></li>
@@ -596,6 +610,9 @@ Jay Hesselberth
 <span id="cb8-17"><a></a>  )</span>
 <span id="cb8-18"><a></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="autocorrelation" class="slide level2">
+<h2>Autocorrelation</h2>
 <p>The <code>density</code> slot contains a vector of densities at base-pair resolution. We will use <code>acf()</code> to calculate the autocorrelation of these values, and will store the tidied result.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>atac_acf_tbl <span class="ot">&lt;-</span></span>
@@ -624,16 +641,14 @@ Jay Hesselberth
 # ℹ 31 more rows</code></pre>
 </div>
 </div>
+</section>
+<section id="autocorrelation-1" class="slide level2">
+<h2>Autocorrelation</h2>
 <p>Now let’s plot the autocorrelation.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-17_files/figure-revealjs/unnamed-chunk-11-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
+
+<img data-src="slides-17_files/figure-revealjs/unnamed-chunk-11-1.png" width="960" class="r-stretch"></section>
+<section id="autocorrelation-2" class="slide level2">
+<h2>Autocorrelation</h2>
 <p>So, it looks like there significant bumps in autocorrelation at 10 and 21 bp positions, indicating that ATAC length distribution is periodic.</p>
 <p>How do we confirm these bumps are interesting? Let’s calculate the acf of a negative control – the length distribution of the MNase data.</p>
 <div class="cell">
@@ -652,23 +667,25 @@ Jay Hesselberth
 <span id="cb11-13"><a></a></span>
 <span id="cb11-14"><a></a><span class="co"># patchwork plot</span></span>
 <span id="cb11-15"><a></a>plot_atac_acf <span class="sc">/</span> plot_mnase_acf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-17_files/figure-revealjs/plot-acfs-1.png" width="960"></p>
-</figure>
+
 </div>
-</div>
-</div>
+<img data-src="slides-17_files/figure-revealjs/plot-acfs-1.png" width="960" class="r-stretch"></section>
+<section id="interpretation" class="slide level2">
+<h2>Interpretation</h2>
 <p>We can see a monotonic decrease in the MNase-seq data, which confirms that the bumps we see are distinctive features of ATAC-seq data.</p>
 <p><strong>What are these features?</strong> Consider that the specificity of binding of DNase, MNase, and Tn5 is not completely generic. These enzymes have specificity for the minor groove of DNA, and there is an optimal substrate geometry for cleavage. You can see this in previous studies, where DNase-seq revealed high-resolution views of DNA:protein structures.</p>
 <p><strong>So what then, exactly is the ~10-11 bp periodicity?</strong> And why is this not present in MNase data?</p>
-<p><img data-src="../img/block-dna/dna-protein-structures.jpg"></p>
 </section>
+<section id="molecular-picture-of-dna-accessibility" class="slide level2">
+<h2>Molecular Picture of DNA accessibility</h2>
+
+<img data-src="../img/block-dna/dna-protein-structures.jpg" class="r-stretch"></section>
 <section id="visualize-read-density-in-genomic-region" class="slide level2 smaller">
 <h2>Visualize read density in genomic region</h2>
 <p>We will use <a href="https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html#2_Basic_Features">Gviz</a> to visualize read densities relative to a reference.</p>
-<h3 id="load-tracks">Load tracks</h3>
+</section>
+<section id="load-tracks" class="slide level2">
+<h2>Load tracks</h2>
 <p>First, we load the gene annotations from the <a href="https://yeastgenome.org">Saccharomyces Genome Databases</a> (SGD).</p>
 <div class="cell columns column-output-location">
 <div class="column">
@@ -689,8 +706,12 @@ Jay Hesselberth
 | annotation features: 7</code></pre>
 </div>
 </div></div>
+</section>
+<section id="import-bigwig" class="slide level2">
+<h2>Import bigWig</h2>
 <p>Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using <code>rtracklayer::import.bw()</code>.</p>
-<p>Inspect the object. What is “GRanges”?</p>
+<p>Inspect the object.</p>
+<p>(What is “GRanges”?)</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a>mnase_nuc_gr <span class="ot">&lt;-</span> <span class="fu">import.bw</span>(</span>
 <span id="cb14-2"><a></a>  <span class="fu">here</span>(<span class="st">"data/block-dna/yeast_mnase_134_160.bw"</span>),</span>
@@ -716,6 +737,9 @@ Jay Hesselberth
   seqinfo: 1 sequence from an unspecified genome</code></pre>
 </div>
 </div>
+</section>
+<section id="load-track" class="slide level2">
+<h2>Load track</h2>
 <p>Next, load the GRanges object as a track for Gviz to plot:</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -727,6 +751,9 @@ Jay Hesselberth
 | strand: * </code></pre>
 </div>
 </div>
+</section>
+<section id="vizualize-a-genomic-region" class="slide level2">
+<h2>Vizualize a genomic region</h2>
 <p>Now, we can make a plot for this particular region of chrII:</p>
 <div class="cell columns column-output-location">
 <div class="column">
@@ -763,6 +790,9 @@ Jay Hesselberth
 <li class="fragment">Load each bigWig as a GRanges object with <code>rtracklayer::import.bw()</code></li>
 <li class="fragment">Convert each to a <code>Gviz::DataTrack()</code> for plotting</li>
 </ol>
+</section>
+<section id="load-the-remaining-data-1" class="slide level2">
+<h2>Load the remaining data</h2>
 <p>We can do this one of two ways. We can do it one-by-one:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="co"># complete the following steps for each of the four tracks</span></span>
@@ -771,6 +801,9 @@ Jay Hesselberth
 <span id="cb18-4"><a></a>big_wig <span class="ot">&lt;-</span> <span class="fu">import.bw</span>(<span class="fu">here</span>(<span class="st">"data/block-dna"</span>, file_name))</span>
 <span id="cb18-5"><a></a>data_track <span class="ot">&lt;-</span> <span class="fu">DataTrack</span>(big_wig, track_name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="load-the-remaining-data-2" class="slide level2">
+<h2>Load the remaining data</h2>
 <p>Or we can create a tibble with file and track names, and use purrr to load and convert each one:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a>track_info <span class="ot">&lt;-</span></span>
@@ -788,6 +821,12 @@ Jay Hesselberth
 <span id="cb19-13"><a></a>    )</span>
 <span id="cb19-14"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="load-the-remaining-data-3" class="slide level2">
+<h2>Load the remaining data</h2>
+</section>
+<section id="load-the-remaining-data-4" class="slide level2">
+<h2>Load the remaining data</h2>
 <p>Now, we just have to make a list of tracks to plot and Gviz takes care of the rest.</p>
 <div class="cell columns column-output-location">
 <div class="column">

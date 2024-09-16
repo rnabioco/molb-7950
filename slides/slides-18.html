@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.5.57">
 
   <meta name="author" content="Jay Hesselberth">
-  <meta name="dcterms.date" content="2024-09-13">
+  <meta name="dcterms.date" content="2024-09-16">
   <title>MOLB 7950 – Chromatin accessibility II</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -350,21 +350,27 @@ Jay Hesselberth
     </div>
 </div>
 
-  <p class="date">2024-09-13</p>
+  <p class="date">2024-09-16</p>
 </section>
 <section id="genomewide-chromatin-analysis-with-meta-plots-and-heatmaps" class="slide level2">
 <h2>Genomewide chromatin analysis with meta-plots and heatmaps</h2>
 <p>Last class we saw what the different methods to profile chromatin accessibility can tell us about general chromatin structure and possible regulation at specific regions in a small portion of a chromosome.</p>
 <p>We also want to make sure these conclusions are valid throughout the genome. Since we want to keep the file sizes small, we will ask if they are valid across an entire chromosome.</p>
-<h3 id="load-libraries">Load libraries</h3>
-<p>First we will plot the profiles of all our data sets relative to the transcription start site (TSS), where all the action seems to be happening:</p>
-<h3 id="load-data">Load data</h3>
+</section>
+<section id="load-libraries" class="slide level2">
+<h2>Load libraries</h2>
+<p>First we will plot the profiles of all our data sets relative to the transcription start site (TSS), where all the action seems to be happening.</p>
+</section>
+<section id="load-data" class="slide level2">
+<h2>Load data</h2>
 <p>First, we need to load relevant files:</p>
 <ul>
 <li class="fragment"><code>yeast_tss_chrII.bed.gz</code> contains transcription start sites (TSS) for genes on yeast chromosome 2.</li>
 <li class="fragment"><code>sacCer3.chrom.sizes</code> contains the sizes of all yeast chromosomes, needed for some of the calculations we’ll do. We’ll grab this from the UCSC download site.</li>
 </ul>
-<h3 id="load-signals">Load signals</h3>
+</section>
+<section id="load-signals" class="slide level2">
+<h2>Load signals</h2>
 <p>Next we’ll load bigWigs for the ATAC and MNase experiments, containing either short or long fragments.</p>
 <p>Recall that the information encoded in short and long fragments should be reflected in our interpretations.</p>
 </section>
@@ -377,6 +383,9 @@ Jay Hesselberth
 <h2>Setting up regions for a meta-plot</h2>
 <p>Next, we need to set up some windows for analyzing signal relative to each TSS. This is an important step that will ultimately impact our interpretations.</p>
 <p>In genomic meta-plots, you first decide on a window size relevant to the features you are measuring, and then make “windows” around a reference point, spanning some distance both up- and downstream. If the features involve gene features, we also need to take strand into account.</p>
+</section>
+<section id="setting-up-regions-for-a-meta-plot-1" class="slide level2">
+<h2>Setting up regions for a meta-plot</h2>
 <p>Reference points could be:</p>
 <ul>
 <li class="fragment">transcription start or end sites</li>
@@ -384,9 +393,18 @@ Jay Hesselberth
 <li class="fragment">enhancers</li>
 <li class="fragment">centromeres and telomeres</li>
 </ul>
+</section>
+<section id="setting-up-regions-for-a-meta-plot-2" class="slide level2">
+<h2>Setting up regions for a meta-plot</h2>
 <p>The window size should be relevant the reference points, such that small- or large-scale features are emphasized in the plot. Moreover, the window typically spans some distance both up- and downstream of the reference points.</p>
+</section>
+<section id="setting-up-regions-for-a-meta-plot-3" class="slide level2">
+<h2>Setting up regions for a meta-plot</h2>
 <p>Once the window size has been decided, the next step is to make “sub-windows” around a reference point. If gene features are involved, we also need to take strand into account.</p>
 <p>(The state of genome annotation directly influences the quality of the meta-plot or heatmap.)</p>
+</section>
+<section id="setting-up-regions-for-a-meta-plot-4" class="slide level2">
+<h2>Setting up regions for a meta-plot</h2>
 <p>For small features like transcription factor binding sites (8-20 bp), you might set up smaller windows (maybe 1 bp) at a distance ~20 bp up- and downstream of a reference point.</p>
 <p>For larger features like nucleosome positions or chromatin domains, you might set up larger windows (~200 bp) at distances up to ~10 kbp up- and downstream of a set of reference points.</p>
 </section>
@@ -395,6 +413,9 @@ Jay Hesselberth
 
 <img data-src="../img/block-dna/metaplot-workflow.png" class="r-stretch quarto-figure-center"><p class="caption">Metaplot workflow overview</p></section>
 <section id="chromatin-accessibility-around-transcription-start-sites-tsss" class="slide level2">
+<h2>Chromatin accessibility around transcription start sites (TSSs)</h2>
+</section>
+<section id="chromatin-accessibility-around-transcription-start-sites-tsss-1" class="slide level2">
 <h2>Chromatin accessibility around transcription start sites (TSSs)</h2>
 <p>Next, we’ll use two valr functions to expand the window of the reference point (<code>bed_slop()</code>) and then break those windows into evenly spaced intervals (<code>bed_makewindows()</code>).</p>
 <div class="cell">
@@ -415,8 +436,17 @@ Jay Hesselberth
 # ℹ 50,877 more rows</code></pre>
 </div>
 </div>
+</section>
+<section id="chromatin-accessibility-around-transcription-start-sites-tsss-2" class="slide level2">
+<h2>Chromatin accessibility around transcription start sites (TSSs)</h2>
 <p>At this point, we also address the fact that the TSS data are stranded. Can someone describe what the issue is here, based on the figure above?</p>
+</section>
+<section id="chromatin-accessibility-around-transcription-start-sites-tsss-3" class="slide level2">
+<h2>Chromatin accessibility around transcription start sites (TSSs)</h2>
 <p>This next step uses valr <code>bed_map()</code>, to calculate the total signal for each window by intersecting signals from the bigWig files.</p>
+</section>
+<section id="chromatin-accessibility-around-transcription-start-sites-tsss-4" class="slide level2">
+<h2>Chromatin accessibility around transcription start sites (TSSs)</h2>
 <p>Once we have the values from <code>bed_map()</code>, we can group by <code>win_coord</code> and calculate a summary statistic for each window.</p>
 <p>Remember that <code>win_coord</code> is the same relative position for each TSS, so these numbers represent a composite signal a the same position across all TSS.</p>
 </section>
@@ -447,9 +477,18 @@ Jay Hesselberth
 <li class="fragment">rows contain the data for individual loci (i.e., each TSS)</li>
 <li class="fragment">columns are ordered positions relative to the TSS (i.e., most upstream to most downstream)</li>
 </ul>
+</section>
+<section id="heatmap-of-signals-around-tsss-1" class="slide level2">
+<h2>Heatmap of signals around TSSs</h2>
 <p>We’re going to plot a heatmap of the “MNase_Long” data. There are two ways to get these data.</p>
 <p>Or, using dplyr / tidyr:</p>
+</section>
+<section id="heatmap-of-signals-around-tsss-2" class="slide level2">
+<h2>Heatmap of signals around TSSs</h2>
 <p>Either way, now we need to reformat the data.</p>
+</section>
+<section id="heatmap-of-signals-around-tsss-3" class="slide level2">
+<h2>Heatmap of signals around TSSs</h2>
 <p>Once we have the data reformatted, we just convert to a matrix and feed it to <code>ComplexHeatmap::Heatmap()</code>.</p>
 
 <img data-src="slides-18_files/figure-revealjs/heatmap-matrix-plot-1.png" width="960" class="r-stretch"></section>
