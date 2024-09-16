@@ -13,10 +13,10 @@ We also want to make sure these conclusions are valid throughout the genome.
 Since we want to keep the file sizes small, we will ask if they are valid across
 an entire chromosome.
 
-### Load libraries
+## Load libraries
 
 First we will plot the profiles of all our data sets relative to the
-transcription start site (TSS), where all the action seems to be happening:
+transcription start site (TSS), where all the action seems to be happening.
 
 ```{r}
 #| label: load-libs
@@ -32,7 +32,7 @@ library(valr)
 library(ComplexHeatmap)
 ```
 
-### Load data
+## Load data
 
 First, we need to load relevant files:
 
@@ -48,7 +48,7 @@ yeast_tss <- read_bed(
 genome <- read_genome("https://hgdownload.soe.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.chrom.sizes")
 ```
 
-### Load signals
+## Load signals
 
 Next we'll load bigWigs for the ATAC and MNase experiments, containing either short or long fragments.
 
@@ -90,6 +90,8 @@ features you are measuring, and then make "windows" around a reference point,
 spanning some distance both up- and downstream. If the features involve gene
 features, we also need to take strand into account.
 
+## Setting up regions for a meta-plot
+
 Reference points could be:
 
 - transcription start or end sites
@@ -97,9 +99,13 @@ Reference points could be:
 - enhancers
 - centromeres and telomeres
 
+## Setting up regions for a meta-plot
+
 The window size should be relevant the reference points, such that small- or
 large-scale features are emphasized in the plot. Moreover, the window typically
 spans some distance both up- and downstream of the reference points.
+
+## Setting up regions for a meta-plot
 
 Once the window size has been decided, the next step is to make "sub-windows"
 around a reference point. If gene features are involved, we also need to take
@@ -107,6 +113,8 @@ strand into account.
 
 (The state of genome annotation directly influences the quality of the meta-plot
 or heatmap.)
+
+## Setting up regions for a meta-plot
 
 For small features like transcription factor binding sites (8-20 bp), you might
 set up smaller windows (maybe 1 bp) at a distance \~20 bp up- and downstream of
@@ -136,6 +144,8 @@ win_coords <- seq(
 )
 ```
 
+## Chromatin accessibility around transcription start sites (TSSs)
+
 Next, we'll use two valr functions to expand the window of the reference
 point (`bed_slop()`) and then break those windows into evenly spaced intervals 
 (`bed_makewindows()`).
@@ -146,6 +156,8 @@ yeast_tss |>
   bed_slop(genome, both = region_size_half) |>
   bed_makewindows(win_size = win_size)
 ```
+
+## Chromatin accessibility around transcription start sites (TSSs)
 
 At this point, we also address the fact that the TSS data are stranded. Can someone describe what the issue is here, based on the figure above?
 
@@ -165,6 +177,8 @@ tss_win_tbl <-
   select(-.win_id, -score, -strand)
 ```
 
+## Chromatin accessibility around transcription start sites (TSSs)
+
 This next step uses valr `bed_map()`, to calculate the total signal for each
 window by intersecting signals from the bigWig files.
 
@@ -183,6 +197,8 @@ acc_tbl <-
     )
   )
 ```
+
+## Chromatin accessibility around transcription start sites (TSSs)
 
 Once we have the values from `bed_map()`, we can group by `win_coord` and
 calculate a summary statistic for each window.
@@ -261,12 +277,14 @@ Take a look at `acc_tbl` and think about how you might reorganize the following 
 - rows contain the data for individual loci (i.e., each TSS)
 - columns are ordered positions relative to the TSS (i.e., most upstream to most downstream)
 
+## Heatmap of signals around TSSs
+
 We're going to plot a heatmap of the "MNase_Long" data. There are two ways
 to get these data.
 
 ```{r}
 #| label: heatmap-data-base
-mnase_tbl <- acc_tbl[acc_tbl$sample_type == "MNase_Short", ]$tss_win_sum[[1]]
+mnase_tbl <- acc_tbl[acc_tbl$sample_type == "MNase_Long", ]$tss_win_sum[[1]]
 ```
 
 Or, using dplyr / tidyr:
@@ -281,6 +299,8 @@ mnase_tbl <-
     select(-big_wig) |>
     unnest(cols = c(tss_win_sum))
 ```
+
+## Heatmap of signals around TSSs
 
 Either way, now we need to reformat the data.
 
@@ -303,6 +323,8 @@ mnase_tbl_wide <-
     values_from = "win_signal"
   )
 ```
+
+## Heatmap of signals around TSSs
 
 Once we have the data reformatted, we just convert to a matrix and feed it to
 `ComplexHeatmap::Heatmap()`.
