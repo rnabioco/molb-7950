@@ -1,7 +1,7 @@
 ---
 title: "Single cell RNA-Seq"
 subtitle: "Introduction and Quality Control"
-author: "Kent Riemondy"
+author: "Kristen Wells-Wrasman"
 ---
 
 
@@ -18,6 +18,7 @@ library(SingleCellExperiment)
 library(scater)
 library(AnnotationHub)
 library(Matrix)
+library(scran)
 
 img_dir <- "../img/block-rna"
 ```
@@ -34,7 +35,9 @@ RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/trai
 <i class="fa fa-envelope"></i> &nbsp; [rbi.fellows@cuanschutz.edu](mailto:rbi.fellows@cuanschutz.edu) 
 <br>
 
-
+## Learning key
+* We will switch between lecture and your exercise `qmd`. 
+* To denote a slide that corresponds to your exercise, I will include `r emo::ji("keyboard")` in the slide title
 
 ## Learning Objectives
 
@@ -53,6 +56,36 @@ RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/trai
 - Describe the importance and reasoning for conducting each step of the analysis
 
 ::: 
+
+::::
+
+## Single cell or bulk? {.smaller}
+
+:::: {.columns .incremental}
+
+::: {.column .incremental}
+### Single cell
+* High level overview of general transcriptomic landscape of genes that are expressed highly at the single cell level
+  * Sequencing depth is low per cell so we only have confident detection of highly expressed genes
+  * Differential expression is less well developed to compare different conditions
+* Most techniques only capture the 5' or 3' end
+* Good for identifying subpopulation of cells that change between conditions
+  * Doesn't require prior knowledge of surface proteins to sort out a population
+  * Doesn't average across all cells in the experiment
+
+:::
+
+::: {.column .incremental}
+### Bulk
+* Global overview of transcriptomic landscape of an entire sample using high to low expressed genes.
+  * Sequencing depth is much deeper so there is higher confidence to detect mid to low range expression
+  * Good for novel transcript identification and assessing how global transcriptome changes between conditions
+* Captures full RNA molecule so can be used for RNA-splicing analysis
+* Doesn't work for subpopulation analysis
+  * All cells are averaged so determining what is happening to one cell type is challengin
+  * Are your results because of a transcriptomic change or a change in cell type frequencies?
+
+:::
 
 ::::
 
@@ -75,6 +108,16 @@ RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/trai
 
 ::::
 
+## Where is the barcode and UMI?
+
+* Below is the design for the 3' 10x genomics assay
+![](../img/block-rna/cb-umi-scheme.jpg)
+
+* Other assays may have different locations of there cell barcode and UMI.
+* These may also be different lengths.
+* Or even on read 2 (ex Parse bioscience).
+* Be sure to check what kit was used to prep your data and always perform sanity checks throughout the analysis!
+
 ## Library prep
 
 ![](../img/block-rna/10x-library-scheme.jpg)
@@ -92,8 +135,6 @@ Smart-seq based scRNA-seq: (bulk-RNA-seq on single cells in individual wells/tub
 [VDJ-Seq](https://www.10xgenomics.com/products/single-cell-immune-profiling): Gene expression + targeted sequencing of T-Cell and B-Cell receptors   
   
 Many others: ATAC, spatial transcriptomics, DNA sequencing, etc. (see [Integrative Single cell analysis](https://www.nature.com/articles/s41576-019-0093-7))  
-
-
 
 ## Overview of analysis steps
 
@@ -234,7 +275,6 @@ quants_tier_mat.gz  # info about mapping for each gene
 whitelist.txt       # valid barcodes discovered by alevin
 ```
 
-
 ## AlevinQC
 
 Can generate interactive QC reports using [alevinQC](https://csoneson.github.io/alevinQC/)
@@ -355,6 +395,10 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
 
 ::::
 
+## Cell calling sanity check {.incremental}
+* It's always a good think to sanity check your data
+* After calling cells, how can we perform a sanity check?
+* I once reanalyzed data from a *published* paper and found that they had treated two separate sequencing runs as two separate captures. If this happens to you, what is a quick and easy way to make sure you treated your data correctly at the cell calling step?
 
 ## Doublets and Multiplets {.smaller}
 
@@ -381,24 +425,28 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
 
 ::::  
 
-## Data import into R
+## Turning to our exercise `r emo::ji("keyboard")`
+Before jumping into the analysis, let's step back and start running through the exercise for today
 
-```{r io}
-#| echo: true
+Start by loading in the packages
+
+```r
+#| label: load-libs
+#| message: false
+#| warning: false
+#| echo: false
+library(here)
+library(scran)
+library(scater)
+library(SingleCellExperiment)
+library(DropletUtils)
 library(tximport)
-data_dir <- here("data/block-rna/scrna/pbmc")
-tx <- tximport(file.path(data_dir, "alevin/quants_mat.gz"),
-  type = "alevin"
-)
-names(tx)
-
-dim(tx$counts)
-
-tx$counts[5:10, 1:3]
+library(Matrix)
+library(AnnotationHub)
+library(eds)
 ```
 
-  
-## Raw data: the UMI count matrix
+## Raw data: the UMI count matrix `r emo::ji("keyboard")`
 
 :::: {.columns}
 
@@ -421,49 +469,209 @@ vals <- c(
   2, 0, 0, 0, 0,
   0, 0, 1, 0, 1
 )
-sm <- Matrix(vals, ncol = 5)
-sm
-summary(sm)
+m <- Matrix(vals, ncol = 5)
+m
+summary(m)
 ```
 
 ::: 
 
 ::::
 
+## Sparse matricies `r emo::ji("keyboard")`
 
-## Filtering low quality cells
+* Use the `as` function to convert to a sparse matrix
+```{r}
+sm <- as(m, "sparseMatrix")
+# alternatively
+# Matrix(vals, nrow = 5)
+sm
+```
+
+* This only stores non-zero values
+* Internally, values are stored as a row column value triplet
 
 ```{r}
-sce <- SingleCellExperiment(list(counts = tx$counts))
-ah <- AnnotationHub()
-ens_db <- ah[["AH113665"]]
+summary(sm)
+```
 
-gene_names <- mapIds(ens_db,
-  keys = rownames(sce),
-  keytype = "GENEID",
-  column = "SYMBOL"
-)
+## Sparse matricies `r emo::ji("keyboard")`
+* Functions at manipulate matricies (`rowMeans`, `colSums`, `apply`, `[`) can be used on sparseMatricies as long as the `Matrix` package is loaded.
 
-rowData(sce)$gene <- gene_names
-rowData(sce)$gene_id <- rownames(sce)
-is_mito <- which(startsWith(rowData(sce)$gene, "MT-"))
-sce <- addPerCellQCMetrics(sce, subsets = list(Mito = is_mito))
+How can we extract the first 2 rows and first 3 columns of the sparse matrix `sm` that we generated above?
 
-plotColData(sce, "sum") +
-  geom_hline(yintercept = c(20000, 2500), linetype = "dashed") +
-  labs(y = "# of UMIs")
+## Sparse matricies `r emo::ji("keyboard")`
+* Functions at manipulate matricies (`rowMeans`, `colSums`, `apply`, `[`) can be used on sparseMatricies as long as the `Matrix` package is loaded.
+
+How can we extract the first 2 rows and first 3 columns of the sparse matrix `sm` that we generated above?
+
+```{r}
+#| eval: false
+# print subset of sm
+sm[1:2, 1:3]
+```
+
+## Sparse matricies `r emo::ji("keyboard")`
+How can we calculate the sum of the columns of `sm`?
+
+
+## Sparse matricies `r emo::ji("keyboard")`
+How can we calculate the sum of the columns of `sm`?
+
+```{r}
+#| eval: false
+# find column sums of sparse
+colSums(sm)
+```
+
+## Base R subsetting `r emo::ji("keyboard")`
+* Basic R concepts for subsetting and referencing columns are important in single cell analysis
+* Vectors can be subset by index (position), logical vector (`c(TRUE, FALSE)`) or name (if vector is named)
+```{r}
+letters
+```
+
+```{r}
+# extract 2nd, 4th, and 6th entry
+letters[c(2, 4, 6)]
+```
+
+## Base R subsetting `r emo::ji("keyboard")`
+
+```{r}
+# subset by creating logical vector
+vowels <- c("a", "e", "i", "o", "u")
+is_a_vowel <- letters %in% vowels
+
+letters[is_a_vowel]
+
+```
+
+## Base R subsetting `r emo::ji("keyboard")`
+
+```{r}
+# name the letters vector with uppercase LETTERS
+names(letters) <- LETTERS
+
+# subset by name
+letters[c("A", "Z")]
+```
+
+## Base R subsetting `r emo::ji("keyboard")`
+* Matrices are 2 dimensional vectors and have similar subsetting rules except there are two dimensions, rows and columns.
+
+`matrix[rows_to_subset, columns_to_subset]`
+
+```{r}
+m <- matrix(1:24, nrow = 6)
+
+# extract 2nd, 4th, and 6th row
+m[c(2, 4, 6), ]
+```
+
+## Base R subsetting `r emo::ji("keyboard")`
+
+```{r}
+# extract 2nd and 4th column
+m[, c(2, 4)]
+```
+
+## Base R subsetting `r emo::ji("keyboard")`
+```{r}
+# first 3 rows and 2nd and 4th column
+m[1:3, c(2, 4)]
+```
+
+## Base R subsetting `r emo::ji("keyboard")`
+```{r}
+# extract rows with totals > 50
+m[rowSums(m) > 50, ]
+```
+
+## Base R subsetting `r emo::ji("keyboard")`
+
+```{r}
+# extract columns with minimum values < 8
+m[, colMins(m) < 8]
+```
+
+## Base R subsetting `r emo::ji("keyboard")`
+The base R `data.frame` and Bioconductor `DataFrame` can also be subset with the `[` and we can reference individual vectors in a data.frame using `$`. 
+
+```{r}
+# first 3 rows and columns of mtcars data.frame
+mtcars[1:3, 1:3]
+```
+
+## Base R subsetting `r emo::ji("keyboard")`
+
+```{r}
+# columns can be referenced using $, which extracts a vector
+mtcars$mpg
+```
+
+## Base R subsetting `r emo::ji("keyboard")`
+```{r}
+# columns can be generated or overwritten using $ with assignment
+mtcars$new_column_name <- "Hello!"
+mtcars$wt <- mtcars$wt * 1000
+
+# We can subset using logical vectors
+# E.g. filter for rows (cars) with mpg > 20
+mtcars[mtcars$mpg > 20, ]
 ```
 
 
-## Filtering low quality cells
+## Read in Alevin output with tximport
+* Now that we know how to work with a sparse matrix, let's read in our data
+* `tximport` has methods for importing the binary data from alevin
+* We need to supply a path to the `quants_mat.gz` file. 
+* If you want to load multiple samples use iteration approaches (e.g. `lapply`, `purrr::map`, a `for` loop). 
+* Also note that the [`eds`](https://bioconductor.org/packages/release/bioc/html/eds.html) package was installed which greatly speeds up the loading of the matrix.
+
+We will load in data from a 10x Genomics scRNA-seq library generated from human periperhal blood mononuclear cells (PMBCS). 
+
+## Read in Alevin output with tximport `r emo::ji("keyboard")`
 
 ```{r}
-plotColData(sce, "subsets_Mito_percent", "sum") +
-  geom_hline(yintercept = 25, linetype = "dashed") +
-  labs(
-    x = "# of UMIs",
-    y = "Percent of UMIs from Mitochondrial RNAs"
-  )
+#| label: tximport
+library(tximport)
+tx <- tximport(
+  here("data/block-rna/scrna/pbmc/alevin/quants_mat.gz"),
+  type = "alevin"
+)
+names(tx)
+```
+
+`tx` is a list with 3 elements, `abundance`, `counts`, and `countsFromAbundance`. Let's look at the counts element
+
+## Read in Alevin output with tximport `r emo::ji("keyboard")`
+```{r}
+mat <- tx$counts
+mat[5:10, 1:3]
+```
+
+Here you can see that `tx$counts` is a sparse matrix that is genes (rows) by cells (columns).
+
+How many barcodes are in `tx$counts`? How many genes?
+
+## Read in Alevin output with tximport `r emo::ji("keyboard")`
+
+```{r}
+#| eval: false
+# TODO Find number of barcodes and genes in tx$counts
+dim(mat)
+```
+
+
+What fraction of the matrix is non-zero? We can use the `nnzero `function from the `Matrix` package check
+
+## Read in Alevin output with tximport `r emo::ji("keyboard")`
+```{r}
+#| eval: false
+nnzero(mat) / length(mat) # (length = # of rows X # of columns)
+# similarily
+sum(mat > 0) / length(mat)
 ```
 
 ## Single cell analysis packages
@@ -482,6 +690,276 @@ Key resource for single cell analysis in Bioconductor:
 ## SingleCellExperiment
 
 ![](../img/block-rna/sce.png)
+
+## Create a SingleCellExperiment object `r emo::ji("keyboard")`
+ A `SingleCellExperiment` object can be created from our sparse matrix using the `SingleCellExperiment()` function.
+
+
+```{r}
+sce <- SingleCellExperiment(list(counts = mat))
+sce
+```
+
+## Exploring the SingleCellExperiment object `r emo::ji("keyboard")`
+The `SingleCellExperiment` object stores the gene x cell count matrix within `assays()`.
+
+```{r}
+# get list of assays
+assays(sce)
+
+# extract single assay
+assay(sce, "counts")[1:4, 1:4]
+```
+
+## Exploring the SingleCellExperiment object `r emo::ji("keyboard")`
+```{r}
+assays(sce)$counts[1:4, 1:4]
+
+```
+
+## Exploring the SingleCellExperiment object `r emo::ji("keyboard")`
+
+```{r}
+# convenience function for counts assay
+counts(sce)[1:4, 1:4]
+```
+
+## Accessing cell metadata `r emo::ji("keyboard")`
+* We generate cell-level information
+ - such as quality control metrics, clustering results, and celltype assignments. 
+* This data is stored within a data frame called `colData`
+* access using `colData()`
+* Specialized Bioconductor specific data.frame class (`DataFrame`) which has similar semantics and functionality to a base R data.frame. 
+
+
+```{r}
+# empty right now.
+colData(sce)
+
+# add a sample annotation
+colData(sce)$cell_source <- "PBMC"
+
+# equivalent approach using $
+sce$cell_source <- "PBMC"
+
+colData(sce)
+```
+
+## Accessing gene metadata `r emo::ji("keyboard")`
+* Gene-level metadata is stored in a data.frame called `rowData()`. 
+* Use the rowData to store gene ids, symbols, and other information about genes.
+
+```{r}
+# empty right now
+rowData(sce)
+```
+
+## Manipulating a SingleCellExperiment `r emo::ji("keyboard")`
+
+* Calculate the total number of counts in each cell and store these counts in the `colData().*
+
+```{r}
+sce$total_counts <- colSums(counts(sce))
+```
+
+## Manipulating a SingleCellExperiment `r emo::ji("keyboard")`
+
+* Calculate the total number of counts for each gene, summed across cells 
+* Calculate the number of cells with > 0 counts per gene
+* store both of these values in the rowData(). 
+```{r}
+rowData(sce)$total_gene_counts <- rowSums(counts(sce))
+rowData(sce)$n_cells_expr <- rowSums(counts(sce) > 0)
+rowData(sce)
+```
+
+## Manipulating a SingleCellExperiment `r emo::ji("keyboard")`
+* We can subset the SingleCellExperiment using the same techniques as base R data.
+* Note that `dplyr` verbs do not work with `SingleCellExperiment`
+
+```r
+data.frame[rows, columns]
+
+sce[genes, cells]
+```
+
+## Manipulating a SingleCellExperiment `r emo::ji("keyboard")`
+* We can subset the SingleCellExperiment using the same techniques as base R data.
+* Note that `dplyr` verbs do not work with `SingleCellExperiment`
+
+```r
+# subset to data from first 4 genes and cells
+sce[1:4, 1:4]
+
+# subset to cells from PBMC cells
+sce[, sce$cell_source == "PBMC"]
+
+
+genes_to_keep <- c("ENSG00000223972", "ENSG00000210195", "ENSG00000210196")
+sce[genes_to_keep, ]
+
+cells_to_keep <- c("ACTATGGAGGTCCCTG", "GCTGCAGTCCGATCTC", "TCTCAGCTCGCCGAAC")
+sce[, cells_to_keep]
+```
+
+## Manipulating a SingleCellExperiment 
+`ncol()`: # of cells  
+`nrow()`: # of gene  
+`dims()`: # of genes and cells  
+`rownames()`: rownames in matrices (e.g. genes)  
+`colnames()`: colnames in matrices (e.g. cells)   
+`cbind()`: combine multiple SingleCellExperiments by column  
+`rbind()`: combine multiple SingleCellExperiments by row  
+
+## Storing gene identifiers 
+Ensembl gene ids are the rownames of our matrix (e.g. ENSG00000289576, ENSG00000221539). 
+* These identifiers are guaranteed to be unique and are more stable and reliable than gene symbols (e.g. ACTB, GAPDH).
+* This becomes important if you want to compare to external datasets or ensure that your data can be easily used by others in the future.
+* But they aren't easy to interpret
+
+
+## Storing gene identifiers `r emo::ji("keyboard")`
+
+```{r}
+ah <- AnnotationHub()
+# download ensembl database
+ens_db <- ah[["AH113665"]]
+
+gene_names <- mapIds(ens_db,
+  keys = rownames(sce),
+  keytype = "GENEID",
+  column = "SYMBOL"
+)
+
+rowData(sce)$gene <- gene_names
+rowData(sce)$gene_id <- rownames(sce)
+rowData(sce)
+```
+
+## Updating our rownames `r emo::ji("keyboard")`
+* Goal rename rownames to symbols
+* Problem, some are ` `, `NA`, or duplicated
+* `uniquifyFeatureNames()` is a convenience function that will rename gene symbols that are `NA` or duplicated values to the ensembl ID or a combination of gene symbol and ensembl ID
+
+```{r}
+rownames(sce) <- uniquifyFeatureNames(
+  rowData(sce)$gene_id,
+  rowData(sce)$gene
+)
+head(rownames(sce))
+```
+
+# Filtering low quality cells `r emo::ji("keyboard")`
+Next we perform some filtering and quality control to remove low expression genes and poor quality cells.
+ 
+Our SingleCellExperiment has `r nrow(sce)` genes in the matrix. Most of these are
+not expressed. We want to exclude these genes as they won't provide any useful
+data for the analysis. 
+
+```{r}
+# exclude genes expressed in fewer than 10 cells (~ 1% of cells)
+rowData(sce)$n_cells <- rowSums(counts(sce) > 0)
+sce <- sce[rowData(sce)$n_cells >= 10, ]
+sce
+```
+
+## Filtering low quality cells
+To exclude low-quality cells we will use the following metrics:
+
+* Number of counts per cell barcode
+* Number of genes detected per barcode
+* The percentage of counts from mitochondrial genes per barcode
+
+A low number of counts, a low number of detected genes, and a high percentage of mitochondrial counts suggests that the cell had a broken membrane and the cytoplasmic mRNA leaked out. 
+
+
+## Filtering low quality cells `r emo::ji("keyboard")`
+
+To calculate these metrics we can use `addPerCellQCMetrics` from scater. Mitochondrial genes are named with a common "MT-" prefix (e.g. MT-CO2, MT-ATP6, MR-RNR2), which we can use to identify them.
+
+```{r}
+# identify subset of genes that are from mitochondrial genome
+is_mito <- startsWith(rowData(sce)$gene, "MT-")
+sce <- addPerCellQCMetrics(sce, subsets = list(Mito = is_mito))
+colData(sce)
+```
+
+## Filtering low quality cells `r emo::ji("keyboard")`
+We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object). 
+
+```{r}
+plotColData(sce, y = "sum")
+```
+
+## Filtering low quality cells `r emo::ji("keyboard")`
+We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object). 
+
+```{r}
+plotColData(sce, y = "detected")
+```
+
+## Filtering low quality cells `r emo::ji("keyboard")`
+We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object). 
+```{r}
+plotColData(sce, y = "detected", x = "sum", colour_by = "subsets_Mito_percent")
+```
+
+## Filtering low quality cells `r emo::ji("keyboard")`
+We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object). 
+```{r}
+plotColData(sce, y = "subsets_Mito_percent", x = "sum") +
+  labs(x = "# of counts")
+```
+
+## Filtering low quality cells `r emo::ji("keyboard")`
+We can also extract `colData` as a dataframe to make custom `ggplot2` plots
+
+```{r}
+cell_info <- as.data.frame(colData(sce))
+ggplot(cell_info, aes(sum, subsets_Mito_percent)) +
+  geom_point()
+```
+
+## Filtering low quality cells `r emo::ji("keyboard")`
+
+* Selecting an appropriate cutoff can be somewhat arbitrary
+* Risk of excluding meaningful cell populations.
+* Start with lenient cutoffs, then later increasing the stringency after examining the clustering and cell types.  
+
+ *How many cells pass these criteria?*
+
+```{r}
+pass_qc <- sce$subsets_Mito_percent < 20 & sce$detected > 500 & sce$sum > 1000
+```
+
+*How many cells pass these criteria?*
+
+## Filtering low quality cells `r emo::ji("keyboard")`
+
+
+```{r}
+sum(pass_qc)
+```
+
+## Visualizing qc failed cells `r emo::ji("keyboard")`
+```{r}
+sce$pass_qc <- sce$subsets_Mito_percent < 20 & sce$detected > 500 & sce$sum > 1000
+
+plotColData(sce,
+  y = "subsets_Mito_percent",
+  x = "sum",
+  colour_by = "pass_qc"
+) +
+  labs(x = "# of counts")
+```
+
+## Remove low quality cells `r emo::ji("keyboard")`
+Lastly we can subset the `SingleCellExperiment` to exclude the low-quality cells. 
+
+```{r}
+sce <- sce[, sce$pass_qc]
+sce
+```
 
 ## Analysis workflow
 
@@ -542,7 +1020,78 @@ digraph workflow {
 }")
 ```
 
-  
+## Normalization `r emo::ji("keyboard")`
+* Normalization attempts to correct for technical biases that will distort biological signal in the data. 
+* A large source of variation arises due to differences in sequencing depth between cells. 
+* This can be seen by performing PCA on the unnormalized counts. 
+* We will use `runPCA` from scater to perform PCA. 
+
+```{r}
+# set seed for functions with a randomized component
+# to obtain the same result each execution
+set.seed(20231023)
+sce <- runPCA(sce, exprs_values = "counts", name = "count_PCA")
+```
+
+## Normalization `r emo::ji("keyboard")`
+* We can now visualize this PCA
+```{r}
+plotReducedDim(sce, "count_PCA", colour_by = "sum")
+```
+
+Note that PC1 is correlated with the total UMI counts (`sum`), meaning that the largest source of variation is related to differences in sequencing depth rather than biological differences between cells. 
+
+# Normalization `r emo::ji("keyboard")`
+```{r}
+plot_df <- makePerCellDF(sce, c("count_PCA", "sum"))
+
+ggplot(plot_df, aes(count_PCA.1, sum)) +
+  geom_point()
+```
+
+## Normalization `r emo::ji("keyboard")`
+* Normalize with `scran`
+1. Crude clustering to group related cells
+2. Identifying a cell-specific normalization factor (size factor)
+3. Scaling the counts by this factor 
+4. log transforming the data (base 2 with a pseudocount). 
+
+
+```{r}
+#| warning: false
+set.seed(20231023)
+clusters <- quickCluster(sce)
+sce <- computeSumFactors(sce, clusters = clusters)
+sce <- logNormCounts(sce)
+```
+
+::: footer
+Description of algorithim:
+Lun AT, Bach K, Marioni JC. Pooling across cells to normalize single-cell RNA sequencing data with many zero counts. Genome Biol. 2016 Apr 27;17:75. doi: 10.1186/s13059-016-0947-7. PMID: 27122128; PMCID: PMC4848819.
+:::
+
+## Normalization `r emo::ji("keyboard")`
+Plot the PCA with normalization
+
+```{r}
+set.seed(20231023)
+sce <- runPCA(sce, exprs_values = "logcounts", name = "PCA")
+```
+
+
+```{r}
+plotReducedDim(sce, "PCA", colour_by = "sum")
+```
+
+## Normalization `r emo::ji("keyboard")`
+```{r}
+plot_df <- makePerCellDF(sce, c("PCA", "sum"))
+ggplot(plot_df, aes(PCA.1, sum)) +
+  geom_point()
+```
+
+PC1 no longer correlates with UMI counts.
+
 ## Further Reading 
 
 eBook: Orchestrating single cell analyses with Bioconductor [eBook](https://osca.bioconductor.org/) [Publication](https://doi.org/10.1038/s41592-019-0654-x)
