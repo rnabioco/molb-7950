@@ -25,25 +25,21 @@ library(broom)
 
 ```
 
-
-
 ## mature mRNA regulatory decisions {.smaller}
 
-Just a review of how RBPs control the fate of mRNAs in  the cytoplasm. 
+Just a review of how RBPs control the fate of mRNAs in the cytoplasm.
 
 ![Mayya and Duchaine](https://www.frontiersin.org/files/Articles/423825/fgene-10-00006-HTML-r1/image_m/fgene-10-00006-g001.jpg)
 
 ## HuR and ARE decay {.smaller}
 
-Remember our analysis of HuR PAR-CLIP data from last class. The model we were testing is that HuR binds to AU-rich elements (ARE) in 3’ UTRs of mRNAs to promote mRNA stability.
+Remember our analysis of HuR PAR-CLIP data from last class. The model we were testing is that HuR binds to AU-rich elements (ARE) in 3' UTRs of mRNAs to promote mRNA stability.
 
-![](/img/block-rna/hur_mechanism.png)
-Model predictions:  
+![](/img/block-rna/hur_mechanism.png) Model predictions:
 
-1. HuR binds to the 3' UTR *and introns*.
-2. HuR binds to AU-rich sequences (AUUUA) *and U-rich sequences*.  
-3. **HuR binding promotes target RNA stabilization (and binding by the other RBPs to the ARE promotes destabilization).**  
-
+1.  HuR binds to the 3' UTR *and introns*.
+2.  HuR binds to AU-rich sequences (AUUUA) *and U-rich sequences*.\
+3.  **HuR binding promotes target RNA stabilization (and binding by the other RBPs to the ARE promotes destabilization).**
 
 ## Set up annotation database {.smaller}
 
@@ -66,9 +62,7 @@ annotations <- build_annotations(genome = 'hg19', annotations = my_hg19_annots)
 
 ```
 
-
-
-## Annotate PAR-CLIP data {.smaller}  
+## Annotate PAR-CLIP data {.smaller}
 
 ```{r}
 #| eval: false
@@ -100,13 +94,9 @@ table(hur_annot$annot.type)
 
 ```
 
+## Summarize PAR-CLIP data to gene level {.smaller}
 
-## Summarize PAR-CLIP data to gene level {.smaller}  
-
-Now we want to get the following info:
-1. The # of HuR binding sites per gene.
-2. The # of HuR binding sites per region per gene.
-
+Now we want to get the following info: 1. The \# of HuR binding sites per gene. 2. The \# of HuR binding sites per region per gene.
 
 ```{r}
 #| eval: false
@@ -136,8 +126,7 @@ colnames(hur_gene_clip)[1] <- "Symbol"
 colnames(hur_gene_clip)[3:4] <- c("utr3","utr5")
 ```
 
-
-## Binding sites per gene {.smaller} 
+## Binding sites per gene {.smaller}
 
 ```{r}
 #| eval: false
@@ -161,7 +150,7 @@ ggplot(hur_gene_clip_long %>%
 
 ```
 
-## Explore intron vs 3' UTR sites {.smaller} 
+## Explore intron vs 3' UTR sites {.smaller}
 
 ```{r}
 #| eval: false
@@ -188,17 +177,16 @@ ggplot(site_combo,
 
 ```
 
-**HuR binds to both introns and 3' UTRs.**  
+**HuR binds to both introns and 3' UTRs.**
 
 **Genes more often have intronic and 3' UTR binding sites than either alone.**
 
-## Load HuR knockdown RNA-seq data {.smaller} 
+## Load HuR knockdown RNA-seq data {.smaller}
 
-1. primary (unspliced precursor) transcripts in `siGFP` treated cells.
-2. mature transcripts in `siGFP` treated cells.
-3. primary (unspliced precursor) transcripts in `siHuR` treated cells.
-4. mature transcripts in `siHuR` treated cells.
-
+1.  primary (unspliced precursor) transcripts in `siGFP` treated cells.
+2.  mature transcripts in `siGFP` treated cells.
+3.  primary (unspliced precursor) transcripts in `siHuR` treated cells.
+4.  mature transcripts in `siHuR` treated cells.
 
 ```{r}
 #| eval: false
@@ -255,17 +243,13 @@ kd_clip <- kd_clip %>%
 
 ```
 
-
-
 ## What is the relationship between HuR binding sites and change expression? {.smaller}
 
-**Does HuR promote the stability of its mRNA targets?**  
+**Does HuR promote the stability of its mRNA targets?**
 
-**Does the number of HuR binding influence the degree of stabilization?**  
+**Does the number of HuR binding influence the degree of stabilization?**
 
-**Does the region of HuR binding influence stabilization?**  
-
-
+**Does the region of HuR binding influence stabilization?**
 
 ## To target or not to target? {.smaller}
 
@@ -299,8 +283,7 @@ ggplot(kd_clip,
 
 ## To target a little or a lot? {.smaller}
 
-**Does the number of HuR binding influence the degree of stabilization?**  
-
+**Does the number of HuR binding influence the degree of stabilization?**
 
 ```{r}
 #| eval: false
@@ -343,11 +326,9 @@ ggplot(data = kd_clip,
 
 ```
 
+## More binding -\> more stabilization? {.smaller}
 
-## More binding -> more stabilization? {.smaller}
-
-**TEST: Does the number of HuR binding influence the degree of stabilization?**  
-
+**TEST: Does the number of HuR binding influence the degree of stabilization?**
 
 ```{r}
 #| eval: false
@@ -371,9 +352,9 @@ tidy(fit_bins) %>%
   gt() 
 ```
 
-## More binding -> more stabilization? {.smaller}
+## More binding -\> more stabilization? {.smaller}
 
-**TEST: Does the number of HuR binding influence the degree of stabilization?** 
+**TEST: Does the number of HuR binding influence the degree of stabilization?**
 
 ```{r}
 #| eval: false

@@ -93,12 +93,10 @@ For example, an RBP might bind to specific sequences in the 3' UTR of an mRNA an
 :::
 :::
 
-
 ## Mapping of RBP binding sites: analysis {.smaller}
 
 ::: columns
-::: {.column width="50%" .nonincremental}
-
+::: {.column .nonincremental width="50%"}
 Most CLIP-seq approaches have single-nucleotide resolution information. However, they vary in the frequency of that information and the efficiency of the procedure.
 
 The basic concept to **call a peak/binding sites** from CLIP-seq:
@@ -108,7 +106,6 @@ The basic concept to **call a peak/binding sites** from CLIP-seq:
 -   Use nucleotide level information to de/refine position of RBP-binding sites
 
 In this class we will be working with PAR-CLIP data. Regardless, I will show you how to access ENCODE eCLIP data. You would easily be able to apply what you learn on those data.
-
 :::
 
 ::: {.column width="50%"}
@@ -116,24 +113,20 @@ In this class we will be working with PAR-CLIP data. Regardless, I will show you
 :::
 :::
 
-
 ## Analysis overview {.smaller}
 
 ::: columns
 ::: {.column width="50%"}
-
 ![](/img/block-rna/workflow.jpg)
+:::
 
-::: 
-::: {.column width="50%" .nonincremental}
-
-1. Filter out low quality or short reads (<18 for larger genomes)  
-2. Trim adapters  
-3. Collapse PCR duplicate reads (molecular indexes)  
-4. Align to genome/transcriptome  
-5. Call peaks
-6. Downstream analysis
-
+::: {.column .nonincremental width="50%"}
+1.  Filter out low quality or short reads (\<18 for larger genomes)\
+2.  Trim adapters\
+3.  Collapse PCR duplicate reads (molecular indexes)\
+4.  Align to genome/transcriptome\
+5.  Call peaks
+6.  Downstream analysis
 :::
 :::
 
@@ -141,52 +134,44 @@ In this class we will be working with PAR-CLIP data. Regardless, I will show you
 
 [Cutadapt](https://cutadapt.readthedocs.io/en/stable/)
 
-
-
 ![](/img/block-rna/adapters.jpg)
-
 
 ## Calling binding sites: PARalyzer {.smaller}
 
 ::: columns
 ::: {.column width="50%"}
+The pattern of T = \> C conversions, coupled with read density, can thus provide a strong signal to generate a high-resolution map of confident RNA-protein interaction sites.
 
-The pattern of T = > C conversions, coupled with read density, can thus provide a strong signal to generate a high-resolution map of confident RNA-protein interaction sites.
-
-A non-parametric kernel-density estimate used to identify the RNA-protein interaction sites from a combination of T = > C conversions and read density.
+A non-parametric kernel-density estimate used to identify the RNA-protein interaction sites from a combination of T = \> C conversions and read density.
 
 See [PARalyzer](https://pubmed.ncbi.nlm.nih.gov/21851591/) for more information.
-
 :::
-::: {.column width="50%"}
 
+::: {.column width="50%"}
 ![](/img/block-rna/FMRreads.png)
 :::
 :::
 
+## Today's menu {.smaller}
 
-## Today's menu {.smaller}  
+We will be starting with position of the binding sites in the genome (the output of PARalyzer) and we will:
 
-We will be starting with position of the binding sites in the genome (the output of PARalyzer) and we will:  
+#### 1a. Annotated the genes and regions of the binding sites.
 
-#### 1a. Annotated the genes and regions of the binding sites.  
+#### 1b. Calculate a summary table for binding sites per gene per region.
 
-#### 1b. Calculate a summary table for binding sites per gene per region.  
-
-#### 2. Perform motif analysis accounting for the background sequence regions.  
- 
+#### 2. Perform motif analysis accounting for the background sequence regions.
 
 ![](/img/block-rna/workflow_2hallf.jpg)
 
 ## Annotation of binding sites {.smaller}
 
-
-Where are the binding sites?  
-- Which genes?  
-- What region of those genes?  
-- How many binding sites per region?  
-- How many binding sites per gene?  
-- How many binding sites per gene by region?  
+Where are the binding sites?\
+- Which genes?\
+- What region of those genes?\
+- How many binding sites per region?\
+- How many binding sites per gene?\
+- How many binding sites per gene by region?
 
 We will use `annotatr` and `Granges` to answer these questions.
 
@@ -220,11 +205,9 @@ annotations <- build_annotations(
 annotations
 ```
 
-
-
 ## Extract annotation categories {.smaller}
 
-What information is contained within the `annotations` object?  
+What information is contained within the `annotations` object?
 
 ```{r}
 #| eval: false
@@ -253,12 +236,7 @@ length_cds <- width(annotation_cds)
 
 ```
 
-
-
-
-
 ## Compare introns and cds length {.smaller}
-
 
 ```{r}
 #| eval: false
@@ -288,34 +266,29 @@ ggplot(all_length,
 
 ```
 
-The typical* human intron is way longer than a CDS exon. 
+The typical\* human intron is way longer than a CDS exon.
 
 ## ELAVL1/HuR {.smaller .nonincremental}
 
-ELAVL1/HuR is an essential RNA-binding protein (RBP). 
+ELAVL1/HuR is an essential RNA-binding protein (RBP).
 
-HuR binds to AU-rich elements (ARE) in 3’ UTRs of mRNAs to promote mRNA stability.
+HuR binds to AU-rich elements (ARE) in 3' UTRs of mRNAs to promote mRNA stability.
 
 ![](/img/block-rna/hur_mechanism.png)
 
+This model makes a few specific prediction:
 
-This model makes a few specific prediction:  
-
-1. HuR binds  to the 3' UTR.  
-2. HuR binds to AU-rich sequences (AUUUA).  
-3. HuR binding promotes target RNA stabilization (and binding by the other RBPs to the ARE promotes destabilization).  
+1.  HuR binds to the 3' UTR.\
+2.  HuR binds to AU-rich sequences (AUUUA).\
+3.  HuR binding promotes target RNA stabilization (and binding by the other RBPs to the ARE promotes destabilization).
 
 We will explore these predictions during the next couple classes.
 
-## PAR-CLIP data {.smaller}  
+## PAR-CLIP data {.smaller}
 
-Reminder that we will be using this resource:
-[rag-tag ENCODE](https://github.com/BIMSBbioinfo/RCAS_meta-analysis)
+Reminder that we will be using this resource: [rag-tag ENCODE](https://github.com/BIMSBbioinfo/RCAS_meta-analysis)
 
 We are looking for an ELAVL1 PAR-CLIP corresponding to this SRA (short-read archive) ID: **SRR248532**
-
-
-
 
 ```{r}
 #| eval: false
@@ -338,8 +311,7 @@ hur_regions <- hur_regions[hur_regions$score > 1]
 hur_regions
 ```
 
-
-## Annotate PAR-CLIP data {.smaller}  
+## Annotate PAR-CLIP data {.smaller}
 
 ```{r}
 #| eval: false
@@ -373,7 +345,6 @@ table()
 
 ```
 
-
 ## HuR binding region preference {.smaller}
 
 It looks like HuR prefers binding to 3' UTRs and introns. That is a bit of a surprise given the model above indicating 3' UTR binding. Well let's take a step back and frame our expectation using what we know about the genome.
@@ -383,7 +354,6 @@ For example, how much of the genome is coding?
 In this case, how many basepairs are introns and 3' UTRs in the genome?
 
 ## binding region length biases {.smaller}
-
 
 ```{r}
 #| eval: false
@@ -415,13 +385,11 @@ barplot(mylengths[1:4], las=2, main = "total bases per category", log="y")
 
 ```
 
-
 ## Control for CLIP-binding sites {.smaller}
 
 We need a way to figure out a null model OR background expectation.
 
-What if we were to take our HuR binding and randomize their position and then repeat the annotation on the randomized binding sites? 
-
+What if we were to take our HuR binding and randomize their position and then repeat the annotation on the randomized binding sites?
 
 ```{r}
 #| eval: false
@@ -496,9 +464,7 @@ ggplot(site_dist_long %>% filter(type=="??"),
 
 ```
 
-
-
-## 5 MINUTE BREAK 
+## 5 MINUTE BREAK
 
 ## What sequence does HuR bind to? {.smaller}
 
@@ -506,9 +472,9 @@ Is it just *AUUUA*?
 
 **Different transcript regions have different nucleotide composition.**
 
-- 5' UTRs are more GC-rich  
+-   5' UTRs are more GC-rich
 
-- 3' UTRs are more AU-rich  
+-   3' UTRs are more AU-rich
 
 ![](/img/block-rna/gc.jpg)
 
@@ -520,13 +486,12 @@ Steps to determine k-mer composition (we use 6mers) for any set of intervals
 
 We'll do it for both HuR binding sites and then compare it to background seqs.
 
-1. Create a `Granges` object for a given annotation category.  
-2. Remove duplicated intervals (from diff transcript  ids) with `reduce`.   
-3. Retrieve seqeunces using  `getSeqs`
-4. Create a dataframe containing the count and frequency of each 6mer.
+1.  Create a `Granges` object for a given annotation category.\
+2.  Remove duplicated intervals (from diff transcript ids) with `reduce`.\
+3.  Retrieve seqeunces using `getSeqs`
+4.  Create a dataframe containing the count and frequency of each 6mer.
 
-
-## Calculate 6mers in HuR sites   {.smaller}
+## Calculate 6mers in HuR sites {.smaller}
 
 Since HuR preferentially binds to 3' UTRs, that is the region we will focus on.
 
@@ -566,10 +531,9 @@ hur_utr3_6mer$hur_utr_freq <- hur_utr3_6mer$hur_utr_count/sum(hur_utr3_6mer$hur_
 
 ```
 
+## Calculate 6mers in 3utrs {.smaller}
 
-## Calculate 6mers in 3utrs   {.smaller}
-
-Next, we will calculate 6mer frequencies in 3' UTRs. This will serve as a null model or background that we can compare with the HuR  binding  site 6mers. 
+Next, we will calculate 6mer frequencies in 3' UTRs. This will serve as a null model or background that we can compare with the HuR binding site 6mers.
 
 ```{r}
 #| eval: false
@@ -598,8 +562,7 @@ utr3_6mer$utr_freq <- utr3_6mer$utr_count/sum(utr3_6mer$utr_count)
 
 ```
 
-## Sequences enriched in hur sites vs 3utr {.smaller}  
-
+## Sequences enriched in hur sites vs 3utr {.smaller}
 
 ```{r}
 #| eval: false
@@ -636,8 +599,7 @@ ggplot(data = utr3_df,
 
 ```
 
-
-## Sequences enriched in hur sites vs 3utr {.smaller}  
+## Sequences enriched in hur sites vs 3utr {.smaller}
 
 Not just AU-rich...
 

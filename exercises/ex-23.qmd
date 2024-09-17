@@ -18,13 +18,11 @@ library(cowplot)
 
 ```
 
-
-
 ## Relating genes and transcripts {.smaller}
 
 We can get this relationships between *transcripts* and *genes* through `biomaRt`.
 
-`biomaRt` has many tables that relate genes, transcripts, and other useful data include gene biotypes and gene ontology categories, even across species.  Let's use it here to get a table of genes and transcripts for the mouse genome.
+`biomaRt` has many tables that relate genes, transcripts, and other useful data include gene biotypes and gene ontology categories, even across species. Let's use it here to get a table of genes and transcripts for the mouse genome.
 
 ```{r}
 #| label: list-marts
@@ -44,7 +42,7 @@ I encourage you to see what is in each mart, but for now we are only going to us
 ```{r choosemart, eval = TRUE}
 #| label: choose-mart
 #| eval: false
-mart <- biomaRt::useMart("??", host = "www.ensembl.org")
+mart <- biomaRt::useMart("??", host = "https://www.ensembl.org")
 ```
 
 ## Using biomaRt {.smaller}
@@ -77,12 +75,11 @@ Ah so we probably want the dataset called 'mmusculus_gene_ensembl'!
 mart <- biomaRt::useMart(
   "ENSEMBL_MART_ENSEMBL",
   dataset = "??",
-  host = "www.ensembl.org"
+  host = "https://www.ensembl.org"
 )
 ```
 
 ## Using biomaRt {.smaller}
-
 
 ```{r}
 #| label: list-attrs
@@ -93,7 +90,7 @@ gt(goodies[1:20,])
 
 ## Using biomaRt {.smaller}
 
-So there are 2885 rows of goodies about the mouse genome and its relationship to *many* other genomes.  However, you can probably see that the ones that are most useful to us right now are right at the top: 'ensembl_transcript_id' and 'ensembl_gene_id'.  We can use those attributes in our mart to make a table relating genes and transcripts.
+So there are 2885 rows of goodies about the mouse genome and its relationship to *many* other genomes. However, you can probably see that the ones that are most useful to us right now are right at the top: 'ensembl_transcript_id' and 'ensembl_gene_id'. We can use those attributes in our mart to make a table relating genes and transcripts.
 
 I'm going to through one more attribute in: external_gene_name. Those are usually more informative than ensembl IDs.
 
@@ -135,7 +132,7 @@ First, we have to tell it where the salmon quantification files (the `quant.sf.g
 
 # The directory where all of the sample-specific salmon subdirectories live
 
-# list.files(here("data/block-rna/salmonouts"), pattern = "^DIV")
+# list.files(here("data/block-rna/differentiation_salmonouts"), pattern = "quant.sf")
 
 metadata <- data.frame(sample_id = ??, # sample id
                    salmon_dirs = ?? # path to files
@@ -181,7 +178,7 @@ txi <- tximport(files = salmdir,
 
 ## Gene expression data with `tximport` {.smaller}
 
-Notice how we chose *lengthscaledTPM* for our abundance measurement. This is going to give us TPM values (transcripts per million) for expression in the $abundance slot. Let's check out what we have now.
+Notice how we chose *lengthscaledTPM* for our abundance measurement. This is going to give us TPM values (transcripts per million) for expression in the \$abundance slot. Let's check out what we have now.
 
 ```{r}
 #| label: make-tpms
@@ -199,9 +196,9 @@ gt(tpms[1:50, ])
 
 Alright, not bad!
 
-Let's stop and think for a minute about what `tximport` did and the metric we are using (TPM).  What does *transcripts per million* mean?  Well, it means pretty much what it sounds like.  For every million transcripts in the cell, X of them are this particular transcript.  Importantly, this means when this TPM value was calculated from the number of *counts* a transcript received, this number had to be adjusted for both the total number of counts in the library and the length of a transcript.
+Let's stop and think for a minute about what `tximport` did and the metric we are using (TPM). What does *transcripts per million* mean? Well, it means pretty much what it sounds like. For every million transcripts in the cell, X of them are this particular transcript. Importantly, this means when this TPM value was calculated from the number of *counts* a transcript received, this number had to be adjusted for both the total number of counts in the library and the length of a transcript.
 
-If sample A had twice the number of total counts as sample B (i.e. was sequenced twice as deeply), then you would expect every transcript to have approximately twice the number of counts in sample A as it has in sample B.  Similarly, if transcript X is twice as long as transcript Y, then you would expect that if they were equally expressed (i.e. the same number of transcript X and transcript Y molecules were present in the sample) that X would have approximately twice the counts that Y does. Working with expression units of TPM incorporates both of these normalizations.
+If sample A had twice the number of total counts as sample B (i.e. was sequenced twice as deeply), then you would expect every transcript to have approximately twice the number of counts in sample A as it has in sample B. Similarly, if transcript X is twice as long as transcript Y, then you would expect that if they were equally expressed (i.e. the same number of transcript X and transcript Y molecules were present in the sample) that X would have approximately twice the counts that Y does. Working with expression units of TPM incorporates both of these normalizations.
 
 So, if a TPM of X means that for every million transcripts in the sample that X of them were the transcript of interest, then the sum of TPM values across all species should equal one million, right?
 
@@ -254,9 +251,7 @@ gt(tpms.txs[1:20, ])
 
 OK so lets look at the expression of ENSMUSG00000020634 in the first sample (DIVminus8.Rep1).
 
-
 ## TPM as an expression metric {.smaller}
-
 
 ```{r txequalsgene}
 #| eval: false
@@ -274,15 +269,14 @@ genetpm
 
 ## Basic RNAseq QC {.smaller}
 
-OK now that we've got expression values for all genes, we now might want to use these expression values to learn a little bit about our samples. One simple question is 
-> Are replicates similar to each other, or at least more similar to each other than to other samples?
+OK now that we've got expression values for all genes, we now might want to use these expression values to learn a little bit about our samples. One simple question is \> Are replicates similar to each other, or at least more similar to each other than to other samples?
 
-If our data is worth anything at all, we would hope that differences between replicates, which are supposed to be drawn from the same condition, are smaller than differences between samples drawn from different conditions. If that's not true, it could indicate that one replicate is very different from other replciates (in which case we might want to remove it), or that the data in general is of poor quality. 
+If our data is worth anything at all, we would hope that differences between replicates, which are supposed to be drawn from the same condition, are smaller than differences between samples drawn from different conditions. If that's not true, it could indicate that one replicate is very different from other replciates (in which case we might want to remove it), or that the data in general is of poor quality.
 
 Another question is:
 
 > How similar is each sample to every other sample?
-    
+
 In our timecourse, we might expect that samples drawn from adjacent timepoints might be more similar to each other than samples from more distant timepoints.
 
 ## Hierarchical clustering {.smaller}
@@ -311,11 +305,11 @@ ggplot(tpms, aes(x = log??(DIVminus8.Rep1 + ??), y = log??(DIVminus8.Rep2 + ??))
 
 ## Hierarchical clustering {.smaller}
 
-With RNAseq data, the variance of a gene's expression increases as the expression increases. However, using a pseudocount and taking the log of the expression value actually reverses this trend.  Now, genes with the lowest expression have the most variance. Why is this a problem? Well, the genes with the most variance are going to be the ones that contribute the most to intersample differences. Ideally, we would like to therefore remove the relationship between expression and variance.
+With RNAseq data, the variance of a gene's expression increases as the expression increases. However, using a pseudocount and taking the log of the expression value actually reverses this trend. Now, genes with the lowest expression have the most variance. Why is this a problem? Well, the genes with the most variance are going to be the ones that contribute the most to intersample differences. Ideally, we would like to therefore remove the relationship between expression and variance.
 
 There are transformations, notably `rlog` and `vst`, that are made to deal with this, but they are best used when dealing with normalized **count** data, while here we are dealing with TPMs. We will talk about counts later, but not here.
 
-So, for now, we will take another approach of simply using an expression threshold. Any gene that does not meet our threshold will be excluded from the analysis. Obviously where to set this threshold is a bit subjective.  For now, we will set this cutoff at 1 TPM.
+So, for now, we will take another approach of simply using an expression threshold. Any gene that does not meet our threshold will be excluded from the analysis. Obviously where to set this threshold is a bit subjective. For now, we will set this cutoff at 1 TPM.
 
 ## Hierarchical clustering {.smaller}
 
@@ -351,7 +345,7 @@ ggplot(tpms_filt, aes(x = log10(DIVminus8.Rep1 + 1e-3), y = log10(DIVminus8.Rep2
 
 ## Filtering lowly expressed genes {.smaller}
 
-OK that's two samples compared to each other, but now we want to see how **all** samples compare to **all** other samples. Before we do this we need to decide how to apply our expression cutoff across many samples. Should a gene have to meet the cutoff in only one sample?  In all samples?  Let's start by saying it has to meet the cutoff in at least half of the 30 samples.
+OK that's two samples compared to each other, but now we want to see how **all** samples compare to **all** other samples. Before we do this we need to decide how to apply our expression cutoff across many samples. Should a gene have to meet the cutoff in only one sample? In all samples? Let's start by saying it has to meet the cutoff in at least half of the 30 samples.
 
 ```{r}
 #| label: filter-exp
@@ -371,7 +365,7 @@ nrow(tpms.cutoff)
 
 ## Correlating gene expression values {.smaller}
 
-Now we can use the `cor` function to calculate pairwise correlations in a .red[*matrix*] of TPM values.
+Now we can use the `cor` function to calculate pairwise correlations in a .red\[*matrix*\] of TPM values.
 
 ```{r}
 #| label: make-matrix
@@ -387,8 +381,7 @@ head(tpms.cor)
 
 ## Hierarchical clustering {.smaller}
 
-Now we need to plot these and have similar samples (i.e. those that are highly correlated with each other) be clustered near to each other.
-We will use `pheatmap` to do this.
+Now we need to plot these and have similar samples (i.e. those that are highly correlated with each other) be clustered near to each other. We will use `pheatmap` to do this.
 
 ```{r}
 #| label: make-heatmap
@@ -405,8 +398,7 @@ pheatmap(
 )
 ```
 
-
-This looks pretty good! There are two main points to takeaway here.  First, all replicates for a given timepoint are clustering with each other. Second, you can kind of derive the order of the timepoints from the clustering. The biggest separation is between early (DIVminus8 to DIV1) and late (DIV7 to DIV28). After that you can then see finer-grained structure.
+This looks pretty good! There are two main points to takeaway here. First, all replicates for a given timepoint are clustering with each other. Second, you can kind of derive the order of the timepoints from the clustering. The biggest separation is between early (DIVminus8 to DIV1) and late (DIV7 to DIV28). After that you can then see finer-grained structure.
 
 ## PCA analysis {.smaller}
 
@@ -498,4 +490,3 @@ ggplot(data = tpms.pca.pc,
   ) +
   geom_text_repel()
 ```
-
