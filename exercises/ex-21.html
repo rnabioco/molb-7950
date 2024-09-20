@@ -241,7 +241,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <a href="#where-do-transcription-factors-bind-in-the-genome" id="toc-where-do-transcription-factors-bind-in-the-genome" class="nav-link active" data-scroll-target="#where-do-transcription-factors-bind-in-the-genome">Where do transcription factors bind in the genome?</a>
   <ul class="collapse">
 <li><a href="#data-download-and-pre-processing" id="toc-data-download-and-pre-processing" class="nav-link" data-scroll-target="#data-download-and-pre-processing">Data download and pre-processing</a></li>
+  </ul>
+</li>
   <li>
+<a href="#cutrun-analysis" id="toc-cutrun-analysis" class="nav-link" data-scroll-target="#cutrun-analysis">CUT&amp;RUN analysis</a>
+  <ul class="collapse">
+<li>
 <a href="#motif-discovery" id="toc-motif-discovery" class="nav-link" data-scroll-target="#motif-discovery">Motif discovery</a>
   <ul class="collapse">
 <li><a href="#theory" id="toc-theory" class="nav-link" data-scroll-target="#theory">Theory</a></li>
@@ -302,7 +307,152 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">bedtools</span> genomecov <span class="at">-i</span> Abf1.bed <span class="at">-g</span> sacCer3.chrom.sizes <span class="at">-bg</span> <span class="op">&gt;</span> Abf1.bg</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bedGraphToBigWig</span> Abf1.bg sacCer3.chrom.sizes Abf1.bw</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The bigWig files are available here in the <code>data/</code> directory.</p>
-</section><section id="motif-discovery" class="level2"><h2 class="anchored" data-anchor-id="motif-discovery">Motif discovery</h2>
+</section></section><section id="cutrun-analysis" class="level1"><h1>CUT&amp;RUN analysis</h1>
+<div class="cell">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/">here</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rnabioco/valr/">valr</a></span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: replacing previous import 'S4Arrays::makeNindexFromArrayViewport' by
+'DelayedArray::makeNindexFromArrayViewport' when loading 'SummarizedExperiment'</code></pre>
+</div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># genome viz</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">TxDb.Scerevisiae.UCSC.sacCer3.sgdGene</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/ivanek/Gviz">Gviz</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">rtracklayer</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># motif discovery and viz</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">BSgenome.Scerevisiae.UCSC.sacCer3</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">rGADEM</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">seqLogo</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">track_start</span> <span class="op">&lt;-</span> <span class="fl">90000</span></span>
+<span><span class="va">track_end</span> <span class="op">&lt;-</span> <span class="fl">150000</span></span>
+<span></span>
+<span><span class="co"># genes track</span></span>
+<span><span class="va">sgd_genes_trk</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/GeneRegionTrack-class.html">GeneRegionTrack</a></span><span class="op">(</span></span>
+<span>    <span class="va">TxDb.Scerevisiae.UCSC.sacCer3.sgdGene</span>,</span>
+<span>    chromosome <span class="op">=</span> <span class="st">"chrII"</span>,</span>
+<span>    start <span class="op">=</span> <span class="va">track_start</span>,</span>
+<span>    end <span class="op">=</span> <span class="va">track_end</span>,</span>
+<span>    background.title <span class="op">=</span> <span class="st">"white"</span>,</span>
+<span>    col.title <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>    fontsize <span class="op">=</span> <span class="fl">16</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># signal tracks</span></span>
+<span><span class="va">track_info</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span></span>
+<span>    file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"CutRun_Reb1_lt120.bw"</span>,</span>
+<span>      <span class="st">"CutRun_Abf1_lt120.bw"</span>,</span>
+<span>      <span class="st">"CutRun_Reb1_gt150.bw"</span>,</span>
+<span>      <span class="st">"CutRun_Abf1_gt150.bw"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    sample_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>      <span class="st">"Reb1_Short"</span>, <span class="st">"Abf1_Short"</span>,</span>
+<span>      <span class="st">"Reb1_Long"</span>, <span class="st">"Abf1_Long"</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span></span>
+<span>    file_path <span class="op">=</span> <span class="fu"><a href="https://here.r-lib.org//reference/here.html">here</a></span><span class="op">(</span><span class="st">"data/block-dna"</span>, <span class="va">file_name</span><span class="op">)</span>,</span>
+<span>    big_wig <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span></span>
+<span>      <span class="va">file_path</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/rtracklayer/man/BigWigFile.html">import.bw</a></span><span class="op">(</span><span class="va">.x</span>, as <span class="op">=</span> <span class="st">"GRanges"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    data_track <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html">map2</a></span><span class="op">(</span></span>
+<span>      <span class="va">big_wig</span>, <span class="va">sample_type</span>,</span>
+<span>      <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/DataTrack-class.html">DataTrack</a></span><span class="op">(</span></span>
+<span>        <span class="va">.x</span>,</span>
+<span>        name <span class="op">=</span> <span class="va">.y</span>,</span>
+<span>        background.title <span class="op">=</span> <span class="st">"white"</span>,</span>
+<span>        col.title <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>        col.axis <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>        fontsize <span class="op">=</span> <span class="fl">16</span></span>
+<span>      <span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">sample_type</span>, <span class="va">big_wig</span>, <span class="va">data_track</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># x-axis track</span></span>
+<span><span class="va">x_axis_trk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/GenomeAxisTrack-class.html">GenomeAxisTrack</a></span><span class="op">(</span></span>
+<span>  col <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  col.axis <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>  fontsize <span class="op">=</span> <span class="fl">16</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/Gviz/man/plotTracks.html">plotTracks</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>    <span class="va">sgd_genes_trk</span>,</span>
+<span>    <span class="va">track_info</span><span class="op">$</span><span class="va">data_track</span>,</span>
+<span>    <span class="va">x_axis_trk</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  from <span class="op">=</span> <span class="va">track_start</span>,</span>
+<span>  to <span class="op">=</span> <span class="va">track_end</span>,</span>
+<span>  chromosome <span class="op">=</span> <span class="st">"chrII"</span>,</span>
+<span>  transcriptAnnotation <span class="op">=</span> <span class="st">"gene"</span>,</span>
+<span>  shape <span class="op">=</span> <span class="st">"arrow"</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"histogram"</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ex-21_files/figure-html/plot-tracks-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">abf1_tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rnabioco.github.io/valr/reference/read_bigwig.html">read_bigwig</a></span><span class="op">(</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html">here</a></span><span class="op">(</span><span class="st">"data/block-dna/CutRun_Abf1_lt120.bw"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">total_reads</span> <span class="op">&lt;-</span> <span class="fl">16e6</span></span>
+<span></span>
+<span><span class="va">genome</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rnabioco.github.io/valr/reference/read_genome.html">read_genome</a></span><span class="op">(</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html">here</a></span><span class="op">(</span><span class="st">"data/block-dna/sacCer3.chrom.sizes"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">genome_size</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">genome</span><span class="op">$</span><span class="va">size</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">genome_lambda</span> <span class="op">&lt;-</span> <span class="va">total_reads</span> <span class="op">/</span> <span class="va">genome_size</span></span>
+<span><span class="va">peak_calls</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">abf1_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># define single-base sites</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span></span>
+<span>    midpoint <span class="op">=</span> <span class="va">start</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="op">(</span><span class="va">end</span> <span class="op">-</span> <span class="va">start</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    start <span class="op">=</span> <span class="va">midpoint</span>,</span>
+<span>    end <span class="op">=</span> <span class="va">start</span> <span class="op">+</span> <span class="fl">1</span>,</span>
+<span>    <span class="co"># use the poisson to calculate a p-value with the genome-wide lambda</span></span>
+<span>    pval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html">dpois</a></span><span class="op">(</span><span class="va">score</span>, <span class="va">genome_lambda</span><span class="op">)</span>,</span>
+<span>    <span class="co"># convert p-values to FDR</span></span>
+<span>    fdr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/p.adjust.html">p.adjust</a></span><span class="op">(</span><span class="va">pval</span>, method <span class="op">=</span> <span class="st">"fdr"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="va">peak_calls_sig</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span></span>
+<span>    <span class="va">peak_calls</span>,</span>
+<span>    <span class="va">fdr</span> <span class="op">==</span> <span class="fl">0</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># collapse neighboring, significant sites</span></span>
+<span>  <span class="fu"><a href="https://rnabioco.github.io/valr/reference/bed_merge.html">bed_merge</a></span><span class="op">(</span>max_dist <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span></span>
+<span>  <span class="va">peak_calls_sig</span>,</span>
+<span>  <span class="va">chrom</span> <span class="op">==</span> <span class="st">"chrII"</span> <span class="op">&amp;</span></span>
+<span>    <span class="va">start</span> <span class="op">&gt;=</span> <span class="va">track_start</span> <span class="op">&amp;</span></span>
+<span>    <span class="va">end</span> <span class="op">&lt;=</span> <span class="va">track_end</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 3
+  chrom  start    end
+  &lt;chr&gt;  &lt;int&gt;  &lt;int&gt;
+1 chrII 100248 100289
+2 chrII 101292 101393
+3 chrII 124916 124949
+4 chrII 136181 136264
+5 chrII 141070 141121</code></pre>
+</div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">peak_calls_gr</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/GRanges-class.html">GRanges</a></span><span class="op">(</span></span>
+<span>    seqnames <span class="op">=</span> <span class="va">peak_calls_sig</span><span class="op">$</span><span class="va">chrom</span>,</span>
+<span>    ranges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/IRanges/man/IRanges-constructor.html">IRanges</a></span><span class="op">(</span><span class="va">peak_calls_sig</span><span class="op">$</span><span class="va">start</span>, <span class="va">peak_calls_sig</span><span class="op">$</span><span class="va">end</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="motif-discovery" class="level2"><h2 class="anchored" data-anchor-id="motif-discovery">Motif discovery</h2>
 <section id="theory" class="level3"><h3 class="anchored" data-anchor-id="theory">Theory</h3>
 <p>There are two major approaches to defining sequence motifs enriched in a sample: enumerative and probabilistic approaches.</p>
 <p>Here we’ll apply a probabilistic approach (GADEM) to discover motifs in a collection of DNA sequences. During the RNA block, you’ll learn about k-mer analysis, which is a form of enumerative approach.</p>
@@ -322,7 +472,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Examine the discovered motifs, and plot as a logo using <code><a href="https://rdrr.io/pkg/seqLogo/man/seqLogo.html">seqLogo::seqLogo()</a></code>.</li>
 </ol>
 <div class="cell">
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">peak_seqs</span> <span class="op">&lt;-</span> <span class="fu">BSgenome</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html">getSeq</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">peak_seqs</span> <span class="op">&lt;-</span> <span class="fu">BSgenome</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Biostrings/man/getSeq.html">getSeq</a></span><span class="op">(</span></span>
 <span>  <span class="co"># provided by BSgenome.Scerevisiae.UCSC.sacCer3</span></span>
 <span>  <span class="va">Scerevisiae</span>,</span>
 <span>  <span class="va">peak_calls_gr</span></span>
@@ -336,14 +486,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># look at the consensus motifs</span></span>
-<span><span class="fu">consensus</span><span class="op">(</span><span class="va">gadem</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/gadem-class.html">consensus</a></span><span class="op">(</span><span class="va">gadem</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># how many consensus motifs are there?</span></span>
-<span><span class="fu">nOccurrences</span><span class="op">(</span><span class="va">gadem</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/rGADEM/man/gadem-class.html">nOccurrences</a></span><span class="op">(</span><span class="va">gadem</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now let’s look at the sequence logo for the top hit.</p>
 <div class="cell">
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pwm</span> <span class="op">&lt;-</span> <span class="va">gadem</span><span class="op">@</span><span class="va">motifList</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">pwm</span></span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pwm</span> <span class="op">&lt;-</span> <span class="va">gadem</span><span class="op">@</span><span class="va">motifList</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">@</span><span class="va">pwm</span></span>
 <span></span>
 <span><span class="fu">seqLogo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/seqLogo/man/seqLogo.html">seqLogo</a></span><span class="op">(</span><span class="va">pwm</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>

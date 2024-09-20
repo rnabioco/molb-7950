@@ -447,11 +447,19 @@ Jay Hesselberth
 <section>
 <section id="cutrun-analysis" class="title-slide slide level1 center">
 <h1>CUT&amp;RUN analysis</h1>
+<div class="cell">
 
-</section>
-<section id="examine-genome-coverage" class="slide level2">
-<h2>Examine genome coverage</h2>
-
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 3
+  chrom  start    end
+  &lt;chr&gt;  &lt;int&gt;  &lt;int&gt;
+1 chrII 100248 100289
+2 chrII 101292 101393
+3 chrII 124916 124949
+4 chrII 136181 136264
+5 chrII 141070 141121</code></pre>
+</div>
+</div>
 <img data-src="slides-21_files/figure-revealjs/plot-tracks-1.png" width="960" class="r-stretch"></section>
 <section id="how-do-proteins-recognize-specific-locations-in-the-genome-to-bind" class="slide level2">
 <h2>How do proteins recognize specific locations in the genome to bind?</h2>
@@ -486,32 +494,170 @@ Jay Hesselberth
 <li class="fragment">Examine the discovered motifs, and plot as a logo using <code>seqLogo::seqLogo()</code>.</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>peak_seqs <span class="ot">&lt;-</span> BSgenome<span class="sc">::</span><span class="fu">getSeq</span>(</span>
-<span id="cb2-2"><a></a>  <span class="co"># provided by BSgenome.Scerevisiae.UCSC.sacCer3</span></span>
-<span id="cb2-3"><a></a>  Scerevisiae,</span>
-<span id="cb2-4"><a></a>  peak_calls_gr</span>
-<span id="cb2-5"><a></a>)</span>
-<span id="cb2-6"><a></a></span>
-<span id="cb2-7"><a></a><span class="co"># takes ~2 minutes to run</span></span>
-<span id="cb2-8"><a></a>gadem <span class="ot">&lt;-</span> rGADEM<span class="sc">::</span><span class="fu">GADEM</span>(</span>
-<span id="cb2-9"><a></a>  peak_seqs,</span>
-<span id="cb2-10"><a></a>  <span class="at">genome =</span> Scerevisiae,</span>
-<span id="cb2-11"><a></a>  <span class="at">verbose =</span> <span class="dv">1</span></span>
-<span id="cb2-12"><a></a>)</span>
-<span id="cb2-13"><a></a></span>
-<span id="cb2-14"><a></a><span class="co"># look at the consensus motifs</span></span>
-<span id="cb2-15"><a></a><span class="fu">consensus</span>(gadem)</span>
-<span id="cb2-16"><a></a></span>
-<span id="cb2-17"><a></a><span class="co"># how many consensus motifs are there?</span></span>
-<span id="cb2-18"><a></a><span class="fu">nOccurrences</span>(gadem)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>peak_seqs <span class="ot">&lt;-</span> BSgenome<span class="sc">::</span><span class="fu">getSeq</span>(</span>
+<span id="cb3-2"><a></a>  <span class="co"># provided by BSgenome.Scerevisiae.UCSC.sacCer3</span></span>
+<span id="cb3-3"><a></a>  Scerevisiae,</span>
+<span id="cb3-4"><a></a>  peak_calls_gr</span>
+<span id="cb3-5"><a></a>)</span>
+<span id="cb3-6"><a></a></span>
+<span id="cb3-7"><a></a><span class="co"># takes ~2 minutes to run</span></span>
+<span id="cb3-8"><a></a>gadem <span class="ot">&lt;-</span> rGADEM<span class="sc">::</span><span class="fu">GADEM</span>(</span>
+<span id="cb3-9"><a></a>  peak_seqs,</span>
+<span id="cb3-10"><a></a>  <span class="at">genome =</span> Scerevisiae,</span>
+<span id="cb3-11"><a></a>  <span class="at">verbose =</span> <span class="dv">1</span></span>
+<span id="cb3-12"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>*** Start C Programm ***
+==============================================================================================
+input sequence file:  
+number of sequences and average length:             452 114.8
+Use pgf method to approximate llr null distribution
+parameters estimated from sequences in:  
+
+number of GA generations &amp; population size:         5 100
+
+PWM score p-value cutoff for binding site declaration:      2.000000e-04
+ln(E-value) cutoff for motif declaration:           0.000000
+
+number of EM steps:                     40
+minimal no. sites considered for a motif:           22
+
+[a,c,g,t] frequencies in input data:                0.281618 0.218382 0.218382 0.281618
+==============================================================================================
+*** Running an unseeded analysis ***
+GADEM cycle  1: enumerate and count k-mers... top 3  4, 5-mers: 10 32 58
+Done.
+Initializing GA... Done.
+GADEM cycle[  1] generation[  1] number of unique motif: 4
+   spacedDyad: cgtgnnnnnnnnnncgacg  motifConsensus: nwnrTCAynnnnnACGrnn   0.60 fitness: -425.76
+   spacedDyad: tttcnnnnnnnnttcg     motifConsensus: wyTTTTTTyTTTTTyk      0.90 fitness: -134.01
+   spacedDyad: aaatnnnnncttcc       motifConsensus: AymArGTTACTTCC        0.10 fitness:  -41.29
+   spacedDyad: ttttgnnnaaaat        motifConsensus: sTTGkACkAAAAT         0.10 fitness:  -30.86
+
+GADEM cycle[  1] generation[  2] number of unique motif: 4
+   spacedDyad: catcnnnnnnnncgacg    motifConsensus: nrTCAyywnnnACGrnn     0.90 fitness: -459.04
+   spacedDyad: ttttnnnnnnnnncggc    motifConsensus: yTTTTTTyTTTTTykky     0.90 fitness: -142.43
+   spacedDyad: aaatnnnnncttcc       motifConsensus: AymArGTTACTTCC        0.10 fitness:  -41.29
+   spacedDyad: ttttgnnnaaaat        motifConsensus: sTTGkACkAAAAT         0.10 fitness:  -30.86
+
+GADEM cycle[  1] generation[  3] number of unique motif: 5
+   spacedDyad: catcnnnnnnnncgacg    motifConsensus: nrTCAyywnnnACGrnn     0.90 fitness: -459.04
+   spacedDyad: ttttnnnnnnnnncggc    motifConsensus: yTTTTTTyTTTTTykky     0.90 fitness: -142.43
+   spacedDyad: aaatnnnnncttcc       motifConsensus: AymArGTTACTTCC        0.10 fitness:  -41.29
+   spacedDyad: ttttgnnnaaaat        motifConsensus: sTTGkACkAAAAT         0.10 fitness:  -30.86
+   spacedDyad: cgtcnnnnnnnnncacg    motifConsensus: mGACmymdTCAyCCACG     0.10 fitness:  -11.04
+
+GADEM cycle[  1] generation[  4] number of unique motif: 5
+   spacedDyad: ccgtnnnnnnnntca      motifConsensus: yCGTnnnwrrTGAyn       0.90 fitness: -472.08
+   spacedDyad: ttttnnnnnnnnncggc    motifConsensus: yTTTTTTyTTTTTykky     0.90 fitness: -142.43
+   spacedDyad: aaatnnnnncttcc       motifConsensus: AymArGTTACTTCC        0.10 fitness:  -41.29
+   spacedDyad: ttttgnnnaaaat        motifConsensus: sTTGkACkAAAAT         0.10 fitness:  -30.86
+   spacedDyad: cgtcnnnnnnnnncacg    motifConsensus: mGACmymdTCAyCCACG     0.10 fitness:  -11.04
+
+GADEM cycle[  1] generation[  5] number of unique motif: 5
+   spacedDyad: ccgtnnnnnnnntca      motifConsensus: yCGTnnnwrrTGAyw       1.00 fitness: -476.24
+   spacedDyad: ttttnnnnnnnnncggc    motifConsensus: yTTTTTTyTTTTTykky     0.90 fitness: -142.43
+   spacedDyad: aaatnnnnncttcc       motifConsensus: AymArGTTACTTCC        0.10 fitness:  -41.29
+   spacedDyad: ttttgnnnaaaat        motifConsensus: sTTGkACkAAAAT         0.10 fitness:  -30.86
+   spacedDyad: cgtcnnnnnnnnncacg    motifConsensus: mGACmymdTCAyCCACG     0.10 fitness:  -11.04
+
+*** Running an unseeded analysis ***
+GADEM cycle  2: enumerate and count k-mers... top 3  4, 5-mers: 10 20 30
+Done.
+Initializing GA... Done.
+GADEM cycle[  2] generation[  1] number of unique motif: 4
+   spacedDyad: ggaaannnnnnnttc      motifConsensus: GGAmATATwGCmTmT       0.10 fitness:  -49.91
+   spacedDyad: ggtgcnnntttg         motifConsensus: rGkGGrAswTTG          0.10 fitness:   -9.35
+   spacedDyad: tttcannnnnnnaaaag    motifConsensus: nsTCAmACwGrmAAwmw     1.00 fitness:   -6.73
+   spacedDyad: caaannnnnnnnnngcggc  motifConsensus: sAwAAATGTwTkrysCsGm   0.10 fitness:   -6.29
+
+GADEM cycle[  2] generation[  2] number of unique motif: 4
+   spacedDyad: gaannnnnnnnnnttttc   motifConsensus: CmrAyAkrmAAwAwTTCC    0.30 fitness:  -86.10
+   spacedDyad: ggtgcnnntttg         motifConsensus: rGkGGrAswTTG          0.10 fitness:   -9.35
+   spacedDyad: caaannnnnnnnnngcggc  motifConsensus: sAwAAATGTwTkrysCsGm   0.10 fitness:   -6.29
+   spacedDyad: tttgnnnnnntgg        motifConsensus: TTTkTywkwsTGr         0.10 fitness:   -6.22
+
+GADEM cycle[  2] generation[  3] number of unique motif: 4
+   spacedDyad: gaannnnnnnnnnttttc   motifConsensus: CmrAyAkrmAAwAwTTCC    0.30 fitness:  -86.10
+   spacedDyad: ggtgcnnntttg         motifConsensus: rGkGGrAswTTG          0.10 fitness:   -9.35
+   spacedDyad: caaannnnnnnnnngcggc  motifConsensus: sAwAAATGTwTkrysCsGm   0.10 fitness:   -6.29
+   spacedDyad: tttgnnnnnntgg        motifConsensus: TTTkTywkwsTGr         0.10 fitness:   -6.22
+
+GADEM cycle[  2] generation[  4] number of unique motif: 4
+   spacedDyad: gaannnnnnnnnnttttc   motifConsensus: CmrAyAkrmAAwAwTTCC    0.30 fitness:  -86.10
+   spacedDyad: gaaaannnnnnnnttc     motifConsensus: AAAAAkGyAwTAyyyC      0.20 fitness:  -21.81
+   spacedDyad: ccttgnnnnnnnnnnaaatg motifConsensus: yyTTTTymTAsTGkGAmATT  0.10 fitness:  -12.64
+   spacedDyad: ggtgcnnntttg         motifConsensus: rGkGGrAswTTG          0.10 fitness:   -9.35
+
+GADEM cycle[  2] generation[  5] number of unique motif: 7
+   spacedDyad: gaannnnnnnnnnttttc   motifConsensus: CmrAyAkrmAAwAwTTCC    0.30 fitness:  -86.10
+   spacedDyad: tttttnnnnnnnnngcgg   motifConsensus: TwwTwCnwTykTrsGmGA    0.20 fitness:  -44.11
+   spacedDyad: gaaaannnnnnnnttc     motifConsensus: AAAAAkGyAwTAyyyC      0.20 fitness:  -21.81
+   spacedDyad: ccttgnnnnnnnnnnaaatg motifConsensus: yyTTTTymTAsTGkGAmATT  0.10 fitness:  -12.64
+   spacedDyad: ttcnnnnnnnnaaa       motifConsensus: sTCAsACTrwmAAA        0.20 fitness:  -10.44
+   spacedDyad: caaannnnnnnnnnaaatg  motifConsensus: mAAwsTyCymmhmArrAAA   0.80 fitness:  -10.18
+   spacedDyad: tttgnnnnnngcggc      motifConsensus: wyTGksTGryGCGsC       0.10 fitness:   -2.96
+
+*** Running an unseeded analysis ***
+GADEM cycle  3: enumerate and count k-mers... top 3  4, 5-mers: 8 16 22
+Done.
+Initializing GA... Done.
+GADEM cycle[  3] generation[  1] number of unique motif: 1
+   spacedDyad: cggcnnctttt          motifConsensus: CGGCCTykTsT           0.10 fitness:   18.49
+
+GADEM cycle[  3] generation[  2] number of unique motif: 1
+   spacedDyad: cggcnnctttt          motifConsensus: CGGCCTykTsT           0.10 fitness:   18.49
+
+GADEM cycle[  3] generation[  3] number of unique motif: 1
+   spacedDyad: tggtgnnnnnnncgcc     motifConsensus: TGGwrAyTTykGyksk      0.10 fitness:   13.43
+
+GADEM cycle[  3] generation[  4] number of unique motif: 1
+   spacedDyad: cggcctttt            motifConsensus: CGGCCTTGT             0.10 fitness:    9.00
+
+GADEM cycle[  3] generation[  5] number of unique motif: 1
+   spacedDyad: cggcctttt            motifConsensus: CGGCCTTGT             0.10 fitness:    9.00
+
+*** Running an unseeded analysis ***
+GADEM cycle  4: enumerate and count k-mers... top 3  4, 5-mers: 4 16 22
+Done.
+Initializing GA... Done.
+GADEM cycle[  4] generation[  1] number of unique motif: 1
+   spacedDyad: ccatcgcacc           motifConsensus: ACATTGCACy            0.10 fitness:   24.22
+
+GADEM cycle[  4] generation[  2] number of unique motif: 1
+   spacedDyad: ccatcgcacc           motifConsensus: ACATTGCACy            0.10 fitness:   24.22
+
+GADEM cycle[  4] generation[  3] number of unique motif: 1
+   spacedDyad: ccatcgcacc           motifConsensus: ACATTGCACy            0.10 fitness:   24.22
+
+GADEM cycle[  4] generation[  4] number of unique motif: 1
+   spacedDyad: gaannnnnnnnngccg     motifConsensus: kAATkkkwTkrTGCsG      0.10 fitness:   19.67
+
+GADEM cycle[  4] generation[  5] number of unique motif: 1
+   spacedDyad: gaannnnnnnnngccg     motifConsensus: kAATkkkwTkrTGCsG      0.10 fitness:   19.67</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="co"># look at the consensus motifs</span></span>
+<span id="cb5-2"><a></a><span class="fu">consensus</span>(gadem)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "yCGTnnnwrrTGAyn"                  "yTkTTTTyTyTTTyk"                 
+[3] "AmsyTAkATCkTTGkACTAAAATCTGykwCwm" "nAAnwwmGACmCATTCACCCACGsnnynynm" 
+[5] "yCmwmyAkrmAAwAwTTCCy"             "nAAAAATGTAwTAyCyC"               
+[7] "ACGGCCTTGTs"                     </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="co"># how many consensus motifs are there?</span></span>
+<span id="cb7-2"><a></a><span class="fu">nOccurrences</span>(gadem)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 436 152  33  31  94  41  47</code></pre>
+</div>
 </div>
 <p>Now let’s look at the sequence logo for the top hit.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>pwm <span class="ot">&lt;-</span> gadem<span class="sc">@</span>motifList[[<span class="dv">1</span>]]<span class="sc">@</span>pwm</span>
-<span id="cb3-2"><a></a></span>
-<span id="cb3-3"><a></a>seqLogo<span class="sc">::</span><span class="fu">seqLogo</span>(pwm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>pwm <span class="ot">&lt;-</span> gadem<span class="sc">@</span>motifList[[<span class="dv">1</span>]]<span class="sc">@</span>pwm</span>
+<span id="cb9-2"><a></a></span>
+<span id="cb9-3"><a></a>seqLogo<span class="sc">::</span><span class="fu">seqLogo</span>(pwm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
 </div>
-</section>
+<img data-src="slides-21_files/figure-revealjs/plot-logo-1.png" width="960" class="r-stretch"></section>
 <section id="questions" class="slide level2">
 <h2>Questions</h2>
 <ol type="1">
