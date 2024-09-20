@@ -57,7 +57,7 @@ library(rGADEM)
 library(seqLogo)
 ```
 
-## Examine genome coverage
+
 
 ```{r}
 #| label: make-tracks
@@ -133,6 +133,46 @@ plotTracks(
   shape = "arrow",
   type = "histogram"
 )
+abf1_tbl <- read_bigwig(here("data/block-dna/CutRun_Abf1_lt120.bw"))
+total_reads <- 16e6
+
+genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
+genome_size <- sum(genome$size)
+
+genome_lambda <- total_reads / genome_size
+peak_calls <-
+  abf1_tbl |>
+  # define single-base sites
+  mutate(
+    midpoint = start + round((end - start) / 2),
+    start = midpoint,
+    end = start + 1,
+    # use the poisson to calculate a p-value with the genome-wide lambda
+    pval = dpois(score, genome_lambda),
+    # convert p-values to FDR
+    fdr = p.adjust(pval, method = "fdr")
+  )
+
+peak_calls_sig <-
+  filter(
+    peak_calls,
+    fdr == 0
+  ) |>
+  # collapse neighboring, significant sites
+  bed_merge(max_dist = 20)
+
+filter(
+  peak_calls_sig,
+  chrom == "chrII" &
+    start >= track_start &
+    end <= track_end
+)
+
+peak_calls_gr <-
+  GRanges(
+    seqnames = peak_calls_sig$chrom,
+    ranges = IRanges(peak_calls_sig$start, peak_calls_sig$end)
+  )
 ```
 
 ## How do proteins recognize specific locations in the genome to bind?
@@ -166,7 +206,7 @@ We'll use the [rGADEM](https://bioconductor.org/packages/release/bioc/html/rGADE
 2.  Provide those sequences and the genomic background to `rGADEM::GADEM()`, which runs uses an Expectation-Maximization (EM) approach to identify and refine motifs.
 3.  Examine the discovered motifs, and plot as a logo using `seqLogo::seqLogo()`.
 
-```{r, eval = FALSE}
+```{r}
 #| label: motif-discovery
 #| echo: true
 
@@ -192,7 +232,7 @@ nOccurrences(gadem)
 
 Now let's look at the sequence logo for the top hit.
 
-```{r, eval = FALSE}
+```{r}
 #| label: plot-logo
 #| echo: true
 

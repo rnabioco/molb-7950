@@ -33,6 +33,143 @@ bedGraphToBigWig Abf1.bg sacCer3.chrom.sizes Abf1.bw
 
 The bigWig files are available here in the `data/` directory.
 
+# CUT&RUN analysis
+
+```{r}
+#| label: load-libs
+#| message: false
+library(tidyverse)
+library(here)
+library(valr)
+
+# genome viz
+library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
+library(Gviz)
+library(rtracklayer)
+
+# motif discovery and viz
+library(BSgenome.Scerevisiae.UCSC.sacCer3)
+library(rGADEM)
+library(seqLogo)
+```
+
+
+
+```{r}
+#| label: make-tracks
+track_start <- 90000
+track_end <- 150000
+
+# genes track
+sgd_genes_trk <-
+  GeneRegionTrack(
+    TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,
+    chromosome = "chrII",
+    start = track_start,
+    end = track_end,
+    background.title = "white",
+    col.title = "black",
+    fontsize = 16
+  )
+
+# signal tracks
+track_info <-
+  tibble(
+    file_name = c(
+      "CutRun_Reb1_lt120.bw",
+      "CutRun_Abf1_lt120.bw",
+      "CutRun_Reb1_gt150.bw",
+      "CutRun_Abf1_gt150.bw"
+    ),
+    sample_type = c(
+      "Reb1_Short", "Abf1_Short",
+      "Reb1_Long", "Abf1_Long"
+    )
+  ) |>
+  mutate(
+    file_path = here("data/block-dna", file_name),
+    big_wig = purrr::map(
+      file_path, ~ import.bw(.x, as = "GRanges")
+    ),
+    data_track = purrr::map2(
+      big_wig, sample_type,
+      ~ DataTrack(
+        .x,
+        name = .y,
+        background.title = "white",
+        col.title = "black",
+        col.axis = "black",
+        fontsize = 16
+      )
+    )
+  ) |>
+  dplyr::select(sample_type, big_wig, data_track)
+
+# x-axis track
+x_axis_trk <- GenomeAxisTrack(
+  col = "black",
+  col.axis = "black",
+  fontsize = 16
+)
+```
+
+
+```{r}
+#| label: plot-tracks
+plotTracks(
+  c(
+    sgd_genes_trk,
+    track_info$data_track,
+    x_axis_trk
+  ),
+  from = track_start,
+  to = track_end,
+  chromosome = "chrII",
+  transcriptAnnotation = "gene",
+  shape = "arrow",
+  type = "histogram"
+)
+abf1_tbl <- read_bigwig(here("data/block-dna/CutRun_Abf1_lt120.bw"))
+total_reads <- 16e6
+
+genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
+genome_size <- sum(genome$size)
+
+genome_lambda <- total_reads / genome_size
+peak_calls <-
+  abf1_tbl |>
+  # define single-base sites
+  mutate(
+    midpoint = start + round((end - start) / 2),
+    start = midpoint,
+    end = start + 1,
+    # use the poisson to calculate a p-value with the genome-wide lambda
+    pval = dpois(score, genome_lambda),
+    # convert p-values to FDR
+    fdr = p.adjust(pval, method = "fdr")
+  )
+
+peak_calls_sig <-
+  filter(
+    peak_calls,
+    fdr == 0
+  ) |>
+  # collapse neighboring, significant sites
+  bed_merge(max_dist = 20)
+
+filter(
+  peak_calls_sig,
+  chrom == "chrII" &
+    start >= track_start &
+    end <= track_end
+)
+
+peak_calls_gr <-
+  GRanges(
+    seqnames = peak_calls_sig$chrom,
+    ranges = IRanges(peak_calls_sig$start, peak_calls_sig$end)
+  )
+```
 
 ## Motif discovery
 
