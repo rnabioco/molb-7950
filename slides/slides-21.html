@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.5.57">
 
   <meta name="author" content="Jay Hesselberth">
-  <meta name="dcterms.date" content="2024-09-18">
+  <meta name="dcterms.date" content="2024-09-20">
   <title>MOLB 7950 – Factor-centric chromatin analysis</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -415,14 +415,19 @@ Jay Hesselberth
     </div>
 </div>
 
-  <p class="date">2024-09-18</p>
+  <p class="date">2024-09-20</p>
 </section>
-<section>
-<section id="where-do-transcription-factors-bind-in-the-genome" class="title-slide slide level1 center">
-<h1>Where do transcription factors bind in the genome?</h1>
+<section id="where-do-transcription-factors-bind-in-the-genome" class="slide level2">
+<h2>Where do transcription factors bind in the genome?</h2>
 <p>Today we’ll look at where two yeast transcription factors bind in the genome using CUT&amp;RUN.</p>
+</section>
+<section id="where-do-transcription-factors-bind-in-the-genome-1" class="slide level2">
+<h2>Where do transcription factors bind in the genome?</h2>
 <p>Techniques like CUT&amp;RUN require an affinity reagent (e.g., an antibody) that uniquely recognizes a transcription factor in the cell.</p>
 <p>This antibody is added to permeabilized cells, and the antibody associates with the epitope. A separate reagent, a fusion of Protein A (which binds IgG) and micrococcal nuclease (MNase) then associates with the antibody. Addition of calcium activates MNase, and nearby DNA is digested. These DNA fragments are then isolated and sequenced to identify sites of TF association in the genome.</p>
+</section>
+<section id="where-do-transcription-factors-bind-in-the-genome-2" class="slide level2">
+<h2>Where do transcription factors bind in the genome?</h2>
 
 <img data-src="../img/block-dna/skene-fig-1a.png" class="r-stretch quarto-figure-center"><p class="caption">Fig 1a, Skene et al.</p></section>
 <section id="data-download-and-pre-processing" class="slide level2">
@@ -438,12 +443,7 @@ Jay Hesselberth
 <span id="cb1-6"><a></a><span class="ex">bedtools</span> genomecov <span class="at">-i</span> Abf1.bed <span class="at">-g</span> sacCer3.chrom.sizes <span class="at">-bg</span> <span class="op">&gt;</span> Abf1.bg</span>
 <span id="cb1-7"><a></a><span class="ex">bedGraphToBigWig</span> Abf1.bg sacCer3.chrom.sizes Abf1.bw</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The bigWig files are available here in the <code>data/</code> directory.</p>
-<h3 id="questions">Questions</h3>
-<ol type="1">
-<li class="fragment"><p>How do you ensure your antibody recognizes what you think it recognizes? What are important controls for ensuring it recognizes a specific epitope?</p></li>
-<li class="fragment"><p>What are some good controls for CUT&amp;RUN experiments?</p></li>
-</ol>
-</section></section>
+</section>
 <section>
 <section id="cutrun-analysis" class="title-slide slide level1 center">
 <h1>CUT&amp;RUN analysis</h1>
@@ -451,90 +451,34 @@ Jay Hesselberth
 </section>
 <section id="examine-genome-coverage" class="slide level2">
 <h2>Examine genome coverage</h2>
-<p>Now that we have tracks loaded, we can make a plot.</p>
 
-<img data-src="slides-21_files/figure-revealjs/plot-tracks-1.png" width="960" class="r-stretch"><h3 id="questions-1">Questions</h3>
-<ol type="1">
-<li class="fragment"><p>What features stand out in the above tracks? What is different between Reb1 and Abf1? Between the short and long fragments?</p></li>
-<li class="fragment"><p>Where are the major signals with respect to genes?</p></li>
-</ol>
-</section>
-<section id="peak-calling" class="slide level2">
-<h2>Peak calling</h2>
-<p>A conceptually simple approach to identification of regions containing “peaks” where a transcription factor was bound is available in the MACS software (<a href="">paper</a>, <a href="">github</a>). There’s also a nice <a href="https://hbctraining.github.io/Intro-to-ChIPseq/lessons/05_peak_calling_macs.html">blog post</a> covering the main ideas.</p>
-<h3 id="theory">Theory</h3>
-<p>The Poisson distribution is a discrete probability distribution of the form:</p>
-<p><span class="math display">\[ P_\lambda (X=k) = \frac{ \lambda^k }{ k! * e^{-\lambda} } \]</span></p>
-<p>where <span class="math inline">\(\lambda\)</span> captures both the mean and variance of the distribution.</p>
-<p>The R functions <code>dpois()</code>, <code>ppois()</code>, and <code>rpois()</code> provide access to the density, distribution, and random generation for the Poisson distribution. See <code>?dpois</code> for details.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-21_files/figure-revealjs/plot-poisson-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-<h3 id="practice">Practice</h3>
-<p>Here, we model read coverage using the Poisson distribution. Given some genome size <span class="math inline">\(G\)</span> and and a number of reads collected <span class="math inline">\(N\)</span>, we can approximate <span class="math inline">\(\lambda\)</span> from <span class="math inline">\(N/G\)</span>.</p>
-<p>MACS uses this value (the “genomewide” lambda) and also calculates several “local” lambda values to account for variation among genomic regions. We’ll just use the genomewide lambda, which provides a conservative threshold for peak calling.</p>
-<p>Using the genomewide lambda, we can use the Poisson distribution to address the question: <strong>How surprised should I be to see</strong> <span class="math inline">\(k\)</span> reads at position X?</p>
-<p>Let’s take a look at a plot of the p-value across a chromosome. What do you notice about this plot, when compared to the coverage of the CUT&amp;RUN coverage above?</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-21_files/figure-revealjs/unnamed-chunk-6-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>How many peaks are called in this region?</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 3
-  chrom  start    end
-  &lt;chr&gt;  &lt;int&gt;  &lt;int&gt;
-1 chrII 100248 100289
-2 chrII 101292 101393
-3 chrII 124916 124949
-4 chrII 136181 136264
-5 chrII 141070 141121</code></pre>
-</div>
-</div>
-<p>Let’s visualize these peaks in the context of genomic CUT&amp;RUN signal. We need to define an <code>AnnotationTrack</code> with the peak intervals, which we can plot against the CUT&amp;RUN coverage we defined above.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-21_files/figure-revealjs/plot-peaks-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-<h3 id="questions-2">Questions</h3>
-<ol type="1">
-<li class="fragment"><p>How many peaks were called throughout the genome? How wide are the called peaks, on average?</p></li>
-<li class="fragment"><p>How else might we define a significance threshold for identifying peaks?</p></li>
-<li class="fragment"><p>What might the relative heights of the peaks indicate? What types of technical or biological variables might influence peak heights?</p></li>
-</ol>
+<img data-src="slides-21_files/figure-revealjs/plot-tracks-1.png" width="960" class="r-stretch"></section>
+<section id="how-do-proteins-recognize-specific-locations-in-the-genome-to-bind" class="slide level2">
+<h2>How do proteins recognize specific locations in the genome to bind?</h2>
 </section>
 <section id="motif-discovery" class="slide level2">
 <h2>Motif discovery</h2>
-<h3 id="theory-1">Theory</h3>
+</section>
+<section id="theory" class="slide level2">
+<h2>Theory</h2>
 <p>There are two major approaches to defining sequence motifs enriched in a sample: enumerative and probabilistic approaches.</p>
+</section>
+<section id="theory-1" class="slide level2">
+<h2>Theory</h2>
 <p>Here we’ll apply a probabilistic approach (GADEM) to discover motifs in a collection of DNA sequences. During the RNA block, you’ll learn about k-mer analysis, which is a form of enumerative approach.</p>
 <p>In each case, the goal is to define a set of sequence motifs that are encriched in a set of provided sequences (i.e., peaks from CUT&amp;RUN data) relative to a genomic background.</p>
+</section>
+<section id="theory-2" class="slide level2">
+<h2>Theory</h2>
 <p>Motifs are expressed in a <a href="https://en.wikipedia.org/wiki/Position_weight_matrix">Position Weight Matrix</a>, which captures the propensities for a position to be a particular nucleotide in a sequence motif.</p>
 <p>These PWMs can be represented as sequence logos, visually represent the amount of information provided by the motif, typically using “information content”, expressed in bits.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="../img/block-dna/lexa-motif.png"></p>
-<figcaption>LexA sequence motif</figcaption>
-</figure>
-</div>
-<h3 id="practice-1">Practice</h3>
+</section>
+<section id="theory-3" class="slide level2">
+<h2>Theory</h2>
+
+<img data-src="../img/block-dna/lexa-motif.png" class="r-stretch quarto-figure-center"><p class="caption">LexA sequence motif</p></section>
+<section id="practice" class="slide level2">
+<h2>Practice</h2>
 <p>We’ll use the <a href="https://bioconductor.org/packages/release/bioc/html/rGADEM.html">rGADEM</a> package from Bioconductor to derive sequence motifs from the peaks we called above. This is a straightforward process:</p>
 <ol type="1">
 <li class="fragment">Collect the DNA sequences within the peak windows using the BSgenome for <em>S. cerevisiae</em></li>
@@ -542,125 +486,34 @@ Jay Hesselberth
 <li class="fragment">Examine the discovered motifs, and plot as a logo using <code>seqLogo::seqLogo()</code>.</li>
 </ol>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>*** Start C Programm ***
-==============================================================================================
-input sequence file:  
-number of sequences and average length:             452 114.8
-Use pgf method to approximate llr null distribution
-parameters estimated from sequences in:  
-
-number of GA generations &amp; population size:         5 100
-
-PWM score p-value cutoff for binding site declaration:      2.000000e-04
-ln(E-value) cutoff for motif declaration:           0.000000
-
-number of EM steps:                     40
-minimal no. sites considered for a motif:           22
-
-[a,c,g,t] frequencies in input data:                0.281618 0.218382 0.218382 0.281618
-==============================================================================================
-*** Running an unseeded analysis ***
-GADEM cycle  1: enumerate and count k-mers... top 3  4, 5-mers: 10 32 58
-Done.
-Initializing GA... Done.
-GADEM cycle[  1] generation[  1] number of unique motif: 2
-   spacedDyad: tttnnnnnnngacg       motifConsensus: nrTCAynwnnnACG        0.80 fitness: -437.99
-   spacedDyad: tttcnnnnnnnnttcg     motifConsensus: wyTTTTTTyTTTTTyk      0.90 fitness: -134.01
-
-GADEM cycle[  1] generation[  2] number of unique motif: 3
-   spacedDyad: tcannnnnnnnnacga     motifConsensus: wwrTCAyywnnnACGr      1.00 fitness: -486.12
-   spacedDyad: tgannnnnnnnnncgtcg   motifConsensus: kkwyTTTTTTywTwTTyk    0.60 fitness: -142.22
-   spacedDyad: cacgnnnnttcgt        motifConsensus: rAsGkTAsTTCsT         0.20 fitness:  -18.84
-
-GADEM cycle[  1] generation[  3] number of unique motif: 5
-   spacedDyad: tcannnnnnnnnacga     motifConsensus: wwrTCAyywnnnACGr      1.00 fitness: -486.12
-   spacedDyad: tgannnnnnnnnncgtcg   motifConsensus: kkwyTTTTTTywTwTTyk    0.60 fitness: -142.22
-   spacedDyad: acggnnnnggtg         motifConsensus: wCkTCswwGrTG          0.20 fitness:  -42.34
-   spacedDyad: tcannnnnncacg        motifConsensus: AmmTTsmmCsAmr         0.20 fitness:  -32.00
-   spacedDyad: cacgnnnnttcgt        motifConsensus: rAsGkTAsTTCsT         0.20 fitness:  -18.84
-
-GADEM cycle[  1] generation[  4] number of unique motif: 5
-   spacedDyad: tcannnnnnnnnacga     motifConsensus: wwrTCAyywnnnACGr      1.00 fitness: -486.12
-   spacedDyad: tgannnnnnnnnncgtcg   motifConsensus: kkwyTTTTTTywTwTTyk    0.60 fitness: -142.22
-   spacedDyad: acggnnnnggtg         motifConsensus: wCkTCswwGrTG          0.20 fitness:  -42.34
-   spacedDyad: tcannnnnncacg        motifConsensus: AmmTTsmmCsAmr         0.20 fitness:  -32.00
-   spacedDyad: cacgnnnnttcgt        motifConsensus: rAsGkTAsTTCsT         0.20 fitness:  -18.84
-
-GADEM cycle[  1] generation[  5] number of unique motif: 6
-   spacedDyad: tcannnnnnnnnacga     motifConsensus: wwrTCAyywnnnACGr      1.00 fitness: -486.12
-   spacedDyad: tgannnnnnnnnncgtcg   motifConsensus: kkwyTTTTTTywTwTTyk    0.60 fitness: -142.22
-   spacedDyad: acggnnnnggtg         motifConsensus: wCkTCswwGrTG          0.20 fitness:  -42.34
-   spacedDyad: tcannnnnncacg        motifConsensus: AmmTTsmmCsAmr         0.20 fitness:  -32.00
-   spacedDyad: cacgnnnnttcgt        motifConsensus: rAsGkTAsTTCsT         0.20 fitness:  -18.84
-   spacedDyad: tcannnnnnnacga       motifConsensus: CyATTywCsyACrA        0.20 fitness:   -7.23
-
-*** Running an unseeded analysis ***
-GADEM cycle  2: enumerate and count k-mers... top 3  4, 5-mers: 10 22 22
-Done.
-Initializing GA... Done.
-GADEM cycle[  2] generation[  1] number of unique motif: 2
-   spacedDyad: ggcnnnnnnnnnaaat     motifConsensus: sGCCkwArsrrsAwAT      0.10 fitness:   -7.73
-   spacedDyad: ccannnnnnaaat        motifConsensus: CAAAAyAGGmAAw         0.20 fitness:   -6.45
-
-GADEM cycle[  2] generation[  2] number of unique motif: 2
-   spacedDyad: ggcnnnnnnnnnaaat     motifConsensus: sGCCkwArsrrsAwAT      0.10 fitness:   -7.73
-   spacedDyad: ccannnnnnaaat        motifConsensus: CAAAAyAGGmAAw         0.20 fitness:   -6.45
-
-GADEM cycle[  2] generation[  3] number of unique motif: 2
-   spacedDyad: ggcnnnnnnnnnaaat     motifConsensus: sGCCkwArsrrsAwAT      0.10 fitness:   -7.73
-   spacedDyad: ccannnnnnaaat        motifConsensus: CAAAAyAGGmAAw         0.20 fitness:   -6.45
-
-GADEM cycle[  2] generation[  4] number of unique motif: 2
-   spacedDyad: ggcnnnnnnnnnaaat     motifConsensus: sGCCkwArsrrsAwAT      0.10 fitness:   -7.73
-   spacedDyad: ccannnnnnaaat        motifConsensus: CAAAAyAGGmAAw         0.20 fitness:   -6.45
-
-GADEM cycle[  2] generation[  5] number of unique motif: 2
-   spacedDyad: gccnnnnnnnnatttt     motifConsensus: GCAwTwTTTCCTkTTT      0.10 fitness:  -11.57
-   spacedDyad: ggcnnnnnnnnnaaat     motifConsensus: sGCCkwArsrrsAwAT      0.10 fitness:   -7.73
-
-*** Running an unseeded analysis ***
-GADEM cycle  3: enumerate and count k-mers... top 3  4, 5-mers: 8 22 18
-Done.
-Initializing GA... Done.
-GADEM cycle[  3] generation[  1] number of unique motif: 1
-   spacedDyad: gaancca              motifConsensus: AAAAAGA               1.00 fitness:   27.80
-
-GADEM cycle[  3] generation[  2] number of unique motif: 1
-   spacedDyad: cggcnnnnncca         motifConsensus: CsvCAnsAAsCA          0.10 fitness:   24.29
-
-GADEM cycle[  3] generation[  3] number of unique motif: 1
-   spacedDyad: cggcnnnnncca         motifConsensus: CsvCAnsAAsCA          0.10 fitness:   24.29
-
-GADEM cycle[  3] generation[  4] number of unique motif: 1
-   spacedDyad: cggcnnnnncca         motifConsensus: CsvCAnsAAsCA          0.10 fitness:   24.29
-
-GADEM cycle[  3] generation[  5] number of unique motif: 1
-   spacedDyad: cggcnnnnncca         motifConsensus: CsvCAnsAAsCA          0.10 fitness:   24.29</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "nrTCAyywnnnACGr"                     
-[2] "wTTTTTTywTwTTyk"                     
-[3] "CArACAGAmvmmATTCmmCCAmrrAyGTwTwAC"   
-[4] "rwmsnTCCTTGACGCTAGwTCrTTsGrCTAAAA"   
-[5] "AAATArGCAATwTTTCCTkTTTn"             
-[6] "wGnndGrCAAGGCCGTAGGrrCAwATAkyAkywrGr"</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 445 137  56  30  39  28</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>peak_seqs <span class="ot">&lt;-</span> BSgenome<span class="sc">::</span><span class="fu">getSeq</span>(</span>
+<span id="cb2-2"><a></a>  <span class="co"># provided by BSgenome.Scerevisiae.UCSC.sacCer3</span></span>
+<span id="cb2-3"><a></a>  Scerevisiae,</span>
+<span id="cb2-4"><a></a>  peak_calls_gr</span>
+<span id="cb2-5"><a></a>)</span>
+<span id="cb2-6"><a></a></span>
+<span id="cb2-7"><a></a><span class="co"># takes ~2 minutes to run</span></span>
+<span id="cb2-8"><a></a>gadem <span class="ot">&lt;-</span> rGADEM<span class="sc">::</span><span class="fu">GADEM</span>(</span>
+<span id="cb2-9"><a></a>  peak_seqs,</span>
+<span id="cb2-10"><a></a>  <span class="at">genome =</span> Scerevisiae,</span>
+<span id="cb2-11"><a></a>  <span class="at">verbose =</span> <span class="dv">1</span></span>
+<span id="cb2-12"><a></a>)</span>
+<span id="cb2-13"><a></a></span>
+<span id="cb2-14"><a></a><span class="co"># look at the consensus motifs</span></span>
+<span id="cb2-15"><a></a><span class="fu">consensus</span>(gadem)</span>
+<span id="cb2-16"><a></a></span>
+<span id="cb2-17"><a></a><span class="co"># how many consensus motifs are there?</span></span>
+<span id="cb2-18"><a></a><span class="fu">nOccurrences</span>(gadem)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now let’s look at the sequence logo for the top hit.</p>
 <div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-21_files/figure-revealjs/plot-logo-1.png" width="960"></p>
-</figure>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>pwm <span class="ot">&lt;-</span> gadem<span class="sc">@</span>motifList[[<span class="dv">1</span>]]<span class="sc">@</span>pwm</span>
+<span id="cb3-2"><a></a></span>
+<span id="cb3-3"><a></a>seqLogo<span class="sc">::</span><span class="fu">seqLogo</span>(pwm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-</div>
-<h3 id="questions-3">Questions</h3>
+</section>
+<section id="questions" class="slide level2">
+<h2>Questions</h2>
 <ol type="1">
 <li class="fragment"><p>Does this motif make sense, based on what you know about the requirements and specificity of DNA binding by transcription factors?</p></li>
 <li class="fragment"><p>How might you confirm that a specific sequence (that conforms to a motif) is bound directly by a transcription factor?</p></li>
