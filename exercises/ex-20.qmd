@@ -3,17 +3,13 @@ title: "Factor-centric chromatin analysis"
 author: "Jay Hesselberth"
 ---
 
-## Where do transcription factors bind in the genome?
+# Where do transcription factors bind in the genome?
 
 Today we'll look at where two yeast transcription factors bind in the genome using CUT&RUN.
-
-## Where do transcription factors bind in the genome?
 
 Techniques like CUT&RUN require an affinity reagent (e.g., an antibody) that uniquely recognizes a transcription factor in the cell.
 
 This antibody is added to permeabilized cells, and the antibody associates with the epitope. A separate reagent, a fusion of Protein A (which binds IgG) and micrococcal nuclease (MNase) then associates with the antibody. Addition of calcium activates MNase, and nearby DNA is digested. These DNA fragments are then isolated and sequenced to identify sites of TF association in the genome.
-
-## Where do transcription factors bind in the genome?
 
 ![Fig 1a, Skene et al.](../img/block-dna/skene-fig-1a.png)
 
@@ -26,7 +22,6 @@ I selected the 16 second time point for *S. cerevisiae* Abf1 and Reb1 (note the 
 BED files containing mapped DNA fragments were separated by size and converted to bigWig with:
 
 ``` bash
-#| echo: true
 # separate fragments by size
 awk '($3 - $2 <= 120)' Abf1.bed > CutRun_Abf1_lt120.bed
 awk '($3 - $2 => 150)' Abf1.bed > CutRun_Abf1_gt150.bed
@@ -38,19 +33,16 @@ bedGraphToBigWig Abf1.bg sacCer3.chrom.sizes Abf1.bw
 
 The bigWig files are available here in the `data/` directory.
 
-## Questions
+### Questions
 
 1.  How do you ensure your antibody recognizes what you think it recognizes? What are important controls for ensuring it recognizes a specific epitope?
 
-2.  What are some good controls for CUT&RUN experiments?
+2.  What are important controls for CUT&RUN experiments?
 
 # CUT&RUN analysis
 
-## Set up libraries
-
 ```{r}
 #| label: load-libs
-#| echo: true
 #| message: false
 library(tidyverse)
 library(here)
@@ -71,7 +63,6 @@ library(seqLogo)
 
 ```{r}
 #| label: make-tracks
-#| echo: true
 track_start <- 90000
 track_end <- 150000
 
@@ -82,20 +73,13 @@ sgd_genes_trk <-
     chromosome = "chrII",
     start = track_start,
     end = track_end,
+    fill = "#009E73",
     background.title = "white",
     col.title = "black",
-    fontsize = 16
+    fontsize = 14
   )
-```
 
-
-## Examine genome coverage
-
-```{r}
-#| label: make-tracks-2
-#| echo: true
 # signal tracks
-
 track_info <-
   tibble(
     file_name = c(
@@ -117,23 +101,17 @@ track_info <-
     data_track = purrr::map2(
       big_wig, sample_type,
       ~ DataTrack(
-        .x,
-        name = .y,
-        background.title = "white",
-        col.title = "black",
-        col.axis = "black",
-        fontsize = 16
+          .x,
+          name = .y,
+          background.title = "white",
+          col.title = "black",
+          col.axis = "black",
+          fontsize = 12
       )
     )
   ) |>
   dplyr::select(sample_type, big_wig, data_track)
-```
 
-## Examine genome coverage
-
-```{r}
-#| label: make-tracks-3
-#| echo: true
 # x-axis track
 x_axis_trk <- GenomeAxisTrack(
   col = "black",
@@ -142,14 +120,10 @@ x_axis_trk <- GenomeAxisTrack(
 )
 ```
 
-## Examine genome coverage
 Now that we have tracks loaded, we can make a plot.
 
 ```{r}
 #| label: plot-tracks
-#| echo: true
-#| output-location: column
-
 plotTracks(
   c(
     sgd_genes_trk,
@@ -165,7 +139,7 @@ plotTracks(
 )
 ```
 
-## Questions
+### Questions
 
 1.  What features stand out in the above tracks? What is different between Reb1 and Abf1? Between the short and long fragments?
 
@@ -175,7 +149,7 @@ plotTracks(
 
 A conceptually simple approach to identification of regions containing "peaks" where a transcription factor was bound is available in the MACS software ([paper](), [github]()). There's also a nice [blog post](https://hbctraining.github.io/Intro-to-ChIPseq/lessons/05_peak_calling_macs.html) covering the main ideas.
 
-## Theory
+### Theory
 
 The Poisson distribution is a discrete probability distribution of the form:
 
@@ -185,17 +159,16 @@ where $\lambda$ captures both the mean and variance of the distribution.
 
 The R functions `dpois()`, `ppois()`, and `rpois()` provide access to the density, distribution, and random generation for the Poisson distribution. See `?dpois` for details.
 
-## Theory
-
 ```{r}
 #| label: plot-poisson
 #| echo: false
 #| message: false
+#| warning: false
 library(cowplot)
 library(ggtext)
 
 crossing(
-  k = 1:20,
+  k = 0:20,
   lambda = c(1, 4, 10)
 ) |>
   mutate(p = dpois(k, lambda)) |>
@@ -206,31 +179,34 @@ crossing(
   geom_line() +
   theme_cowplot() +
   scale_color_brewer(palette = "Set1") +
-  labs(x = "k", y = "Density", color = "&lambda;") +
+  labs(x = "k", y = "Density of P(X=k)", color = "&lambda;") +
   theme(
     legend.position = "top",
     legend.title = element_markdown()
   )
 ```
 
-## Practice
+### Practice
 
-Here, we model read coverage using the Poisson distribution. Given some genome size $G$ and and a number of reads collected $N$, we can approximate $\lambda$ from $N/G$.
+Here, we model read coverage using the Poisson distribution. Given a genome size $G$ and and a number of reads collected $N$, we can approximate $\lambda$ from $N/G$, scaled by the size of the sequence read (about 100 bp).
 
-MACS uses this value (the "genomewide" lambda) and also calculates several "local" lambda values to account for variation among genomic regions. We'll just use the genomewide lambda, which provides a conservative threshold for peak calling.
+The intuition here is: where are $N$ reads placed randomly on a genome of size $G$?
 
-Using the genomewide lambda, we can use the Poisson distribution to address the question: **How surprised should I be to see** $k$ reads at position X?
+MACS uses this value (the "genomic" lambda) and also calculates several "local" lambda values to account for variation among genomic regions. We'll just using the genomic lambda, which provides a conservative threshold for peak calling.
+
+Using genomic lambda, we can use the Poisson distribution to address the question: **How surprised should I be to see** $k$ reads at position X?
 
 ```{r}
 #| label: peak-calling
-#| echo: true
+#| eval: false
 abf1_tbl <- read_bigwig(here("data/block-dna/CutRun_Abf1_lt120.bw"))
 
 # number of reads in the original Abf1 BED file
 total_reads <- 16e6
 
 genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
-genome_size <- sum(genome$size)
+# how can we calculate genome size?
+genome_size <- ___ 
 
 genome_lambda <- total_reads / genome_size
 
@@ -242,46 +218,40 @@ peak_calls <-
     start = midpoint,
     end = start + 1,
     # use the poisson to calculate a p-value with the genome-wide lambda
-    pval = dpois(score, genome_lambda),
+    pval = ___(score, genome_lambda),
     # convert p-values to FDR
     fdr = p.adjust(pval, method = "fdr")
   )
 ```
 
-## P-values
-
 Let's take a look at a plot of the p-value across a chromosome. What do you notice about this plot, when compared to the coverage of the CUT&RUN coverage above?
 
 ```{r}
-#| label: plot-p-vals
-#| echo: true
-#| output-location: column
-
+#| label: plot-peak-sig
+#| eval: false
 ggplot(
   filter(peak_calls, chrom == "chrII"),
-  aes(start, -log10(pval))
-) +
+  # convert p-values to positive values for plotting
+  aes(start, ___)
+) + 
   geom_line() +
   xlim(track_start, track_end) +
-  theme_cowplot()
+  theme_cowplot() 
 ```
-
-## Peaks
 
 How many peaks are called in this region?
 
 ```{r}
 #| label: n-peaks
-#| echo: true
-#| output-location: column
+#| eval: false
 # most stringent cut-off
-peak_calls_sig <-
+peak_calls_sig <- 
   filter(
     peak_calls,
     fdr == 0
-  ) |>
-  # collapse neighboring, significant sites
-  bed_merge(max_dist = 20)
+    ) |>
+    # collapse neighboring, significant sites
+    bed_merge(max_dist = 20)
 
 filter(
   peak_calls_sig,
@@ -289,19 +259,13 @@ filter(
     start >= track_start &
     end <= track_end
 )
-
 ```
-
-## Visualize
 
 Let's visualize these peaks in the context of genomic CUT&RUN signal. We need to define an `AnnotationTrack` with the peak intervals, which we can plot against the CUT&RUN coverage we defined above.
 
-Let us load the data:
-
 ```{r}
 #| label: plot-peaks
-#| echo: true
-
+#| eval: false
 # need a GRanges object to convert to an AnnotationTrack
 peak_calls_gr <-
   GRanges(
@@ -326,16 +290,7 @@ abf1_short_trk <-
     sample_type == "Abf1_Short"
   ) |>
   pull(data_track)
-```
 
-## Visualize
-
-And plot:
-
-```{r}
-#| label: plot-peaks-2
-#| echo: true
-#| output-location: column
 plotTracks(
   c(
     sgd_genes_trk,
@@ -352,7 +307,7 @@ plotTracks(
 )
 ```
 
-## Questions
+### Questions
 
 1.  How many peaks were called throughout the genome? How wide are the called peaks, on average?
 

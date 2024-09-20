@@ -3,17 +3,13 @@ title: "Factor-centric chromatin analysis"
 author: "Jay Hesselberth"
 ---
 
-## Where do transcription factors bind in the genome?
+# Where do transcription factors bind in the genome?
 
 Today we'll look at where two yeast transcription factors bind in the genome using CUT&RUN.
-
-## Where do transcription factors bind in the genome?
 
 Techniques like CUT&RUN require an affinity reagent (e.g., an antibody) that uniquely recognizes a transcription factor in the cell.
 
 This antibody is added to permeabilized cells, and the antibody associates with the epitope. A separate reagent, a fusion of Protein A (which binds IgG) and micrococcal nuclease (MNase) then associates with the antibody. Addition of calcium activates MNase, and nearby DNA is digested. These DNA fragments are then isolated and sequenced to identify sites of TF association in the genome.
-
-## Where do transcription factors bind in the genome?
 
 ![Fig 1a, Skene et al.](../img/block-dna/skene-fig-1a.png)
 
@@ -37,128 +33,24 @@ bedGraphToBigWig Abf1.bg sacCer3.chrom.sizes Abf1.bw
 
 The bigWig files are available here in the `data/` directory.
 
-# CUT&RUN analysis
-
-```{r}
-#| label: load-libs
-#| message: false
-library(tidyverse)
-library(here)
-library(valr)
-
-# genome viz
-library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
-library(Gviz)
-library(rtracklayer)
-
-# motif discovery and viz
-library(BSgenome.Scerevisiae.UCSC.sacCer3)
-library(rGADEM)
-library(seqLogo)
-```
-
-## Examine genome coverage
-
-```{r}
-#| label: make-tracks
-track_start <- 90000
-track_end <- 150000
-
-# genes track
-sgd_genes_trk <-
-  GeneRegionTrack(
-    TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,
-    chromosome = "chrII",
-    start = track_start,
-    end = track_end,
-    background.title = "white",
-    col.title = "black",
-    fontsize = 16
-  )
-
-# signal tracks
-track_info <-
-  tibble(
-    file_name = c(
-      "CutRun_Reb1_lt120.bw",
-      "CutRun_Abf1_lt120.bw",
-      "CutRun_Reb1_gt150.bw",
-      "CutRun_Abf1_gt150.bw"
-    ),
-    sample_type = c(
-      "Reb1_Short", "Abf1_Short",
-      "Reb1_Long", "Abf1_Long"
-    )
-  ) |>
-  mutate(
-    file_path = here("data/block-dna", file_name),
-    big_wig = purrr::map(
-      file_path, ~ import.bw(.x, as = "GRanges")
-    ),
-    data_track = purrr::map2(
-      big_wig, sample_type,
-      ~ DataTrack(
-        .x,
-        name = .y,
-        background.title = "white",
-        col.title = "black",
-        col.axis = "black",
-        fontsize = 16
-      )
-    )
-  ) |>
-  dplyr::select(sample_type, big_wig, data_track)
-
-# x-axis track
-x_axis_trk <- GenomeAxisTrack(
-  col = "black",
-  col.axis = "black",
-  fontsize = 16
-)
-```
-
-
-```{r}
-#| label: plot-tracks
-plotTracks(
-  c(
-    sgd_genes_trk,
-    track_info$data_track,
-    x_axis_trk
-  ),
-  from = track_start,
-  to = track_end,
-  chromosome = "chrII",
-  transcriptAnnotation = "gene",
-  shape = "arrow",
-  type = "histogram"
-)
-```
-
-## How do proteins recognize specific locations in the genome to bind?
 
 ## Motif discovery
 
-## Theory
+### Theory
 
 There are two major approaches to defining sequence motifs enriched in a sample: enumerative and probabilistic approaches.
-
-## Theory
 
 Here we'll apply a probabilistic approach (GADEM) to discover motifs in a collection of DNA sequences. During the RNA block, you'll learn about k-mer analysis, which is a form of enumerative approach.
 
 In each case, the goal is to define a set of sequence motifs that are encriched in a set of provided sequences (i.e., peaks from CUT&RUN data) relative to a genomic background.
 
-## Theory
-
 Motifs are expressed in a [Position Weight Matrix](https://en.wikipedia.org/wiki/Position_weight_matrix), which captures the propensities for a position to be a particular nucleotide in a sequence motif.
 
 These PWMs can be represented as sequence logos, visually represent the amount of information provided by the motif, typically using "information content", expressed in bits.
 
-## Theory
 ![LexA sequence motif](../img/block-dna/lexa-motif.png)
 
-## Practice
+### Practice
 
 We'll use the [rGADEM](https://bioconductor.org/packages/release/bioc/html/rGADEM.html) package from Bioconductor to derive sequence motifs from the peaks we called above. This is a straightforward process:
 
@@ -168,8 +60,7 @@ We'll use the [rGADEM](https://bioconductor.org/packages/release/bioc/html/rGADE
 
 ```{r}
 #| label: motif-discovery
-#| echo: true
-
+#| eval: false
 peak_seqs <- BSgenome::getSeq(
   # provided by BSgenome.Scerevisiae.UCSC.sacCer3
   Scerevisiae,
@@ -194,14 +85,13 @@ Now let's look at the sequence logo for the top hit.
 
 ```{r}
 #| label: plot-logo
-#| echo: true
-
+#| eval: false
 pwm <- gadem@motifList[[1]]@pwm
 
 seqLogo::seqLogo(pwm)
 ```
 
-## Questions
+### Questions
 
 1.  Does this motif make sense, based on what you know about the requirements and specificity of DNA binding by transcription factors?
 
