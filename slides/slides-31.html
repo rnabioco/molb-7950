@@ -10,8 +10,8 @@
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.5.57">
 
-  <meta name="author" content="Kristen Wells-Wrasman">
-  <meta name="dcterms.date" content="2024-09-25">
+  <meta name="author" content="Kent Riemondy and Kristen Wells">
+  <meta name="dcterms.date" content="2024-09-26">
   <title>MOLB 7950 – Single cell RNA-Seq</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -415,7 +415,7 @@
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
 <div class="quarto-title-author-name">
-Kristen Wells-Wrasman 
+Kent Riemondy and Kristen Wells 
 </div>
         <p class="quarto-title-affiliation">
             RNA Bioscience Initiative | CU Anschutz
@@ -423,7 +423,7 @@ Kristen Wells-Wrasman
     </div>
 </div>
 
-  <p class="date">2024-09-25</p>
+  <p class="date">2024-09-26</p>
 </section>
 <section id="contact-info" class="slide level2">
 <h2>Contact Info</h2>
@@ -442,13 +442,15 @@ Kristen Wells-Wrasman
 <section id="learning-objectives" class="slide level2">
 <h2>Learning Objectives</h2>
 <div class="columns">
-<div class="column">
+<div class="column" style="width:49%;">
 <h3 id="lecture-1">Lecture 1</h3>
 <ul>
 <li>Identify key quality control issues with single cell RNA-seq data and perform filtering to exclude poor quality cells</li>
 <li>Interact with single cell data using Bioconductor tools</li>
 </ul>
-</div><div class="column">
+</div><div class="column" style="width:2%;">
+
+</div><div class="column" style="width:49%;">
 <h3 id="lecture-2">Lecture 2</h3>
 <ul>
 <li>Perform analysis to identify cell types in single cell data by using unsupervised clustering methods and comparing to public datasets</li>
@@ -459,7 +461,7 @@ Kristen Wells-Wrasman
 <section id="single-cell-or-bulk" class="slide level2 smaller">
 <h2>Single cell or bulk?</h2>
 <div class="columns">
-<div class="column">
+<div class="column" style="width:49%;">
 <h3 id="single-cell">Single cell</h3>
 <ul>
 <li class="fragment">High level overview of general transcriptomic landscape of genes that are expressed highly at the single cell level
@@ -474,7 +476,9 @@ Kristen Wells-Wrasman
 <li class="fragment">Doesn’t average across all cells in the experiment</li>
 </ul></li>
 </ul>
-</div><div class="column">
+</div><div class="column" style="width:2%;">
+
+</div><div class="column" style="width:49%;">
 <h3 id="bulk">Bulk</h3>
 <ul>
 <li class="fragment">Global overview of transcriptomic landscape of an entire sample using high to low expressed genes.
@@ -485,7 +489,7 @@ Kristen Wells-Wrasman
 <li class="fragment">Captures full RNA molecule so can be used for RNA-splicing analysis</li>
 <li class="fragment">Doesn’t work for subpopulation analysis
 <ul>
-<li class="fragment">All cells are averaged so determining what is happening to one cell type is challengin</li>
+<li class="fragment">All cells are averaged so determining what is happening to one cell type is challenging</li>
 <li class="fragment">Are your results because of a transcriptomic change or a change in cell type frequencies?</li>
 </ul></li>
 </ul>
@@ -527,8 +531,8 @@ Kristen Wells-Wrasman
 <h2>Overview of analysis steps</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div class="grViz html-widget html-fill-item" id="htmlwidget-e03fb945e517285503e2" style="width:60%;height:50%;"></div>
-<script type="application/json" data-for="htmlwidget-e03fb945e517285503e2">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = TB]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  cr [label = \"Process FASTQ to UMI count matrix\n(Cellranger, Alevin, or STARsolo)\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n (% mitochondrial UMIs,\n# of UMIs/Genes,\nremove empty droplets)\"]\n  norm [label = \"Normalize UMI counts\n(Normalize by deconvolution)\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\n(a.k.a Feature selection)\"]\n  dim_red [label = \"Dimensionality reduction (PCA)\"]\n  cluster [label = \"Clustering\n (using Shared Nearest Neighbors)\"]\n  viz [label = \"Make 2D-Visualization\n(PCA, UMAP, tSNE\nForce-directed graph)\"]\n  traj [label = \"Trajectory Inference\n(Slingshot,\nPAGA, scVelo)\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n\n  markers [label = \"Discover cell type markers\"]\n  annot [label = \"Annotate cell types\"]\n\n  # orange\n  node [fillcolor = \"#E69F00\"]\n  downstream  [label = \"Downstream analysis\n(Differential expression,\nShifts in cell type composition,\n Find new cell-types/states)\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  cr -> cell_qc [label = \"Load into \nSingleCellExperiment\"]\n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> traj\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n  annot -> downstream\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-d7b8585542a339b71351" style="width:60%;height:50%;"></div>
+<script type="application/json" data-for="htmlwidget-d7b8585542a339b71351">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = TB]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  cr [label = \"Process FASTQ to UMI count matrix\n(Cellranger, Alevin, or STARsolo)\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n (% mitochondrial UMIs,\n# of UMIs/Genes,\nremove empty droplets)\"]\n  norm [label = \"Normalize UMI counts\n(Normalize by deconvolution)\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\n(a.k.a Feature selection)\"]\n  dim_red [label = \"Dimensionality reduction (PCA)\"]\n  cluster [label = \"Clustering\n (using Shared Nearest Neighbors)\"]\n  viz [label = \"Make 2D-Visualization\n(PCA, UMAP, tSNE\nForce-directed graph)\"]\n  traj [label = \"Trajectory Inference\n(Slingshot,\nPAGA, scVelo)\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n\n  markers [label = \"Discover cell type markers\"]\n  annot [label = \"Annotate cell types\"]\n\n  # orange\n  node [fillcolor = \"#E69F00\"]\n  downstream  [label = \"Downstream analysis\n(Differential expression,\nShifts in cell type composition,\n Find new cell-types/states)\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  cr -> cell_qc [label = \"Load into \nSingleCellExperiment\"]\n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> traj\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n  annot -> downstream\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </section>
@@ -679,19 +683,15 @@ Kristen Wells-Wrasman
 <h2>Turning to our exercise ⌨️</h2>
 <p>Before jumping into the analysis, let’s step back and start running through the exercise for today</p>
 <p>Start by loading in the packages</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a><span class="co">#| label: load-libs</span></span>
-<span id="cb4-2"><a></a><span class="co">#| message: false</span></span>
-<span id="cb4-3"><a></a><span class="co">#| warning: false</span></span>
-<span id="cb4-4"><a></a><span class="co">#| echo: false</span></span>
-<span id="cb4-5"><a></a><span class="fu">library</span>(here)</span>
-<span id="cb4-6"><a></a><span class="fu">library</span>(scran)</span>
-<span id="cb4-7"><a></a><span class="fu">library</span>(scater)</span>
-<span id="cb4-8"><a></a><span class="fu">library</span>(SingleCellExperiment)</span>
-<span id="cb4-9"><a></a><span class="fu">library</span>(DropletUtils)</span>
-<span id="cb4-10"><a></a><span class="fu">library</span>(tximport)</span>
-<span id="cb4-11"><a></a><span class="fu">library</span>(Matrix)</span>
-<span id="cb4-12"><a></a><span class="fu">library</span>(AnnotationHub)</span>
-<span id="cb4-13"><a></a><span class="fu">library</span>(eds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a><span class="fu">library</span>(here)</span>
+<span id="cb4-2"><a></a><span class="fu">library</span>(scran)</span>
+<span id="cb4-3"><a></a><span class="fu">library</span>(scater)</span>
+<span id="cb4-4"><a></a><span class="fu">library</span>(SingleCellExperiment)</span>
+<span id="cb4-5"><a></a><span class="fu">library</span>(DropletUtils)</span>
+<span id="cb4-6"><a></a><span class="fu">library</span>(tximport)</span>
+<span id="cb4-7"><a></a><span class="fu">library</span>(Matrix)</span>
+<span id="cb4-8"><a></a><span class="fu">library</span>(AnnotationHub)</span>
+<span id="cb4-9"><a></a><span class="fu">library</span>(eds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="raw-data-the-umi-count-matrix" class="slide level2">
 <h2>Raw data: the UMI count matrix ⌨️</h2>
@@ -705,42 +705,53 @@ Kristen Wells-Wrasman
 </div><div class="column">
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>vals <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb5-2"><a></a>  <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
-<span id="cb5-3"><a></a>  <span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
-<span id="cb5-4"><a></a>  <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span></span>
-<span id="cb5-5"><a></a>)</span>
-<span id="cb5-6"><a></a>m <span class="ot">&lt;-</span> <span class="fu">Matrix</span>(vals, <span class="at">ncol =</span> <span class="dv">5</span>)</span>
-<span id="cb5-7"><a></a>m</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-2"><a></a>  <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">0</span>,</span>
+<span id="cb5-3"><a></a>  <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb5-4"><a></a>  <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb5-5"><a></a>  <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>,</span>
+<span id="cb5-6"><a></a>  <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb5-7"><a></a>)</span>
+<span id="cb5-8"><a></a>m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(vals, <span class="at">ncol =</span> <span class="dv">5</span>)</span>
+<span id="cb5-9"><a></a>m</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>3 x 5 sparse Matrix of class "dgCMatrix"
-              
-[1,] . . . . 1
-[2,] . . . . .
-[3,] . 2 . . 1</code></pre>
+<pre><code>     [,1] [,2] [,3] [,4] [,5]
+[1,]    0    0    0    0    0
+[2,]    0    1    0    0    0
+[3,]    0    0    0    0    0
+[4,]    2    0    0    0    0
+[5,]    0    0    0    1    0</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="fu">summary</span>(m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>3 x 5 sparse Matrix of class "dgCMatrix", with 3 entries
-  i j x
-1 3 2 2
-2 1 5 1
-3 3 5 1</code></pre>
+<pre><code>       V1            V2            V3          V4            V5   
+ Min.   :0.0   Min.   :0.0   Min.   :0   Min.   :0.0   Min.   :0  
+ 1st Qu.:0.0   1st Qu.:0.0   1st Qu.:0   1st Qu.:0.0   1st Qu.:0  
+ Median :0.0   Median :0.0   Median :0   Median :0.0   Median :0  
+ Mean   :0.4   Mean   :0.2   Mean   :0   Mean   :0.2   Mean   :0  
+ 3rd Qu.:0.0   3rd Qu.:0.0   3rd Qu.:0   3rd Qu.:0.0   3rd Qu.:0  
+ Max.   :2.0   Max.   :1.0   Max.   :0   Max.   :1.0   Max.   :0  </code></pre>
 </div>
 </div>
 </div></div>
 </section>
-<section id="sparse-matricies" class="slide level2">
+<section id="sparse-matricies" class="slide level2 nonincremental smaller">
 <h2>Sparse matricies ⌨️</h2>
 <ul>
 <li class="fragment">Use the <code>as</code> function to convert to a sparse matrix</li>
 </ul>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>sm <span class="ot">&lt;-</span> <span class="fu">as</span>(m, <span class="st">"sparseMatrix"</span>)</span>
+<span id="cb9-2"><a></a><span class="co"># alternatively</span></span>
+<span id="cb9-3"><a></a><span class="co"># Matrix(vals, nrow = 5)</span></span>
+<span id="cb9-4"><a></a>sm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>3 x 5 sparse Matrix of class "dgCMatrix"
+<pre><code>5 x 5 sparse Matrix of class "dtCMatrix"
               
-[1,] . . . . 1
-[2,] . . . . .
-[3,] . 2 . . 1</code></pre>
+[1,] . . . . .
+[2,] . 1 . . .
+[3,] . . . . .
+[4,] 2 . . . .
+[5,] . . . 1 .</code></pre>
 </div>
 </div>
 <ul>
@@ -748,28 +759,39 @@ Kristen Wells-Wrasman
 <li class="fragment">Internally, values are stored as a row column value triplet</li>
 </ul>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="fu">summary</span>(sm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>3 x 5 sparse Matrix of class "dgCMatrix", with 3 entries
+<pre><code>5 x 5 sparse Matrix of class "dtCMatrix", with 3 entries
   i j x
-1 3 2 2
-2 1 5 1
-3 3 5 1</code></pre>
+1 4 1 2
+2 2 2 1
+3 5 4 1</code></pre>
 </div>
 </div>
 </section>
 <section id="sparse-matricies-1" class="slide level2">
 <h2>Sparse matricies ⌨️</h2>
 <ul>
-<li class="fragment">Functions at manipulate matricies (<code>rowMeans</code>, <code>colSums</code>, <code>apply</code>, <code>[</code>) can be used on sparseMatricies as long as the <code>Matrix</code> package is loaded.</li>
+<li class="fragment"><p>Functions at manipulate matricies (<code>rowMeans</code>, <code>colSums</code>, <code>apply</code>, <code>[</code>) can be used on sparseMatricies as long as the <code>Matrix</code> package is loaded.</p></li>
+<li class="fragment"><p>How can we extract the first 2 rows and first 3 columns of the sparse matrix <code>sm</code> that we generated above?</p></li>
 </ul>
-<p>How can we extract the first 2 rows and first 3 columns of the sparse matrix <code>sm</code> that we generated above?</p>
 </section>
-<section id="sparse-matricies-2" class="slide level2">
+<section id="sparse-matricies-2" class="slide level2 nonincremental">
 <h2>Sparse matricies ⌨️</h2>
 <ul>
-<li class="fragment">Functions at manipulate matricies (<code>rowMeans</code>, <code>colSums</code>, <code>apply</code>, <code>[</code>) can be used on sparseMatricies as long as the <code>Matrix</code> package is loaded.</li>
+<li class="fragment"><p>Functions at manipulate matricies (<code>rowMeans</code>, <code>colSums</code>, <code>apply</code>, <code>[</code>) can be used on sparseMatricies as long as the <code>Matrix</code> package is loaded.</p></li>
+<li class="fragment"><p>How can we extract the first 2 rows and first 3 columns of the sparse matrix <code>sm</code> that we generated above?</p></li>
 </ul>
-<p>How can we extract the first 2 rows and first 3 columns of the sparse matrix <code>sm</code> that we generated above?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a><span class="co"># print subset of sm</span></span>
+<span id="cb13-2"><a></a>sm[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2 x 3 sparse Matrix of class "dgCMatrix"
+          
+[1,] . . .
+[2,] . 1 .</code></pre>
+</div>
+</div>
 </section>
 <section id="sparse-matricies-3" class="slide level2">
 <h2>Sparse matricies ⌨️</h2>
@@ -778,20 +800,30 @@ Kristen Wells-Wrasman
 <section id="sparse-matricies-4" class="slide level2">
 <h2>Sparse matricies ⌨️</h2>
 <p>How can we calculate the sum of the columns of <code>sm</code>?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a><span class="co"># find column sums of sparse</span></span>
+<span id="cb15-2"><a></a><span class="fu">colSums</span>(sm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2 1 0 1 0</code></pre>
+</div>
+</div>
 </section>
-<section id="base-r-subsetting" class="slide level2">
+<section id="base-r-subsetting" class="slide level2 nonincremental">
 <h2>Base R subsetting ⌨️</h2>
 <ul>
 <li class="fragment">Basic R concepts for subsetting and referencing columns are important in single cell analysis</li>
 <li class="fragment">Vectors can be subset by index (position), logical vector (<code>c(TRUE, FALSE)</code>) or name (if vector is named)</li>
 </ul>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>letters</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s"
 [20] "t" "u" "v" "w" "x" "y" "z"</code></pre>
 </div>
 </div>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="co"># extract 2nd, 4th, and 6th entry</span></span>
+<span id="cb19-2"><a></a>letters[<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "b" "d" "f"</code></pre>
 </div>
@@ -800,6 +832,11 @@ Kristen Wells-Wrasman
 <section id="base-r-subsetting-1" class="slide level2">
 <h2>Base R subsetting ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="co"># subset by creating logical vector</span></span>
+<span id="cb21-2"><a></a>vowels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"a"</span>, <span class="st">"e"</span>, <span class="st">"i"</span>, <span class="st">"o"</span>, <span class="st">"u"</span>)</span>
+<span id="cb21-3"><a></a>is_a_vowel <span class="ot">&lt;-</span> letters <span class="sc">%in%</span> vowels</span>
+<span id="cb21-4"><a></a></span>
+<span id="cb21-5"><a></a>letters[is_a_vowel]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "a" "e" "i" "o" "u"</code></pre>
 </div>
@@ -808,6 +845,11 @@ Kristen Wells-Wrasman
 <section id="base-r-subsetting-2" class="slide level2">
 <h2>Base R subsetting ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="co"># name the letters vector with uppercase LETTERS</span></span>
+<span id="cb23-2"><a></a><span class="fu">names</span>(letters) <span class="ot">&lt;-</span> LETTERS</span>
+<span id="cb23-3"><a></a></span>
+<span id="cb23-4"><a></a><span class="co"># subset by name</span></span>
+<span id="cb23-5"><a></a>letters[<span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"Z"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  A   Z 
 "a" "z" </code></pre>
@@ -821,6 +863,10 @@ Kristen Wells-Wrasman
 </ul>
 <p><code>matrix[rows_to_subset, columns_to_subset]</code></p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a>m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">24</span>, <span class="at">nrow =</span> <span class="dv">6</span>)</span>
+<span id="cb25-2"><a></a></span>
+<span id="cb25-3"><a></a><span class="co"># extract 2nd, 4th, and 6th row</span></span>
+<span id="cb25-4"><a></a>m[<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2] [,3] [,4]
 [1,]    2    8   14   20
@@ -832,6 +878,8 @@ Kristen Wells-Wrasman
 <section id="base-r-subsetting-4" class="slide level2">
 <h2>Base R subsetting ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="co"># extract 2nd and 4th column</span></span>
+<span id="cb27-2"><a></a>m[, <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2]
 [1,]    7   19
@@ -846,6 +894,8 @@ Kristen Wells-Wrasman
 <section id="base-r-subsetting-5" class="slide level2">
 <h2>Base R subsetting ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="co"># first 3 rows and 2nd and 4th column</span></span>
+<span id="cb29-2"><a></a>m[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2]
 [1,]    7   19
@@ -857,6 +907,8 @@ Kristen Wells-Wrasman
 <section id="base-r-subsetting-6" class="slide level2">
 <h2>Base R subsetting ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a></a><span class="co"># extract rows with totals &gt; 50</span></span>
+<span id="cb31-2"><a></a>m[<span class="fu">rowSums</span>(m) <span class="sc">&gt;</span> <span class="dv">50</span>, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2] [,3] [,4]
 [1,]    4   10   16   22
@@ -868,6 +920,8 @@ Kristen Wells-Wrasman
 <section id="base-r-subsetting-7" class="slide level2">
 <h2>Base R subsetting ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a></a><span class="co"># extract columns with minimum values &lt; 8</span></span>
+<span id="cb33-2"><a></a>m[, <span class="fu">colMins</span>(m) <span class="sc">&lt;</span> <span class="dv">8</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2]
 [1,]    1    7
@@ -883,6 +937,8 @@ Kristen Wells-Wrasman
 <h2>Base R subsetting ⌨️</h2>
 <p>The base R <code>data.frame</code> and Bioconductor <code>DataFrame</code> can also be subset with the <code>[</code> and we can reference individual vectors in a data.frame using <code>$</code>.</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a></a><span class="co"># first 3 rows and columns of mtcars data.frame</span></span>
+<span id="cb35-2"><a></a>mtcars[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>               mpg cyl disp
 Mazda RX4     21.0   6  160
@@ -894,6 +950,8 @@ Datsun 710    22.8   4  108</code></pre>
 <section id="base-r-subsetting-9" class="slide level2">
 <h2>Base R subsetting ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a></a><span class="co"># columns can be referenced using $, which extracts a vector</span></span>
+<span id="cb37-2"><a></a>mtcars<span class="sc">$</span>mpg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] 21.0 21.0 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8 16.4 17.3 15.2 10.4
 [16] 10.4 14.7 32.4 30.4 33.9 21.5 15.5 15.2 13.3 19.2 27.3 26.0 30.4 15.8 19.7
@@ -904,6 +962,13 @@ Datsun 710    22.8   4  108</code></pre>
 <section id="base-r-subsetting-10" class="slide level2">
 <h2>Base R subsetting ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a><span class="co"># columns can be generated or overwritten using $ with assignment</span></span>
+<span id="cb39-2"><a></a>mtcars<span class="sc">$</span>new_column_name <span class="ot">&lt;-</span> <span class="st">"Hello!"</span></span>
+<span id="cb39-3"><a></a>mtcars<span class="sc">$</span>wt <span class="ot">&lt;-</span> mtcars<span class="sc">$</span>wt <span class="sc">*</span> <span class="dv">1000</span></span>
+<span id="cb39-4"><a></a></span>
+<span id="cb39-5"><a></a><span class="co"># We can subset using logical vectors</span></span>
+<span id="cb39-6"><a></a><span class="co"># E.g. filter for rows (cars) with mpg &gt; 20</span></span>
+<span id="cb39-7"><a></a>mtcars[mtcars<span class="sc">$</span>mpg <span class="sc">&gt;</span> <span class="dv">20</span>, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                mpg cyl  disp  hp drat   wt  qsec vs am gear carb
 Mazda RX4      21.0   6 160.0 110 3.90 2620 16.46  0  1    4    4
@@ -938,7 +1003,7 @@ Volvo 142E              Hello!</code></pre>
 </div>
 </div>
 </section>
-<section id="read-in-alevin-output-with-tximport" class="slide level2">
+<section id="read-in-alevin-output-with-tximport" class="slide level2 smaller">
 <h2>Read in Alevin output with tximport</h2>
 <ul>
 <li class="fragment">Now that we know how to work with a sparse matrix, let’s read in our data</li>
@@ -952,6 +1017,12 @@ Volvo 142E              Hello!</code></pre>
 <section id="read-in-alevin-output-with-tximport-1" class="slide level2">
 <h2>Read in Alevin output with tximport ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a></a><span class="fu">library</span>(tximport)</span>
+<span id="cb41-2"><a></a>tx <span class="ot">&lt;-</span> <span class="fu">tximport</span>(</span>
+<span id="cb41-3"><a></a>  <span class="fu">here</span>(<span class="st">"data/block-rna/scrna/pbmc/alevin/quants_mat.gz"</span>),</span>
+<span id="cb41-4"><a></a>  <span class="at">type =</span> <span class="st">"alevin"</span></span>
+<span id="cb41-5"><a></a>)</span>
+<span id="cb41-6"><a></a><span class="fu">names</span>(tx)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "abundance"           "counts"              "countsFromAbundance"</code></pre>
 </div>
@@ -961,6 +1032,8 @@ Volvo 142E              Hello!</code></pre>
 <section id="read-in-alevin-output-with-tximport-2" class="slide level2">
 <h2>Read in Alevin output with tximport ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a>mat <span class="ot">&lt;-</span> tx<span class="sc">$</span>counts</span>
+<span id="cb43-2"><a></a>mat[<span class="dv">5</span><span class="sc">:</span><span class="dv">10</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>6 x 3 sparse Matrix of class "dgCMatrix"
                 GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG ATTTCTGTCTCTATGT
@@ -977,10 +1050,28 @@ ENSG00000240361                .                .                .</code></pre>
 </section>
 <section id="read-in-alevin-output-with-tximport-3" class="slide level2">
 <h2>Read in Alevin output with tximport ⌨️</h2>
-<p>What fraction of the matrix is non-zero? We can use the <code>nnzero</code>function from the <code>Matrix</code> package check</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a><span class="co"># </span><span class="al">TODO</span><span class="co"> Find number of barcodes and genes in tx$counts</span></span>
+<span id="cb45-2"><a></a><span class="fu">dim</span>(mat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 62266  6075</code></pre>
+</div>
+</div>
+<p>What fraction of the matrix is non-zero? We can use the <code>nnzero</code> function from the <code>Matrix</code> package check</p>
 </section>
 <section id="read-in-alevin-output-with-tximport-4" class="slide level2">
 <h2>Read in Alevin output with tximport ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a><span class="fu">nnzero</span>(mat) <span class="sc">/</span> <span class="fu">length</span>(mat) <span class="co"># (length = # of rows X # of columns)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.03282941</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a><span class="co"># similarily</span></span>
+<span id="cb49-2"><a></a><span class="fu">sum</span>(mat <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">/</span> <span class="fu">length</span>(mat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.03282941</code></pre>
+</div>
+</div>
 </section>
 <section id="single-cell-analysis-packages" class="slide level2">
 <h2>Single cell analysis packages</h2>
@@ -993,10 +1084,12 @@ ENSG00000240361                .                .                .</code></pre>
 <h2>SingleCellExperiment</h2>
 
 <img data-src="../img/block-rna/sce.png" class="r-stretch"></section>
-<section id="create-a-singlecellexperiment-object" class="slide level2">
+<section id="create-a-singlecellexperiment-object" class="slide level2 smaller">
 <h2>Create a SingleCellExperiment object ⌨️</h2>
 <p>A <code>SingleCellExperiment</code> object can be created from our sparse matrix using the <code>SingleCellExperiment()</code> function.</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">SingleCellExperiment</span>(<span class="fu">list</span>(<span class="at">counts =</span> mat))</span>
+<span id="cb51-2"><a></a>sce</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>class: SingleCellExperiment 
 dim: 62266 6075 
@@ -1014,14 +1107,18 @@ altExpNames(0):</code></pre>
 </div>
 </div>
 </section>
-<section id="exploring-the-singlecellexperiment-object" class="slide level2">
+<section id="exploring-the-singlecellexperiment-object" class="slide level2 smaller">
 <h2>Exploring the SingleCellExperiment object ⌨️</h2>
 <p>The <code>SingleCellExperiment</code> object stores the gene x cell count matrix within <code>assays()</code>.</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a></a><span class="co"># get list of assays</span></span>
+<span id="cb53-2"><a></a><span class="fu">assays</span>(sce)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>List of length 1
 names(1): counts</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a></a><span class="co"># extract single assay</span></span>
+<span id="cb55-2"><a></a><span class="fu">assay</span>(sce, <span class="st">"counts"</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>4 x 4 sparse Matrix of class "dgCMatrix"
                 GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG ATTTCTGTCTCTATGT
@@ -1040,6 +1137,7 @@ ENSG00000278267                .</code></pre>
 <section id="exploring-the-singlecellexperiment-object-1" class="slide level2">
 <h2>Exploring the SingleCellExperiment object ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a></a><span class="fu">assays</span>(sce)<span class="sc">$</span>counts[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>4 x 4 sparse Matrix of class "dgCMatrix"
                 GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG ATTTCTGTCTCTATGT
@@ -1058,6 +1156,8 @@ ENSG00000278267                .</code></pre>
 <section id="exploring-the-singlecellexperiment-object-2" class="slide level2">
 <h2>Exploring the SingleCellExperiment object ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a></a><span class="co"># convenience function for counts assay</span></span>
+<span id="cb59-2"><a></a><span class="fu">counts</span>(sce)[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>4 x 4 sparse Matrix of class "dgCMatrix"
                 GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG ATTTCTGTCTCTATGT
@@ -1082,10 +1182,22 @@ ENSG00000278267                .</code></pre>
 <li class="fragment">access using <code>colData()</code></li>
 <li class="fragment">Specialized Bioconductor specific data.frame class (<code>DataFrame</code>) which has similar semantics and functionality to a base R data.frame.</li>
 </ul>
+</section>
+<section id="accessing-cell-metadata-1" class="slide level2 smaller">
+<h2>Accessing cell metadata ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a></a><span class="co"># empty right now.</span></span>
+<span id="cb61-2"><a></a><span class="fu">colData</span>(sce)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 6075 rows and 0 columns</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a></a><span class="co"># add a sample annotation</span></span>
+<span id="cb63-2"><a></a><span class="fu">colData</span>(sce)<span class="sc">$</span>cell_source <span class="ot">&lt;-</span> <span class="st">"PBMC"</span></span>
+<span id="cb63-3"><a></a></span>
+<span id="cb63-4"><a></a><span class="co"># equivalent approach using $</span></span>
+<span id="cb63-5"><a></a>sce<span class="sc">$</span>cell_source <span class="ot">&lt;-</span> <span class="st">"PBMC"</span></span>
+<span id="cb63-6"><a></a></span>
+<span id="cb63-7"><a></a><span class="fu">colData</span>(sce)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 6075 rows and 1 column
                  cell_source
@@ -1111,6 +1223,8 @@ TCTCAGCTCGCCGAAC        PBMC</code></pre>
 <li class="fragment">Use the rowData to store gene ids, symbols, and other information about genes.</li>
 </ul>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a></a><span class="co"># empty right now</span></span>
+<span id="cb65-2"><a></a><span class="fu">rowData</span>(sce)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 62266 rows and 0 columns</code></pre>
 </div>
@@ -1121,8 +1235,11 @@ TCTCAGCTCGCCGAAC        PBMC</code></pre>
 <ul>
 <li class="fragment">Calculate the total number of counts in each cell and store these counts in the `colData().*</li>
 </ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a></a>sce<span class="sc">$</span>total_counts <span class="ot">&lt;-</span> <span class="fu">colSums</span>(<span class="fu">counts</span>(sce))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="manipulating-a-singlecellexperiment-1" class="slide level2">
+<section id="manipulating-a-singlecellexperiment-1" class="slide level2 smaller">
 <h2>Manipulating a SingleCellExperiment ⌨️</h2>
 <ul>
 <li class="fragment">Calculate the total number of counts for each gene, summed across cells</li>
@@ -1130,6 +1247,9 @@ TCTCAGCTCGCCGAAC        PBMC</code></pre>
 <li class="fragment">store both of these values in the rowData().</li>
 </ul>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>total_gene_counts <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">counts</span>(sce))</span>
+<span id="cb68-2"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>n_cells_expr <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">counts</span>(sce) <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb68-3"><a></a><span class="fu">rowData</span>(sce)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 62266 rows and 2 columns
                 total_gene_counts n_cells_expr
@@ -1154,28 +1274,28 @@ ENSG00000210196                 0            0</code></pre>
 <li class="fragment">We can subset the SingleCellExperiment using the same techniques as base R data.</li>
 <li class="fragment">Note that <code>dplyr</code> verbs do not work with <code>SingleCellExperiment</code></li>
 </ul>
-<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a>data.frame[rows, columns]</span>
-<span id="cb34-2"><a></a></span>
-<span id="cb34-3"><a></a>sce[genes, cells]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb70"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a></a>data.frame[rows, columns]</span>
+<span id="cb70-2"><a></a></span>
+<span id="cb70-3"><a></a>sce[genes, cells]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="manipulating-a-singlecellexperiment-3" class="slide level2">
+<section id="manipulating-a-singlecellexperiment-3" class="slide level2 smaller">
 <h2>Manipulating a SingleCellExperiment ⌨️</h2>
 <ul>
 <li class="fragment">We can subset the SingleCellExperiment using the same techniques as base R data.</li>
 <li class="fragment">Note that <code>dplyr</code> verbs do not work with <code>SingleCellExperiment</code></li>
 </ul>
-<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a></a><span class="co"># subset to data from first 4 genes and cells</span></span>
-<span id="cb35-2"><a></a>sce[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span>
-<span id="cb35-3"><a></a></span>
-<span id="cb35-4"><a></a><span class="co"># subset to cells from PBMC cells</span></span>
-<span id="cb35-5"><a></a>sce[, sce<span class="sc">$</span>cell_source <span class="sc">==</span> <span class="st">"PBMC"</span>]</span>
-<span id="cb35-6"><a></a></span>
-<span id="cb35-7"><a></a></span>
-<span id="cb35-8"><a></a>genes_to_keep <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"ENSG00000223972"</span>, <span class="st">"ENSG00000210195"</span>, <span class="st">"ENSG00000210196"</span>)</span>
-<span id="cb35-9"><a></a>sce[genes_to_keep, ]</span>
-<span id="cb35-10"><a></a></span>
-<span id="cb35-11"><a></a>cells_to_keep <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"ACTATGGAGGTCCCTG"</span>, <span class="st">"GCTGCAGTCCGATCTC"</span>, <span class="st">"TCTCAGCTCGCCGAAC"</span>)</span>
-<span id="cb35-12"><a></a>sce[, cells_to_keep]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb71"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a></a><span class="co"># subset to data from first 4 genes and cells</span></span>
+<span id="cb71-2"><a></a>sce[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span>
+<span id="cb71-3"><a></a></span>
+<span id="cb71-4"><a></a><span class="co"># subset to cells from PBMC cells</span></span>
+<span id="cb71-5"><a></a>sce[, sce<span class="sc">$</span>cell_source <span class="sc">==</span> <span class="st">"PBMC"</span>]</span>
+<span id="cb71-6"><a></a></span>
+<span id="cb71-7"><a></a></span>
+<span id="cb71-8"><a></a>genes_to_keep <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"ENSG00000223972"</span>, <span class="st">"ENSG00000210195"</span>, <span class="st">"ENSG00000210196"</span>)</span>
+<span id="cb71-9"><a></a>sce[genes_to_keep, ]</span>
+<span id="cb71-10"><a></a></span>
+<span id="cb71-11"><a></a>cells_to_keep <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"ACTATGGAGGTCCCTG"</span>, <span class="st">"GCTGCAGTCCGATCTC"</span>, <span class="st">"TCTCAGCTCGCCGAAC"</span>)</span>
+<span id="cb71-12"><a></a>sce[, cells_to_keep]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="manipulating-a-singlecellexperiment-4" class="slide level2">
 <h2>Manipulating a SingleCellExperiment</h2>
@@ -1189,11 +1309,29 @@ ENSG00000210196                 0            0</code></pre>
 </section>
 <section id="storing-gene-identifiers" class="slide level2">
 <h2>Storing gene identifiers</h2>
-<p>Ensembl gene ids are the rownames of our matrix (e.g.&nbsp;ENSG00000289576, ENSG00000221539). * These identifiers are guaranteed to be unique and are more stable and reliable than gene symbols (e.g.&nbsp;ACTB, GAPDH). * This becomes important if you want to compare to external datasets or ensure that your data can be easily used by others in the future. * But they aren’t easy to interpret</p>
+<ul>
+<li class="fragment">Ensembl gene ids are the rownames of our matrix (e.g.&nbsp;ENSG00000289576, ENSG00000221539).</li>
+<li class="fragment">These identifiers are guaranteed to be unique and are more stable and reliable than gene symbols (e.g.&nbsp;ACTB, GAPDH).</li>
+<li class="fragment">This becomes important if you want to compare to external datasets or ensure that your data can be easily used by others in the future.</li>
+<li class="fragment">But they aren’t easy to interpret</li>
+</ul>
 </section>
-<section id="storing-gene-identifiers-1" class="slide level2">
+<section id="storing-gene-identifiers-1" class="slide level2 smaller">
 <h2>Storing gene identifiers ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a></a>ah <span class="ot">&lt;-</span> <span class="fu">AnnotationHub</span>()</span>
+<span id="cb72-2"><a></a><span class="co"># download ensembl database</span></span>
+<span id="cb72-3"><a></a>ens_db <span class="ot">&lt;-</span> ah[[<span class="st">"AH113665"</span>]]</span>
+<span id="cb72-4"><a></a></span>
+<span id="cb72-5"><a></a>gene_names <span class="ot">&lt;-</span> <span class="fu">mapIds</span>(ens_db,</span>
+<span id="cb72-6"><a></a>  <span class="at">keys =</span> <span class="fu">rownames</span>(sce),</span>
+<span id="cb72-7"><a></a>  <span class="at">keytype =</span> <span class="st">"GENEID"</span>,</span>
+<span id="cb72-8"><a></a>  <span class="at">column =</span> <span class="st">"SYMBOL"</span></span>
+<span id="cb72-9"><a></a>)</span>
+<span id="cb72-10"><a></a></span>
+<span id="cb72-11"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>gene <span class="ot">&lt;-</span> gene_names</span>
+<span id="cb72-12"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>gene_id <span class="ot">&lt;-</span> <span class="fu">rownames</span>(sce)</span>
+<span id="cb72-13"><a></a><span class="fu">rowData</span>(sce)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 62266 rows and 4 columns
                 total_gene_counts n_cells_expr        gene         gene_id
@@ -1212,7 +1350,7 @@ ENSG00000210196                 0            0       MT-TP ENSG00000210196</code
 </div>
 </div>
 </section>
-<section id="updating-our-rownames" class="slide level2">
+<section id="updating-our-rownames" class="slide level2 smaller">
 <h2>Updating our rownames ⌨️</h2>
 <ul>
 <li class="fragment">Goal rename rownames to symbols</li>
@@ -1220,6 +1358,11 @@ ENSG00000210196                 0            0       MT-TP ENSG00000210196</code
 <li class="fragment"><code>uniquifyFeatureNames()</code> is a convenience function that will rename gene symbols that are <code>NA</code> or duplicated values to the ensembl ID or a combination of gene symbol and ensembl ID</li>
 </ul>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a></a><span class="fu">rownames</span>(sce) <span class="ot">&lt;-</span> <span class="fu">uniquifyFeatureNames</span>(</span>
+<span id="cb74-2"><a></a>  <span class="fu">rowData</span>(sce)<span class="sc">$</span>gene_id,</span>
+<span id="cb74-3"><a></a>  <span class="fu">rowData</span>(sce)<span class="sc">$</span>gene</span>
+<span id="cb74-4"><a></a>)</span>
+<span id="cb74-5"><a></a><span class="fu">head</span>(<span class="fu">rownames</span>(sce))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "DDX11L2_ENSG00000290825" "DDX11L1"                
 [3] "WASH7P"                  "MIR6859-1"              
@@ -1227,12 +1370,15 @@ ENSG00000210196                 0            0       MT-TP ENSG00000210196</code
 </div>
 </div>
 </section>
-<section>
-<section id="filtering-low-quality-cells" class="title-slide slide level1 center">
-<h1>Filtering low quality cells ⌨️</h1>
+<section id="filtering-low-quality-cells" class="slide level2 smaller">
+<h2>Filtering low quality cells ⌨️</h2>
 <p>Next we perform some filtering and quality control to remove low expression genes and poor quality cells.</p>
 <p>Our SingleCellExperiment has 62266 genes in the matrix. Most of these are not expressed. We want to exclude these genes as they won’t provide any useful data for the analysis.</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a></a><span class="co"># exclude genes expressed in fewer than 10 cells (~ 1% of cells)</span></span>
+<span id="cb76-2"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>n_cells <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">counts</span>(sce) <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb76-3"><a></a>sce <span class="ot">&lt;-</span> sce[<span class="fu">rowData</span>(sce)<span class="sc">$</span>n_cells <span class="sc">&gt;=</span> <span class="dv">10</span>, ]</span>
+<span id="cb76-4"><a></a>sce</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>class: SingleCellExperiment 
 dim: 20858 6075 
@@ -1259,10 +1405,14 @@ altExpNames(0):</code></pre>
 </ul>
 <p>A low number of counts, a low number of detected genes, and a high percentage of mitochondrial counts suggests that the cell had a broken membrane and the cytoplasmic mRNA leaked out.</p>
 </section>
-<section id="filtering-low-quality-cells-2" class="slide level2">
+<section id="filtering-low-quality-cells-2" class="slide level2 smaller">
 <h2>Filtering low quality cells ⌨️</h2>
 <p>To calculate these metrics we can use <code>addPerCellQCMetrics</code> from scater. Mitochondrial genes are named with a common “MT-” prefix (e.g.&nbsp;MT-CO2, MT-ATP6, MR-RNR2), which we can use to identify them.</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a></a><span class="co"># identify subset of genes that are from mitochondrial genome</span></span>
+<span id="cb78-2"><a></a>is_mito <span class="ot">&lt;-</span> <span class="fu">startsWith</span>(<span class="fu">rowData</span>(sce)<span class="sc">$</span>gene, <span class="st">"MT-"</span>)</span>
+<span id="cb78-3"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">addPerCellQCMetrics</span>(sce, <span class="at">subsets =</span> <span class="fu">list</span>(<span class="at">Mito =</span> is_mito))</span>
+<span id="cb78-4"><a></a><span class="fu">colData</span>(sce)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 6075 rows and 8 columns
                  cell_source total_counts       sum  detected subsets_Mito_sum
@@ -1297,28 +1447,47 @@ TCTCAGCTCGCCGAAC                     2              2.77778   144.000</code></pr
 <section id="filtering-low-quality-cells-3" class="slide level2">
 <h2>Filtering low quality cells ⌨️</h2>
 <p>We can use the <code>plotColData()</code> function from scater to plot various metrics (as a ggplot2 object).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a></a><span class="fu">plotColData</span>(sce, <span class="at">y =</span> <span class="st">"sum"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-36-1.png" width="960" class="r-stretch"></section>
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-36-1.png" width="864" class="r-stretch"></section>
 <section id="filtering-low-quality-cells-4" class="slide level2">
 <h2>Filtering low quality cells ⌨️</h2>
 <p>We can use the <code>plotColData()</code> function from scater to plot various metrics (as a ggplot2 object).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a></a><span class="fu">plotColData</span>(sce, <span class="at">y =</span> <span class="st">"detected"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-37-1.png" width="960" class="r-stretch"></section>
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-37-1.png" width="864" class="r-stretch"></section>
 <section id="filtering-low-quality-cells-5" class="slide level2">
 <h2>Filtering low quality cells ⌨️</h2>
 <p>We can use the <code>plotColData()</code> function from scater to plot various metrics (as a ggplot2 object).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a></a><span class="fu">plotColData</span>(sce, <span class="at">y =</span> <span class="st">"detected"</span>, <span class="at">x =</span> <span class="st">"sum"</span>, </span>
+<span id="cb82-2"><a></a>            <span class="at">colour_by =</span> <span class="st">"subsets_Mito_percent"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-38-1.png" width="960" class="r-stretch"></section>
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-38-1.png" width="864" class="r-stretch"></section>
 <section id="filtering-low-quality-cells-6" class="slide level2">
 <h2>Filtering low quality cells ⌨️</h2>
 <p>We can use the <code>plotColData()</code> function from scater to plot various metrics (as a ggplot2 object).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a></a><span class="fu">plotColData</span>(sce, <span class="at">y =</span> <span class="st">"subsets_Mito_percent"</span>, <span class="at">x =</span> <span class="st">"sum"</span>) <span class="sc">+</span></span>
+<span id="cb83-2"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"# of counts"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-39-1.png" width="960" class="r-stretch"></section>
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-39-1.png" width="864" class="r-stretch"></section>
 <section id="filtering-low-quality-cells-7" class="slide level2">
 <h2>Filtering low quality cells ⌨️</h2>
 <p>We can also extract <code>colData</code> as a dataframe to make custom <code>ggplot2</code> plots</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a></a>cell_info <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">colData</span>(sce))</span>
+<span id="cb84-2"><a></a><span class="fu">ggplot</span>(cell_info, <span class="fu">aes</span>(sum, subsets_Mito_percent)) <span class="sc">+</span></span>
+<span id="cb84-3"><a></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-40-1.png" width="960" class="r-stretch"></section>
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-40-1.png" width="864" class="r-stretch"></section>
 <section id="filtering-low-quality-cells-8" class="slide level2">
 <h2>Filtering low quality cells ⌨️</h2>
 <ul>
@@ -1327,11 +1496,17 @@ TCTCAGCTCGCCGAAC                     2              2.77778   144.000</code></pr
 <li class="fragment">Start with lenient cutoffs, then later increasing the stringency after examining the clustering and cell types.</li>
 </ul>
 <p><em>How many cells pass these criteria?</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a></a>pass_qc <span class="ot">&lt;-</span> sce<span class="sc">$</span>subsets_Mito_percent <span class="sc">&lt;</span> <span class="dv">20</span> <span class="sc">&amp;</span> </span>
+<span id="cb85-2"><a></a>  sce<span class="sc">$</span>detected <span class="sc">&gt;</span> <span class="dv">500</span> <span class="sc">&amp;</span> </span>
+<span id="cb85-3"><a></a>  sce<span class="sc">$</span>sum <span class="sc">&gt;</span> <span class="dv">1000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p><em>How many cells pass these criteria?</em></p>
 </section>
 <section id="filtering-low-quality-cells-9" class="slide level2">
 <h2>Filtering low quality cells ⌨️</h2>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a></a><span class="fu">sum</span>(pass_qc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 4565</code></pre>
 </div>
@@ -1339,12 +1514,26 @@ TCTCAGCTCGCCGAAC                     2              2.77778   144.000</code></pr
 </section>
 <section id="visualizing-qc-failed-cells" class="slide level2">
 <h2>Visualizing qc failed cells ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a></a>sce<span class="sc">$</span>pass_qc <span class="ot">&lt;-</span> sce<span class="sc">$</span>subsets_Mito_percent <span class="sc">&lt;</span> <span class="dv">20</span> <span class="sc">&amp;</span> </span>
+<span id="cb88-2"><a></a>  sce<span class="sc">$</span>detected <span class="sc">&gt;</span> <span class="dv">500</span> <span class="sc">&amp;</span> </span>
+<span id="cb88-3"><a></a>  sce<span class="sc">$</span>sum <span class="sc">&gt;</span> <span class="dv">1000</span></span>
+<span id="cb88-4"><a></a></span>
+<span id="cb88-5"><a></a><span class="fu">plotColData</span>(sce,</span>
+<span id="cb88-6"><a></a>  <span class="at">y =</span> <span class="st">"subsets_Mito_percent"</span>,</span>
+<span id="cb88-7"><a></a>  <span class="at">x =</span> <span class="st">"sum"</span>,</span>
+<span id="cb88-8"><a></a>  <span class="at">colour_by =</span> <span class="st">"pass_qc"</span></span>
+<span id="cb88-9"><a></a>) <span class="sc">+</span></span>
+<span id="cb88-10"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"# of counts"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-43-1.png" width="960" class="r-stretch"></section>
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-43-1.png" width="864" class="r-stretch"></section>
 <section id="remove-low-quality-cells" class="slide level2">
 <h2>Remove low quality cells ⌨️</h2>
 <p>Lastly we can subset the <code>SingleCellExperiment</code> to exclude the low-quality cells.</p>
 <div class="cell">
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a></a>sce <span class="ot">&lt;-</span> sce[, sce<span class="sc">$</span>pass_qc]</span>
+<span id="cb89-2"><a></a>sce</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>class: SingleCellExperiment 
 dim: 20858 4565 
@@ -1365,8 +1554,8 @@ altExpNames(0):</code></pre>
 <h2>Analysis workflow</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div class="grViz html-widget html-fill-item" id="htmlwidget-78ac1f2ad9066223abce" style="width:100%;height:100%;"></div>
-<script type="application/json" data-for="htmlwidget-78ac1f2ad9066223abce">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = LR]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  load [label= \"Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n addPerCellQCMetrics()\n plotColData()\"]\n  norm [label = \"Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()\"]\n  dim_red [label = \"Dimensionality reduction via PCA \n runPCA()\"]\n  cluster [label = \"Clustering\n clusterCells()\"]\n  viz [label = \"Make 2D-Visualization\nrunUMAP()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n\n  markers [label = \"Discover cell type markers \nscoreMarkers()\"]\n  annot [label = \"Annotate cell types\nclustifyr and SingleR\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  load -> cell_qc\n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-693aba093e74df827697" style="width:100%;height:100%;"></div>
+<script type="application/json" data-for="htmlwidget-693aba093e74df827697">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = LR]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  load [label= \"Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n addPerCellQCMetrics()\n plotColData()\"]\n  norm [label = \"Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()\"]\n  dim_red [label = \"Dimensionality reduction via PCA \n runPCA()\"]\n  cluster [label = \"Clustering\n clusterCells()\"]\n  viz [label = \"Make 2D-Visualization\nrunUMAP()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n\n  markers [label = \"Discover cell type markers \nscoreMarkers()\"]\n  annot [label = \"Annotate cell types\nclustifyr and SingleR\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  load -> cell_qc\n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </section>
@@ -1378,19 +1567,45 @@ altExpNames(0):</code></pre>
 <li class="fragment">This can be seen by performing PCA on the unnormalized counts.</li>
 <li class="fragment">We will use <code>runPCA</code> from scater to perform PCA.</li>
 </ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a></a><span class="co"># set seed for functions with a randomized component</span></span>
+<span id="cb91-2"><a></a><span class="co"># to obtain the same result each execution</span></span>
+<span id="cb91-3"><a></a><span class="fu">set.seed</span>(<span class="dv">20231023</span>)</span>
+<span id="cb91-4"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runPCA</span>(sce, <span class="at">exprs_values =</span> <span class="st">"counts"</span>, <span class="at">name =</span> <span class="st">"count_PCA"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="normalization-1" class="slide level2">
+<section id="normalization-1" class="slide level2 smaller">
 <h2>Normalization ⌨️</h2>
+<div class="columns">
+<div class="column" style="width:70%;">
 <ul>
 <li class="fragment">We can now visualize this PCA</li>
 </ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a></a><span class="fu">plotReducedDim</span>(sce, <span class="st">"count_PCA"</span>, <span class="at">colour_by =</span> <span class="st">"sum"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-31_files/figure-revealjs/unnamed-chunk-47-1.png" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:3%;">
 
-<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-47-1.png" width="960" class="r-stretch"><p>Note that PC1 is correlated with the total UMI counts (<code>sum</code>), meaning that the largest source of variation is related to differences in sequencing depth rather than biological differences between cells.</p>
-</section></section>
-<section>
-<section id="normalization-2" class="title-slide slide level1 center">
-<h1>Normalization ⌨️</h1>
+</div><div class="column" style="width:27%;">
+<p>Note that PC1 is correlated with the total UMI counts (<code>sum</code>), meaning that the largest source of variation is related to differences in sequencing depth rather than biological differences between cells.</p>
+</div></div>
+</section>
+<section id="normalization-2" class="slide level2">
+<h2>Normalization ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a></a>plot_df <span class="ot">&lt;-</span> <span class="fu">makePerCellDF</span>(sce, <span class="fu">c</span>(<span class="st">"count_PCA"</span>, <span class="st">"sum"</span>))</span>
+<span id="cb93-2"><a></a></span>
+<span id="cb93-3"><a></a><span class="fu">ggplot</span>(plot_df, <span class="fu">aes</span>(count_PCA<span class="fl">.1</span>, sum)) <span class="sc">+</span></span>
+<span id="cb93-4"><a></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
+</div>
 <img data-src="slides-31_files/figure-revealjs/unnamed-chunk-48-1.png" width="960" class="r-stretch"></section>
 <section id="normalization-3" class="slide level2">
 <h2>Normalization ⌨️</h2>
@@ -1403,6 +1618,12 @@ altExpNames(0):</code></pre>
 <li class="fragment">Scaling the counts by this factor</li>
 <li class="fragment">log transforming the data (base 2 with a pseudocount).</li>
 </ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a></a><span class="fu">set.seed</span>(<span class="dv">20231023</span>)</span>
+<span id="cb94-2"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">quickCluster</span>(sce)</span>
+<span id="cb94-3"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">computeSumFactors</span>(sce, <span class="at">clusters =</span> clusters)</span>
+<span id="cb94-4"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">logNormCounts</span>(sce)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <div class="footer">
 <p>Description of algorithim: Lun AT, Bach K, Marioni JC. Pooling across cells to normalize single-cell RNA sequencing data with many zero counts. Genome Biol. 2016 Apr 27;17:75. doi: 10.1186/s13059-016-0947-7. PMID: 27122128; PMCID: PMC4848819.</p>
 </div>
@@ -1410,12 +1631,22 @@ altExpNames(0):</code></pre>
 <section id="normalization-4" class="slide level2">
 <h2>Normalization ⌨️</h2>
 <p>Plot the PCA with normalization</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a></a><span class="fu">set.seed</span>(<span class="dv">20231023</span>)</span>
+<span id="cb95-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runPCA</span>(sce, <span class="at">exprs_values =</span> <span class="st">"logcounts"</span>, <span class="at">name =</span> <span class="st">"PCA"</span>)</span>
+<span id="cb95-3"><a></a><span class="fu">plotReducedDim</span>(sce, <span class="st">"PCA"</span>, <span class="at">colour_by =</span> <span class="st">"sum"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-51-1.png" width="960" class="r-stretch"></section>
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-50-1.png" width="960" class="r-stretch"></section>
 <section id="normalization-5" class="slide level2">
 <h2>Normalization ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a></a>plot_df <span class="ot">&lt;-</span> <span class="fu">makePerCellDF</span>(sce, <span class="fu">c</span>(<span class="st">"PCA"</span>, <span class="st">"sum"</span>))</span>
+<span id="cb96-2"><a></a><span class="fu">ggplot</span>(plot_df, <span class="fu">aes</span>(PCA<span class="fl">.1</span>, sum)) <span class="sc">+</span></span>
+<span id="cb96-3"><a></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-52-1.png" width="960" class="r-stretch"><p>PC1 no longer correlates with UMI counts.</p>
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-51-1.png" width="960" class="r-stretch"><p>PC1 no longer correlates with UMI counts.</p>
 </section>
 <section id="further-reading" class="slide level2">
 <h2>Further Reading</h2>
@@ -1429,7 +1660,7 @@ altExpNames(0):</code></pre>
 <p>Course website: <a href="https://rnabioco.github.io/molb-7950" class="uri">https://rnabioco.github.io/molb-7950</a></p>
 </div>
 </div>
-</section></section>
+</section>
     </div>
   </div>
 

@@ -10,8 +10,8 @@
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.5.57">
 
-  <meta name="author" content="Kent Riemondy">
-  <meta name="dcterms.date" content="2024-09-25">
+  <meta name="author" content="Kent Riemondy and Kristen Wells">
+  <meta name="dcterms.date" content="2024-09-26">
   <title>MOLB 7950 – Single cell RNA-Seq:</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -415,7 +415,7 @@
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
 <div class="quarto-title-author-name">
-Kent Riemondy 
+Kent Riemondy and Kristen Wells 
 </div>
         <p class="quarto-title-affiliation">
             RNA Bioscience Initiative | CU Anschutz
@@ -423,7 +423,7 @@ Kent Riemondy
     </div>
 </div>
 
-  <p class="date">2024-09-25</p>
+  <p class="date">2024-09-26</p>
 </section>
 <section id="contact-info" class="slide level2">
 <h2>Contact Info</h2>
@@ -449,14 +449,21 @@ Kent Riemondy
 </ul>
 </div></div>
 </section>
+<section id="learning-key" class="slide level2">
+<h2>Learning key</h2>
+<ul>
+<li class="fragment">We will switch between lecture and your exercise <code>qmd</code>.</li>
+<li class="fragment">To denote a slide that corresponds to your exercise, I will include ⌨️ in the slide title</li>
+</ul>
+</section>
 <section id="analysis-steps-revisited" class="slide level2 smaller">
 <h2>Analysis steps revisited</h2>
 <div class="columns">
 <div class="column" style="width:&quot;50%;">
 <div class="cell">
 <div class="cell-output-display">
-<div class="grViz html-widget html-fill-item" id="htmlwidget-31297e3cfa345e40ab8a" style="width:70%;height:70%;"></div>
-<script type="application/json" data-for="htmlwidget-31297e3cfa345e40ab8a">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = TD]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  load [label= \"Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n addPerCellQCMetrics()\n plotColData()\"]\n  norm [label = \"Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()\"]\n  dim_red [label = \"Dimensionality reduction via PCA \n runPCA()\"]\n  cluster [label = \"Clustering\n clusterCells()\"]\n  viz [label = \"Make 2D-Visualization\nrunUMAP()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n\n  markers [label = \"Discover cell type markers \nscoreMarkers()\"]\n  annot [label = \"Annotate cell types\nclustifyr and SingleR\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  load -> cell_qc\n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-e512a57021c932f37d72" style="width:70%;height:70%;"></div>
+<script type="application/json" data-for="htmlwidget-e512a57021c932f37d72">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = TD]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  load [label= \"Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n addPerCellQCMetrics()\n plotColData()\"]\n  norm [label = \"Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()\"]\n  dim_red [label = \"Dimensionality reduction via PCA \n runPCA()\"]\n  cluster [label = \"Clustering\n clusterCells()\"]\n  viz [label = \"Make 2D-Visualization\nrunUMAP()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n\n  markers [label = \"Discover cell type markers \nscoreMarkers()\"]\n  annot [label = \"Annotate cell types\nclustifyr and SingleR\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  load -> cell_qc\n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </div><div class="column" style="width:&quot;50%;">
@@ -473,7 +480,7 @@ Kent Riemondy
 </section>
 <section>
 <section id="tldr" class="title-slide slide level1 center">
-<h1>TL;DR</h1>
+<h1>TL;DR ⌨️</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="co"># normalize data</span></span>
 <span id="cb1-2"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">quickCluster</span>(sce)</span>
 <span id="cb1-3"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">computeSumFactors</span>(sce, <span class="at">clusters=</span>clusters)</span>
@@ -495,100 +502,144 @@ Kent Riemondy
 <span id="cb1-19"><a></a></span>
 <span id="cb1-20"><a></a>...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="normalization" class="slide level2 smaller">
-<h2>Normalization</h2>
-<div class="columns">
-<div class="column">
-<p>Normalization attempts to correct for technical biases that will distort biological signal in the data.</p>
-<p>A large source of variation arises due to differences in sequencing depth between cells. See PCA performed on unnormalized counts on right -&gt;</p>
-<p>We also have the same mean expression and variance relationship as seen in bulk-RNA-seq. More abundant RNAs have more variance, which means they will contribute more to the clustering than lower abundance RNAs unless corrected.</p>
-</div><div class="column">
+<section id="rerun-steps-from-previous-class" class="slide level2">
+<h2>Rerun steps from previous class ⌨️</h2>
 <div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-2-1.png" width="960"></p>
-</figure>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a><span class="co"># load data</span></span>
+<span id="cb2-2"><a></a><span class="fu">library</span>(tximport)</span>
+<span id="cb2-3"><a></a>tx <span class="ot">&lt;-</span> <span class="fu">tximport</span>(</span>
+<span id="cb2-4"><a></a>  <span class="fu">here</span>(<span class="st">"data/block-rna/scrna/pbmc/alevin/quants_mat.gz"</span>),</span>
+<span id="cb2-5"><a></a>  <span class="at">type =</span> <span class="st">"alevin"</span></span>
+<span id="cb2-6"><a></a>)</span>
+<span id="cb2-7"><a></a></span>
+<span id="cb2-8"><a></a><span class="co"># setup gene ids</span></span>
+<span id="cb2-9"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">SingleCellExperiment</span>(<span class="fu">list</span>(<span class="at">counts =</span> tx<span class="sc">$</span>counts))</span>
+<span id="cb2-10"><a></a>ah <span class="ot">&lt;-</span> <span class="fu">AnnotationHub</span>()</span>
+<span id="cb2-11"><a></a>ens_db <span class="ot">&lt;-</span> ah[[<span class="st">"AH113665"</span>]]</span>
+<span id="cb2-12"><a></a></span>
+<span id="cb2-13"><a></a>gene_names <span class="ot">&lt;-</span> <span class="fu">mapIds</span>(ens_db,</span>
+<span id="cb2-14"><a></a>  <span class="at">keys =</span> <span class="fu">rownames</span>(sce),</span>
+<span id="cb2-15"><a></a>  <span class="at">keytype =</span> <span class="st">"GENEID"</span>,</span>
+<span id="cb2-16"><a></a>  <span class="at">column =</span> <span class="st">"SYMBOL"</span></span>
+<span id="cb2-17"><a></a>)</span>
+<span id="cb2-18"><a></a></span>
+<span id="cb2-19"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>gene <span class="ot">&lt;-</span> gene_names</span>
+<span id="cb2-20"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>gene_id <span class="ot">&lt;-</span> <span class="fu">rownames</span>(sce)</span>
+<span id="cb2-21"><a></a><span class="fu">rownames</span>(sce) <span class="ot">&lt;-</span> <span class="fu">uniquifyFeatureNames</span>(</span>
+<span id="cb2-22"><a></a>  <span class="fu">rowData</span>(sce)<span class="sc">$</span>gene_id,</span>
+<span id="cb2-23"><a></a>  <span class="fu">rowData</span>(sce)<span class="sc">$</span>gene</span>
+<span id="cb2-24"><a></a>)</span>
+<span id="cb2-25"><a></a></span>
+<span id="cb2-26"><a></a><span class="co"># drop non/low expressed genes</span></span>
+<span id="cb2-27"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>n_cells <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">counts</span>(sce) <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb2-28"><a></a>sce <span class="ot">&lt;-</span> sce[<span class="fu">rowData</span>(sce)<span class="sc">$</span>n_cells <span class="sc">&gt;=</span> <span class="dv">10</span>, ]</span>
+<span id="cb2-29"><a></a></span>
+<span id="cb2-30"><a></a><span class="co"># basic QC</span></span>
+<span id="cb2-31"><a></a>is_mito <span class="ot">&lt;-</span> <span class="fu">startsWith</span>(<span class="fu">rowData</span>(sce)<span class="sc">$</span>gene, <span class="st">"MT-"</span>)</span>
+<span id="cb2-32"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">addPerCellQCMetrics</span>(sce, <span class="at">subsets =</span> <span class="fu">list</span>(<span class="at">Mito =</span> is_mito))</span>
+<span id="cb2-33"><a></a>sce<span class="sc">$</span>pass_qc <span class="ot">&lt;-</span> sce<span class="sc">$</span>subsets_Mito_percent <span class="sc">&lt;</span> <span class="dv">20</span> <span class="sc">&amp;</span> sce<span class="sc">$</span>sum <span class="sc">&gt;</span> <span class="dv">1000</span> <span class="sc">&amp;</span> sce<span class="sc">$</span>detected <span class="sc">&gt;</span> <span class="dv">500</span></span>
+<span id="cb2-34"><a></a>sce <span class="ot">&lt;-</span> sce[, sce<span class="sc">$</span>pass_qc]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-3-1.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
 </section>
-<section id="normalization-1" class="slide level2 smaller">
-<h2>Normalization</h2>
-<div class="columns">
-<div class="column">
+<section id="normalization-refresher" class="slide level2 smaller">
+<h2>Normalization refresher ⌨️</h2>
 <p><code>quickCluster()</code>: Crude clustering to group related cells into groups with similar expression profiles</p>
 <p><code>computeSumFactors()</code>: Pool counts across clusters to establish an average cell profile for each cluster. Then use deconvolution to estimate a cell-specific scaling factor for normalization</p>
 <p><code>logNormCounts()</code>: Apply scaling factors (size factors) to counts and log transform with a pseudocount.</p>
-</div><div class="column">
 <div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-4-1.png" width="960"></p>
-</figure>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="fu">set.seed</span>(<span class="dv">20231023</span>)</span>
+<span id="cb3-2"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">quickCluster</span>(sce)</span>
+<span id="cb3-3"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">computeSumFactors</span>(sce, <span class="at">clusters =</span> clusters)</span>
+<span id="cb3-4"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">logNormCounts</span>(sce)</span>
+<span id="cb3-5"><a></a></span>
+<span id="cb3-6"><a></a><span class="fu">logcounts</span>(sce)[<span class="dv">50</span><span class="sc">:</span><span class="dv">60</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>11 x 4 sparse Matrix of class "dgCMatrix"
+           GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG ATTTCTGTCTCTATGT TATCTGTAGGTGATAT
+CPTP              .                0.2645668        .                .        
+TAS1R3            .                .                .                .        
+DVL1              .                0.2645668        .                .        
+MXRA8             .                .                .                .        
+AURKAIP1          0.3500082        1.9327619        0.2923841        0.7922116
+CCNL2             0.6314635        .                0.7432885        0.5731981
+MRPL20-AS1        0.3500082        0.2645668        0.2923841        .        
+MRPL20            0.8668712        1.1425125        0.9249737        0.7922116
+RN7SL657P         .                .                .                .        
+MRPL20-DT         .                .                .                0.3148810
+ATAD3C            .                .                .                .        </code></pre>
 </div>
 </div>
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-4-2.png" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
 </section>
 <section id="variable-gene-selection" class="slide level2 smaller">
 <h2>Variable gene selection</h2>
-<div class="columns">
-<div class="column">
 <ul>
 <li class="fragment"><p>Genes that have high variance across cells are genes that tend to be differentially expressed between cell types</p></li>
 <li class="fragment"><p>Low variance genes are usually low-expressed or “house-keeping” genes whose expression will not help us distinguish between cell populations</p></li>
 <li class="fragment"><p>Including these genes could potentially introduce more technical variation rather then helpful biological variation.</p></li>
 <li class="fragment"><p>Keeping uninteresting genes will increase the computational burden and likely either not improve or be deleterious to the clustering.</p></li>
 </ul>
-</div><div class="column">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-5-1.png" width="864"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
 </section>
 <section id="variable-gene-selection-1" class="slide level2 smaller">
-<h2>Variable gene selection</h2>
-<div class="columns">
-<div class="column">
+<h2>Variable gene selection ⌨️</h2>
 <p><code>modelGeneVarByPoisson()</code>: Fit curve, using Poisson distribution, to variance against the mean expression distribution. Estimate technical (Poisson estimate) and biological (the residuals from the Poisson) variance for each gene.</p>
-<p><code>getTopHVGs()</code>: Filter output from <code>modelGeneVarByPoisson</code> to select top variable genes.</p>
-</div><div class="column">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-6-1.png" width="864"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
+<p><code>getTopHVGs()</code>: Filter output from <code>modelGeneVarByPoisson</code> to select top variable genes. Use <code>prop</code> to identify the proportion of genes to call highly variable or <code>n</code> to identify a number. Often starting between 1000-2000 is best.</p>
 </section>
+<section id="variable-gene-selection-2" class="slide level2 smaller">
+<h2>Variable gene selection ⌨️</h2>
+<p><code>modelGeneVarByPoisson()</code>: Fit curve, using Poisson distribution, to variance against the mean expression distribution. Estimate technical (Poisson estimate) and biological (the residuals from the Poisson) variance for each gene.</p>
+<p><code>getTopHVGs()</code>: Filter output from <code>modelGeneVarByPoisson</code> to select top variable genes. Use <code>prop</code> to identify the proportion of genes to call highly variable or <code>n</code> to identify a number. Often starting between 1000-2000 is best.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="fu">set.seed</span>(<span class="dv">00010101</span>)</span>
+<span id="cb5-2"><a></a>dec <span class="ot">&lt;-</span> <span class="fu">modelGeneVarByPoisson</span>(sce)</span>
+<span id="cb5-3"><a></a>top <span class="ot">&lt;-</span> <span class="fu">getTopHVGs</span>(dec, <span class="at">prop =</span> <span class="fl">0.1</span>)</span>
+<span id="cb5-4"><a></a>top[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "LYZ"     "S100A9"  "S100A8"  "HLA-DRA"</code></pre>
+</div>
+</div>
+</section>
+<section id="variable-gene-selection-3" class="slide level2 smaller">
+<h2>Variable gene selection ⌨️</h2>
+<p>We can plot mean expression against variance to see the trend and visualize the top variable genes. These are often marker genes of specific cell populations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>top_genes <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(dec[top[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>], ])</span>
+<span id="cb7-2"><a></a>top_genes<span class="sc">$</span>genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(top_genes)</span>
+<span id="cb7-3"><a></a></span>
+<span id="cb7-4"><a></a><span class="fu">ggplot</span>(<span class="fu">as.data.frame</span>(dec), <span class="fu">aes</span>(mean, total)) <span class="sc">+</span></span>
+<span id="cb7-5"><a></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb7-6"><a></a>  <span class="fu">geom_text</span>(</span>
+<span id="cb7-7"><a></a>    <span class="at">data =</span> top_genes,</span>
+<span id="cb7-8"><a></a>    <span class="fu">aes</span>(<span class="at">label =</span> genes)</span>
+<span id="cb7-9"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb7-10"><a></a>  <span class="fu">stat_function</span>(</span>
+<span id="cb7-11"><a></a>    <span class="at">fun =</span> <span class="cf">function</span>(x) <span class="fu">metadata</span>(dec)<span class="sc">$</span><span class="fu">trend</span>(x),</span>
+<span id="cb7-12"><a></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb7-13"><a></a>    <span class="at">colour =</span> <span class="st">"blue"</span></span>
+<span id="cb7-14"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-5-1.png" width="864" class="r-stretch"></section>
+<section id="variable-gene-selection-4" class="slide level2 smaller">
+<h2>Variable gene selection</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>dec <span class="ot">&lt;-</span> <span class="fu">modelGeneVarByPoisson</span>(sce)</span>
+<span id="cb8-2"><a></a>top <span class="ot">&lt;-</span> <span class="fu">getTopHVGs</span>(dec, <span class="at">prop =</span> <span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>dec_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(dec)</span>
+<span id="cb9-2"><a></a>dec_df<span class="sc">$</span>genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(dec_df)</span>
+<span id="cb9-3"><a></a>dec_df<span class="sc">$</span>variable_gene <span class="ot">&lt;-</span> dec_df<span class="sc">$</span>genes <span class="sc">%in%</span> top</span>
+<span id="cb9-4"><a></a></span>
+<span id="cb9-5"><a></a><span class="fu">ggplot</span>(dec_df, <span class="fu">aes</span>(mean, total)) <span class="sc">+</span></span>
+<span id="cb9-6"><a></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> variable_gene),</span>
+<span id="cb9-7"><a></a>    <span class="at">size =</span> <span class="fl">0.75</span></span>
+<span id="cb9-8"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb9-9"><a></a>  <span class="fu">stat_function</span>(</span>
+<span id="cb9-10"><a></a>    <span class="at">fun =</span> <span class="cf">function</span>(x) <span class="fu">metadata</span>(dec)<span class="sc">$</span><span class="fu">trend</span>(x),</span>
+<span id="cb9-11"><a></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb9-12"><a></a>    <span class="at">colour =</span> <span class="st">"blue"</span></span>
+<span id="cb9-13"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-6-1.png" width="864" class="r-stretch"></section>
 <section id="dimensionality-reduction" class="slide level2 smaller">
 <h2>Dimensionality reduction</h2>
 <p>Dimensionality reduction is the concept of transforming high dimensional data and representing it with a smaller set of dimensions.</p>
@@ -605,13 +656,20 @@ Kent Riemondy
 </section>
 <section id="pca-in-2-dimensions" class="slide level2 smaller">
 <h2>PCA in 2 dimensions</h2>
+<p>In this two dimensional space, PCA minimizes the distances from a line and every point in the x and y direction (think of a regression line). For a great walk through of how PCA works, see <a href="https://web.stanford.edu/class/bios221/book/07-chap.html#dimension-reduction">section 7.3 in Modern Statistics for Modern Biology</a></p>
 
 <img data-src="slides-32_files/figure-revealjs/pca-intro-1.png" width="960" class="r-stretch"></section>
 <section id="pca-with-more-dimensions" class="slide level2 smaller">
 <h2>PCA with more dimensions</h2>
+<ul>
+<li class="fragment">If we add more dimensions, we now need to fit this line in a much higher dimensional space while still minimizing the distance of each point from the line.</li>
+<li class="fragment">We end up with the same number of PCs as the number of our initial dimensions
+<ul>
+<li class="fragment">In our 2-D example, we get two PCs</li>
+<li class="fragment">Adding more genes increases the number of PCs.</li>
+</ul></li>
+</ul>
 <p>What if we had more dimensions that are uninteresting variance/noise? How does this impact the PCA?</p>
-<div class="columns">
-<div class="column" style="width:60%;">
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>     gene_1    gene_2 gene_noise_1 gene_noise_2 gene_noise_3
@@ -622,67 +680,126 @@ Kent Riemondy
 5 -1.528019 -1.310610  0.007170167   0.04159706   0.03533156</code></pre>
 </div>
 </div>
-</div><div class="column" style="width:40%;">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-8-1.png" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
+
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-8-1.png" width="672" class="r-stretch"></section>
 <section id="pca-as-dimensional-reduction" class="slide level2 smaller">
 <h2>PCA as dimensional reduction</h2>
+<ul>
+<li class="fragment">PC 1 and PC 2 capture less of the total variance (from capturing 100% of the variance to capturing about 80% of the variance)</li>
+<li class="fragment">Additionally, the points are spread more and differently because the distance had to be minimized in a higher dimensional space</li>
+<li class="fragment">However adding random noise does not dramatically change PC1 and PC2</li>
+</ul>
 
 <img data-src="slides-32_files/figure-revealjs/unnamed-chunk-9-1.png" width="960" class="r-stretch"></section>
 <section id="computing-pca-with-scater" class="slide level2 smaller">
-<h2>computing PCA with scater</h2>
-<div class="columns">
-<div class="column">
+<h2>computing PCA with scater ⌨️</h2>
 <p><code>runPCA()</code>: computes an approximate truncated PCA, returning 50 PCs by default.</p>
 <p><code>reducedDim(sce, "PCA")</code>: function to access or assign reduced dimensionality results</p>
 <p><code>plotPCA()</code>: plot 2 or more PC components</p>
 <p><code>plotReducedDim()</code>: plot 2 or more dimensions or arbitrary <code>reducedDim()</code> matrix</p>
-</div><div class="column">
 <div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-10-1.png" width="864"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="how-many-pcs-to-retain" class="slide level2 smaller">
-<h2>How many PCs to retain?</h2>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="fu">set.seed</span>(<span class="dv">101010011</span>) <span class="co"># runPCA uses a specialize form of PCA that has a random component</span></span>
+<span id="cb11-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runPCA</span>(sce, <span class="at">subset_row =</span> top)</span>
+<span id="cb11-3"><a></a><span class="fu">plotPCA</span>(sce, <span class="at">color_by =</span> <span class="st">"CD3D"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
-<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-11-1.png" width="960" class="r-stretch"></section>
-<section id="projecting-pcs-into-2-dimensions-umap-tsne-etc." class="slide level2 smaller">
-<h2>Projecting PCs into 2 dimensions (UMAP, tSNE, etc.)</h2>
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-10-1.png" width="864" class="r-stretch"></section>
+<section id="computing-pca-with-scater-1" class="slide level2 smaller">
+<h2>computing PCA with scater ⌨️</h2>
+<p><code>runPCA()</code>: computes an approximate truncated PCA, returning 50 PCs by default.</p>
+<p><code>reducedDim(sce, "PCA")</code>: function to access or assign reduced dimensionality results</p>
+<p><code>plotPCA()</code>: plot 2 or more PC components</p>
+<p><code>plotReducedDim()</code>: plot 2 or more dimensions or arbitrary <code>reducedDim()</code> matrix</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="fu">plotPCA</span>(sce, <span class="at">ncomponents =</span> <span class="dv">4</span>, <span class="at">colour_by =</span> <span class="st">"CD3D"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-11-1.png" width="864" class="r-stretch"></section>
+<section id="how-many-pcs-to-retain" class="slide level2 smaller">
+<h2>How many PCs to retain? ⌨️</h2>
+<ul>
+<li class="fragment"><p>In general the # of PCs to use for downstream steps depends on the complexity and heterogeneity in the data, as well as the biological question. For this analysis we will retain the top 30, but you should explore how the downstream steps are affected by including fewer or more PCs.</p></li>
+<li class="fragment"><p>In practice picking fewer PCs will identify fewer subpopulations, and picking more PCs will find more subpopulations, at the expense of potentially increased noise and longer runtime.</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>percent.var <span class="ot">&lt;-</span> <span class="fu">attr</span>(<span class="fu">reducedDim</span>(sce), <span class="st">"percentVar"</span>)</span>
+<span id="cb13-2"><a></a><span class="fu">plot</span>(percent.var, <span class="at">log =</span> <span class="st">"y"</span>, <span class="at">xlab =</span> <span class="st">"PC"</span>, <span class="at">ylab =</span> <span class="st">"Variance explained (%)"</span>, <span class="at">pch =</span> <span class="dv">16</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-12-1.png" width="864" class="r-stretch"></section>
+<section id="how-is-pca-data-stored" class="slide level2">
+<h2>How is PCA data stored? ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a><span class="fu">reducedDim</span>(sce, <span class="st">"PCA"</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>] <span class="co"># the PCA is stored in the reducedDim() slot</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                         PC1       PC2       PC3        PC4
+GCTGCAGTCCGATCTC -17.7865879 -5.494428 -3.609731 -2.2119402
+ACTATGGAGGTCCCTG  -0.0933944  7.195291  2.840164  0.0138008
+ATTTCTGTCTCTATGT -17.8824692 -1.533912 -3.546737  0.5637093
+TATCTGTAGGTGATAT -16.7533963 -2.843034 -5.289824 -1.3747961</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a><span class="co"># we can subset the PCA to fewer dimensions, e.g. 30</span></span>
+<span id="cb16-2"><a></a><span class="fu">reducedDim</span>(sce, <span class="st">"PCA"</span>) <span class="ot">&lt;-</span> <span class="fu">reducedDim</span>(sce, <span class="st">"PCA"</span>)[, <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="which-dimensional-reduction-to-use" class="slide level2 smaller">
+<h2>Which dimensional reduction to use</h2>
 <div class="columns">
 <div class="column">
+<h3 id="pca">PCA</h3>
+<ul>
+<li class="fragment">Used by early studies (and bulk methods)</li>
+<li class="fragment">In bulk studies, we expect to have a large amount of variation captured by PC1 (&gt;50%)</li>
+<li class="fragment">Best for small and simple data sets</li>
+<li class="fragment">In large single cell studies lots of information is present at the higher principal components</li>
+</ul>
+</div><div class="column">
+<h3 id="umap">UMAP</h3>
+<ul>
+<li class="fragment">Popular in current single cell studies</li>
+<li class="fragment">Does a good job of preserving local differences between cells while balancing global differences</li>
+</ul>
+</div></div>
+</section>
+<section id="projecting-pcs-into-2-dimensions-umap-tsne-etc." class="slide level2 smaller">
+<h2>Projecting PCs into 2 dimensions (UMAP, tSNE, etc.) ⌨️</h2>
 <p>Non-linear dimensionallty reductions are commonly used to project the PCA matrix into 2 dimensions for visualization</p>
 <p>This entails trying to reduce the ~10-50 PCA dimensions into a 2 dimensional space.</p>
 <p>To do this the algorithm performs non-linear transformations that distort the true distances between cells</p>
 <p>Attempts to balance global and local differences to produce visualization that capture variation in data.</p>
 <p><code>runUMAP()</code> and <code>runTSNE()</code></p>
-</div><div class="column">
 <div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-12-1.png" width="960"></p>
-</figure>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a><span class="fu">set.seed</span>(<span class="dv">1234323523</span>)</span>
+<span id="cb17-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runUMAP</span>(sce, <span class="at">dimred =</span> <span class="st">"PCA"</span>)</span>
+<span id="cb17-3"><a></a><span class="fu">reducedDims</span>(sce)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of length 2
+names(2): PCA UMAP</code></pre>
 </div>
 </div>
-</div>
-</div></div>
 </section>
+<section id="plotting-the-umap" class="slide level2">
+<h2>Plotting the UMAP ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="fu">plotUMAP</span>(sce)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-15-1.png" width="864" class="r-stretch"></section>
+<section id="plotting-the-umap-1" class="slide level2">
+<h2>Plotting the UMAP ⌨️</h2>
+<p>We can also color by any gene expression</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"CD3D"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-16-1.png" width="864" class="r-stretch"></section>
+<section id="plotting-the-umap-2" class="slide level2">
+<h2>Plotting the UMAP ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"CD79A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-17-1.png" width="864" class="r-stretch"></section>
 <section id="parameters-affect-the-visualization" class="slide level2 smaller">
 <h2>Parameters affect the visualization</h2>
 <div class="columns">
@@ -691,7 +808,7 @@ Kent Riemondy
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-13-1.png" width="960"></p>
+<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-18-1.png" width="960"></p>
 </figure>
 </div>
 </div>
@@ -701,7 +818,7 @@ Kent Riemondy
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-14-1.png" width="960"></p>
+<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-19-1.png" width="960"></p>
 </figure>
 </div>
 </div>
@@ -711,7 +828,7 @@ Kent Riemondy
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-15-1.png" width="960"></p>
+<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-20-1.png" width="960"></p>
 </figure>
 </div>
 </div>
@@ -721,7 +838,7 @@ Kent Riemondy
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-16-1.png" width="960"></p>
+<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-21-1.png" width="960"></p>
 </figure>
 </div>
 </div>
@@ -739,8 +856,6 @@ Kent Riemondy
 </section>
 <section id="graph-based-clustering" class="slide level2 smaller nonincremental">
 <h2>Graph based clustering</h2>
-<div class="columns">
-<div class="column">
 <p>Approach:</p>
 <ul>
 <li class="fragment">identify the K nearest neighbors of each cell in the PCA matrix (e.g.&nbsp;k = 10)</li>
@@ -748,53 +863,455 @@ Kent Riemondy
 <li class="fragment">apply a community detection algorithm to cluster the shared nearest neighbor graph (walktrap, louvain, leiden, etc.)</li>
 <li class="fragment"><code>clusterCells()</code></li>
 </ul>
-</div><div class="column">
+
+<img data-src="slides-32_files/figure-revealjs/clustering-1.png" width="1152" class="r-stretch"></section>
+<section id="clustering-1" class="slide level2 smaller">
+<h2>Clustering ⌨️</h2>
+<p><strong>Note that the clustering is performed on the PCA matrix not the 2D UMAP plot</strong></p>
 <div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-revealjs/clustering-1.png" width="1152"></p>
-</figure>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a><span class="fu">set.seed</span>(<span class="dv">10101010</span>)</span>
+<span id="cb22-2"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce, <span class="at">use.dimred =</span> <span class="st">"PCA"</span>)</span>
+<span id="cb22-3"><a></a>sce<span class="sc">$</span>clusters <span class="ot">&lt;-</span> clusters</span>
+<span id="cb22-4"><a></a><span class="fu">table</span>(clusters)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>clusters
+   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16 
+ 766  257  552  122  369  211  141 1409   52   74   55   63   44   47  103   97 
+  17   18   19 
+ 163   24   16 </code></pre>
 </div>
 </div>
+</section>
+<section id="clustering-2" class="slide level2 smaller">
+<h2>Clustering ⌨️</h2>
+<p>The parameters of the clustering can be changed by changing the <code>NNGraphParam</code>. Here are the defaults:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a><span class="fu">library</span>(bluster)</span>
+<span id="cb24-2"><a></a><span class="fu">set.seed</span>(<span class="dv">10101010</span>)</span>
+<span id="cb24-3"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce,</span>
+<span id="cb24-4"><a></a>  <span class="at">use.dimred =</span> <span class="st">"PCA"</span>,</span>
+<span id="cb24-5"><a></a>  <span class="at">BLUSPARAM =</span> <span class="fu">NNGraphParam</span>(</span>
+<span id="cb24-6"><a></a>    <span class="at">k =</span> <span class="dv">10</span>,</span>
+<span id="cb24-7"><a></a>    <span class="at">type =</span> <span class="st">"rank"</span>,</span>
+<span id="cb24-8"><a></a>    <span class="at">cluster.fun =</span> <span class="st">"walktrap"</span></span>
+<span id="cb24-9"><a></a>  )</span>
+<span id="cb24-10"><a></a>)</span>
+<span id="cb24-11"><a></a><span class="fu">table</span>(clusters)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>clusters
+   1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16 
+ 766  257  552  122  369  211  141 1409   52   74   55   63   44   47  103   97 
+  17   18   19 
+ 163   24   16 </code></pre>
 </div>
-</div></div>
+</div>
+</section>
+<section id="clustering-3" class="slide level2 smaller">
+<h2>Clustering ⌨️</h2>
+<p>The parameters of the clustering can be changed by changing the <code>NNGraphParam</code>. Here are the defaults:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="fu">library</span>(bluster)</span>
+<span id="cb26-2"><a></a><span class="fu">set.seed</span>(<span class="dv">10101010</span>)</span>
+<span id="cb26-3"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce,</span>
+<span id="cb26-4"><a></a>  <span class="at">use.dimred =</span> <span class="st">"PCA"</span>,</span>
+<span id="cb26-5"><a></a>  <span class="at">BLUSPARAM =</span> <span class="fu">NNGraphParam</span>(</span>
+<span id="cb26-6"><a></a>    <span class="at">k =</span> <span class="dv">10</span>,</span>
+<span id="cb26-7"><a></a>    <span class="at">type =</span> <span class="st">"rank"</span>,</span>
+<span id="cb26-8"><a></a>    <span class="at">cluster.fun =</span> <span class="st">"walktrap"</span></span>
+<span id="cb26-9"><a></a>  )</span>
+<span id="cb26-10"><a></a>)</span>
+<span id="cb26-11"><a></a><span class="fu">table</span>(clusters)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="clustering-4" class="slide level2 smaller">
+<h2>Clustering ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a>sce<span class="sc">$</span>clusters <span class="ot">&lt;-</span> clusters</span>
+<span id="cb27-2"><a></a></span>
+<span id="cb27-3"><a></a>color_palette <span class="ot">&lt;-</span> <span class="fu">colorRampPalette</span>(</span>
+<span id="cb27-4"><a></a>  <span class="at">colors =</span> RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="at">n =</span> <span class="dv">9</span>, <span class="at">name =</span> <span class="st">"Set1"</span>)</span>
+<span id="cb27-5"><a></a>)(<span class="fu">length</span>(<span class="fu">unique</span>(clusters)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="clustering-5" class="slide level2 smaller">
+<h2>Clustering ⌨️</h2>
+
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-25-1.png" width="960" class="r-stretch"></section>
+<section id="clustering-6" class="slide level2 smaller">
+<h2>Clustering ⌨️</h2>
+<p>Generally increasing the # of neighbors will decrease the number of clusters and vice versa.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a><span class="fu">set.seed</span>(<span class="dv">12121212</span>)</span>
+<span id="cb28-2"><a></a></span>
+<span id="cb28-3"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce,</span>
+<span id="cb28-4"><a></a>  <span class="at">use.dimred =</span> <span class="st">"PCA"</span>,</span>
+<span id="cb28-5"><a></a>  <span class="at">BLUSPARAM =</span> <span class="fu">NNGraphParam</span>(</span>
+<span id="cb28-6"><a></a>    <span class="at">k =</span> <span class="dv">100</span>,</span>
+<span id="cb28-7"><a></a>    <span class="at">type =</span> <span class="st">"rank"</span>,</span>
+<span id="cb28-8"><a></a>    <span class="at">cluster.fun =</span> <span class="st">"walktrap"</span></span>
+<span id="cb28-9"><a></a>  )</span>
+<span id="cb28-10"><a></a>)</span>
+<span id="cb28-11"><a></a></span>
+<span id="cb28-12"><a></a>sce<span class="sc">$</span>coarse_clusters <span class="ot">&lt;-</span> clusters</span>
+<span id="cb28-13"><a></a></span>
+<span id="cb28-14"><a></a>color_palette2 <span class="ot">&lt;-</span> <span class="fu">colorRampPalette</span>(</span>
+<span id="cb28-15"><a></a>  <span class="at">colors =</span> RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="at">n =</span> <span class="dv">9</span>, <span class="at">name =</span> <span class="st">"Set1"</span>)</span>
+<span id="cb28-16"><a></a>)(<span class="fu">length</span>(<span class="fu">unique</span>(clusters)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="clustering-7" class="slide level2 smaller">
+<h2>Clustering ⌨️</h2>
+
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-27-1.png" width="960" class="r-stretch"></section>
+<section id="clustering-8" class="slide level2 smaller">
+<h2>Clustering ⌨️</h2>
+<p>What clusters are the genes S100A8, CD79A and CD3G most highly expressed in? We can use the <code>plotExpression()</code> function to visualize the expression data in each cluster.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">plotExpression</span>(sce, <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"S100A8"</span>, <span class="st">"CD79A"</span>, <span class="st">"CD3G"</span>), <span class="at">x =</span> <span class="st">"clusters"</span>,</span>
+<span id="cb29-2"><a></a>               <span class="at">color_by =</span> <span class="st">"clusters"</span>) <span class="sc">+</span></span>
+<span id="cb29-3"><a></a>  ggplot2<span class="sc">::</span><span class="fu">scale_color_manual</span>(<span class="at">values =</span> color_palette)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-28-1.png" width="864" class="r-stretch"></section>
+<section id="how-many-clusters" class="slide level2 smaller">
+<h2>How many clusters?</h2>
+<p>Clustering algorithms produce clusters, even if there isn’t anything meaningfully different between cells. Determining the optimal number of clusters can be tricky and also dependent on the biological question.</p>
+<p>Some guidelines:</p>
+<ol type="1">
+<li class="fragment"><p>Cluster the data into a small number of clusters to identify cell types, then recluster to generate additional clusters to define sub-populations of cell types.</p></li>
+<li class="fragment"><p>To determine if the data is overclustered examine differentially expressed genes between clusters. If the clusters have few or no differentially expressed genes then the data is likely overclustered. Similar clusters can be merged post-hoc if necessary as sometimes it is difficult to use 1 clustering approach for many diverse cell populations. Using a reference-based approach to name cell types will also often merge similar clusters.</p></li>
+<li class="fragment"><p>A hybrid approach is to first annotate major cell types using a small # of clusters (e.g.&nbsp;B-cell, T-cell, Myeloid, etc.), then subset the SingleCellExperiment object for each cluster and perform additional clustering to obtain ‘subclusters’ (e.g.&nbsp;b-cell-subset 1, b-cell-subset 2, t-cell-subset-1, etc.)</p></li>
+</ol>
 </section>
 <section id="identifying-marker-genes-using-scoremarkers" class="slide level2 smaller">
 <h2>Identifying marker genes using scoreMarkers()</h2>
-<div class="columns">
-<div class="column">
-<p>Compare many metrics for each gene between a pair of clusters</p>
-<p>Perform these pairwise comparisons between every pair of clusters in the data</p>
-<p>Summarize the metrics across all pairwise comparisons into a data frame, 1 for each cluster</p>
-<p>Select markers based on desired type of “marker” gene and effect size.</p>
-</div><div class="column">
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>self.average</span>
-<span id="cb3-2"><a></a>other.average</span>
-<span id="cb3-3"><a></a>self.detected</span>
-<span id="cb3-4"><a></a>other.detected</span>
-<span id="cb3-5"><a></a>mean.logFC.cohen</span>
-<span id="cb3-6"><a></a>min.logFC.cohen</span>
-<span id="cb3-7"><a></a>median.logFC.cohen</span>
-<span id="cb3-8"><a></a>max.logFC.cohen</span>
-<span id="cb3-9"><a></a>rank.logFC.cohen</span>
-<span id="cb3-10"><a></a>mean.AUC</span>
-<span id="cb3-11"><a></a>min.AUC</span>
-<span id="cb3-12"><a></a>median.AUC</span>
-<span id="cb3-13"><a></a>max.AUC</span>
-<span id="cb3-14"><a></a>rank.AUC</span>
-<span id="cb3-15"><a></a>mean.logFC.detected</span>
-<span id="cb3-16"><a></a>min.logFC.detected</span>
-<span id="cb3-17"><a></a>median.logFC.detected</span>
-<span id="cb3-18"><a></a>max.logFC.detected</span>
-<span id="cb3-19"><a></a>rank.logFC.detected</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div></div>
+<p>Clustering algorithms produce clusters, even if there isn’t anything meaningfully different between cells. Determining the optimal number of clusters can be tricky and also dependent on the biological question.</p>
+<p>Some guidelines:</p>
+<ol type="1">
+<li class="fragment"><p>Cluster the data into a small number of clusters to identify cell types, then recluster to generate additional clusters to define sub-populations of cell types.</p></li>
+<li class="fragment"><p>To determine if the data is overclustered examine differentially expressed genes between clusters. If the clusters have few or no differentially expressed genes then the data is likely overclustered. Similar clusters can be merged post-hoc if necessary as sometimes it is difficult to use 1 clustering approach for many diverse cell populations. Using a reference-based approach to name cell types will also often merge similar clusters.</p></li>
+<li class="fragment"><p>A hybrid approach is to first annotate major cell types using a small # of clusters (e.g.&nbsp;B-cell, T-cell, Myeloid, etc.), then subset the SingleCellExperiment object for each cluster and perform additional clustering to obtain ‘subclusters’ (e.g.&nbsp;b-cell-subset 1, b-cell-subset 2, t-cell-subset-1, etc.)</p></li>
+</ol>
 </section>
-<section id="annotating-cell-types" class="slide level2">
+<section id="identifying-marker-genes-using-scoremarkers-1" class="slide level2 smaller">
+<h2>Identifying marker genes using scoreMarkers() ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a>mrks <span class="ot">&lt;-</span> <span class="fu">scoreMarkers</span>(sce, sce<span class="sc">$</span>clusters)</span>
+<span id="cb30-2"><a></a>mrks</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of length 19
+names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
+</div>
+</div>
+</section>
+<section id="how-do-we-identify-marker-genes" class="slide level2 smaller">
+<h2>How do we identify marker genes? ⌨️</h2>
+<p>To identify marker genes we will need to decide of cutoffs based on effect sizes. There are many reported by scoreMarkers().</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a><span class="fu">colnames</span>(mrks[[<span class="dv">1</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "self.average"          "other.average"         "self.detected"        
+ [4] "other.detected"        "mean.logFC.cohen"      "min.logFC.cohen"      
+ [7] "median.logFC.cohen"    "max.logFC.cohen"       "rank.logFC.cohen"     
+[10] "mean.AUC"              "min.AUC"               "median.AUC"           
+[13] "max.AUC"               "rank.AUC"              "mean.logFC.detected"  
+[16] "min.logFC.detected"    "median.logFC.detected" "max.logFC.detected"   
+[19] "rank.logFC.detected"  </code></pre>
+</div>
+</div>
+</section>
+<section id="how-do-we-identify-marker-genes-1" class="slide level2 smaller">
+<h2>How do we identify marker genes?</h2>
+<p>What is a marker gene? * Differentially expressed between cluster 1 and all others? * This could be too strict, what if the same gene marks clusters 1-8 but not 9? We would miss that as a marker * Differentially expressed between some or any pairwise clusters</p>
+<p>The output of scoreMarkers() allows you to filter the data in many different ways depending on what type of marker you want to identify. Importantly it doesn’t hide the complexity of this data. I highly recommend reading the chapter on <a href="https://bioconductor.org/books/3.17/OSCA.basic/marker-detection.html#motivation-2">marker gene detection</a> from the OSCA book to understand how best to identify markers depending on the dataset you are analyzing.</p>
+</section>
+<section id="how-do-we-identify-marker-genes-2" class="slide level2 smaller">
+<h2>How do we identify marker genes?</h2>
+<ul>
+<li class="fragment">We will use <code>AUC</code> to rank markers
+<ul>
+<li class="fragment">Probability that a randomly chosen observation from our cluster of interest is greater than a randomly chosen obsevation from the other cluster</li>
+<li class="fragment">Value of 1 = upregulated in the cluster of interest, 0 = downregulated, 0.5 = no difference.</li>
+</ul></li>
+<li class="fragment">Other ranking options include log fold change or fold change in the detection rate</li>
+<li class="fragment">Can chose <code>mean</code>, <code>min</code>, <code>median</code>, <code>max</code>, or <code>rank</code> for potential ranking</li>
+</ul>
+<p>Paraphrasing from the OSCA book: * The most obvious summary statistic is the mean. For cluster X, a large mean effect size (&gt;0.5 for the AUCs) indicates that the gene is upregulated in X compared to the average of the other groups. * Another summary statistic is the median, where a large value indicates that the gene is upregulated in X compared to most (&gt;50%) other clusters. * The minimum value (min.<em>) is the most stringent summary for identifying upregulated genes, as a large value indicates that the gene is upregulated in X compared to all other clusters. </em> The maximum value (max.<em>) is the least stringent summary for identifying upregulated genes, as a large value can be obtained if there is strong upregulation in X compared to any other cluster. </em> The minimum rank, a.k.a., “min-rank” (rank.*) is the smallest rank of each gene across all pairwise comparisons. Specifically, genes are ranked within each pairwise comparison based on decreasing effect size, and then the smallest rank across all comparisons is reported for each gene. If a gene has a small min-rank, we can conclude that it is one of the top upregulated genes in at least one comparison of X to another cluster.</p>
+</section>
+<section id="cluster-1-genes" class="slide level2 smaller">
+<h2>Cluster 1 genes ⌨️</h2>
+<p>Plotting top genes ranked by <code>mean.AUC</code> for cluster 1.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a>cluster1_markers <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(mrks[[<span class="dv">1</span>]]) <span class="sc">|&gt;</span> tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"gene"</span>)</span>
+<span id="cb34-2"><a></a></span>
+<span id="cb34-3"><a></a>ordered <span class="ot">&lt;-</span> cluster1_markers <span class="sc">|&gt;</span></span>
+<span id="cb34-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(mean.AUC <span class="sc">&gt;</span> <span class="fl">0.5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb34-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(mean.AUC))</span>
+<span id="cb34-6"><a></a></span>
+<span id="cb34-7"><a></a><span class="fu">plotExpression</span>(sce,</span>
+<span id="cb34-8"><a></a>  <span class="at">features =</span> <span class="fu">head</span>(ordered<span class="sc">$</span>gene),</span>
+<span id="cb34-9"><a></a>  <span class="at">x =</span> <span class="st">"clusters"</span>,</span>
+<span id="cb34-10"><a></a>  <span class="at">colour_by =</span> <span class="st">"clusters"</span>,</span>
+<span id="cb34-11"><a></a>  <span class="at">color =</span> color_palette</span>
+<span id="cb34-12"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-31-1.png" width="864" class="r-stretch"></section>
+<section id="top-marker-heatmap" class="slide level2 smaller">
+<h2>Top marker heatmap ⌨️</h2>
+<p>Next we will extract the top N markers from each cluster, ranked on <code>mean.AUC</code>, then plot the average expression of these markers in each cluster as a heatmap.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a></a>n_top_markers <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb35-2"><a></a></span>
+<span id="cb35-3"><a></a>top_markers <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(mrks, <span class="sc">~</span> {</span>
+<span id="cb35-4"><a></a>  .x <span class="sc">|&gt;</span></span>
+<span id="cb35-5"><a></a>    <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb35-6"><a></a>    tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"gene"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-7"><a></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(mean.AUC <span class="sc">&gt;</span> <span class="fl">0.5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb35-8"><a></a>    dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(mean.AUC)) <span class="sc">|&gt;</span></span>
+<span id="cb35-9"><a></a>    dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span>n_top_markers)</span>
+<span id="cb35-10"><a></a>}, <span class="at">.id =</span> <span class="st">"cluster"</span>)</span>
+<span id="cb35-11"><a></a></span>
+<span id="cb35-12"><a></a>top_markers[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   cluster      gene
+1        1    S100A9
+2        1    S100A8
+3        1       LYZ
+4        1      MNDA
+5        1      FCN1
+6        2     BANK1
+7        2     CD79A
+8        2     MS4A1
+9        2 TNFRSF13C
+10       2   RALGPS2</code></pre>
+</div>
+</div>
+</section>
+<section id="top-marker-heatmap-1" class="slide level2 smaller">
+<h2>Top marker heatmap ⌨️</h2>
+<p>Next we will extract the top N markers from each cluster, ranked on <code>mean.AUC</code>, then plot the average expression of these markers in each cluster as a heatmap.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a></a><span class="fu">plotGroupedHeatmap</span>(sce,</span>
+<span id="cb37-2"><a></a>  <span class="at">features =</span> <span class="fu">unique</span>(top_markers<span class="sc">$</span>gene),</span>
+<span id="cb37-3"><a></a>  <span class="at">group =</span> <span class="st">"clusters"</span>,</span>
+<span id="cb37-4"><a></a>  <span class="at">center =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb37-5"><a></a>  <span class="at">zlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb37-6"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-33-1.png" width="864" class="r-stretch"></section>
+<section id="some-differnetial-expression-thoughts" class="slide level2 smaller">
+<h2>Some differnetial expression thoughts</h2>
+<ul>
+<li class="fragment">Differential expression in single cell RNA-seq should be interpreted with caution</li>
+<li class="fragment">Data is very overpowered
+<ul>
+<li class="fragment">Individual cells are treated as independent replicates (often using a Wilcoxin test)</li>
+<li class="fragment">They are however NOT independent
+<ul>
+<li class="fragment">Come from the same sample</li>
+<li class="fragment">Come from identical processing</li>
+<li class="fragment">Come from highly correlated environments</li>
+</ul></li>
+<li class="fragment">This means that p-values will be inflated and there will be many false negatives</li>
+<li class="fragment">Most methods don’t account for batch effects and # of DE genes does not change with increase variability between batches</li>
+</ul></li>
+<li class="fragment">If you are performing DE between samples, it is better to use a pseudobulk approach and control for batch effect</li>
+<li class="fragment">More info in two articles: <a href="https://www.nature.com/articles/s41467-021-25960-2">false-discoveries</a>, <a href="https://www.nature.com/articles/s41467-021-21038-1">pseudoreplication bias</a></li>
+</ul>
+</section>
+<section id="annotating-cell-types" class="slide level2 smaller">
 <h2>Annotating cell types</h2>
-<p>How do we confidently identify a known cell type? Is looking at a list of marker genes sufficient?</p>
-<p>We can compare the expression profiles of each cluster (or cell) to databases of cell type specific gene expression profiles and derive a score for how similar each cluster is to the reference.</p>
-<p>Check out <code>clustifyr</code> and <code>SingleR</code> bioconductor packages</p>
+<ul>
+<li class="fragment">Early days of single cell used manual cluster annotation
+<ul>
+<li class="fragment">Using visual inspection of key genes using expertise in the lab</li>
+</ul></li>
+<li class="fragment">Now it is becomming more comon to compare your dataset to another dataset or a reference
+<ul>
+<li class="fragment">Leads to more reproducability and agreement across publications</li>
+<li class="fragment">Not biased to only a handful of genes, instead thousand of genes are used</li>
+<li class="fragment">Correlation and machine learning approaches are common</li>
+</ul></li>
+<li class="fragment">Packages include <code>clustifyr</code>, <code>SingleR</code>, <code>SignacX</code>, and <code>Azimuth</code></li>
+</ul>
+</section>
+<section id="annotating-cell-types-1" class="slide level2 smaller">
+<h2>Annotating cell types</h2>
+<p>We we use <a href="https://rnabioco.github.io/clustifyr/"><code>clustifyr</code></a> which was developed by a previous RBI fellow Rui Fu. There are also many other methods (e.g.&nbsp;<code>SingleR</code>)</p>
+<ul>
+<li class="fragment"><code>clustifyr</code> compares the average gene expression in each cluster to a reference matrix that contains average gene signatures of reference cell types.</li>
+<li class="fragment">The reference can be built from other single cell data, bulk-rna-seq, or other sources.</li>
+<li class="fragment">Ranked spearman correlation is used to compare the reference to the clusters.</li>
+<li class="fragment">Only the variable genes are used for the correlation.
+<ul>
+<li class="fragment">Fewer variable genes (ie 1000) are recommended as too many genes leads to high correlations across the board (think of a lot of zero values).</li>
+</ul></li>
+</ul>
+<p>In order to compare our dataset we need to use a publicly available reference dataset. Thankfully many datasets have been organized into a separate package: <a href="https://github.com/rnabioco/clustifyrdatahub">clustifyrdatahub</a>. This is an extension of the <code>ExperimentHub</code> package on bioconductor that allows you to easily download and cache external datasets.</p>
+</section>
+<section id="annotating-cell-types-2" class="slide level2 smaller">
+<h2>Annotating cell types ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a><span class="fu">library</span>(clustifyr)</span>
+<span id="cb38-2"><a></a><span class="fu">library</span>(clustifyrdatahub)</span>
+<span id="cb38-3"><a></a></span>
+<span id="cb38-4"><a></a><span class="co"># get reference dataset derived from a microarray experiment of sorted immune cell types</span></span>
+<span id="cb38-5"><a></a><span class="fu">ref_hema_microarray</span>()[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       Basophils CD4+ Central Memory CD4+ Effector Memory CD8+ Central Memory
+DDR1    6.084244            5.967502             5.933039            6.005278
+RFC2    6.280044            6.028615             6.047005            5.992979
+HSPA6   6.535444            5.811475             5.746326            5.928349
+PAX8    6.669153            5.896401             6.118577            6.270870
+GUCA1A  5.239230            5.232116             5.206960            5.227415
+       CD8+ Effector Memory
+DDR1               5.895926
+RFC2               5.942426
+HSPA6              5.942670
+PAX8               6.323922
+GUCA1A             5.090882</code></pre>
+</div>
+</div>
+</section>
+<section id="annotating-cell-types-3" class="slide level2 smaller">
+<h2>Annotating cell types ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a>res <span class="ot">&lt;-</span> <span class="fu">clustify</span>(</span>
+<span id="cb40-2"><a></a>  sce, <span class="co"># SingleCellExperiment object</span></span>
+<span id="cb40-3"><a></a>  <span class="at">ref_mat =</span> <span class="fu">ref_hema_microarray</span>(), <span class="co"># cell type reference data</span></span>
+<span id="cb40-4"><a></a>  <span class="at">cluster_col =</span> <span class="st">"clusters"</span>, <span class="co"># column in metadata with clusters</span></span>
+<span id="cb40-5"><a></a>  <span class="co"># don't add to SingleCellExperiment object, just return results</span></span>
+<span id="cb40-6"><a></a>  <span class="at">obj_out =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb40-7"><a></a>  <span class="co"># use variable genes for comparison</span></span>
+<span id="cb40-8"><a></a>  <span class="at">query_genes =</span> top,</span>
+<span id="cb40-9"><a></a>)</span>
+<span id="cb40-10"><a></a></span>
+<span id="cb40-11"><a></a>res[<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Basophils CD4+ Central Memory CD4+ Effector Memory CD8+ Central Memory
+1  0.5370093           0.4111325            0.4176017           0.3936302
+10 0.5945973           0.4591039            0.4655590           0.4433302
+11 0.4386922           0.7151960            0.7115503           0.6798845
+12 0.6333579           0.5402749            0.5289964           0.5160502
+13 0.3935435           0.6535071            0.6516310           0.6321161
+14 0.4656631           0.6099487            0.6324938           0.6493463
+15 0.6258199           0.5493260            0.5378138           0.5284327
+16 0.4883762           0.7668150            0.7549072           0.7346618
+17 0.6277840           0.5580115            0.5459105           0.5343926
+18 0.5650205           0.5267830            0.5237343           0.5021841
+19 0.3379409           0.3154402            0.3177152           0.3003928
+2  0.6210041           0.5744730            0.5678439           0.5518513</code></pre>
+</div>
+</div>
+</section>
+<section id="annotating-cell-types-4" class="slide level2 smaller">
+<h2>Annotating cell types ⌨️</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a></a><span class="co">#| fig.height: 5</span></span>
+<span id="cb42-2"><a></a><span class="co">#| fig.width: 5</span></span>
+<span id="cb42-3"><a></a><span class="fu">library</span>(ComplexHeatmap)</span>
+<span id="cb42-4"><a></a><span class="fu">Heatmap</span>(<span class="fu">t</span>(res))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-36-1.png" width="960" class="r-stretch"></section>
+<section id="annotating-cell-types-5" class="slide level2 smaller">
+<h2>Annotating cell types ⌨️</h2>
+<p>We can use <code>cor_to_call</code> to pull out the highest correlation for each cluster</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a><span class="fu">cor_to_call</span>(res) <span class="co"># assign cluster to highest correlation cell type (above a threshold). Cell types lower than a threshold will be assigned as unassigned.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 19 × 3
+# Groups:   cluster [19]
+   cluster type                                r
+   &lt;chr&gt;   &lt;chr&gt;                           &lt;dbl&gt;
+ 1 11      CD4+ Central Memory             0.715
+ 2 13      CD4+ Central Memory             0.654
+ 3 5       CD4+ Effector Memory            0.769
+ 4 3       CD8+ Effector Memory            0.747
+ 5 2       Mature B-cell class switched    0.772
+ 6 14      Mature NK cell_CD56- CD16- CD3- 0.715
+ 7 6       Mature NK cell_CD56+ CD16+ CD3- 0.729
+ 8 7       Mature NK cell_CD56+ CD16+ CD3- 0.735
+ 9 19      Megakaryocyte                   0.462
+10 1       Monocyte                        0.756
+11 4       Monocyte                        0.713
+12 10      Myeloid Dendritic Cell          0.743
+13 9       Myeloid Dendritic Cell          0.641
+14 12      Naïve B-cells                   0.778
+15 15      Naïve B-cells                   0.794
+16 17      Naïve B-cells                   0.797
+17 16      Naive CD4+ T-cell               0.781
+18 8       Naive CD4+ T-cell               0.765
+19 18      Plasmacytoid Dendritic Cell     0.673</code></pre>
+</div>
+</div>
+</section>
+<section id="annotating-cell-types-6" class="slide level2 smaller">
+<h2>Annotating cell types ⌨️</h2>
+<p>Or we can insert the classification results into the SingleCellExperiment object directly which will be called <code>type</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb45-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">clustify</span>(</span>
+<span id="cb45-3"><a></a>  sce, <span class="co"># seurat object</span></span>
+<span id="cb45-4"><a></a>  <span class="at">ref_mat =</span> <span class="fu">ref_hema_microarray</span>(), <span class="co"># cell type reference data</span></span>
+<span id="cb45-5"><a></a>  <span class="at">cluster_col =</span> <span class="st">"clusters"</span>, <span class="co"># column in metadata with clusters</span></span>
+<span id="cb45-6"><a></a>  <span class="at">obj_out =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb45-7"><a></a>  <span class="co"># use variable genes for comparison</span></span>
+<span id="cb45-8"><a></a>  <span class="at">query_genes =</span> top</span>
+<span id="cb45-9"><a></a>)</span>
+<span id="cb45-10"><a></a></span>
+<span id="cb45-11"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-38-1.png" width="960" class="r-stretch"></section>
+<section id="saving-and-sharing-objects" class="slide level2">
+<h2>Saving and sharing objects</h2>
+<ol type="1">
+<li class="fragment"><p>You can share your SingleCellExperiment objects with collaborators by saving the object as an <code>.rds</code> file.</p></li>
+<li class="fragment"><p>If you plan on publishing the data, then the best practices are to upload the UMI count matrix and your colData() data.frame containing the cell type annotations.</p></li>
+</ol>
+<p>To save the UMI count matrix use write10xcounts() from the DropletUtils Bioconductor package.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a></a>mat <span class="ot">&lt;-</span> <span class="fu">counts</span>(sce) </span>
+<span id="cb46-2"><a></a><span class="fu">write10xCounts</span>(<span class="st">"path/to/output"</span>, mat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="saving-and-sharing-objects-1" class="slide level2">
+<h2>Saving and sharing objects</h2>
+<p>When saving the <code>colData()</code> it is also a nice gesture to include the UMAP coordinates that you used for the main visualizations in your manuscript. The clustering and UMAP coordinates are very hard to reproduce because of the non-deterministic elements of the algorithms.</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a><span class="fu">cbind</span>(<span class="fu">colData</span>(sce), <span class="fu">reducedDim</span>(sce, <span class="st">"UMAP"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb47-2"><a></a>  <span class="fu">rownames_to_column</span>(<span class="st">"cell"</span>) <span class="sc">|&gt;</span> ()</span>
+<span id="cb47-3"><a></a>  <span class="fu">write_csv</span>(<span class="st">"cell-level-metadata.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="saving-and-sharing-objects-2" class="slide level2">
+<h2>Saving and sharing objects</h2>
+<ul>
+<li class="fragment">In addition to sharing count tables, in most cases (except for some cases of human data), you must publish your fastq files</li>
+<li class="fragment">Make sure these are always protected using the 3-2-1 strategy:
+<ul>
+<li class="fragment">3 copies</li>
+<li class="fragment">2 storage types</li>
+<li class="fragment">1 off site</li>
+</ul></li>
+<li class="fragment">For me, this is:
+<ul>
+<li class="fragment">Peta library active allocation</li>
+<li class="fragment">Peta library archive allocation</li>
+<li class="fragment">AWS glacial storage (with version control)</li>
+<li class="fragment">Nightly backup between each</li>
+<li class="fragment">Changing the permissions to read only for fastq files</li>
+</ul></li>
+</ul>
+</section>
+<section id="saving-and-sharing-objects-3" class="slide level2">
+<h2>Saving and sharing objects</h2>
+<ul>
+<li class="fragment">It is also best practice to share your code</li>
+<li class="fragment">Keep your code on github
+<ul>
+<li class="fragment">Version control - if you make a mistake it’s easy to go back</li>
+<li class="fragment">Github counts as a backup for your scripts. The sever goes down, you can recover everything from github</li>
+<li class="fragment">Easy to change a repo to public when your manuscript is accepted</li>
+</ul></li>
+</ul>
 
 <div class="quarto-auto-generated-content">
 <div class="footer footer-default">
