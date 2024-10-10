@@ -14,41 +14,16 @@ library(janitor)
 library(here)
 ```
 
-```{r}
-biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
-  janitor::clean_names()
-
-# simplify names a bit more
-colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
-
-# we are going to simplify this a bit and only keep some columns
-keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
-biochem <- biochem[, keep]
-
-# get weights for each individual mouse
-# careful: did not come with column names
-weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
-
-# add column names
-colnames(weight) <- c("subject_name", "weight")
-
-# add weight to biochem table and get rid of NAs
-# rename gender to sex
-b <- inner_join(biochem, weight, by = "subject_name") |>
-  na.omit() |>
-  rename(sex = gender)
-```
-
 ## Problem \# 1
 
 Does mouse sex explain mouse total cholesterol levels? Make sure to run chunks above.
 
-### 1.  Examine and specify the variable(s)
+### 1. Examine and specify the variable(s) (1 pt)
 
 > The response variable y is $tot\_cholesterol$\
 > The explantory variable x is $sex$
 
-### Make a plot:
+### Make a violin plot: (2 pt)
 
 response variable on the y-axis
 
@@ -64,7 +39,7 @@ ggviolin(
 )
 ```
 
-### Get n, mean, median, sd
+### Get n, mean, median, sd (1 pt)
 
 ```{r}
 b |>
@@ -75,7 +50,7 @@ b |>
   )
 ```
 
-### Is it normally distribute?
+### Is it normally distribute? (1 pt)
 
 ```{r}
 ggqqplot(
@@ -93,7 +68,7 @@ b |>
 
 > Yes, based on the qq-plot and the high $n$, but i do understand if you want to play it safe due to the shapiro_test p-value.
 
-### Is it variance similar between groups?
+### Is it variance similar between groups? (1 pt)
 
 ```{r}
 b |>
@@ -103,15 +78,15 @@ b |>
 
 > Yes
 
-### What kind of test are you picking and why?
+### What kind of test are you picking and why? (1 pt)
 
 > t_test since i think it is normally distribute, with equal variance based on levene test
 
-### 2. Declare null hypothesis $\mathcal{H}_0$
+### 2. Declare null hypothesis $\mathcal{H}_0$ (1 pt)
 
 $\mathcal{H}_0$ is that $sex$ does not explain $tot\_cholesterol$
 
-### 3. Calculate test-statistic, exact p-value and plot
+### 3. Calculate test-statistic, exact p-value and plot (2 pt)
 
 ```{r}
 b |>
@@ -143,39 +118,18 @@ ggviolin(
   ylim(1, 6)
 ```
 
-```{r}
-# i have pre-selected some families to compare
-myfams <- c(
-  "B1.5:E1.4(4) B1.5:A1.4(5)",
-  "F1.3:A1.2(3) F1.3:E2.2(3)",
-  "A1.3:D1.2(3) A1.3:H1.2(3)",
-  "D5.4:G2.3(4) D5.4:C4.3(4)"
-)
-
-# only keep the familys in myfams
-bfam <- b |>
-  filter(family %in% myfams) |>
-  droplevels()
-
-# simplify family names and make factor
-bfam$family <- gsub(pattern = "\\..*", replacement = "", x = bfam$family) |>
-  as.factor()
-
-
-# make B1 the reference (most similar to overall mean)
-bfam$family <- relevel(x = bfam$family, ref = "B1")
-```
+> can reject null hypothesis
 
 ## Problem \# 2
 
 Does mouse family explain mouse total cholesterol levels? Make sure to run chunk above.
 
-### 1.  Examine and specify the variable(s)
+### 1. Examine and specify the variable(s) (1 pt)
 
 > The response variable y is $tot\_cholesterol$\
 > The explantory variable x is $family$
 
-### Make a plot:
+### Make a plot: (2 pt)
 
 response variable on the y-axis
 
@@ -191,7 +145,7 @@ ggviolin(
 )
 ```
 
-### Get n, mean, median, sd
+### Get n, mean, median, sd (1 pt)
 
 ```{r}
 bfam |>
@@ -202,7 +156,7 @@ bfam |>
   )
 ```
 
-### Is it normally distribute?
+### Is it normally distribute? (1 pt)
 
 ```{r}
 ggqqplot(
@@ -218,9 +172,9 @@ bfam |>
   gt()
 ```
 
-> Yes
+> yes
 
-### Is it variance similar between groups?
+### Is it variance similar between groups? (1 pt)
 
 ```{r}
 b |>
@@ -228,17 +182,17 @@ b |>
   gt()
 ```
 
-> Yes
+> yes
 
-### What kind of test are you picking and why?
+### What kind of test are you picking and why? (1 pt)
 
 > anova_test since i think it is normally distribute and has equal variance
 
 ### 2. Declare null hypothesis $\mathcal{H}_0$
 
-$\mathcal{H}_0$ is that $family$ does not explain $tot\_cholesterol$
+\mathcal{H}\_0\$ is that $family$ does not explain $tot\_cholesterol$ (1 pt)
 
-### 3. Calculate test-statistic, exact p-value and plot
+### 3. Calculate test-statistic, exact p-value and plot (2 pt)
 
 ```{r}
 bfam |>
@@ -255,3 +209,5 @@ ggviolin(
 ) +
   stat_anova_test()
 ```
+
+> My interpretation of the result
