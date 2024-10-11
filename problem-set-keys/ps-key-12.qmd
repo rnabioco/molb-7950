@@ -14,6 +14,32 @@ library(janitor)
 library(here)
 ```
 
+```{r prep biochem}
+biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+  janitor::clean_names()
+
+# simplify names a bit more
+colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
+
+# we are going to simplify this a bit and only keep some columns
+keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
+biochem <- biochem[, keep]
+
+# get weights for each individual mouse
+# careful: did not come with column names
+weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
+
+# add column names
+colnames(weight) <- c("subject_name", "weight")
+
+# add weight to biochem table and get rid of NAs
+# rename gender to sex
+b <- inner_join(biochem, weight, by = "subject_name") |>
+  na.omit() |>
+  rename(sex = gender)
+```
+
+
 ## Problem \# 1
 
 Does mouse sex explain mouse total cholesterol levels? Make sure to run chunks above.
@@ -29,7 +55,7 @@ response variable on the y-axis
 
 explanatory variable on the x-axis
 
-```{r, eval = FALSE}
+```{r}
 ggviolin(
   data = b,
   y = "tot_cholesterol",
@@ -41,7 +67,7 @@ ggviolin(
 
 ### Get n, mean, median, sd (1 pt)
 
-```{r, eval = FALSE}
+```{r}
 b |>
   group_by(sex) |>
   get_summary_stats(tot_cholesterol,
@@ -52,7 +78,7 @@ b |>
 
 ### Is it normally distribute? (1 pt)
 
-```{r, eval = FALSE}
+```{r}
 ggqqplot(
   data = b,
   x = "tot_cholesterol",
@@ -70,7 +96,7 @@ b |>
 
 ### Is it variance similar between groups? (1 pt)
 
-```{r, eval = FALSE}
+```{r}
 b |>
   levene_test(tot_cholesterol ~ sex) |>
   gt()
@@ -88,7 +114,7 @@ $\mathcal{H}_0$ is that $sex$ does not explain $tot\_cholesterol$
 
 ### 3. Calculate test-statistic, exact p-value and plot (2 pt)
 
-```{r, eval = FALSE}
+```{r}
 b |>
   t_test(tot_cholesterol ~ sex,
     var.equal = T,
@@ -120,6 +146,30 @@ ggviolin(
 
 > can reject null hypothesis
 
+```{r prep fam}
+# i have pre-selected some families to compare
+myfams <- c(
+  "B1.5:E1.4(4) B1.5:A1.4(5)",
+  "F1.3:A1.2(3) F1.3:E2.2(3)",
+  "A1.3:D1.2(3) A1.3:H1.2(3)",
+  "D5.4:G2.3(4) D5.4:C4.3(4)"
+)
+
+# only keep the familys in myfams
+bfam <- b |>
+  filter(family %in% myfams) |>
+  droplevels()
+
+# simplify family names and make factor
+bfam$family <- gsub(pattern = "\\..*", replacement = "", x = bfam$family) |>
+  as.factor()
+
+
+# make B1 the reference (most similar to overall mean)
+bfam$family <- relevel(x = bfam$family, ref = "B1")
+```
+
+
 ## Problem \# 2
 
 Does mouse family explain mouse total cholesterol levels? Make sure to run chunk above.
@@ -135,7 +185,7 @@ response variable on the y-axis
 
 explanatory variable on the x-axis
 
-```{r, eval = FALSE}
+```{r}
 ggviolin(
   data = bfam,
   y = "tot_cholesterol",
@@ -147,7 +197,7 @@ ggviolin(
 
 ### Get n, mean, median, sd (1 pt)
 
-```{r, eval = FALSE}
+```{r}
 bfam |>
   group_by(family) |>
   get_summary_stats(tot_cholesterol,
@@ -158,7 +208,7 @@ bfam |>
 
 ### Is it normally distribute? (1 pt)
 
-```{r, eval = FALSE}
+```{r}
 ggqqplot(
   data = bfam,
   x = "tot_cholesterol",
@@ -176,7 +226,7 @@ bfam |>
 
 ### Is it variance similar between groups? (1 pt)
 
-```{r, eval = FALSE}
+```{r}
 b |>
   levene_test(tot_cholesterol ~ family) |>
   gt()
@@ -194,7 +244,7 @@ b |>
 
 ### 3. Calculate test-statistic, exact p-value and plot (2 pt)
 
-```{r, eval = FALSE}
+```{r}
 bfam |>
   anova_test(tot_cholesterol ~ family) |>
   gt()
