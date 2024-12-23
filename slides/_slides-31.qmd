@@ -556,7 +556,6 @@ vowels <- c("a", "e", "i", "o", "u")
 is_a_vowel <- letters %in% vowels
 
 letters[is_a_vowel]
-
 ```
 
 ## Base R subsetting `r emo::ji("keyboard")`
@@ -741,7 +740,6 @@ assay(sce, "counts")[1:4, 1:4]
 ```{r}
 #| echo: true
 assays(sce)$counts[1:4, 1:4]
-
 ```
 
 ## Exploring the SingleCellExperiment object `r emo::ji("keyboard")`
@@ -947,8 +945,10 @@ We can use the `plotColData()` function from scater to plot various metrics (as 
 #| echo: true
 #| fig-width: 9
 #| fig-height: 9
-plotColData(sce, y = "detected", x = "sum", 
-            colour_by = "subsets_Mito_percent")
+plotColData(sce,
+  y = "detected", x = "sum",
+  colour_by = "subsets_Mito_percent"
+)
 ```
 
 ## Filtering low quality cells `r emo::ji("keyboard")`
@@ -983,8 +983,8 @@ ggplot(cell_info, aes(sum, subsets_Mito_percent)) +
 
 ```{r}
 #| echo: true
-pass_qc <- sce$subsets_Mito_percent < 20 & 
-  sce$detected > 500 & 
+pass_qc <- sce$subsets_Mito_percent < 20 &
+  sce$detected > 500 &
   sce$sum > 1000
 ```
 
@@ -1003,8 +1003,8 @@ sum(pass_qc)
 #| echo: true
 #| fig-width: 9
 #| fig-height: 9
-sce$pass_qc <- sce$subsets_Mito_percent < 20 & 
-  sce$detected > 500 & 
+sce$pass_qc <- sce$subsets_Mito_percent < 20 &
+  sce$detected > 500 &
   sce$sum > 1000
 
 plotColData(sce,
