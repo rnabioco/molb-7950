@@ -2,6 +2,7 @@
 title: "Chromatin accessibility I"
 subtitle: "Chromatin-centric measurement of genomic features"
 author: "Jay Hesselberth"
+format: revealjs
 ---
 
 ## Chromatin accessbility patterns and genome function
@@ -35,7 +36,7 @@ library(rtracklayer)
 library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 ```
 
-## Load the data
+## Load the data {.smaller}
 
 In this and the next class we will analyze ATAC-seq and MNase-seq data sets from budding yeast. Here are the references for the two data set:
 
@@ -99,6 +100,7 @@ For the MNase-seq BED file, you see that there are only three columns: `chrom`, 
 
 ```{r}
 #| echo: true
+#| output-location: column
 mutate(mnase_tbl, frag_len = end - start)
 ```
 
@@ -107,7 +109,7 @@ mutate(mnase_tbl, frag_len = end - start)
 ```{r}
 #| echo: true
 #| warning: false
-#| output-location: column
+#| output-location: slide
 acc_tbl <-
   bind_rows(
     mutate(mnase_tbl, type = "mnase"),
@@ -146,6 +148,8 @@ The ATAC data seems to be periodic. How can we test that hypothesis? We can calc
 
 We'll use the base `hist` function to calculate the densities of the above histogram. Let's write a function we can use to analyze fragment lengths.
 
+---
+
 ```{r}
 #| label: fun-fragment-len
 #| echo: true
@@ -167,10 +171,15 @@ fragment_len_hist <- function(tbl) {
     plot = FALSE
   )
 }
+
+# inspect the this value in the console
+atac_frag_lens <- fragment_len_hist(atac_tbl)
 ```
 
 ```{r}
-atac_frag_lens <- fragment_len_hist(atac_tbl)
+#| label: inspect-frag-lens
+#| echo: true
+atac_frag_lens
 ```
 
 ## Autocorrelation
@@ -178,7 +187,9 @@ atac_frag_lens <- fragment_len_hist(atac_tbl)
 The `density` slot contains a vector of densities at base-pair resolution. We will use `acf()` to calculate the autocorrelation of these values, and will store the tidied result.
 
 ```{r}
+#| label: calc-atac-acf
 #| echo: true
+#| output-location: column
 atac_acf_tbl <-
   acf(
     atac_frag_lens$density,
@@ -192,9 +203,11 @@ atac_acf_tbl
 
 ## Autocorrelation
 
-Now let's plot the autocorrelation.
+Now let's plot the autocorrelation. First, we define a function.
 
 ```{r}
+#| label: fun-plot-acf-atac
+#| echo: true
 plot_acf <- function(tbl, title) {
   ggplot(
     tbl,
@@ -208,21 +221,26 @@ plot_acf <- function(tbl, title) {
 }
 ```
 
+And then we make the plot.
+
 ```{r}
+#| label: plot-acf-atac
+#| echo: true
+#| output-location: slide
 plot_atac_acf <- plot_acf(atac_acf_tbl, title = "ATAC ACF")
 plot_atac_acf
 ```
 
-## Autocorrelation
+## Autocorrelation {.smaller}
 
 So, it looks like there significant bumps in autocorrelation at 10 and 21 bp positions, indicating that ATAC length distribution is periodic.
 
 How do we confirm these bumps are interesting? Let's calculate the acf of a negative control -- the length distribution of the MNase data.
 
 ```{r}
-#| label: plot-acfs
+#| label: plot-combined-acfs
 #| echo: true
-#| output-location: default
+#| output-location: slide
 mnase_frag_lens <-
   fragment_len_hist(mnase_tbl)
 
@@ -237,7 +255,7 @@ mnase_acf_tbl <-
 plot_mnase_acf <- plot_acf(mnase_acf_tbl, title = "MNase ACF")
 
 # patchwork plot
-plot_atac_acf / plot_mnase_acf
+plot_atac_acf & plot_mnase_acf
 ```
 
 ## Interpretation
@@ -261,6 +279,7 @@ We will use [Gviz](https://bioconductor.org/packages/release/bioc/vignettes/Gviz
 First, we load the gene annotations from the [Saccharomyces Genome Databases](https://yeastgenome.org) (SGD).
 
 ```{r}
+#| label: load-sgd-genes
 #| echo: true
 #| output-location: column
 
@@ -275,7 +294,7 @@ sgd_genes <-
 sgd_genes
 ```
 
-## Import bigWig
+## Import bigWig {.smaller}
 
 Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using `rtracklayer::import.bw()`.
 
@@ -284,7 +303,9 @@ Inspect the object.
 (What is "GRanges"?)
 
 ```{r}
+#| label: load-mnase-gr
 #| echo: true
+#| output-location: column
 mnase_nuc_gr <- import.bw(
   here("data/block-dna/yeast_mnase_134_160.bw"),
   as = "GRanges"
@@ -297,6 +318,9 @@ mnase_nuc_gr
 Next, load the GRanges object as a track for Gviz to plot:
 
 ```{r}
+#| label: gen-mnase-track
+#| echo: true
+#| output-location: column
 mnase_nuc_trk <- DataTrack(
   mnase_nuc_gr,
   name = "MNase_nuc"
@@ -304,13 +328,14 @@ mnase_nuc_trk <- DataTrack(
 mnase_nuc_trk
 ```
 
-## Vizualize a genomic region
+## Vizualize a genomic region {.smaller}
 
 Now, we can make a plot for this particular region of chrII:
 
 ```{r}
+#| label: gen-track-plot
 #| echo: true
-#| output-location: column
+#| output-location: slide
 
 # special track for the x-axis
 x_axis <- GenomeAxisTrack()
@@ -339,7 +364,7 @@ That looks great! Let's load all the other data sets.
 
 ## Load the remaining data
 
-We can do this one of two ways. We can do it one-by-one:
+We can do this one of two ways. We could do it one-by-one:
 
 ```{r}
 #| eval: false
@@ -351,11 +376,14 @@ big_wig <- import.bw(here("data/block-dna", file_name))
 data_track <- DataTrack(big_wig, track_name)
 ```
 
-## Load the remaining data
+---
 
-Or we can create a tibble with file and track names, and use purrr to load and convert each one:
+Or we can create a tibble with file and track names, and use [purrr](https://purrr.tidyverse.org/) to load and convert each one.
+
+First, we define a tibble of files an metadata.
 
 ```{r}
+#| label: prep-import-data
 #| echo: true
 track_info <-
   tibble(
@@ -376,6 +404,8 @@ track_info <-
 ## Load the remaining data
 
 ```{r}
+#| label: local-track-data
+#| echo: true
 track_info <-
   mutate(
     track_info,
@@ -393,8 +423,9 @@ track_info <-
 Now, we just have to make a list of tracks to plot and Gviz takes care of the rest.
 
 ```{r}
+#| label: plot-rest-track-data
 #| echo: true
-#| output-location: column-fragment
+#| output-location: slide
 plotTracks(
   c(
     sgd_genes,
