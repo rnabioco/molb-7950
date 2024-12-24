@@ -8,7 +8,8 @@ author: "Insert your name here"
 Start by loading libraries you need analysis in the code chunk below.
 When in doubt, start by loading the tidyverse package.
 
-```{r, setup}
+```{r}
+#| label: setup
 library(tidyverse)
 library(here)
 ```
@@ -60,7 +61,8 @@ Use `arrange`, `filter`, and `select` on a data frame. Do the following, in orde
 3. Filter the tibble by `count` > 100
 4. Select all columns *except* for `type`
 
-```{r, q1}
+```{r}
+#| label: q1
 exp_tbl <- read_csv(here("data/data_transcript_exp_tidy.csv.gz"))
 exp_tbl |>
   arrange(count) |>
@@ -79,7 +81,8 @@ B) rearrange the columns in the following order: ensembl_transcript_id, type, ti
 
 Hint: Use `mutate` and `select`
 
-```{r, q3}
+```{r}
+#| label: q3
 exp_tbl |>
   mutate(log10count = log10(count)) |>
   select(ensembl_transcript_id, type, time, replicate, count, log10count)
@@ -91,7 +94,8 @@ Calculate a per-transcript sum, while keeping the `time` information?
 
 Hint: Use `group_by` with multiple variables, and `summarise` the "count" values using `sum()`
 
-```{r, q4}
+```{r}
+#| label: q4
 exp_tbl |>
   group_by(ensembl_transcript_id, time) |>
   summarize(count_sum = sum(count))

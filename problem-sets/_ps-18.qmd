@@ -91,7 +91,8 @@ So you'll make a metaplot, but instead of using transcription start sites as the
     -   a "genome" file, `sacCer3.chrom.sizes`
     -   a BED file, `yeast_p1_chrII.bed.gz` which contains the mid-points of the +1 nucleosomes on chromosome 22. Recall that the +1 nucleosome is the nucleosome downstream of the transcription start site.
 
-```{r tidy=FALSE}
+```{r}
+#| tidy: false
 #| label: load-data-2
 genome <- read_???(here("data/block-dna/sacCer3.chrom.sizes"))
 p1_tbl <- read_???(here("data/block-dna/yeast_p1_chrII.bed.gz"))
@@ -109,7 +110,8 @@ p1_tbl <- read_???(here("data/block-dna/yeast_p1_chrII.bed.gz"))
 
         The output is a new tibble with columns `chrom`, `start`, and `end`.
 
-```{r, tidy=FALSE}
+```{r}
+#| tidy: false
 #| label: calc-midpoints
 #| eval: false
 calc_mids <- function(tbl, min_len, max_len) {
@@ -133,7 +135,8 @@ calc_mids <- function(tbl, min_len, max_len) {
 
 3.  Next, use that function to calculate midpoints, and expand these midpoints by 20 bp in each direction with `bed_slop()`.
 
-```{r, tidy=FALSE}
+```{r}
+#| tidy: false
 #| label: nuc-mid-ivls
 #| eval: false
 ncp_mids_tbl <-
@@ -150,7 +153,8 @@ subnuc_mids_tbl <-
 
 4.  Next, we need to make the reference points for a metaplot. We'll look 100 bp up- and downstream of the +1 nucleosome positions, and make windows that are 1 bp in size.
 
-```{r, tidy=FALSE}
+```{r}
+#| tidy: false
 #| label: p1-ivls
 #| eval: false
 p1_win_tbl <-
@@ -166,7 +170,8 @@ p1_win_tbl <-
 
     Use `bed_intersect()` to identify fragments that overlap, and then just count the number of fragments per `.win_id` (don't forget the suffix). Note you will do this separately for the short and long fragments.
 
-```{r, tidy=FALSE}
+```{r}
+#| tidy: false
 #| label: count-windows
 #| eval: false
 ncp_mids_summary_tbl <-
@@ -188,7 +193,8 @@ subnuc_mids_summary_tbl <-
 
 6.  The following joins the tables you made together, and makes the x-axis more informative, by converting to relative genomic position rather than window ID.
 
-```{r, tidy=FALSE}
+```{r}
+#| tidy: false
 #| label: window-pos
 #| eval: false
 win_ids <- seq(-100, 100, 1)
@@ -202,7 +208,8 @@ all_tbl <- bind_rows(
 
 7.  Finally, we plot the data with position on the x-axis, and count on the y-axis.
 
-```{r, tidy=FALSE}
+```{r}
+#| tidy: false
 #| label: plot-meta
 #| eval: false
 ggplot(
