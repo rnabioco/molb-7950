@@ -46,6 +46,7 @@ sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
     .by = c(block, topic)
   ) |>
   arrange(date) |>
+  select(-location) |>
   mutate(
     # set up dates / weeks
     class_num = str_pad(class_num, 2, "left", "0"),
@@ -108,7 +109,7 @@ gt(
 ) |>
   tab_header(
     title = md(glue("**MOLB 7950 - {params$course$semester} Schedule**")),
-    subtitle = glue("Classes held in-person from {params$course$time}")
+    subtitle = glue("Classes held in-person from {params$course$time} in {params$course$room}")
   ) |>
   fmt_date(
     columns = date,
@@ -117,7 +118,7 @@ gt(
   cols_label(
     # class = md("**Class**"),
     date = md("**Date**"),
-    location = md("**Location**"),
+    # location = md("**Location**"),
     block = md("**Block**"),
     topic = md("**Topic**"),
     title = md("**Title**"),
