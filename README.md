@@ -58,7 +58,13 @@ If you want to suppress quarto rendering of a file, prefix the filename with an 
 3.  Re-render the page (`quarto render index.qmd`) and check formatting.
 4.  Commit and push to GitHub.
 
+## Additional, external content
+
+- Problem sets and keys live here: https://github.com/rnabioco/molb-7950-problem-sets
+
+- Large data sets, mainly single-cell problem sets, live here (so we don't bloat this repo): https://github.com/rnabioco/molb-7950-data/
+
 ### Acknowledgements
 
-This work borrows fromand modifies:
+This work borrows from and modifies:
 https://github.com/mine-cetinkaya-rundel/quarto-sdss
