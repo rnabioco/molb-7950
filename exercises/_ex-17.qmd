@@ -23,7 +23,7 @@ library(patchwork)
 
 These are new libraries specifically for genome analysis. You learned about valr and Gviz for your homework.
 
-rtracklayer provides a few utility functions we'll use today, and TxDb.Scerevisiae.UCSC.sacCer3.sgdGene provides gene annotations for the S. cerevisiae genome.
+cpp11bigwig provides `read_bigwig()`, and TxDb.Scerevisiae.UCSC.sacCer3.sgdGene provides gene annotations for the S. cerevisiae genome.
 
 ```{r}
 #| label: genome-libs
@@ -31,7 +31,7 @@ rtracklayer provides a few utility functions we'll use today, and TxDb.Scerevisi
 library(valr)
 library(Gviz)
 
-library(rtracklayer)
+library(cpp11bigwig)
 library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 ```
 
@@ -79,7 +79,7 @@ mnase_tbl <- read_bed(
 mnase_tbl
 ```
 
-Working with a small genome is a huge advantage -- we can study the whole chromosome in this class. 
+Working with a small genome is a huge advantage -- we can study the whole chromosome in this class.
 
 ## Expectations for chromatin fragment lengths
 
@@ -273,15 +273,15 @@ sgd_genes <-
 sgd_genes
 ```
 
-Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using `rtracklayer::import.bw()`.
+Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using `cpp11bigwig::read_bigwig()`.
 
 Inspect the object. What is "GRanges"?
 
 ```{r}
 #| echo: true
-mnase_nuc_gr <- import.bw(
+mnase_nuc_gr <- read_bigwig(
   here("data/block-dna/yeast_mnase_134_160.bw"),
-  as = "GRanges"
+  as = "gr"
 )
 mnase_nuc_gr
 ```
@@ -324,7 +324,7 @@ plotTracks(
 
 That looks great! Let's load all the other data sets.
 
-1.  Load each bigWig as a GRanges object with `rtracklayer::import.bw()`
+1.  Load each bigWig as a GRanges object with `cpp11bigwig::read_bigwig()`
 2.  Convert each to a `Gviz::DataTrack()` for plotting
 
 We can do this one of two ways. We can do it one-by-one:
@@ -335,7 +335,7 @@ We can do this one of two ways. We can do it one-by-one:
 # complete the following steps for each of the four tracks
 file_name <- "yeast_mnase_lt50.bw"
 track_name <- "MNase_Short"
-big_wig <- import.bw(here("data/block-dna", file_name))
+big_wig <- read_bigwig(here("data/block-dna", file_name))
 data_track <- DataTrack(big_wig, track_name)
 ```
 
@@ -364,7 +364,7 @@ track_info <-
   mutate(
     track_info,
     big_wig = purrr::map(
-      file_path, ~ import.bw(.x, as = "GRanges")
+      file_path, ~ read_bigwig(.x, as = "gr")
     ),
     data_track = purrr::map2(
       big_wig, track_name, ~ DataTrack(.x, name = .y)

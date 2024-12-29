@@ -51,7 +51,7 @@ library(valr)
 # genome viz
 library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 library(Gviz)
-library(rtracklayer)
+library(cpp11bigwig)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
@@ -96,7 +96,7 @@ track_info <-
   mutate(
     file_path = here("data/block-dna", file_name),
     big_wig = purrr::map(
-      file_path, ~ import.bw(.x, as = "GRanges")
+      file_path, ~ read_bigwig(.x, as = "gr")
     ),
     data_track = purrr::map2(
       big_wig, sample_type,
@@ -206,7 +206,7 @@ total_reads <- 16e6
 
 genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
 # how can we calculate genome size?
-genome_size <- ___ 
+genome_size <- ___
 
 genome_lambda <- total_reads / genome_size
 
@@ -233,10 +233,10 @@ ggplot(
   filter(peak_calls, chrom == "chrII"),
   # convert p-values to positive values for plotting
   aes(start, ___)
-) + 
+) +
   geom_line() +
   xlim(track_start, track_end) +
-  theme_cowplot() 
+  theme_cowplot()
 ```
 
 How many peaks are called in this region?
@@ -245,7 +245,7 @@ How many peaks are called in this region?
 #| label: n-peaks
 #| eval: false
 # most stringent cut-off
-peak_calls_sig <- 
+peak_calls_sig <-
   filter(
     peak_calls,
     fdr == 0

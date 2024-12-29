@@ -1,6 +1,6 @@
 ---
 title: "DNA Block - Problem Set 21"
-execute: 
+execute:
   eval: false
 ---
 
@@ -12,7 +12,7 @@ The first several chunks just run, putting libraries and files in your environme
 
 Each question below is worth 4 points.
 
-### Setup 
+### Setup
 
 Start by loading libraries you need analysis in the code chunk below.
 
@@ -27,7 +27,7 @@ library(cowplot)
 # genome viz
 library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 library(Gviz)
-library(rtracklayer)
+library(cpp11bigwig)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
@@ -39,8 +39,8 @@ Next, load the coverage tracks for CUT&RUN data.
 
 ```{r}
 #| label: make-tracks
-track_start <- 1e5 
-track_end <- 2e5 
+track_start <- 1e5
+track_end <- 2e5
 
 # genes track
 sgd_genes_trk <-
@@ -72,7 +72,7 @@ track_info <-
   mutate(
     file_path = here("data/block-dna", file_name),
     big_wig = purrr::map(
-      file_path, ~ import.bw(.x, as = "GRanges")
+      file_path, ~ read_bigwig(.x, as = "gr")
     ),
     data_track = purrr::map2(
       big_wig, sample_type,
@@ -127,7 +127,7 @@ where are the short fragments enriched? And where do you see more of the long fr
 Remake the plot above, but zoom in to a promoter region that has strong enrichment
 for both Reb1 and Abf1 (short fragments).
 
-Do the signals for Reb1 and Abf1 line up with one another? Why is this the case? 
+Do the signals for Reb1 and Abf1 line up with one another? Why is this the case?
 
 > Answer.
 
@@ -152,7 +152,7 @@ plotTracks(
 ### Question 3
 
 Next we'll take a look at Reb1 CUT&RUN data. In the following chunk, use the appraoch
-we took in class to identify enriched sites of Reb1 binding. 
+we took in class to identify enriched sites of Reb1 binding.
 
 ```{r}
 #| eval: false
@@ -165,10 +165,10 @@ total_reads <- 16e6
 genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
 
 # how can we calculate genome size?
-genome_size <- ___ 
+genome_size <- ___
 
 # define the genome-wide lambda value here
-genome_lambda <- ___ / ___ 
+genome_lambda <- ___ / ___
 
 peak_calls <-
   reb1_tbl |>
@@ -186,8 +186,8 @@ peak_calls <-
 
 Let's take a look at a plot of the p-value across a chromosome.
 
-Use `geom_hline()` to draw a red horizontal line at a cutoff that selects ~10 regions 
-enriched for Reb1 binding. You'll use this cutoff in the code chunks below.  
+Use `geom_hline()` to draw a red horizontal line at a cutoff that selects ~10 regions
+enriched for Reb1 binding. You'll use this cutoff in the code chunks below.
 
 ```{r}
 #| label: plot-peak-sig
@@ -196,7 +196,7 @@ ggplot(
   filter(peak_calls, chrom == "chrII"),
   # convert p-values to positive values for plotting
   aes(start, ___)
-) + 
+) +
   geom_line() +
   xlim(track_start, track_end) +
   theme_cowplot() +
@@ -205,7 +205,7 @@ ggplot(
 
 ### Question 4
 
-How many peaks are called in this region? Use the cutoff you defined above to identify 
+How many peaks are called in this region? Use the cutoff you defined above to identify
 "peaks" of Reb1 binding.
 
 > Answer.
@@ -218,7 +218,7 @@ How many *total* peaks are identified in the genome using this cutoff?
 #| label: n-peaks
 #| eval: false
 # most stringent cut-off
-peak_calls_sig <- 
+peak_calls_sig <-
   filter(
     peak_calls,
     ___
@@ -285,7 +285,7 @@ plotTracks(
 Use the peak calls you defined to identify a putative sequence motif bound by Reb1. You can
 assume that the most abundant motif identified is the most likely candidate.
 
-Use Google and Pubmed to identify a study that defines a Reb1 motif using a genomewide analysis. How well does your 
+Use Google and Pubmed to identify a study that defines a Reb1 motif using a genomewide analysis. How well does your
 motify match the previously defined one?
 
 ```{r}

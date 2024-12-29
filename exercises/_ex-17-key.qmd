@@ -31,7 +31,7 @@ rtracklayer provides a few utility functions we'll use today, and TxDb.Scerevisi
 library(valr)
 library(Gviz)
 
-library(rtracklayer)
+library(cpp11bigwig)
 library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 ```
 
@@ -266,9 +266,9 @@ Inspect the object. What is "GRanges"?
 
 ```{r}
 #| echo: true
-mnase_nuc_gr <- import.bw(
+mnase_nuc_gr <- read_bigwig(
   here("data/block-dna/yeast_mnase_134_160.bw"),
-  as = "GRanges"
+  as = "gr"
 )
 mnase_nuc_gr
 ```
@@ -322,7 +322,7 @@ We can do this one of two ways. We can do it one-by-one:
 # complete the following steps for each of the four tracks
 file_name <- "yeast_mnase_lt50.bw"
 track_name <- "MNase_Short"
-big_wig <- import.bw(here("data/block-dna", file_name))
+big_wig <- read_bigwig(here("data/block-dna", file_name))
 data_track <- DataTrack(big_wig, track_name)
 ```
 
@@ -352,7 +352,7 @@ track_info <-
   mutate(
     track_info,
     big_wig = purrr::map(
-      file_path, ~ import.bw(.x, as = "GRanges")
+      file_path, ~ read_bigwig(.x, as = "gr")
     ),
     data_track = purrr::map2(
       big_wig, track_name, ~ DataTrack(.x, name = .y)
