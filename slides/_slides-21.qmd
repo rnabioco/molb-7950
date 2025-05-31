@@ -53,7 +53,7 @@ library(rtracklayer)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
-library(rGADEM)
+# library(rGADEM)
 library(seqLogo)
 ```
 
@@ -86,17 +86,21 @@ track_info <-
       "CutRun_Abf1_gt150.bw"
     ),
     sample_type = c(
-      "Reb1_Short", "Abf1_Short",
-      "Reb1_Long", "Abf1_Long"
+      "Reb1_Short",
+      "Abf1_Short",
+      "Reb1_Long",
+      "Abf1_Long"
     )
   ) |>
   mutate(
     file_path = here("data/block-dna", file_name),
     big_wig = purrr::map(
-      file_path, ~ import.bw(.x, as = "GRanges")
+      file_path,
+      ~ import.bw(.x, as = "GRanges")
     ),
     data_track = purrr::map2(
-      big_wig, sample_type,
+      big_wig,
+      sample_type,
       ~ DataTrack(
         .x,
         name = .y,
