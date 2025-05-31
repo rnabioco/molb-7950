@@ -18,7 +18,7 @@ library(annotatr)
 library(ggrepel)
 library(tidyverse)
 library(cowplot)
-library(scales) 
+library(scales)
 library(gt)
 library(here)
 library(Hmisc)
@@ -87,7 +87,7 @@ hur_annot <- annotate_regions(
 myInfo <- c("seqnames","start","end","width","strand","annot.symbol","annot.type")
 
 hur_annot <- hur_annot[,myInfo] %>%
-  unique() 
+  unique()
 
 # getting rid of the "hg19_genes_" string to simplify `annot.type`
 hur_annot$annot.type <- gsub("hg19_genes_","",hur_annot$annot.type)
@@ -117,7 +117,7 @@ hur_gene_clip <- hur_annot %>%
 hur_gene_clip <- hur_gene_clip %>% mutate_if(is.numeric , replace_na, replace = 0)
 
 # new column w/total # sites
-hur_gene_clip$total <- 
+hur_gene_clip$total <-
 
 # remove symbols that are NA
 hur_gene_clip <- hur_gene_clip %>%
@@ -137,12 +137,12 @@ colnames(hur_gene_clip)[3:4] <- c("utr3","utr5")
 #| output-location: column-fragment
 
 
-hur_gene_clip_long  <- hur_gene_clip %>% 
-  pivot_longer(-??) 
+hur_gene_clip_long  <- hur_gene_clip %>%
+  pivot_longer(-??)
 
 colnames(hur_gene_clip_long)  <-  c("symbol","region","sites")
 
-# histogram of sites/mrna colored by region 
+# histogram of sites/mrna colored by region
 ggplot(hur_gene_clip_long %>%
          filter(region != "total"),
        aes(x=??, fill=??)) +
@@ -169,7 +169,7 @@ site_combo <- hur_gene_clip[,2:5] %>%
       introns ?? & utr3 ?? ~ "intron",
       introns ??  & utr3 ?? ~ "utr3",
       TRUE ~ "other")
-    ) 
+    )
 
 ggplot(site_combo,
        aes(x=??,
@@ -226,8 +226,8 @@ hur_filt_rnaseq <- HuR %>%
 
 #join kd and clip data
 kd_clip <- left_join(??,
-                     ??, 
-                     by = "Symbol") 
+                     ??,
+                     by = "Symbol")
 
 # convert all NA to 0
 kd_clip <- kd_clip %>%
@@ -265,7 +265,7 @@ kd_clip <- kd_clip %>%
 
 kd_clip$target <- case_when(
   kd_clip$total > ?? ~  "target",
-  TRUE ~ "not target") 
+  TRUE ~ "not target")
 
 
 ggplot(kd_clip,
@@ -351,7 +351,7 @@ fit_bins <- lm(data = kd_clip_targets,
 
 # examine estimates and p-vals
 tidy(fit_bins) %>%
-  gt() 
+  gt()
 ```
 
 ## More binding -\> more stabilization? {.smaller}
@@ -385,5 +385,5 @@ tidy(fit_bins) %>%
              color = "red") +
   theme_cowplot()
 
-  
+
 ```

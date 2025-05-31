@@ -43,7 +43,7 @@ colnames(weight) <- c("subject_name","weight")
 
 # add weight to biochem table and get rid of NAs
 # rename sex to sex
-b <- inner_join(biochem, weight, by="subject_name") |> 
+b <- inner_join(biochem, weight, by="subject_name") |>
   na.omit() |>
   rename(sex=gender)
 ```
@@ -109,7 +109,7 @@ p_ws <- ggplot(b,
   theme_cowplot()
 
 
-# plot weight by sex with mean weight and mean weight by sex  
+# plot weight by sex with mean weight and mean weight by sex
 p_ws2 <- ggplot(b,
                 aes(x = sex, y = weight)) +
   geom_jitter(size=1) +
@@ -146,7 +146,7 @@ We will explore this in more detail soon.
 #| output-location: fragment
 #| eval: false
 
-fit_ws <- 
+fit_ws <-
 
 ```
 
@@ -175,7 +175,7 @@ Coefficient summary:
 ??(fit_ws) |>
   gt() |>
   fmt_number(columns =estimate:statistic, decimals = 3)
-  
+
 
 ```
 
@@ -189,7 +189,7 @@ add residuals and other information
 #| eval: false
 
 #augment
-b_ws <- 
+b_ws <-
 
 
 ```
@@ -203,11 +203,11 @@ b_ws <-
 avg_w <-
 
 # mean weight female
-avg_wf <- 
+avg_wf <-
 
 
 # mean weight male
-avg_wm <- 
+avg_wm <-
 
 ```
 
@@ -237,8 +237,8 @@ p_ws <- ggplot(b_ws,
                      y=??), yend=??,
                  color="red") +
   theme_cowplot()
-  
-p_ws 
+
+p_ws
 ```
 
 ## STEP 3: Visualize the error around the null (mean weight) {.smaller}
@@ -259,7 +259,7 @@ p_w <- ggplot(b_ws,
     geom_hline(yintercept = avg_w,
                color = "darkgrey") +
   theme_cowplot()
-  
+
 p_w
 ```
 
@@ -283,7 +283,7 @@ We are fitting 2 lines to the data. For the weight by sex model of the fit (left
 #| eval: false
 
 
-b_ws |> 
+b_ws |>
   arrange(??) |>
   top_n(15) |>
   select(subject_name,weight,sex,.resid,.fitted) |>
@@ -327,7 +327,7 @@ $y_{62}= 0 \cdot F_{avg} + 1 \cdot M_{avg} + residual_{62}$
 #| eval: false
 #| echo: true
 
-b_ws |> 
+b_ws |>
   filter(subject_name %in% c("A048054885","A067109771","A066822351","A048274362")) |>
   select(subject_name, weight, sex, .fitted, .resid) |>
   arrange(sex) |>
@@ -366,7 +366,7 @@ $SS_{fit}$ --- sum of squared errors around the least-squares fit
 #| output-location: column-fragment
 #| eval: false
 
-ss_fit <- 
+ss_fit <-
 
 ```
 
@@ -376,7 +376,7 @@ $SS_{null}$ --- sum of squared errors around the mean of $y$
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
-ss_null <- 
+ss_null <-
 ```
 
 $R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
@@ -405,7 +405,7 @@ Woohoo!!
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
-b |> 
+b |>
   ?? |>
   select(-c(n1,n2,df)) |>
   gt()
@@ -426,7 +426,6 @@ tidy(fit_ws) |>
 
 ## prep data for fams {.smaller}
 
-
 ```{r}
 #| label: prep fam data
 #| echo: true
@@ -440,7 +439,7 @@ myfams <- c("B1.5:E1.4(4) B1.5:A1.4(5)",
 # only keep the familys in myfams
 bfam <- b |>
   filter(family %in% myfams) |>
-  droplevels() 
+  droplevels()
 
 # simplify family names and make factor
 bfam$family <- gsub(pattern = "\\..*", replacement = "", x = bfam$family) |>
@@ -451,13 +450,12 @@ bfam$family <- gsub(pattern = "\\..*", replacement = "", x = bfam$family) |>
 bfam$family <- relevel(x = bfam$family, ref ="B1")
 ```
 
-
-
 ## STEP 1: Can family explain weight? {.smaller}
 
-ANOVA -> comparing means of 3 or more groups.
+ANOVA -\> comparing means of 3 or more groups.
 
 Let's compare the $weight$ by $family$, but only for a few selected families.
+
 ```{r}
 #| echo: false
 #| echo: true
@@ -486,7 +484,7 @@ $\mathcal{H}_1:$ mouse $family$ does explain $weight$
 
 **Important:** $x_{i}$ is an indicator (0 or 1) saying which group point $i$ was sampled from using the matrix encoding of 0s and 1s.
 
-Below is an example depicting 6 observations with 2 from each of 3 families:  
+Below is an example depicting 6 observations with 2 from each of 3 families:
 
 $\begin{bmatrix} y_{1} \\ y_{2} \\ y_{3} \\y_{4} \\y_{5} \\y_{5} \end{bmatrix} = \begin{bmatrix} 1 & 0 & 0 \\ 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \\ 0 & 0 & 1 \\ \end{bmatrix} \cdot \begin{bmatrix} \beta_0 \\ \beta_1 \end{bmatrix} + \begin{bmatrix} e_{1} \\ e_{2} \\ e_{3} \\e_{4} \\e_{5} \\e_{6} \end{bmatrix}$
 
@@ -525,7 +523,7 @@ Coefficient summary:
 tidy(fit_wf) |>
   gt() |>
   fmt_number(columns =estimate:statistic, decimals = 3)
-  
+
 ```
 
 ## Collecting residuals and other information {.smaller}
@@ -538,7 +536,7 @@ add residuals and other information
 #| eval: false
 
 #augment
-b_wf <- 
+b_wf <-
 
 # mean weight per fam
 mean_B1 <- fit_wf$coefficients[??]
@@ -578,14 +576,13 @@ geom_segment(aes(x=.5, xend=1.5, y=mean_B1, yend=mean_B1), color="red") +
 
 ```
 
-
 ## Compare to traditional ANOVA {.smaller}
 
 ```{r}
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
-bfam |> 
+bfam |>
   ?? |>
   gt()
 
@@ -603,11 +600,9 @@ tidy(fit_wf) |>
 
 ```
 
-
 ## Comparing 2 groups of 2 continuous variables {.smaller}
 
-**ANCOVA, Analysis of Covariance.** ANOVA with more than one independent variable. 
-What is the impact of mouse age on mouse weight for males vs females.
+**ANCOVA, Analysis of Covariance.** ANOVA with more than one independent variable. What is the impact of mouse age on mouse weight for males vs females.
 
 ```{r}
 #| label: ANCOVA
@@ -660,8 +655,6 @@ aov(formula = weight ~ 1 + age + sex, data = b) |>
 
 
 ```
-
-
 
 ## References
 

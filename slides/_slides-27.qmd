@@ -123,13 +123,13 @@ In this class we will be working with PAR-CLIP data. Regardless, I will show you
 
 ![](/img/block-rna/workflow.jpg)
 
-::: 
+:::
 ::: {.column width="50%" .nonincremental}
 
-1. Filter out low quality or short reads (<18 for larger genomes)  
-2. Trim adapters  
-3. Collapse PCR duplicate reads (molecular indexes)  
-4. Align to genome/transcriptome  
+1. Filter out low quality or short reads (<18 for larger genomes)
+2. Trim adapters
+3. Collapse PCR duplicate reads (molecular indexes)
+4. Align to genome/transcriptome
 5. Call peaks
 6. Downstream analysis
 
@@ -164,28 +164,28 @@ See [PARalyzer](https://pubmed.ncbi.nlm.nih.gov/21851591/) for more information.
 :::
 
 
-## Today's menu {.smaller}  
+## Today's menu {.smaller}
 
-We will be starting with position of the binding sites in the genome (the output of PARalyzer) and we will:  
+We will be starting with position of the binding sites in the genome (the output of PARalyzer) and we will:
 
-#### 1a. Annotated the genes and regions of the binding sites.  
+#### 1a. Annotated the genes and regions of the binding sites.
 
-#### 1b. Calculate a summary table for binding sites per gene per region.  
+#### 1b. Calculate a summary table for binding sites per gene per region.
 
-#### 2. Perform motif analysis accounting for the background sequence regions.  
- 
+#### 2. Perform motif analysis accounting for the background sequence regions.
+
 
 ![](/img/block-rna/workflow_2hallf.jpg)
 
 ## Annotation of binding sites {.smaller}
 
 
-Where are the binding sites?  
-- Which genes?  
-- What region of those genes?  
-- How many binding sites per region?  
-- How many binding sites per gene?  
-- How many binding sites per gene by region?  
+Where are the binding sites?
+- Which genes?
+- What region of those genes?
+- How many binding sites per region?
+- How many binding sites per gene?
+- How many binding sites per gene by region?
 
 We will use `annotatr` and `Granges` to answer these questions.
 
@@ -219,7 +219,7 @@ annotations
 
 ## Extract annotation categories {.smaller}
 
-What information is contained within the `annotations` object?  
+What information is contained within the `annotations` object?
 
 ```{r}
 #| eval: true
@@ -292,26 +292,26 @@ ggplot(all_length, aes(x = nt, color = cat)) +
   theme_cowplot()
 ```
 
-The typical* human intron is way longer than a CDS exon. 
+The typical* human intron is way longer than a CDS exon.
 
 ## ELAVL1/HuR {.smaller .nonincremental}
 
-ELAVL1/HuR is an essential RNA-binding protein (RBP). 
+ELAVL1/HuR is an essential RNA-binding protein (RBP).
 
 HuR binds to AU-rich elements (ARE) in 3’ UTRs of mRNAs to promote mRNA stability.
 
 ![](/img/block-rna/hur_mechanism.png)
 
 
-This model makes a few specific prediction:  
+This model makes a few specific prediction:
 
-1. HuR binds  to the 3' UTR.  
-2. HuR binds to AU-rich sequences (AUUUA).  
-3. HuR binding promotes target RNA stabilization (and binding by the other RBPs to the ARE promotes destabilization).  
+1. HuR binds  to the 3' UTR.
+2. HuR binds to AU-rich sequences (AUUUA).
+3. HuR binding promotes target RNA stabilization (and binding by the other RBPs to the ARE promotes destabilization).
 
 We will explore these predictions during the next couple classes.
 
-## PAR-CLIP data {.smaller}  
+## PAR-CLIP data {.smaller}
 
 Reminder that we will be using this resource:
 [rag-tag ENCODE](https://github.com/BIMSBbioinfo/RCAS_meta-analysis)
@@ -334,7 +334,6 @@ hur_regions <- read_regions(
 )
 
 
-
 # looks like there are 111236 binding sites!!!
 # we are only going to keep those w/a score > 1
 # this will reduce it down to ~20K sites
@@ -345,7 +344,7 @@ hur_regions
 ```
 
 
-## Annotate PAR-CLIP data {.smaller}  
+## Annotate PAR-CLIP data {.smaller}
 
 ```{r}
 #| eval: true
@@ -368,7 +367,15 @@ hur_annot <- annotate_regions(
 # redundant info due to transcript_id
 
 # keep only columns we need
-myInfo <- c("seqnames", "start", "end", "width", "strand", "annot.symbol", "annot.type")
+myInfo <- c(
+  "seqnames",
+  "start",
+  "end",
+  "width",
+  "strand",
+  "annot.symbol",
+  "annot.type"
+)
 
 hur_annot <- hur_annot[, myInfo] %>%
   unique()
@@ -409,7 +416,9 @@ In this case, how many basepairs are introns and 3' UTRs in the genome?
 mylengths <- vector()
 
 for (i in 1:length(my_hg19_annots)) {
-  mylengths[i] <- sum(width(GenomicRanges::reduce(annotations[annotations$type %in% my_hg19_annots[i]])))
+  mylengths[i] <- sum(width(GenomicRanges::reduce(annotations[
+    annotations$type %in% my_hg19_annots[i]
+  ])))
 
   names(mylengths)[i] <- gsub("hg19_genes_", "", my_hg19_annots[i])
 }
@@ -422,7 +431,7 @@ barplot(mylengths[1:4], las = 2, main = "total bases per category", log = "y")
 
 We need a way to figure out a null model OR background expectation.
 
-What if we were to take our HuR binding and randomize their position and then repeat the annotation on the randomized binding sites? 
+What if we were to take our HuR binding and randomize their position and then repeat the annotation on the randomized binding sites?
 
 
 ```{r}
@@ -452,7 +461,11 @@ random_sites_annot <- random_sites_annot[, myInfo] %>%
   unique()
 
 # clean names
-random_sites_annot$annot.type <- gsub("hg19_genes_", "", random_sites_annot$annot.type)
+random_sites_annot$annot.type <- gsub(
+  "hg19_genes_",
+  "",
+  random_sites_annot$annot.type
+)
 
 
 table(random_sites_annot$annot.type)
@@ -466,7 +479,6 @@ table(random_sites_annot$annot.type)
 #| label: enrichment-region
 #| output-location: slide
 
-
 # create a new tibble with the annotation counts for hur (observed) and random (expected) binding sties
 site_dist <- bind_cols(
   region = names(table(hur_annot$annot.type)),
@@ -476,7 +488,8 @@ site_dist <- bind_cols(
   mutate(enrichment = observed / expected) # calculate enrichment
 
 
-site_dist_long <- pivot_longer(site_dist,
+site_dist_long <- pivot_longer(
+  site_dist,
   cols = c(observed, expected, enrichment)
 )
 
@@ -490,7 +503,10 @@ colnames(site_dist_long) <- c("region", "type", "value")
 #   theme_cowplot()
 
 # plot enrichment barplot
-ggplot(site_dist_long %>% filter(type == "enrichment"), aes(y = value, x = region)) +
+ggplot(
+  site_dist_long %>% filter(type == "enrichment"),
+  aes(y = value, x = region)
+) +
   geom_bar(stat = "identity") +
   ylab("Observed vs Expected") +
   theme_cowplot()
@@ -498,7 +514,7 @@ ggplot(site_dist_long %>% filter(type == "enrichment"), aes(y = value, x = regio
 
 
 
-## 5 MINUTE BREAK 
+## 5 MINUTE BREAK
 
 ## What sequence does HuR bind to? {.smaller}
 
@@ -506,9 +522,9 @@ Is it just *AUUUA*?
 
 **Different transcript regions have different nucleotide composition.**
 
-- 5' UTRs are more GC-rich  
+- 5' UTRs are more GC-rich
 
-- 3' UTRs are more AU-rich  
+- 3' UTRs are more AU-rich
 
 ![](/img/block-rna/gc.jpg)
 
@@ -520,8 +536,8 @@ Steps to determine k-mer composition (we use 6mers) for any set of intervals
 
 We'll do it for both HuR binding sites and then compare it to background seqs.
 
-1. Create a `Granges` object for a given annotation category.  
-2. Remove duplicated intervals (from diff transcript  ids) with `reduce`.   
+1. Create a `Granges` object for a given annotation category.
+2. Remove duplicated intervals (from diff transcript  ids) with `reduce`.
 3. Retrieve seqeunces using  `getSeqs`
 4. Create a dataframe containing the count and frequency of each 6mer.
 
@@ -537,7 +553,15 @@ Since HuR preferentially binds to 3' UTRs, that is the region we will focus on.
 #| output-location: slide
 
 # create a Grange for 3' UTRs
-hur_3utr <- makeGRangesFromDataFrame(df = hur_annot %>% filter(annot.type == "3UTRs"), ignore.strand = F, seqnames.field = "seqnames", start.field = "start", end.field = "end", strand.field = "strand", keep.extra.columns = T)
+hur_3utr <- makeGRangesFromDataFrame(
+  df = hur_annot %>% filter(annot.type == "3UTRs"),
+  ignore.strand = F,
+  seqnames.field = "seqnames",
+  start.field = "start",
+  end.field = "end",
+  strand.field = "strand",
+  keep.extra.columns = T
+)
 
 # get  sequencees for those coordinates
 hur_3utr_seqs <- getSeq(BSgenome.Hsapiens.UCSC.hg19, hur_3utr)
@@ -555,13 +579,14 @@ hur_utr3_6mer <- oligonucleotideFrequency(
 colnames(hur_utr3_6mer) <- "hur_utr_count"
 
 # calc freq
-hur_utr3_6mer$hur_utr_freq <- hur_utr3_6mer$hur_utr_count / sum(hur_utr3_6mer$hur_utr_count)
+hur_utr3_6mer$hur_utr_freq <- hur_utr3_6mer$hur_utr_count /
+  sum(hur_utr3_6mer$hur_utr_count)
 ```
 
 
 ## Calculate 6mers in 3utrs   {.smaller}
 
-Next, we will calculate 6mer frequencies in 3' UTRs. This will serve as a null model or background that we can compare with the HuR  binding  site 6mers. 
+Next, we will calculate 6mer frequencies in 3' UTRs. This will serve as a null model or background that we can compare with the HuR  binding  site 6mers.
 
 ```{r}
 #| eval: true
@@ -569,7 +594,9 @@ Next, we will calculate 6mer frequencies in 3' UTRs. This will serve as a null m
 #| label: utr-seqs
 
 # create a Grange for 3' UTRs
-threeUTR <- GenomicRanges::reduce(annotations[annotations$type %in% my_hg19_annots[4]])
+threeUTR <- GenomicRanges::reduce(annotations[
+  annotations$type %in% my_hg19_annots[4]
+])
 
 # get sequences for those coordinates
 threeUTR_seqs <- getSeq(BSgenome.Hsapiens.UCSC.hg19, threeUTR)
@@ -590,7 +617,7 @@ colnames(utr3_6mer) <- "utr_count"
 utr3_6mer$utr_freq <- utr3_6mer$utr_count / sum(utr3_6mer$utr_count)
 ```
 
-## Sequences enriched in hur sites vs 3utr {.smaller}  
+## Sequences enriched in hur sites vs 3utr {.smaller}
 
 
 ```{r}
@@ -623,15 +650,12 @@ ggplot(
   ylab("kmers: HuR 3'UTR sites") +
   xlab("kmers: 3'UTR") +
   geom_abline(intercept = 0, slope = 1) +
-  geom_text_repel(aes(label = ifelse(hur_enrich > 8,
-    rownames(utr3_df),
-    ""
-  ))) +
+  geom_text_repel(aes(label = ifelse(hur_enrich > 8, rownames(utr3_df), ""))) +
   theme_cowplot()
 ```
 
 
-## Sequences enriched in hur sites vs 3utr {.smaller}  
+## Sequences enriched in hur sites vs 3utr {.smaller}
 
 Not just AU-rich...
 

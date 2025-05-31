@@ -139,7 +139,10 @@ I encourage you to see what is in each mart, but for now we are only going to us
 #| eval: true
 #| label: choose-mart
 #| eval: true
-mart <- biomaRt::useMart("ENSEMBL_MART_ENSEMBL", host = "https://www.ensembl.org")
+mart <- biomaRt::useMart(
+  "ENSEMBL_MART_ENSEMBL",
+  host = "https://www.ensembl.org"
+)
 ```
 
 ## Using biomaRt {.smaller}
@@ -192,8 +195,14 @@ I'm going to through one more attribute in: external_gene_name. Those are usuall
 #| label: maket2g
 #| eval: true
 
-
-t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name"), mart = mart)
+t2g <- biomaRt::getBM(
+  attributes = c(
+    "ensembl_transcript_id",
+    "ensembl_gene_id",
+    "external_gene_name"
+  ),
+  mart = mart
+)
 
 # write_tsv(x = t2g, file = here("data","block-rna","t2g.tsv.gz"))
 # t2g <- read_tsv(here("data","block-rna","t2g.tsv.gz"))
@@ -226,8 +235,16 @@ First, we have to tell it where the salmon quantification files (the `quant.sf.g
 # The directory where all of the sample-specific salmon subdirectories live
 
 metadata <- data.frame(
-  sample_id = list.files(here("data/block-rna/differentiation_salmonouts"), pattern = "^DIV"),
-  salmon_dirs = list.files(here("data/block-rna/differentiation_salmonouts"), recursive = T, pattern = "quant.sf", full.names = T)
+  sample_id = list.files(
+    here("data/block-rna/differentiation_salmonouts"),
+    pattern = "^DIV"
+  ),
+  salmon_dirs = list.files(
+    here("data/block-rna/differentiation_salmonouts"),
+    recursive = T,
+    pattern = "quant.sf",
+    full.names = T
+  )
 ) |>
   separate(col = sample_id, into = c("samp", "rep"), sep = "\\.", remove = F)
 
@@ -268,7 +285,6 @@ Notice how we chose *lengthscaledTPM* for our abundance measurement. This is goi
 ```{r}
 #| label: make-tpms
 #| eval: true
-
 
 tpms <- txi$abundance |>
   as.data.frame() |>
@@ -338,11 +354,17 @@ OK so lets look at the expression of ENSMUSG00000020634 in the first sample (DIV
 ```{r}
 #| label: txequalsgene
 # Get sum of tpm values for transcripts that belong to ENSMUSG00000020634
-tpms.tx.ENSMUSG00000020634 <- filter(tpms.txs, ensembl_gene_id == "ENSMUSG00000020634")
+tpms.tx.ENSMUSG00000020634 <- filter(
+  tpms.txs,
+  ensembl_gene_id == "ENSMUSG00000020634"
+)
 sumoftxtpm <- sum(tpms.tx.ENSMUSG00000020634$DIVminus8.Rep1)
 
 # Get gene level tpm value of ENSMUSG00000020634
-genetpm <- filter(tpms.genes, ensembl_gene_id == "ENSMUSG00000020634")$DIVminus8.Rep1
+genetpm <- filter(
+  tpms.genes,
+  ensembl_gene_id == "ENSMUSG00000020634"
+)$DIVminus8.Rep1
 
 # Are they the same?
 sumoftxtpm
@@ -377,13 +399,17 @@ A simple way to think about this is to simply correlate TPM values for genes bet
 
 # Add pseudocounts and take log within ggplot function call
 r.spearman <- cor.test(
-  tpms$DIVminus8.Rep1, tpms$DIVminus8.Rep2,
+  tpms$DIVminus8.Rep1,
+  tpms$DIVminus8.Rep2,
   method = "spearman"
 )$estimate[[1]]
 
 r.spearman <- signif(r.spearman, 2)
 
-ggplot(tpms, aes(x = log10(DIVminus8.Rep1 + 1e-3), y = log10(DIVminus8.Rep2 + 1e-3))) +
+ggplot(
+  tpms,
+  aes(x = log10(DIVminus8.Rep1 + 1e-3), y = log10(DIVminus8.Rep2 + 1e-3))
+) +
   geom_point() +
   theme_classic() +
   annotate("text", x = 2, y = 0, label = paste0("R = ", r.spearman))
@@ -423,7 +449,10 @@ r.spearman <- cor.test(
 r.spearman <- signif(r.spearman, 2)
 
 # plot
-ggplot(tpms.2samplecor, aes(x = log10(DIVminus8.Rep1 + 1e-3), y = log10(DIVminus8.Rep2 + 1e-3))) +
+ggplot(
+  tpms.2samplecor,
+  aes(x = log10(DIVminus8.Rep1 + 1e-3), y = log10(DIVminus8.Rep2 + 1e-3))
+) +
   geom_point() +
   theme_classic() +
   annotate("text", x = 2, y = 1, label = paste0("R = ", r.spearman))
@@ -525,14 +554,11 @@ tpms.pca <- prcomp(t(tpms.cutoff.matrix))
 # These are what we are going to use to plot
 # We can also also some data about the samples here so that our plot is a little more interesting
 
-
-
 ### Tricky piping!!
 tpms.pca.pc <- tpms.pca$x %>%
   as.data.frame() %>%
   rownames_to_column(var = "sample_id") %>%
   left_join(., metadata[, 1:3], by = "sample_id")
-
 
 
 # We can see how much of the total variance is explained by each PC using the summary function
@@ -551,8 +577,14 @@ tpms.pca.pc$samp <-
   factor(
     tpms.pca.pc$samp,
     levels = c(
-      "DIVminus8", "DIVminus4", "DIV0",
-      "DIV1", "DIV7", "DIV16", "DIV21", "DIV28"
+      "DIVminus8",
+      "DIVminus4",
+      "DIV0",
+      "DIV1",
+      "DIV7",
+      "DIV16",
+      "DIV21",
+      "DIV28"
     )
   )
 
@@ -560,8 +592,10 @@ tpms.pca.pc$samp <-
 ggplot(
   data = tpms.pca.pc,
   aes(
-    x = PC1, y = PC2,
-    color = samp, label = sample_id
+    x = PC1,
+    y = PC2,
+    color = samp,
+    label = sample_id
   )
 ) +
   geom_point(size = 5) +

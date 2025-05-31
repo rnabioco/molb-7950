@@ -80,7 +80,7 @@ mnase_tbl <- read_bed(
 mnase_tbl
 ```
 
-Working with a small genome is a huge advantage -- we can study the whole chromosome in this class. 
+Working with a small genome is a huge advantage -- we can study the whole chromosome in this class.
 
 ## Expectations for chromatin fragment lengths
 
@@ -298,7 +298,7 @@ sgd_genes
 
 Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using `rtracklayer::import.bw()`.
 
-Inspect the object. 
+Inspect the object.
 
 (What is "GRanges"?)
 
@@ -395,8 +395,10 @@ track_info <-
     ),
     file_path = here("data/block-dna", file_name),
     track_name = c(
-      "MNase_Short", "MNase_Long",
-      "ATAC_Short", "ATAC_Long"
+      "MNase_Short",
+      "MNase_Long",
+      "ATAC_Short",
+      "ATAC_Long"
     )
   )
 ```
@@ -410,10 +412,13 @@ track_info <-
   mutate(
     track_info,
     big_wig = purrr::map(
-      file_path, ~ import.bw(.x, as = "GRanges")
+      file_path,
+      ~ import.bw(.x, as = "GRanges")
     ),
     data_track = purrr::map2(
-      big_wig, track_name, ~ DataTrack(.x, name = .y)
+      big_wig,
+      track_name,
+      ~ DataTrack(.x, name = .y)
     )
   )
 ```

@@ -55,7 +55,7 @@ colnames(weight) <- c("subject_name","weight")
 
 # add weight to biochem table and get rid of NAs
 # rename gender to sex
-b <- inner_join(biochem, weight, by="subject_name") |> 
+b <- inner_join(biochem, weight, by="subject_name") |>
   na.omit() |>
   rename(sex=gender)
 ```
@@ -109,7 +109,7 @@ let's see some summary stats
 #| output-location: column-fragment
 #| eval: false
 
-b |> 
+b |>
   get_summary_stats(
     ??,
     type = "common",
@@ -143,7 +143,7 @@ Looks reasonable
 #| eval: false
 
 
-b |> 
+b |>
   ??_test(weight)
 ```
 
@@ -299,7 +299,7 @@ ggviolin(
 #| eval: false
 
 
-b |> 
+b |>
   group_by(??) |>
   get_summary_stats(
     ??,
@@ -329,7 +329,7 @@ ggqqplot(
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
-b |> 
+b |>
   group_by(sex) |>
   ??_test(weight) |>
   gt()
@@ -344,7 +344,7 @@ Looks reasonable
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
-b |> 
+b |>
   ??_test(weight~sex) |>
   gt()
 
@@ -410,7 +410,7 @@ $sex$ can explain $weight$
 # save statistical test result
 statres <- b |>
   t_test(weight ~ sex,
-         var.equal = F, 
+         var.equal = F,
          ref.group = "F")
 
 
@@ -424,7 +424,7 @@ ggviolin(
   stat_pvalue_manual(
     ??,
     label = "p",
-    y.position = 34 
+    y.position = 34
     ) +
   ylim(10,35)
 
@@ -476,7 +476,7 @@ myfams <- c("B1.5:E1.4(4) B1.5:A1.4(5)",
 # only keep the familys in myfams
 bfam <- b |>
   filter(family %in% myfams) |>
-  droplevels() 
+  droplevels()
 
 # simplify family names and make factor
 bfam$family <- gsub(pattern = "\\..*", replacement = "", x = bfam$family) |>
@@ -517,7 +517,7 @@ ggboxplot(
 #| eval: false
 
 
-bfam |> 
+bfam |>
   group_by(??) |>
   get_summary_stats(
     ??,
@@ -547,7 +547,7 @@ ggqqplot(
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
-bfam |> 
+bfam |>
   group_by(family) |>
   ??_test(weight) |>
   gt()
@@ -562,7 +562,7 @@ Looks reasonable
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
-bfam |> 
+bfam |>
   ??_test(??~??) |>
   gt()
 
@@ -630,9 +630,9 @@ ggboxplot(
   y = "weight",
   x = "family",
   fill = "family"
-  ) + 
+  ) +
   stat_anova_test()
-  
+
 
 ```
 
@@ -646,7 +646,7 @@ Quick aside
 #| eval: false
 # save statistical test result
 pairwise <- bfam |>
-  t_test(weight ~ family, ref.group = "??") 
+  t_test(weight ~ family, ref.group = "??")
 
 
 ggboxplot(bfam,
@@ -656,7 +656,7 @@ ggboxplot(bfam,
           ) +
   stat_pvalue_manual(
     pairwise,
-    label = "p.adj", 
+    label = "p.adj",
     y.position = c(30, 32, 34)
     ) +
   ylim(10,38)

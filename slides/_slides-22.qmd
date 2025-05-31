@@ -224,7 +224,7 @@ Need to deal with systematic differences within/between samples such as:
 
 ![](https://hbctraining.github.io/DGE_workshop/img/normalization_methods_depth.png){width=50%}
 
-## Gene length {.smaller}  
+## Gene length {.smaller}
 
 ![](https://hbctraining.github.io/DGE_workshop/img/normalization_methods_length.png){width=50%}
 
@@ -233,19 +233,19 @@ Need to deal with systematic differences within/between samples such as:
 ![](https://hbctraining.github.io/DGE_workshop/img/normalization_methods_composition.png){width=50%}
 
 
-## Popular metrics: {.smaller} 
+## Popular metrics: {.smaller}
 
 ::: columns
 ::: {.column width="60%"}
 
 
-CPM — (read) Counts Per Million: $$CPM = 	\displaystyle \frac {\#\ reads\ mapped\ to\ gene*10^6}{Total\ \#\ mapped\ reads}$$ 
+CPM — (read) Counts Per Million: $$CPM = 	\displaystyle \frac {\#\ reads\ mapped\ to\ gene*10^6}{Total\ \#\ mapped\ reads}$$
 
-[F|R]PKM — [Fragments|Reads] Per Kilobase per Million: $$FPKM = 	\displaystyle \frac {\#\ fragments\ mapped\ to\ gene*10^6}{Total\ \#\ mapped\ reads*transcript\ length}$$ 
+[F|R]PKM — [Fragments|Reads] Per Kilobase per Million: $$FPKM = 	\displaystyle \frac {\#\ fragments\ mapped\ to\ gene*10^6}{Total\ \#\ mapped\ reads*transcript\ length}$$
 
 TPM — Transcripts Per Million: $$TPM = 	\displaystyle A* \frac {1}{\sum_{}A}$$
 $$A = \displaystyle \frac {\#\ fragments\ mapped\ to\ gene*10^6}{transcript\ length}$$
-::: 
+:::
 ::: {.column width="40%"}
 
 * RPKM and FPKM are pretty much the same thing. FPKM is for fragments (paired-ends), not reads (single-end).
@@ -257,8 +257,8 @@ $$A = \displaystyle \frac {\#\ fragments\ mapped\ to\ gene*10^6}{transcript\ len
 * TPM normalizes to gene length first and then normalize for sequencing depth. **Thus the sum of all TPMs is the same across samples**. A better measure of relative transcript "concentration" in your sample than [F|R]PKM.
 
 
-::: 
-::: 
+:::
+:::
 
 ## Appropriate use and caveats {.smaller}
 
@@ -283,7 +283,7 @@ DO NOT USE TPM (or anything we just talked about) to perform differential expres
 
 RNA-seq data are discrete non-negative integers (counts per  transcripts).
 
-Remember the reads are (pseudo-)aligned and we **COUNT** how many are assigned to a specific transcript in a given sample.  
+Remember the reads are (pseudo-)aligned and we **COUNT** how many are assigned to a specific transcript in a given sample.
 
 :::
 ::: {.column width="50%"}
@@ -299,7 +299,7 @@ Remember the reads are (pseudo-)aligned and we **COUNT** how many are assigned t
 
 ## Overdispersion {.smaller}
 
-> **Overdispersion** the variance of counts is generally greater than their mean, especially for genes expressed at a higher level.  
+> **Overdispersion** the variance of counts is generally greater than their mean, especially for genes expressed at a higher level.
 
 ::: columns
 ::: {.column width="50%"}
@@ -307,7 +307,7 @@ Remember the reads are (pseudo-)aligned and we **COUNT** how many are assigned t
 
 ![](/img/block-rna/nb_mean_var.png)
 
-::: 
+:::
 ::: {.column width="50%"}
 
 The total number of reads for each sample tends to be in the millions, while the counts per gene are much lower (many zeros, tens/hundreds) and vary considerably. While the Poisson distribution seems appropriate for sampling out of a large pool with low probability. Poisson does not handle **overdispersion**, enter the Negative Binomial distribution.
@@ -341,22 +341,22 @@ ggplot(df) +
 
 * data points do not fall on the diagonal, *mean* != *var*
 
-* for highly expressed genes, *var* > *mean*  
+* for highly expressed genes, *var* > *mean*
 
 * lowly expressed genes have more scatter i.e. “heteroscedasticity”.
 
 
 [Why do we use the negative binomial distribution for analysing RNAseq data?](http://bridgeslab.sph.umich.edu/posts/why-do-we-use-the-negative-binomial-distribution-for-rnaseq)
- 
- 
-[Why sequencing data is modeled as a negative binomial](https://bioramble.wordpress.com/2016/01/30/why-sequencing-data-is-modeled-as-negative-binomial/) 
+
+
+[Why sequencing data is modeled as a negative binomial](https://bioramble.wordpress.com/2016/01/30/why-sequencing-data-is-modeled-as-negative-binomial/)
 
 ## DEseq Model {.smaller}
 
 ![](https://hbctraining.github.io/DGE_workshop/img/NB_model_formula.png)
 
 
-where counts $K_{ij}$ for gene `i`, sample `j` are modeled using a negative binomial distribution with fitted mean $\mu_{ij}$ and a gene-specific dispersion parameter $\alpha_i$. The fitted mean is composed of a sample-specific size factor $s_{j}$ and a parameter $q_{ij}$ proportional to the expected true concentration of fragments for sample `j`. 
+where counts $K_{ij}$ for gene `i`, sample `j` are modeled using a negative binomial distribution with fitted mean $\mu_{ij}$ and a gene-specific dispersion parameter $\alpha_i$. The fitted mean is composed of a sample-specific size factor $s_{j}$ and a parameter $q_{ij}$ proportional to the expected true concentration of fragments for sample `j`.
 
 ## DESeq2 {.smaller}
 
@@ -385,9 +385,9 @@ The coefficients $\beta_{i}$ give log2 fold changes for gene `i` `for each colum
 
 The counts divided by sample-specific size factors determined by median ratio of gene counts relative to geometric mean per gene.
 
-* Step 1: creates a pseudo-reference sample (row-wise geometric mean)  
+* Step 1: creates a pseudo-reference sample (row-wise geometric mean)
 
-* Step 2: calculates ratio of each sample to the reference  
+* Step 2: calculates ratio of each sample to the reference
 
 * Step 3: calculate the normalization factor for each sample (size factor)
 
@@ -436,8 +436,8 @@ To model the dispersion based on expression level (mean counts of replicates), t
 
 ![](/img/block-rna/auer.jpg)
 
- 
- 
+
+
 ## Remember ENCODE {.smaller}
 
 A study compared mRNA expression profiles of many human and mouse tissues. One of their key findings:
@@ -458,11 +458,10 @@ Replicates allow us to:
 * spot outliers
 * improve precision of expression and fold-change estimates
 
-[RNA-seq power calculation](https://cqs-vumc.shinyapps.io/rnaseqsamplesizeweb/)  
+[RNA-seq power calculation](https://cqs-vumc.shinyapps.io/rnaseqsamplesizeweb/)
 
 :::
 ::: {.column width="50%"}
 ![](/img/block-rna/de_replicates_img2)
 :::
 :::
-

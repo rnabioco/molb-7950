@@ -46,7 +46,9 @@ yeast_tss <- read_bed(
   here("data/block-dna/yeast_tss_chrII.bed.gz")
 )
 
-genome <- read_genome("https://hgdownload.soe.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.chrom.sizes")
+genome <- read_genome(
+  "https://hgdownload.soe.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.chrom.sizes"
+)
 ```
 
 ### Load signals
@@ -67,14 +69,17 @@ acc_tbl <-
       "yeast_atac_gt120.bw"
     ),
     sample_type = c(
-      "MNase_Short", "MNase_Long",
-      "ATAC_Short", "ATAC_Long"
+      "MNase_Short",
+      "MNase_Long",
+      "ATAC_Short",
+      "ATAC_Long"
     )
   ) |>
   mutate(
     file_path = here("data/block-dna", file_name),
     big_wig = purrr::map(
-      file_path, ~ read_bigwig(.x)
+      file_path,
+      ~ read_bigwig(.x)
     )
   ) |>
   select(sample_type, big_wig)
@@ -132,7 +137,7 @@ win_coords <- seq(
 ```
 
 Next, we'll use two valr functions to expand the window of the reference
-point (`bed_slop()`) and then break those windows into evenly spaced intervals 
+point (`bed_slop()`) and then break those windows into evenly spaced intervals
 (`bed_makewindows()`).
 
 ```{r}
@@ -236,7 +241,7 @@ ggplot(
   )
 ```
 
-## Interpreting the meta-plots 
+## Interpreting the meta-plots
 
 - What is the direction of transcription in these meta-plots?
 

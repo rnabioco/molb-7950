@@ -25,7 +25,7 @@ img_dir <- "../img/block-rna"
 ```
 
 
-## Contact Info 
+## Contact Info
 
 Greetings experimentalist humans `r emo::ji("wave")`
 
@@ -33,11 +33,11 @@ Greetings experimentalist humans `r emo::ji("wave")`
 
 RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/training-and-education/rbi-office-hours)
 
-<i class="fa fa-envelope"></i> &nbsp; [rbi.fellows@cuanschutz.edu](mailto:rbi.fellows@cuanschutz.edu) 
+<i class="fa fa-envelope"></i> &nbsp; [rbi.fellows@cuanschutz.edu](mailto:rbi.fellows@cuanschutz.edu)
 <br>
 
 ## Learning key
-* We will switch between lecture and your exercise `qmd`. 
+* We will switch between lecture and your exercise `qmd`.
 * To denote a slide that corresponds to your exercise, I will include `r emo::ji("keyboard")` in the slide title
 
 ## Learning Objectives
@@ -46,21 +46,21 @@ RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/trai
 
 ::: {.column .nonincremental width="49%"}
 ### Lecture 1
-- Identify key quality control issues with single cell RNA-seq data and perform filtering to exclude poor quality cells 
+- Identify key quality control issues with single cell RNA-seq data and perform filtering to exclude poor quality cells
 - Interact with single cell data using Bioconductor tools
 
-::: 
+:::
 
 ::: {.column width="2%"}
 
 :::
- 
+
 ::: {.column .nonincremental width="49%"}
-### Lecture 2 
+### Lecture 2
 - Perform analysis to identify cell types in single cell data by using unsupervised clustering methods and comparing to public datasets
 - Describe the importance and reasoning for conducting each step of the analysis
 
-::: 
+:::
 
 ::::
 
@@ -107,13 +107,13 @@ RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/trai
 ![](../img/block-rna/10x_bead_example.jpg)
 
 ![](../img/block-rna/cb-umi-scheme.jpg)
-::: 
+:::
 
 ::: {.column}
 
 ![](../img/block-rna/drop-generation.png)
 
-::: 
+:::
 
 ::::
 
@@ -133,24 +133,25 @@ RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/trai
 
 
 
-## Other single cell methods  
-  
-   droplet-based scRNA-seq: e.g. 10x Genomics or Drop-Seq  
+## Other single cell methods
 
-Smart-seq based scRNA-seq: (bulk-RNA-seq on single cells in individual wells/tubes)  
-  
-[CITE-Seq](http://cite-seq.com/): gene expression + cell surface protein abundance  
-  
-[VDJ-Seq](https://www.10xgenomics.com/products/single-cell-immune-profiling): Gene expression + targeted sequencing of T-Cell and B-Cell receptors   
-  
-Many others: ATAC, spatial transcriptomics, DNA sequencing, etc. (see [Integrative Single cell analysis](https://www.nature.com/articles/s41576-019-0093-7))  
+   droplet-based scRNA-seq: e.g. 10x Genomics or Drop-Seq
+
+Smart-seq based scRNA-seq: (bulk-RNA-seq on single cells in individual wells/tubes)
+
+[CITE-Seq](http://cite-seq.com/): gene expression + cell surface protein abundance
+
+[VDJ-Seq](https://www.10xgenomics.com/products/single-cell-immune-profiling): Gene expression + targeted sequencing of T-Cell and B-Cell receptors
+
+Many others: ATAC, spatial transcriptomics, DNA sequencing, etc. (see [Integrative Single cell analysis](https://www.nature.com/articles/s41576-019-0093-7))
 
 ## Overview of analysis steps
 
 ```{r}
 #| out-height: '50%'
 #| out-width: '60%'
-grViz("
+grViz(
+  "
 digraph workflow {
   graph [layout = dot,
          rankdir = TB]
@@ -208,7 +209,8 @@ digraph workflow {
   annot -> dim_red
   annot -> cluster
   annot -> downstream
-}")
+}"
+)
 ```
 
 
@@ -222,7 +224,7 @@ digraph workflow {
 
 ![](../img/block-rna/count-matrix.png)
 
-::: 
+:::
 
 
 ::: {.column .nonincremental}
@@ -230,7 +232,7 @@ digraph workflow {
 - [`cellranger`](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger) from 10x Genomics (STAR)
 - [`alevin`](https://salmon.readthedocs.io/en/latest/alevin.html) (Salmon)
 - [`STAR-solo`](https://github.com/alexdobin/STAR/blob/master/docs/STARsolo.md) (From the STAR developers)
- 
+
 :::
 
 
@@ -252,7 +254,7 @@ Commands:
      quant      : quantify a sample
      alevin     : single cell analysis # <------
      swim       : perform super-secret operation
-     quantmerge : merge multiple quantifications into a single file  
+     quantmerge : merge multiple quantifications into a single file
 ```
 
 
@@ -261,14 +263,14 @@ Commands:
 
 ```bash
 $ salmon index ...
-$ salmon alevin 
+$ salmon alevin
    -l ISR                    # library type
-   -1 read1.fastq.gz         # reads 
+   -1 read1.fastq.gz         # reads
    -2 read2.fastq.gz         # reads
    --chromiumv3              # chemistry
    -i /path/to/salmon/index  # index path
    -o /path/to/output        # output
-   --tgMap transcript_to_gene.tsv 
+   --tgMap transcript_to_gene.tsv
 ```
 
 ## Alevin output files
@@ -277,7 +279,7 @@ $ salmon alevin
 $ls alevin/
 alevin.log          # run info
 featureDump.txt     # info on each cell barcode
-quants_mat.gz       # binary file with UMI counts 
+quants_mat.gz       # binary file with UMI counts
 quants_mat_cols.txt # genes in count matrix
 quants_mat_rows.txt # cell barcodes in count matrix
 quants_tier_mat.gz  # info about mapping for each gene
@@ -296,20 +298,20 @@ Can generate interactive QC reports using [alevinQC](https://csoneson.github.io/
 
 :::: {.columns}
 
-::: {.column .nonincremental width="50%"} 
+::: {.column .nonincremental width="50%"}
 
-- In a typical droplet scRNA-seq experiment 100k - 1M cell barcodes are 
+- In a typical droplet scRNA-seq experiment 100k - 1M cell barcodes are
 detected, but only 1-10k cells are loaded
 
-- Most of these droplets are "empty" and contain very few reads. 
+- Most of these droplets are "empty" and contain very few reads.
 
 - What is the source of these reads in the "empty" droplets?
 
 - How do we determine if the data from a particular cell barcode is derived from a single cell?
 
-::: 
+:::
 
-::: {.column width="50%"} 
+::: {.column width="50%"}
 
 ```{r}
 #| label: cb-umi-plot
@@ -337,7 +339,7 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
 
 :::: {.columns}
 
-::: {.column width="50%"} 
+::: {.column width="50%"}
 
 ```{r}
 #| fig-width: 9
@@ -354,9 +356,9 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
   )
 ```
 
-::: 
+:::
 
-::: {.column width="50%"} 
+::: {.column width="50%"}
 
 - Fit a curve to the observed data and identify point where first derivative is minimized.
 
@@ -371,11 +373,11 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
 
 
 
-## QC: Cell or empty droplet? 
+## QC: Cell or empty droplet?
 
 :::: {.columns}
 
-::: {.column} 
+::: {.column}
 
 #### Good data
 
@@ -394,9 +396,9 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
   )
 ```
 
-::: 
+:::
 
-::: {.column} 
+::: {.column}
 
 #### Bad data
 
@@ -415,16 +417,16 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
 
 :::: {.columns}
 
-::: {.column width="50%"} 
+::: {.column width="50%"}
 
 
 ![](../img/block-rna/10x-barnyard.png)
 
 :::
 
-::: {.column width="50%"} 
+::: {.column width="50%"}
 
-- Doublets are not clearly identifiable using simple QC metrics, so cannot be reliably removed with filtering with # of UMIs or genes detected. 
+- Doublets are not clearly identifiable using simple QC metrics, so cannot be reliably removed with filtering with # of UMIs or genes detected.
 
 - `scran::doublet_cluster` : Compare each cluster to an in silico mix of two other clusters. Get per cluster score of likelihood of being a doublet.
 
@@ -434,7 +436,7 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
 
 :::
 
-::::  
+::::
 
 ## Turning to our exercise `r emo::ji("keyboard")`
 Before jumping into the analysis, let's step back and start running through the exercise for today
@@ -461,7 +463,7 @@ library(eds)
 
 - scRNA-seq libraries produce reads from 100,000 - 1,000,000 cell barcodes
 
-- A matrix of 20,000 genes x 1,000,000 barcodes is 20 billion values (!). 
+- A matrix of 20,000 genes x 1,000,000 barcodes is 20 billion values (!).
 
 - \>95% are zeros due to empty droplets and the low efficiency of the library prep (< 10-20% of RNA captured).
 
@@ -472,18 +474,38 @@ library(eds)
 ```{r}
 #| echo: true
 vals <- c(
-  0, 0, 0, 2, 0,
-  0, 1, 0, 0, 0,
-  0, 0, 0, 0, 0,
-  0, 0, 0, 0, 1,
-  0, 0, 0, 0, 0
+  0,
+  0,
+  0,
+  2,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0
 )
 m <- matrix(vals, ncol = 5)
 m
 summary(m)
 ```
 
-::: 
+:::
 
 ::::
 
@@ -616,7 +638,7 @@ m[, colMins(m) < 8]
 ```
 
 ## Base R subsetting `r emo::ji("keyboard")`
-The base R `data.frame` and Bioconductor `DataFrame` can also be subset with the `[` and we can reference individual vectors in a data.frame using `$`. 
+The base R `data.frame` and Bioconductor `DataFrame` can also be subset with the `[` and we can reference individual vectors in a data.frame using `$`.
 
 ```{r}
 #| echo: true
@@ -649,11 +671,11 @@ mtcars[mtcars$mpg > 20, ]
 ## Read in Alevin output with tximport {.smaller}
 * Now that we know how to work with a sparse matrix, let's read in our data
 * `tximport` has methods for importing the binary data from alevin
-* We need to supply a path to the `quants_mat.gz` file. 
-* If you want to load multiple samples use iteration approaches (e.g. `lapply`, `purrr::map`, a `for` loop). 
+* We need to supply a path to the `quants_mat.gz` file.
+* If you want to load multiple samples use iteration approaches (e.g. `lapply`, `purrr::map`, a `for` loop).
 * Also note that the [`eds`](https://bioconductor.org/packages/release/bioc/html/eds.html) package was installed which greatly speeds up the loading of the matrix.
 
-We will load in data from a 10x Genomics scRNA-seq library generated from human periperhal blood mononuclear cells (PMBCS). 
+We will load in data from a 10x Genomics scRNA-seq library generated from human periperhal blood mononuclear cells (PMBCS).
 
 ## Read in Alevin output with tximport `r emo::ji("keyboard")`
 
@@ -755,10 +777,10 @@ counts(sce)[1:4, 1:4]
 
 ## Accessing cell metadata `r emo::ji("keyboard")`
 * We generate cell-level information
- - such as quality control metrics, clustering results, and celltype assignments. 
+ - such as quality control metrics, clustering results, and celltype assignments.
 * This data is stored within a data frame called `colData`
 * access using `colData()`
-* Specialized Bioconductor specific data.frame class (`DataFrame`) which has similar semantics and functionality to a base R data.frame. 
+* Specialized Bioconductor specific data.frame class (`DataFrame`) which has similar semantics and functionality to a base R data.frame.
 
 ## Accessing cell metadata `r emo::ji("keyboard")` {.smaller}
 
@@ -777,7 +799,7 @@ colData(sce)
 ```
 
 ## Accessing gene metadata `r emo::ji("keyboard")`
-* Gene-level metadata is stored in a data.frame called `rowData()`. 
+* Gene-level metadata is stored in a data.frame called `rowData()`.
 * Use the rowData to store gene ids, symbols, and other information about genes.
 
 ```{r}
@@ -797,9 +819,9 @@ sce$total_counts <- colSums(counts(sce))
 
 ## Manipulating a SingleCellExperiment `r emo::ji("keyboard")` {.smaller}
 
-* Calculate the total number of counts for each gene, summed across cells 
+* Calculate the total number of counts for each gene, summed across cells
 * Calculate the number of cells with > 0 counts per gene
-* store both of these values in the rowData(). 
+* store both of these values in the rowData().
 ```{r}
 #| echo: true
 rowData(sce)$total_gene_counts <- rowSums(counts(sce))
@@ -836,17 +858,17 @@ cells_to_keep <- c("ACTATGGAGGTCCCTG", "GCTGCAGTCCGATCTC", "TCTCAGCTCGCCGAAC")
 sce[, cells_to_keep]
 ```
 
-## Manipulating a SingleCellExperiment 
-`ncol()`: # of cells  
-`nrow()`: # of gene  
-`dims()`: # of genes and cells  
-`rownames()`: rownames in matrices (e.g. genes)  
-`colnames()`: colnames in matrices (e.g. cells)   
-`cbind()`: combine multiple SingleCellExperiments by column  
-`rbind()`: combine multiple SingleCellExperiments by row  
+## Manipulating a SingleCellExperiment
+`ncol()`: # of cells
+`nrow()`: # of gene
+`dims()`: # of genes and cells
+`rownames()`: rownames in matrices (e.g. genes)
+`colnames()`: colnames in matrices (e.g. cells)
+`cbind()`: combine multiple SingleCellExperiments by column
+`rbind()`: combine multiple SingleCellExperiments by row
 
-## Storing gene identifiers 
-* Ensembl gene ids are the rownames of our matrix (e.g. ENSG00000289576, ENSG00000221539). 
+## Storing gene identifiers
+* Ensembl gene ids are the rownames of our matrix (e.g. ENSG00000289576, ENSG00000221539).
 * These identifiers are guaranteed to be unique and are more stable and reliable than gene symbols (e.g. ACTB, GAPDH).
 * This becomes important if you want to compare to external datasets or ensure that your data can be easily used by others in the future.
 * But they aren't easy to interpret
@@ -860,7 +882,8 @@ ah <- AnnotationHub()
 # download ensembl database
 ens_db <- ah[["AH113665"]]
 
-gene_names <- mapIds(ens_db,
+gene_names <- mapIds(
+  ens_db,
   keys = rownames(sce),
   keytype = "GENEID",
   column = "SYMBOL"
@@ -887,10 +910,10 @@ head(rownames(sce))
 
 ## Filtering low quality cells `r emo::ji("keyboard")` {.smaller}
 Next we perform some filtering and quality control to remove low expression genes and poor quality cells.
- 
+
 Our SingleCellExperiment has `r nrow(sce)` genes in the matrix. Most of these are
 not expressed. We want to exclude these genes as they won't provide any useful
-data for the analysis. 
+data for the analysis.
 
 ```{r}
 #| echo: true
@@ -907,7 +930,7 @@ To exclude low-quality cells we will use the following metrics:
 * Number of genes detected per barcode
 * The percentage of counts from mitochondrial genes per barcode
 
-A low number of counts, a low number of detected genes, and a high percentage of mitochondrial counts suggests that the cell had a broken membrane and the cytoplasmic mRNA leaked out. 
+A low number of counts, a low number of detected genes, and a high percentage of mitochondrial counts suggests that the cell had a broken membrane and the cytoplasmic mRNA leaked out.
 
 
 ## Filtering low quality cells `r emo::ji("keyboard")` {.smaller}
@@ -923,7 +946,7 @@ colData(sce)
 ```
 
 ## Filtering low quality cells `r emo::ji("keyboard")`
-We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object). 
+We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object).
 
 ```{r}
 #| echo: true
@@ -933,7 +956,7 @@ plotColData(sce, y = "sum")
 ```
 
 ## Filtering low quality cells `r emo::ji("keyboard")`
-We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object). 
+We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object).
 
 ```{r}
 #| echo: true
@@ -943,19 +966,16 @@ plotColData(sce, y = "detected")
 ```
 
 ## Filtering low quality cells `r emo::ji("keyboard")`
-We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object). 
+We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object).
 ```{r}
 #| echo: true
 #| fig-width: 9
 #| fig-height: 9
-plotColData(sce,
-  y = "detected", x = "sum",
-  colour_by = "subsets_Mito_percent"
-)
+plotColData(sce, y = "detected", x = "sum", colour_by = "subsets_Mito_percent")
 ```
 
 ## Filtering low quality cells `r emo::ji("keyboard")`
-We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object). 
+We can use the `plotColData()` function from scater to plot various metrics (as a ggplot2 object).
 ```{r}
 #| echo: true
 #| fig-width: 9
@@ -980,7 +1000,7 @@ ggplot(cell_info, aes(sum, subsets_Mito_percent)) +
 
 * Selecting an appropriate cutoff can be somewhat arbitrary
 * Risk of excluding meaningful cell populations.
-* Start with lenient cutoffs, then later increasing the stringency after examining the clustering and cell types.  
+* Start with lenient cutoffs, then later increasing the stringency after examining the clustering and cell types.
 
  *How many cells pass these criteria?*
 
@@ -1010,16 +1030,12 @@ sce$pass_qc <- sce$subsets_Mito_percent < 20 &
   sce$detected > 500 &
   sce$sum > 1000
 
-plotColData(sce,
-  y = "subsets_Mito_percent",
-  x = "sum",
-  colour_by = "pass_qc"
-) +
+plotColData(sce, y = "subsets_Mito_percent", x = "sum", colour_by = "pass_qc") +
   labs(x = "# of counts")
 ```
 
 ## Remove low quality cells `r emo::ji("keyboard")`
-Lastly we can subset the `SingleCellExperiment` to exclude the low-quality cells. 
+Lastly we can subset the `SingleCellExperiment` to exclude the low-quality cells.
 
 ```{r}
 #| echo: true
@@ -1032,7 +1048,8 @@ sce
 ```{r}
 #| out-height: "100%"
 #| out-width: "100%"
-grViz("
+grViz(
+  "
 digraph workflow {
   graph [layout = dot,
          rankdir = LR]
@@ -1083,14 +1100,15 @@ digraph workflow {
   annot -> feature
   annot -> dim_red
   annot -> cluster
-}")
+}"
+)
 ```
 
 ## Normalization `r emo::ji("keyboard")`
-* Normalization attempts to correct for technical biases that will distort biological signal in the data. 
-* A large source of variation arises due to differences in sequencing depth between cells. 
-* This can be seen by performing PCA on the unnormalized counts. 
-* We will use `runPCA` from scater to perform PCA. 
+* Normalization attempts to correct for technical biases that will distort biological signal in the data.
+* A large source of variation arises due to differences in sequencing depth between cells.
+* This can be seen by performing PCA on the unnormalized counts.
+* We will use `runPCA` from scater to perform PCA.
 
 ```{r}
 #| echo: true
@@ -1121,7 +1139,7 @@ plotReducedDim(sce, "count_PCA", colour_by = "sum")
 ::: {.column width="27%"}
 
 
-Note that PC1 is correlated with the total UMI counts (`sum`), meaning that the largest source of variation is related to differences in sequencing depth rather than biological differences between cells. 
+Note that PC1 is correlated with the total UMI counts (`sum`), meaning that the largest source of variation is related to differences in sequencing depth rather than biological differences between cells.
 
 :::
 :::
@@ -1139,8 +1157,8 @@ ggplot(plot_df, aes(count_PCA.1, sum)) +
 * Normalize with `scran`
 1. Crude clustering to group related cells
 2. Identifying a cell-specific normalization factor (size factor)
-3. Scaling the counts by this factor 
-4. log transforming the data (base 2 with a pseudocount). 
+3. Scaling the counts by this factor
+4. log transforming the data (base 2 with a pseudocount).
 
 
 ```{r}
@@ -1177,14 +1195,12 @@ ggplot(plot_df, aes(PCA.1, sum)) +
 
 PC1 no longer correlates with UMI counts.
 
-## Further Reading 
+## Further Reading
 
 eBook: Orchestrating single cell analyses with Bioconductor [eBook](https://osca.bioconductor.org/) [Publication](https://doi.org/10.1038/s41592-019-0654-x)
 
-Review: [Current best practices for analysis](https://www.embopress.org/doi/full/10.15252/msb.20188746) 
+Review: [Current best practices for analysis](https://www.embopress.org/doi/full/10.15252/msb.20188746)
 
-Blog: [Single Cell Thoughts](https://ltla.github.io/SingleCellThoughts/)  
+Blog: [Single Cell Thoughts](https://ltla.github.io/SingleCellThoughts/)
 
-Blog: [What do you mean "heterogeneity"](http://www.nxn.se/)  
-
-
+Blog: [What do you mean "heterogeneity"](http://www.nxn.se/)

@@ -45,7 +45,6 @@ The first thing we need to do is read in the data again and move from transcript
 #| eval: true
 #| label: t2g
 
-
 mart <- biomaRt::useMart(
   "ENSEMBL_MART_ENSEMBL",
   dataset = "mmusculus_gene_ensembl"
@@ -77,16 +76,23 @@ Now we can read in the transcript-level data and collapse to gene-level data wit
 #| label: metadata
 
 metadata <- data.frame(
-  sample_id = list.files(here("data/block-rna/differentiation_salmonouts"),
+  sample_id = list.files(
+    here("data/block-rna/differentiation_salmonouts"),
     pattern = "^DIV"
   ),
-  salmon_dirs = list.files(here("data/block-rna/differentiation_salmonouts"),
+  salmon_dirs = list.files(
+    here("data/block-rna/differentiation_salmonouts"),
     recursive = T,
     pattern = "quant.sf",
     full.names = T
   )
 ) |>
-  separate(col = sample_id, into = c("timepoint", "rep"), sep = "\\.", remove = F)
+  separate(
+    col = sample_id,
+    into = c("timepoint", "rep"),
+    sep = "\\.",
+    remove = F
+  )
 
 metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep)
 
@@ -147,13 +153,13 @@ ddsTxi <- ddsTxi[keepG, ]
 
 You can see that `DESeqDataSetFromTximport` wants three things. The first is our `tximport` object. The second is the dataframe we made that relates samples and conditions (or in this case timepoints). The last is something called a **design formula**. A design formula contains all of the variables that will go into `DESeq2`'s model. The formula starts with a tilde and then has variables separated by a plus sign think `lm()`. It is common practice, and in fact basically required with `DESeq2`, to put the variable of interest last. In our case, that's trivial because we only have one: timepoint. So our design formula is very simple:
 
-```         
+```
 design = ~ timepoint
 ```
 
 Your design formula should ideally include **all of the sources of variation in your data**. For example, let's say that here we thought there was a batch effect with the replicates. Maybe all of the Rep1 samples were prepped and sequenced on a different day than the Rep2 samples and so on. We could potentially account for this in `DESeq2`'s model with the following forumula:
 
-```         
+```
 design = ~ rep + timepoint
 ```
 
@@ -178,7 +184,7 @@ The results can be accessed using the `results()` function. We will use the `con
 
 The lexographically first condition will be the numerator. I find it easier to explicitly specify what the numerator and denominator of this ratio are using the `contrast` argument. The `contrast` argument can be used to implement more complicated design formula. Remember our design formula that accounted for potential differences due to Replicate batch effects:
 
-```         
+```
 ~ replicate + timepoint
 ```
 
@@ -297,7 +303,8 @@ In addition to an FDR cutoff, let's also apply a log2FoldChange cutoff. This wil
 
 # Is the expression of the gene at least 3-fold different?
 diff_lfc <-
-  results(dds,
+  results(
+    dds,
     contrast = c("timepoint", "DIV7", "DIV0"),
     lfcThreshold = log(3, 2)
   ) |>
@@ -316,14 +323,16 @@ diff_lfc <-
 # number of upregulated genes
 nrow(
   filter(
-    diff_lfc, padj < 0.01 & log2FoldChange > 0
+    diff_lfc,
+    padj < 0.01 & log2FoldChange > 0
   )
 )
 
 # number of downregulated genes
 nrow(
   filter(
-    diff_lfc, padj < 0.01 & log2FoldChange < 0
+    diff_lfc,
+    padj < 0.01 & log2FoldChange < 0
   )
 )
 ```
@@ -335,7 +344,6 @@ nrow(
 #| eval: true
 #| label: results-filt-2
 #| output-location: column-fragment
-
 
 diff_lfc_sig <-
   mutate(
@@ -351,8 +359,10 @@ diff_lfc_sig <-
 # look at some specific genes
 
 diff_lfc_sig |>
-  filter(gene %in%
-    c("Bdnf", "Dlg4", "Klf4", "Sox2")) |>
+  filter(
+    gene %in%
+      c("Bdnf", "Dlg4", "Klf4", "Sox2")
+  ) |>
   gt()
 ```
 
@@ -398,7 +408,6 @@ A more interpretable value to plot might be TPM, since TPM is length-normalized.
 #| eval: false
 #| label: cpm
 
-
 # If you are interested in getting normalized counts, here's how you do it
 normcounts <- counts(dds, normalized = TRUE)
 ```
@@ -412,7 +421,6 @@ Let's plot the expression of Klf4, Sox2, Bdnf, and Dlg4 in our samples.
 #| eval: true
 #| label: tpms
 #| output-location: slide
-
 
 tpms <- txi$abundance |>
   as.data.frame() |>
@@ -534,8 +542,10 @@ diff_paths$annot <-
   factor(
     diff_paths$annot,
     levels = c(
-      "none", "cellcycle",
-      "pluripotency", "neurondiff"
+      "none",
+      "cellcycle",
+      "pluripotency",
+      "neurondiff"
     )
   )
 ```
@@ -549,7 +559,11 @@ OK we've got our table, now we are going to ask if the log2FoldChange values for
 #| eval: true
 #| label: sig-pathways
 
-pvals <- rstatix::wilcox_test(data = diff_paths, log2FoldChange ~ annot, ref.group = "none")
+pvals <- rstatix::wilcox_test(
+  data = diff_paths,
+  log2FoldChange ~ annot,
+  ref.group = "none"
+)
 
 
 p.pluripotency <- pvals |>
@@ -600,7 +614,10 @@ ggplot(
   scale_fill_manual(values = c("gray", "red", "blue", "purple"), guide = F) +
   scale_x_discrete(
     labels = c(
-      "none", "Cell cycle", "Pluripotency", "Neuron\ndifferentiation"
+      "none",
+      "Cell cycle",
+      "Pluripotency",
+      "Neuron\ndifferentiation"
     )
   ) +
   ylim(-5, 7) +

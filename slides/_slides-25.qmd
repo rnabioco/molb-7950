@@ -35,7 +35,7 @@ Below are examples of some RNAseq reads mapped along a transcript. This transcri
 
 ## Split alignments {.smaller}
 
-Another way to think about this is that the orange, purple, blue, and teal reads came from RNA molecules in which the transcript was included. 
+Another way to think about this is that the orange, purple, blue, and teal reads came from RNA molecules in which the transcript was included.
 
 We know this because each of those reads cross a **splice junction** that is either `exon1-exon2` or `exon2-exon3`. These reads tell us, **unambiguously**, that `exon2` was included in the RNA molecule that these reads came from.
 
@@ -62,7 +62,7 @@ We will focus on the right side of the flowchart that relies on [`STAR`](https:/
 ::: columns
 ::: {.column width="50%"}
 
-STAR begins by finding matches (either unique or nonunique) between a portion of a read and the reference. This matching region of the query is extended along the reference until the two start to disagree. If this match extends all the way through to the end of the read, then the read lies completely within one exon (or intron, or I guess intergenic region if you are bad at making RNAseq libraries) and we are done. If the match ends before the end of the read, the part that has matched so far defines one *seed*. 
+STAR begins by finding matches (either unique or nonunique) between a portion of a read and the reference. This matching region of the query is extended along the reference until the two start to disagree. If this match extends all the way through to the end of the read, then the read lies completely within one exon (or intron, or I guess intergenic region if you are bad at making RNAseq libraries) and we are done. If the match ends before the end of the read, the part that has matched so far defines one *seed*.
 
 :::
 ::: {.column width="50%"}
@@ -163,7 +163,7 @@ OK now we are ready to make our index.  There relevant options we will need to p
 
 ## Make STAR index {.smaller}
 
->STAR --runMode genomeGenerate 
+>STAR --runMode genomeGenerate
   --genomeDir {path-to}/mySTARindex
   --genomeFastaFiles {path-to}/genome.fasta
   --sjdbGTFfile {path-to}/MOLB7950.gff3
@@ -191,10 +191,10 @@ Now we are ready to align our reads.
 > STAR --runMode alignReads
   --genomeDir  {path-to}/mySTARindex/
   --readFilesIn {path-to}/MOLB7950_1.fastq.gz {path-to}/MOLB7950_2.fastq.gz
-  --readFilesCommand gunzip -c 
+  --readFilesCommand gunzip -c
   --outFileNamePrefix {path-to}/myalignments
   --outSAMtype BAM SortedByCoordinate
-  
+
 ![](/img/block-rna/read_align_status.png)
 
 
@@ -259,8 +259,8 @@ The **fourth** field is the position on the reference that corresponds to the be
 
 The **sixth** field is called the CIGAR string. This is a string of characters that tells you a little bit about *how* the query aligns to the reference.  Again, details can be found in the [SAM format specification](https://samtools.github.io/hts-specs/SAMv1.pdf). The CIGAR string for the first read can be interpreted as follows:
 
-* The first 67 bases in the query align to the reference. 
-* There is then a gap in the reference of 3415 nt. 
+* The first 67 bases in the query align to the reference.
+* There is then a gap in the reference of 3415 nt.
 * Then the query starts to match again, and does so for the next 84 nt.
 
 These are paired end 151 nt reads, so it makes sense that 67 + 84 = 151.
@@ -307,7 +307,7 @@ In this diagram, the exon in gray can either be included or skipped to produced 
 
 :::
 ::: {.column width="50%"}
-There are other types of alternative splicing besides skipped exons. In each case, $\psi$ is defined as the fraction of transcript in which the white sequence is included. 
+There are other types of alternative splicing besides skipped exons. In each case, $\psi$ is defined as the fraction of transcript in which the white sequence is included.
 
 Since we have already determined where in the genome RNAseq reads came from using `STAR`, we will now use `rMATS` to take those locations and combine it with information about the locations of alternative exons to quantify the inclusion of each alternative exon.
 
@@ -423,9 +423,26 @@ The numbers from `[S|I]JC_SAMPLE_X ` could be useful for filtering events based 
 #| echo: true
 #| label: read-rmats
 
-psis <- read.table(here("data/block-rna/rMATS/SE.MATS.JC.txt.gz"), header = T) %>%
+psis <- read.table(
+  here("data/block-rna/rMATS/SE.MATS.JC.txt.gz"),
+  header = T
+) %>%
   # Get rid of columns we aren't really going to use.
-  dplyr::select(., c("ID", "geneSymbol", "IJC_SAMPLE_1", "SJC_SAMPLE_1", "IJC_SAMPLE_2", "SJC_SAMPLE_2", "FDR", "IncLevel1", "IncLevel2", "IncLevelDifference"))
+  dplyr::select(
+    .,
+    c(
+      "ID",
+      "geneSymbol",
+      "IJC_SAMPLE_1",
+      "SJC_SAMPLE_1",
+      "IJC_SAMPLE_2",
+      "SJC_SAMPLE_2",
+      "FDR",
+      "IncLevel1",
+      "IncLevel2",
+      "IncLevelDifference"
+    )
+  )
 
 head(psis)
 ```
@@ -443,10 +460,38 @@ We will only consider events where there are *at least* 20 informative reads tha
 
 psis <- psis %>%
   # Split the replicate read counts that are separated by commas into different columns
-  separate(., col = IJC_SAMPLE_1, into = c("IJC_S1R1", "IJC_S1R2", "IJC_S1R3", "IJC_S1R4"), sep = ",", remove = T, convert = T) %>%
-  separate(., col = SJC_SAMPLE_1, into = c("SJC_S1R1", "SJC_S1R2", "SJC_S1R3", "SJC_S1R4"), sep = ",", remove = T, convert = T) %>%
-  separate(., col = IJC_SAMPLE_2, into = c("IJC_S2R1", "IJC_S2R2", "IJC_S2R3", "IJC_S2R4"), sep = ",", remove = T, convert = T) %>%
-  separate(., col = SJC_SAMPLE_2, into = c("SJC_S2R1", "SJC_S2R2", "SJC_S2R3", "SJC_S2R4"), sep = ",", remove = T, convert = T)
+  separate(
+    .,
+    col = IJC_SAMPLE_1,
+    into = c("IJC_S1R1", "IJC_S1R2", "IJC_S1R3", "IJC_S1R4"),
+    sep = ",",
+    remove = T,
+    convert = T
+  ) %>%
+  separate(
+    .,
+    col = SJC_SAMPLE_1,
+    into = c("SJC_S1R1", "SJC_S1R2", "SJC_S1R3", "SJC_S1R4"),
+    sep = ",",
+    remove = T,
+    convert = T
+  ) %>%
+  separate(
+    .,
+    col = IJC_SAMPLE_2,
+    into = c("IJC_S2R1", "IJC_S2R2", "IJC_S2R3", "IJC_S2R4"),
+    sep = ",",
+    remove = T,
+    convert = T
+  ) %>%
+  separate(
+    .,
+    col = SJC_SAMPLE_2,
+    into = c("SJC_S2R1", "SJC_S2R2", "SJC_S2R3", "SJC_S2R4"),
+    sep = ",",
+    remove = T,
+    convert = T
+  )
 
 head(psis)
 ```
@@ -470,8 +515,17 @@ psis_filt <- psis %>%
   mutate(., S2R3counts = IJC_S2R3 + SJC_S2R3) %>%
   mutate(., S2R4counts = IJC_S2R4 + SJC_S2R4) %>%
   # Filter on read counts
-  filter(., S1R1counts >= 20 & S1R2counts >= 20 & S1R3counts >= 20 & S1R4counts >= 20 &
-    S2R1counts >= 20 & S2R2counts >= 20 & S2R3counts >= 20 & S2R4counts >= 20)
+  filter(
+    .,
+    S1R1counts >= 20 &
+      S1R2counts >= 20 &
+      S1R3counts >= 20 &
+      S1R4counts >= 20 &
+      S2R1counts >= 20 &
+      S2R2counts >= 20 &
+      S2R3counts >= 20 &
+      S2R4counts >= 20
+  )
 
 head(psis_filt)
 ```
@@ -489,17 +543,39 @@ Exons whose inclusion is not regulated tend to have PSI values that are either v
 
 psis_filt_psi <- psis_filt %>%
   # Separate psi value replicates into individual columns
-  separate(., col = IncLevel1, into = c("PSI_S1R1", "PSI_S1R2", "PSI_S1R3", "PSI_S1R4"), sep = ",", remove = T, convert = T) %>%
-  separate(., col = IncLevel2, into = c("PSI_S2R1", "PSI_S2R2", "PSI_S2R3", "PSI_S2R4"), sep = ",", remove = T, convert = T) %>%
+  separate(
+    .,
+    col = IncLevel1,
+    into = c("PSI_S1R1", "PSI_S1R2", "PSI_S1R3", "PSI_S1R4"),
+    sep = ",",
+    remove = T,
+    convert = T
+  ) %>%
+  separate(
+    .,
+    col = IncLevel2,
+    into = c("PSI_S2R1", "PSI_S2R2", "PSI_S2R3", "PSI_S2R4"),
+    sep = ",",
+    remove = T,
+    convert = T
+  ) %>%
   # Select the columns we want
   dplyr::select(., c(contains("PSI"), FDR))
 
 # Turn data from wide format into long format for plotting purposes
 
-psis_filt_psi_long <- gather(psis_filt_psi, key = sample, value = psi, PSI_S1R1:PSI_S2R4) %>%
+psis_filt_psi_long <- gather(
+  psis_filt_psi,
+  key = sample,
+  value = psi,
+  PSI_S1R1:PSI_S2R4
+) %>%
   # For each row, mark whether that replicate came from Condition 1 (RBFOXkd) or Condition2 (Controlkd)
   # We can tell that by asking if the substring 'S1' is somewhere in 'sample'
-  mutate(., condition = ifelse(grepl("S1", sample), "RBFOX2kd", "Controlkd")) %>%
+  mutate(
+    .,
+    condition = ifelse(grepl("S1", sample), "RBFOX2kd", "Controlkd")
+  ) %>%
   # Make a column indicating whether the FDR in this row is significant
   mutate(., sig = ifelse(FDR < 0.05, "yes", "no"))
 
@@ -543,7 +619,10 @@ pc1var <- round(psi.pca.summary[2, 1] * 100, 1)
 pc2var <- round(psi.pca.summary[2, 2] * 100, 1)
 
 # Plot PCA data
-ggplot(psi.pca.pc, aes(x = PC1, y = PC2, shape = condition, color = condition)) +
+ggplot(
+  psi.pca.pc,
+  aes(x = PC1, y = PC2, shape = condition, color = condition)
+) +
   geom_point(size = 5) +
   scale_color_manual(values = colors) +
   xlab(paste("PC1,", pc1var, "% explained var.")) +

@@ -70,11 +70,11 @@ first we will look at a histogram n1
 #| eval: false
 #| output-location: column-fragment
 
-ggplot(data = ??, 
+ggplot(data = ??,
        aes(x=??)
        ) +
   geom_??() +
-  theme_cowplot() 
+  theme_cowplot()
 
 
 ```
@@ -88,12 +88,12 @@ next a density plot
 #| eval: false
 #| output-location: column-fragment
 
-ggplot(data = d, 
+ggplot(data = d,
        aes(x=n1)
        ) +
   geom_??() +
   geom_vline(xintercept = ??) + # draw mean
-  theme_cowplot() 
+  theme_cowplot()
 
 
 ```
@@ -112,7 +112,7 @@ What is the probability of students scoring 85 or more in the exam?
 #| output-location: column-fragment
 
 s <- 85
-pnorm(??, mean=76, sd=13.8, lower.tail = F) 
+pnorm(??, mean=76, sd=13.8, lower.tail = F)
 
 ```
 
@@ -125,7 +125,7 @@ What is the probability of students scoring 85 or less in the exam?
 #| eval: false
 #| output-location: column-fragment
 
-pnorm(s, mean=76, sd=13.8, lower.tail = T) 
+pnorm(s, mean=76, sd=13.8, lower.tail = T)
 
 ```
 
@@ -136,12 +136,12 @@ Prob of 85 or more is equivalent to the area under the curve to the right of 85.
 ```{r}
 #| eval: false
 
-ggplot(data = d, 
+ggplot(data = d,
        aes(x=n1)
        ) +
   geom_density() +
   geom_vline(xintercept = s) +
-  theme_cowplot() 
+  theme_cowplot()
 
 
 ```
@@ -157,7 +157,7 @@ What is the likelihood of students scoring 85 on the exam?
 #| eval: false
 #| output-location: column-fragment
 
-l <- dnorm(s, mean=76, sd=13.8) 
+l <- dnorm(s, mean=76, sd=13.8)
 l
 ```
 
@@ -168,13 +168,13 @@ The likelihood is the y-axis value on the curve when th x-axis = 85.
 ```{r}
 #| eval: false
 
-ggplot(data = d, 
+ggplot(data = d,
        aes(x=n1)
        ) +
   geom_density() +
   geom_vline(xintercept = s) +
   geom_hline(yintercept = l) +
-  theme_cowplot() 
+  theme_cowplot()
 
 ```
 
@@ -186,7 +186,7 @@ We will use the [Palmer Penguins dataset](https://allisonhorst.github.io/palmerp
 #| echo: true
 #| output-location: fragment
 
-penguins_raw 
+penguins_raw
 
 ```
 
@@ -251,8 +251,8 @@ Let's select a few of these columns to keep and get rid of `NA`s
 #| echo: true
 #| output-location: fragment
 
-p <- pen |> 
-  select(species, island, culmen_length_mm, flipper_length_mm, body_mass_g, sex) |> 
+p <- pen |>
+  select(species, island, culmen_length_mm, flipper_length_mm, body_mass_g, sex) |>
   drop_na()
 
 
@@ -283,12 +283,12 @@ histogram of body mass
 #| eval: false
 #| output-location: column-fragment
 
-ggplot(data = ??, 
+ggplot(data = ??,
        aes(x=??)
        ) +
   geom_histogram() +
   theme_cowplot()
-  
+
 
 ```
 
@@ -301,13 +301,13 @@ density plot of body mass
 #| eval: false
 #| output-location: column-fragment
 
-ggplot(data = p, 
+ggplot(data = p,
        aes(x=body_mass_g)
        ) +
   geom_??() +
   theme_cowplot()
 
-  
+
 
 ```
 
@@ -323,7 +323,7 @@ barplot - 1 category
 ggplot(data = p, aes(x = island, fill = island)) +
     geom_bar() +
   theme_cowplot()
-  
+
 
 ```
 
@@ -388,13 +388,13 @@ Let's look at the distribution again
 #| echo: true
 #| output-location: column-fragment
 
-ggplot(data = p, 
+ggplot(data = p,
        aes(x=body_mass_g)
        ) +
   geom_density() +
   theme_cowplot()
 
-  
+
 
 ```
 
@@ -440,7 +440,7 @@ viz mean + median
 
 ```{r}
 
-ggplot(data = p, 
+ggplot(data = p,
        aes(x=body_mass_g)
        ) +
   geom_density() +
@@ -448,7 +448,7 @@ ggplot(data = p,
 #  geom_vline() +
   theme_cowplot()
 
-  
+
 
 ```
 
@@ -481,7 +481,7 @@ p |>
 p |>
   get_summary_stats(body_mass_g,
                     show = c("??","??")
-                    ) 
+                    )
 
 
 ```
@@ -496,8 +496,8 @@ Standard Deviation: square root of the variance
 
 $\sigma = \sqrt {\displaystyle \frac {\sum (x_{i} - \mu)^2}{n}}$
 
-> ```         
-> The variance measures the mathematical dispersion of the data relative to the mean. However, it is more difficult to apply in a real-world sense because the values used to calculate it were squared. 
+> ```
+> The variance measures the mathematical dispersion of the data relative to the mean. However, it is more difficult to apply in a real-world sense because the values used to calculate it were squared.
 >
 > The standard deviation, as the square root of the variance, is in the same units as the original values, which makes it much easier to work with and interpret w/respect to the mean.
 > ```
@@ -515,7 +515,7 @@ Confidence Interval (**ci**): a range of values that you can be 95% (or x%) cert
 #| output-location: column-fragment
 
 p |>
-  get_summary_stats(body_mass_g, show = c("mean","median","sd")) 
+  get_summary_stats(body_mass_g, show = c("mean","median","sd"))
 
 
 ```
@@ -545,7 +545,7 @@ by species and island
 
 p |>
   group_by(species,island) |>
-  get_summary_stats(body_mass_g, show = c("mean","median","sd")) 
+  get_summary_stats(body_mass_g, show = c("mean","median","sd"))
 
 
 ```
@@ -608,7 +608,7 @@ Quantile is the fraction (or percent) of points below the given value. For examp
 ggplot(data = d,
        aes(sample = n1)) +
   geom_qq() +
-  geom_qq_line() + 
+  geom_qq_line() +
   theme_cowplot()
 
 ```
@@ -653,7 +653,7 @@ ggplot(data = p,
 ggplot(data = p,
        aes(sample = body_mass_g)) +
   geom_qq() +
-  geom_qq_line() + 
+  geom_qq_line() +
   theme_cowplot()
 
 
@@ -669,7 +669,7 @@ Hmmm...
 #| output-location: column-fragment
 
 p |>
-  shapiro_test(??)  
+  shapiro_test(??)
 
 ```
 
@@ -698,7 +698,7 @@ ggplot(data = p,
 ggplot(data = p,
        aes(sample = body_mass_g, color = species)) +
   geom_qq() +
-  geom_qq_line() + 
+  geom_qq_line() +
   theme_cowplot()
 
 
@@ -715,7 +715,7 @@ That looks better...
 
 p |>
   group_by(??) |>
-  shapiro_test(??)  
+  shapiro_test(??)
 
 ```
 
@@ -735,7 +735,7 @@ n <- 50
 
 # make a hundred fair and unfair flips
 f <- tibble(fair=rbinom(n = n, size = 1, prob = .5),
-       unfair=rbinom(n = n, size = 1, prob = .2)) |> 
+       unfair=rbinom(n = n, size = 1, prob = .2)) |>
     pivot_longer(cols = c("fair","unfair"), names_to = "cheating", values_to = "flips")
 
 ```
@@ -748,7 +748,7 @@ Look at the distribution of fair flips
 #| echo: true
 #| output-location: column-fragment
 
-ggplot(data = f |> filter(cheating=="fair"), 
+ggplot(data = f |> filter(cheating=="fair"),
        aes(x=flips)
        ) +
   geom_histogram() +
@@ -762,7 +762,7 @@ Look at the distribution of unfair flips
 #| echo: true
 #| output-location: column-fragment
 
-ggplot(data = f |> filter(cheating=="unfair"), 
+ggplot(data = f |> filter(cheating=="unfair"),
        aes(x=flips)
        ) +
   geom_histogram() +
@@ -805,7 +805,7 @@ Look at the distribution of fair flips
 #| echo: true
 #| output-location: column-fragment
 
-ggplot(data = fmean |> filter(cheating=="fair"), 
+ggplot(data = fmean |> filter(cheating=="fair"),
        aes(x=flips)
        ) +
   geom_density() +
@@ -821,11 +821,11 @@ Look at the distribution of unfair flips
 #| echo: true
 #| output-location: column-fragment
 
-ggplot(data = fmean |> filter(cheating=="unfair"), 
+ggplot(data = fmean |> filter(cheating=="unfair"),
        aes(x=flips)
        ) +
   geom_density() +
-  geom_vline(xintercept = .2) + 
+  geom_vline(xintercept = .2) +
   xlim(0,1) +
   theme_cowplot()
 
@@ -910,7 +910,7 @@ ggplot(all , aes(x=r, y=f, color=r)) +
 #| echo: true
 #| output-location: column-fragment
 
-all |> 
+all |>
   group_by(type,r) |>
   get_summary_stats(show = c("mean","sd"))
 

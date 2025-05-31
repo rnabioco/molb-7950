@@ -72,13 +72,13 @@ glimpse(diamonds)
 View(diamonds)
 ```
 
-## The syntax of `ggplot()`  
+## The syntax of `ggplot()`
 
 `ggplot()` builds plots piece by piece.
 
 ggplot divides a plot into three different fundamental parts:
 
-plot = _data_ + _coordinate-system_ + _geometry_.  
+plot = _data_ + _coordinate-system_ + _geometry_.
 
 ![](../img/ggplot2/ggplot-syntax.png)
 
@@ -223,11 +223,11 @@ Why can't I just do this?
 hist(diamonds$carat)
 ```
 
-. . . 
+. . .
 
 You can. But the advantage of ggplot is that it is equally "simple" to make basic and complex plots.
 
-The underlying grammar lets you exquisitely customize the appearance of your plot and easily generate *reproducible & publishable* figures. 
+The underlying grammar lets you exquisitely customize the appearance of your plot and easily generate *reproducible & publishable* figures.
 
 ## Creating more complex plots
 
@@ -237,7 +237,7 @@ The underlying grammar lets you exquisitely customize the appearance of your plo
 
 * Use a geom function to represent data points, use the geom aesthetic properties to represent variables.
 * Each function returns a plot layer.
-* There are many geoms in ggplot that are specific to plots with 1, 2, or 3 variables 
+* There are many geoms in ggplot that are specific to plots with 1, 2, or 3 variables
 
 ## Geom functions for one variable - Exercise 4
 
@@ -355,7 +355,7 @@ kinds of geoms:
   - continuous x, continuous y
   - continuous bivariate
   - & others (check out the cheatsheet!)
-  
+
 ## discrete x, continuous y - Exercise 5
 
 ![](../img/ggplot2/ggplot-geom-dx-cy.png)
@@ -623,11 +623,11 @@ ggplot(
 
 ## Coordinate and Scale Functions - Exercise 11
 
-We won't go into these functions too much today, but here is a brief overview: 
+We won't go into these functions too much today, but here is a brief overview:
 
 * The coordinate system determines how the x and y aesthetics combine to position elements in the plot. The default coordinate system is Cartesian ( coord_cartesian() ), which can be tweaked with coord_map() , coord_fixed() , coord_flip() , and coord_trans() , or completely replaced with coord_polar()
 
-* Scales control the details of how data values are translated to visual properties. There are 20+ scale functions. We will look at one; the ggplot2 cheatsheet is your friend for the rest. 
+* Scales control the details of how data values are translated to visual properties. There are 20+ scale functions. We will look at one; the ggplot2 cheatsheet is your friend for the rest.
 ---
 
 Logarithmic axes - 1
@@ -698,7 +698,7 @@ ggplot(
 
 ---
 
-Brief aside: ggplot can handle on-the-fly data transformations. 
+Brief aside: ggplot can handle on-the-fly data transformations.
 
 Here we log-transform carat and convert USD to CAD.
 
@@ -737,7 +737,7 @@ ggplot(
   ylim(0, 5000)
 ```
 
-. . . 
+. . .
 
 You can also use `coord_cartesian(xlim, ylim)`
 
@@ -799,13 +799,13 @@ ggplot(
 
 ## Themes - Exercise 14
 
-Themes can significantly affect the appearance of your plot. Thanksfully, there are a lot to choose from. 
+Themes can significantly affect the appearance of your plot. Thanksfully, there are a lot to choose from.
 
 ![](../img/ggplot2/ggplot-themes.png)
 
 ---
 
-Scatter plot with default theme. 
+Scatter plot with default theme.
 
 ```{r}
 #| fig-height: 3
@@ -875,7 +875,7 @@ ggplot(
 We're not going to cover it, but you can also customize pre-existing themes.
 
 ## Labels & Legends - Exercise 15
-    
+
 ![](../img/ggplot2/ggplot-labels-legends.png)
 
 ---
@@ -939,18 +939,36 @@ plot2 <- p + geom_hline(aes(yintercept = 5000))
 plot3 <- p + geom_vline(aes(xintercept = 2))
 plot4 <- p + geom_abline(aes(intercept = 0.5, slope = 5000))
 
-all_plots <- plot_grid(plot1, plot2, plot3, plot4, labels = c("A", "B", "C", "D"), nrow = 2)
+all_plots <- plot_grid(
+  plot1,
+  plot2,
+  plot3,
+  plot4,
+  labels = c("A", "B", "C", "D"),
+  nrow = 2
+)
 all_plots
 
 # we have 4 legends, which is too many - can they be removed?
 # Yes, but it is not exactly straightforward
 legend <- get_legend(plot1 + theme(legend.position = "bottom"))
 plot1 <- p + theme(legend.position = "none")
-plot2 <- p + geom_hline(aes(yintercept = 5000)) + theme(legend.position = "none")
+plot2 <- p +
+  geom_hline(aes(yintercept = 5000)) +
+  theme(legend.position = "none")
 plot3 <- p + geom_vline(aes(xintercept = 2)) + theme(legend.position = "none")
-plot4 <- p + geom_abline(aes(intercept = 0.5, slope = 5000)) + theme(legend.position = "none")
+plot4 <- p +
+  geom_abline(aes(intercept = 0.5, slope = 5000)) +
+  theme(legend.position = "none")
 
-all_plots <- plot_grid(plot1, plot2, plot3, plot4, labels = c("A", "B", "C", "D"), nrow = 2)
+all_plots <- plot_grid(
+  plot1,
+  plot2,
+  plot3,
+  plot4,
+  labels = c("A", "B", "C", "D"),
+  nrow = 2
+)
 plot_final <- plot_grid(all_plots, legend, ncol = 1, rel_heights = c(1, .1))
 plot_final
 ```

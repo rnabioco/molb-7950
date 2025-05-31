@@ -22,7 +22,7 @@ library(tidyverse)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
 library(cowplot)
-library(scales) 
+library(scales)
 library(gt)
 
 
@@ -250,7 +250,7 @@ all_length <- bind_rows(
   tibble(nt=??,
        cat=rep("??",
                length(??))),
-  
+
   tibble(nt=length_cds,
        cat=rep("cds",
                length(length_cds)))
@@ -328,7 +328,7 @@ hur_annot <- annotate_regions(
     ignore.strand = FALSE,
     quiet = FALSE) %>%
   data.frame()
-  
+
 
 # we put in ~20K and got ~50K??
 
@@ -338,7 +338,7 @@ hur_annot <- annotate_regions(
 myInfo <- c("seqnames","start","end","width","strand","annot.symbol","annot.type")
 
 hur_annot <- hur_annot[,??] %>%
-  unique() 
+  unique()
 
 # getting rid of the "hg19_genes_" string to simplify `annot.type`
 hur_annot$annot.type <- gsub("hg19_genes_","",hur_annot$annot.type)
@@ -376,10 +376,10 @@ mylengths <- vector()
 
 for (i in 1:length(my_hg19_annots)) {
   mylengths[i] <- sum(width(GenomicRanges::reduce(annotations[annotations$type %in% my_hg19_annots[i]])))
-  
+
   names(mylengths)[i] <- gsub("hg19_genes_","",my_hg19_annots[i])
-  
-  
+
+
 }
 
 barplot(mylengths[1:4], las=2, main = "total bases per category", log="y")
@@ -415,7 +415,7 @@ random_sites_annot <- annotate_regions(
 
 # select cols, keep unique
 random_sites_annot <- random_sites_annot[,myInfo] %>%
-  unique() 
+  unique()
 
 # clean names
 random_sites_annot$annot.type <- gsub("hg19_genes_","",random_sites_annot$annot.type)
@@ -503,7 +503,7 @@ Since HuR preferentially binds to 3' UTRs, that is the region we will focus on.
 #| label: hur-seqs
 #| output-location: slide
 
-# create a Grange for 3' UTRs 
+# create a Grange for 3' UTRs
 hur_3utr <- makeGRangesFromDataFrame(
   df = hur_annot %>% filter(??=="??"),
   ignore.strand = F,
@@ -528,7 +528,7 @@ hur_utr3_6mer <- ??(
 
 colnames(hur_utr3_6mer) <- "hur_utr_count"
 
-# calc freq 
+# calc freq
 hur_utr3_6mer$hur_utr_freq <- hur_utr3_6mer$hur_utr_count/sum(hur_utr3_6mer$hur_utr_count)
 
 ```
@@ -542,7 +542,7 @@ Next, we will calculate 6mer frequencies in 3' UTRs. This will serve as a null m
 #| echo: true
 #| label: utr-seqs
 
-# create a Grange for 3' UTRs 
+# create a Grange for 3' UTRs
 threeUTR <- GenomicRanges::reduce(annotations[annotations$type %in% my_hg19_annots[??]])
 
 # get sequences for those coordinates
@@ -613,7 +613,7 @@ Not just AU-rich...
 utr3_df %>%
   rownames_to_column(var = "6mer") %>%
   arrange(-hur_enrich) %>%
-  gt() 
+  gt()
 
 
 ```

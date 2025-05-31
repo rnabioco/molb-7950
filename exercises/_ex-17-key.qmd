@@ -340,8 +340,10 @@ track_info <-
     ),
     file_path = here("data/block-dna", file_name),
     track_name = c(
-      "MNase_Short", "MNase_Long",
-      "ATAC_Short", "ATAC_Long"
+      "MNase_Short",
+      "MNase_Long",
+      "ATAC_Short",
+      "ATAC_Long"
     )
   )
 ```
@@ -352,10 +354,13 @@ track_info <-
   mutate(
     track_info,
     big_wig = purrr::map(
-      file_path, ~ import.bw(.x, as = "GRanges")
+      file_path,
+      ~ import.bw(.x, as = "GRanges")
     ),
     data_track = purrr::map2(
-      big_wig, track_name, ~ DataTrack(.x, name = .y)
+      big_wig,
+      track_name,
+      ~ DataTrack(.x, name = .y)
     )
   )
 ```

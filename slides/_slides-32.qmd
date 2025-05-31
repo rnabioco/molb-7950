@@ -23,7 +23,7 @@ library(cowplot)
 ```
 
 
-## Contact Info 
+## Contact Info
 
 Greetings experimentalist humans `r emo::ji("wave")`
 
@@ -31,7 +31,7 @@ Greetings experimentalist humans `r emo::ji("wave")`
 
 RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/training-and-education/rbi-office-hours)
 
-<i class="fa fa-envelope"></i> &nbsp; [rbi.fellows@cuanschutz.edu](mailto:rbi.fellows@cuanschutz.edu) 
+<i class="fa fa-envelope"></i> &nbsp; [rbi.fellows@cuanschutz.edu](mailto:rbi.fellows@cuanschutz.edu)
 <br>
 
 
@@ -41,23 +41,23 @@ RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/trai
 
 ::: {.column .nonincremental}
 ### Lecture 1
-- Identify key quality control issues with single cell RNA-seq data and perform filtering onto exclude poor quality cells 
-- Interact with single cell data using Bioconductor 
+- Identify key quality control issues with single cell RNA-seq data and perform filtering onto exclude poor quality cells
+- Interact with single cell data using Bioconductor
 
-::: 
- 
+:::
+
 ::: {.column .nonincremental}
-### Lecture 2 
+### Lecture 2
 - Perform analysis to identify cell types in single cell data by using unsupervised clustering methods and comparing to public datasets
 - Describe the importance and reasoning for conducting each step of the analysis
 
-::: 
+:::
 
 ::::
 
 
 ## Learning key
-* We will switch between lecture and your exercise `qmd`. 
+* We will switch between lecture and your exercise `qmd`.
 * To denote a slide that corresponds to your exercise, I will include `r emo::ji("keyboard")` in the slide title
 
 ## Analysis steps revisited {.smaller}
@@ -126,11 +126,11 @@ digraph workflow {
 }")
 ```
 
-::: 
+:::
 
 ::: {.column width="50%}
 
-- Normalize and log transform UMI counts to correct for sequencing depth. 
+- Normalize and log transform UMI counts to correct for sequencing depth.
 
 - Select genes with high variance to use for clustering and UMAP generation
 
@@ -140,7 +140,7 @@ digraph workflow {
 
 - Use clustering on PCA matrix to identify clusters of related cells.
 
-- Find marker genes that are specifically expressed in each cluster. 
+- Find marker genes that are specifically expressed in each cluster.
 
 - Compare the gene expression profile of each cluster to public data to help annotate the cell type.
 
@@ -249,9 +249,9 @@ logcounts(sce)[50:60, 1:4]
 
 - Low variance genes are usually low-expressed or "house-keeping" genes whose expression will not help us distinguish between cell populations
 
-- Including these genes could potentially introduce more technical variation rather then helpful biological variation. 
+- Including these genes could potentially introduce more technical variation rather then helpful biological variation.
 
-- Keeping uninteresting genes will increase the computational burden and likely either not improve or be deleterious to the clustering. 
+- Keeping uninteresting genes will increase the computational burden and likely either not improve or be deleterious to the clustering.
 
 ## Variable gene selection `r emo::ji("keyboard")` {.smaller}
 
@@ -335,7 +335,7 @@ ggplot(dec_df, aes(mean, total)) +
 
 Dimensionality reduction is the concept of transforming high dimensional data and representing it with a smaller set of dimensions.
 
-We can reduce the # of dimensions without loosing much information because many features (genes) are highly correlated which can be approximated with fewer dimensions. 
+We can reduce the # of dimensions without loosing much information because many features (genes) are highly correlated which can be approximated with fewer dimensions.
 
 This is analogous to reducing the gene expression data into a set of metagenes that represents the expression of many correlated genes.
 
@@ -345,11 +345,11 @@ Using fewer dimensions makes computation much quicker and as we will see will re
 
 We will use PCA to reduce the dimensionality of the data from 20,000 genes to ~10-50 principle components.
 
-[PCA](http://setosa.io/ev/principal-component-analysis/) takes a matrix of features (genes) and samples (cells) and transforms the matrix into a new set of features known as a principal components. A principal component is a linear combination of the original genes that is oriented to capture variance in the dataset. 
+[PCA](http://setosa.io/ev/principal-component-analysis/) takes a matrix of features (genes) and samples (cells) and transforms the matrix into a new set of features known as a principal components. A principal component is a linear combination of the original genes that is oriented to capture variance in the dataset.
 
 `PC1` is a vector through the dataset oriented in a direction that spans the most variation in the data.  The second component is another linear combination of the original variables but is uncorrelated to the first component (points in an orthogonal direction).
 
-In a geometric sense, PCA produces a new coordinate system whereby instead of the axes being each gene, the axes are each a PC and the first axis points through the largest spread in the data. 
+In a geometric sense, PCA produces a new coordinate system whereby instead of the axes being each gene, the axes are each a PC and the first axis points through the largest spread in the data.
 
 ## PCA in 2 dimensions {.smaller}
 
@@ -448,7 +448,7 @@ plot_grid(og_plt, pca_plt)
   * In our 2-D example, we get two PCs
   * Adding more genes increases the number of PCs.
 
-What if we had more dimensions that are uninteresting variance/noise? How does this impact the PCA? 
+What if we had more dimensions that are uninteresting variance/noise? How does this impact the PCA?
 
 ```{r}
 #| echo: false
@@ -502,13 +502,13 @@ plot_grid(pca_plt, pc2_plt)
 
 ## computing PCA with scater `r emo::ji("keyboard")` {.smaller}
 
-`runPCA()`: computes an approximate truncated PCA, returning 50 PCs by default. 
+`runPCA()`: computes an approximate truncated PCA, returning 50 PCs by default.
 
 `reducedDim(sce, "PCA")`: function to access or assign reduced dimensionality results
 
 `plotPCA()`: plot 2 or more PC components
 
-`plotReducedDim()`: plot 2 or more dimensions or arbitrary `reducedDim()` matrix 
+`plotReducedDim()`: plot 2 or more dimensions or arbitrary `reducedDim()` matrix
 
 
 ```{r}
@@ -523,13 +523,13 @@ plotPCA(sce, color_by = "CD3D")
 
 ## computing PCA with scater `r emo::ji("keyboard")` {.smaller}
 
-`runPCA()`: computes an approximate truncated PCA, returning 50 PCs by default. 
+`runPCA()`: computes an approximate truncated PCA, returning 50 PCs by default.
 
 `reducedDim(sce, "PCA")`: function to access or assign reduced dimensionality results
 
 `plotPCA()`: plot 2 or more PC components
 
-`plotReducedDim()`: plot 2 or more dimensions or arbitrary `reducedDim()` matrix 
+`plotReducedDim()`: plot 2 or more dimensions or arbitrary `reducedDim()` matrix
 
 
 ```{r}
@@ -541,7 +541,7 @@ plotPCA(sce, ncomponents = 4, colour_by = "CD3D")
 ```
 
 ## How many PCs to retain? `r emo::ji("keyboard")` {.smaller}
-* In general the # of PCs to use for downstream steps depends on the complexity and heterogeneity in the data, as well as the biological question. For this analysis we will retain the top 30, but you should explore how the downstream steps are affected by including fewer or more PCs.  
+* In general the # of PCs to use for downstream steps depends on the complexity and heterogeneity in the data, as well as the biological question. For this analysis we will retain the top 30, but you should explore how the downstream steps are affected by including fewer or more PCs.
 
 * In practice picking fewer PCs will identify fewer subpopulations, and picking more PCs will find more subpopulations, at the expense of potentially increased noise and longer runtime.
 
@@ -553,7 +553,7 @@ percent.var <- attr(reducedDim(sce), "percentVar")
 plot(percent.var, log = "y", xlab = "PC", ylab = "Variance explained (%)", pch = 16)
 ```
 
-## How is PCA data stored? `r emo::ji("keyboard")` 
+## How is PCA data stored? `r emo::ji("keyboard")`
 
 ```{r}
 #| echo: true
@@ -572,7 +572,7 @@ reducedDim(sce, "PCA") <- reducedDim(sce, "PCA")[, 1:30]
 ### PCA
 * Used by early studies (and bulk methods)
 * In bulk studies, we expect to have a large amount of variation captured by PC1 (>50%)
-* Best for small and simple data sets 
+* Best for small and simple data sets
 * In large single cell studies lots of information is present at the higher principal components
 
 :::
@@ -592,11 +592,11 @@ reducedDim(sce, "PCA") <- reducedDim(sce, "PCA")[, 1:30]
 
 Non-linear dimensionallty reductions are commonly used to project the PCA matrix into 2 dimensions for visualization
 
-This entails trying to reduce the ~10-50 PCA dimensions into a 2 dimensional space. 
+This entails trying to reduce the ~10-50 PCA dimensions into a 2 dimensional space.
 
 To do this the algorithm performs non-linear transformations that distort the true distances between cells
 
-Attempts to balance global and local differences to produce visualization that capture variation in data. 
+Attempts to balance global and local differences to produce visualization that capture variation in data.
 
 `runUMAP()` and `runTSNE()`
 
@@ -688,12 +688,12 @@ plotUMAP(sce) + ggtitle("spread = 1, min_dist = 0.5, k =3") +
 
 We use clustering to assign cells to discrete cell populations. This is a simplification of the true complexity of the underlying data.
 
-Clustering is a data analysis tool rather than a result. We can increase, decrease, merge, or subset clusters at our whim by changing clustering parameters, the # of PCs used, the # of variable genes, and the particular cell subsets analyzed. 
+Clustering is a data analysis tool rather than a result. We can increase, decrease, merge, or subset clusters at our whim by changing clustering parameters, the # of PCs used, the # of variable genes, and the particular cell subsets analyzed.
 
-There is no correct or valid number of clusters. It depends on what biological question you are trying to explore and at what granularity you want to ask the question. 
+There is no correct or valid number of clusters. It depends on what biological question you are trying to explore and at what granularity you want to ask the question.
 
 >[A]sking for an unqualified “best” clustering is akin to asking for the best magnification on a microscope without any context - OSCA book
- 
+
 
 ## Graph based clustering {.smaller .nonincremental}
 
@@ -702,7 +702,7 @@ Approach:
 - identify the K nearest neighbors of each cell in the PCA matrix (e.g. k = 10)
 - weight the connection between cells based on "connectivity" of shared nearest neighbors (total number, proportion, average rank of neighbors, etc.)
 - apply a community detection algorithm to cluster the shared nearest neighbor graph (walktrap, louvain, leiden, etc.)
-- `clusterCells()` 
+- `clusterCells()`
 
 
 ```{r}
@@ -810,7 +810,7 @@ plotUMAP(sce, colour_by = "clusters") +
 
 ## Clustering `r emo::ji("keyboard")` {.smaller}
 
-Generally increasing the # of neighbors will decrease the number of clusters and vice versa. 
+Generally increasing the # of neighbors will decrease the number of clusters and vice versa.
 
 ```{r}
 #| echo: true
@@ -888,7 +888,7 @@ mrks
 ```
 
 ## How do we identify marker genes? `r emo::ji("keyboard")` {.smaller}
-To identify marker genes we will need to decide of cutoffs based on effect sizes. There are many reported by scoreMarkers(). 
+To identify marker genes we will need to decide of cutoffs based on effect sizes. There are many reported by scoreMarkers().
 
 ```{r}
 #| echo: true
@@ -902,7 +902,7 @@ What is a marker gene?
   * This could be too strict, what if the same gene marks clusters 1-8 but not 9? We would miss that as a marker
 * Differentially expressed between some or any pairwise clusters
 
-The output of scoreMarkers() allows you to filter the data in many different ways depending on what type of marker you want to identify. Importantly it doesn't hide the complexity of this data. I highly recommend reading the chapter on [marker gene detection](https://bioconductor.org/books/3.17/OSCA.basic/marker-detection.html#motivation-2) from the OSCA book to understand how best to identify markers depending on the dataset you are analyzing. 
+The output of scoreMarkers() allows you to filter the data in many different ways depending on what type of marker you want to identify. Importantly it doesn't hide the complexity of this data. I highly recommend reading the chapter on [marker gene detection](https://bioconductor.org/books/3.17/OSCA.basic/marker-detection.html#motivation-2) from the OSCA book to understand how best to identify markers depending on the dataset you are analyzing.
 
 ## How do we identify marker genes? {.smaller}
 * We will use `AUC` to rank markers
@@ -913,13 +913,13 @@ The output of scoreMarkers() allows you to filter the data in many different way
 
 Paraphrasing from the OSCA book:
 * The most obvious summary statistic is the mean. For cluster X, a large mean effect size (>0.5 for the AUCs) indicates that the gene is upregulated in X compared to the average of the other groups.
-* Another summary statistic is the median, where a large value indicates that the gene is upregulated in  X compared to most (>50%) other clusters. 
-* The minimum value (min.*) is the most stringent summary for identifying upregulated genes, as a large value indicates that the gene is upregulated in X compared to all other clusters. 
+* Another summary statistic is the median, where a large value indicates that the gene is upregulated in  X compared to most (>50%) other clusters.
+* The minimum value (min.*) is the most stringent summary for identifying upregulated genes, as a large value indicates that the gene is upregulated in X compared to all other clusters.
 * The maximum value (max.*) is the least stringent summary for identifying upregulated genes, as a large value can be obtained if there is strong upregulation in X compared to any other cluster.
 *  The minimum rank, a.k.a., “min-rank” (rank.*) is the smallest rank of each gene across all pairwise comparisons. Specifically, genes are ranked within each pairwise comparison based on decreasing effect size, and then the smallest rank across all comparisons is reported for each gene. If a gene has a small min-rank, we can conclude that it is one of the top upregulated genes in at least one comparison of  X to another cluster.
 
 ## Cluster 1 genes `r emo::ji("keyboard")` {.smaller}
-Plotting top genes ranked by `mean.AUC` for cluster 1. 
+Plotting top genes ranked by `mean.AUC` for cluster 1.
 
 ```{r}
 #| echo: true
@@ -1003,11 +1003,11 @@ We we use [`clustifyr`](https://rnabioco.github.io/clustifyr/) which was develop
 
 * `clustifyr` compares the average gene expression in each cluster to a reference matrix that contains average gene signatures of reference cell types.
 * The reference can be built from other single cell data, bulk-rna-seq, or other sources.
-* Ranked spearman correlation is used to compare the reference to the clusters. 
-* Only the variable genes are used for the correlation. 
+* Ranked spearman correlation is used to compare the reference to the clusters.
+* Only the variable genes are used for the correlation.
   * Fewer variable genes (ie 1000) are recommended as too many genes leads to high correlations across the board (think of a lot of zero values).
 
-In order to compare our dataset we need to use a publicly available reference dataset. Thankfully many datasets have been organized into a separate package: [clustifyrdatahub](https://github.com/rnabioco/clustifyrdatahub). This is an extension of the `ExperimentHub` package on bioconductor that allows you to easily download and cache external datasets. 
+In order to compare our dataset we need to use a publicly available reference dataset. Thankfully many datasets have been organized into a separate package: [clustifyrdatahub](https://github.com/rnabioco/clustifyrdatahub). This is an extension of the `ExperimentHub` package on bioconductor that allows you to easily download and cache external datasets.
 
 ## Annotating cell types `r emo::ji("keyboard")` {.smaller}
 ```{r}
@@ -1057,7 +1057,7 @@ cor_to_call(res) # assign cluster to highest correlation cell type (above a thre
 ```
 
 ## Annotating cell types `r emo::ji("keyboard")` {.smaller}
-Or we can insert the classification results into the SingleCellExperiment object directly which will be called `type`. 
+Or we can insert the classification results into the SingleCellExperiment object directly which will be called `type`.
 ```{r}
 #| echo: true
 
@@ -1075,24 +1075,24 @@ plotUMAP(sce, colour_by = "type")
 ```
 
 ## Saving and sharing objects
-1) You can share your SingleCellExperiment objects with collaborators by saving the object as an `.rds` file. 
+1) You can share your SingleCellExperiment objects with collaborators by saving the object as an `.rds` file.
 
-2) If you plan on publishing the data, then the best practices are to upload the UMI count matrix and your colData() data.frame containing the cell type annotations. 
+2) If you plan on publishing the data, then the best practices are to upload the UMI count matrix and your colData() data.frame containing the cell type annotations.
 
 To save the UMI count matrix use write10xcounts() from the DropletUtils Bioconductor package.
 ``` r
-mat <- counts(sce) 
+mat <- counts(sce)
 write10xCounts("path/to/output", mat)
-``` 
+```
 
 ## Saving and sharing objects
-When saving the `colData()` it is also a nice gesture to include the UMAP coordinates that you used for the main visualizations in your manuscript. The clustering and UMAP coordinates are very hard to reproduce because of the non-deterministic elements of the algorithms. 
+When saving the `colData()` it is also a nice gesture to include the UMAP coordinates that you used for the main visualizations in your manuscript. The clustering and UMAP coordinates are very hard to reproduce because of the non-deterministic elements of the algorithms.
 
 ``` r
-cbind(colData(sce), reducedDim(sce, "UMAP")) |> 
+cbind(colData(sce), reducedDim(sce, "UMAP")) |>
   rownames_to_column("cell") |> ()
   write_csv("cell-level-metadata.csv")
-```  
+```
 
 ## Saving and sharing objects
 * In addition to sharing count tables, in most cases (except for some cases of human data), you must publish your fastq files
