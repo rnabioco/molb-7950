@@ -55,7 +55,7 @@ library(rtracklayer)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
-library(rGADEM)
+# library(rGADEM)
 library(seqLogo)
 ```
 
@@ -89,24 +89,28 @@ track_info <-
       "CutRun_Abf1_gt150.bw"
     ),
     sample_type = c(
-      "Reb1_Short", "Abf1_Short",
-      "Reb1_Long", "Abf1_Long"
+      "Reb1_Short",
+      "Abf1_Short",
+      "Reb1_Long",
+      "Abf1_Long"
     )
   ) |>
   mutate(
     file_path = here("data/block-dna", file_name),
     big_wig = purrr::map(
-      file_path, ~ import.bw(.x, as = "GRanges")
+      file_path,
+      ~ import.bw(.x, as = "GRanges")
     ),
     data_track = purrr::map2(
-      big_wig, sample_type,
+      big_wig,
+      sample_type,
       ~ DataTrack(
-          .x,
-          name = .y,
-          background.title = "white",
-          col.title = "black",
-          col.axis = "black",
-          fontsize = 12
+        .x,
+        name = .y,
+        background.title = "white",
+        col.title = "black",
+        col.axis = "black",
+        fontsize = 12
       )
     )
   ) |>
@@ -206,7 +210,7 @@ total_reads <- 16e6
 
 genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
 # how can we calculate genome size?
-genome_size <- ___ 
+genome_size <- ___
 
 genome_lambda <- total_reads / genome_size
 
@@ -233,10 +237,10 @@ ggplot(
   filter(peak_calls, chrom == "chrII"),
   # convert p-values to positive values for plotting
   aes(start, ___)
-) + 
+) +
   geom_line() +
   xlim(track_start, track_end) +
-  theme_cowplot() 
+  theme_cowplot()
 ```
 
 How many peaks are called in this region?
@@ -245,13 +249,13 @@ How many peaks are called in this region?
 #| label: n-peaks
 #| eval: false
 # most stringent cut-off
-peak_calls_sig <- 
+peak_calls_sig <-
   filter(
     peak_calls,
     fdr == 0
-    ) |>
-    # collapse neighboring, significant sites
-    bed_merge(max_dist = 20)
+  ) |>
+  # collapse neighboring, significant sites
+  bed_merge(max_dist = 20)
 
 filter(
   peak_calls_sig,
