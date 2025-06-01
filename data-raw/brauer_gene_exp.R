@@ -47,8 +47,12 @@ brauer_gene_exp_wide <-
   select(
     brauer_gene_exp_raw,
     -name,
-    -number, -GID, -YORF,
-    -GWEIGHT, -BP, -MF
+    -number,
+    -GID,
+    -YORF,
+    -GWEIGHT,
+    -BP,
+    -MF
   )
 
 brauer_gene_exp_tidy <-
@@ -77,7 +81,10 @@ brauer_gene_exp_tidy <-
 
 write_tsv(brauer_gene_exp, file = here("data", "brauer_gene_exp_tidy.tsv.gz"))
 write_tsv(brauer_gene_exp, file = here("data", "brauer_gene_exp_wide.tsv.gz"))
-write_tsv(brauer_gene_exp_raw, file = here("data", "brauer_gene_exp_raw.tsv.gz"))
+write_tsv(
+  brauer_gene_exp_raw,
+  file = here("data", "brauer_gene_exp_raw.tsv.gz")
+)
 write_tsv(yeast_go_terms, file = here("data", "yeast_go_terms.tsv.gz"))
 
 url <- "http://sgd-archive.yeastgenome.org/curation/calculated_protein_info/archive/protein_properties.tab.20210422.gz"

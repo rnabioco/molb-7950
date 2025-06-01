@@ -27,4 +27,3 @@ for bedfile in CutRun*.bed; do
 
     bedGraphToBigWig $sample.bg sacCer3.chrom.sizes $sample.bw
 done
-
