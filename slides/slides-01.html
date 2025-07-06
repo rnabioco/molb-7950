@@ -6,11 +6,11 @@
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-732fb9ccd080a018ca85ca5d15770f52.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.7.31">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-c3c2c9e745155556954bc4da23476b10.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.32">
 
   <meta name="author" content="Jay Hesselberth">
-  <meta name="dcterms.date" content="2025-06-09">
+  <meta name="dcterms.date" content="2025-07-06">
   <title>MOLB 7950 – R Bootcamp - Day 1</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -218,7 +218,7 @@ Jay Hesselberth
     </div>
 </div>
 
-  <p class="date">2025-06-09</p>
+  <p class="date">2025-07-06</p>
 </section>
 <section>
 <section id="course-overview" class="title-slide slide level1 center">
@@ -533,7 +533,7 @@ Jay Hesselberth
 <p>Vectors are a core R data structure.</p>
 <ul>
 <li class="fragment"><p>A vector is an ordered collection of elements of the same type (e.g.&nbsp;numeric, character, or logical).</p></li>
-<li class="fragment"><p>Later you will see that every column of a data.table / tibble is a vector.</p></li>
+<li class="fragment"><p>Later you will see that every column of a <code>data.frame</code> / <code>tibble</code> is a vector.</p></li>
 <li class="fragment"><p>Operations on vectors propagate to all the elements of the vectors.</p></li>
 </ul>
 </section>
@@ -622,9 +622,9 @@ Jay Hesselberth
 <section id="data-frames" class="slide level2">
 <h2>Data frames</h2>
 <ul>
-<li class="fragment"><p>A data.frame is a rectangle, where each column is a vector, and each row is a slice across vectors.</p></li>
-<li class="fragment"><p>data.frame columns are vectors, and can have different types (numeric, character, factor, etc.).</p></li>
-<li class="fragment"><p>A data.frame is constructed with <code>data.frame()</code>.</p></li>
+<li class="fragment"><p>A <code>data.frame</code> is a rectangle, where each column is a vector, and each row is a slice across vectors.</p></li>
+<li class="fragment"><p><code>data.frame</code> columns are vectors, and can have different types (numeric, character, factor, etc.).</p></li>
+<li class="fragment"><p>A <code>data.frame</code> is constructed with <code>data.frame()</code>.</p></li>
 </ul>
 </section>
 <section class="slide level2">
@@ -958,6 +958,44 @@ Jay Hesselberth
         ]
       });
     </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
