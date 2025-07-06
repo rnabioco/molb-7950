@@ -1,8 +1,8 @@
 on:
   pull_request:
     branches: main
-    
-name: quarto pr 
+
+name: quarto pr
 
 permissions: write-all
 
@@ -12,30 +12,31 @@ jobs:
     steps:
       - name: ✅ Check out repository
         uses: actions/checkout@v4
-        
+
       - name: 🆀 Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
-     
+
       - name: 🆀 Quarto extensions
         shell: bash
         run: |
           quarto add --no-prompt quarto-ext/fontawesome
           quarto add --no-prompt sellorm/quarto-social-embeds
           quarto add --no-prompt r-wasm/quarto-drop
-          quarto add --no-prompt quarto-ext/pointer 
+          quarto add --no-prompt quarto-ext/pointer
+          quarto add --no-prompt r-wasm/quarto-live
 
       - name: 🔧 Install R
         uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
           r-version: 'renv'
-    
-      - name: 🔁 Install system dependencies 
+
+      - name: 🔁 Install system dependencies
         run: |
           sudo apt-get install libcurl4-openssl-dev
           sudo apt-get install libmagick++-dev
-          sudo apt-get install libglpk-dev 
-          
+          sudo apt-get install libglpk-dev
+
       - name: 🔁 Install R Dependencies
         uses: r-lib/actions/setup-renv@v2
         with:
@@ -43,7 +44,7 @@ jobs:
 
       - name: Render Quarto Project
         uses: quarto-dev/quarto-actions/render@v2
-                
+
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3.0
         with:
@@ -52,10 +53,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message:
             'Deploy from GHA: ${{ github.event.pull_request.title || github.event.head_commit.message }} (${{ github.sha }})'
-          # these default to 'true'
-          enable-commit-comment: false
-          enable-github-deployment: false
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          
