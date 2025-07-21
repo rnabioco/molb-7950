@@ -10,7 +10,7 @@ format:
     code-copy: true
     code-overflow: wrap
     toc: true
-    
+
 ---
 
 This page contains an outline of the topics, content, and assignments for the semester. Note that this schedule will be updated as the semester progresses, with all changes documented here.
@@ -68,12 +68,14 @@ sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
 
     # set up links
     prepare_link = case_when(
-      qmd_exists(prepare_html) == TRUE ~ glue('[{emo::ji("book")}]({prepare_html})'),
+      qmd_exists(prepare_html) == TRUE ~
+        glue('[{emo::ji("book")}]({prepare_html})'),
       .default = "."
     ),
     prepare_link = map(prepare_link, gt::md),
     slides_link = case_when(
-      qmd_exists(slides_html) == TRUE ~ glue('[{emo::ji("page")}]({slides_html})'),
+      qmd_exists(slides_html) == TRUE ~
+        glue('[{emo::ji("page")}]({slides_html})'),
       .default = "."
     ),
     slides_link = map(slides_link, gt::md),
@@ -91,7 +93,8 @@ sched_tbl <- read_tsv(here("data/syllabus.tsv")) |>
     hw_link = map(hw_link, gt::md),
     # problem set keys links
     hw_key_link = case_when(
-      qmd_exists(hw_key_html) == TRUE ~ glue('[{emo::ji("key")}]({hw_key_html})'),
+      qmd_exists(hw_key_html) == TRUE ~
+        glue('[{emo::ji("key")}]({hw_key_html})'),
       .default = "."
     ),
     hw_key_link = map(hw_key_link, gt::md)
@@ -109,7 +112,9 @@ gt(
 ) |>
   tab_header(
     title = md(glue("**MOLB 7950 - {params$course$semester} Schedule**")),
-    subtitle = glue("Classes held in-person from {params$course$time} in {params$course$room}")
+    subtitle = glue(
+      "Classes held in-person from {params$course$time} in {params$course$room}"
+    )
   ) |>
   fmt_date(
     columns = date,
