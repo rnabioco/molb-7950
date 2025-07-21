@@ -23,7 +23,7 @@ instructions to `renv::install()` if needed, and then be sure to commit the
 `renv.lock` file.
 
 You can also trying using `pak` for installation by setting
-`RENV_CONFIG_PAK_ENABLED = TRUE` in the user's `.Renviron` file 
+`RENV_CONFIG_PAK_ENABLED = TRUE` in the user's `.Renviron` file
 (`usethis::edit_r_environ()`) to use pak installation,
 which is a lot faster ([issue](https://github.com/rstudio/renv/issues/1210)).
 In practice, pak with renv seems a bit flaky.
@@ -34,8 +34,8 @@ Use `quarto render` or `quarto preview` locally to inspect content prior to
 commit / push. A Github Action builds the site automatically unless you include
 `[ci skip]` in the commit message.
 
-After a significant update (i.e., uploading a lot of class material), you should 
-`quarto render` the entire site, and then commit & push the contents of the `_freeze` directory, 
+After a significant update (i.e., uploading a lot of class material), you should
+`quarto render` the entire site, and then commit & push the contents of the `_freeze` directory,
 which will enable rendering of only changed materials relative to that build.
 
 ## File structure
@@ -63,6 +63,10 @@ If you want to suppress quarto rendering of a file, prefix the filename with an 
 - Problem sets and keys live here: https://github.com/rnabioco/molb-7950-problem-sets
 
 - Large data sets, mainly single-cell problem sets, live here (so we don't bloat this repo): https://github.com/rnabioco/molb-7950-data/
+
+## AI tooling
+
+Setup the project using the suggestions here: https://www.simonpcouch.com/blog/2025-07-17-claude-code-2/
 
 ### Acknowledgements
 
