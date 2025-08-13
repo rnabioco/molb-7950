@@ -15,6 +15,13 @@ This is a Quarto website project containing teaching materials for a one semeste
 
 ## Key Instructions for AI Assistants
 
+### Response Style
+
+- Be terse and direct - no apologies, positive feedback, or flattery
+- Focus only on differences when showing code changes
+- Skip conversational filler and transition phrases
+- Point out specific modifications rather than full code blocks
+
 ### Content Requirements
 
 - **Always read all `.qmd` files** when working on content-related tasks
@@ -23,7 +30,24 @@ This is a Quarto website project containing teaching materials for a one semeste
 - Use the same R packages and libraries already present in the codebase
 
 ### File Editing Guidelines
+### Code Change Examples
 
+Show only what changes:
+
+```r
+# Change this line:
+- flights |> filter(month == 1)
++ flights |> filter(month == 1, day == 1)
+```
+
+Or indicate specific modifications:
+
+```r
+# Add after line 15:
+mutate(speed = distance / air_time)
+```
+
+### Code Standards
 - **NEVER create new files** unless absolutely necessary for the specific task
 - **Always prefer editing existing files** over creating new ones
 - **Never proactively create documentation files** (*.md, README) unless explicitly requested
