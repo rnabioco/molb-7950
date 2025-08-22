@@ -334,6 +334,38 @@ separate(
 )
 ```
 
+## `separate_wider_delim()` - modern alternative
+
+A more explicit way to separate columns with delimited data.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+table3 |>
+  separate_wider_delim(
+    rate,
+    delim = "/",
+    names = c("cases", "population")
+  )
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# Convert to numeric in the same step
+table3 |>
+  separate_wider_delim(
+    rate,
+    delim = "/",
+    names = c("cases", "population"),
+    cols_remove = FALSE
+  ) |>
+  mutate(
+    cases = as.numeric(cases),
+    population = as.numeric(population)
+  )
+```
+
 ## `unite()` - syntax
 
 `unite()` combines multiple columns into a single column.

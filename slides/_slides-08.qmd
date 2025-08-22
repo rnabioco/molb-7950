@@ -1,115 +1,444 @@
 ---
-title: "R Bootcamp - Day 8"
-subtitle: "Exercises"
+title: "R Bootcamp - Day 7"
+subtitle: "tidyverse odds & ends"
 author: "{{< var instructor.block.bootcamp-r >}}"
 ---
 
 ```{r}
 #| include: false
 library(tidyverse)
-library(knitr)
+library(cowplot)
 library(here)
 ```
 
-### R bootcamp review
+## Class 7 outline
+
+* Accessing data in vectors (Exercise)
+* other tidyverse packages (stringr & forcats)
+* dplyr table joins (Exercise)
+* ggplot2 scale functions
+* ggplot2 multi-panel figures (Exercise)
+* ggplot2 saving figures
+
+# Accessing data in vectors
+
+## Using `[`, `[[`, and `$` {.smaller}
 
 ```{r}
-#| label: load-data
-#| warning: false
-# import data
-data_transcript_exp_tidy <- read_csv(here("data/data_transcript_exp_tidy.csv"))
-
-# save to have smaller name
-data <- data_transcript_exp_tidy
-
-# examples of grouping by differently - type these into the console to see the difference
-group_by(data, type)
-group_by(data, replicate)
-group_by(data, time)
-group_by(data, ensembl_transcript_id)
-
-# example of how group_by affects the way summarise works
-data |> summarise(count = mean(count, na.rm = TRUE))
-group_by(data, time) |> summarise(count = mean(count, na.rm = TRUE))
-group_by(data, ensembl_transcript_id) |>
-  summarise(count = mean(count, na.rm = TRUE))
-group_by(data, ensembl_transcript_id, time) |>
-  summarise(count = mean(count, na.rm = TRUE))
+#| echo: true
+#| output-location: column-fragment
+# `hp` vector from mtcars
+mtcars$hp
 ```
 
-  - functions to use within mutate - google is your friend
-  - manipulation of cols & rows - use cheatsheets
-
-* ggplot
-
-  - aesthetic mapping: [Ref](https://ggplot2.tidyverse.org/reference/aes.html)
+. . .
 
 ```{r}
-#| label: aesthetic_mapping
+#| echo: true
+#| output-location: column-fragment
+# columns by name
+mtcars[c("hp", "mpg")]
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# first 10 items in hp
+hp <- mtcars$hp
+hp[1:10]
+```
+
+---
+
+```{r}
+#| eval: false
+#| echo: true
+#| output-location: column-fragment
+# 2 ways to get the 10th value
+hp[10]
+hp[[10]]
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| error: true
+#| output-location: column-fragment
+# this is an error
+hp[[1:10]]
+```
+
+. . .
+
+`[` can return a range, `[[` returns a single value.
+
+## vector selection with logic {.smaller}
+
+one-step filtering.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+hp[hp > 100]
+```
+
+. . .
+
+two-step filtering. same result.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# get a vector of T/F values
+x <- hp > 100
+x
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# use that vector to index the original
+hp[x]
+```
+
+. . .
+
+also can use with `is.na()` to identify / exclude `NA` values in a vector.
+
+---
+
+Use `sum()` to figure out how many are `TRUE`.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+x <- hp > 100
+
+# how many are TRUE?
+sum(x)
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+length(hp[x])
+```
+
+# other tidyverse libraries
+
+## string operations with stringr {.smaller}
+
+stringr provides several useful functions for operating on strings.
+
+See the [stringr cheatsheet](https://github.com/rstudio/cheatsheets/blob/main/strings.pdf)
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+str_c("letter: ", letters[1:5])
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+ids <- c("x-1", "x-2", "y-1", "y-2")
+str_split(ids, "-")
+
+# just the first parts
+# str_split_i(ids, '-', 1)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+str_detect("A", LETTERS[1:5])
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+str_pad(
+  1:10,
+  width = 2,
+  side = "left",
+  pad = 0
+)
+```
+
+::: {.notes}
+`str_c()` is similar to `paste` and `paste0` but the behavior is more consistent.
+:::
+
+## forcats operations for factors {.smaller}
+
+forcats provides several utilities for working with factors.
+
+See the [forcats cheatsheet](https://github.com/rstudio/cheatsheets/blob/main/factors.pdf)
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+library(palmerpenguins)
+penguins[1:3]
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+fct_count(penguins$species)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+fct_lump_min(
+  penguins$species,
+  min = 150
+) |>
+  fct_count()
+```
+
+::: aside
+`dplyr::count()` is a more flexible alternative to `forcats::fct_count()`
+:::
+
+---
+
+## Use forcats to reorder data in plots {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
-# specifying colors of plots
-diamonds_subset <- sample_n(diamonds, size = 1000)
-
-# scatter plot with color by cut - aesthetics specified in the main "mapping"
 ggplot(
-  diamonds_subset,
-  aes(x = carat, y = price, color = cut)
+  mpg,
+  aes(
+    x = class,
+    y = hwy
+  )
 ) +
-  geom_point()
-
-# scatter plot with color by cut - aesthetics specified in the geom "mapping"
-ggplot(
-  diamonds_subset,
-  aes(x = carat, y = price)
-) +
-  geom_point(aes(color = cut))
-
-# color specified in the main mapping will apply universally to all geoms
-ggplot(
-  diamonds_subset,
-  aes(x = carat, y = price, color = cut)
-) +
-  geom_point() +
-  geom_smooth()
-
-# color specified in the geom mapping only applies to that layer
-ggplot(diamonds_subset, mapping = aes(x = carat, y = price)) +
-  geom_point(aes(color = cut)) +
-  geom_smooth()
+  geom_boxplot()
 ```
 
-  - piping data into ggplot - example below
+. . .
 
 ```{r}
-#| label: piping_data
+#| echo: true
+#| output-location: column-fragment
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 ggplot(
-  diamonds_subset,
-  aes(x = carat, y = price)
+  mpg,
+  aes(
+    x = fct_reorder(
+      class,
+      hwy,
+      .fun = median
+    ),
+    y = hwy
+  )
 ) +
-  geom_point(aes(color = cut)) +
-  geom_smooth()
+  geom_boxplot()
 ```
 
-  - more applied examples - plenty to come in the rest of the course
+::: aside
+[FAQ on rordering in ggplot2](https://ggplot2.tidyverse.org/articles/faq-reordering.html)
+:::
 
-  - specifying colors of plots: [tutorial](http://www.sthda.com/english/wiki/ggplot2-colors-how-to-change-colors-automatically-and-manually)
+# dplyr
+
+## Advanced summarizing with `across()`
+
+Apply functions to multiple columns at once.
 
 ```{r}
-#| label: single-color
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-# coloring by a single color - more information in the tutorial above
-ggplot(
-  data = diamonds_subset,
-  mapping = aes(x = carat, y = price)
-) +
-  geom_point(color = "red") +
-  geom_smooth()
+#| echo: true
+#| output-location: column-fragment
+library(palmerpenguins)
+penguins |>
+  group_by(species) |>
+  summarise(
+    across(
+      c(bill_length_mm, bill_depth_mm, flipper_length_mm),
+      list(mean = ~ mean(.x, na.rm = TRUE), sd = ~ sd(.x, na.rm = TRUE))
+    ),
+    .groups = "drop"
+  )
 ```
 
-* other
-  - log10 - `?log10`
-  - How to use Help pages: help(<function>)
-  - required vs. optional arguments: this is possible to distinguish if you have a well-documented function. If not, trial-an-error is how it goes.
-  - Use of commas with multiple vars: Depends on the function. Look at the exact syntax required for specific functions on the cheatsheet to know what to use: col1, col2, col3, vs col1:col3, etc
-  - Metacharacters "." etc.: Refer to cheatsheet on Regex + stringr
+## Multiple grouping variables
+
+Complex grouping for detailed analysis.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+penguins |>
+  group_by(species, island, year) |>
+  summarise(
+    n_penguins = n(),
+    avg_mass = mean(body_mass_g, na.rm = TRUE),
+    mass_range = max(body_mass_g, na.rm = TRUE) -
+      min(body_mass_g, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(desc(avg_mass))
+```
+
+# ggplot2
+
+## scale functions in ggplot2
+
+- `scale_color_brewer()` and `scale_fill_brewer()` control `color` and `fill` aesthetics.
+- See available [ggplot2 brewer palettes](https://ggplot2.tidyverse.org/reference/scale_brewer.html#palettes)
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column
+#| fig.alt: "Description of the plot - PLEASE FILL IN"
+p <- ggplot(
+  mtcars,
+  aes(
+    x = mpg,
+    y = hp,
+    color = factor(cyl)
+  )
+) +
+  geom_point(size = 3) +
+  theme_cowplot()
+
+p
+```
+
+## scale functions in ggplot2 {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+p + scale_color_brewer(palette = "Set1")
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+p + scale_color_brewer(palette = "Dark2")
+```
+
+## Set up a points plot {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+#| fig.alt: "Description of the plot - PLEASE FILL IN"
+diamonds_subset <- sample_n(diamonds, 1000)
+
+p <- ggplot(
+  diamonds_subset,
+  aes(
+    x = carat,
+    y = price,
+    color = cut
+  )
+) +
+  geom_point(alpha = 0.8) +
+  theme_cowplot()
+
+p + geom_line()
+```
+
+## How to combine multiple plots into a figure? {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: slide
+#| fig.alt: "Description of the plot - PLEASE FILL IN"
+# `plot_grid()` is from `cowplot`
+plot_grid(
+  p,
+  p,
+  p,
+  p,
+  labels = c(
+    "A",
+    "B",
+    "C",
+    "D"
+  ),
+  nrow = 2
+)
+```
+
+::: aside
+[patchwork](https://github.com/thomasp85/patchwork) is a related library that uses arithmetic syntax (`a + b | c`)
+:::
+
+## We have 4 legends - can they be condensed? {.smaller}
+
+Yes, but it is not exactly straightforward.
+
+```{r}
+#| echo: true
+#| output-location: slide
+#| fig.alt: "Description of the plot - PLEASE FILL IN"
+# fetch the legend for `p1`
+legend <- get_legend(
+  p + theme(legend.position = "bottom")
+)
+
+p <- p + theme(legend.position = "none")
+
+# first `plot_grid` builds the panels
+panels <- plot_grid(
+  p,
+  p,
+  p,
+  p,
+  labels = c(
+    "A",
+    "B",
+    "C",
+    "D"
+  ),
+  nrow = 2
+)
+
+# second `plot_grid` adds the legend to the panels
+plot_grid(
+  panels,
+  legend,
+  ncol = 1,
+  rel_heights = c(1, .1)
+)
+```
+
+## Saving plots (Exercise 18)
+
+Saves last plot as 5' x 5' file named `plot_final.png` in working directory.
+
+Matches file type to file extension.
+
+```{r}
+#| echo: true
+#| eval: false
+# default is to save last plot in the buffer
+# can also specify with the `plot` argument
+ggsave(
+  here("img/plot_final.png"),
+  width = 5,
+  height = 5
+)
+```

@@ -342,22 +342,42 @@ starwars_bmi <- starwars |>
 
 ---
 
-## Using `case_when()`clauses with `mutate()`. {.smaller}
-
-Let's create a new variable `tall_short` based on other values.
+## Complex conditional logic with `case_when()`
 
 ```{r}
 #| echo: true
-#| output-location: fragment
-#| code-line-numbers: "3-6"
+#| output-location: column-fragment
 starwars |>
   mutate(
-    tall_short = case_when(
-      height > 160 ~ "tall",
-      .default = "short"
+    size_description = case_when(
+      height < 100 ~ "very short",
+      height < 150 ~ "short",
+      height < 200 ~ "average",
+      height >= 200 ~ "tall",
+      .default = "unknown"
     )
   ) |>
-  select(name, tall_short, everything())
+  count(size_description)
+```
+
+---
+
+Multiple conditions with `case_when()`
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+starwars |>
+  mutate(
+    character_type = case_when(
+      species == "Human" & homeworld == "Tatooine" ~ "Tatooine Human",
+      species == "Human" ~ "Other Human",
+      mass > 100 ~ "Heavy non-human",
+      height > 180 ~ "Tall non-human",
+      .default = "Standard character"
+    )
+  ) |>
+  count(character_type, sort = TRUE)
 ```
 
 ## `group_by()` & `summarise()` - Exercise 6
