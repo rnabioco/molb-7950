@@ -1,0 +1,429 @@
+---
+title: "R Bootcamp - Day 2"
+subtitle: "Tidy data & tidyr"
+author: "{{< var instructor.block.bootcamp-r >}}"
+---
+
+```{r}
+#| include: false
+library(tidyverse)
+library(here)
+```
+
+## Class 2 outline
+
+:::: {.columns}
+
+::: {.column width="50%"}
+* Become familiar with "tidyverse" suite of packages
+* Introduce _readr_ (Exercise 1)
+* Introduce _tidyr_ (Exercise 2)
+* Tools for data exploration (Exercises 3-5)
+:::
+
+::: {.column width="50%"}
+* Learn tidyr functions:
+* pivot_wider (Exercise 6)
+* pivot_longer (Exercise 7)
+* separate (Exercise 8 & 9)
+* unite (Exercise 10)
+* handling missing values
+:::
+
+::::
+
+# Tidying exercises
+
+## Data import with readr
+
+![](../img/readr/readr.png)
+
+N.B. note the difference between `readr::read_csv()` and the built-in `read.csv()`. Use the former.
+
+---
+
+![](../img/readr/readr-args.png)
+
+## finding files in a project with `here`
+
+The `here` packages makes it easy to reference files in an R project.
+
+```{r}
+#| echo: true
+library(here)
+here("data/syllabus.tsv")
+```
+
+---
+
+### Paths identified by `here()` can be fed to e.g. `read_*` functions. {.smaller}
+
+```{r}
+#| echo: true
+read_tsv(here("data/syllabus.tsv"))
+```
+
+## Data sets for tidying - Exercise 2
+
+* In this class, we will use the data sets that come with the tidyr package to explore all the functions provided by tidyr.
+
+* `table1`, `table2`, `table3`, `table4a`, `table4b`, and `table5` all display the number of TB cases documented by the World Health Organization in Afghanistan, Brazil, and China between 1999 and 2000.
+
+* Let's take a look at these data sets.
+
+## Getting familiar with the data - Exercise 3
+
+R provides many functions to examine features of data:
+
+  - `View()`: To open the table up in an excel-like interface - not recommended for large tables
+  - `class()`: what kind of object is it (high-level)?
+  - `typeof()`: what is an object data type (low-level)?
+  - `is_tibble()`: use `is` functions to query data type
+  - `str()`: what is the structure of the object?
+  - `attributes()`: does it have any metadata?
+
+. . .
+
+Let's use these to explore `table1`
+
+## Getting familiar with the data - Exercise 4 {.smaller}
+
+Useful functions for tibbles:
+
+- `head()` - shows first 6 rows
+- `tail()` - shows last 6 rows
+- `dim()` - returns the dimensions of data frame (i.e. number of rows and number of columns)
+- `nrow()` - number of rows
+- `ncol()` - number of columns
+- `names()` or `colnames()` - both show the names attribute for a data frame
+- `glimpse()`
+
+. . .
+
+Use these on `table1`
+
+## Exercise 5 - _summary_, _hist_, & _table_ {.smaller}
+
+`summary()`: A generic function used to produce result summaries of the results of various model fitting functions.
+
+```{r}
+#| echo: true
+summary(table1) # summary of the whole table
+```
+
+. . .
+
+you can also summarize one variable, e.g. `summary(table1$cases)`
+
+---
+
+`hist()`: takes a vector and plots a histogram.
+
+```{r}
+#| fig-height: 4
+#| fig-width: 4
+#| echo: true
+hist(table1$cases)
+```
+
+---
+
+`table()`: uses classifying factors to build a contingency table of the counts for each factor combination.
+
+```{r}
+#| echo: true
+table(table2$year) # tally of one column
+```
+
+. . .
+
+```{r}
+#| echo: true
+table(table2$year, table2$type) # two columns at a time
+```
+
+# Main verbs in tidyr
+
+## Tidying data
+
+The four verbs (functions) to keep in mind for reshaping data with `tidyr` are:
+
+  - `pivot_wider()`
+  - `pivot_longer()`
+  - `separate()`
+  - `unite()`
+
+. . .
+
+There are other verbs as well - look at the `tidyr` cheatsheet!
+
+## pivot function - visualized
+
+![](../img/tidyexplain/tidyr-pivoting.gif)
+::: aside
+[tidyexplain](https://github.com/gadenbuie/tidyexplain) from @gadenbuie
+:::
+
+---
+
+`pivot_wider()` "widens" data, increasing the number of columns and decreasing the number of rows.
+
+![](../img/tidyr/pivot.png)
+
+. . .
+
+**Is the left tibble tidy?**
+
+## `pivot_wider()` - Exercise 6 {.smaller}
+
+What will the output look like?
+
+```{r}
+#| echo: true
+#| output-location: column
+table2
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+pivot_wider(
+  table2,
+  names_from = type,
+  values_from = count
+)
+```
+
+---
+
+If you want to save the output, assign it to a new variable. This new variable
+will appear in your Environment tab.
+
+```{r}
+#| echo: true
+table2_tidy <- pivot_wider(
+  table2,
+  names_from = type,
+  values_from = count
+)
+
+table2_tidy
+```
+
+---
+
+`pivot_longer()` "lengthens" data, increasing the number of rows and decreasing the number of columns.
+
+![](../img/tidyr/pivot.png)
+
+**Is the left tibble tidy?**
+
+## `pivot_longer()` - Exercise 7 {.smaller}
+
+What will the output look like?
+
+```{r}
+#| echo: true
+#| output-location: column
+table4a
+```
+
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+pivot_longer(
+  table4a,
+  2:3,
+  names_to = "year",
+  values_to = "cases"
+)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+pivot_longer(
+  table4a,
+  -country,
+  names_to = "year",
+  values_to = "cases"
+)
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+table4_tidy <- pivot_longer(
+  table4a,
+  -country,
+  names_to = "year",
+  values_to = "cases"
+)
+
+table4_tidy
+```
+
+## separate - syntax
+
+Given either a regular expression or a vector of character positions, `separate()` turns a single character column into multiple columns.
+
+![](../img/tidyr/separate.png)
+
+---
+
+### `separate()` syntax
+
+```r
+separate(
+  data,
+  col,
+  into,
+  sep = "[^[:alnum:]]+", #any sequence of non-alphanumeric values
+  remove = TRUE, # default is to remove the original column
+  convert = FALSE, # default is to not convert
+  extra = "warn",
+  fill = "warn",
+  ...
+)
+
+```
+
+## separate - Exercise 8 {.smaller}
+
+What will the output look like?
+
+```{r}
+#| echo: true
+#| output-location: column
+table3
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+separate(
+  table3,
+  rate,
+  into = c("cases", "population"),
+  sep = "/"
+)
+```
+
+## `separate_wider_delim()` - modern alternative
+
+A more explicit way to separate columns with delimited data.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+table3 |>
+  separate_wider_delim(
+    rate,
+    delim = "/",
+    names = c("cases", "population")
+  )
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# Convert to numeric in the same step
+table3 |>
+  separate_wider_delim(
+    rate,
+    delim = "/",
+    names = c("cases", "population"),
+    cols_remove = FALSE
+  ) |>
+  mutate(
+    cases = as.numeric(cases),
+    population = as.numeric(population)
+  )
+```
+
+## `unite()` - syntax
+
+`unite()` combines multiple columns into a single column.
+
+![](../img/tidyr/unite.png)
+
+---
+
+### `unite()` syntax
+
+```r
+unite(
+  data,
+  col,
+  ..., # select columns to unite
+  sep = "[^[:alnum:]]+", #any sequence of non-alphanumeric values
+  remove = TRUE, #default is set to TRUE
+  na.rm = FALSE #default is set to FALSE
+)
+```
+
+## unite - Exercise 9 {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column
+table6 <- read_csv(
+  here("data/bootcamp/table6.csv"),
+  show_col_types = FALSE
+)
+
+table6
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+unite(
+  table6,
+  "new",
+  century,
+  year,
+  sep = ""
+)
+```
+
+## Handling missing values
+
+![](../img/tidyr/missing-values.png)
+
+## Handling missing values {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: column
+df <- tibble(
+  x = c(1, 2, NA),
+  y = c("a", NA, "b")
+)
+
+df
+```
+
+<br>
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+drop_na(df)
+```
+
+<br>
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+replace_na(
+  df,
+  list(x = 0, y = "unknown")
+)
+```
