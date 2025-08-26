@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.7.33">
 
   <meta name="author" content="Jay Hesselberth">
-  <meta name="dcterms.date" content="2025-08-25">
+  <meta name="dcterms.date" content="2025-08-26">
   <title>MOLB 7950 – R Bootcamp - Day 2</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -218,7 +218,7 @@ Jay Hesselberth
     </div>
 </div>
 
-  <p class="date">2025-08-25</p>
+  <p class="date">2025-08-26</p>
 </section>
 <section id="class-2-outline" class="slide level2">
 <h2>Class 2 outline</h2>
@@ -586,27 +586,12 @@ dttm (1): date
 <p>Given either a regular expression or a vector of character positions, <code>separate()</code> turns a single character column into multiple columns.</p>
 
 <img data-src="../img/tidyr/separate.png" class="r-stretch"></section>
-<section class="slide level2">
-
-<h3 id="separate-syntax"><code>separate()</code> syntax</h3>
-<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">separate</span>(</span>
-<span id="cb27-2"><a></a>  data,</span>
-<span id="cb27-3"><a></a>  col,</span>
-<span id="cb27-4"><a></a>  into,</span>
-<span id="cb27-5"><a></a>  <span class="at">sep =</span> <span class="st">"[^[:alnum:]]+"</span>, <span class="co">#any sequence of non-alphanumeric values</span></span>
-<span id="cb27-6"><a></a>  <span class="at">remove =</span> <span class="cn">TRUE</span>, <span class="co"># default is to remove the original column</span></span>
-<span id="cb27-7"><a></a>  <span class="at">convert =</span> <span class="cn">FALSE</span>, <span class="co"># default is to not convert</span></span>
-<span id="cb27-8"><a></a>  <span class="at">extra =</span> <span class="st">"warn"</span>,</span>
-<span id="cb27-9"><a></a>  <span class="at">fill =</span> <span class="st">"warn"</span>,</span>
-<span id="cb27-10"><a></a>  ...</span>
-<span id="cb27-11"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="separate---exercise-8" class="slide level2 smaller">
-<h2>separate - Exercise 8</h2>
+<section id="separate_wider_delim---exercise-8" class="slide level2 smaller">
+<h2><code>separate_wider_delim()</code> - Exercise 8</h2>
 <p>What will the output look like?</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a>table3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a>table3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 3
@@ -622,12 +607,12 @@ dttm (1): date
 </div></div>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="fu">separate</span>(</span>
-<span id="cb30-2"><a></a>  table3,</span>
-<span id="cb30-3"><a></a>  rate,</span>
-<span id="cb30-4"><a></a>  <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"cases"</span>, <span class="st">"population"</span>),</span>
-<span id="cb30-5"><a></a>  <span class="at">sep =</span> <span class="st">"/"</span></span>
-<span id="cb30-6"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">separate_wider_delim</span>(</span>
+<span id="cb29-2"><a></a>  table3,</span>
+<span id="cb29-3"><a></a>  rate,</span>
+<span id="cb29-4"><a></a>  <span class="at">delim =</span> <span class="st">"/"</span>,</span>
+<span id="cb29-5"><a></a>  <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"cases"</span>, <span class="st">"population"</span>)</span>
+<span id="cb29-6"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 4
@@ -639,58 +624,6 @@ dttm (1): date
 4 Brazil       2000 80488  174504898 
 5 China        1999 212258 1272915272
 6 China        2000 213766 1280428583</code></pre>
-</div>
-</div></div>
-</section>
-<section id="separate_wider_delim---modern-alternative" class="slide level2">
-<h2><code>separate_wider_delim()</code> - modern alternative</h2>
-<p>A more explicit way to separate columns with delimited data.</p>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a>table3 <span class="sc">|&gt;</span></span>
-<span id="cb32-2"><a></a>  <span class="fu">separate_wider_delim</span>(</span>
-<span id="cb32-3"><a></a>    rate,</span>
-<span id="cb32-4"><a></a>    <span class="at">delim =</span> <span class="st">"/"</span>,</span>
-<span id="cb32-5"><a></a>    <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"cases"</span>, <span class="st">"population"</span>)</span>
-<span id="cb32-6"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div><div class="column fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 4
-  country      year cases  population
-  &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;     
-1 Afghanistan  1999 745    19987071  
-2 Afghanistan  2000 2666   20595360  
-3 Brazil       1999 37737  172006362 
-4 Brazil       2000 80488  174504898 
-5 China        1999 212258 1272915272
-6 China        2000 213766 1280428583</code></pre>
-</div>
-</div></div>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a><span class="co"># Convert to numeric in the same step</span></span>
-<span id="cb34-2"><a></a>table3 <span class="sc">|&gt;</span></span>
-<span id="cb34-3"><a></a>  <span class="fu">separate_wider_delim</span>(</span>
-<span id="cb34-4"><a></a>    rate,</span>
-<span id="cb34-5"><a></a>    <span class="at">delim =</span> <span class="st">"/"</span>,</span>
-<span id="cb34-6"><a></a>    <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"cases"</span>, <span class="st">"population"</span>),</span>
-<span id="cb34-7"><a></a>    <span class="at">cols_remove =</span> <span class="cn">FALSE</span></span>
-<span id="cb34-8"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb34-9"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb34-10"><a></a>    <span class="at">cases =</span> <span class="fu">as.numeric</span>(cases),</span>
-<span id="cb34-11"><a></a>    <span class="at">population =</span> <span class="fu">as.numeric</span>(population)</span>
-<span id="cb34-12"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div><div class="column fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 5
-  country      year  cases population rate             
-  &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;            
-1 Afghanistan  1999    745   19987071 745/19987071     
-2 Afghanistan  2000   2666   20595360 2666/20595360    
-3 Brazil       1999  37737  172006362 37737/172006362  
-4 Brazil       2000  80488  174504898 80488/174504898  
-5 China        1999 212258 1272915272 212258/1272915272
-6 China        2000 213766 1280428583 213766/1280428583</code></pre>
 </div>
 </div></div>
 </section>
@@ -702,29 +635,29 @@ dttm (1): date
 <section class="slide level2">
 
 <h3 id="unite-syntax"><code>unite()</code> syntax</h3>
-<div class="sourceCode" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a><span class="fu">unite</span>(</span>
-<span id="cb36-2"><a></a>  data,</span>
-<span id="cb36-3"><a></a>  col,</span>
-<span id="cb36-4"><a></a>  ..., <span class="co"># select columns to unite</span></span>
-<span id="cb36-5"><a></a>  <span class="at">sep =</span> <span class="st">"[^[:alnum:]]+"</span>, <span class="co">#any sequence of non-alphanumeric values</span></span>
-<span id="cb36-6"><a></a>  <span class="at">remove =</span> <span class="cn">TRUE</span>, <span class="co">#default is set to TRUE</span></span>
-<span id="cb36-7"><a></a>  <span class="at">na.rm =</span> <span class="cn">FALSE</span> <span class="co">#default is set to FALSE</span></span>
-<span id="cb36-8"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a></a><span class="fu">unite</span>(</span>
+<span id="cb31-2"><a></a>  data,</span>
+<span id="cb31-3"><a></a>  col,</span>
+<span id="cb31-4"><a></a>  ..., <span class="co"># select columns to unite</span></span>
+<span id="cb31-5"><a></a>  <span class="at">sep =</span> <span class="st">"[^[:alnum:]]+"</span>, <span class="co">#any sequence of non-alphanumeric values</span></span>
+<span id="cb31-6"><a></a>  <span class="at">remove =</span> <span class="cn">TRUE</span>, <span class="co">#default is set to TRUE</span></span>
+<span id="cb31-7"><a></a>  <span class="at">na.rm =</span> <span class="cn">FALSE</span> <span class="co">#default is set to FALSE</span></span>
+<span id="cb31-8"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="unite---exercise-9" class="slide level2 smaller">
 <h2>unite - Exercise 9</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a></a>table6 <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(</span>
-<span id="cb37-2"><a></a>  <span class="fu">here</span>(<span class="st">"data/bootcamp/table6.csv"</span>),</span>
-<span id="cb37-3"><a></a>  <span class="at">show_col_types =</span> <span class="cn">FALSE</span></span>
-<span id="cb37-4"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a>table6 <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(</span>
+<span id="cb32-2"><a></a>  <span class="fu">here</span>(<span class="st">"data/bootcamp/table6.csv"</span>),</span>
+<span id="cb32-3"><a></a>  <span class="at">show_col_types =</span> <span class="cn">FALSE</span></span>
+<span id="cb32-4"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column">
 <div class="cell-output cell-output-stderr">
 <pre><code>New names:
 • `` -&gt; `...1`</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a>table6</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a>table6</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 5
    ...1 country    century  year  cases
@@ -736,13 +669,13 @@ dttm (1): date
 </div></div>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a></a><span class="fu">unite</span>(</span>
-<span id="cb41-2"><a></a>  table6,</span>
-<span id="cb41-3"><a></a>  <span class="st">"new"</span>,</span>
-<span id="cb41-4"><a></a>  century,</span>
-<span id="cb41-5"><a></a>  year,</span>
-<span id="cb41-6"><a></a>  <span class="at">sep =</span> <span class="st">""</span></span>
-<span id="cb41-7"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a><span class="fu">unite</span>(</span>
+<span id="cb36-2"><a></a>  table6,</span>
+<span id="cb36-3"><a></a>  <span class="st">"new"</span>,</span>
+<span id="cb36-4"><a></a>  century,</span>
+<span id="cb36-5"><a></a>  year,</span>
+<span id="cb36-6"><a></a>  <span class="at">sep =</span> <span class="st">""</span></span>
+<span id="cb36-7"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 4
@@ -762,12 +695,12 @@ dttm (1): date
 <h2>Handling missing values</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a>df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb43-2"><a></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>),</span>
-<span id="cb43-3"><a></a>  <span class="at">y =</span> <span class="fu">c</span>(<span class="st">"a"</span>, <span class="cn">NA</span>, <span class="st">"b"</span>)</span>
-<span id="cb43-4"><a></a>)</span>
-<span id="cb43-5"><a></a></span>
-<span id="cb43-6"><a></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a>df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb38-2"><a></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="cn">NA</span>),</span>
+<span id="cb38-3"><a></a>  <span class="at">y =</span> <span class="fu">c</span>(<span class="st">"a"</span>, <span class="cn">NA</span>, <span class="st">"b"</span>)</span>
+<span id="cb38-4"><a></a>)</span>
+<span id="cb38-5"><a></a></span>
+<span id="cb38-6"><a></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 2
@@ -781,7 +714,7 @@ dttm (1): date
 <p><br></p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a><span class="fu">drop_na</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a><span class="fu">drop_na</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 2
@@ -793,10 +726,10 @@ dttm (1): date
 <p><br></p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a><span class="fu">replace_na</span>(</span>
-<span id="cb47-2"><a></a>  df,</span>
-<span id="cb47-3"><a></a>  <span class="fu">list</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="st">"unknown"</span>)</span>
-<span id="cb47-4"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a></a><span class="fu">replace_na</span>(</span>
+<span id="cb42-2"><a></a>  df,</span>
+<span id="cb42-3"><a></a>  <span class="fu">list</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="st">"unknown"</span>)</span>
+<span id="cb42-4"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 2
