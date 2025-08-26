@@ -1,0 +1,177 @@
+---
+title: "Problem Set 1 Key"
+author: "JH"
+format:
+    html:
+        embed-resources: true
+---
+
+## Problem Set
+
+Each problem below is worth **8 points**.
+
+**The problem set is due 12pm on Aug 30.**
+
+### Grading rubric
+
+- Everything is good: 5 points
+- Partially correct answers: 3-4 points
+- Reasonable attempt: 2 points
+
+## Setup
+
+Start by loading libraries you need analysis below. When in doubt, start by loading the tidyverse package.
+
+```{r}
+#| label: load-libs
+library(tidyverse)
+```
+
+## Question 1
+
+Create 3 different vectors called `x`, `y`, and `z`:
+
+- `x` should be character vector of length 5 (hint: use `LETTERS` or `letters`)
+- `y` should be a numeric vector of length 5 (hint: try `1:5` or `c(1, 2, 3, 4, 5)`)
+- `z` should be a logical vector of length 5 (hint: use `TRUE` and `FALSE` values)
+
+Use `length()` to calculate the length of each vector.
+
+```{r}
+#| label: create-vectors
+x <- LETTERS[1:5]
+y <- 1:5
+z <- c(TRUE, TRUE, FALSE, FALSE, FALSE)
+
+x
+y
+z
+
+# Traditional way
+length(x)
+length(y)
+length(z)
+```
+
+## Question 2
+
+Using the vectors you created above, create a new tibble with column names
+`x`, `y`, and `z`. Use the `tibble()` function to combine your vectors into a data frame.
+
+Use `nrow()` and `ncol()` to calculate the number of rows and columns, both with and without the pipe operator.
+
+Use `glimpse()` to get a quick overview of your tibble - this shows data types and first few values.
+
+What do you notice about the length of the vectors and the number of rows?
+
+```{r}
+tbl <- tibble(x = x, y = y, z = z)
+
+# Traditional way
+nrow(tbl)
+ncol(tbl)
+
+# Get a quick overview
+glimpse(tbl)
+```
+
+### Answer
+
+The length of the vectors and the number of rows are the same, because
+tibble columns are simply the vectors we started with.
+
+## Question 3
+
+Let's explore the `penguins` dataset that we loaded.
+
+1. Look at the number of rows with `nrow()` - this tells us how many penguins are in the dataset
+2. Look at the number of columns with `ncol()` - this tells us how many variables we measured
+3. Look at the column names with `names()` - this shows us what variables we have
+4. Get a glimpse of the data with `glimpse()` - this shows data types and sample values
+
+```{r}
+# Explore the penguins dataset
+nrow(penguins)
+ncol(penguins)
+names(penguins)
+glimpse(penguins)
+```
+
+## Question 4
+
+Next we will think about data tidying. Let's start by analyzing the `penguins` dataset.
+
+**Part A**: Is the `penguins` dataset tidy? To determine this, we need to think about the three principles of tidy data:
+
+1. Each variable forms a column
+2. Each observation forms a row
+3. Each type of observational unit forms a table
+
+Look at the `penguins` dataset and answer:
+
+- What are the variables in the dataset? (Hint: use `names(penguins)` to see them)
+- Does each column represent a single variable?
+- Does each row represent a single penguin observation?
+
+```{r}
+# Look at the structure of penguins
+penguins |> glimpse()
+
+# What are the variables?
+names(penguins)
+
+# Look at a few rows
+penguins |> head()
+```
+
+**Answer**: Yes, the `penguins` dataset is tidy because:
+
+- Each column represents one variable (species, island, bill_length_mm, etc.)
+- Each row represents one penguin observation
+- All observations are of the same type (penguin measurements)
+
+**Part B**: Now let's examine some datasets that are NOT tidy. Use `data()` to see available datasets, then look at these two examples:
+
+**Example 1: `anscombe`** - This is a classic statistics dataset:
+
+```{r}
+# Look at the anscombe dataset
+anscombe
+glimpse(anscombe)
+```
+
+Is `anscombe` tidy? Think about:
+- What are the actual variables? (Hint: x and y coordinates for different datasets)
+- How many different datasets are encoded in the column names?
+- What would a tidy version look like?
+
+**Example 2: Choose another dataset** - Pick one more dataset from `data()` and analyze whether it's tidy:
+
+```{r}
+# Look at available datasets
+data()
+
+# Choose one and examine it (examples: WorldPhones, UCBAdmissions, HairEyeColor)
+# Let's try WorldPhones as an example
+WorldPhones
+```
+`
+
+**Part C**: Write a brief explanation (2-3 sentences) for each dataset about:
+1. Whether it's tidy or not
+2. What makes it tidy/untidy
+3. What the variables actually represent
+
+### Your Analysis:
+
+**penguins**: The penguins dataset is tidy because each column represents a single variable (species, island, bill measurements, etc.), each row represents one penguin observation, and all data is the same type of observational unit (individual penguin measurements). The variables are clearly defined and there's no mixing of different types of information in single columns.
+
+**anscombe**: The anscombe dataset is NOT tidy because it violates multiple tidy data principles. The actual variables are x-coordinates, y-coordinates, and dataset identifier, but the dataset identifier is encoded in the column names (x1, y1, x2, y2, etc.). Four different datasets are stored in one table, with each dataset's x and y values spread across separate columns rather than being in rows with a dataset identifier column.
+
+**WorldPhones**: The WorldPhones dataset is NOT tidy because it has years as row names instead of a proper column, and regions are spread across columns rather than being values in a "region" variable. The actual variables should be year, region, and number of phones, but currently the year and region information is stored in the structure of the table rather than as data values. A tidy version would have one row per year-region combination.
+
+## Submit
+
+Be sure to click the "Render" button to render the HTML output.
+
+Then paste the URL of the **Posit Cloud project** (NOT the HTML link) into the problem set on Canvas.
