@@ -293,7 +293,7 @@ separate(
 
 ```
 
-## separate - Exercise 8 {.smaller}
+## `separate_wider_delim()` - Exercise 8 {.smaller}
 
 What will the output look like?
 
@@ -306,44 +306,12 @@ table3
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-separate(
+separate_wider_delim(
   table3,
   rate,
-  into = c("cases", "population"),
-  sep = "/"
+  delim = "/",
+  names = c("cases", "population")
 )
-```
-
-## `separate_wider_delim()` - modern alternative
-
-A more explicit way to separate columns with delimited data.
-
-```{r}
-#| echo: true
-#| output-location: column-fragment
-table3 |>
-  separate_wider_delim(
-    rate,
-    delim = "/",
-    names = c("cases", "population")
-  )
-```
-
-```{r}
-#| echo: true
-#| output-location: column-fragment
-# Convert to numeric in the same step
-table3 |>
-  separate_wider_delim(
-    rate,
-    delim = "/",
-    names = c("cases", "population"),
-    cols_remove = FALSE
-  ) |>
-  mutate(
-    cases = as.numeric(cases),
-    population = as.numeric(population)
-  )
 ```
 
 ## `unite()` - syntax
