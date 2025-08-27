@@ -10,7 +10,6 @@ library(tidyverse)
 library(here)
 ```
 
-
 ## Class 3 outline {.smaller}
 
 * Introduce _dplyr_ & today's datasets (Exercise 1)
@@ -342,6 +341,56 @@ starwars_bmi <- starwars |>
 
 ---
 
+## `count()` - Count observations
+
+`count()` is a shortcut for `group_by()` + `summarise()` + `n()`.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# Count observations by species
+starwars |>
+  count(species)
+```
+
+---
+
+Sort counts with `sort = TRUE`
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# Most common species first
+starwars |>
+  count(species, sort = TRUE)
+```
+
+---
+
+Count by multiple variables
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# Count by species and gender
+starwars |>
+  count(species, gender, sort = TRUE)
+```
+
+---
+
+`count()` is equivalent to this longer approach:
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# The long way
+starwars |>
+  group_by(species) |>
+  summarise(n = n()) |>
+  arrange(desc(n))
+```
+
 ## Complex conditional logic with `case_when()`
 
 ```{r}
@@ -460,45 +509,11 @@ starwars |>
 #| output-location: column-fragment
 # Apply mean to multiple numeric columns
 starwars |>
-  summarise(
-    across(c(height, mass), mean, na.rm = TRUE)
-  )
-```
-
----
-
-Apply multiple functions with `across()`
-
-```{r}
-#| echo: true
-#| output-location: column-fragment
-# Apply multiple functions using list()
-starwars |>
-  summarise(
-    across(
-      c(height, mass),
-      list(mean = mean, median = median),
-      na.rm = TRUE
-    )
-  )
-```
-
----
-
-`across()` with grouping
-
-```{r}
-#| echo: true
-#| output-location: column-fragment
-# Combine across() with group_by()
-starwars |>
   group_by(species) |>
   summarise(
     across(
       c(height, mass),
-      list(mean = mean, median = median),
-      na.rm = TRUE
-    ),
-    .groups = "drop"
+      \(x) mean(x, na.rm = TRUE)
+    )
   )
 ```
