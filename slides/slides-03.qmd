@@ -450,3 +450,55 @@ starwars |>
     mass = mean(mass, na.rm = TRUE)
   )
 ```
+
+## `across()` - Apply functions to multiple columns
+
+`across()` allows you to apply the same operations to multiple columns efficiently.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# Apply mean to multiple numeric columns
+starwars |>
+  summarise(
+    across(c(height, mass), mean, na.rm = TRUE)
+  )
+```
+
+---
+
+Apply multiple functions with `across()`
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# Apply multiple functions using list()
+starwars |>
+  summarise(
+    across(
+      c(height, mass),
+      list(mean = mean, median = median),
+      na.rm = TRUE
+    )
+  )
+```
+
+---
+
+`across()` with grouping
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# Combine across() with group_by()
+starwars |>
+  group_by(species) |>
+  summarise(
+    across(
+      c(height, mass),
+      list(mean = mean, median = median),
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  )
+```
