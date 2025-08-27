@@ -894,21 +894,131 @@ Jay Hesselberth
 
 </div>
 </section>
+<section id="count---count-observations" class="slide level2">
+<h2><code>count()</code> - Count observations</h2>
+<p><code>count()</code> is a shortcut for <code>group_by()</code> + <code>summarise()</code> + <code>n()</code>.</p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a><span class="co"># Count observations by species</span></span>
+<span id="cb49-2"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb49-3"><a></a>  <span class="fu">count</span>(species)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 38 × 2
+   species       n
+   &lt;chr&gt;     &lt;int&gt;
+ 1 Aleena        1
+ 2 Besalisk      1
+ 3 Cerean        1
+ 4 Chagrian      1
+ 5 Clawdite      1
+ 6 Droid         6
+ 7 Dug           1
+ 8 Ewok          1
+ 9 Geonosian     1
+10 Gungan        3
+# ℹ 28 more rows</code></pre>
+</div>
+</div></div>
+</section>
+<section class="slide level2">
+
+<p>Sort counts with <code>sort = TRUE</code></p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a><span class="co"># Most common species first</span></span>
+<span id="cb51-2"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb51-3"><a></a>  <span class="fu">count</span>(species, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 38 × 2
+   species      n
+   &lt;chr&gt;    &lt;int&gt;
+ 1 Human       35
+ 2 Droid        6
+ 3 &lt;NA&gt;         4
+ 4 Gungan       3
+ 5 Kaminoan     2
+ 6 Mirialan     2
+ 7 Twi'lek      2
+ 8 Wookiee      2
+ 9 Zabrak       2
+10 Aleena       1
+# ℹ 28 more rows</code></pre>
+</div>
+</div></div>
+</section>
+<section class="slide level2">
+
+<p>Count by multiple variables</p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a></a><span class="co"># Count by species and gender</span></span>
+<span id="cb53-2"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb53-3"><a></a>  <span class="fu">count</span>(species, gender, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 42 × 3
+   species  gender        n
+   &lt;chr&gt;    &lt;chr&gt;     &lt;int&gt;
+ 1 Human    masculine    26
+ 2 Human    feminine      9
+ 3 Droid    masculine     5
+ 4 &lt;NA&gt;     &lt;NA&gt;          4
+ 5 Gungan   masculine     3
+ 6 Mirialan feminine      2
+ 7 Wookiee  masculine     2
+ 8 Zabrak   masculine     2
+ 9 Aleena   masculine     1
+10 Besalisk masculine     1
+# ℹ 32 more rows</code></pre>
+</div>
+</div></div>
+</section>
+<section class="slide level2">
+
+<p><code>count()</code> is equivalent to this longer approach:</p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a></a><span class="co"># The long way</span></span>
+<span id="cb55-2"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb55-3"><a></a>  <span class="fu">group_by</span>(species) <span class="sc">|&gt;</span></span>
+<span id="cb55-4"><a></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb55-5"><a></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 38 × 2
+   species      n
+   &lt;chr&gt;    &lt;int&gt;
+ 1 Human       35
+ 2 Droid        6
+ 3 &lt;NA&gt;         4
+ 4 Gungan       3
+ 5 Kaminoan     2
+ 6 Mirialan     2
+ 7 Twi'lek      2
+ 8 Wookiee      2
+ 9 Zabrak       2
+10 Aleena       1
+# ℹ 28 more rows</code></pre>
+</div>
+</div></div>
+</section>
 <section id="complex-conditional-logic-with-case_when" class="slide level2">
 <h2>Complex conditional logic with <code>case_when()</code></h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a>starwars <span class="sc">|&gt;</span></span>
-<span id="cb49-2"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb49-3"><a></a>    <span class="at">size_description =</span> <span class="fu">case_when</span>(</span>
-<span id="cb49-4"><a></a>      height <span class="sc">&lt;</span> <span class="dv">100</span> <span class="sc">~</span> <span class="st">"very short"</span>,</span>
-<span id="cb49-5"><a></a>      height <span class="sc">&lt;</span> <span class="dv">150</span> <span class="sc">~</span> <span class="st">"short"</span>,</span>
-<span id="cb49-6"><a></a>      height <span class="sc">&lt;</span> <span class="dv">200</span> <span class="sc">~</span> <span class="st">"average"</span>,</span>
-<span id="cb49-7"><a></a>      height <span class="sc">&gt;=</span> <span class="dv">200</span> <span class="sc">~</span> <span class="st">"tall"</span>,</span>
-<span id="cb49-8"><a></a>      <span class="at">.default =</span> <span class="st">"unknown"</span></span>
-<span id="cb49-9"><a></a>    )</span>
-<span id="cb49-10"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb49-11"><a></a>  <span class="fu">count</span>(size_description)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb57-2"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb57-3"><a></a>    <span class="at">size_description =</span> <span class="fu">case_when</span>(</span>
+<span id="cb57-4"><a></a>      height <span class="sc">&lt;</span> <span class="dv">100</span> <span class="sc">~</span> <span class="st">"very short"</span>,</span>
+<span id="cb57-5"><a></a>      height <span class="sc">&lt;</span> <span class="dv">150</span> <span class="sc">~</span> <span class="st">"short"</span>,</span>
+<span id="cb57-6"><a></a>      height <span class="sc">&lt;</span> <span class="dv">200</span> <span class="sc">~</span> <span class="st">"average"</span>,</span>
+<span id="cb57-7"><a></a>      height <span class="sc">&gt;=</span> <span class="dv">200</span> <span class="sc">~</span> <span class="st">"tall"</span>,</span>
+<span id="cb57-8"><a></a>      <span class="at">.default =</span> <span class="st">"unknown"</span></span>
+<span id="cb57-9"><a></a>    )</span>
+<span id="cb57-10"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb57-11"><a></a>  <span class="fu">count</span>(size_description)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 2
@@ -927,17 +1037,17 @@ Jay Hesselberth
 <p>Multiple conditions with <code>case_when()</code></p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a>starwars <span class="sc">|&gt;</span></span>
-<span id="cb51-2"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb51-3"><a></a>    <span class="at">character_type =</span> <span class="fu">case_when</span>(</span>
-<span id="cb51-4"><a></a>      species <span class="sc">==</span> <span class="st">"Human"</span> <span class="sc">&amp;</span> homeworld <span class="sc">==</span> <span class="st">"Tatooine"</span> <span class="sc">~</span> <span class="st">"Tatooine Human"</span>,</span>
-<span id="cb51-5"><a></a>      species <span class="sc">==</span> <span class="st">"Human"</span> <span class="sc">~</span> <span class="st">"Other Human"</span>,</span>
-<span id="cb51-6"><a></a>      mass <span class="sc">&gt;</span> <span class="dv">100</span> <span class="sc">~</span> <span class="st">"Heavy non-human"</span>,</span>
-<span id="cb51-7"><a></a>      height <span class="sc">&gt;</span> <span class="dv">180</span> <span class="sc">~</span> <span class="st">"Tall non-human"</span>,</span>
-<span id="cb51-8"><a></a>      <span class="at">.default =</span> <span class="st">"Standard character"</span></span>
-<span id="cb51-9"><a></a>    )</span>
-<span id="cb51-10"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb51-11"><a></a>  <span class="fu">count</span>(character_type, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb59-2"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb59-3"><a></a>    <span class="at">character_type =</span> <span class="fu">case_when</span>(</span>
+<span id="cb59-4"><a></a>      species <span class="sc">==</span> <span class="st">"Human"</span> <span class="sc">&amp;</span> homeworld <span class="sc">==</span> <span class="st">"Tatooine"</span> <span class="sc">~</span> <span class="st">"Tatooine Human"</span>,</span>
+<span id="cb59-5"><a></a>      species <span class="sc">==</span> <span class="st">"Human"</span> <span class="sc">~</span> <span class="st">"Other Human"</span>,</span>
+<span id="cb59-6"><a></a>      mass <span class="sc">&gt;</span> <span class="dv">100</span> <span class="sc">~</span> <span class="st">"Heavy non-human"</span>,</span>
+<span id="cb59-7"><a></a>      height <span class="sc">&gt;</span> <span class="dv">180</span> <span class="sc">~</span> <span class="st">"Tall non-human"</span>,</span>
+<span id="cb59-8"><a></a>      <span class="at">.default =</span> <span class="st">"Standard character"</span></span>
+<span id="cb59-9"><a></a>    )</span>
+<span id="cb59-10"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb59-11"><a></a>  <span class="fu">count</span>(character_type, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 2
@@ -959,7 +1069,7 @@ Jay Hesselberth
 <li class="fragment">dplyr verbs automatically detect grouped tables and calculate “by group”.</li>
 </ul>
 <div class="fragment">
-<div class="sourceCode" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a></a><span class="fu">group_by</span>(<span class="at">data =</span> ..., <span class="sc">&lt;</span>colname<span class="sc">&gt;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a></a><span class="fu">group_by</span>(<span class="at">data =</span> ..., <span class="sc">&lt;</span>colname<span class="sc">&gt;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="group_by---syntax" class="slide level2">
@@ -970,14 +1080,14 @@ Jay Hesselberth
 <li class="fragment">Then, when you use the dplyr verbs on a grouped data frame they’ll be automatically applied “by group”.</li>
 </ul>
 <div class="fragment">
-<div class="sourceCode" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a></a><span class="fu">group_by</span>(<span class="at">data =</span> ..., <span class="sc">&lt;</span>colname<span class="sc">&gt;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a></a><span class="fu">group_by</span>(<span class="at">data =</span> ..., <span class="sc">&lt;</span>colname<span class="sc">&gt;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="group_by-summarize---exercise-7" class="slide level2 smaller">
 <h2>group_by + summarize - Exercise 7</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a></a>starwars <span class="sc">|&gt;</span></span>
-<span id="cb55-2"><a></a>  <span class="fu">group_by</span>(species)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb63-2"><a></a>  <span class="fu">group_by</span>(species)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell fragment">
 <div class="cell-output cell-output-stdout">
@@ -1007,17 +1117,17 @@ Jay Hesselberth
 <li class="fragment"><code>summarize()</code> takes named expressions and calculates a summary based on group.</li>
 </ul>
 <div class="fragment">
-<div class="sourceCode" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a></a><span class="fu">summarize</span>(<span class="at">data =</span> ..., <span class="at">name =</span> expression)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a></a><span class="fu">summarize</span>(<span class="at">data =</span> ..., <span class="at">name =</span> expression)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="calculate-a-summary-statistic-by-species" class="slide level2 smaller">
 <h2>Calculate a summary statistic <em>by species</em></h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a></a>starwars <span class="sc">|&gt;</span></span>
-<span id="cb58-2"><a></a>  <span class="fu">group_by</span>(species) <span class="sc">|&gt;</span></span>
-<span id="cb58-3"><a></a>  <span class="fu">summarise</span>(</span>
-<span id="cb58-4"><a></a>    <span class="at">height =</span> <span class="fu">mean</span>(height, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb58-5"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb66-2"><a></a>  <span class="fu">group_by</span>(species) <span class="sc">|&gt;</span></span>
+<span id="cb66-3"><a></a>  <span class="fu">summarise</span>(</span>
+<span id="cb66-4"><a></a>    <span class="at">height =</span> <span class="fu">mean</span>(height, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb66-5"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell fragment">
 <div class="cell-output cell-output-stdout">
@@ -1042,12 +1152,12 @@ Jay Hesselberth
 
 <p>Calucate multiple summary statistics.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a></a>starwars <span class="sc">|&gt;</span></span>
-<span id="cb60-2"><a></a>  <span class="fu">group_by</span>(species, gender) <span class="sc">|&gt;</span></span>
-<span id="cb60-3"><a></a>  <span class="fu">summarise</span>(</span>
-<span id="cb60-4"><a></a>    <span class="at">height =</span> <span class="fu">mean</span>(height, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb60-5"><a></a>    <span class="at">mass =</span> <span class="fu">mean</span>(mass, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb60-6"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb68-2"><a></a>  <span class="fu">group_by</span>(species, gender) <span class="sc">|&gt;</span></span>
+<span id="cb68-3"><a></a>  <span class="fu">summarise</span>(</span>
+<span id="cb68-4"><a></a>    <span class="at">height =</span> <span class="fu">mean</span>(height, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb68-5"><a></a>    <span class="at">mass =</span> <span class="fu">mean</span>(mass, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb68-6"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell fragment">
 <div class="cell-output cell-output-stderr">
@@ -1078,87 +1188,30 @@ Jay Hesselberth
 <p><code>across()</code> allows you to apply the same operations to multiple columns efficiently.</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a></a><span class="co"># Apply mean to multiple numeric columns</span></span>
-<span id="cb63-2"><a></a>starwars <span class="sc">|&gt;</span></span>
-<span id="cb63-3"><a></a>  <span class="fu">summarise</span>(</span>
-<span id="cb63-4"><a></a>    <span class="fu">across</span>(<span class="fu">c</span>(height, mass), mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb63-5"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div><div class="column fragment">
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: There was 1 warning in `summarise()`.
-ℹ In argument: `across(c(height, mass), mean, na.rm = TRUE)`.
-Caused by warning:
-! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
-Supply arguments directly to `.fns` through an anonymous function instead.
-
-  # Previously
-  across(a:b, mean, na.rm = TRUE)
-
-  # Now
-  across(a:b, \(x) mean(x, na.rm = TRUE))</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 2
-  height  mass
-   &lt;dbl&gt; &lt;dbl&gt;
-1   175.  97.3</code></pre>
-</div>
-</div></div>
-</section>
-<section class="slide level2">
-
-<p>Apply multiple functions with <code>across()</code></p>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a></a><span class="co"># Apply multiple functions using list()</span></span>
-<span id="cb66-2"><a></a>starwars <span class="sc">|&gt;</span></span>
-<span id="cb66-3"><a></a>  <span class="fu">summarise</span>(</span>
-<span id="cb66-4"><a></a>    <span class="fu">across</span>(</span>
-<span id="cb66-5"><a></a>      <span class="fu">c</span>(height, mass),</span>
-<span id="cb66-6"><a></a>      <span class="fu">list</span>(<span class="at">mean =</span> mean, <span class="at">median =</span> median),</span>
-<span id="cb66-7"><a></a>      <span class="at">na.rm =</span> <span class="cn">TRUE</span></span>
-<span id="cb66-8"><a></a>    )</span>
-<span id="cb66-9"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a></a><span class="co"># Apply mean to multiple numeric columns</span></span>
+<span id="cb71-2"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb71-3"><a></a>  <span class="fu">group_by</span>(species) <span class="sc">|&gt;</span></span>
+<span id="cb71-4"><a></a>  <span class="fu">summarise</span>(</span>
+<span id="cb71-5"><a></a>    <span class="fu">across</span>(</span>
+<span id="cb71-6"><a></a>      <span class="fu">c</span>(height, mass),</span>
+<span id="cb71-7"><a></a>      \(x) <span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb71-8"><a></a>    )</span>
+<span id="cb71-9"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 4
-  height_mean height_median mass_mean mass_median
-        &lt;dbl&gt;         &lt;int&gt;     &lt;dbl&gt;       &lt;dbl&gt;
-1        175.           180      97.3          79</code></pre>
-</div>
-</div></div>
-</section>
-<section class="slide level2">
-
-<p><code>across()</code> with grouping</p>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a></a><span class="co"># Combine across() with group_by()</span></span>
-<span id="cb68-2"><a></a>starwars <span class="sc">|&gt;</span></span>
-<span id="cb68-3"><a></a>  <span class="fu">group_by</span>(species) <span class="sc">|&gt;</span></span>
-<span id="cb68-4"><a></a>  <span class="fu">summarise</span>(</span>
-<span id="cb68-5"><a></a>    <span class="fu">across</span>(</span>
-<span id="cb68-6"><a></a>      <span class="fu">c</span>(height, mass),</span>
-<span id="cb68-7"><a></a>      <span class="fu">list</span>(<span class="at">mean =</span> mean, <span class="at">median =</span> median),</span>
-<span id="cb68-8"><a></a>      <span class="at">na.rm =</span> <span class="cn">TRUE</span></span>
-<span id="cb68-9"><a></a>    ),</span>
-<span id="cb68-10"><a></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb68-11"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div><div class="column fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 38 × 5
-   species   height_mean height_median mass_mean mass_median
-   &lt;chr&gt;           &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
- 1 Aleena            79             79      15          15  
- 2 Besalisk         198            198     102         102  
- 3 Cerean           198            198      82          82  
- 4 Chagrian         196            196     NaN          NA  
- 5 Clawdite         168            168      55          55  
- 6 Droid            131.            97      69.8        53.5
- 7 Dug              112            112      40          40  
- 8 Ewok              88             88      20          20  
- 9 Geonosian        183            183      80          80  
-10 Gungan           209.           206      74          74  
+<pre><code># A tibble: 38 × 3
+   species   height  mass
+   &lt;chr&gt;      &lt;dbl&gt; &lt;dbl&gt;
+ 1 Aleena       79   15  
+ 2 Besalisk    198  102  
+ 3 Cerean      198   82  
+ 4 Chagrian    196  NaN  
+ 5 Clawdite    168   55  
+ 6 Droid       131.  69.8
+ 7 Dug         112   40  
+ 8 Ewok         88   20  
+ 9 Geonosian   183   80  
+10 Gungan      209.  74  
 # ℹ 28 more rows</code></pre>
 </div>
 </div></div>
