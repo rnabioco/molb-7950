@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7530c408590d20eba92ebedbb433c75c.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.7.33">
+
+  <meta name="author" content="Jay Hesselberth">
+  <meta name="dcterms.date" content="2025-08-27">
+  <title>MOLB 7950 – R Bootcamp - Day 3</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #97947a;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #97947a;  padding-left: 4px; }
+    div.sourceCode
+      { color: #f8f8f2; background-color: #2b2b2b; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #f8f8f2; } /* Normal */
+    code span.al { color: #dcc6e0; } /* Alert */
+    code span.an { color: #d4d0ab; } /* Annotation */
+    code span.at { color: #ffd700; } /* Attribute */
+    code span.bn { color: #dcc6e0; } /* BaseN */
+    code span.bu { color: #f5ab35; } /* BuiltIn */
+    code span.cf { color: #ffa07a; } /* ControlFlow */
+    code span.ch { color: #abe338; } /* Char */
+    code span.cn { color: #ffa07a; } /* Constant */
+    code span.co { color: #d4d0ab; } /* Comment */
+    code span.cv { color: #d4d0ab; font-style: italic; } /* CommentVar */
+    code span.do { color: #d4d0ab; font-style: italic; } /* Documentation */
+    code span.dt { color: #dcc6e0; } /* DataType */
+    code span.dv { color: #dcc6e0; } /* DecVal */
+    code span.er { color: #dcc6e0; } /* Error */
+    code span.ex { color: #ffd700; } /* Extension */
+    code span.fl { color: #f5ab35; } /* Float */
+    code span.fu { color: #ffd700; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #d4d0ab; } /* Information */
+    code span.kw { color: #ffa07a; } /* Keyword */
+    code span.op { color: #00e0e0; } /* Operator */
+    code span.ot { color: #ffa07a; } /* Other */
+    code span.pp { color: #dcc6e0; } /* Preprocessor */
+    code span.sc { color: #00e0e0; } /* SpecialChar */
+    code span.ss { color: #abe338; } /* SpecialString */
+    code span.st { color: #abe338; } /* String */
+    code span.va { color: #f5ab35; } /* Variable */
+    code span.vs { color: #abe338; } /* VerbatimString */
+    code span.wa { color: #d4d0ab; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../site_libs/revealjs/dist/theme/quarto-9e2515fdc8c82743d0ba5fb7912e685e.css">
+  <link href="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+<meta property="og:title" content="R Bootcamp - Day 3 – MOLB 7950">
+<meta property="og:description" content="dplyr">
+<meta property="og:site_name" content="MOLB 7950">
+<meta name="twitter:title" content="R Bootcamp - Day 3 – MOLB 7950">
+<meta name="twitter:description" content="dplyr">
+<meta name="twitter:image" content="https://rnabioco.github.io/molb-7950/slides/images/twitter-card.png">
+<meta name="twitter:creator" content="@rnabioco">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">R Bootcamp - Day 3</h1>
+  <p class="subtitle">dplyr</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Jay Hesselberth 
+</div>
+        <p class="quarto-title-affiliation">
+            RNA Bioscience Initiative | CU Anschutz
+          </p>
+    </div>
+</div>
+
+  <p class="date">2025-08-27</p>
+</section>
+<section id="class-3-outline" class="slide level2 smaller">
+<h2>Class 3 outline</h2>
+<ul>
+<li class="fragment">Introduce <em>dplyr</em> &amp; today’s datasets (Exercise 1)</li>
+<li class="fragment">Review basic functions of <em>dplyr</em>
+<ul>
+<li class="fragment">core dplyr verbs:</li>
+<li class="fragment"><code>arrange</code> (Exercise 2)</li>
+<li class="fragment"><code>filter</code> (Exercise 3)</li>
+<li class="fragment"><code>select</code> (Exercise 4)</li>
+<li class="fragment"><code>mutate</code> and the pipe (Exercise 5)</li>
+<li class="fragment"><code>summarise</code> (Exercise 6)</li>
+<li class="fragment">modify scope of verbs using: <code>group_by</code> (Exercise 7)</li>
+<li class="fragment">and many others! <code>rename</code>, <code>count</code>, <code>add_row</code>, <code>add_column</code>, <code>distinct</code>, <code>sample_n</code>, <code>sample_frac</code>, <code>slice</code>, <code>pull</code> (Exercise 8)</li>
+</ul></li>
+</ul>
+</section>
+<section id="dplyr-overview" class="slide level2">
+<h2>dplyr overview</h2>
+<p>dplyr:</p>
+<ul>
+<li class="fragment">provides a set of tools for efficiently manipulating data sets in R.</li>
+<li class="fragment">is extremely fast even with large data sets.</li>
+<li class="fragment">follows the tidyverse grammar and philosophy; human-readable and intuitive</li>
+<li class="fragment">encourages linking of verbs together using pipes <code>|&gt;</code> (or the older <code>%&gt;%</code>)</li>
+</ul>
+</section>
+<section id="todays-datasets" class="slide level2 smaller">
+<h2>Today’s datasets</h2>
+<ul>
+<li class="fragment"><p>We will use a data set that comes with the <code>dplyr</code> package to explore its functions.</p></li>
+<li class="fragment"><p><code>dplyr::starwars</code> contains data for characters from Star Wars.</p></li>
+</ul>
+<div class="fragment">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>starwars</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 14
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 Luke Sk…    172    77 blond      fair       blue            19   male  mascu…
+ 2 C-3PO       167    75 &lt;NA&gt;       gold       yellow         112   none  mascu…
+ 3 R2-D2        96    32 &lt;NA&gt;       white, bl… red             33   none  mascu…
+ 4 Darth V…    202   136 none       white      yellow          41.9 male  mascu…
+ 5 Leia Or…    150    49 brown      light      brown           19   fema… femin…
+ 6 Owen La…    178   120 brown, gr… light      blue            52   male  mascu…
+ 7 Beru Wh…    165    75 brown      light      blue            47   fema… femin…
+ 8 R5-D4        97    32 &lt;NA&gt;       white, red red             NA   none  mascu…
+ 9 Biggs D…    183    84 black      light      brown           24   male  mascu…
+10 Obi-Wan…    182    77 auburn, w… fair       blue-gray       57   male  mascu…
+# ℹ 77 more rows
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="fragment">
+<p>Explore <code>starwars</code> in the console with <code>head()</code>, <code>View()</code>, and <code>summary()</code>.</p>
+</div>
+</section>
+<section id="dplyr-package" class="slide level2 smaller">
+<h2>dplyr package</h2>
+<p><code>dplyr</code> is a grammar of data manipulation, providing a consistent set of verbs that help you solve the most common data manipulation challenges:</p>
+<ul>
+<li class="fragment"><code>arrange()</code> changes the ordering of the rows.</li>
+<li class="fragment"><code>filter()</code> picks cases based on their values.</li>
+<li class="fragment"><code>select()</code> picks variables based on their names.</li>
+<li class="fragment"><code>mutate()</code> adds new variables that are functions of existing variables</li>
+<li class="fragment"><code>summarise()</code> reduces multiple values down to a single summary.</li>
+</ul>
+<div class="fragment">
+<ul>
+<li class="fragment"><p>These all combine naturally with <code>group_by()</code> which allows you to perform any operation “by group”.</p></li>
+<li class="fragment"><p>Pipes <code>|&gt;</code> allows different functions to be used together to create a workflow. <code>x |&gt; f(y)</code> turns into <code>f(x, y)</code></p></li>
+</ul>
+</div>
+</section>
+<section id="arrange---syntax" class="slide level2">
+<h2>arrange - Syntax</h2>
+<ul>
+<li class="fragment"><code>arrange()</code> orders rows by values of one or more columns (low to high).</li>
+<li class="fragment">The <code>desc()</code> helper orders high to low.</li>
+</ul>
+<div class="fragment">
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="fu">arrange</span>(<span class="at">data =</span> ..., <span class="sc">&lt;</span>colname<span class="sc">&gt;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="arrange---exercise-2" class="slide level2 smaller">
+<h2>arrange - Exercise 2</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a><span class="co"># default is to arrange in ascending order</span></span>
+<span id="cb4-2"><a></a><span class="fu">arrange</span>(starwars, height)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 14
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 Yoda         66    17 white      green      brown            896 male  mascu…
+ 2 Ratts T…     79    15 none       grey, blue unknown           NA male  mascu…
+ 3 Wicket …     88    20 brown      brown      brown              8 male  mascu…
+ 4 Dud Bolt     94    45 none       blue, grey yellow            NA male  mascu…
+ 5 R2-D2        96    32 &lt;NA&gt;       white, bl… red               33 none  mascu…
+ 6 R4-P17       96    NA none       silver, r… red, blue         NA none  femin…
+ 7 R5-D4        97    32 &lt;NA&gt;       white, red red               NA none  mascu…
+ 8 Sebulba     112    40 none       grey, red  orange            NA male  mascu…
+ 9 Gasgano     122    NA none       white, bl… black             NA male  mascu…
+10 Watto       137    NA black      blue, grey yellow            NA male  mascu…
+# ℹ 77 more rows
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="arrange---exercise-2-1" class="slide level2 smaller">
+<h2>arrange - Exercise 2</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a><span class="co"># arrange in descending order</span></span>
+<span id="cb6-2"><a></a><span class="fu">arrange</span>(starwars, <span class="fu">desc</span>(height))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 14
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 Yarael …    264    NA none       white      yellow          NA   male  mascu…
+ 2 Tarfful     234   136 brown      brown      blue            NA   male  mascu…
+ 3 Lama Su     229    88 none       grey       black           NA   male  mascu…
+ 4 Chewbac…    228   112 brown      unknown    blue           200   male  mascu…
+ 5 Roos Ta…    224    82 none       grey       orange          NA   male  mascu…
+ 6 Grievous    216   159 none       brown, wh… green, y…       NA   male  mascu…
+ 7 Taun We     213    NA none       grey       black           NA   fema… femin…
+ 8 Rugor N…    206    NA none       green      orange          NA   male  mascu…
+ 9 Tion Me…    206    80 none       grey       black           NA   male  mascu…
+10 Darth V…    202   136 none       white      yellow          41.9 male  mascu…
+# ℹ 77 more rows
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="arrange---exercise-2-2" class="slide level2 smaller">
+<h2>arrange - Exercise 2</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="co"># arrange by multiple columns</span></span>
+<span id="cb8-2"><a></a><span class="fu">arrange</span>(starwars, height, mass)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 14
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 Yoda         66    17 white      green      brown            896 male  mascu…
+ 2 Ratts T…     79    15 none       grey, blue unknown           NA male  mascu…
+ 3 Wicket …     88    20 brown      brown      brown              8 male  mascu…
+ 4 Dud Bolt     94    45 none       blue, grey yellow            NA male  mascu…
+ 5 R2-D2        96    32 &lt;NA&gt;       white, bl… red               33 none  mascu…
+ 6 R4-P17       96    NA none       silver, r… red, blue         NA none  femin…
+ 7 R5-D4        97    32 &lt;NA&gt;       white, red red               NA none  mascu…
+ 8 Sebulba     112    40 none       grey, red  orange            NA male  mascu…
+ 9 Gasgano     122    NA none       white, bl… black             NA male  mascu…
+10 Watto       137    NA black      blue, grey yellow            NA male  mascu…
+# ℹ 77 more rows
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="filter---syntax" class="slide level2">
+<h2>filter - Syntax</h2>
+<ul>
+<li class="fragment"><code>filter()</code> chooses rows/cases where conditions are true.</li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="fu">filter</span>(<span class="at">data =</span> ..., <span class="sc">&lt;</span>condition<span class="sc">&gt;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="filter---exercise-3" class="slide level2 smaller">
+<h2>filter - Exercise 3</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="fu">filter</span>(starwars, skin_color <span class="sc">==</span> <span class="st">"light"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 11 × 14
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 Leia Or…    150    49 brown      light      brown             19 fema… femin…
+ 2 Owen La…    178   120 brown, gr… light      blue              52 male  mascu…
+ 3 Beru Wh…    165    75 brown      light      blue              47 fema… femin…
+ 4 Biggs D…    183    84 black      light      brown             24 male  mascu…
+ 5 Lobot       175    79 none       light      blue              37 male  mascu…
+ 6 Padmé A…    185    45 brown      light      brown             46 fema… femin…
+ 7 Cordé       157    NA brown      light      brown             NA &lt;NA&gt;  &lt;NA&gt;  
+ 8 Dormé       165    NA brown      light      brown             NA fema… femin…
+ 9 Raymus …    188    79 brown      light      brown             NA male  mascu…
+10 Rey          NA    NA brown      light      hazel             NA fema… femin…
+11 Poe Dam…     NA    NA brown      light      brown             NA male  mascu…
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="filter---exercise-3-1" class="slide level2 smaller">
+<h2>filter - Exercise 3</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a><span class="fu">filter</span>(starwars, height <span class="sc">&lt;</span> <span class="dv">150</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 14
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 R2-D2        96    32 &lt;NA&gt;       white, bl… red               33 none  mascu…
+ 2 R5-D4        97    32 &lt;NA&gt;       white, red red               NA none  mascu…
+ 3 Yoda         66    17 white      green      brown            896 male  mascu…
+ 4 Wicket …     88    20 brown      brown      brown              8 male  mascu…
+ 5 Watto       137    NA black      blue, grey yellow            NA male  mascu…
+ 6 Sebulba     112    40 none       grey, red  orange            NA male  mascu…
+ 7 Ratts T…     79    15 none       grey, blue unknown           NA male  mascu…
+ 8 Dud Bolt     94    45 none       blue, grey yellow            NA male  mascu…
+ 9 Gasgano     122    NA none       white, bl… black             NA male  mascu…
+10 R4-P17       96    NA none       silver, r… red, blue         NA none  femin…
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="filter---exercise-3-2" class="slide level2 smaller">
+<h2>filter - Exercise 3</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a><span class="fu">filter</span>(</span>
+<span id="cb15-2"><a></a>  starwars,</span>
+<span id="cb15-3"><a></a>  mass <span class="sc">&gt;</span> <span class="fu">mean</span>(mass, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-4"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 14
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 Darth V…    202   136 none       white      yellow          41.9 male  mascu…
+ 2 Owen La…    178   120 brown, gr… light      blue            52   male  mascu…
+ 3 Chewbac…    228   112 brown      unknown    blue           200   male  mascu…
+ 4 Jabba D…    175  1358 &lt;NA&gt;       green-tan… orange         600   herm… mascu…
+ 5 Jek Ton…    180   110 brown      fair       blue            NA   &lt;NA&gt;  &lt;NA&gt;  
+ 6 IG-88       200   140 none       metal      red             15   none  mascu…
+ 7 Bossk       190   113 none       green      red             53   male  mascu…
+ 8 Dexter …    198   102 none       brown      yellow          NA   male  mascu…
+ 9 Grievous    216   159 none       brown, wh… green, y…       NA   male  mascu…
+10 Tarfful     234   136 brown      brown      blue            NA   male  mascu…
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="filter---exercise-3-3" class="slide level2 smaller">
+<h2>filter - Exercise 3</h2>
+<p>Filter out cases where <code>hair_color</code> is <code>NA</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a><span class="fu">filter</span>(starwars, <span class="fu">is.na</span>(hair_color))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 14
+  name      height  mass hair_color skin_color eye_color birth_year sex   gender
+  &lt;chr&gt;      &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+1 C-3PO        167    75 &lt;NA&gt;       gold       yellow           112 none  mascu…
+2 R2-D2         96    32 &lt;NA&gt;       white, bl… red               33 none  mascu…
+3 R5-D4         97    32 &lt;NA&gt;       white, red red               NA none  mascu…
+4 Greedo       173    74 &lt;NA&gt;       green      black             44 male  mascu…
+5 Jabba De…    175  1358 &lt;NA&gt;       green-tan… orange           600 herm… mascu…
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="filter---exercise-3-4" class="slide level2 smaller">
+<h2>filter - Exercise 3</h2>
+<ul>
+<li class="fragment"><p>The most frequently used comparison operators are:</p></li>
+<li class="fragment"><p><code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>==</code> (equal), <code>!=</code> (not equal)</p></li>
+<li class="fragment"><p><code>is.na()</code>, <code>!is.na()</code>, and <code>%in%</code> (contained in a vector of cases).</p></li>
+</ul>
+<div class="fragment">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="fu">filter</span>(</span>
+<span id="cb19-2"><a></a>  starwars,</span>
+<span id="cb19-3"><a></a>  skin_color <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"light"</span>, <span class="st">"fair"</span>, <span class="st">"pale"</span>)</span>
+<span id="cb19-4"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 33 × 14
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 Luke Sk…    172    77 blond      fair       blue            19   male  mascu…
+ 2 Leia Or…    150    49 brown      light      brown           19   fema… femin…
+ 3 Owen La…    178   120 brown, gr… light      blue            52   male  mascu…
+ 4 Beru Wh…    165    75 brown      light      blue            47   fema… femin…
+ 5 Biggs D…    183    84 black      light      brown           24   male  mascu…
+ 6 Obi-Wan…    182    77 auburn, w… fair       blue-gray       57   male  mascu…
+ 7 Anakin …    188    84 blond      fair       blue            41.9 male  mascu…
+ 8 Wilhuff…    180    NA auburn, g… fair       blue            64   male  mascu…
+ 9 Han Solo    180    80 brown      fair       brown           29   male  mascu…
+10 Wedge A…    170    77 brown      fair       hazel           21   male  mascu…
+# ℹ 23 more rows
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="co"># can also store as a named vector and use %in% with the vector</span></span>
+<span id="cb21-2"><a></a>color <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"light"</span>, <span class="st">"fair"</span>, <span class="st">"pale"</span>)</span>
+<span id="cb21-3"><a></a><span class="fu">filter</span>(starwars, skin_color <span class="sc">%in%</span> color)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 33 × 14
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 Luke Sk…    172    77 blond      fair       blue            19   male  mascu…
+ 2 Leia Or…    150    49 brown      light      brown           19   fema… femin…
+ 3 Owen La…    178   120 brown, gr… light      blue            52   male  mascu…
+ 4 Beru Wh…    165    75 brown      light      blue            47   fema… femin…
+ 5 Biggs D…    183    84 black      light      brown           24   male  mascu…
+ 6 Obi-Wan…    182    77 auburn, w… fair       blue-gray       57   male  mascu…
+ 7 Anakin …    188    84 blond      fair       blue            41.9 male  mascu…
+ 8 Wilhuff…    180    NA auburn, g… fair       blue            64   male  mascu…
+ 9 Han Solo    180    80 brown      fair       brown           29   male  mascu…
+10 Wedge A…    170    77 brown      fair       hazel           21   male  mascu…
+# ℹ 23 more rows
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<p>Conditions can be combined using <code>&amp;</code> (and), <code>|</code> (or).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="fu">filter</span>(</span>
+<span id="cb23-2"><a></a>  starwars,</span>
+<span id="cb23-3"><a></a>  skin_color <span class="sc">==</span> <span class="st">"light"</span> <span class="sc">|</span> eye_color <span class="sc">==</span> <span class="st">"brown"</span></span>
+<span id="cb23-4"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 25 × 14
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 Leia Or…    150  49   brown      light      brown           19   fema… femin…
+ 2 Owen La…    178 120   brown, gr… light      blue            52   male  mascu…
+ 3 Beru Wh…    165  75   brown      light      blue            47   fema… femin…
+ 4 Biggs D…    183  84   black      light      brown           24   male  mascu…
+ 5 Han Solo    180  80   brown      fair       brown           29   male  mascu…
+ 6 Yoda         66  17   white      green      brown          896   male  mascu…
+ 7 Boba Fe…    183  78.2 black      fair       brown           31.5 male  mascu…
+ 8 Lando C…    177  79   black      dark       brown           31   male  mascu…
+ 9 Lobot       175  79   none       light      blue            37   male  mascu…
+10 Arvel C…     NA  NA   brown      fair       brown           NA   male  mascu…
+# ℹ 15 more rows
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">filter</span>(</span>
+<span id="cb25-2"><a></a>  starwars,</span>
+<span id="cb25-3"><a></a>  skin_color <span class="sc">==</span> <span class="st">"light"</span> <span class="sc">&amp;</span> eye_color <span class="sc">==</span> <span class="st">"brown"</span></span>
+<span id="cb25-4"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 7 × 14
+  name      height  mass hair_color skin_color eye_color birth_year sex   gender
+  &lt;chr&gt;      &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+1 Leia Org…    150    49 brown      light      brown             19 fema… femin…
+2 Biggs Da…    183    84 black      light      brown             24 male  mascu…
+3 Padmé Am…    185    45 brown      light      brown             46 fema… femin…
+4 Cordé        157    NA brown      light      brown             NA &lt;NA&gt;  &lt;NA&gt;  
+5 Dormé        165    NA brown      light      brown             NA fema… femin…
+6 Raymus A…    188    79 brown      light      brown             NA male  mascu…
+7 Poe Dame…     NA    NA brown      light      brown             NA male  mascu…
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="select---syntax" class="slide level2">
+<h2>select - Syntax</h2>
+<ul>
+<li class="fragment"><code>select</code> extracts one or more columns from a table</li>
+</ul>
+<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">select</span>(<span class="at">data =</span> ..., <span class="sc">&lt;</span>colname<span class="sc">&gt;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="select---exercise-4" class="slide level2 smaller">
+<h2>select - Exercise 4</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a><span class="co"># select *only* the variable `hair_color`</span></span>
+<span id="cb28-2"><a></a><span class="fu">select</span>(starwars, hair_color)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 1
+   hair_color   
+   &lt;chr&gt;        
+ 1 blond        
+ 2 &lt;NA&gt;         
+ 3 &lt;NA&gt;         
+ 4 none         
+ 5 brown        
+ 6 brown, grey  
+ 7 brown        
+ 8 &lt;NA&gt;         
+ 9 black        
+10 auburn, white
+# ℹ 77 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="select---exercise-4-1" class="slide level2 smaller">
+<h2>select - Exercise 4</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="co"># drop the variable `hair_color`</span></span>
+<span id="cb30-2"><a></a><span class="fu">select</span>(starwars, <span class="sc">-</span>hair_color)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 13
+   name      height  mass skin_color eye_color birth_year sex   gender homeworld
+   &lt;chr&gt;      &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;    
+ 1 Luke Sky…    172    77 fair       blue            19   male  mascu… Tatooine 
+ 2 C-3PO        167    75 gold       yellow         112   none  mascu… Tatooine 
+ 3 R2-D2         96    32 white, bl… red             33   none  mascu… Naboo    
+ 4 Darth Va…    202   136 white      yellow          41.9 male  mascu… Tatooine 
+ 5 Leia Org…    150    49 light      brown           19   fema… femin… Alderaan 
+ 6 Owen Lars    178   120 light      blue            52   male  mascu… Tatooine 
+ 7 Beru Whi…    165    75 light      blue            47   fema… femin… Tatooine 
+ 8 R5-D4         97    32 white, red red             NA   none  mascu… Tatooine 
+ 9 Biggs Da…    183    84 light      brown           24   male  mascu… Tatooine 
+10 Obi-Wan …    182    77 fair       blue-gray       57   male  mascu… Stewjon  
+# ℹ 77 more rows
+# ℹ 4 more variables: species &lt;chr&gt;, films &lt;list&gt;, vehicles &lt;list&gt;,
+#   starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="select---exercise-4-2" class="slide level2 smaller">
+<h2>select - Exercise 4</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a><span class="fu">select</span>(starwars, hair_color, skin_color, eye_color)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 3
+   hair_color    skin_color  eye_color
+   &lt;chr&gt;         &lt;chr&gt;       &lt;chr&gt;    
+ 1 blond         fair        blue     
+ 2 &lt;NA&gt;          gold        yellow   
+ 3 &lt;NA&gt;          white, blue red      
+ 4 none          white       yellow   
+ 5 brown         light       brown    
+ 6 brown, grey   light       blue     
+ 7 brown         light       blue     
+ 8 &lt;NA&gt;          white, red  red      
+ 9 black         light       brown    
+10 auburn, white fair        blue-gray
+# ℹ 77 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="select---exercise-4-3" class="slide level2 smaller">
+<h2>select - Exercise 4</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a><span class="co"># select variables `hair_color` through `eye_color`</span></span>
+<span id="cb34-2"><a></a><span class="fu">select</span>(starwars, hair_color<span class="sc">:</span>eye_color)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 3
+   hair_color    skin_color  eye_color
+   &lt;chr&gt;         &lt;chr&gt;       &lt;chr&gt;    
+ 1 blond         fair        blue     
+ 2 &lt;NA&gt;          gold        yellow   
+ 3 &lt;NA&gt;          white, blue red      
+ 4 none          white       yellow   
+ 5 brown         light       brown    
+ 6 brown, grey   light       blue     
+ 7 brown         light       blue     
+ 8 &lt;NA&gt;          white, red  red      
+ 9 black         light       brown    
+10 auburn, white fair        blue-gray
+# ℹ 77 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="select---exercise-4-4" class="slide level2 smaller">
+<h2>select - Exercise 4</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a><span class="co"># drop variables `hair_color` through `eye_color`</span></span>
+<span id="cb36-2"><a></a><span class="fu">select</span>(starwars, <span class="sc">!</span>(hair_color<span class="sc">:</span>eye_color))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 11
+   name    height  mass birth_year sex   gender homeworld species films vehicles
+   &lt;chr&gt;    &lt;int&gt; &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;     &lt;chr&gt;   &lt;lis&gt; &lt;list&gt;  
+ 1 Luke S…    172    77       19   male  mascu… Tatooine  Human   &lt;chr&gt; &lt;chr&gt;   
+ 2 C-3PO      167    75      112   none  mascu… Tatooine  Droid   &lt;chr&gt; &lt;chr&gt;   
+ 3 R2-D2       96    32       33   none  mascu… Naboo     Droid   &lt;chr&gt; &lt;chr&gt;   
+ 4 Darth …    202   136       41.9 male  mascu… Tatooine  Human   &lt;chr&gt; &lt;chr&gt;   
+ 5 Leia O…    150    49       19   fema… femin… Alderaan  Human   &lt;chr&gt; &lt;chr&gt;   
+ 6 Owen L…    178   120       52   male  mascu… Tatooine  Human   &lt;chr&gt; &lt;chr&gt;   
+ 7 Beru W…    165    75       47   fema… femin… Tatooine  Human   &lt;chr&gt; &lt;chr&gt;   
+ 8 R5-D4       97    32       NA   none  mascu… Tatooine  Droid   &lt;chr&gt; &lt;chr&gt;   
+ 9 Biggs …    183    84       24   male  mascu… Tatooine  Human   &lt;chr&gt; &lt;chr&gt;   
+10 Obi-Wa…    182    77       57   male  mascu… Stewjon   Human   &lt;chr&gt; &lt;chr&gt;   
+# ℹ 77 more rows
+# ℹ 1 more variable: starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="select---exercise-4-5" class="slide level2 smaller">
+<h2>select - Exercise 4</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a><span class="co"># `starts_with`, `ends_with`, `contains`</span></span>
+<span id="cb38-2"><a></a><span class="fu">select</span>(starwars, <span class="fu">ends_with</span>(<span class="st">"color"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 3
+   hair_color    skin_color  eye_color
+   &lt;chr&gt;         &lt;chr&gt;       &lt;chr&gt;    
+ 1 blond         fair        blue     
+ 2 &lt;NA&gt;          gold        yellow   
+ 3 &lt;NA&gt;          white, blue red      
+ 4 none          white       yellow   
+ 5 brown         light       brown    
+ 6 brown, grey   light       blue     
+ 7 brown         light       blue     
+ 8 &lt;NA&gt;          white, red  red      
+ 9 black         light       brown    
+10 auburn, white fair        blue-gray
+# ℹ 77 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="mutate---syntax" class="slide level2">
+<h2>mutate - Syntax</h2>
+<ul>
+<li class="fragment"><code>mutate()</code> to compute new columns</li>
+</ul>
+
+<img data-src="../img/dplyr/mutate.png" class="r-stretch"></section>
+<section class="slide level2">
+
+<div class="sourceCode" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a><span class="fu">mutate</span>(<span class="at">data =</span> ..., <span class="sc">&lt;</span>newcolname<span class="sc">&gt;</span> <span class="er">=</span>  <span class="fu">funs</span>(<span class="sc">&lt;</span>oldcolname<span class="sc">&gt;</span>))</span>
+<span id="cb40-2"><a></a><span class="fu">mutate</span>(<span class="at">data =</span> ..., <span class="sc">&lt;</span>colname<span class="sc">&gt;</span>, <span class="fu">funs</span>(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="fragment">
+<p>or with the the pipe <code>|&gt;</code></p>
+<p>Useful when multiple functions act sequentially on a dataframe.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a></a>data <span class="sc">|&gt;</span></span>
+<span id="cb41-2"><a></a>  <span class="fu">mutate</span>(<span class="sc">&lt;</span>colname<span class="sc">&gt;</span>, <span class="fu">funs</span>(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="mutate-pipe---exercise-5" class="slide level2 smaller">
+<h2>mutate (&amp; pipe |&gt;)- Exercise 5</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a></a><span class="co"># create a new column to display height in meters</span></span>
+<span id="cb42-2"><a></a><span class="fu">mutate</span>(starwars, <span class="at">height_m =</span> height <span class="sc">/</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 15
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 Luke Sk…    172    77 blond      fair       blue            19   male  mascu…
+ 2 C-3PO       167    75 &lt;NA&gt;       gold       yellow         112   none  mascu…
+ 3 R2-D2        96    32 &lt;NA&gt;       white, bl… red             33   none  mascu…
+ 4 Darth V…    202   136 none       white      yellow          41.9 male  mascu…
+ 5 Leia Or…    150    49 brown      light      brown           19   fema… femin…
+ 6 Owen La…    178   120 brown, gr… light      blue            52   male  mascu…
+ 7 Beru Wh…    165    75 brown      light      blue            47   fema… femin…
+ 8 R5-D4        97    32 &lt;NA&gt;       white, red red             NA   none  mascu…
+ 9 Biggs D…    183    84 black      light      brown           24   male  mascu…
+10 Obi-Wan…    182    77 auburn, w… fair       blue-gray       57   male  mascu…
+# ℹ 77 more rows
+# ℹ 6 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;, height_m &lt;dbl&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="mutate-pipe---exercise-5-1" class="slide level2 smaller">
+<h2>mutate (&amp; pipe |&gt;)- Exercise 5</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a></a><span class="co"># using the pipe to feed data into multiple functions sequentially</span></span>
+<span id="cb44-2"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb44-3"><a></a>  <span class="fu">mutate</span>(<span class="at">height_m =</span> height <span class="sc">/</span> <span class="dv">100</span>) <span class="sc">|&gt;</span></span>
+<span id="cb44-4"><a></a>  <span class="fu">select</span>(name, height_m, height, <span class="fu">everything</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 15
+   name   height_m height  mass hair_color skin_color eye_color birth_year sex  
+   &lt;chr&gt;     &lt;dbl&gt;  &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;
+ 1 Luke …     1.72    172    77 blond      fair       blue            19   male 
+ 2 C-3PO      1.67    167    75 &lt;NA&gt;       gold       yellow         112   none 
+ 3 R2-D2      0.96     96    32 &lt;NA&gt;       white, bl… red             33   none 
+ 4 Darth…     2.02    202   136 none       white      yellow          41.9 male 
+ 5 Leia …     1.5     150    49 brown      light      brown           19   fema…
+ 6 Owen …     1.78    178   120 brown, gr… light      blue            52   male 
+ 7 Beru …     1.65    165    75 brown      light      blue            47   fema…
+ 8 R5-D4      0.97     97    32 &lt;NA&gt;       white, red red             NA   none 
+ 9 Biggs…     1.83    183    84 black      light      brown           24   male 
+10 Obi-W…     1.82    182    77 auburn, w… fair       blue-gray       57   male 
+# ℹ 77 more rows
+# ℹ 6 more variables: gender &lt;chr&gt;, homeworld &lt;chr&gt;, species &lt;chr&gt;,
+#   films &lt;list&gt;, vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="mutate-pipe---exercise-5-2" class="slide level2 smaller">
+<h2>mutate (&amp; pipe |&gt;)- Exercise 5</h2>
+<p>Mutate allows you to refer to columns that you’ve just created</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb46-2"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb46-3"><a></a>    <span class="at">height_m =</span> height <span class="sc">/</span> <span class="dv">100</span>,</span>
+<span id="cb46-4"><a></a>    <span class="at">BMI =</span> mass <span class="sc">/</span> (height_m<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb46-5"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb46-6"><a></a>  <span class="fu">select</span>(name, BMI, <span class="fu">everything</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 16
+   name        BMI height  mass hair_color skin_color eye_color birth_year sex  
+   &lt;chr&gt;     &lt;dbl&gt;  &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;
+ 1 Luke Sky…  26.0    172    77 blond      fair       blue            19   male 
+ 2 C-3PO      26.9    167    75 &lt;NA&gt;       gold       yellow         112   none 
+ 3 R2-D2      34.7     96    32 &lt;NA&gt;       white, bl… red             33   none 
+ 4 Darth Va…  33.3    202   136 none       white      yellow          41.9 male 
+ 5 Leia Org…  21.8    150    49 brown      light      brown           19   fema…
+ 6 Owen Lars  37.9    178   120 brown, gr… light      blue            52   male 
+ 7 Beru Whi…  27.5    165    75 brown      light      blue            47   fema…
+ 8 R5-D4      34.0     97    32 &lt;NA&gt;       white, red red             NA   none 
+ 9 Biggs Da…  25.1    183    84 black      light      brown           24   male 
+10 Obi-Wan …  23.2    182    77 auburn, w… fair       blue-gray       57   male 
+# ℹ 77 more rows
+# ℹ 7 more variables: gender &lt;chr&gt;, homeworld &lt;chr&gt;, species &lt;chr&gt;,
+#   films &lt;list&gt;, vehicles &lt;list&gt;, starships &lt;list&gt;, height_m &lt;dbl&gt;</code></pre>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<p>Output needs to be saved into a new data frame since dplyr does not “change” the original dataframe.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a></a>starwars_bmi <span class="ot">&lt;-</span> starwars <span class="sc">|&gt;</span></span>
+<span id="cb48-2"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb48-3"><a></a>    <span class="at">height_m =</span> height <span class="sc">/</span> <span class="dv">100</span>,</span>
+<span id="cb48-4"><a></a>    <span class="at">BMI =</span> mass <span class="sc">/</span> (height_m<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb48-5"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb48-6"><a></a>  <span class="fu">select</span>(name, BMI, <span class="fu">everything</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+
+</div>
+</section>
+<section id="complex-conditional-logic-with-case_when" class="slide level2">
+<h2>Complex conditional logic with <code>case_when()</code></h2>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb49-2"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb49-3"><a></a>    <span class="at">size_description =</span> <span class="fu">case_when</span>(</span>
+<span id="cb49-4"><a></a>      height <span class="sc">&lt;</span> <span class="dv">100</span> <span class="sc">~</span> <span class="st">"very short"</span>,</span>
+<span id="cb49-5"><a></a>      height <span class="sc">&lt;</span> <span class="dv">150</span> <span class="sc">~</span> <span class="st">"short"</span>,</span>
+<span id="cb49-6"><a></a>      height <span class="sc">&lt;</span> <span class="dv">200</span> <span class="sc">~</span> <span class="st">"average"</span>,</span>
+<span id="cb49-7"><a></a>      height <span class="sc">&gt;=</span> <span class="dv">200</span> <span class="sc">~</span> <span class="st">"tall"</span>,</span>
+<span id="cb49-8"><a></a>      <span class="at">.default =</span> <span class="st">"unknown"</span></span>
+<span id="cb49-9"><a></a>    )</span>
+<span id="cb49-10"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb49-11"><a></a>  <span class="fu">count</span>(size_description)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 2
+  size_description     n
+  &lt;chr&gt;            &lt;int&gt;
+1 average             60
+2 short                3
+3 tall                11
+4 unknown              6
+5 very short           7</code></pre>
+</div>
+</div></div>
+</section>
+<section class="slide level2">
+
+<p>Multiple conditions with <code>case_when()</code></p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb51-2"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb51-3"><a></a>    <span class="at">character_type =</span> <span class="fu">case_when</span>(</span>
+<span id="cb51-4"><a></a>      species <span class="sc">==</span> <span class="st">"Human"</span> <span class="sc">&amp;</span> homeworld <span class="sc">==</span> <span class="st">"Tatooine"</span> <span class="sc">~</span> <span class="st">"Tatooine Human"</span>,</span>
+<span id="cb51-5"><a></a>      species <span class="sc">==</span> <span class="st">"Human"</span> <span class="sc">~</span> <span class="st">"Other Human"</span>,</span>
+<span id="cb51-6"><a></a>      mass <span class="sc">&gt;</span> <span class="dv">100</span> <span class="sc">~</span> <span class="st">"Heavy non-human"</span>,</span>
+<span id="cb51-7"><a></a>      height <span class="sc">&gt;</span> <span class="dv">180</span> <span class="sc">~</span> <span class="st">"Tall non-human"</span>,</span>
+<span id="cb51-8"><a></a>      <span class="at">.default =</span> <span class="st">"Standard character"</span></span>
+<span id="cb51-9"><a></a>    )</span>
+<span id="cb51-10"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb51-11"><a></a>  <span class="fu">count</span>(character_type, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 2
+  character_type         n
+  &lt;chr&gt;              &lt;int&gt;
+1 Other Human           27
+2 Standard character    26
+3 Tall non-human        18
+4 Heavy non-human        8
+5 Tatooine Human         8</code></pre>
+</div>
+</div></div>
+</section>
+<section id="group_by-summarise---exercise-6" class="slide level2">
+<h2><code>group_by()</code> &amp; <code>summarise()</code> - Exercise 6</h2>
+<p><code>group_by</code> creates a grouped copy of a table.</p>
+<ul>
+<li class="fragment">This changes the unit of analysis from the complete data set to individual groups.</li>
+<li class="fragment">dplyr verbs automatically detect grouped tables and calculate “by group”.</li>
+</ul>
+<div class="fragment">
+<div class="sourceCode" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a></a><span class="fu">group_by</span>(<span class="at">data =</span> ..., <span class="sc">&lt;</span>colname<span class="sc">&gt;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="group_by---syntax" class="slide level2">
+<h2>group_by - Syntax</h2>
+<ul>
+<li class="fragment"><code>group_by()</code> creates a grouped tibble.</li>
+<li class="fragment">This changes the unit of analysis from the complete dataset to individual groups.</li>
+<li class="fragment">Then, when you use the dplyr verbs on a grouped data frame they’ll be automatically applied “by group”.</li>
+</ul>
+<div class="fragment">
+<div class="sourceCode" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a></a><span class="fu">group_by</span>(<span class="at">data =</span> ..., <span class="sc">&lt;</span>colname<span class="sc">&gt;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="group_by-summarize---exercise-7" class="slide level2 smaller">
+<h2>group_by + summarize - Exercise 7</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb55-2"><a></a>  <span class="fu">group_by</span>(species)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 87 × 14
+# Groups:   species [38]
+   name     height  mass hair_color skin_color eye_color birth_year sex   gender
+   &lt;chr&gt;     &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; 
+ 1 Luke Sk…    172    77 blond      fair       blue            19   male  mascu…
+ 2 C-3PO       167    75 &lt;NA&gt;       gold       yellow         112   none  mascu…
+ 3 R2-D2        96    32 &lt;NA&gt;       white, bl… red             33   none  mascu…
+ 4 Darth V…    202   136 none       white      yellow          41.9 male  mascu…
+ 5 Leia Or…    150    49 brown      light      brown           19   fema… femin…
+ 6 Owen La…    178   120 brown, gr… light      blue            52   male  mascu…
+ 7 Beru Wh…    165    75 brown      light      blue            47   fema… femin…
+ 8 R5-D4        97    32 &lt;NA&gt;       white, red red             NA   none  mascu…
+ 9 Biggs D…    183    84 black      light      brown           24   male  mascu…
+10 Obi-Wan…    182    77 auburn, w… fair       blue-gray       57   male  mascu…
+# ℹ 77 more rows
+# ℹ 5 more variables: homeworld &lt;chr&gt;, species &lt;chr&gt;, films &lt;list&gt;,
+#   vehicles &lt;list&gt;, starships &lt;list&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="summarize---syntax" class="slide level2">
+<h2>summarize - syntax</h2>
+<ul>
+<li class="fragment"><code>summarize()</code> takes named expressions and calculates a summary based on group.</li>
+</ul>
+<div class="fragment">
+<div class="sourceCode" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a></a><span class="fu">summarize</span>(<span class="at">data =</span> ..., <span class="at">name =</span> expression)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="calculate-a-summary-statistic-by-species" class="slide level2 smaller">
+<h2>Calculate a summary statistic <em>by species</em></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb58-2"><a></a>  <span class="fu">group_by</span>(species) <span class="sc">|&gt;</span></span>
+<span id="cb58-3"><a></a>  <span class="fu">summarise</span>(</span>
+<span id="cb58-4"><a></a>    <span class="at">height =</span> <span class="fu">mean</span>(height, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb58-5"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 38 × 2
+   species   height
+   &lt;chr&gt;      &lt;dbl&gt;
+ 1 Aleena       79 
+ 2 Besalisk    198 
+ 3 Cerean      198 
+ 4 Chagrian    196 
+ 5 Clawdite    168 
+ 6 Droid       131.
+ 7 Dug         112 
+ 8 Ewok         88 
+ 9 Geonosian   183 
+10 Gungan      209.
+# ℹ 28 more rows</code></pre>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<p>Calucate multiple summary statistics.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb60-2"><a></a>  <span class="fu">group_by</span>(species, gender) <span class="sc">|&gt;</span></span>
+<span id="cb60-3"><a></a>  <span class="fu">summarise</span>(</span>
+<span id="cb60-4"><a></a>    <span class="at">height =</span> <span class="fu">mean</span>(height, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb60-5"><a></a>    <span class="at">mass =</span> <span class="fu">mean</span>(mass, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb60-6"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'species'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 42 × 4
+# Groups:   species [38]
+   species   gender    height  mass
+   &lt;chr&gt;     &lt;chr&gt;      &lt;dbl&gt; &lt;dbl&gt;
+ 1 Aleena    masculine     79  15  
+ 2 Besalisk  masculine    198 102  
+ 3 Cerean    masculine    198  82  
+ 4 Chagrian  masculine    196 NaN  
+ 5 Clawdite  feminine     168  55  
+ 6 Droid     feminine      96 NaN  
+ 7 Droid     masculine    140  69.8
+ 8 Dug       masculine    112  40  
+ 9 Ewok      masculine     88  20  
+10 Geonosian masculine    183  80  
+# ℹ 32 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="across---apply-functions-to-multiple-columns" class="slide level2">
+<h2><code>across()</code> - Apply functions to multiple columns</h2>
+<p><code>across()</code> allows you to apply the same operations to multiple columns efficiently.</p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a></a><span class="co"># Apply mean to multiple numeric columns</span></span>
+<span id="cb63-2"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb63-3"><a></a>  <span class="fu">summarise</span>(</span>
+<span id="cb63-4"><a></a>    <span class="fu">across</span>(<span class="fu">c</span>(height, mass), mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb63-5"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: There was 1 warning in `summarise()`.
+ℹ In argument: `across(c(height, mass), mean, na.rm = TRUE)`.
+Caused by warning:
+! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
+Supply arguments directly to `.fns` through an anonymous function instead.
+
+  # Previously
+  across(a:b, mean, na.rm = TRUE)
+
+  # Now
+  across(a:b, \(x) mean(x, na.rm = TRUE))</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 2
+  height  mass
+   &lt;dbl&gt; &lt;dbl&gt;
+1   175.  97.3</code></pre>
+</div>
+</div></div>
+</section>
+<section class="slide level2">
+
+<p>Apply multiple functions with <code>across()</code></p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a></a><span class="co"># Apply multiple functions using list()</span></span>
+<span id="cb66-2"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb66-3"><a></a>  <span class="fu">summarise</span>(</span>
+<span id="cb66-4"><a></a>    <span class="fu">across</span>(</span>
+<span id="cb66-5"><a></a>      <span class="fu">c</span>(height, mass),</span>
+<span id="cb66-6"><a></a>      <span class="fu">list</span>(<span class="at">mean =</span> mean, <span class="at">median =</span> median),</span>
+<span id="cb66-7"><a></a>      <span class="at">na.rm =</span> <span class="cn">TRUE</span></span>
+<span id="cb66-8"><a></a>    )</span>
+<span id="cb66-9"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 4
+  height_mean height_median mass_mean mass_median
+        &lt;dbl&gt;         &lt;int&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+1        175.           180      97.3          79</code></pre>
+</div>
+</div></div>
+</section>
+<section class="slide level2">
+
+<p><code>across()</code> with grouping</p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a></a><span class="co"># Combine across() with group_by()</span></span>
+<span id="cb68-2"><a></a>starwars <span class="sc">|&gt;</span></span>
+<span id="cb68-3"><a></a>  <span class="fu">group_by</span>(species) <span class="sc">|&gt;</span></span>
+<span id="cb68-4"><a></a>  <span class="fu">summarise</span>(</span>
+<span id="cb68-5"><a></a>    <span class="fu">across</span>(</span>
+<span id="cb68-6"><a></a>      <span class="fu">c</span>(height, mass),</span>
+<span id="cb68-7"><a></a>      <span class="fu">list</span>(<span class="at">mean =</span> mean, <span class="at">median =</span> median),</span>
+<span id="cb68-8"><a></a>      <span class="at">na.rm =</span> <span class="cn">TRUE</span></span>
+<span id="cb68-9"><a></a>    ),</span>
+<span id="cb68-10"><a></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb68-11"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 38 × 5
+   species   height_mean height_median mass_mean mass_median
+   &lt;chr&gt;           &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+ 1 Aleena            79             79      15          15  
+ 2 Besalisk         198            198     102         102  
+ 3 Cerean           198            198      82          82  
+ 4 Chagrian         196            196     NaN          NA  
+ 5 Clawdite         168            168      55          55  
+ 6 Droid            131.            97      69.8        53.5
+ 7 Dug              112            112      40          40  
+ 8 Ewok              88             88      20          20  
+ 9 Geonosian        183            183      80          80  
+10 Gungan           209.           206      74          74  
+# ℹ 28 more rows</code></pre>
+</div>
+</div></div>
+
+
+</section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+<p><a href="https://rnabioco.github.io/molb-7950">Course 🔗</a></p>
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="../site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+            const codeEl = trigger.previousElementSibling.cloneNode(true);
+            for (const childEl of codeEl.children) {
+              if (isCodeAnnotation(childEl)) {
+                childEl.remove();
+              }
+            }
+            return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp("https:\/\/rnabioco\.github\.io\/molb-7950\/");
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>
