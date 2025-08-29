@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Your objective is to create some new *extreme* art using R, something either ugly or sublime. What you *cannot* do is be boring; your goal is to stay on the fringe.
 
-**Your submission (a quarto/Rmarkdown file) is due Tues Sept 5 by 12pm**. If you submit an entry, you'll get full credit on the problem set. Entries will be anonymized and winners will selected by popular vote.
+**Your submission (a Quarto .qmd file) is due Tues Sept 2 by 5pm**. If you submit an entry, you get full credit on the problem set. Entries will be anonymized and winners will selected by popular vote.
 
 ## Favorite Rtists
 
@@ -25,7 +25,7 @@ Here are some of my favorite generative artists who use R. Be inspired!
 -   Ijeamaka Anyene [[Github]](https://github.com/Ijeamakaanyene) and [this study](https://ijeamakaanyene.github.io/patterns/zine/zine_radial_patterns.html#1) in particular.
 -   Claus Wilke [[Art]](https://clauswilke.com/art/) [[Github]](https://github.com/clauswilke), a biologist at UT Austin who also wrote [the book on data visualization](https://clauswilke.com/dataviz/) (it's excellent).
 -   Thomas Lin Pederesen [[Art]](https://www.data-imaginist.com/art) [[Github](https://github.com/thomasp85)]. I have some of his pieces in my office.
--   inconvergent [[Art]](https://github.com/inconvergent/weird). It's lisp, not R. But it's so good.
+-   inconvergent [[Art]](https://img.inconvergent.net/plot/) [[Github]](https://github.com/inconvergent/weird). It's lisp, not R. But it's so good.
 
 There are several resources for color palettes, an important component of any hideous or beautiful creation.
 
@@ -33,9 +33,9 @@ There are several resources for color palettes, an important component of any hi
 -   The colors in e.g. `scale_color_brewer` come from [Cynthia Brewer](https://en.wikipedia.org/wiki/Cynthia_Brewer), a cartographer who makes [visually informative maps](https://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3).
 -   [color-hex](https://www.color-hex.com/color-palettes/) has collections of complementary color palettes.
 
-There are also several R packages that may help you build Rtistic plots.
+There are also several R packages that might help you build Rtistic plots.
 
-- [gganimate](https://gganimate.com/) provides tools to bring your plots to life. 
+- [gganimate](https://gganimate.com/) provides tools to bring your plots to life.
 - [ggforce](https://ggforce.data-imaginist.com/) provides interesting geoms that build on ggplot2.
 - [patchwork](https://github.com/thomasp85/patchwork) provides layout functions for plots.
 
@@ -107,21 +107,53 @@ ggplot(
   ) +
   scale_x_discrete(position = "top") +
   theme(
-    axis.text.x = element_text(face = "bold.italic", color = "#993333", size = 18, angle = 180),
-    axis.text.y = element_text(face = "bold", color = "orange", size = 18, angle = 135),
+    axis.text.x = element_text(
+      face = "bold.italic",
+      color = "#993333",
+      size = 18,
+      angle = 180
+    ),
+    axis.text.y = element_text(
+      face = "bold",
+      color = "orange",
+      size = 18,
+      angle = 135
+    ),
     plot.background = element_rect(fill = "darkblue"),
-    plot.title = element_text(face = "italic", color = "green", size = 48, angle = 183),
+    plot.title = element_text(
+      face = "italic",
+      color = "green",
+      size = 48,
+      angle = 183
+    ),
     plot.caption = element_text(color = "white", size = 22),
     axis.title.x = element_text(size = 22, color = "pink", angle = 12),
     axis.title.y = element_text(color = "yellow", angle = 273, size = 17),
     legend.background = element_rect(fill = "yellow"),
-    legend.title = element_text(angle = 71, face = "bold", color = "purple", size = 12),
+    legend.title = element_text(
+      angle = 71,
+      face = "bold",
+      color = "purple",
+      size = 12
+    ),
     legend.key = element_rect(color = "green", fill = "orange"),
     legend.text = element_text(color = "red", size = 14),
     panel.background = element_rect(fill = "yellow"),
-    panel.grid.major.y = element_line(color = "green", linetype = "dotdash", linewidth = 1.2),
-    panel.grid.major.x = element_line(color = "purple", linewidth = 3, linetype = "twodash"),
-    panel.grid.minor = element_line(color = "red", linewidth = 2, linetype = "dashed"),
+    panel.grid.major.y = element_line(
+      color = "green",
+      linetype = "dotdash",
+      linewidth = 1.2
+    ),
+    panel.grid.major.x = element_line(
+      color = "purple",
+      linewidth = 3,
+      linetype = "twodash"
+    ),
+    panel.grid.minor = element_line(
+      color = "red",
+      linewidth = 2,
+      linetype = "dashed"
+    ),
     legend.position = "bottom"
   )
 ```
@@ -154,12 +186,16 @@ apply_pattern_theme <- function(bg_hex, caption_hex) {
 }
 
 outline <- tibble(
-  x = 1, xend = 7,
-  y = 15, yend = 15
+  x = 1,
+  xend = 7,
+  y = 15,
+  yend = 15
 )
 segment_line <- tibble(
-  x = c(1, 7), xend = c(1, 7),
-  y = c(0, 2), yend = 15
+  x = c(1, 7),
+  xend = c(1, 7),
+  y = c(0, 2),
+  yend = 15
 )
 area <- tibble(
   x = c(3, 5, 6),
@@ -177,16 +213,20 @@ ggplot() +
   geom_segment(
     data = outline,
     aes(
-      x = x, y = y,
-      xend = xend, yend = yend
+      x = x,
+      y = y,
+      xend = xend,
+      yend = yend
     ),
     size = 0.5
   ) +
   geom_segment(
     data = segment_line,
     aes(
-      x = x, xend = xend,
-      y = y, yend = yend
+      x = x,
+      xend = xend,
+      y = y,
+      yend = yend
     ),
     size = 0.5
   ) +
