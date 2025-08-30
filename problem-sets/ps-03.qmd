@@ -1,0 +1,198 @@
+---
+title: "R Bootcamp Problem Set 3"
+author: "Insert your name here"
+execute:
+  eval: false
+---
+
+## Setup
+
+Start by loading libraries you need analysis in the code chunk below.
+When in doubt, start by loading the tidyverse package.
+
+```{r}
+#| label: setup
+#| echo: false
+library(tidyverse)
+library(here)
+```
+
+## Problem Set
+
+Each problem below is worth **5 points**.
+
+Use the data files in the `data/` directory to answer the questions.
+
+For this problem set, you are allowed to help each other, but you are not allowed to post correct answers in slack.
+
+**The problem set is due 5pm on Aug 28.**
+
+### Grading rubric
+
+- Everything is good: 5 points
+- Partially correct answers: 3-4 points
+- Reasonable attempt: 2 points
+
+## Question 1
+
+Load the `palmerpenguins` package (already done above). Inspect the `penguins` tibble with `summary()` to see the distribution of variables and any missing values.
+
+Use `drop_na()` to remove rows with `NA` values in the `penguins` tibble. Calculate how many rows were removed by subtracting the new count from the original count using `nrow()`.
+
+Then, use `count()` to explore the data and see how many penguins of each species we have. This is a simple but powerful way to understand your data!
+
+```{r}
+#| label: q1
+#| echo: false
+summary(___)
+
+# Remove rows with any missing values
+penguins_nona <- drop_na(___)
+nrow(___) - nrow(___)
+
+# Simple counting - this is a great way to explore data!
+___ |>
+  count(___)
+
+# You can count by multiple variables too
+penguins |>
+  count(___, ___)
+```
+
+Then, use `replace_na()` to replace `NA` values in `bill_length_mm` and `bill_depth_mm` with a value of 0. You'll need to:
+
+- Provide the data frame as the first argument
+- Provide a named list showing which columns to replace and what values to use
+
+```{r}
+#| label: q1b
+#| echo: false
+replace_na(___, list(bill_length_mm = ___, bill_depth_mm = ___))
+```
+
+## Question 2
+
+Use `arrange`, `filter`, and `select` on a data frame. Let's build this step by step to understand how pipes work:
+
+1. Import the data set `data/data_transcript_exp_tidy.csv` using `read_csv()` and `here()`.
+2. **Step 2a**: First, just sort the tibble by expression data (`count`) from highest to lowest level using `arrange()`. Use `desc()` to get descending order.
+3. **Step 2b**: Then add `filter()` to keep only rows where `count` > 100. Chain this with the pipe operator.
+4. **Step 2c**: Finally, add `select()` to choose all columns *except* for `type`. Use the `-` operator to exclude columns.
+
+```{r}
+#| label: q2
+#| echo: false
+exp_tbl <- read_csv(here("___"))
+
+# Step 2a: Just arrange first
+exp_tbl |>
+  arrange(___(_____)) # desc() for descending order
+
+# Step 2b: Add the filter
+exp_tbl |>
+  arrange(desc(count)) |>
+  filter(___ > ___)
+
+# Step 2c: Add the select (use -type to exclude the type column)
+exp_tbl |>
+  arrange(desc(count)) |>
+  filter(count > 100) |>
+  select(___)
+```
+
+## Question 3
+
+How will you:
+
+1. create a new column `log10count` that contains log10 transformed `count` values using `mutate()` and `log10()` and
+2. rearrange the columns in the following order: ensembl_transcript_id, type, time, replicate, count, log10count using `select()`.
+
+Before showing the solution, remember:
+- `mutate()` adds new columns (or modifies existing ones) - it keeps all existing columns
+- `select()` chooses columns and can reorder them - list them in the order you want
+
+```{r}
+#| label: q3
+#| echo: false
+exp_tbl |>
+  mutate(log10count = ___(_____)) |>
+  select(___, ___, ___, ___, ___, ___)
+```
+
+## Question 4
+
+Let's explore grouping operations step by step. We'll build your understanding progressively, starting with simple examples and then combining concepts.
+
+**Step 4a**: First, try a simple grouping operation. Calculate the total count per transcript (ignoring time). Use:
+
+- `group_by()` to group by transcript ID
+- `summarize()` to calculate the sum of counts
+- `.groups = "drop"` to remove grouping afterward (good practice!)
+
+```{r}
+#| label: q4a
+#| echo: false
+# Simple grouping - sum counts for each transcript across all conditions
+exp_tbl |>
+  group_by(___) |>
+  summarize(
+    total_count = ___(_____),
+    .groups = "___" # This removes the grouping afterward - good practice!
+  )
+```
+
+**Step 4b**: Now calculate a per-transcript sum, while keeping the `time` information (group by both transcript and time). This creates separate groups for each combination of transcript AND time:
+
+```{r}
+#| label: q4b
+#| echo: false
+exp_tbl |>
+  group_by(___, ___) |>
+  summarize(
+    count_sum = sum(___),
+    .groups = "drop"
+  )
+```
+
+## Question 5
+
+Create meaningful categories from your data using `case_when()`. This function lets you create new variables based on multiple conditions - it's like a more powerful version of `if_else()`.
+
+Categorize the expression levels in the `count` column into meaningful groups:
+- "Low" for counts less than 50
+- "Medium" for counts between 50 and 200 (inclusive of 50, exclusive of 200)
+- "High" for counts between 200 and 1000 (inclusive of 200, exclusive of 1000)
+- "Very High" for counts 1000 and above
+
+Use `case_when()` inside `mutate()` to create a new column called `expression_level`, then use `count()` to see how many transcripts fall into each category.
+
+```{r}
+#| label: q5
+#| echo: false
+# Categorize expression levels into meaningful groups
+exp_tbl |>
+  mutate(
+    expression_level = case_when(
+      count < ___ ~ "___",
+      count < ___ ~ "___",
+      count < ___ ~ "___",
+      count >= ___ ~ "___"
+    )
+  ) |>
+  count(___, sort = TRUE)
+```
+
+## Question 6
+
+Try to state and answer a new question! Stitch together several dplyr fuctions to answer a new question. I'm trying to wean you off the fill-in-the-blanks approach and get you to think independently using the tidyverse.
+
+Here are some ideas to get you started, you don't have to use any of them:
+
+- Which transcript has the highest expression level at each time point? (Hint: use `dplyr::slice_max()` after grouping by time)
+- What is the average expression level for each transcript across all time points? (Hint: use `group_by()` and `summarize()`)
+- Which time point has the highest total expression level across all transcripts? (Hint: group by time and summarize total count)
+
+```{r}
+#| label: q6
+
+```
