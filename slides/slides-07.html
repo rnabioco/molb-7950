@@ -190,6 +190,13 @@
       margin-right: 0; 
     }
   </style>
+  <script src="../site_libs/core-js-2.5.3/shim.min.js"></script>
+  <script src="../site_libs/react-18.2.0/react.min.js"></script>
+  <script src="../site_libs/react-18.2.0/react-dom.min.js"></script>
+  <script src="../site_libs/reactwidget-2.0.0/react-tools.js"></script>
+  <script src="../site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+  <link href="../site_libs/reactable-0.4.4/reactable.css" rel="stylesheet">
+  <script src="../site_libs/reactable-binding-0.4.4/reactable.js"></script>
 <meta property="og:title" content="R Bootcamp - Class 7 – MOLB 7950">
 <meta property="og:description" content="Tidyverse odds &amp; ends">
 <meta property="og:site_name" content="MOLB 7950">
@@ -525,16 +532,16 @@ Jay Hesselberth
 <pre><code># A tibble: 100 × 2
    category lumped
    &lt;fct&gt;    &lt;fct&gt; 
- 1 h        h     
- 2 a        Other 
- 3 h        h     
- 4 h        h     
- 5 j        Other 
+ 1 f        f     
+ 2 i        Other 
+ 3 e        Other 
+ 4 j        Other 
+ 5 h        h     
  6 f        f     
- 7 b        Other 
- 8 e        Other 
- 9 g        Other 
-10 h        h     
+ 7 f        f     
+ 8 h        h     
+ 9 c        Other 
+10 d        Other 
 # ℹ 90 more rows</code></pre>
 </div>
 </div></div>
@@ -556,10 +563,10 @@ Jay Hesselberth
 <pre><code># A tibble: 4 × 2
   lumped     n
   &lt;fct&gt;  &lt;int&gt;
-1 c         14
+1 a         12
 2 f         16
-3 h         18
-4 Other     52</code></pre>
+3 h         12
+4 Other     60</code></pre>
 </div>
 </div></div>
 
@@ -574,11 +581,11 @@ Jay Hesselberth
 </div>
 <div class="cell fragment">
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 86 52  8 64 75 40 15 82 30 76</code></pre>
+<pre><code> [1] 39  1 13 44 16 33 79 27 96 45</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">100</span>, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 19 43 41 21 27 22  3 15 82  4</code></pre>
+<pre><code> [1]   0  87  62   7  69  93  56  12  96 100</code></pre>
 </div>
 </div>
 </section>
@@ -814,6 +821,580 @@ Jay Hesselberth
 <span id="cb52-6"><a></a>  <span class="at">width =</span> <span class="dv">5</span>,</span>
 <span id="cb52-7"><a></a>  <span class="at">height =</span> <span class="dv">5</span></span>
 <span id="cb52-8"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section></section>
+<section>
+<section id="displaying-data-in-tables" class="title-slide slide level1 center">
+<h1>Displaying data in tables</h1>
+<p>We’ll use a couple of approaches to display data in tables instead of graphs, which can be useful for reports or presentations.</p>
+</section>
+<section id="using-knitrkable" class="slide level2">
+<h2>Using <code>knitr::kable()</code></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a></a><span class="fu">library</span>(knitr) <span class="co"># also loaded with library(tidyverse)</span></span>
+<span id="cb53-2"><a></a></span>
+<span id="cb53-3"><a></a><span class="fu">kable</span>(</span>
+<span id="cb53-4"><a></a>  penguins <span class="sc">|&gt;</span></span>
+<span id="cb53-5"><a></a>    <span class="fu">select</span>(species, island, body_mass) <span class="sc">|&gt;</span></span>
+<span id="cb53-6"><a></a>    <span class="fu">head</span>(<span class="dv">10</span>),</span>
+<span id="cb53-7"><a></a>  <span class="at">caption =</span> <span class="st">"First 10 rows of the penguins dataset"</span></span>
+<span id="cb53-8"><a></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output-display">
+<table class="caption-top">
+<caption>First 10 rows of the penguins dataset</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">species</th>
+<th style="text-align: left;">island</th>
+<th style="text-align: right;">body_mass</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Adelie</td>
+<td style="text-align: left;">Torgersen</td>
+<td style="text-align: right;">3750</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Adelie</td>
+<td style="text-align: left;">Torgersen</td>
+<td style="text-align: right;">3800</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Adelie</td>
+<td style="text-align: left;">Torgersen</td>
+<td style="text-align: right;">3250</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Adelie</td>
+<td style="text-align: left;">Torgersen</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Adelie</td>
+<td style="text-align: left;">Torgersen</td>
+<td style="text-align: right;">3450</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Adelie</td>
+<td style="text-align: left;">Torgersen</td>
+<td style="text-align: right;">3650</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Adelie</td>
+<td style="text-align: left;">Torgersen</td>
+<td style="text-align: right;">3625</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Adelie</td>
+<td style="text-align: left;">Torgersen</td>
+<td style="text-align: right;">4675</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Adelie</td>
+<td style="text-align: left;">Torgersen</td>
+<td style="text-align: right;">3475</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Adelie</td>
+<td style="text-align: left;">Torgersen</td>
+<td style="text-align: right;">4250</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="using-gt" class="slide level2">
+<h2>Using <code>gt</code></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a></a><span class="fu">library</span>(gt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell fragment">
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'gt'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:cowplot':
+
+    as_gtable</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a></a><span class="fu">gt</span>(</span>
+<span id="cb57-2"><a></a>  penguins <span class="sc">|&gt;</span></span>
+<span id="cb57-3"><a></a>    <span class="fu">select</span>(species, island, body_mass)</span>
+<span id="cb57-4"><a></a>) <span class="sc">|&gt;</span></span>
+<span id="cb57-5"><a></a>  <span class="fu">tab_header</span>(</span>
+<span id="cb57-6"><a></a>    <span class="at">title =</span> <span class="st">"First 10 rows of the penguins dataset"</span></span>
+<span id="cb57-7"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb57-8"><a></a>  <span class="fu">fmt_number</span>(</span>
+<span id="cb57-9"><a></a>    <span class="at">columns =</span> body_mass,</span>
+<span id="cb57-10"><a></a>    <span class="at">decimals =</span> <span class="dv">1</span></span>
+<span id="cb57-11"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb57-12"><a></a>  <span class="fu">opt_interactive</span>(</span>
+<span id="cb57-13"><a></a>    <span class="at">use_pagination =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb57-14"><a></a>    <span class="at">use_filters =</span> <span class="cn">TRUE</span></span>
+<span id="cb57-15"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="bhczajxkov" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#bhczajxkov table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#bhczajxkov thead, #bhczajxkov tbody, #bhczajxkov tfoot, #bhczajxkov tr, #bhczajxkov td, #bhczajxkov th {
+  border-style: none;
+}
+
+#bhczajxkov p {
+  margin: 0;
+  padding: 0;
+}
+
+#bhczajxkov .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#bhczajxkov .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#bhczajxkov .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#bhczajxkov .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#bhczajxkov .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bhczajxkov .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bhczajxkov .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#bhczajxkov .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#bhczajxkov .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#bhczajxkov .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#bhczajxkov .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#bhczajxkov .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#bhczajxkov .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#bhczajxkov .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#bhczajxkov .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#bhczajxkov .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#bhczajxkov .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#bhczajxkov .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#bhczajxkov .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bhczajxkov .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#bhczajxkov .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#bhczajxkov .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#bhczajxkov .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bhczajxkov .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#bhczajxkov .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#bhczajxkov .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bhczajxkov .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bhczajxkov .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#bhczajxkov .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bhczajxkov .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#bhczajxkov .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#bhczajxkov .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bhczajxkov .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bhczajxkov .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#bhczajxkov .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#bhczajxkov .gt_left {
+  text-align: left;
+}
+
+#bhczajxkov .gt_center {
+  text-align: center;
+}
+
+#bhczajxkov .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#bhczajxkov .gt_font_normal {
+  font-weight: normal;
+}
+
+#bhczajxkov .gt_font_bold {
+  font-weight: bold;
+}
+
+#bhczajxkov .gt_font_italic {
+  font-style: italic;
+}
+
+#bhczajxkov .gt_super {
+  font-size: 65%;
+}
+
+#bhczajxkov .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#bhczajxkov .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#bhczajxkov .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#bhczajxkov .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#bhczajxkov .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#bhczajxkov .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#bhczajxkov .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#bhczajxkov .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#bhczajxkov div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+<div style="font-family:system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;border-top-style:solid;border-top-width:2px;border-top-color:#D3D3D3;">
+<div class="gt_heading gt_title gt_font_normal" style="text-size:bigger;">First 10 rows of the penguins dataset</div>
+<div class="gt_heading gt_subtitle "></div>
+</div>
+<div id="bhczajxkov" class="reactable html-widget" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="bhczajxkov">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"species":["Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap"],"island":["Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream"],"body_mass":[3750,3800,3250,"NA",3450,3650,3625,4675,3475,4250,3300,3700,3200,3800,4400,3700,3450,4500,3325,4200,3400,3600,3800,3950,3800,3800,3550,3200,3150,3950,3250,3900,3300,3900,3325,4150,3950,3550,3300,4650,3150,3900,3100,4400,3000,4600,3425,2975,3450,4150,3500,4300,3450,4050,2900,3700,3550,3800,2850,3750,3150,4400,3600,4050,2850,3950,3350,4100,3050,4450,3600,3900,3550,4150,3700,4250,3700,3900,3550,4000,3200,4700,3800,4200,3350,3550,3800,3500,3950,3600,3550,4300,3400,4450,3300,4300,3700,4350,2900,4100,3725,4725,3075,4250,2925,3550,3750,3900,3175,4775,3825,4600,3200,4275,3900,4075,2900,3775,3350,3325,3150,3500,3450,3875,3050,4000,3275,4300,3050,4000,3325,3500,3500,4475,3425,3900,3175,3975,3400,4250,3400,3475,3050,3725,3000,3650,4250,3475,3450,3750,3700,4000,4500,5700,4450,5700,5400,4550,4800,5200,4400,5150,4650,5550,4650,5850,4200,5850,4150,6300,4800,5350,5700,5000,4400,5050,5000,5100,4100,5650,4600,5550,5250,4700,5050,6050,5150,5400,4950,5250,4350,5350,3950,5700,4300,4750,5550,4900,4200,5400,5100,5300,4850,5300,4400,5000,4900,5050,4300,5000,4450,5550,4200,5300,4400,5650,4700,5700,4650,5800,4700,5550,4750,5000,5100,5200,4700,5800,4600,6000,4750,5950,4625,5450,4725,5350,4750,5600,4600,5300,4875,5550,4950,5400,4750,5650,4850,5200,4925,4875,4625,5250,4850,5600,4975,5500,4725,5500,4700,5500,4575,5500,5000,5950,4650,5500,4375,5850,4875,6000,4925,"NA",4850,5750,5200,5400,3500,3900,3650,3525,3725,3950,3250,3750,4150,3700,3800,3775,3700,4050,3575,4050,3300,3700,3450,4400,3600,3400,2900,3800,3300,4150,3400,3800,3700,4550,3200,4300,3350,4100,3600,3900,3850,4800,2700,4500,3950,3650,3550,3500,3675,4450,3400,4300,3250,3675,3325,3950,3600,4050,3350,3450,3250,4050,3800,3525,3950,3650,3650,4000,3400,3775,4100,3775]},"columns":[{"id":"species","name":"species","type":"factor","na":"NA","minWidth":125,"style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","html":true,"align":"center"},{"id":"island","name":"island","type":"factor","na":"NA","minWidth":125,"style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","html":true,"align":"center"},{"id":"body_mass","name":"body_mass","type":"numeric","na":"NA","minWidth":125,"style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["3,750.0","3,800.0","3,250.0","NA","3,450.0","3,650.0","3,625.0","4,675.0","3,475.0","4,250.0","3,300.0","3,700.0","3,200.0","3,800.0","4,400.0","3,700.0","3,450.0","4,500.0","3,325.0","4,200.0","3,400.0","3,600.0","3,800.0","3,950.0","3,800.0","3,800.0","3,550.0","3,200.0","3,150.0","3,950.0","3,250.0","3,900.0","3,300.0","3,900.0","3,325.0","4,150.0","3,950.0","3,550.0","3,300.0","4,650.0","3,150.0","3,900.0","3,100.0","4,400.0","3,000.0","4,600.0","3,425.0","2,975.0","3,450.0","4,150.0","3,500.0","4,300.0","3,450.0","4,050.0","2,900.0","3,700.0","3,550.0","3,800.0","2,850.0","3,750.0","3,150.0","4,400.0","3,600.0","4,050.0","2,850.0","3,950.0","3,350.0","4,100.0","3,050.0","4,450.0","3,600.0","3,900.0","3,550.0","4,150.0","3,700.0","4,250.0","3,700.0","3,900.0","3,550.0","4,000.0","3,200.0","4,700.0","3,800.0","4,200.0","3,350.0","3,550.0","3,800.0","3,500.0","3,950.0","3,600.0","3,550.0","4,300.0","3,400.0","4,450.0","3,300.0","4,300.0","3,700.0","4,350.0","2,900.0","4,100.0","3,725.0","4,725.0","3,075.0","4,250.0","2,925.0","3,550.0","3,750.0","3,900.0","3,175.0","4,775.0","3,825.0","4,600.0","3,200.0","4,275.0","3,900.0","4,075.0","2,900.0","3,775.0","3,350.0","3,325.0","3,150.0","3,500.0","3,450.0","3,875.0","3,050.0","4,000.0","3,275.0","4,300.0","3,050.0","4,000.0","3,325.0","3,500.0","3,500.0","4,475.0","3,425.0","3,900.0","3,175.0","3,975.0","3,400.0","4,250.0","3,400.0","3,475.0","3,050.0","3,725.0","3,000.0","3,650.0","4,250.0","3,475.0","3,450.0","3,750.0","3,700.0","4,000.0","4,500.0","5,700.0","4,450.0","5,700.0","5,400.0","4,550.0","4,800.0","5,200.0","4,400.0","5,150.0","4,650.0","5,550.0","4,650.0","5,850.0","4,200.0","5,850.0","4,150.0","6,300.0","4,800.0","5,350.0","5,700.0","5,000.0","4,400.0","5,050.0","5,000.0","5,100.0","4,100.0","5,650.0","4,600.0","5,550.0","5,250.0","4,700.0","5,050.0","6,050.0","5,150.0","5,400.0","4,950.0","5,250.0","4,350.0","5,350.0","3,950.0","5,700.0","4,300.0","4,750.0","5,550.0","4,900.0","4,200.0","5,400.0","5,100.0","5,300.0","4,850.0","5,300.0","4,400.0","5,000.0","4,900.0","5,050.0","4,300.0","5,000.0","4,450.0","5,550.0","4,200.0","5,300.0","4,400.0","5,650.0","4,700.0","5,700.0","4,650.0","5,800.0","4,700.0","5,550.0","4,750.0","5,000.0","5,100.0","5,200.0","4,700.0","5,800.0","4,600.0","6,000.0","4,750.0","5,950.0","4,625.0","5,450.0","4,725.0","5,350.0","4,750.0","5,600.0","4,600.0","5,300.0","4,875.0","5,550.0","4,950.0","5,400.0","4,750.0","5,650.0","4,850.0","5,200.0","4,925.0","4,875.0","4,625.0","5,250.0","4,850.0","5,600.0","4,975.0","5,500.0","4,725.0","5,500.0","4,700.0","5,500.0","4,575.0","5,500.0","5,000.0","5,950.0","4,650.0","5,500.0","4,375.0","5,850.0","4,875.0","6,000.0","4,925.0","NA","4,850.0","5,750.0","5,200.0","5,400.0","3,500.0","3,900.0","3,650.0","3,525.0","3,725.0","3,950.0","3,250.0","3,750.0","4,150.0","3,700.0","3,800.0","3,775.0","3,700.0","4,050.0","3,575.0","4,050.0","3,300.0","3,700.0","3,450.0","4,400.0","3,600.0","3,400.0","2,900.0","3,800.0","3,300.0","4,150.0","3,400.0","3,800.0","3,700.0","4,550.0","3,200.0","4,300.0","3,350.0","4,100.0","3,600.0","3,900.0","3,850.0","4,800.0","2,700.0","4,500.0","3,950.0","3,650.0","3,550.0","3,500.0","3,675.0","4,450.0","3,400.0","4,300.0","3,250.0","3,675.0","3,325.0","3,950.0","3,600.0","4,050.0","3,350.0","3,450.0","3,250.0","4,050.0","3,800.0","3,525.0","3,950.0","3,650.0","3,650.0","4,000.0","3,400.0","3,775.0","4,100.0","3,775.0"],"html":true,"align":"right"}],"filterable":true,"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"font-family":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif","fontSize":"16px"},"tableStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3"},"headerStyle":{"fontWeight":"normal","backgroundColor":"transparent","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"},"groupHeaderStyle":{"fontWeight":"normal","backgroundColor":"transparent","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"},"cellStyle":{"fontWeight":"normal"}},"elementId":"bhczajxkov","dataKey":"82a67c5e731e74b5a159ba0df47a9c9a"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
+</div>
+</div>
 </div>
 
 
