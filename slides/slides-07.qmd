@@ -401,3 +401,47 @@ ggsave(
   height = 5
 )
 ```
+
+# Displaying data in tables
+
+We'll use a couple of approaches to display data in tables instead of graphs, which
+can be useful for reports or presentations.
+
+## Using `knitr::kable()`
+
+```{r}
+#| echo: true
+#| output-location: fragment
+library(knitr) # also loaded with library(tidyverse)
+
+kable(
+  penguins |>
+    select(species, island, body_mass) |>
+    head(10),
+  caption = "First 10 rows of the penguins dataset"
+)
+```
+
+## Using `gt`
+
+```{r}
+#| echo: true
+#| output-location: fragment
+library(gt)
+
+gt(
+  penguins |>
+    select(species, island, body_mass)
+) |>
+  tab_header(
+    title = "First 10 rows of the penguins dataset"
+  ) |>
+  fmt_number(
+    columns = body_mass,
+    decimals = 1
+  ) |>
+  opt_interactive(
+    use_pagination = TRUE,
+    use_filters = TRUE
+  )
+```
