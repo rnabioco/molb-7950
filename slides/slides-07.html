@@ -234,9 +234,13 @@ Jay Hesselberth
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a></a><span class="fu">library</span>(here)</span>
-<span id="cb1-3"><a></a></span>
-<span id="cb1-4"><a></a><span class="co"># overwrite as tibble</span></span>
-<span id="cb1-5"><a></a>penguins <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(penguins)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a></a><span class="fu">library</span>(cowplot)</span>
+<span id="cb1-4"><a></a></span>
+<span id="cb1-5"><a></a><span class="co"># set the theme for all plots</span></span>
+<span id="cb1-6"><a></a><span class="fu">theme_set</span>(<span class="fu">theme_cowplot</span>())</span>
+<span id="cb1-7"><a></a></span>
+<span id="cb1-8"><a></a><span class="co"># overwrite as tibble</span></span>
+<span id="cb1-9"><a></a>penguins <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(penguins)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section>
@@ -442,7 +446,9 @@ Jay Hesselberth
 <span id="cb20-5"><a></a>    <span class="at">y =</span> body_mass</span>
 <span id="cb20-6"><a></a>  )</span>
 <span id="cb20-7"><a></a>) <span class="sc">+</span></span>
-<span id="cb20-8"><a></a>  <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-8"><a></a>  <span class="fu">geom_boxplot</span>(</span>
+<span id="cb20-9"><a></a>    <span class="at">fill =</span> <span class="st">"grey50"</span></span>
+<span id="cb20-10"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 </section>
@@ -469,7 +475,9 @@ Jay Hesselberth
 <span id="cb21-10"><a></a>    <span class="at">y =</span> body_mass</span>
 <span id="cb21-11"><a></a>  )</span>
 <span id="cb21-12"><a></a>) <span class="sc">+</span></span>
-<span id="cb21-13"><a></a>  <span class="fu">geom_boxplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-13"><a></a>  <span class="fu">geom_boxplot</span>(</span>
+<span id="cb21-14"><a></a>    <span class="at">fill =</span> <span class="st">"grey50"</span></span>
+<span id="cb21-15"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 </section>
@@ -515,16 +523,16 @@ Jay Hesselberth
 <pre><code># A tibble: 100 × 2
    category lumped
    &lt;chr&gt;    &lt;fct&gt; 
- 1 j        j     
- 2 j        j     
- 3 a        a     
- 4 j        j     
- 5 d        Other 
- 6 h        Other 
- 7 a        a     
- 8 b        Other 
- 9 f        f     
-10 a        a     
+ 1 g        g     
+ 2 a        Other 
+ 3 j        Other 
+ 4 a        Other 
+ 5 a        Other 
+ 6 g        g     
+ 7 b        b     
+ 8 e        e     
+ 9 g        g     
+10 h        h     
 # ℹ 90 more rows</code></pre>
 </div>
 </div></div>
@@ -543,14 +551,16 @@ Jay Hesselberth
 <span id="cb25-8"><a></a>  <span class="fu">count</span>(lumped)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 2
+<pre><code># A tibble: 7 × 2
   lumped     n
   &lt;fct&gt;  &lt;int&gt;
-1 a         12
-2 c         12
-3 f         12
-4 j         12
-5 Other     52</code></pre>
+1 b         13
+2 c         10
+3 e         10
+4 f         10
+5 g         14
+6 h         10
+7 Other     33</code></pre>
 </div>
 </div></div>
 
@@ -565,11 +575,11 @@ Jay Hesselberth
 </div>
 <div class="cell fragment">
 <div class="cell-output cell-output-stdout">
-<pre><code> [1]  40 100  49  24  15  71  66  52   7  33</code></pre>
+<pre><code> [1] 16 79  2 43 65 80 78 61 15 82</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">100</span>, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 20 75 18 81  0 30  1  4 36 51</code></pre>
+<pre><code> [1] 65 26 14 78 79 53 22 20  7 55</code></pre>
 </div>
 </div>
 </section>
@@ -706,8 +716,7 @@ Jay Hesselberth
 <section id="setup-2" class="slide level2">
 <h2>Setup</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a><span class="fu">library</span>(cowplot)</span>
-<span id="cb47-2"><a></a><span class="fu">library</span>(patchwork)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a><span class="fu">library</span>(patchwork)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="scale-functions-in-ggplot2" class="slide level2 smaller">
@@ -726,10 +735,9 @@ Jay Hesselberth
 <span id="cb48-7"><a></a>    <span class="at">color =</span> <span class="fu">factor</span>(cyl)</span>
 <span id="cb48-8"><a></a>  )</span>
 <span id="cb48-9"><a></a>) <span class="sc">+</span></span>
-<span id="cb48-10"><a></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb48-11"><a></a>  <span class="fu">theme_cowplot</span>()</span>
-<span id="cb48-12"><a></a></span>
-<span id="cb48-13"><a></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb48-10"><a></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">5</span>)</span>
+<span id="cb48-11"><a></a></span>
+<span id="cb48-12"><a></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 </section>
