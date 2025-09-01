@@ -1,5 +1,3 @@
-source("common.R")
-
 library(tidyverse)
 library(here)
 
@@ -16,20 +14,14 @@ nutrient_abbrs <- tribble(
 )
 
 brauer_gene_exp_raw <-
-  read_delim(
-    url,
-    delim = "\t",
-    show_col_types = FALSE
-  ) |>
-  separate(
-    NAME,
-    c("name", "BP", "MF", "systematic_name", "number"),
-    sep = "\\|\\|"
+  read_tsv(url) |>
+  separate_wider_delim(
+    cols = NAME,
+    names = c("name", "BP", "MF", "systematic_name", "number"),
+    delim = "||",
   ) |>
   mutate(
-    across(name:number, trimws)
-  ) |>
-  mutate(
+    across(name:number, trimws),
     name = na_if(name, "")
   )
 
@@ -46,13 +38,9 @@ yeast_go_terms <-
 brauer_gene_exp_wide <-
   select(
     brauer_gene_exp_raw,
-    -name,
+    -(GID:MF),
     -number,
-    -GID,
-    -YORF,
     -GWEIGHT,
-    -BP,
-    -MF
   )
 
 brauer_gene_exp_tidy <-
@@ -62,11 +50,10 @@ brauer_gene_exp_tidy <-
     names_to = "nutrient_rate",
     values_to = "exp"
   ) |>
-  separate(
+  separate_wider_position(
     nutrient_rate,
-    into = c("nutrient_abbr", "rate"),
-    sep = 1,
-    convert = FALSE
+    widths = c(nutrient_abbr = 1, rate = 4),
+    too_few = "align_start"
   ) |>
   filter(systematic_name != "") |>
   left_join(nutrient_abbrs, by = "nutrient_abbr") |>
@@ -76,8 +63,14 @@ brauer_gene_exp_tidy <-
     everything(),
     -nutrient_abbr
   ) |>
-  mutate(across(c(rate, nutrient), as_factor)) |>
-  arrange(desc(systematic_name), nutrient, rate)
+  mutate(
+    across(c(rate, nutrient), as_factor)
+  ) |>
+  arrange(
+    desc(systematic_name),
+    nutrient,
+    rate
+  )
 
 write_tsv(brauer_gene_exp, file = here("data", "brauer_gene_exp_tidy.tsv.gz"))
 write_tsv(brauer_gene_exp, file = here("data", "brauer_gene_exp_wide.tsv.gz"))
