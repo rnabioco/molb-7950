@@ -1,0 +1,391 @@
+---
+title: "R Bootcamp - Class 7"
+subtitle: "Tidyverse odds & ends"
+author: "{{< var instructor.block.bootcamp-r >}}"
+---
+
+
+## Class 7 outline
+
+* String manipulation with `stringr`
+* Factor operations with `forcats`
+* Join functions with `dplyr`
+* Advanced plotting with `ggplot2`
+
+## Setup
+
+```{r}
+#| message: false
+library(tidyverse)
+library(here)
+
+# overwrite as tibble
+penguins <- as_tibble(penguins)
+```
+
+# String operations
+
+## Combining strings with `str_c()`
+
+```{r}
+#| echo: true
+#| output-location: fragment
+str_c("letter: ", letters[1:5])
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: fragment
+penguins |>
+  mutate(
+    id = str_c(species, island, sep = "_"),
+    label = str_c(species, " (", year, ")")
+  ) |>
+  select(species, island, year, id, label)
+```
+
+::: {.notes}
+`str_c()` is similar to `paste` and `paste0` but the behavior is more consistent.
+:::
+
+## Detecting patterns with `str_detect()`
+
+```{r}
+#| echo: true
+#| output-location: fragment
+str_detect("A", LETTERS[1:10])
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: fragment
+mtcars_tbl <-
+  rownames_to_column(mtcars, "name") |>
+  as_tibble()
+
+# find the Mercedes Benz's
+filter(
+  mtcars_tbl,
+  str_detect(name, "Merc")
+)
+```
+
+## Splitting strings with `str_split()` {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: fragment
+ids <- c("x-1", "x-2", "y-1", "y-2")
+str_split(ids, "-")
+
+# just the first parts
+str_split_i(ids, '-', 1)
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# create some sample data
+df <- tribble(
+  ~ sample_ids,
+  "gene_1_treatment",
+  "gene_2_control",
+  "gene_3_treatment"
+)
+
+mutate(
+  df,
+  split_parts = str_split(sample_ids, "_"),
+  gene_part = map_chr(split_parts, ~ .x[1]),
+  number_part = map_chr(split_parts, ~ .x[2]),
+  condition = map_chr(split_parts, ~ .x[3])
+)
+```
+
+# Factor operations
+
+## Counting factor levels with `fct_count()`
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# equivalent with dplyr
+penguins |>
+  count(species)
+```
+
+```{r}
+#| echo: true
+#| output-location: fragment
+fct_count(penguins$species)
+```
+
+## Reordering factors with `fct_reorder()`
+
+```{r}
+#| echo: true
+#| warning: false
+#| output-location: fragment
+#| fig.alt: "Bar plot showing penguin species counts, ordered by frequency from lowest to highest"
+ggplot(
+  penguins,
+  aes(
+    x = species,
+    y = body_mass
+  )
+) +
+  geom_boxplot()
+```
+
+---
+
+```{r}
+#| echo: true
+#| warning: false
+#| output-location: fragment
+#| fig.alt: "Bar plot showing penguin species counts, ordered by frequency from lowest to highest"
+ggplot(
+  penguins,
+  aes(
+    x = fct_reorder(
+      species,
+      body_mass,
+      .fun = sd,
+      na.rm = TRUE
+    ),
+    y = body_mass
+  )
+) +
+  geom_boxplot()
+```
+
+## Lumping infrequent levels with `fct_lump()`
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# create some sample data with many levels
+sample_data <- tibble(
+  category = sample(
+    letters[1:10],
+    100,
+    replace = TRUE
+  )
+)
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: fragment
+mutate(
+  sample_data,
+  lumped = fct_lump_n(category, n = 3)
+)
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: fragment
+mutate(
+  sample_data,
+  lumped = fct_lump_n(category, n = 3)
+) |>
+  count(lumped)
+```
+
+::: {.aside}
+Do your numbers look different? `sample()` is not reproducible by default.
+:::
+
+## Aside on `sample()` and reproducibility {.smaller}
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# run this several times
+sample(0:100, 10)
+
+sample(0:100, 10)
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: fragment
+# now make `sample()` reproducible.
+# you have the set the seed each time.
+
+set.seed(42) # set the seed for reproducibility
+sample(0:100, 10)
+
+set.seed(42)
+sample(0:100, 10)
+
+sample(0:100, 10)
+```
+
+::: {.aside}
+this also applies to `rnorm()`, `runif()`, and other random number generation functions.
+:::
+
+# Join operations
+
+## Understanding joins
+
+Joins combine data from two tables based on matching keys.
+
+```{r}
+#| echo: true
+# Sample data for demonstration
+band_members <- tribble(
+  ~name,    ~band,
+  "Mick",   "Stones",
+  "John",   "Beatles",
+  "Paul",   "Beatles"
+)
+
+band_instruments <- tribble(
+  ~name,    ~plays,
+  "John",   "guitar",
+  "Paul",   "bass",
+  "Keith",  "guitar"
+)
+```
+
+## `left_join()` - keep all rows from left table
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  left_join(
+    band_instruments,
+    by = "name"
+  )
+```
+
+Most common join - keeps all observations from the "primary" table.
+
+## `inner_join()` - keep only matching rows
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  inner_join(
+    band_instruments,
+    by = "name"
+  )
+```
+
+Only keeps rows that exist in both tables.
+
+## `full_join()` - keep all rows from both tables
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+band_members |>
+  full_join(
+    band_instruments,
+    by = "name"
+  )
+```
+
+Keeps everything, filling missing values with `NA`.
+
+# Advanced plotting
+
+## Setup
+
+```{r}
+library(cowplot)
+library(patchwork)
+```
+
+## scale functions in ggplot2 {.smaller}
+
+- `scale_color_brewer()` and `scale_fill_brewer()` control `color` and `fill` aesthetics.
+- See available [ggplot2 brewer palettes](https://ggplot2.tidyverse.org/reference/scale_brewer.html#palettes)
+
+```{r}
+#| echo: true
+#| message: false
+#| output-location: fragment
+#| fig.alt: "Example of a ggplot2 scatter plot with points colored by number of cylinders, using the cowplot theme"
+p1 <- ggplot(
+  mtcars,
+  aes(
+    x = mpg,
+    y = hp,
+    color = factor(cyl)
+  )
+) +
+  geom_point(size = 5) +
+  theme_cowplot()
+
+p1
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: fragment
+p1 + scale_color_brewer(palette = "Set1")
+```
+
+---
+
+```{r}
+#| echo: true
+#| output-location: fragment
+p1 + scale_color_brewer(palette = "Dark2")
+```
+
+## Combining multiple plots into a figure? {.smaller}
+
+Use the [`{patchwork}` package](https://patchwork.data-imaginist.com/).
+
+```{r}
+#| echo: true
+#| message: false
+#| output-location: slide
+#| fig.alt: "Example of combining multiple ggplot2 plots into a single figure using the patchwork package"
+library(patchwork)
+
+(p1 + p1) /
+  (p1 + p1) +
+  plot_annotation(tag_levels = 'A') +
+  plot_layout(guides = 'collect')
+```
+
+## Saving plots
+
+Saves last plot as 5' x 5' file named `plot_final.png` in working directory.
+
+Matches file type to file extension (`*.png`, `*.jpeg`, `*.pdf`).
+
+```{r}
+#| echo: true
+#| eval: false
+# default is to save last plot in the buffer
+# can also specify with the `plot` argument
+ggsave(
+  filename = here("img/plot_final.png"),
+  plot = last_plot(),
+  width = 5,
+  height = 5
+)
+```
