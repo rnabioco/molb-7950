@@ -4,7 +4,6 @@ subtitle: "Tidyverse odds & ends"
 author: "{{< var instructor.block.bootcamp-r >}}"
 ---
 
-
 ## Class 7 outline
 
 * String manipulation with `stringr`
@@ -131,7 +130,7 @@ fct_count(penguins$species)
 ```{r}
 #| echo: true
 #| warning: false
-#| output-location: fragment
+#| output-location: slide
 #| fig.alt: "Bar plot showing penguin species counts, ordered by frequency from lowest to highest"
 ggplot(
   penguins,
@@ -148,7 +147,7 @@ ggplot(
 ```{r}
 #| echo: true
 #| warning: false
-#| output-location: fragment
+#| output-location: slide
 #| fig.alt: "Bar plot showing penguin species counts, ordered by frequency from lowest to highest"
 ggplot(
   penguins,
@@ -170,21 +169,23 @@ ggplot(
 ```{r}
 #| echo: true
 #| output-location: fragment
-# create some sample data with many levels
-sample_data <- tibble(
-  category = sample(
-    letters[1:10],
-    100,
-    replace = TRUE
+# create some sample data with many levels.
+# how many rows / cols are in this tibble?
+sample_data <-
+  tibble(
+    category = sample(
+      letters[1:10],
+      100,
+      replace = TRUE
+    )
   )
-)
 ```
 
 ---
 
 ```{r}
 #| echo: true
-#| output-location: fragment
+#| output-location: column-fragment
 mutate(
   sample_data,
   lumped = fct_lump_n(category, n = 3)
@@ -195,7 +196,7 @@ mutate(
 
 ```{r}
 #| echo: true
-#| output-location: fragment
+#| output-location: column-fragment
 mutate(
   sample_data,
   lumped = fct_lump_n(category, n = 3)
@@ -247,20 +248,10 @@ Joins combine data from two tables based on matching keys.
 
 ```{r}
 #| echo: true
-# Sample data for demonstration
-band_members <- tribble(
-  ~name,    ~band,
-  "Mick",   "Stones",
-  "John",   "Beatles",
-  "Paul",   "Beatles"
-)
+#| output-location: column-fragment
+band_members
 
-band_instruments <- tribble(
-  ~name,    ~plays,
-  "John",   "guitar",
-  "Paul",   "bass",
-  "Keith",  "guitar"
-)
+band_instruments
 ```
 
 ## `left_join()` - keep all rows from left table
@@ -310,6 +301,7 @@ Keeps everything, filling missing values with `NA`.
 ## Setup
 
 ```{r}
+#| message: false
 library(cowplot)
 library(patchwork)
 ```
@@ -322,13 +314,14 @@ library(patchwork)
 ```{r}
 #| echo: true
 #| message: false
-#| output-location: fragment
+#| output-location: slide
 #| fig.alt: "Example of a ggplot2 scatter plot with points colored by number of cylinders, using the cowplot theme"
 p1 <- ggplot(
-  mtcars,
+  mtcars_tbl,
   aes(
     x = mpg,
     y = hp,
+    # why do we `factor` here?
     color = factor(cyl)
   )
 ) +
@@ -363,8 +356,6 @@ Use the [`{patchwork}` package](https://patchwork.data-imaginist.com/).
 #| message: false
 #| output-location: slide
 #| fig.alt: "Example of combining multiple ggplot2 plots into a single figure using the patchwork package"
-library(patchwork)
-
 (p1 + p1) /
   (p1 + p1) +
   plot_annotation(tag_levels = 'A') +
