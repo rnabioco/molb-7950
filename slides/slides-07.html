@@ -496,12 +496,14 @@ Jay Hesselberth
 <span id="cb22-2"><a></a><span class="co"># how many rows / cols are in this tibble?</span></span>
 <span id="cb22-3"><a></a>sample_data <span class="ot">&lt;-</span></span>
 <span id="cb22-4"><a></a>  <span class="fu">tibble</span>(</span>
-<span id="cb22-5"><a></a>    <span class="at">category =</span> <span class="fu">sample</span>(</span>
-<span id="cb22-6"><a></a>      letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>],</span>
-<span id="cb22-7"><a></a>      <span class="dv">100</span>,</span>
-<span id="cb22-8"><a></a>      <span class="at">replace =</span> <span class="cn">TRUE</span></span>
-<span id="cb22-9"><a></a>    )</span>
-<span id="cb22-10"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-5"><a></a>    <span class="at">category =</span> <span class="fu">factor</span>(</span>
+<span id="cb22-6"><a></a>      <span class="fu">sample</span>(</span>
+<span id="cb22-7"><a></a>        letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>],</span>
+<span id="cb22-8"><a></a>        <span class="dv">100</span>,</span>
+<span id="cb22-9"><a></a>        <span class="at">replace =</span> <span class="cn">TRUE</span></span>
+<span id="cb22-10"><a></a>      )</span>
+<span id="cb22-11"><a></a>    )</span>
+<span id="cb22-12"><a></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell fragment">
 
@@ -522,16 +524,16 @@ Jay Hesselberth
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 100 × 2
    category lumped
-   &lt;chr&gt;    &lt;fct&gt; 
- 1 g        g     
+   &lt;fct&gt;    &lt;fct&gt; 
+ 1 h        h     
  2 a        Other 
- 3 j        Other 
- 4 a        Other 
- 5 a        Other 
- 6 g        g     
- 7 b        b     
- 8 e        e     
- 9 g        g     
+ 3 h        h     
+ 4 h        h     
+ 5 j        Other 
+ 6 f        f     
+ 7 b        Other 
+ 8 e        Other 
+ 9 g        Other 
 10 h        h     
 # ℹ 90 more rows</code></pre>
 </div>
@@ -551,16 +553,13 @@ Jay Hesselberth
 <span id="cb25-8"><a></a>  <span class="fu">count</span>(lumped)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 7 × 2
+<pre><code># A tibble: 4 × 2
   lumped     n
   &lt;fct&gt;  &lt;int&gt;
-1 b         13
-2 c         10
-3 e         10
-4 f         10
-5 g         14
-6 h         10
-7 Other     33</code></pre>
+1 c         14
+2 f         16
+3 h         18
+4 Other     52</code></pre>
 </div>
 </div></div>
 
@@ -575,11 +574,11 @@ Jay Hesselberth
 </div>
 <div class="cell fragment">
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 16 79  2 43 65 80 78 61 15 82</code></pre>
+<pre><code> [1] 86 52  8 64 75 40 15 82 30 76</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">100</span>, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 65 26 14 78 79 53 22 20  7 55</code></pre>
+<pre><code> [1] 19 43 41 21 27 22  3 15 82  4</code></pre>
 </div>
 </div>
 </section>
@@ -634,7 +633,11 @@ Jay Hesselberth
 2 John  Beatles
 3 Paul  Beatles</code></pre>
 </div>
+</div></div>
+<div class="cell columns column-output-location">
+<div class="column">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a>band_instruments</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 2
   name  plays 
@@ -647,6 +650,7 @@ Jay Hesselberth
 </section>
 <section id="left_join---keep-all-rows-from-left-table" class="slide level2">
 <h2><code>left_join()</code> - keep all rows from left table</h2>
+<p>Most common join - keeps all observations from the “primary” table.</p>
 <div class="cell columns column-output-location">
 <div class="column">
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a></a>band_members <span class="sc">|&gt;</span></span>
@@ -664,10 +668,10 @@ Jay Hesselberth
 3 Paul  Beatles bass  </code></pre>
 </div>
 </div></div>
-<p>Most common join - keeps all observations from the “primary” table.</p>
 </section>
 <section id="inner_join---keep-only-matching-rows" class="slide level2">
 <h2><code>inner_join()</code> - keep only matching rows</h2>
+<p>Only keeps rows that exist in both tables.</p>
 <div class="cell columns column-output-location">
 <div class="column">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a>band_members <span class="sc">|&gt;</span></span>
@@ -684,7 +688,6 @@ Jay Hesselberth
 2 Paul  Beatles bass  </code></pre>
 </div>
 </div></div>
-<p>Only keeps rows that exist in both tables.</p>
 </section>
 <section id="full_join---keep-all-rows-from-both-tables" class="slide level2">
 <h2><code>full_join()</code> - keep all rows from both tables</h2>
@@ -745,7 +748,7 @@ Jay Hesselberth
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-22-1.png" alt="Example of a ggplot2 scatter plot with points colored by number of cylinders, using the cowplot theme" width="960"></p>
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-23-1.png" alt="Example of a ggplot2 scatter plot with points colored by number of cylinders, using the cowplot theme" width="960"></p>
 </figure>
 </div>
 </div>
@@ -758,7 +761,7 @@ Jay Hesselberth
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-23-1.png" width="960"></p>
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-24-1.png" width="960"></p>
 </figure>
 </div>
 </div>
@@ -773,7 +776,7 @@ Jay Hesselberth
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-24-1.png" width="960"></p>
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-25-1.png" width="960"></p>
 </figure>
 </div>
 </div>
@@ -794,7 +797,7 @@ Jay Hesselberth
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-25-1.png" alt="Example of combining multiple ggplot2 plots into a single figure using the patchwork package" width="960"></p>
+<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-26-1.png" alt="Example of combining multiple ggplot2 plots into a single figure using the patchwork package" width="960"></p>
 </figure>
 </div>
 </div>
