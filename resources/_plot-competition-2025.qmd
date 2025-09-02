@@ -1,0 +1,331 @@
+---
+title: aRt competition entries
+execute:
+  message: false
+  warning: false
+format:
+  html:
+    code-fold: true
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+library(here)
+```
+
+**Vote for your favorites at this [Google Form](https://forms.gle/WpYSNTptytum8UgV7).**
+
+### Plot 1
+
+```{r}
+#| label: p1
+library(tidyverse)
+library(patchwork)
+library(emo)
+
+# need length.out and sequence function to have enough data points to make smooth curved lines; here I create a tbl with values for theta and a corresponding r for my coordinate plot
+tbl <- tibble(
+  theta = seq(0, 2 * 3.14, length.out = 500),
+  r = (3 * sin(pi * theta))
+)
+
+# create a plot of each coordinate point and changed the aesthetics to adjust x and y to make an abstract plot. With different variations I came upon these aesthetic adjustments to create what looks like a squid
+ggplot(tbl) +
+  geom_point(
+    aes(x = r * theta, y = r^2),
+    color = "#613092",
+    alpha = 0.75,
+    size = 0.25
+  ) +
+  coord_polar(start = 0) +
+  #added a face to my squid using annotate
+  annotate(
+    "text",
+    x = 0,
+    y = -4,
+    label = "❁´◡`❁  ",
+    size = 7,
+    color = "#452268",
+    angle = 4
+  ) +
+
+  # added a title amd subtitle
+  labs(
+    title = "Hugs From Miss Squid",
+    subtitle = "❤️  ❤️  ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️ ❤️"
+  ) +
+  theme(
+    plot.subtitle = element_text(color = "red")
+  ) +
+
+  # used theme_void() to remove the coordinate plot background and axis labels so I was left with a white background behind my data points (squid body) and annotated text (face of squid)
+  theme_void()
+```
+
+### Plot 2
+
+```{r}
+#| label: p2
+library(ggplot2)
+library(dplyr)
+library(viridis)
+
+set.seed(42)
+x <- seq(-4 * pi, 4 * pi, length.out = 2000)
+
+# Mountain Layers
+mountain_data <- data.frame(
+  x = rep(x, 5),
+  layer = rep(1:5, each = length(x))
+) %>%
+  mutate(
+    # Base mountain shape
+    base_height = case_when(
+      layer == 1 ~ 3 * sin(x / 2) + 1.5 * sin(x / 1.3) + 0.8 * sin(x * 0.7),
+      layer == 2 ~ 2.5 * sin(x / 1.8) + 1.2 * sin(x / 1.1) + 0.6 * sin(x * 0.9),
+      layer == 3 ~ 2 * sin(x / 2.2) + sin(x / 0.9) + 0.4 * sin(x * 1.2),
+      layer == 4 ~ 1.5 * sin(x / 2.8) + 0.8 * sin(x / 1.5) + 0.3 * sin(x * 1.5),
+      layer == 5 ~ sin(x / 3.2) + 0.5 * sin(x / 2.1) + 0.2 * sin(x * 1.8)
+    ),
+    # Noise for texture
+    noise = rnorm(n(), 0, 0.1 * (6 - layer)),
+    y = pmax(base_height + noise, -layer * 0.5), # Ensure layers don't go below each other
+    # Color based on height and layer for atmospheric perspective
+    fill_color = layer + (y - min(y)) / (max(y) - min(y))
+  )
+
+# Plot each layer
+p1 <- ggplot() +
+  # Layer 5 (background)
+  geom_ribbon(
+    data = filter(mountain_data, layer == 5),
+    aes(x = x, ymin = -2.5, ymax = y),
+    fill = "#440154",
+    alpha = 0.6
+  ) +
+  # Layer 4
+  geom_ribbon(
+    data = filter(mountain_data, layer == 4),
+    aes(x = x, ymin = -2, ymax = y),
+    fill = "#31688e",
+    alpha = 0.7
+  ) +
+  # Layer 3
+  geom_ribbon(
+    data = filter(mountain_data, layer == 3),
+    aes(x = x, ymin = -1.5, ymax = y),
+    fill = "#26828e",
+    alpha = 0.75
+  ) +
+  # Layer 2
+  geom_ribbon(
+    data = filter(mountain_data, layer == 2),
+    aes(x = x, ymin = -1, ymax = y),
+    fill = "#35b779",
+    alpha = 0.8
+  ) +
+  # Layer 1 (foreground)
+  geom_ribbon(
+    data = filter(mountain_data, layer == 1),
+    aes(x = x, ymin = -0.5, ymax = y),
+    fill = "#fde725",
+    alpha = 0.85
+  ) +
+  labs(title = "The Rocky Mountains", x = "", y = "") +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "black", color = NA),
+    panel.background = element_rect(fill = "black", color = NA),
+    plot.title = element_text(color = "white", size = 16, hjust = 0.5),
+    plot.subtitle = element_text(color = "white", size = 12, hjust = 0.5),
+    legend.position = "none"
+  )
+
+print(p1)
+```
+
+### Plot 3
+
+```{r}
+#| label: p3
+#| echo: true
+
+# aRt Title: Transcript City
+
+# Use transcriptomic data from ps-04.
+# Select for gene name & RNA_fc values only.
+# Drop NAs & remove duplicates.
+# Filter rna_fc within a positive range that is reasonable to display.
+
+library(tidyverse)
+library(here)
+
+art_tbl <- read_csv(
+  here("data/bootcamp/data_rna_protein.csv.gz")
+)
+
+art_tbl_trim <- art_tbl |>
+  select(gene = geneid, rna_fc = iDUX4_logFC) |>
+  drop_na() |>
+  distinct(gene, .keep_all = TRUE) |>
+  filter(rna_fc > 0 & rna_fc <= 0.5) |>
+  # Mutate to assign `color_class` based on arbitrary rna_fc value; will be used to vary color in plot
+  mutate(
+    color_class = case_when(
+      rna_fc < 0.1 ~ "A",
+      rna_fc < 0.2 ~ "B",
+      rna_fc < 0.3 ~ "C",
+      rna_fc < 0.4 ~ "D",
+      .default = "E"
+    )
+  ) |>
+  # Mutate to assign `star_class` based on first letter of gene name. Use this stackoverflow post to understand partial strings: https://stackoverflow.com/questions/56993566/how-to-create-a-new-column-based-on-partial-string-of-another-column
+  mutate(
+    star_class = substr(gene, 1L, 1L)
+  )
+
+city_palette <- c("#eeaf61", "#fb9062", "#ee5d6c", "#ce4993", "#6a0d83")
+
+ggplot(
+  art_tbl_trim,
+  aes(
+    x = gene,
+    y = rna_fc,
+    fill = color_class
+  )
+) +
+  geom_col() +
+  geom_point(
+    shape = 8,
+    color = "white",
+    size = 0.2
+  ) +
+  theme(
+    # Remove legend, axis titles, grid, & make background black
+    legend.position = "none",
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid = element_blank(),
+    panel.background = element_rect(fill = 'black')
+  ) +
+  scale_fill_manual(values = city_palette)
+```
+
+### Plot 4
+
+```{r}
+#| label: p4
+library(ggplot2)
+
+pride_colors <- c(
+  "maroon",
+  "purple",
+  "pink",
+  "lavender",
+  "steelblue",
+  "turquoise",
+  "springgreen",
+  "snow4"
+)
+
+stripes_df <- data.frame(
+  ymin = seq(0, 7),
+  #Ymin needs to match the number of colors you've picked out
+  ymax = seq(1, 8),
+  #Ymax is setting the width of each rectangle to be 1 unit later on
+  color = pride_colors
+)
+
+base_flag <- ggplot(stripes_df) +
+  geom_rect(
+    aes(xmin = 0, xmax = 15, ymin = ymin, ymax = ymax, fill = color),
+    color = NA
+  )
+
+#Create a triangle polygon df
+
+triangle_df <- data.frame(
+  x = c(0, 0, 5),
+  y = c(0, 8, 4) # bottom, top, center
+)
+
+combined_flag <- base_flag +
+  geom_polygon(
+    data = triangle_df,
+    aes(x = x, y = y),
+    fill = "orange",
+    alpha = 0.7
+  ) +
+  scale_fill_identity() +
+  theme_void() +
+  coord_fixed()
+
+dots_df <- data.frame(
+  x = runif(400, 0, 15), # Random x across flag width
+  y = runif(400, 0, length(pride_colors)), # Random y across flag height
+  size = runif(400, 0.5, 2), # Dot sizes
+  alpha = runif(400, 0.1, 0.4), # Transparency
+  color = sample(pride_colors, 400, replace = TRUE) # Pride color for each dot
+)
+
+# Final plot
+combined_flag +
+  geom_point(
+    data = dots_df,
+    aes(x = x, y = y, size = size, alpha = 0.7, color = color),
+    show.legend = FALSE
+  ) +
+  #scale_fill_identity() +
+  theme_void() +
+  coord_fixed()
+```
+
+### Plot 5
+
+```{r}
+#| label: p5
+library(tidyverse)
+data("trees")
+trees_tibble <- as_tibble(trees)
+
+ggplot_trees <- ggplot(
+  data = trees_tibble,
+  mapping = aes(
+    x = Girth,
+    y = Height,
+    size = Volume
+  )
+) +
+  geom_point(
+    alpha = 1.0,
+    shape = 8,
+    color = "#FF0000",
+    size = 10,
+    stroke = 1
+  ) +
+  geom_smooth(
+    alpha = 0.5,
+    color = "#0000FF",
+    fill = "#8A00C4",
+    linetype = "dashed",
+    size = 3
+  ) +
+  theme(
+    plot.background = element_rect(fill = "#FFFF00"),
+    panel.background = element_rect(fill = "#39FF14"),
+    panel.grid.major = element_line(color = "#FF0000"),
+    panel.grid.minor.x = element_line(color = "#0000FF"),
+    panel.grid.minor.y = element_line(color = "#FFAE42"),
+    panel.grid.major.y = element_line(color = "#FF13F0")
+  ) +
+  labs(
+    x = "how thick is it (in) ??",
+    y = "vertical dominance (ft)",
+    title = "cool facts about 31 black cherry trees"
+  )
+
+ggplot_trees
+```
