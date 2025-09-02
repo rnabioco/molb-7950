@@ -329,3 +329,182 @@ ggplot_trees <- ggplot(
 
 ggplot_trees
 ```
+
+### Plot 6
+
+```{r}
+#| label: p6
+#generating histogram with labels and title
+ugly_plant <- ggplot(PlantGrowth, aes(weight, fill = group, color = group)) + geom_histogram() + labs(x = "PLANT WEIGHT", y = "PLANT COUNT", title = "green plants")
+
+#Theme changes for colors and position/angle of labels
+ugly_plant + theme(
+  plot.background = element_rect(fill = "lightgreen"),
+  panel.background = element_rect(fill = "darkgreen"),
+  panel.grid.major = element_line(colour = "white"),
+  plot.title = element_text(color = "#29AB87", angle = 100, hjust = 6),
+  axis.title.x = element_text(color = "blue", angle = 145, hjust = 1, vjust = 1),
+  axis.title.y = element_text(color = "yellow", angle = 250, hjust = 1, vjust = 1),
+  legend.title = element_text(color = "green", angle = 170, hjust = -1, vjust = -1),
+  legend.text = element_text(color = "darkgreen", angle = 120)) + scale_fill_brewer(palette = "Light1")
+```
+
+### Plot 7
+
+```{r}
+#| label: p7
+library(tidyverse)
+library(here)
+library(gganimate)
+library(ragg)
+
+storms_sin <- storms |> drop_na()
+
+anim <-  ggplot(
+ storms_sin,
+  aes(
+    x = cos(pressure), 
+    y= sin(wind), 
+   )
+) +
+  geom_point(alpha = 0.05, shape = 11, size = 8, color="#edf8b1") +
+  theme_void() +
+  coord_flip()+
+  geom_point(
+  aes(x = cos(pressure), y = sin(lat)),
+  alpha = 0.3, shape = 8, size = 15, color="#7fcdbb"
+)+
+  geom_density_2d_filled(
+  aes(x = cos(pressure), y = sin(lat)),
+  alpha = 0.1, linewidth = 12, color="violet")+
+  
+  theme(legend.position = "none", plot.background = element_rect(fill = "#91c7d8"),
+    panel.background = element_rect(fill = 	"#9c8080"))+
+  transition_states(
+    transition_length = 0,
+    state_length = 0.001,
+    year
+  ) 
+
+spacestorm_plot <- animate(anim, device = "ragg_png", renderer = gifski_renderer())
+
+anim_save(
+  filename = "spacestorm.gif",
+  animation = spacestorm_plot,
+  path = here("img")
+)
+```
+
+![]("img/spacestorm.gif")
+
+### Plot 8
+
+```{r}
+library(tidyverse)
+library(emo)
+# library(emojifont)
+library(here)
+library(gganimate)
+library(ragg)
+data("WorldPhones")
+
+set.seed(42)
+
+ worldphones_tidy <- WorldPhones %>%
+      as.data.frame() %>%
+      rownames_to_column(var = "year") %>%
+      pivot_longer(
+        cols = -year,
+        names_to = "region",
+        values_to = "phones"
+      ) %>%
+  mutate(
+    emoji = case_when(
+      region == "N.Amer" ~ emo::ji("eagle"),
+      region == "Europe" ~ emo::ji("bear"),
+      region == "Asia" ~ emo::ji("tiger"),
+      region == "S.Amer" ~ emo::ji("monkey"),
+      region == "Oceania" ~ emo::ji("penguin"),
+      region == "Africa" ~ emo::ji("giraffe"),
+      region == "Mid.Amer" ~ emo::ji("cow")
+    )
+  ) %>%
+  select(
+    year,
+    emoji,
+    region,
+    phones
+  )
+ 
+  ggplot(
+    worldphones_tidy,
+      aes(
+      x = year,
+      y = phones,
+      color = region
+    )
+  ) +
+  geom_text(
+    aes(label = emoji),
+    size = 4,
+    show.legend = FALSE
+   ) +
+  labs(
+    x = "BEST YEARS",
+    y = "TOO MANY PHONES",
+    title = "ANIMALS LOVE PHONES",
+    caption = "eagles are addicted to phones"
+  ) +
+  scale_y_continuous(
+    limits = c(0, 100000),           
+    breaks = seq(0, 100000, 10000),
+    labels = scales::comma
+  ) +
+  scale_x_discrete(position = "top") +
+  theme(
+    axis.text.x = element_text(
+      face = "bold",
+      color = "#ffeda0",
+      size = 13,
+      angle = 179
+    ),
+    axis.text.y = element_text(
+      face = "bold",
+      color = "orange",
+      size = 10,
+      angle = 180
+    ),
+    plot.background = element_rect(fill = "pink"),
+    plot.title = element_text(
+      face = "bold.italic",
+      color = "green",
+      size = 18,
+      angle = 183
+    ),
+    plot.caption = element_text(color = "white", size = 12),
+    axis.title.x = element_text(size = 22, color = "dark blue", angle = 12),
+    axis.title.y = element_text(color = "orange", angle = 181, size = 14),
+    panel.background = element_rect(fill = "light blue")
+  )
+```
+
+### Plot 9
+
+
+```{r}
+library(tidyverse)
+library(here)
+library(emo)
+library(ggplot2)
+  
+exp_tbl <- read_csv(here("data/languages.csv"))
+
+exp_tidy <-
+  exp_tbl|>
+  select(state, language, percent)|> drop_na()
+  
+ ggplot(
+    exp_tbl_tidy, aes(x=state, y=language, size=percent, color=percent)
+    )+geom_point(alpha=0.50, fill="tomato1",color="red")
+    +labs(x="States", y="Language", title="Linguistics")
+```
