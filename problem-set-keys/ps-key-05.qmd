@@ -1,5 +1,5 @@
 ---
-title: "R Bootcamp - Problem Set 5 (Extreme aRt)"
+title: "R Bootcamp Problem Set 5 Key"
 author: "JH"
 format:
   html:
@@ -7,111 +7,110 @@ format:
 ---
 
 ```{r}
-#| echo: false
-library(emo)
-emos <- paste0(
-  emo::ji("penguin"),
-  emo::ji("heart"),
-  emo::ji("pizza"),
-  collapse = " "
-)
-```
-
-# `r emos`
-
-```{r}
-#| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| label: gears
 library(tidyverse)
-library(emo)
-library(here)
 library(gganimate)
-library(palmerpenguins)
-library(ragg)
 
-set.seed(42)
+# Create data for saw blade teeth using rectangles with different speeds
+create_saw_blade <- function(
+  y_pos,
+  blade_id,
+  x_jitter = 0,
+  y_jitter = 0,
+  frame = 1,
+  speed = 1
+) {
+  # Parameters for the saw blade
+  tooth_width <- 0.6
+  tooth_spacing <- 0.8
+  tooth_height <- 1.2
+  base_height <- 0.4
+  n_teeth <- sample(12:35, 1)
+  blade_length <- n_teeth * tooth_spacing
 
-anim <- penguins |>
-  drop_na() |>
+  # Apply jitter to positions plus frame offset with speed multiplier
+  x_offset <- x_jitter + (frame - 1) * 0.1 * speed # Multiply by speed
+  y_offset <- y_pos + y_jitter
+
+  # Create base rectangles (the main body of the blade)
+  base_rect <- data.frame(
+    xmin = 0 + x_offset,
+    xmax = blade_length + x_offset,
+    ymin = y_offset - base_height / 2,
+    ymax = y_offset + base_height / 2,
+    part = "base",
+    blade = blade_id,
+    frame = frame
+  )
+
+  # Create tooth rectangles with gaps
+  tooth_starts <- seq(0, blade_length - tooth_spacing, by = tooth_spacing)
+  gap_width <- (tooth_spacing - tooth_width) / 2
+
+  teeth_rects <- tibble(
+    xmin = tooth_starts + gap_width + x_offset,
+    xmax = tooth_starts + gap_width + tooth_width + x_offset,
+    ymin = y_offset + base_height / 2,
+    ymax = y_offset + base_height / 2 + tooth_height,
+    part = "teeth",
+    blade = blade_id,
+    frame = frame
+  )
+
+  rbind(base_rect, teeth_rects)
+}
+
+# Define different speeds for each blade
+set.seed(123)
+blade_speeds <- c(0.5, 1.0, 1.5, 0.8, 2.0) # Different speeds for each blade
+
+# Create data for all combinations of blades and frames with different speeds
+saw_data_animated <- expand_grid(
+  blade_id = 1:5,
+  frame = 1:10
+) |>
   mutate(
-    emoji = case_when(
-      sex == "female" ~ emo::ji("pizza"),
-      sex == "male" ~ emo::ji("penguin")
-    )
+    x_jitter = x_jitters[blade_id],
+    y_jitter = y_jitters[blade_id],
+    speed = blade_speeds[blade_id]
   ) |>
-  mutate(
-    angle = sample(
-      0:360,
-      size = n(),
-      replace = TRUE
+  pmap_dfr(
+    ~ create_saw_blade(
+      y_pos = ..1 * 3,
+      blade_id = ..1,
+      x_jitter = ..3,
+      y_jitter = ..4,
+      frame = ..2,
+      speed = ..5
     )
-  ) |>
-  select(
-    emoji,
-    angle,
-    mass = body_mass_g,
-    flipper = flipper_length_mm,
-    year
-  ) |>
-  ggplot(
-    aes(
-      x = mass,
-      y = flipper
-    )
-  ) +
-  geom_text(
-    aes(
-      label = emoji,
-      angle = angle
-    ),
-    size = 13,
-  ) +
-  coord_trans(x = "log", y = "log") +
-  labs(
-    title = paste0(
-      "PENGUIN",
-      emo::ji("penguin"),
-      "PIZZA",
-      emo::ji("pizza"),
-      "PARTY",
-      emo::ji("party"),
-      collapse = ""
-    ),
-    x = paste0(
-      emo::ji("island"),
-      "maybe latitude or longitude",
-      collapse = "  "
-    ),
-    y = paste0(emo::ji("sun"), "temperature (K)", collapse = "  ")
-  ) +
-  theme(
-    legend.position = "none",
-    axis.text = element_text(angle = 180),
-    plot.title = element_text(hjust = 0.5, size = 30),
-    axis.title = element_text(size = 30),
-    axis.text.x = element_text(size = 2),
-    axis.text.y = element_text(size = 2),
-    plot.background = element_rect(fill = "#ffcc5c"),
-    panel.background = element_rect(fill = "#ffeead"),
-    panel.grid.major = element_line(color = "#ff6f69"),
-    panel.grid.minor = element_line(color = "#96ceb4")
-  ) +
-  transition_states(
-    transition_length = 1,
-    state_length = 0.001,
-    year
-  ) +
-  enter_grow() +
-  exit_shrink() +
-  view_follow()
+  )
 
-ppp_plot <- animate(anim, device = "ragg_png", renderer = gifski_renderer())
+# Create the animated plot
+anim <- ggplot(saw_data_animated) +
+  geom_rect(
+    aes(
+      xmin = xmin,
+      xmax = xmax,
+      ymin = ymin,
+      ymax = ymax,
+      fill = factor(blade),
+      alpha = part
+    ),
+    color = "black",
+    linewidth = 0.3
+  ) +
+  scale_fill_grey(start = 0.1, end = 0.9) +
+  scale_alpha_manual(
+    values = c("base" = 0.9, "teeth" = 0.7)
+  ) +
+  coord_fixed() +
+  theme_void() +
+  coord_polar() +
+  theme(legend.position = "none") +
+  transition_states(frame, transition_length = 1, state_length = 1) +
+  ease_aes('linear') +
+  view_zoom()
 
-anim_save(
-  filename = "penguin-pizza-party.gif",
-  animation = ppp_plot,
-  path = here("img")
-)
+anim
+
 ```
-
-![](../img/penguin-pizza-party.gif)
