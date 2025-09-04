@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.34">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Your Name">
+<meta name="dcterms.date" content="2025-09-04">
+<title>Exercises 8: Gene Expression Analysis with Tidyverse – MOLB 7950</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-4025c78eb06e3211cf54df66d954ffce.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-4025c78eb06e3211cf54df66d954ffce.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-4025c78eb06e3211cf54df66d954ffce.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b3619805d73c0e2e729afee2ff3a3090.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-dee721ab0dfa70be0da38e2a5b803aea.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-b3619805d73c0e2e729afee2ff3a3090.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<meta property="og:title" content="Exercises 8: Gene Expression Analysis with Tidyverse – MOLB 7950">
+<meta property="og:description" content="Advanced Modeling and Functional Analysis">
+<meta property="og:site_name" content="MOLB 7950">
+<meta name="twitter:title" content="Exercises 8: Gene Expression Analysis with Tidyverse – MOLB 7950">
+<meta name="twitter:description" content="Advanced Modeling and Functional Analysis">
+<meta name="twitter:image" content="https://rnabioco.github.io/molb-7950/problem-sets/images/twitter-card.png">
+<meta name="twitter:creator" content="@rnabioco">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Exercises 8: Gene Expression Analysis with Tidyverse</li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto"><div class="pt-lg-2 mt-2 text-center sidebar-header">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../img/logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none"></a>
+      <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/rnabioco/molb-7950" title="Course GitHub page" class="quarto-navigation-tool px-1" aria-label="Course GitHub page"><i class="bi bi-github"></i></a>
+    <a href="https://sso.posit.cloud/cu-anschutz" title="Posit Cloud SSO login" class="quarto-navigation-tool px-1" aria-label="Posit Cloud SSO login"><i class="bi bi-cloud"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Course information</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Schedule</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/syllabus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Syllabus</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/support.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/team.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Teaching team</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="px-0"><hr class="sidebar-divider hi "></li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Resources</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/bootcamp-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bootcamp resources</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/block-dna-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DNA Block resources</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/block-rna-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RNA Block resources</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/plot-competition-2025.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Plot Competition 2025</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="px-0"><hr class="sidebar-divider hi "></li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Assignments</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/problem-sets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Problet Set Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/final-projects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Final Project Overview</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li>
+<a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">1</span> Overview</a>
+  <ul class="collapse">
+<li><a href="#predictions" id="toc-predictions" class="nav-link" data-scroll-target="#predictions"><span class="header-section-number">1.1</span> Predictions</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#setup-and-data-loading" id="toc-setup-and-data-loading" class="nav-link" data-scroll-target="#setup-and-data-loading"><span class="header-section-number">2</span> Setup and Data Loading</a>
+  <ul class="collapse">
+<li><a href="#load-required-libraries" id="toc-load-required-libraries" class="nav-link" data-scroll-target="#load-required-libraries"><span class="header-section-number">2.1</span> Load Required Libraries</a></li>
+  <li><a href="#load-the-data" id="toc-load-the-data" class="nav-link" data-scroll-target="#load-the-data"><span class="header-section-number">2.2</span> Load the Data</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#part-1-data-tidying-tidyr" id="toc-part-1-data-tidying-tidyr" class="nav-link" data-scroll-target="#part-1-data-tidying-tidyr"><span class="header-section-number">3</span> Part 1: Data Tidying (tidyr)</a>
+  <ul class="collapse">
+<li><a href="#create-a-tidy-dataset" id="toc-create-a-tidy-dataset" class="nav-link" data-scroll-target="#create-a-tidy-dataset"><span class="header-section-number">3.1</span> Create a Tidy Dataset</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#part-2-expression-patterns" id="toc-part-2-expression-patterns" class="nav-link" data-scroll-target="#part-2-expression-patterns"><span class="header-section-number">4</span> Part 2: Expression patterns</a>
+  <ul class="collapse">
+<li><a href="#explore-expression-patterns" id="toc-explore-expression-patterns" class="nav-link" data-scroll-target="#explore-expression-patterns"><span class="header-section-number">4.1</span> Explore Expression Patterns</a></li>
+  <li><a href="#identify-high-and-low-expression" id="toc-identify-high-and-low-expression" class="nav-link" data-scroll-target="#identify-high-and-low-expression"><span class="header-section-number">4.2</span> Identify High and Low Expression</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#part-3-statistical-modeling-with-broom" id="toc-part-3-statistical-modeling-with-broom" class="nav-link" data-scroll-target="#part-3-statistical-modeling-with-broom"><span class="header-section-number">5</span> Part 3: Statistical Modeling with broom</a>
+  <ul class="collapse">
+<li><a href="#linear-models-for-individual-genes" id="toc-linear-models-for-individual-genes" class="nav-link" data-scroll-target="#linear-models-for-individual-genes"><span class="header-section-number">5.1</span> Linear Models for Individual Genes</a></li>
+  <li><a href="#analyze-slope-coefficients" id="toc-analyze-slope-coefficients" class="nav-link" data-scroll-target="#analyze-slope-coefficients"><span class="header-section-number">5.2</span> Analyze Slope Coefficients</a></li>
+  <li><a href="#analyze-intercept-terms" id="toc-analyze-intercept-terms" class="nav-link" data-scroll-target="#analyze-intercept-terms"><span class="header-section-number">5.3</span> Analyze Intercept Terms</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#your-assignment" id="toc-your-assignment" class="nav-link" data-scroll-target="#your-assignment"><span class="header-section-number">6</span> Your assignment</a>
+  <ul class="collapse">
+<li><a href="#hypothesis" id="toc-hypothesis" class="nav-link" data-scroll-target="#hypothesis"><span class="header-section-number">6.1</span> Hypothesis</a></li>
+  <li><a href="#explore-analyze" id="toc-explore-analyze" class="nav-link" data-scroll-target="#explore-analyze"><span class="header-section-number">6.2</span> Explore / Analyze</a></li>
+  <li><a href="#interpreation" id="toc-interpreation" class="nav-link" data-scroll-target="#interpreation"><span class="header-section-number">6.3</span> Interpreation</a></li>
+  </ul>
+</li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li><li><a href="https://github.com/rnabioco/molb-7950/edit/main/problem-sets/ps-08.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">Exercises 8: Gene Expression Analysis with Tidyverse</h1>
+<p class="subtitle lead">Advanced Modeling and Functional Analysis</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Your Name </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 4, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header><section id="overview" class="level1" data-number="1"><h1 data-number="1">
+<span class="header-section-number">1</span> Overview</h1>
+<p>In this problem set, you’ll work with the Brauer gene expression dataset to practice comprehensive tidyverse skills including data tidying, transformation, joins, pivoting, string manipulation, and <strong>statistical modeling using broom</strong>. The dataset contains gene expression measurements for yeast genes under different nutrient limitations and growth rates.</p>
+<section id="predictions" class="level2" data-number="1.1"><h2 data-number="1.1" class="anchored" data-anchor-id="predictions">
+<span class="header-section-number">1.1</span> Predictions</h2>
+<p>Before we start tidying and analyzing the data, take a moment to predict what you might find.</p>
+<ul>
+<li>Question: What patterns do you expect to see in gene expression across different nutrients and growth rates?</li>
+<li>Hypothesis: Genes involved in nutrient uptake and metabolism will show higher expression under their respective limiting conditions.</li>
+<li>Hypohtesis: The different nutrient conditions will cause distinct gene expression profiles.</li>
+</ul></section></section><section id="setup-and-data-loading" class="level1" data-number="2"><h1 data-number="2">
+<span class="header-section-number">2</span> Setup and Data Loading</h1>
+<section id="load-required-libraries" class="level2" data-number="2.1"><h2 data-number="2.1" class="anchored" data-anchor-id="load-required-libraries">
+<span class="header-section-number">2.1</span> Load Required Libraries</h2>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load required libraries</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="load-the-data" class="level2" data-number="2.2"><h2 data-number="2.2" class="anchored" data-anchor-id="load-the-data">
+<span class="header-section-number">2.2</span> Load the Data</h2>
+<p><strong>Task 1:</strong> Load the raw Brauer gene expression data and examine its structure. What makes this data “messy” or untidy?</p>
+<p><em>Breadcrumbs: Use <code>read_tsv()</code> to load the data from the URL. Examine column names and the first few rows. Think about tidy data principles - what issues do you see with the current format?</em></p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">#|label: data-loading-02</span></span>
+<span></span>
+<span><span class="co"># Load the Brauer gene expression data</span></span>
+<span><span class="va">url</span> <span class="op">&lt;-</span> <span class="st">"https://github.com/rnabioco/molb-7950/raw/refs/heads/main/data/bootcamp/brauer_gene_exp_raw.tsv.gz"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Examine the structure of the data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section><section id="part-1-data-tidying-tidyr" class="level1" data-number="3"><h1 data-number="3">
+<span class="header-section-number">3</span> Part 1: Data Tidying (tidyr)</h1>
+<p>We want to create a tibble that looks like this:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 199,296 × 4</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>   systematic_name nutrient  rate exp_level</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>   <span class="sc">&lt;</span>chr<span class="sc">&gt;</span>           <span class="er">&lt;</span>fct<span class="sc">&gt;</span>    <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a> <span class="dv">1</span> YPR204W         Glucose   <span class="fl">0.05</span>      <span class="fl">1.17</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a> <span class="dv">2</span> YPR204W         Glucose   <span class="fl">0.1</span>       <span class="dv">1</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a> <span class="dv">3</span> YPR204W         Glucose   <span class="fl">0.15</span>      <span class="fl">0.86</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a> <span class="dv">4</span> YPR204W         Glucose   <span class="fl">0.2</span>       <span class="fl">0.77</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a> <span class="dv">5</span> YPR204W         Glucose   <span class="fl">0.25</span>      <span class="fl">0.53</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a> <span class="dv">6</span> YPR204W         Glucose   <span class="fl">0.3</span>       <span class="fl">0.3</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a> <span class="dv">7</span> YPR204W         Ammonia   <span class="fl">0.05</span>      <span class="fl">2.79</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a> <span class="dv">8</span> YPR204W         Ammonia   <span class="fl">0.1</span>       <span class="dv">2</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a> <span class="dv">9</span> YPR204W         Ammonia   <span class="fl">0.15</span>      <span class="fl">0.6</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> YPR204W         Ammonia   <span class="fl">0.2</span>       <span class="fl">0.16</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co"># ℹ 199,286 more rows</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co"># ℹ Use `print(n = ...)` to see more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><em>Note the classes of each column - systematic_name is character, nutrient is a factor, rate is numeric, and exp_level is numeric.</em></p>
+<section id="create-a-tidy-dataset" class="level2" data-number="3.1"><h2 data-number="3.1" class="anchored" data-anchor-id="create-a-tidy-dataset">
+<span class="header-section-number">3.1</span> Create a Tidy Dataset</h2>
+<p><strong>Task 3:</strong> Transform the wide-format expression data into a long format suitable for analysis.</p>
+<p><em>Breadcrumbs:</em></p>
+<ul>
+<li><p>First select the relevant columns (<code>systematic_name</code> and the expression columns (<code>G0.05</code>, etc))</p></li>
+<li><p>Then use <code>pivot_longer()</code> to convert expression columns to rows</p></li>
+<li><p>The column names contain both nutrient type (<code>G</code>) and growth rate (<code>0.05</code>) information - use <code>separate_wider_position()</code> to split the first character (nutrient abbreviation) from the numeric rate. The key here is to specify <code>widths = c(nutrient_abbr = 1, rate = 4)</code> to split after the first character, and put the rest into <code>rate</code>. Not all the rates have 4 characters, so use <code>too_few = "align_start"</code> to handle that.</p></li>
+<li>
+<p>Create a nutrient lookup table to convert abbreviations to full names. The lookup table should look like this:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 6 × 2</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  nutrient_abbr nutrient</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="sc">&lt;</span>chr<span class="sc">&gt;</span>         <span class="er">&lt;</span>chr<span class="sc">&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> G             Glucose</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> N             Ammonia</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span> P             Phosphate</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span> S             Sulfate</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="dv">5</span> L             Leucine</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="dv">6</span> U             Uracil</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</li>
+<li><p>Use that table with a <code>join</code> function to add full nutrient names to the tidied data.</p></li>
+<li><p>Convert the <code>rate</code> column to numeric and select the final columns in the desired order</p></li>
+<li><p>Remove any NA values from <code>systematic_name</code> and <code>exp_level</code> using <code><a href="https://rdrr.io/r/stats/filter.html">filter()</a></code></p></li>
+</ul></section></section><section id="part-2-expression-patterns" class="level1" data-number="4"><h1 data-number="4">
+<span class="header-section-number">4</span> Part 2: Expression patterns</h1>
+<p>This is a “cheat” chunk to load the tidy data directly if you want to skip ahead. Otherwise, use the code above to create the tidy data from the raw data.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">brauer_tidy_tbl</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span></span>
+<span>  <span class="st">"https://github.com/rnabioco/molb-7950/raw/refs/heads/main/data/bootcamp/brauer_gene_exp_tidy.tsv.gz"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">yeast_gene_info_tbl</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span></span>
+<span>  <span class="st">"https://github.com/rnabioco/molb-7950/raw/refs/heads/main/data/bootcamp/yeast_go_terms.tsv.gz"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">yeast_protein_props_tbl</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span></span>
+<span>  <span class="st">"https://github.com/rnabioco/molb-7950/raw/refs/heads/main/data/bootcamp/yeast_prot_prop.tsv.gz"</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="explore-expression-patterns" class="level2" data-number="4.1"><h2 data-number="4.1" class="anchored" data-anchor-id="explore-expression-patterns">
+<span class="header-section-number">4.1</span> Explore Expression Patterns</h2>
+<p><strong>Task 6:</strong> Calculate summary statistics for gene expression by nutrient type.</p>
+<p><em>Breadcrumbs:</em> - Use <code>group_by()</code> and <code>summarize()</code> to calculate mean, median, and standard deviation of expression values for each nutrient. Which nutrients show the highest variability in expression?*</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Calculate summary statistics by nutrient</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Find genes with extreme expression values</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Inspect the results and note any patterns you observe in high and low expression genes across different nutrient-rate combinations.</p>
+<p>Next, make a boxplot to visualize the distribution of expression levels for each nutrient condition. What insights can you draw from the plot?</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">#|</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="identify-high-and-low-expression" class="level2" data-number="4.2"><h2 data-number="4.2" class="anchored" data-anchor-id="identify-high-and-low-expression">
+<span class="header-section-number">4.2</span> Identify High and Low Expression</h2>
+<p><strong>Task 7:</strong> Find genes with extreme expression values under different conditions.</p>
+<p><em>Breadcrumbs: For each nutrient-rate combination, identify the top 5 highest and lowest expressing genes. Use <code>slice_max()</code> and <code>slice_min()</code> or ranking functions. What patterns do you notice?</em></p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Find genes with extreme expression values</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section><section id="part-3-statistical-modeling-with-broom" class="level1" data-number="5"><h1 data-number="5">
+<span class="header-section-number">5</span> Part 3: Statistical Modeling with broom</h1>
+<section id="linear-models-for-individual-genes" class="level2" data-number="5.1"><h2 data-number="5.1" class="anchored" data-anchor-id="linear-models-for-individual-genes">
+<span class="header-section-number">5.1</span> Linear Models for Individual Genes</h2>
+<p><strong>Task 8:</strong> Fit linear models to examine how each gene’s expression responds to growth rate within each nutrient condition.</p>
+<p><em>Breadcrumbs:</em></p>
+<ul>
+<li>Use <code>reframe()</code> with <code>broom::tidy(lm(exp_level ~ rate))</code> for each gene-nutrient combination</li>
+<li>Use <code>.by = c(nutrient, systematic_name)</code> to group the modeling</li>
+<li>This creates a tidy data frame of model coefficients</li>
+</ul>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit linear models for each gene-nutrient combination</span></span>
+<span><span class="va">brauer_models_tbl</span> <span class="op">&lt;-</span></span>
+<span>  <span class="va">brauer_tidy_tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">reframe</span><span class="op">(</span></span>
+<span>    <span class="fu">broom</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html">tidy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">exp_level</span> <span class="op">~</span> <span class="va">rate</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    .by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">nutrient</span>, <span class="va">systematic_name</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The above should give you a tibble that looks like this:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 66,430 × 7</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>   nutrient  systematic_name term        estimate std.error statistic p.value</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>   <span class="sc">&lt;</span>chr<span class="sc">&gt;</span>     <span class="er">&lt;</span>chr<span class="sc">&gt;</span>           <span class="er">&lt;</span>chr<span class="sc">&gt;</span>          <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>   <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a> <span class="dv">1</span> Glucose   <span class="fu">YNL049C</span>         (Intercept)   <span class="sc">-</span><span class="fl">0.263</span>    <span class="fl">0.0441</span>    <span class="sc">-</span><span class="fl">5.98</span>  <span class="fl">0.00394</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a> <span class="dv">2</span> Glucose   YNL049C         rate           <span class="fl">0.714</span>    <span class="fl">0.226</span>      <span class="fl">3.16</span>  <span class="fl">0.0343</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a> <span class="dv">3</span> Ammonia   <span class="fu">YNL049C</span>         (Intercept)    <span class="fl">0.153</span>    <span class="fl">0.247</span>      <span class="fl">0.619</span> <span class="fl">0.569</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a> <span class="dv">4</span> Ammonia   YNL049C         rate          <span class="sc">-</span><span class="fl">1.09</span>     <span class="fl">1.27</span>      <span class="sc">-</span><span class="fl">0.862</span> <span class="fl">0.437</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a> <span class="dv">5</span> Phosphate <span class="fu">YNL049C</span>         (Intercept)   <span class="sc">-</span><span class="fl">0.465</span>    <span class="fl">0.161</span>     <span class="sc">-</span><span class="fl">2.89</span>  <span class="fl">0.0444</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a> <span class="dv">6</span> Phosphate YNL049C         rate           <span class="fl">2.07</span>     <span class="fl">0.825</span>      <span class="fl">2.51</span>  <span class="fl">0.0657</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a> <span class="dv">7</span> Sulfate   <span class="fu">YNL049C</span>         (Intercept)   <span class="sc">-</span><span class="fl">0.419</span>    <span class="fl">0.157</span>     <span class="sc">-</span><span class="fl">2.67</span>  <span class="fl">0.0558</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a> <span class="dv">8</span> Sulfate   YNL049C         rate           <span class="fl">2.23</span>     <span class="fl">0.807</span>      <span class="fl">2.77</span>  <span class="fl">0.0503</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a> <span class="dv">9</span> Leucine   <span class="fu">YNL049C</span>         (Intercept)    <span class="fl">0.193</span>    <span class="fl">0.0313</span>     <span class="fl">6.16</span>  <span class="fl">0.00352</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> Leucine   YNL049C         rate          <span class="sc">-</span><span class="fl">0.177</span>    <span class="fl">0.161</span>     <span class="sc">-</span><span class="fl">1.10</span>  <span class="fl">0.332</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co"># ℹ 66,420 more rows</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co"># ℹ Use `print(n = ...)` to see more rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section><section id="analyze-slope-coefficients" class="level2" data-number="5.2"><h2 data-number="5.2" class="anchored" data-anchor-id="analyze-slope-coefficients">
+<span class="header-section-number">5.2</span> Analyze Slope Coefficients</h2>
+<p><strong>Task 9:</strong> Examine the slope terms to identify genes that significantly respond to growth rate changes.</p>
+<p><em>Breadcrumbs: Filter for slope terms (not intercepts). Use q-value correction for multiple testing. Create histograms of p-values by nutrient. Which genes show the strongest positive or negative relationships with growth rate?</em></p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Analyze slope coefficients</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="analyze-intercept-terms" class="level2" data-number="5.3"><h2 data-number="5.3" class="anchored" data-anchor-id="analyze-intercept-terms">
+<span class="header-section-number">5.3</span> Analyze Intercept Terms</h2>
+<p><strong>Task 10:</strong> Use intercept terms to identify genes with unusual baseline expression under specific nutrient limitations.</p>
+<p><em>Breadcrumbs: Filter for intercept terms. Center intercepts around each gene’s mean across nutrients using <code>group_by()</code> and <code>mutate()</code>. Use <code>top_n()</code> to find genes with extreme centered intercepts.</em></p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Analyze intercept terms</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section><section id="your-assignment" class="level1" data-number="6"><h1 data-number="6">
+<span class="header-section-number">6</span> Your assignment</h1>
+<p>Use this above data to try to ask and answer your own biological question.</p>
+<section id="hypothesis" class="level2" data-number="6.1"><h2 data-number="6.1" class="anchored" data-anchor-id="hypothesis">
+<span class="header-section-number">6.1</span> Hypothesis</h2>
+<p>State one or more hypotheses you want to test using this data.</p>
+</section><section id="explore-analyze" class="level2" data-number="6.2"><h2 data-number="6.2" class="anchored" data-anchor-id="explore-analyze">
+<span class="header-section-number">6.2</span> Explore / Analyze</h2>
+<p>Generate some tables or plots to explore your hypothesis.</p>
+</section><section id="interpreation" class="level2" data-number="6.3"><h2 data-number="6.3" class="anchored" data-anchor-id="interpreation">
+<span class="header-section-number">6.3</span> Interpreation</h2>
+<p>Interpret your results. What do they mean in the context of your hypothesis? Were you able to support or refute your hypothesis?</p>
+
+
+</section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/rnabioco\.github\.io\/molb-7950\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li><li><a href="https://github.com/rnabioco/molb-7950/edit/main/problem-sets/ps-08.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This page is built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
