@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.34">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Neelanjan Mukherjee">
+<meta name="dcterms.date" content="2025-09-09">
+<title>Stats Bootcamp - class 13 – MOLB 7950</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-4025c78eb06e3211cf54df66d954ffce.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-4025c78eb06e3211cf54df66d954ffce.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-4025c78eb06e3211cf54df66d954ffce.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b3619805d73c0e2e729afee2ff3a3090.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-dee721ab0dfa70be0da38e2a5b803aea.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-b3619805d73c0e2e729afee2ff3a3090.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+<meta property="og:title" content="Stats Bootcamp - class 13 – MOLB 7950">
+<meta property="og:description" content="Hypothesis testing">
+<meta property="og:image" content="https://rnabioco.github.io/molb-7950/exercises/ex-13_files/figure-html/unnamed-chunk-5-1.png">
+<meta property="og:site_name" content="MOLB 7950">
+<meta property="og:image:height" content="960">
+<meta property="og:image:width" content="1344">
+<meta name="twitter:title" content="Stats Bootcamp - class 13 – MOLB 7950">
+<meta name="twitter:description" content="Hypothesis testing">
+<meta name="twitter:image" content="https://rnabioco.github.io/molb-7950/exercises/images/twitter-card.png">
+<meta name="twitter:creator" content="@rnabioco">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body class="nav-sidebar docked quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Stats Bootcamp - class 13</li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto"><div class="pt-lg-2 mt-2 text-center sidebar-header">
+      <a href="../index.html" class="sidebar-logo-link">
+      <img src="../img/logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none"></a>
+      <div class="sidebar-tools-main tools-wide">
+    <a href="https://github.com/rnabioco/molb-7950" title="Course GitHub page" class="quarto-navigation-tool px-1" aria-label="Course GitHub page"><i class="bi bi-github"></i></a>
+    <a href="https://sso.posit.cloud/cu-anschutz" title="Posit Cloud SSO login" class="quarto-navigation-tool px-1" aria-label="Posit Cloud SSO login"><i class="bi bi-cloud"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Course information</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Schedule</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/syllabus.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Syllabus</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/support.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/team.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Teaching team</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="px-0"><hr class="sidebar-divider hi "></li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Resources</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/bootcamp-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bootcamp resources</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/block-dna-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DNA Block resources</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/block-rna-resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RNA Block resources</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/plot-competition-2025.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Plot Competition 2025</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="px-0"><hr class="sidebar-divider hi "></li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Assignments</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/problem-sets.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Problet Set Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../course-info/final-projects.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Final Project Overview</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">On this page</h2>
+   
+  <ul>
+<li><a href="#prepare-mouse-biochem-data" id="toc-prepare-mouse-biochem-data" class="nav-link active" data-scroll-target="#prepare-mouse-biochem-data">Prepare mouse biochem data</a></li>
+  <li><a href="#association-between-mouse-weight-and-tot_cholesterol" id="toc-association-between-mouse-weight-and-tot_cholesterol" class="nav-link" data-scroll-target="#association-between-mouse-weight-and-tot_cholesterol">Association between mouse <span class="math inline">\(weight\)</span> and <span class="math inline">\(tot\_cholesterol\)</span></a></li>
+  <li><a href="#visualize-pearson-correlation" id="toc-visualize-pearson-correlation" class="nav-link" data-scroll-target="#visualize-pearson-correlation">Visualize Pearson correlation</a></li>
+  <li><a href="#manual-calculation-of-pearson-correlation" id="toc-manual-calculation-of-pearson-correlation" class="nav-link" data-scroll-target="#manual-calculation-of-pearson-correlation">Manual calculation of Pearson correlation</a></li>
+  <li><a href="#spearman-correlation-nonparametric" id="toc-spearman-correlation-nonparametric" class="nav-link" data-scroll-target="#spearman-correlation-nonparametric">Spearman Correlation (nonparametric)</a></li>
+  <li><a href="#visualize-spearman-correlation" id="toc-visualize-spearman-correlation" class="nav-link" data-scroll-target="#visualize-spearman-correlation">Visualize Spearman correlation</a></li>
+  <li><a href="#lets-create-a-hypothetical-example" id="toc-lets-create-a-hypothetical-example" class="nav-link" data-scroll-target="#lets-create-a-hypothetical-example">Let’s create a hypothetical example</a></li>
+  <li><a href="#additional-examples-with-correlation" id="toc-additional-examples-with-correlation" class="nav-link" data-scroll-target="#additional-examples-with-correlation">Additional examples with correlation</a></li>
+  <li><a href="#appropriate-statistical-test-cheatsheet" id="toc-appropriate-statistical-test-cheatsheet" class="nav-link" data-scroll-target="#appropriate-statistical-test-cheatsheet">Appropriate statistical test cheatsheet</a></li>
+  <li><a href="#regression" id="toc-regression" class="nav-link" data-scroll-target="#regression">Regression</a></li>
+  <li><a href="#the-simplicity-underlying-common-tests" id="toc-the-simplicity-underlying-common-tests" class="nav-link" data-scroll-target="#the-simplicity-underlying-common-tests">The simplicity underlying common tests</a></li>
+  <li><a href="#equation-for-a-line" id="toc-equation-for-a-line" class="nav-link" data-scroll-target="#equation-for-a-line">Equation for a line</a></li>
+  <li><a href="#stats-equation-for-a-line" id="toc-stats-equation-for-a-line" class="nav-link" data-scroll-target="#stats-equation-for-a-line">Stats equation for a line</a></li>
+  <li><a href="#stats-equation-for-a-line-1" id="toc-stats-equation-for-a-line-1" class="nav-link" data-scroll-target="#stats-equation-for-a-line-1">Stats equation for a line</a></li>
+  <li><a href="#linear-regression" id="toc-linear-regression" class="nav-link" data-scroll-target="#linear-regression">Linear Regression</a></li>
+  <li><a href="#step-1-can-mouse-cholesterol-levels-explain-mouse-weight" id="toc-step-1-can-mouse-cholesterol-levels-explain-mouse-weight" class="nav-link" data-scroll-target="#step-1-can-mouse-cholesterol-levels-explain-mouse-weight">STEP 1: Can mouse cholesterol levels explain mouse weight?</a></li>
+  <li><a href="#step-2-do-the-regression" id="toc-step-2-do-the-regression" class="nav-link" data-scroll-target="#step-2-do-the-regression">STEP 2: Do the regression</a></li>
+  <li><a href="#step-4-look-at-the-r2-f-value-and-p-value" id="toc-step-4-look-at-the-r2-f-value-and-p-value" class="nav-link" data-scroll-target="#step-4-look-at-the-r2-f-value-and-p-value">STEP 4: Look at the <span class="math inline">\(R^2\)</span>, <span class="math inline">\(F\)</span>-value and <span class="math inline">\(p\)</span>-value</a></li>
+  <li><a href="#tidying-output" id="toc-tidying-output" class="nav-link" data-scroll-target="#tidying-output">Tidying output</a></li>
+  <li><a href="#collecting-residuals-and-other-information" id="toc-collecting-residuals-and-other-information" class="nav-link" data-scroll-target="#collecting-residuals-and-other-information">Collecting residuals and other information</a></li>
+  <li><a href="#what-are-residuals" id="toc-what-are-residuals" class="nav-link" data-scroll-target="#what-are-residuals">What are <strong>Residuals</strong></a></li>
+  <li><a href="#step-5-visualize-fit-and-errors" id="toc-step-5-visualize-fit-and-errors" class="nav-link" data-scroll-target="#step-5-visualize-fit-and-errors">STEP 5: Visualize fit and errors</a></li>
+  <li><a href="#step-6-calculate-r2-f-value-p-value-ourselves" id="toc-step-6-calculate-r2-f-value-p-value-ourselves" class="nav-link" data-scroll-target="#step-6-calculate-r2-f-value-p-value-ourselves">STEP 6: Calculate <span class="math inline">\(R^2\)</span>, <span class="math inline">\(F\)</span>-value, <span class="math inline">\(p\)</span>-value ourselves</a></li>
+  <li><a href="#what-is-r2" id="toc-what-is-r2" class="nav-link" data-scroll-target="#what-is-r2">What is <span class="math inline">\(R^2\)</span></a></li>
+  <li><a href="#calculate-r2" id="toc-calculate-r2" class="nav-link" data-scroll-target="#calculate-r2">Calculate <span class="math inline">\(R^2\)</span></a></li>
+  <li><a href="#interpret-r2" id="toc-interpret-r2" class="nav-link" data-scroll-target="#interpret-r2">Interpret <span class="math inline">\(R^2\)</span></a></li>
+  <li><a href="#what-is-the-f-statistic" id="toc-what-is-the-f-statistic" class="nav-link" data-scroll-target="#what-is-the-f-statistic">What is the <strong>F-statistic</strong></a></li>
+  <li><a href="#calculate-the-f-statistic" id="toc-calculate-the-f-statistic" class="nav-link" data-scroll-target="#calculate-the-f-statistic">Calculate the <strong>F-statistic</strong></a></li>
+  <li><a href="#p-values" id="toc-p-values" class="nav-link" data-scroll-target="#p-values">P-values</a></li>
+  <li><a href="#lets-get-started" id="toc-lets-get-started" class="nav-link" data-scroll-target="#lets-get-started">Let’s get started</a></li>
+  <li><a href="#run-100-linear-models" id="toc-run-100-linear-models" class="nav-link" data-scroll-target="#run-100-linear-models">Run 100 linear models!</a></li>
+  <li><a href="#visualize-the-null" id="toc-visualize-the-null" class="nav-link" data-scroll-target="#visualize-the-null">Visualize the null</a></li>
+  <li><a href="#how-to-find-the-best-least-squares-fit" id="toc-how-to-find-the-best-least-squares-fit" class="nav-link" data-scroll-target="#how-to-find-the-best-least-squares-fit">How to find the best (least squares) fit?</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li><li><a href="https://github.com/rnabioco/molb-7950/edit/main/exercises/ex-13.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<h1 class="title">Stats Bootcamp - class 13</h1>
+<p class="subtitle lead">Hypothesis testing</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Neelanjan Mukherjee </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 9, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header><section id="prepare-mouse-biochem-data" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="prepare-mouse-biochem-data">Prepare mouse biochem data</h2>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># we are reading the data directly from the internet</span></span>
+<span><span class="va">biochem</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span><span class="st">"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt"</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://sfirke.github.io/janitor/reference/clean_names.html">clean_names</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># simplify names a bit more</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">biochem</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span>pattern <span class="op">=</span> <span class="st">"biochem_"</span>, replacement <span class="op">=</span> <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">biochem</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># we are going to simplify this a bit and only keep some columns</span></span>
+<span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">biochem</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">6</span>,<span class="fl">9</span>,<span class="fl">14</span>,<span class="fl">15</span>,<span class="fl">24</span><span class="op">:</span><span class="fl">28</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">biochem</span> <span class="op">&lt;-</span> <span class="va">biochem</span><span class="op">[</span>,<span class="va">keep</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># get weights for each individual mouse</span></span>
+<span><span class="co"># careful: did not come with column names</span></span>
+<span><span class="va">weight</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span><span class="st">"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight"</span>, col_names <span class="op">=</span> <span class="cn">F</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># add column names</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">weight</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"subject_name"</span>,<span class="st">"weight"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># add weight to biochem table and get rid of NAs</span></span>
+<span><span class="co"># rename gender to sex</span></span>
+<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu">inner_join</span><span class="op">(</span><span class="va">biochem</span>, <span class="va">weight</span>, by<span class="op">=</span><span class="st">"subject_name"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html">na.omit</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">rename</span><span class="op">(</span>sex<span class="op">=</span><span class="va">gender</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="association-between-mouse-weight-and-tot_cholesterol" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="association-between-mouse-weight-and-tot_cholesterol">Association between mouse <span class="math inline">\(weight\)</span> and <span class="math inline">\(tot\_cholesterol\)</span>
+</h2>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ggscatter</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>we previously established these are normal enough &gt; <span class="math inline">\(\mathcal{H}_0\)</span> is no (linear) relationship between <span class="math inline">\(tot\_cholesterol\)</span> and <span class="math inline">\(weight\)</span></p>
+<hr>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor_test</span>(??, ??,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">"??"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>           )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>P value well below 0.05</p>
+<blockquote class="blockquote">
+<p><span class="math inline">\(\mathcal{H}_0\)</span> is no relationship between <span class="math inline">\(tot\_cholesterol\)</span> and <span class="math inline">\(weight\)</span> <strong>NOT WELL SUPPORTED</strong></p>
+</blockquote>
+<p>So there is a (linear) relationship between <span class="math inline">\(tot\_cholesterol\)</span> and <span class="math inline">\(weight\)</span></p>
+</section><section id="visualize-pearson-correlation" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="visualize-pearson-correlation">Visualize Pearson correlation</h2>
+<div class="cell" data-output-location="slide">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ggscatter</span><span class="op">(</span>data <span class="op">=</span> <span class="va">b</span>,</span>
+<span>          y <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>          x <span class="op">=</span> <span class="st">"tot_cholesterol"</span></span>
+<span>          <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">stat_cor</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"pearson"</span>,</span>
+<span>           label.x <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>           label.y <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ex-13_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="manual-calculation-of-pearson-correlation" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="manual-calculation-of-pearson-correlation">Manual calculation of Pearson correlation</h2>
+<p><span class="math inline">\(Corr(x,y) = \displaystyle \frac {\sum_{i=1}^{n} (x_{i} - \overline{x})(y_{i} - \overline{y})}{\sum_{i=1}^{n} \sqrt(x_{i} - \overline{x})^2 \sqrt(y_{i} - \overline{y})^2}\)</span></p>
+<div class="cell" data-output-location="slide">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># mean total cholesterol</span></span>
+<span><span class="va">m_chol</span> <span class="op">&lt;-</span></span>
+<span></span>
+<span><span class="co"># average weight</span></span>
+<span><span class="va">m_weight</span> <span class="op">&lt;-</span></span>
+<span></span>
+<span><span class="co"># difference from mean total cholesterol</span></span>
+<span><span class="va">diff_chol</span> <span class="op">&lt;-</span></span>
+<span></span>
+<span><span class="co"># difference from mean total weight</span></span>
+<span><span class="va">diff_weight</span> <span class="op">&lt;-</span></span>
+<span></span>
+<span><span class="co"># follow formula above</span></span>
+<span><span class="va">manual_pearson</span> <span class="op">&lt;-</span></span>
+<span></span>
+<span><span class="va">manual_pearson</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="spearman-correlation-nonparametric" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="spearman-correlation-nonparametric">Spearman Correlation (nonparametric)</h2>
+<p><a href="https://en.wikipedia.org/wiki/Spearman%27s_rank_correlation_coefficient">Spearman’s rank correlation coefficient</a>or Spearman’s ρ, named after Charles Spearman is a <strong>nonparametric</strong> measure of <strong>rank</strong> correlation (statistical dependence between the rankings of two variables). It assesses how well the relationship between two variables can be described using a monotonic function.</p>
+<p>More info <a href="https://towardsdatascience.com/clearly-explained-pearson-v-s-spearman-correlation-coefficient-ada2f473b8#:~:text=The%20fundamental%20difference%20between%20the,with%20monotonic%20relationships%20as%20well.">here</a>.</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">b</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">cor_test</span><span class="op">(</span><span class="va">weight</span>, <span class="va">tot_cholesterol</span>,</span>
+<span>           method <span class="op">=</span> <span class="st">"??"</span></span>
+<span>           <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>P value well below 0.05</p>
+<blockquote class="blockquote">
+<p><span class="math inline">\(\mathcal{H}_0\)</span> is no relationship between <span class="math inline">\(tot\_cholesterol\)</span> and <span class="math inline">\(weight\)</span> <strong>NOT WELL SUPPORTED</strong></p>
+</blockquote>
+</section><section id="visualize-spearman-correlation" class="level2"><h2 class="anchored" data-anchor-id="visualize-spearman-correlation">Visualize Spearman correlation</h2>
+<div class="cell" data-output-location="slide">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ggscatter</span><span class="op">(</span>data <span class="op">=</span> <span class="va">b</span>,</span>
+<span>          y <span class="op">=</span> <span class="st">"weight"</span>,</span>
+<span>          x <span class="op">=</span> <span class="st">"tot_cholesterol"</span></span>
+<span>          <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">stat_cor</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"spearman"</span>,</span>
+<span>           label.x <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>           label.y <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ex-13_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="lets-create-a-hypothetical-example" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="lets-create-a-hypothetical-example">Let’s create a hypothetical example</h2>
+<p>create tibble <span class="math inline">\(d\)</span> with variables <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span></p>
+<p><span class="math inline">\(x\)</span>, 1:50</p>
+<p><span class="math inline">\(y\)</span>, which is <span class="math inline">\(x^{10}\)</span></p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x=</span>??,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">y=</span>??)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>. . .</p>
+<p>scatter plot</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ggscatter</span><span class="op">(</span>data <span class="op">=</span> <span class="va">d</span>,</span>
+<span>          x <span class="op">=</span> <span class="st">"x"</span>,</span>
+<span>          y <span class="op">=</span> <span class="st">"y"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Pearson</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">d</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">cor_test</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>,</span>
+<span>           method <span class="op">=</span> <span class="st">"pearson"</span></span>
+<span>           <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">cor</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>. . .</p>
+<p>Spearman</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">d</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">cor_test</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>,</span>
+<span>           method <span class="op">=</span> <span class="st">"spearman"</span></span>
+<span>           <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">cor</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="additional-examples-with-correlation" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="additional-examples-with-correlation">Additional examples with correlation</h2>
+<p>compare 1 variable to all other quantitative variables</p>
+<p><span class="math inline">\(weight\)</span></p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>b <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor_test</span>(??) <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>relationship between <span class="math inline">\(weight\)</span> and <span class="math inline">\(tot\_cholesterol\)</span> by <span class="math inline">\(sex\)</span></p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">b</span> <span class="op">|&gt;</span></span>
+<span></span>
+<span>  <span class="fu">gt</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="appropriate-statistical-test-cheatsheet" class="level2"><h2 class="anchored" data-anchor-id="appropriate-statistical-test-cheatsheet">Appropriate statistical test cheatsheet</h2>
+<p><img src="../img/stats_table.png" class="img-fluid"></p>
+</section><section id="regression" class="level2"><h2 class="anchored" data-anchor-id="regression">Regression</h2>
+<p>We are going to change our frame work to learn about regression. The nice thing is that everything we learn for regression is applicable to all the tests we just learned.</p>
+</section><section id="the-simplicity-underlying-common-tests" class="level2"><h2 class="anchored" data-anchor-id="the-simplicity-underlying-common-tests">The simplicity underlying common tests</h2>
+<p>Most of the common statistical models (t-test, correlation, ANOVA; etc.) are special cases of linear models or a very close approximation. This simplicity means that there is less to learn. It all comes down to:</p>
+<blockquote class="blockquote">
+<p><span class="math inline">\(y = a \cdot x + b\)</span></p>
+</blockquote>
+<p>This needless complexity multiplies when students try to rote learn the parametric assumptions underlying each test separately rather than deducing them from the linear model.</p>
+</section><section id="equation-for-a-line" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="equation-for-a-line">Equation for a line</h2>
+<p>Remember:<br><span class="math inline">\(y = a \cdot x + b\)</span><br>
+OR<br><span class="math inline">\(y = b + a \cdot x\)</span></p>
+<p><span class="math inline">\(a\)</span> is the <strong>SLOPE</strong>&nbsp;(2) <span class="math inline">\(b\)</span> is the <strong>y-intercept</strong> (1)</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="op">(</span>x<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span>,</span>
+<span>            y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">6</span><span class="op">)</span></span>
+<span>             <span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span>data<span class="op">=</span><span class="va">d</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>,y<span class="op">=</span><span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_blank</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_abline</span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>              slope <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>              col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_linedraw</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ex-13_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="stats-equation-for-a-line" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="stats-equation-for-a-line">Stats equation for a line</h2>
+<p>Model:</p>
+<p><span class="math inline">\(y\)</span> equals the intercept (<span class="math inline">\(\beta_0\)</span>) pluss a slope (<span class="math inline">\(\beta_1\)</span>) times <span class="math inline">\(x\)</span>.</p>
+<p><span class="math inline">\(y = \beta_0 + \beta_1 x \qquad \qquad \mathcal{H}_0: \beta_1 = 0\)</span></p>
+<p>… which is the same as <span class="math inline">\(y = b + a \cdot x\)</span>.</p>
+<p>The short hand for this in R: <code>y ~ 1 + x</code></p>
+<p>R interprets this as:</p>
+<p><code>y = 1*number + x*othernumber</code></p>
+<p>The task of t-tests, lm, etc., is simply to find the numbers that best predict <span class="math inline">\(y\)</span>.</p>
+</section><section id="stats-equation-for-a-line-1" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="stats-equation-for-a-line-1">Stats equation for a line</h2>
+<p>All you need is an intercept (<span class="math inline">\(\beta_0\)</span>) and a slope (<span class="math inline">\(\beta_1\)</span>) to get a line:</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span>data<span class="op">=</span><span class="va">d</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>,y<span class="op">=</span><span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_blank</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_abline</span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>              slope <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>              col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_linedraw</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ex-13_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="192"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><span class="math inline">\(\beta_0\)</span> = 1 (the y-intercept), <span class="math inline">\(\beta_1\)</span> = 2 (the slope)</p>
+<p><span class="math inline">\(y = \beta_0 \cdot 1 + \beta_1 \cdot x\)</span><br></p>
+<p><span class="math inline">\(y = 1 \cdot 1 + 2 \cdot x\)</span></p>
+<p><span class="math inline">\(y = 1 + 2x\)</span></p>
+<blockquote class="blockquote">
+<p>Our mission: <strong>FIND THE BEST</strong> <span class="math inline">\(\beta\)</span> coefficients</p>
+</blockquote>
+</section><section id="linear-regression" class="level2"><h2 class="anchored" data-anchor-id="linear-regression">Linear Regression</h2>
+<ul>
+<li>STEP 1: Make a scatter plot visualize the linear relationship between x and y.</li>
+<li>STEP 2: Perform the regression</li>
+<li>STEP 3: Look at the <span class="math inline">\(R^2\)</span>, <span class="math inline">\(F\)</span>-value and <span class="math inline">\(p\)</span>-value</li>
+<li>STEP 4: Visualize fit and errors</li>
+<li>STEP 5: Calculate <span class="math inline">\(R^2\)</span>, <span class="math inline">\(F\)</span>-value and <span class="math inline">\(p\)</span>-value ourselves</li>
+</ul></section><section id="step-1-can-mouse-cholesterol-levels-explain-mouse-weight" class="level2"><h2 class="anchored" data-anchor-id="step-1-can-mouse-cholesterol-levels-explain-mouse-weight">STEP 1: Can mouse cholesterol levels explain mouse weight?</h2>
+<p>Plot <span class="math inline">\(weight\)</span> (y, response variable) and <span class="math inline">\(tot_cholesterol\)</span> (x, explanatory variable)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> ??,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">y =</span> ??,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">x =</span> ??)) <span class="sc">+</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span>.<span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>() <span class="sc">+</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="step-2-do-the-regression" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="step-2-do-the-regression">STEP 2: Do the regression</h2>
+<p>Keep calm and fit a line! Remember: <span class="math inline">\(y = \beta_0 \cdot 1+ \beta_1 \cdot x\)</span></p>
+<p>linear model equation: <span class="math inline">\(weight = \beta_0 \cdot 1 + \beta_1 \cdot tot\_cholesterol\)</span></p>
+<blockquote class="blockquote">
+<p><span class="math inline">\(\mathcal{H}_0:\)</span> <span class="math inline">\(tot\_cholesterol\)</span> does NOT explain <span class="math inline">\(weight\)</span> Null Hypothesis: <span class="math inline">\(\mathcal{H}_0: \beta_1 = 0\)</span></p>
+</blockquote>
+<p><span class="math inline">\(weight = \beta_0 \cdot 1 + 0 \cdot tot\_cholesterol\)</span> <span class="math inline">\(weight = \beta_0 \cdot 1\)</span></p>
+<blockquote class="blockquote">
+<p><span class="math inline">\(\mathcal{H}_1:\)</span> Mouse <span class="math inline">\(tot\_cholesterol\)</span> does explain <span class="math inline">\(weight\)</span></p>
+</blockquote>
+<p><span class="math inline">\(weight = \beta_0 \cdot 1 + \beta_1 \cdot tot\_cholesterol\)</span></p>
+<p>The cool thing here is that we can assess and compare our null and alternative hypothesis by learning and examining the model coefficients (namely the slope). Ultimately, we are comparing a complex model (with cholesterol) to a simple model (without cholesterol).</p>
+<p><a href="https://statisticsbyjim.com/regression/interpret-constant-y-intercept-regression/" class="uri">https://statisticsbyjim.com/regression/interpret-constant-y-intercept-regression/</a></p>
+</section><section id="step-4-look-at-the-r2-f-value-and-p-value" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="step-4-look-at-the-r2-f-value-and-p-value">STEP 4: Look at the <span class="math inline">\(R^2\)</span>, <span class="math inline">\(F\)</span>-value and <span class="math inline">\(p\)</span>-value</h2>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fitting a line</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>fit_WvC <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> ??,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> ??)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co"># base R summary of fit</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_WvC)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>That’s a lot of info, but how would I access it? Time to meet your new best friend:</p>
+<p><a href="&quot;https://cran.r-project.org/web/packages/broom/vignettes/broom.html&quot;">Broom</a></p>
+</section><section id="tidying-output" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="tidying-output">Tidying output</h2>
+<p>information about the model fit</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="op">?</span><span class="op">?</span><span class="op">(</span><span class="va">fit_WvC</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">gt</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">fmt_number</span><span class="op">(</span>columns <span class="op">=</span> <span class="va">r.squared</span><span class="op">:</span><span class="va">statistic</span>, decimals <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>information about the intercept and coefficients</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="op">?</span><span class="op">?</span><span class="op">(</span><span class="va">fit_WvC</span><span class="op">)</span><span class="op">|&gt;</span></span>
+<span>  <span class="fu">gt</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">fmt_number</span><span class="op">(</span>columns <span class="op">=</span><span class="va">estimate</span><span class="op">:</span><span class="va">statistic</span>, decimals <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>save the intercept and slope into variable to use later</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>chol_intercept <span class="ot">&lt;-</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>chol_slope <span class="ot">&lt;-</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<blockquote class="blockquote">
+<p>for every 1 unit increase in cholesterol there is a 1.85 unit increase weight</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">b</span>,</span>
+<span>       <span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="va">weight</span>,</span>
+<span>           x <span class="op">=</span> <span class="va">tot_cholesterol</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_smooth</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"lm"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>size<span class="op">=</span><span class="fl">.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_color_manual</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_linedraw</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure"><p><img src="ex-13_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section><section id="collecting-residuals-and-other-information" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="collecting-residuals-and-other-information">Collecting residuals and other information</h2>
+<p>add residuals and other information</p>
+<div class="cell" data-output-location="fragment">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>b_WvC <span class="ot">&lt;-</span> ??(fit_WvC, <span class="at">data =</span> b)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>b_WvC</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="what-are-residuals" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="what-are-residuals">What are <strong>Residuals</strong>
+</h2>
+<p><strong>Residuals</strong>, <span class="math inline">\(e\)</span> — the difference between the observed value of the response variable <span class="math inline">\(y\)</span> and the explanatory value <span class="math inline">\(\widehat{y}\)</span> is called the residual. Each data point has one residual. Specifically, it is the distance on the y-axis between the observed <span class="math inline">\(y_{i}\)</span> and the fit line.</p>
+<p><span class="math inline">\(e = y_{i} - \widehat{y}\)</span></p>
+<p>Residuals with large absolute values indicate the data point is NOT well explained by the model.</p>
+</section><section id="step-5-visualize-fit-and-errors" class="level2"><h2 class="anchored" data-anchor-id="step-5-visualize-fit-and-errors">STEP 5: Visualize fit and errors</h2>
+<p>Visualize the residuals OR the error around the fit</p>
+<div class="cell">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span>data <span class="op">=</span> <span class="va">b_WvC</span>,</span>
+<span>       <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">tot_cholesterol</span>, y <span class="op">=</span> <span class="va">weight</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>size<span class="op">=</span><span class="fl">1</span>, <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">.resid</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_abline</span><span class="op">(</span>intercept <span class="op">=</span> <span class="fu">pull</span><span class="op">(</span><span class="va">chol_intercept</span><span class="op">)</span>,</span>
+<span>              slope <span class="op">=</span> <span class="fu">pull</span><span class="op">(</span><span class="va">chol_slope</span><span class="op">)</span>,</span>
+<span>              col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">scale_color_gradient2</span><span class="op">(</span>low <span class="op">=</span> <span class="st">"blue"</span>,</span>
+<span>                        mid <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>                        high <span class="op">=</span> <span class="st">"yellow"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_segment</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>xend <span class="op">=</span> <span class="va">tot_cholesterol</span>,</span>
+<span>                   yend <span class="op">=</span> <span class="va">.fitted</span><span class="op">)</span>,</span>
+<span>               alpha <span class="op">=</span> <span class="fl">.1</span><span class="op">)</span> <span class="op">+</span> <span class="co"># plot line representing residuals</span></span>
+<span>  <span class="fu">theme_linedraw</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Visualize the total error OR the error around the null. So no cholesterol fit, just the mean of y.</p>
+<div class="cell">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">avg_weight</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">b_WvC</span><span class="op">$</span><span class="va">weight</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="step-6-calculate-r2-f-value-p-value-ourselves" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="step-6-calculate-r2-f-value-p-value-ourselves">STEP 6: Calculate <span class="math inline">\(R^2\)</span>, <span class="math inline">\(F\)</span>-value, <span class="math inline">\(p\)</span>-value ourselves</h2>
+</section><section id="what-is-r2" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="what-is-r2">What is <span class="math inline">\(R^2\)</span>
+</h2>
+<p><span class="math inline">\(R^2\)</span> — the coefficient of determination, which is the proportion of the variance in the response variable that is predictable from the explanatory variable(s).</p>
+<p><span class="math inline">\(R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}\)</span></p>
+<p><span class="math inline">\(SS_{fit}\)</span> — sum of squared errors around the least-squares fit</p>
+<p><span class="math inline">\(SS_{fit} = \sum_{i=1}^{n} (data - line)^2 = \sum_{i=1}^{n} (y_{i} - (\beta_0 \cdot 1+ \beta_1 \cdot x)^2\)</span></p>
+<p><span class="math inline">\(SS_{null}\)</span> — sum of squared errors around the mean of <span class="math inline">\(y\)</span></p>
+<p><span class="math inline">\(SS_{null} = \sum_{i=1}^{n} (data - mean)^2 = \sum_{i=1}^{n} (y_{i} - \overline{y})^2\)</span></p>
+</section><section id="calculate-r2" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="calculate-r2">Calculate <span class="math inline">\(R^2\)</span>
+</h2>
+<p><span class="math inline">\(SS_{fit}\)</span> — sum of squared errors around the least-squares fit</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ss_fit</span> <span class="op">&lt;-</span> <span class="op">?</span><span class="op">?</span></span>
+<span><span class="va">ss_fit</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><span class="math inline">\(SS_{null}\)</span> — sum of squared errors around the mean of <span class="math inline">\(y\)</span></p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ss_null</span> <span class="op">&lt;-</span> <span class="op">?</span><span class="op">?</span></span>
+<span><span class="va">ss_null</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><span class="math inline">\(R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}\)</span></p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">rsq</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">-</span> <span class="op">?</span><span class="op">?</span></span>
+<span></span>
+<span><span class="fu">glance</span><span class="op">(</span><span class="va">fit_WvC</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">select</span><span class="op">(</span><span class="va">r.squared</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>. . .</p>
+<p>BTW this is the same <span class="math inline">\(R\)</span> as from the Pearson correlation, just squared:</p>
+<div class="cell">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">b</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">cor_test</span><span class="op">(</span><span class="va">weight</span>,<span class="va">tot_cholesterol</span>,</span>
+<span>           method <span class="op">=</span> <span class="st">"pearson"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>r2 <span class="op">=</span> <span class="va">cor</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">pull</span><span class="op">(</span><span class="va">r2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="interpret-r2" class="level2"><h2 class="anchored" data-anchor-id="interpret-r2">Interpret <span class="math inline">\(R^2\)</span>
+</h2>
+<p>There is a 13 % reduction in the variance when we take mouse <span class="math inline">\(cholesterol\)</span> into account<br>
+OR<br><span class="math inline">\(cholesterol\)</span> explains 13% of variation in mouse <span class="math inline">\(weight\)</span></p>
+</section><section id="what-is-the-f-statistic" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="what-is-the-f-statistic">What is the <strong>F-statistic</strong>
+</h2>
+<p><strong>F-statistic</strong> — based on the ratio of two variances: the explained variance (due to the model) and the unexplained variance (residuals).</p>
+<p><span class="math inline">\(F = \displaystyle \frac{SS_{fit}/(p_{fit}-p_{null})} {SS_{null}/(n-p_{fit})}\)</span></p>
+<p><span class="math inline">\(p_{fit}\)</span> — number of parameters (coefficients) in the fit line<br></p>
+<p><span class="math inline">\(p_{null}\)</span> — number of parameters (coefficients) in the mean line<br></p>
+<p><span class="math inline">\(n\)</span> — number of data points</p>
+</section><section id="calculate-the-f-statistic" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="calculate-the-f-statistic">Calculate the <strong>F-statistic</strong>
+</h2>
+<p><span class="math inline">\(F = \displaystyle \frac{SS_{null} - SS_{fit}/(p_{fit}-p_{null})} {SS_{fit}/(n-p_{fit})}\)</span></p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pfit</span> <span class="op">&lt;-</span> <span class="op">?</span><span class="op">?</span></span>
+<span><span class="va">pnull</span> <span class="op">&lt;-</span> <span class="op">?</span><span class="op">?</span></span>
+<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="op">?</span><span class="op">?</span></span>
+<span></span>
+<span><span class="va">f</span> <span class="op">&lt;-</span> <span class="op">?</span><span class="op">?</span></span>
+<span></span>
+<span></span>
+<span><span class="va">f</span></span>
+<span></span>
+<span><span class="fu">glance</span><span class="op">(</span><span class="va">fit_WvC</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">select</span><span class="op">(</span><span class="va">statistic</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="p-values" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="p-values">P-values</h2>
+<p>You don’t really need to know what the <span class="math inline">\(F-statistic\)</span> is unless you want to calculate the p-value. In this case we need to generate a null distribution of <span class="math inline">\(F-statistic\)</span> values to compare to our observed <span class="math inline">\(F-statistic\)</span>.</p>
+<p>Therefore, we will randomize the <span class="math inline">\(tot_cholesterol\)</span> and <span class="math inline">\(weight\)</span> and then calculate the <span class="math inline">\(F-statistic\)</span>.</p>
+<p><img src="https://media.giphy.com/media/3o7TKDedZiHXRJNveU/giphy.gif" class="img-fluid" style="width:10.0%"></p>
+<p></p>
+<p>We will do this many many times to generate a null distribution of <span class="math inline">\(F-statistic\)</span>s.<br></p>
+<p><img src="https://media.giphy.com/media/3o7TKDedZiHXRJNveU/giphy.gif" class="img-fluid" style="width:5.0%"><img src="https://media.giphy.com/media/3o7TKDedZiHXRJNveU/giphy.gif" class="img-fluid" style="width:5.0%"><br><img src="https://media.giphy.com/media/3o7TKDedZiHXRJNveU/giphy.gif" class="img-fluid" style="width:5.0%"><img src="https://media.giphy.com/media/3o7TKDedZiHXRJNveU/giphy.gif" class="img-fluid" style="width:5.0%"></p>
+<p>The p-value will be the probability of obtaining an <span class="math inline">\(F-statistic\)</span> in the null distribution at least as extreme as our observed <span class="math inline">\(F-statistic\)</span>.</p>
+</section><section id="lets-get-started" class="level2"><h2 class="anchored" data-anchor-id="lets-get-started">Let’s get started</h2>
+<div class="cell" data-output-location="slide">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># set up an empty tibble to hold our null distribution</span></span>
+<span><span class="va">fake_biochem</span> <span class="op">&lt;-</span> <span class="fu">tribble</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># we will perform 100 permutations</span></span>
+<span><span class="va">myPerms</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
+<span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">myPerms</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">tmp</span> <span class="op">&lt;-</span> <span class="fu">bind_cols</span><span class="op">(</span></span>
+<span>    <span class="va">b_WvC</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">b_WvC</span><span class="op">)</span><span class="op">)</span>, <span class="st">"weight"</span><span class="op">]</span>,</span>
+<span>    <span class="va">b_WvC</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">b_WvC</span><span class="op">)</span><span class="op">)</span>,<span class="st">"tot_cholesterol"</span><span class="op">]</span>,</span>
+<span>    <span class="st">"perm"</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="va">i</span>,<span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">b_WvC</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">fake_biochem</span> <span class="op">&lt;-</span> <span class="fu">bind_rows</span><span class="op">(</span><span class="va">fake_biochem</span>,<span class="va">tmp</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/rm.html">rm</a></span><span class="op">(</span><span class="va">tmp</span><span class="op">)</span></span>
+<span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span></span>
+<span><span class="co"># let's look at permutations 1 and 2</span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">fake_biochem</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">perm</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>, <span class="fu">aes</span><span class="op">(</span>x<span class="op">=</span><span class="va">weight</span>, y<span class="op">=</span><span class="va">tot_cholesterol</span>, color<span class="op">=</span><span class="va">perm</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>size<span class="op">=</span><span class="fl">.1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="run-100-linear-models" class="level2"><h2 class="anchored" data-anchor-id="run-100-linear-models">Run 100 linear models!</h2>
+<p>Now we will calculate and extract linear model results for each permutation individually using nest, mutate, and map functions</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fake_biochem_lms</span> <span class="op">&lt;-</span> <span class="va">fake_biochem</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">nest</span><span class="op">(</span>data <span class="op">=</span> <span class="op">-</span><span class="va">perm</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span></span>
+<span>    fit <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">data</span>, <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">weight</span> <span class="op">~</span> <span class="va">tot_cholesterol</span>, data <span class="op">=</span> <span class="va">.x</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    glanced <span class="op">=</span> <span class="fu">map</span><span class="op">(</span><span class="va">fit</span>, <span class="va">glance</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">unnest</span><span class="op">(</span><span class="va">glanced</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="visualize-the-null" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="visualize-the-null">Visualize the null</h2>
+<p>Let’s take a look at the null distribution of F-statistics from the randomized values</p>
+<div class="cell" data-output-location="column-fragment">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span><span class="va">fake_biochem_lms</span>,</span>
+<span>       <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">statistic</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu">geom_density</span><span class="op">(</span>color<span class="op">=</span><span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>remember that the <span class="math inline">\(F-statistic\)</span> we observed was 255!</p>
+<div class="cell" data-output-location="slide">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span><span class="va">fake_biochem_lms</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">statistic</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu">xlim</span><span class="op">(</span><span class="fl">0</span>,<span class="va">f</span><span class="op">*</span><span class="fl">1.1</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu">geom_density</span><span class="op">(</span>color<span class="op">=</span><span class="st">"red"</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">f</span>, color <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="co">#  scale_x_log10() +</span></span>
+<span><span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In our 100 randoized simulations, we never see an F-statistic as extreme as the one we observed in the actual data. Therefore:</p>
+<blockquote class="blockquote">
+<p>P &lt; 0.01 or 1/100</p>
+</blockquote>
+<p>Reminder, our calculate P value was:</p>
+</section><section id="how-to-find-the-best-least-squares-fit" class="level2"><h2 class="anchored" data-anchor-id="how-to-find-the-best-least-squares-fit">How to find the best (least squares) fit?</h2>
+<ol type="1">
+<li>Rotate the line of fit<br>
+</li>
+<li>Find the fit that minimizes the Sum of Squared Residuals or <span class="math inline">\(SS_{fit}\)</span><br>
+</li>
+<li>This is the derivative (slope of tangent at best point = 0) of the function describing the <span class="math inline">\(SS_{fit}\)</span> and the next rotation is 0.</li>
+</ol></section><section id="references" class="level2"><h2 class="anchored" data-anchor-id="references">References</h2>
+<p><a href="https://www.graphpad.com/support/faq/what-is-the-difference-between-correlation-and-linear-regression/">Differences between correlation and regression</a></p>
+<p><a href="https://keydifferences.com/difference-between-correlation-and-regression.html">also more differences between correlation and regression</a>.</p>
+<p><a href="https://lindeloev.github.io/tests-as-linear/">Common statistical tests are linear models</a> from Jonas Lindeløv<br></p>
+<p><a href="https://www.youtube.com/channel/UCtYLUTtgS3k1Fg4y5tAhLbw">Statquest</a></p>
+<p><a href="https://www.rapidtables.com/math/symbols/Statistical_Symbols.html">Stats gobbledygook</a></p>
+<p><a href="http://www.sthda.com/english/articles/39-regression-model-diagnostics/161-linear-regression-assumptions-and-diagnostics-in-r-essentials/">Linear Regression Assumptions and Diagnostics in R: Essentials</a><br></p>
+<p><a href="https://www.graphpad.com/guides/prism/latest/statistics/stat_---_principles_of_statistics_-.htm">PRINCIPLES OF STATISTICS</a> from GraphPad/SAS.</p>
+<p><a href="https://www.youtube.com/watch?v=nk2CQITm_eo">Statquest: how to go from F-statistic to p-value</a></p>
+<p><a href="https://youtu.be/PaFPbb66DxQ">StatQuest: Fitting a line to data, aka least squares, aka linear regression.</a></p>
+<p><a href="https://youtu.be/sDv4f4s2SB8">StatQuest: Gradient Descent, Step-by-Step</a></p>
+
+
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/rnabioco\.github\.io\/molb-7950\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer"><div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li><li><a href="https://github.com/rnabioco/molb-7950/edit/main/exercises/ex-13.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>This page is built with <a href="https://quarto.org/">Quarto</a>.</p>
+</div>
+  </div>
+</footer>
+
+
+</body></html>
