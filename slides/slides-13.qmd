@@ -25,11 +25,18 @@ library(broom)
 #| echo: true
 
 # we are reading the data directly from the internet
-biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+biochem <- read_tsv(
+  "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt",
+  show_col_types = FALSE
+) |>
   janitor::clean_names()
 
 # simplify names a bit more
-colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
+colnames(biochem) <- gsub(
+  pattern = "biochem_",
+  replacement = "",
+  colnames(biochem)
+)
 
 # we are going to simplify this a bit and only keep some columns
 keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
@@ -37,7 +44,11 @@ biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
-weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
+weight <- read_tsv(
+  "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight",
+  col_names = F,
+  show_col_types = FALSE
+)
 
 # add column names
 colnames(weight) <- c("subject_name", "weight")
@@ -65,7 +76,11 @@ b <- inner_join(biochem, weight, by = "subject_name") |>
 
 ```{r}
 #| echo: false
-tibble("Info" = c("better descriptor", "# of samples (N)"), "Parametric" = c("mean", "many"), "Nonparametric" = c("median  ", "few")) |>
+tibble(
+  "Info" = c("better descriptor", "# of samples (N)"),
+  "Parametric" = c("mean", "many"),
+  "Nonparametric" = c("median  ", "few")
+) |>
   gt()
 ```
 
@@ -164,9 +179,7 @@ we previously established these are normal enough \> $\mathcal{H}_0$ is no (line
 #| output-location: column-fragment
 
 b |>
-  cor_test(weight, tot_cholesterol,
-    method = "pearson"
-  )
+  cor_test(weight, tot_cholesterol, method = "pearson")
 ```
 
 P value well below 0.05
@@ -214,8 +227,8 @@ diff_chol <- b$tot_cholesterol - m_chol
 diff_weight <- b$weight - m_weight
 
 # follow formula above
-manual_pearson <- sum(diff_chol * diff_weight) / (
-  sqrt(sum(diff_chol^2)) * sqrt(sum(diff_weight^2)))
+manual_pearson <- sum(diff_chol * diff_weight) /
+  (sqrt(sum(diff_chol^2)) * sqrt(sum(diff_weight^2)))
 
 manual_pearson
 ```
@@ -230,11 +243,8 @@ More info [here](https://towardsdatascience.com/clearly-explained-pearson-v-s-sp
 #| echo: true
 #| output-location: column-fragment
 
-
 b |>
-  cor_test(weight, tot_cholesterol,
-    method = "spearman"
-  )
+  cor_test(weight, tot_cholesterol, method = "spearman")
 ```
 
 P value well below 0.05
@@ -297,9 +307,7 @@ Pearson
 #| output-location: column-fragment
 
 d |>
-  cor_test(x, y,
-    method = "pearson"
-  ) |>
+  cor_test(x, y, method = "pearson") |>
   select(cor)
 ```
 
@@ -312,9 +320,7 @@ Spearman
 #| output-location: column-fragment
 
 d |>
-  cor_test(x, y,
-    method = "spearman"
-  ) |>
+  cor_test(x, y, method = "spearman") |>
   select(cor)
 ```
 
@@ -698,9 +704,7 @@ BTW this is the same $R$ as from the Pearson correlation, just squared:
 
 ```{r}
 b |>
-  cor_test(weight, tot_cholesterol,
-    method = "pearson"
-  ) |>
+  cor_test(weight, tot_cholesterol, method = "pearson") |>
   mutate(rsq = cor^2) |>
   pull(rsq) |>
   round(2)
@@ -788,7 +792,10 @@ for (i in 1:myPerms) {
 
 
 # let's look at permutations 1 and 2
-ggplot(fake_biochem |> filter(perm %in% c(1:2)), aes(x = weight, y = tot_cholesterol, color = perm)) +
+ggplot(
+  fake_biochem |> filter(perm %in% c(1:2)),
+  aes(x = weight, y = tot_cholesterol, color = perm)
+) +
   geom_point(size = .1) +
   theme_minimal()
 ```

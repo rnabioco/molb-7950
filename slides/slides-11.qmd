@@ -238,7 +238,14 @@ Let's select a few of these columns to keep and get rid of `NA`s
 #| output-location: fragment
 
 p <- pen |>
-  select(species, island, culmen_length_mm, flipper_length_mm, body_mass_g, sex) |>
+  select(
+    species,
+    island,
+    culmen_length_mm,
+    flipper_length_mm,
+    body_mass_g,
+    sex
+  ) |>
   drop_na()
 ```
 
@@ -298,7 +305,6 @@ barplot - 1 category
 #| echo: true
 #| output-location: column-fragment
 #| fig.alt: "barplot"
-
 
 ggplot(data = p, aes(x = island, fill = island)) +
   geom_bar() +
@@ -460,7 +466,7 @@ Standard Deviation: square root of the variance
 
 $\sigma = \sqrt {\displaystyle \frac {\sum (x_{i} - \mu)^2}{n}}$
 
-> ```         
+> ```
 > The variance measures the mathematical dispersion of the data relative to the mean. However, it is more difficult to apply in a real-world sense because the values used to calculate it were squared.
 >
 > The standard deviation, as the square root of the variance, is in the same units as the original values, which makes it much easier to work with and interpret w/respect to the mean.
@@ -700,7 +706,11 @@ f <- tibble(
   fair = rbinom(n = n, size = 1, prob = .5),
   unfair = rbinom(n = n, size = 1, prob = .2)
 ) |>
-  pivot_longer(cols = c("fair", "unfair"), names_to = "cheating", values_to = "flips")
+  pivot_longer(
+    cols = c("fair", "unfair"),
+    names_to = "cheating",
+    values_to = "flips"
+  )
 ```
 
 ## flip distributions {.smaller}
@@ -863,8 +873,11 @@ all <- bind_rows(fair10, unfair10) |>
 ggplot(all, aes(x = r, y = f, color = r)) +
   geom_jitter() +
   stat_summary(
-    fun.y = mean, geom = "point", shape = 18,
-    size = 3, color = "black"
+    fun.y = mean,
+    geom = "point",
+    shape = 18,
+    size = 3,
+    color = "black"
   ) +
   ylim(-0.05, 1.05) +
   facet_grid(~type) +
