@@ -96,7 +96,11 @@ Calculate the frequency of your observation vs all null distribution values\
 
 ```{r}
 #| echo: false
-tibble("Info" = c("better descriptor", "# of samples (N)"), "Parametric" = c("mean", "many"), "Nonparametric" = c("median  ", "few")) |>
+tibble(
+  "Info" = c("better descriptor", "# of samples (N)"),
+  "Parametric" = c("mean", "many"),
+  "Nonparametric" = c("median  ", "few")
+) |>
   gt()
 ```
 
@@ -131,7 +135,10 @@ tibble("Info" = c("better descriptor", "# of samples (N)"), "Parametric" = c("me
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+read_tsv(
+  "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt",
+  show_col_types = FALSE
+) |>
   janitor::clean_names() |>
   colnames()
 ```
@@ -142,11 +149,18 @@ read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_co
 #| echo: true
 
 # we are reading the data directly from the internet
-biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+biochem <- read_tsv(
+  "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt",
+  show_col_types = FALSE
+) |>
   janitor::clean_names()
 
 # simplify names a bit more
-colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
+colnames(biochem) <- gsub(
+  pattern = "biochem_",
+  replacement = "",
+  colnames(biochem)
+)
 
 # we are going to simplify this a bit and only keep some columns
 keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
@@ -154,7 +168,11 @@ biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
-weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
+weight <- read_tsv(
+  "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight",
+  col_names = F,
+  show_col_types = FALSE
+)
 
 # add column names
 colnames(weight) <- c("subject_name", "weight")
@@ -458,10 +476,7 @@ Parametric test:
 x <- 27.5 # standard from google
 
 b |>
-  t_test(weight ~ sex,
-    var.equal = F,
-    ref.group = "F"
-  ) |>
+  t_test(weight ~ sex, var.equal = F, ref.group = "F") |>
   gt()
 ```
 
@@ -481,10 +496,7 @@ $sex$ can explain $weight$
 
 # save statistical test result
 statres <- b |>
-  t_test(weight ~ sex,
-    var.equal = F,
-    ref.group = "F"
-  )
+  t_test(weight ~ sex, var.equal = F, ref.group = "F")
 
 
 ggviolin(
@@ -645,7 +657,6 @@ Parametric test:
 #| echo: true
 #| output-location: column-fragment
 
-
 bfam |>
   anova_test(weight ~ family) |>
   gt()
@@ -705,11 +716,7 @@ pairwise <- bfam |>
   t_test(weight ~ family, ref.group = "B1")
 
 
-ggboxplot(bfam,
-  x = "family",
-  y = "weight",
-  fill = "weight",
-) +
+ggboxplot(bfam, x = "family", y = "weight", fill = "weight", ) +
   stat_pvalue_manual(
     pairwise,
     label = "p.adj",
