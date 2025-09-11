@@ -98,7 +98,7 @@ We will compare mouse $weight$ by $sex$.
 #| fig-width: 10
 #| echo: true
 #| output-location: slide
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+
 
 # plot weight by sex
 p_ws <- ggplot(b,
@@ -152,7 +152,6 @@ fit_ws <-
 Fit summary:
 
 ```{r}
-
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
@@ -166,7 +165,6 @@ Fit summary:
 Coefficient summary:
 
 ```{r}
-
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
@@ -213,11 +211,10 @@ avg_wm <-
 ## STEP 3: Visualize the error around fit {.smaller}
 
 ```{r}
-
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+
 
 # plot of data with mean and colored by residuals
 
@@ -244,11 +241,10 @@ p_ws
 ## STEP 3: Visualize the error around the null (mean weight) {.smaller}
 
 ```{r}
-
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+
 
 p_w <- ggplot(b_ws,
                aes(x = sex, y = weight)) +
@@ -269,7 +265,7 @@ p_w
 ```{r}
 #| echo: true
 #| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+
 
 
 plot_grid(p_ws, p_w, ncol = 2, labels = c("weight by sex","weight by intercept"))
@@ -281,7 +277,6 @@ We are fitting 2 lines to the data. For the weight by sex model of the fit (left
 ## Exceptions: mice with highest residuals {.smaller}
 
 ```{r}
-
 #| eval: false
 
 
@@ -387,6 +382,7 @@ $R^2 = 1 - \displaystyle \frac {SS_{fit}}{SS_{null}}$
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
+#| 
 rsq <- ??
 
 ```
@@ -397,6 +393,7 @@ rsq <- ??
 #| eval: false
 
 glance(fit_ws) |> select(r.squared)
+
 ```
 
 Woohoo!!
@@ -407,6 +404,7 @@ Woohoo!!
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
+
 b |>
   ?? |>
   select(-c(n1,n2,df)) |>
@@ -432,6 +430,7 @@ tidy(fit_ws) |>
 #| label: prep fam data
 #| echo: true
 #| eval: false
+
 # i have pre-selected some families to compare
 myfams <- c("B1.5:E1.4(4) B1.5:A1.4(5)",
             "F1.3:A1.2(3) F1.3:E2.2(3)",
@@ -459,12 +458,9 @@ ANOVA -\> comparing means of 3 or more groups.
 Let's compare the $weight$ by $family$, but only for a few selected families.
 
 ```{r}
-
 #| echo: true
 #| output-location: slide
 #| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-
 
 ggplot(data = ??,
        aes(??)) +
@@ -494,7 +490,6 @@ $\begin{bmatrix} y_{1} \\ y_{2} \\ y_{3} \\y_{4} \\y_{5} \\y_{5} \end{bmatrix} =
 ## STEP 2: Fit linear model and examine results {.smaller}
 
 ```{r}
-
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
@@ -506,7 +501,6 @@ fit_wf <- ??
 Fit summary:
 
 ```{r}
-
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
@@ -519,7 +513,6 @@ glance(fit_wf) |>
 Coefficient summary:
 
 ```{r}
-
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
@@ -558,11 +551,10 @@ mean_F1 <- mean_B1 +
 ## STEP 3: Visualize the error around fit {.smaller}
 
 ```{r}
-
 #| echo: true
 #| output-location: slide
 #| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+
 
 ggplot(b_wf,
        aes(x = family, y = weight)) +
@@ -586,6 +578,7 @@ geom_segment(aes(x=.5, xend=1.5, y=mean_B1, yend=mean_B1), color="red") +
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
+
 bfam |>
   ?? |>
   gt()
@@ -596,7 +589,6 @@ bfam |>
 #| echo: true
 #| output-location: column-fragment
 #| eval: false
-
 
 tidy(fit_wf) |>
   select(term, estimate, statistic, p.value) |>
@@ -613,7 +605,7 @@ tidy(fit_wf) |>
 #| echo: true
 #| output-location: slide
 #| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+
 ggplot(data = b, aes(y = weight, x = age, color=sex)) +
   geom_point(size=.5) +
   geom_smooth(method=lm) +
@@ -623,10 +615,10 @@ ggplot(data = b, aes(y = weight, x = age, color=sex)) +
 ## STEP 2: Fit linear model and examine results {.smaller}
 
 ```{r}
-
 #| echo: true
 #| output-location: fragment
 #| eval: false
+
 fit_wa_sex <- lm(formula = weight ~ 1 + age + sex, data = b)
 b_wa_sex <- augment(fit_ws, data = b)
 
@@ -635,11 +627,9 @@ b_wa_sex <- augment(fit_ws, data = b)
 Fit summary:
 
 ```{r}
-
 #| echo: true
 #| output-location: fragment
 #| eval: false
-
 
 glance(fit_wa_sex) |>
   gt() |>
@@ -653,7 +643,6 @@ Compare to traditional:
 #| echo: true
 #| output-location: fragment
 #| eval: false
-
 
 aov(formula = weight ~ 1 + age + sex, data = b) |>
   glance()
