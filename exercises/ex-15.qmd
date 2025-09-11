@@ -1,7 +1,7 @@
 ---
 title: "Stats Bootcamp - class 15"
 subtitle: "Dealing with big data"
-author: "{{< var instructor.block.bootcamp-stats >}}"
+author: "Neelanjan Mukherjee"
 editor: visual
 ---
 
@@ -17,6 +17,7 @@ library(ggpubr)
 library(gt)
 library(pheatmap)
 library(GeneOverlap)
+
 ```
 
 ## Learning objectives
@@ -90,21 +91,30 @@ For each ranked p-value, it is compared to the α calculated for its respective 
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 #| output-location: slide
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 
-rna <- read_csv(here("data/bootcamp/data_rna_protein.csv.gz")) |> select(iDUX4_pval)
+rna <- read_csv(here("data/data_rna_protein.csv.gz")) |>select(iDUX4_pval)
 
-rna$fdr <- p.adjust(p = rna$iDUX4_pval, method = "fdr", n = nrow(rna))
+
+rna$fdr <- p.adjust(p = ??, method = "fdr", n = nrow(rna))
+
 rna$BH <- p.adjust(p = rna$iDUX4_pval, method = "BH", n = nrow(rna))
-rna$bon <- p.adjust(p = rna$iDUX4_pval, method = "bonferroni", n = nrow(rna))
-rna_long <- rna |> pivot_longer(cols = iDUX4_pval:bon, names_to = "type")
 
-ggplot(data = rna_long, aes(x = value, fill = type)) +
+rna$bon <- p.adjust(p = rna$iDUX4_pval, method = "bonferroni", n = nrow(rna))
+
+
+rna_long <- rna |>pivot_longer(cols = iDUX4_pval:bon, names_to = "type")
+
+
+
+ggplot(data = rna_long, aes(x=value, fill = type)) +
   geom_histogram(bins = 50) +
   facet_wrap(~type) +
   theme_cowplot()
+
+
 ```
 
 ## Exploratory data analysis (EDA) {.smaller}
@@ -125,25 +135,27 @@ Is it normal-ish?
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 #| output-location: column-fragment
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-# get dux targets
-dux_targets <- read_csv(file = here("data", "target_genes.csv.gz"))
+#| fig.alt: "density plot"
 
-d <- read_tsv(here("data", "data_genelevel.tsv.gz")) |>
+# get dux targets
+dux_targets <- read_csv(file = here("data","target_genes.csv.gz"))
+
+# get expression data
+d <- read_tsv(here("data","data_genelevel.tsv.gz")) |>
   mutate(target = case_when(
     gene_symbol %in% dux_targets$hgnc_symbol ~ "target",
-    TRUE ~ "not_target"
-  )) |>
-  filter(gene_symbol != "ISCA1") |>
+    TRUE ~ "not_target")
+         ) |>
+  filter(gene_symbol!="ISCA1") |>
   drop_na()
 
 
 d |>
   pivot_longer(cols = hour00_rep1:hour14_rep3) |>
-  ggplot(aes(x = value, color = name)) +
-  geom_density() +
+  ggplot(aes(x=value, color=name)) +
+  ??() +
   theme_cowplot()
 ```
 
@@ -157,13 +169,13 @@ We often transform data to make it closer to being normally-distributed. This al
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 #| output-location: column-fragment
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "log transformed density"
 
 d |>
   pivot_longer(cols = hour00_rep1:hour14_rep3) |>
-  ggplot(aes(x = log10(value), color = name)) +
+  ggplot(aes(x=??(value), color=name)) +
   geom_density() +
   theme_cowplot()
 ```
@@ -180,13 +192,13 @@ $log_{x}(0)$ is a common problem. One solution is to add a pseudocount. Since th
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 #| output-location: column-fragment
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "density plot"
 
 d |>
   pivot_longer(cols = hour00_rep1:hour14_rep3) |>
-  ggplot(aes(x = log10(value + 1), color = name)) +
+  ggplot(aes(x=??(value), color=name)) +
   geom_density() +
   theme_cowplot()
 ```
@@ -197,30 +209,28 @@ prepare the data for analysis
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 #| output-location: slide
 
 # pull counts
-x <- d |>
-  select_if(is.numeric) |> # keep only the numeric columns
-  mutate_all(funs(log2(1 + .))) |> # log2 transform
+x <-  d |>
+  select_if(is.numeric) |># keep only the numeric columns
+  mutate_all(funs(log2(1 + .))) |># log2 transform
   as.matrix() # matrix
-
 
 rownames(x) <- d$gene_symbol
 
-
-x <- t(scale(t(x)))
-
+x <- t(scale(t(x))) # scale
 
 # pairwise pearson correlation
-p <- cor(x, method = "pearson")
+p <- ???
 
+# heatmap
 pheatmap(
   mat = p,
-  clustering_distance_rows = "euclidean",
-  clustering_distance_cols = "euclidean",
-  clustering_method = "ward.D2"
+  clustering_distance_rows = "??",
+  clustering_distance_cols = "??",
+  clustering_method = "??"
 )
 ```
 
@@ -230,9 +240,7 @@ PCA is a common dimensionality reduction method that is used to visualize the si
 
 **Let's watch this fantastic 5 minute video explaining PCA**
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/HMOI_lkzW08" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-
-</iframe>
+{{< video https://www.youtube.com/embed/HMOI_lkzW08 >}}
 
 For more detailed explanations go [here](https://www.nature.com/articles/nbt0308-303) and [here](https://liorpachter.wordpress.com/2014/05/26/what-is-principal-component-analysis/).
 
@@ -240,22 +248,23 @@ For more detailed explanations go [here](https://www.nature.com/articles/nbt0308
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 #| output-location: column-fragment
 
 # pairwise pearson correlation
-pc <- prcomp(x)
+pc <-
 
 summary(pc) # summarize the PCs by variance
+
 ```
 
 ## PCA - prepare visualization
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 #| output-location: slide
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "PCA plot"
 
 # create a dataframe with the importance/explanation of variation for each PC
 pca_data_info <- summary(pc)$importance |> as.data.frame()
@@ -266,10 +275,15 @@ pca_data_info <- round(x = pca_data_info, digits = 3)
 pca_plot_data <- pc$rotation |>
   as.data.frame() |>
   rownames_to_column(var = "ID") |>
-  separate(col = ID, into = c("time", "rep"), sep = "_")
+  separate(
+    ID,
+    into = c("time","rep"),
+    sep = "_"
+  )
 
 # recode "rep"
-pca_plot_data$rep <- recode(pca_plot_data$rep,
+pca_plot_data$rep <- recode(
+  pca_plot_data$rep,
   rep1 = "A",
   rep2 = "B",
   rep3 = "C"
@@ -282,10 +296,13 @@ pca_plot_data$time <- gsub(
   x = pca_plot_data$time
 )
 
-ggplot(data = pca_plot_data, mapping = aes(x = PC1, y = PC2, color = time)) +
+ggplot(
+  pca_plot_data,
+  aes(x=PC1, y = PC2, color=time)
+  ) +
   geom_point() +
-  xlab(paste("PC1, %", 100 * pca_data_info["Proportion of Variance", "PC1"])) +
-  ylab(paste("PC2, %", 100 * pca_data_info["Proportion of Variance", "PC2"])) +
+  xlab(paste("PC1, %",100 * pca_data_info["Proportion of Variance","PC1"])) +
+  ylab(paste("PC2, %",100 * pca_data_info["Proportion of Variance","PC2"])) +
   ggtitle("PCA for DUX4 timecourse") +
   theme_cowplot()
 ```
@@ -362,7 +379,7 @@ We pick the cluster where that drop in total reaches diminishing returns -\> the
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 #| output-location: slide
 
 set.seed(33)
@@ -370,13 +387,14 @@ tmp <- pheatmap(
   mat = x,
   clustering_distance_rows = "euclidean",
   clustering_method = "ward.D2",
-  kmeans_k = 8,
-  cluster_cols = F,
+  kmeans_k = ??,
+  cluster_cols = FALSE,
   scale = "none"
 )
 
 
 tmp$kmeans$tot.withinss
+
 ```
 
 ## Functions in R {.smaller}
@@ -387,17 +405,17 @@ tmp$kmeans$tot.withinss
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 
 wss <- function(knum) {
   ph <- pheatmap(
     mat = x,
-    kmeans_k = knum,
+    kmeans_k = ??,
     scale = "none",
-    cluster_cols = F,
+    cluster_cols = FALSE,
     clustering_distance_rows = "euclidean",
     clustering_method = "ward.D2",
-    silent = T
+    silent = TRUE
   )
   return(ph$kmeans$tot.withinss)
 }
@@ -409,15 +427,13 @@ wss(6)
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 #| output-location: fragment
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "elbow plot"
 
-tibble(
-  wss = map_vec(2:15, wss),
-  k = 2:15
-) |>
-  ggplot(aes(x = k, y = wss)) +
+tibble(wss=map_vec(2:15,wss),
+       k=2:15) |>
+  ggplot(., aes(x=k, y=wss)) +
   geom_point() +
   theme_cowplot()
 ```
@@ -426,7 +442,7 @@ tibble(
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 #| output-location: fragment
 
 set.seed(33)
@@ -439,14 +455,12 @@ c <- pheatmap(
   scale = "none"
 )
 
-cg <- data.frame(
-  Cluster = c$kmeans$cluster,
-  gene_symbol = names(c$kmeans$cluster)
+cg <- tibble(
+  Cluster=c$kmeans$cluster,
+  gene_symbol=names(c$kmeans$cluster)
 )
 
-cd <- left_join(d, cg, by = "gene_symbol") |> as_tibble()
-
-write_tsv(cd, here("data", "dux4_clustering_results.csv.gz"))
+cd <- left_join(d, cg, by="gene_symbol")
 ```
 
 ## Which cluster(s) contains DUX4 targets? {.smaller}
@@ -455,20 +469,19 @@ write_tsv(cd, here("data", "dux4_clustering_results.csv.gz"))
 
 ```{r}
 #| echo: true
-#| eval: true
+#| eval: false
 #| output-location: slide
 
 # list of genes by dux4 targeting
-duxList <- split(cd$gene_symbol, cd$target)
+duxList <- split(cd$gene_symbol, cd$??)
 
 # list of genes by clustering
-clustList <- split(cd$gene_symbol, as.factor(cd$Cluster))
+clustList <- split(cd$gene_symbol, as.factor(cd$??))
 
 # calculate all overlaps between lists
-gom.duxclust <- newGOM(duxList,
-  clustList,
-  genome.size = nrow(d)
-)
+gom.duxclust <- newGOM(??List,
+                       ??List,
+                       genome.size = ??)
 
 
 getMatrix(gom.duxclust, "pval") |>
