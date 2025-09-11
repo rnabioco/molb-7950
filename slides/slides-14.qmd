@@ -3,6 +3,8 @@ title: "Stats Bootcamp - class 14"
 subtitle: "Hypothesis testing"
 author: "{{< var instructor.block.bootcamp-stats >}}"
 editor: visual
+execute:
+  warning: false
 ---
 
 ```{r}
@@ -24,11 +26,18 @@ library(broom)
 #| echo: true
 
 # we are reading the data directly from the internet
-biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+biochem <- read_tsv(
+  "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt",
+  show_col_types = FALSE
+) |>
   janitor::clean_names()
 
 # simplify names a bit more
-colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
+colnames(biochem) <- gsub(
+  pattern = "biochem_",
+  replacement = "",
+  colnames(biochem)
+)
 
 # we are going to simplify this a bit and only keep some columns
 keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
@@ -36,7 +45,11 @@ biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
-weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
+weight <- read_tsv(
+  "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight",
+  col_names = F,
+  show_col_types = FALSE
+)
 
 # add column names
 colnames(weight) <- c("subject_name", "weight")
@@ -123,10 +136,22 @@ p_ws2 <- ggplot(
     yintercept = mean(b$weight),
     color = "red"
   ) +
-  stat_summary(fun = "mean", geom = "point", fill = "blue", shape = 23, size = 3) +
+  stat_summary(
+    fun = "mean",
+    geom = "point",
+    fill = "blue",
+    shape = 23,
+    size = 3
+  ) +
   theme_cowplot()
 
-plot_grid(p_ws, p_ws2, ncol = 2, labels = c("weight", "weight by sex"), scale = c(1, 1))
+plot_grid(
+  p_ws,
+  p_ws2,
+  ncol = 2,
+  labels = c("weight", "weight by sex"),
+  scale = c(1, 1)
+)
 ```
 
 ## STEP 1: Can mouse sex explain mouse weight? {.smaller}
@@ -182,7 +207,6 @@ add residuals and other information
 #| echo: true
 #| output-location: column-fragment
 
-
 # augment
 b_ws <- augment(fit_ws, data = b)
 
@@ -219,7 +243,6 @@ avg_wm
 #| output-location: column-fragment
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 
-
 # plot of data with mean and colored by residuals
 p_ws <- ggplot(
   b_ws,
@@ -240,14 +263,17 @@ p_ws <- ggplot(
   ) +
   geom_segment(
     aes(
-      x = .5, xend = 1.5,
-      y = avg_wf, yend = avg_wf
+      x = .5,
+      xend = 1.5,
+      y = avg_wf,
+      yend = avg_wf
     ),
     color = "red"
   ) +
   geom_segment(
     aes(
-      x = 1.5, xend = 2.5,
+      x = 1.5,
+      xend = 2.5,
       y = avg_wm
     ),
     yend = avg_wm,
@@ -293,7 +319,12 @@ p_w
 #| echo: true
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 
-plot_grid(p_ws, p_w, ncol = 2, labels = c("weight by sex", "weight by intercept"))
+plot_grid(
+  p_ws,
+  p_w,
+  ncol = 2,
+  labels = c("weight by sex", "weight by intercept")
+)
 ```
 
 We are fitting 2 lines to the data. For the weight by sex model of the fit (left), we fit **2** lines. For the weight by null model (right) we fit **1** line.
@@ -344,7 +375,9 @@ $y_{62}= 0 \cdot F_{avg} + 1 \cdot M_{avg} + residual_{62}$
 
 ```{r}
 b_ws |>
-  filter(subject_name %in% c("A048054885", "A067109771", "A066822351", "A048274362")) |>
+  filter(
+    subject_name %in% c("A048054885", "A067109771", "A066822351", "A048274362")
+  ) |>
   select(subject_name, weight, sex, .fitted, .resid) |>
   arrange(sex) |>
   gt()
@@ -539,7 +572,6 @@ add residuals and other information
 #| echo: true
 #| output-location: column-fragment
 
-
 # augment
 b_wf <- augment(fit_wf, data = bfam)
 
@@ -577,11 +609,26 @@ ggplot(
     mid = "black",
     high = "yellow"
   ) +
-  geom_segment(aes(x = .5, xend = 1.5, y = mean_B1, yend = mean_B1), color = "red") +
-  geom_segment(aes(x = 1.5, xend = 2.5, y = mean_A1, yend = mean_A1), color = "red") +
-  geom_segment(aes(x = 2.5, xend = 3.5, y = mean_D5, yend = mean_D5), color = "red") +
-  geom_segment(aes(x = 3.5, xend = 4.5, y = mean_F1, yend = mean_F1), color = "red") +
-  geom_segment(aes(x = .5, xend = 4.5, y = mean(weight), yend = mean(weight)), color = "black") +
+  geom_segment(
+    aes(x = .5, xend = 1.5, y = mean_B1, yend = mean_B1),
+    color = "red"
+  ) +
+  geom_segment(
+    aes(x = 1.5, xend = 2.5, y = mean_A1, yend = mean_A1),
+    color = "red"
+  ) +
+  geom_segment(
+    aes(x = 2.5, xend = 3.5, y = mean_D5, yend = mean_D5),
+    color = "red"
+  ) +
+  geom_segment(
+    aes(x = 3.5, xend = 4.5, y = mean_F1, yend = mean_F1),
+    color = "red"
+  ) +
+  geom_segment(
+    aes(x = .5, xend = 4.5, y = mean(weight), yend = mean(weight)),
+    color = "black"
+  ) +
   theme_cowplot()
 ```
 
