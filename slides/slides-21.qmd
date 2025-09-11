@@ -53,7 +53,7 @@ library(rtracklayer)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
-# library(rGADEM)
+library(motifRG)
 library(seqLogo)
 ```
 
@@ -189,7 +189,7 @@ There are two major approaches to defining sequence motifs enriched in a sample:
 
 ## Theory
 
-Here we'll apply a probabilistic approach (GADEM) to discover motifs in a collection of DNA sequences. During the RNA block, you'll learn about k-mer analysis, which is a form of enumerative approach.
+Here we'll apply a probabilistic approach (motifRG) to discover motifs in a collection of DNA sequences. During the RNA block, you'll learn about k-mer analysis, which is a form of enumerative approach.
 
 In each case, the goal is to define a set of sequence motifs that are encriched in a set of provided sequences (i.e., peaks from CUT&RUN data) relative to a genomic background.
 
@@ -204,10 +204,10 @@ These PWMs can be represented as sequence logos, visually represent the amount o
 
 ## Practice
 
-We'll use the [rGADEM](https://bioconductor.org/packages/release/bioc/html/rGADEM.html) package from Bioconductor to derive sequence motifs from the peaks we called above. This is a straightforward process:
+We'll use the [motifRG](https://bioconductor.org/packages/release/bioc/html/motifRG.html) package from Bioconductor to derive sequence motifs from the peaks we called above. This is a straightforward process:
 
 1.  Collect the DNA sequences within the peak windows using the BSgenome for *S. cerevisiae*
-2.  Provide those sequences and the genomic background to `rGADEM::GADEM()`, which runs uses an Expectation-Maximization (EM) approach to identify and refine motifs.
+2.  Provide those sequences to `motifRG::findMotif()`, which implements a Gibbs sampling approach to identify and refine motifs.
 3.  Examine the discovered motifs, and plot as a logo using `seqLogo::seqLogo()`.
 
 ```{r}
@@ -218,20 +218,22 @@ peak_seqs <- BSgenome::getSeq(
   # provided by BSgenome.Scerevisiae.UCSC.sacCer3
   Scerevisiae,
   peak_calls_gr
-)
+) |>
+  as.character()
 
 # takes ~2 minutes to run
-gadem <- rGADEM::GADEM(
-  peak_seqs,
-  genome = Scerevisiae,
-  verbose = 1
+motif_results <- findMotif(
+  sequences = peak_seqs,
+  len = c(6, 8, 10, 12), # motif lengths to search
+  numMotif = 5, # number of motifs to find
+  strand = "both" # search both strands
 )
 
 # look at the consensus motifs
-consensus(gadem)
+motif_results$consensus
 
 # how many consensus motifs are there?
-nOccurrences(gadem)
+motif_results$numOccur
 ```
 
 Now let's look at the sequence logo for the top hit.
@@ -239,8 +241,7 @@ Now let's look at the sequence logo for the top hit.
 ```{r}
 #| label: plot-logo
 #| echo: true
-
-pwm <- gadem@motifList[[1]]@pwm
+pwm <- motif_results$pwm[[1]]
 
 seqLogo::seqLogo(pwm)
 ```
