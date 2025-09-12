@@ -83,7 +83,7 @@ acc_tbl <-
     file_path = here("data/block-dna", file_name),
     big_wig = purrr::map(
       file_path,
-      ~ read_bigwig(.x)
+      \(x) read_bigwig(x)
     )
   ) |>
   select(sample_type, big_wig)
@@ -208,10 +208,10 @@ acc_tbl <-
   mutate(
     tss_win_sum = purrr::map(
       big_wig,
-      ~ bed_map(
+      \(x) bed_map(
         tss_win_tbl,
-        .x,
-        win_signal = sum(score)
+        x,
+        win_signal = sum(value, na.rm = TRUE)
       )
     )
   )
