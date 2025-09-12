@@ -28,7 +28,7 @@ We will ask for a sketch of the rough plan for a final project by the end of wee
 
 ## DNA accessibility drives all biochemical transactions on the genome
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 -   Transcription Initiation
 -   Transcription Elongation
@@ -41,11 +41,11 @@ We will ask for a sketch of the rough plan for a final project by the end of wee
 ::: {.column width="50%"}
 ![](../img/block-dna/domino.gif)
 :::
-:::
+:::::
 
 ## Mapping & measurement are first steps toward understanding. {.smaller}
 
-::: columns
+::::: columns
 ::: {.column width="60%"}
 Before genome-wide DNA accessibility measurements, we knew about chromatin transactions at only a handful of loci.
 
@@ -55,7 +55,7 @@ This was a classic "keys under the lamppost" situation, leading to general model
 ::: {.column width="40%"}
 ![](../img/block-dna/street-lamp.jpg){width="100%"}
 :::
-:::
+:::::
 
 ::: aside
 Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on [Unsplash](https://unsplash.com/photos/PvQtCNm4teI?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText)
@@ -63,7 +63,7 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 
 ## Using micrococcal nuclease (MNase) to map chromatin {.smaller}
 
-::: columns
+::::: columns
 ::: {.column .nonincremental width="50%"}
 -   Micrococcal nuclease is an endo/exonuclease from *Staphylococcus aureus*
 -   Efficient, **multiple turnover** enzyme that digests accessible DNA (& RNA)
@@ -73,11 +73,11 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 ::: {.column width="50%"}
 ![](../img/block-dna/mnase-overview.png){fig-align="center"}
 :::
-:::
+:::::
 
 ## Using ATAC to map chromatin {.smaller}
 
-::: columns
+::::: columns
 ::: {.column .nonincremental width="50%"}
 -   Tn5 transposase catalyzes "cut-and-paste" insertion of DNA into a target
 -   In ATAC ("Assay for Transposase-Accessible Chromatin"), the transposase enzymes are loaded with DNA sequencing adaptors (blue and red in the image), so the products of transposition are ready to PCR.
@@ -88,15 +88,15 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 ::: {.column width="50%"}
 ![](../img/block-dna/atac-explain.png){fig-align="center"}
 :::
-:::
+:::::
 
 ## **Chromatin mapping experimental summary** {.smaller}
 
-|                           |                     DNase-seq                     |                                             ATAC-seq                                              |             MNase-seq              |
-|---------------------------|:-------------------------------------------------:|:-------------------------------------------------------------------------------------------------:|:----------------------------------:|
-| **Genome representation** |                Most active regions                |                                        Most active regions                                        |            Whole genome            |
-| **Ease of experiment**    |                  Very difficult                   |                                            Easy peasy                                             |           One day's work           |
-| **What is profiled?**     | Accessible DNA, "footprints" at low cut frequency | Accessible DNA. Not really "footprints", single turnover enzyme, so fragments are not informative | Protections of TFs and nucleosomes |
+|   | DNase-seq | ATAC-seq | MNase-seq |
+|---------------|:-------------:|:---------------------------:|:-------------:|
+| **Genome representation** | Most active regions | Most active regions | Whole genome |
+| **Ease of experiment** | Very difficult | Easy peasy | One day's work |
+| **What is profiled?** | Accessible DNA, "footprints" at low cut frequency | Accessible DNA. Not really "footprints", single turnover enzyme, so fragments are not informative | Protections of TFs and nucleosomes |
 
 # Experimental details
 
@@ -120,7 +120,7 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 
 ### BED format {.smaller}
 
-::: columns
+::::: columns
 ::: {.column .nonincremental width="50%"}
 -   Contains information about genomic intervals.
 -   Used to represent genomic features (exons, introns, transcription start sites)
@@ -136,13 +136,13 @@ chr7 127475864 127477031 Neg1 0  -
 chr7 127477031 127478198 Neg2 0  -
 ```
 :::
-:::
+:::::
 
 ------------------------------------------------------------------------
 
 ### WIG / bedGraph {.smaller}
 
-::: columns
+::::: columns
 ::: {.column .nonincremental width="50%"}
 -   WIG and bedGraph store interval *signals*.
 
@@ -160,7 +160,7 @@ chr19 49302600 49302900 -0.50
 chr19 49302900 49303200 -0.25
 ```
 :::
-:::
+:::::
 
 ::: aside
 bigWig is a binary form of WIG, used to store large amounts of signal in a compressed, indexed format.
@@ -168,7 +168,7 @@ bigWig is a binary form of WIG, used to store large amounts of signal in a compr
 
 ## Interval analysis {.smaller}
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 The primary tool in the genome interval analysis is [BEDtools](https://bedtools.readthedocs.io/en/latest/) -- it's the Swiss-army knife of internal analysis.
 
@@ -182,7 +182,7 @@ Let's take a look at that it does.
 ::: {.column width="50%"}
 ![](../img/block-dna/intersect-glyph.png)
 :::
-:::
+:::::
 
 ## `bed_intersect()` example {.smaller}
 
@@ -285,8 +285,8 @@ nearby |>
 
 ## `bed_map()` example
 
-::: columns
-::: {.column width="50%"}
+:::::: columns
+:::: {.column width="50%"}
 `bed_map()` does two things in order:
 
 ::: nonincremental
@@ -295,12 +295,12 @@ nearby |>
 :::
 
 A typical use is to count up signals (e.g., coverage from an MNase-seq experiment) over specific regions (e.g., promoter regions).
-:::
+::::
 
 ::: {.column width="50%"}
 ![](../img/block-dna/map-glyph.png)
 :::
-:::
+::::::
 
 ## `bed_map()` example {.smaller}
 

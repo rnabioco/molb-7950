@@ -53,8 +53,8 @@ library(rtracklayer)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
-library(motifRG)
-library(seqLogo)
+library(memes)
+library(ggseqlogo)
 ```
 
 
@@ -152,7 +152,7 @@ peak_calls <-
     start = midpoint,
     end = start + 1,
     # use the poisson to calculate a p-value with the genome-wide lambda
-    pval = dpois(score, genome_lambda),
+    pval = dpois(value, genome_lambda),
     # convert p-values to FDR
     fdr = p.adjust(pval, method = "fdr")
   )
@@ -213,27 +213,24 @@ We'll use the [motifRG](https://bioconductor.org/packages/release/bioc/html/moti
 ```{r}
 #| label: motif-discovery
 #| echo: true
-
 peak_seqs <- BSgenome::getSeq(
   # provided by BSgenome.Scerevisiae.UCSC.sacCer3
   Scerevisiae,
   peak_calls_gr
-) |>
-  as.character()
+)
 
 # takes ~2 minutes to run
-motif_results <- findMotif(
-  sequences = peak_seqs,
-  len = c(6, 8, 10, 12), # motif lengths to search
-  numMotif = 5, # number of motifs to find
-  strand = "both" # search both strands
+motif_results <- runStreme(
+  input = peak_seqs,
+  control = "shuffle", # use shuffled sequences as control
+  minw = 6, # minimum motif width
+  maxw = 12, # maximum motif width
+  nmotifs = 5, # number of motifs to find
+  seed = 42
 )
 
 # look at the consensus motifs
-motif_results$consensus
-
-# how many consensus motifs are there?
-motif_results$numOccur
+motif_results
 ```
 
 Now let's look at the sequence logo for the top hit.
@@ -241,9 +238,12 @@ Now let's look at the sequence logo for the top hit.
 ```{r}
 #| label: plot-logo
 #| echo: true
-pwm <- motif_results$pwm[[1]]
+# Plot the top motif as a sequence logo
+pwm <- motif_results[[1]]$m01_CGTRHAWARTGA@motif
 
-seqLogo::seqLogo(pwm)
+ggplot() +
+  geom_logo(pwm) +
+  theme_logo()
 ```
 
 ## Questions

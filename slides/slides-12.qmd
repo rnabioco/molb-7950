@@ -170,7 +170,7 @@ biochem <- biochem[, keep]
 # careful: did not come with column names
 weight <- read_tsv(
   "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight",
-  col_names = F,
+  col_names = FALSE,
   show_col_types = FALSE
 )
 
@@ -180,7 +180,7 @@ colnames(weight) <- c("subject_name", "weight")
 # add weight to biochem table and get rid of NAs
 # rename gender to sex
 b <- inner_join(biochem, weight, by = "subject_name") |>
-  na.omit() |>
+  drop_na() |>
   rename(sex = gender)
 ```
 
@@ -213,7 +213,6 @@ Let's explore mouse $weight$
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-
 ggdensity(
   data = b,
   x = "weight",
@@ -229,7 +228,6 @@ let's see some summary stats
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-
 b |>
   get_summary_stats(
     weight,
@@ -243,7 +241,6 @@ b |>
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-
 ggqqplot(
   data = b,
   x = "weight"
@@ -257,7 +254,6 @@ Looks reasonable
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-
 b |>
   shapiro_test(weight)
 ```
