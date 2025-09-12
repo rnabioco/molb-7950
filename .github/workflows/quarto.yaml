@@ -1,8 +1,10 @@
 on:
   push:
     branches: main
+  pull_request:
+    branches: main
 
-name: quarto build
+name: quarto build and deploy
 
 permissions: write-all
 
@@ -36,15 +38,36 @@ jobs:
           sudo apt-get install libcurl4-openssl-dev
           sudo apt-get install libmagick++-dev
           sudo apt-get install libglpk-dev
+          sudo apt-get install libnode-dev
 
       - name: 🔁 Install R Dependencies
         uses: r-lib/actions/setup-renv@v2
         with:
           cache-version: 2
 
-      - name: 🚀 Publish to GitHub Pages (and render)
-        uses: quarto-dev/quarto-actions/publish@v2
+      # Always render the Quarto project first
+      - name: 📝 Render Quarto Project
+        uses: quarto-dev/quarto-actions/render@v2
+
+      # Deploy to GitHub Pages on push to main
+      - name: 🚀 Deploy to GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          target: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+
+      # Deploy to Netlify on pull request
+      - name: 🌐 Deploy to Netlify
+        if: github.event_name == 'pull_request'
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: './_site'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: 'Deploy from GHA: ${{ github.event.pull_request.title || github.event.head_commit.message }} (${{ github.sha }})'
+          enable-commit-comment: false
+          enable-github-deployment: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # this secret is always available for github actions
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
