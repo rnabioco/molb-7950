@@ -53,11 +53,9 @@ library(rtracklayer)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
-# library(rGADEM)
-library(seqLogo)
+library(memes)
+library(ggseqlogo)
 ```
-
-
 
 ```{r}
 #| label: make-tracks
@@ -101,14 +99,16 @@ track_info <-
     data_track = purrr::map2(
       big_wig,
       sample_type,
-      ~ DataTrack(
-        .x,
-        name = .y,
-        background.title = "white",
-        col.title = "black",
-        col.axis = "black",
-        fontsize = 16
-      )
+      \(x, y) {
+        DataTrack(
+          x,
+          name = ,
+          background.title = "white",
+          col.title = "black",
+          col.axis = "black",
+          fontsize = 16
+        )
+      }
     )
   ) |>
   dplyr::select(sample_type, big_wig, data_track)
@@ -124,6 +124,7 @@ x_axis_trk <- GenomeAxisTrack(
 
 ```{r}
 #| label: plot-tracks
+#| fig.alt: "Genome browser tracks for Abf1 and Reb1 CUT&RUN data."
 plotTracks(
   c(
     sgd_genes_trk,
@@ -152,7 +153,7 @@ peak_calls <-
     start = midpoint,
     end = start + 1,
     # use the poisson to calculate a p-value with the genome-wide lambda
-    pval = dpois(score, genome_lambda),
+    pval = dpois(value, genome_lambda),
     # convert p-values to FDR
     fdr = p.adjust(pval, method = "fdr")
   )
@@ -204,45 +205,47 @@ These PWMs can be represented as sequence logos, visually represent the amount o
 
 ## Practice
 
-We'll use the [rGADEM](https://bioconductor.org/packages/release/bioc/html/rGADEM.html) package from Bioconductor to derive sequence motifs from the peaks we called above. This is a straightforward process:
+We'll use the [memes](https://bioconductor.org/packages/release/bioc/html/memes.html) package from Bioconductor to derive sequence motifs from the peaks we called above. This is a straightforward process:
 
 1.  Collect the DNA sequences within the peak windows using the BSgenome for *S. cerevisiae*
-2.  Provide those sequences and the genomic background to `rGADEM::GADEM()`, which runs uses an Expectation-Maximization (EM) approach to identify and refine motifs.
-3.  Examine the discovered motifs, and plot as a logo using `seqLogo::seqLogo()`.
+2.  Provide those sequences and the genomic background to `runDreme()`, which runs uses an Expectation-Maximization (EM) approach to identify and refine motifs.
+3.  Examine the discovered motifs, and plot as a logo using `ggseqlogo`.
 
 ```{r}
 #| label: motif-discovery
 #| echo: true
-
 peak_seqs <- BSgenome::getSeq(
   # provided by BSgenome.Scerevisiae.UCSC.sacCer3
   Scerevisiae,
   peak_calls_gr
 )
 
-# takes ~2 minutes to run
-gadem <- rGADEM::GADEM(
-  peak_seqs,
-  genome = Scerevisiae,
-  verbose = 1
+motif_results <- runStreme(
+  input = peak_seqs,
+  control = "shuffle", # use shuffled sequences as control
+  minw = 6, # minimum motif width
+  maxw = 12, # maximum motif width
+  nmotifs = 5, # number of motifs to find
+  seed = 42
 )
 
 # look at the consensus motifs
-consensus(gadem)
-
-# how many consensus motifs are there?
-nOccurrences(gadem)
+motif_results
 ```
 
 Now let's look at the sequence logo for the top hit.
 
 ```{r}
-#| label: plot-logo
+#| label: plt-seq-logo
+#| fig.alt: "Sequence logo for the top motif discovered in Abf1 CUT&RUN peaks."
 #| echo: true
+#| warning: false
+motif_1 <- motif_results[[1]]
+pwm <- motif_1[[1]]@motif
 
-pwm <- gadem@motifList[[1]]@pwm
-
-seqLogo::seqLogo(pwm)
+ggplot() +
+  geom_logo(pwm) +
+  theme_logo()
 ```
 
 ## Questions
@@ -250,7 +253,3 @@ seqLogo::seqLogo(pwm)
 1.  Does this motif make sense, based on what you know about the requirements and specificity of DNA binding by transcription factors?
 
 2.  How might you confirm that a specific sequence (that conforms to a motif) is bound directly by a transcription factor?
-
-## References
-
-GADEM: a genetic algorithm guided formation of spaced dyads coupled with an EM algorithm for motif discovery. J Comput Biol 2009 \[[PMC free article](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2756050/)\] \[[PubMed](https://pubmed.ncbi.nlm.nih.gov/19193149)\] \[[Google Scholar](https://scholar.google.com/scholar_lookup?journal=J+Comput+Biol&title=GADEM:+a+genetic+algorithm+guided+formation+of+spaced+dyads+coupled+with+an+EM+algorithm+for+motif+discovery&author=L.+Li&volume=16&issue=2&publication_year=2009&pages=317-329&pmid=19193149&)\]

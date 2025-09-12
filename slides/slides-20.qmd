@@ -66,8 +66,6 @@ library(rtracklayer)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
-# library(rGADEM)
-library(seqLogo)
 ```
 
 ## Examine genome coverage
@@ -98,7 +96,6 @@ sgd_genes_trk <-
 #| label: make-tracks-2
 #| echo: true
 # signal tracks
-
 track_info <-
   tibble(
     file_name = c(
@@ -123,14 +120,16 @@ track_info <-
     data_track = purrr::map2(
       big_wig,
       sample_type,
-      ~ DataTrack(
-        .x,
-        name = .y,
-        background.title = "white",
-        col.title = "black",
-        col.axis = "black",
-        fontsize = 16
-      )
+      \(x, y) {
+        DataTrack(
+          x,
+          name = y,
+          background.title = "white",
+          col.title = "black",
+          col.axis = "black",
+          fontsize = 16
+        )
+      }
     )
   ) |>
   dplyr::select(sample_type, big_wig, data_track)
@@ -200,7 +199,7 @@ Look over the `?dpois` documentation.
 #| label: plot-poisson
 #| echo: false
 #| message: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "Poisson distributions with different lambda values"
 library(cowplot)
 library(ggtext)
 
@@ -264,7 +263,7 @@ peak_calls <-
     start = midpoint,
     end = start + 1,
     # use the poisson to calculate a p-value with the genome-wide lambda
-    pval = dpois(score, genome_lambda),
+    pval = dpois(value, genome_lambda),
     # convert p-values to FDR
     fdr = p.adjust(pval, method = "fdr")
   )
@@ -278,7 +277,7 @@ Let's take a look at a plot of the p-value across a chromosome. What do you noti
 #| label: plot-p-vals
 #| echo: true
 #| output-location: slide
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "Peak calls based on Poisson p-values"
 
 ggplot(
   filter(peak_calls, chrom == "chrII"),
