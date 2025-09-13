@@ -474,67 +474,28 @@ window.Quarto = {
 
 
 </header><div class="cell">
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.4     ✔ readr     2.1.5
-✔ forcats   1.0.0     ✔ stringr   1.5.1
-✔ ggplot2   3.5.2     ✔ tibble    3.3.0
-✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-✔ purrr     1.1.0     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors
-
-Attaching package: 'rstatix'
-
-
-The following object is masked from 'package:stats':
-
-    filter
-
-
-
-Attaching package: 'janitor'
-
-
-The following object is masked from 'package:rstatix':
-
-    make_clean_names
-
-
-The following objects are masked from 'package:stats':
-
-    chisq.test, fisher.test
-
-
-here() starts at /home/runner/work/molb-7950/molb-7950
-
-
-Attaching package: 'cowplot'
-
-
-The following object is masked from 'package:gt':
-
-    as_gtable
-
-
-The following object is masked from 'package:ggpubr':
-
-    get_legend
-
-
-The following object is masked from 'package:lubridate':
-
-    stamp</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rpkgs.datanovia.com/rstatix/">rstatix</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rpkgs.datanovia.com/ggpubr/">ggpubr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://gt.rstudio.com">gt</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sfirke/janitor">janitor</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://here.r-lib.org/">here</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://wilkelab.org/cowplot/">cowplot</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://broom.tidymodels.org/">broom</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">biochem</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span><span class="st">"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt"</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">biochem</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_tsv</a></span><span class="op">(</span></span>
+<span>  <span class="st">"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt"</span>,</span>
+<span>  show_col_types <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://sfirke.github.io/janitor/reference/clean_names.html">clean_names</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># simplify names a bit more</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">biochem</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span>pattern <span class="op">=</span> <span class="st">"biochem_"</span>, replacement <span class="op">=</span> <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">biochem</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">biochem</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span></span>
+<span>  pattern <span class="op">=</span> <span class="st">"biochem_"</span>,</span>
+<span>  replacement <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">biochem</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># we are going to simplify this a bit and only keep some columns</span></span>
 <span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">biochem</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">6</span>, <span class="fl">9</span>, <span class="fl">14</span>, <span class="fl">15</span>, <span class="fl">24</span><span class="op">:</span><span class="fl">28</span><span class="op">)</span><span class="op">]</span></span>
@@ -542,16 +503,20 @@ The following object is masked from 'package:lubridate':
 <span></span>
 <span><span class="co"># get weights for each individual mouse</span></span>
 <span><span class="co"># careful: did not come with column names</span></span>
-<span><span class="va">weight</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span><span class="st">"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight"</span>, col_names <span class="op">=</span> <span class="cn">F</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">weight</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_tsv</a></span><span class="op">(</span></span>
+<span>  <span class="st">"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight"</span>,</span>
+<span>  col_names <span class="op">=</span> <span class="cn">F</span>,</span>
+<span>  show_col_types <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># add column names</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">weight</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"subject_name"</span>, <span class="st">"weight"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># add weight to biochem table and get rid of NAs</span></span>
 <span><span class="co"># rename gender to sex</span></span>
-<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu">inner_join</span><span class="op">(</span><span class="va">biochem</span>, <span class="va">weight</span>, by <span class="op">=</span> <span class="st">"subject_name"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">inner_join</a></span><span class="op">(</span><span class="va">biochem</span>, <span class="va">weight</span>, by <span class="op">=</span> <span class="st">"subject_name"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html">na.omit</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">rename</span><span class="op">(</span>sex <span class="op">=</span> <span class="va">gender</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>sex <span class="op">=</span> <span class="va">gender</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="problem-1" class="level2"><h2 class="anchored" data-anchor-id="problem-1">Problem # 1</h2>
 <p>Can mouse sex explain mouse cholesterol? {.smaller}</p>
@@ -569,27 +534,27 @@ The following object is masked from 'package:lubridate':
 </div>
 <p>Fit summary:</p>
 <div class="cell" data-output-location="column-fragment">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">glance</span><span class="op">(</span><span class="va">fit_cs</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">gt</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">fmt_number</span><span class="op">(</span>columns <span class="op">=</span> <span class="va">r.squared</span><span class="op">:</span><span class="va">statistic</span>, decimals <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html">glance</a></span><span class="op">(</span><span class="va">fit_cs</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/gt.html">gt</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/fmt_number.html">fmt_number</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="va">r.squared</span><span class="op">:</span><span class="va">statistic</span>, decimals <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div id="izqgvnqgkw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#izqgvnqgkw table {
+<div id="ggcwhjbjyg" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#ggcwhjbjyg table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#izqgvnqgkw thead, #izqgvnqgkw tbody, #izqgvnqgkw tfoot, #izqgvnqgkw tr, #izqgvnqgkw td, #izqgvnqgkw th {
+#ggcwhjbjyg thead, #ggcwhjbjyg tbody, #ggcwhjbjyg tfoot, #ggcwhjbjyg tr, #ggcwhjbjyg td, #ggcwhjbjyg th {
   border-style: none;
 }
 
-#izqgvnqgkw p {
+#ggcwhjbjyg p {
   margin: 0;
   padding: 0;
 }
 
-#izqgvnqgkw .gt_table {
+#ggcwhjbjyg .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -615,12 +580,12 @@ The following object is masked from 'package:lubridate':
   border-left-color: #D3D3D3;
 }
 
-#izqgvnqgkw .gt_caption {
+#ggcwhjbjyg .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#izqgvnqgkw .gt_title {
+#ggcwhjbjyg .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -632,7 +597,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-width: 0;
 }
 
-#izqgvnqgkw .gt_subtitle {
+#ggcwhjbjyg .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -644,7 +609,7 @@ The following object is masked from 'package:lubridate':
   border-top-width: 0;
 }
 
-#izqgvnqgkw .gt_heading {
+#ggcwhjbjyg .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -656,13 +621,13 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#izqgvnqgkw .gt_bottom_border {
+#ggcwhjbjyg .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#izqgvnqgkw .gt_col_headings {
+#ggcwhjbjyg .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -677,7 +642,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#izqgvnqgkw .gt_col_heading {
+#ggcwhjbjyg .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -697,7 +662,7 @@ The following object is masked from 'package:lubridate':
   overflow-x: hidden;
 }
 
-#izqgvnqgkw .gt_column_spanner_outer {
+#ggcwhjbjyg .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -709,15 +674,15 @@ The following object is masked from 'package:lubridate':
   padding-right: 4px;
 }
 
-#izqgvnqgkw .gt_column_spanner_outer:first-child {
+#ggcwhjbjyg .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#izqgvnqgkw .gt_column_spanner_outer:last-child {
+#ggcwhjbjyg .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#izqgvnqgkw .gt_column_spanner {
+#ggcwhjbjyg .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -729,11 +694,11 @@ The following object is masked from 'package:lubridate':
   width: 100%;
 }
 
-#izqgvnqgkw .gt_spanner_row {
+#ggcwhjbjyg .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#izqgvnqgkw .gt_group_heading {
+#ggcwhjbjyg .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -759,7 +724,7 @@ The following object is masked from 'package:lubridate':
   text-align: left;
 }
 
-#izqgvnqgkw .gt_empty_group_heading {
+#ggcwhjbjyg .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -774,15 +739,15 @@ The following object is masked from 'package:lubridate':
   vertical-align: middle;
 }
 
-#izqgvnqgkw .gt_from_md > :first-child {
+#ggcwhjbjyg .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#izqgvnqgkw .gt_from_md > :last-child {
+#ggcwhjbjyg .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#izqgvnqgkw .gt_row {
+#ggcwhjbjyg .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -801,7 +766,7 @@ The following object is masked from 'package:lubridate':
   overflow-x: hidden;
 }
 
-#izqgvnqgkw .gt_stub {
+#ggcwhjbjyg .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -814,7 +779,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#izqgvnqgkw .gt_stub_row_group {
+#ggcwhjbjyg .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -828,15 +793,15 @@ The following object is masked from 'package:lubridate':
   vertical-align: top;
 }
 
-#izqgvnqgkw .gt_row_group_first td {
+#ggcwhjbjyg .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#izqgvnqgkw .gt_row_group_first th {
+#ggcwhjbjyg .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#izqgvnqgkw .gt_summary_row {
+#ggcwhjbjyg .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -846,16 +811,16 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#izqgvnqgkw .gt_first_summary_row {
+#ggcwhjbjyg .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#izqgvnqgkw .gt_first_summary_row.thick {
+#ggcwhjbjyg .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#izqgvnqgkw .gt_last_summary_row {
+#ggcwhjbjyg .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -865,7 +830,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#izqgvnqgkw .gt_grand_summary_row {
+#ggcwhjbjyg .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -875,7 +840,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#izqgvnqgkw .gt_first_grand_summary_row {
+#ggcwhjbjyg .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -885,7 +850,7 @@ The following object is masked from 'package:lubridate':
   border-top-color: #D3D3D3;
 }
 
-#izqgvnqgkw .gt_last_grand_summary_row_top {
+#ggcwhjbjyg .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -895,11 +860,11 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#izqgvnqgkw .gt_striped {
+#ggcwhjbjyg .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#izqgvnqgkw .gt_table_body {
+#ggcwhjbjyg .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -908,7 +873,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#izqgvnqgkw .gt_footnotes {
+#ggcwhjbjyg .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -922,7 +887,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#izqgvnqgkw .gt_footnote {
+#ggcwhjbjyg .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -931,7 +896,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#izqgvnqgkw .gt_sourcenotes {
+#ggcwhjbjyg .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -945,7 +910,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#izqgvnqgkw .gt_sourcenote {
+#ggcwhjbjyg .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -953,72 +918,72 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#izqgvnqgkw .gt_left {
+#ggcwhjbjyg .gt_left {
   text-align: left;
 }
 
-#izqgvnqgkw .gt_center {
+#ggcwhjbjyg .gt_center {
   text-align: center;
 }
 
-#izqgvnqgkw .gt_right {
+#ggcwhjbjyg .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#izqgvnqgkw .gt_font_normal {
+#ggcwhjbjyg .gt_font_normal {
   font-weight: normal;
 }
 
-#izqgvnqgkw .gt_font_bold {
+#ggcwhjbjyg .gt_font_bold {
   font-weight: bold;
 }
 
-#izqgvnqgkw .gt_font_italic {
+#ggcwhjbjyg .gt_font_italic {
   font-style: italic;
 }
 
-#izqgvnqgkw .gt_super {
+#ggcwhjbjyg .gt_super {
   font-size: 65%;
 }
 
-#izqgvnqgkw .gt_footnote_marks {
+#ggcwhjbjyg .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#izqgvnqgkw .gt_asterisk {
+#ggcwhjbjyg .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#izqgvnqgkw .gt_indent_1 {
+#ggcwhjbjyg .gt_indent_1 {
   text-indent: 5px;
 }
 
-#izqgvnqgkw .gt_indent_2 {
+#ggcwhjbjyg .gt_indent_2 {
   text-indent: 10px;
 }
 
-#izqgvnqgkw .gt_indent_3 {
+#ggcwhjbjyg .gt_indent_3 {
   text-indent: 15px;
 }
 
-#izqgvnqgkw .gt_indent_4 {
+#ggcwhjbjyg .gt_indent_4 {
   text-indent: 20px;
 }
 
-#izqgvnqgkw .gt_indent_5 {
+#ggcwhjbjyg .gt_indent_5 {
   text-indent: 25px;
 }
 
-#izqgvnqgkw .katex-display {
+#ggcwhjbjyg .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#izqgvnqgkw div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#ggcwhjbjyg div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1057,27 +1022,27 @@ The following object is masked from 'package:lubridate':
 </div>
 <p>Coefficient summary:</p>
 <div class="cell" data-output-location="column-fragment">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">tidy</span><span class="op">(</span><span class="va">fit_cs</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">gt</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">fmt_number</span><span class="op">(</span>columns <span class="op">=</span> <span class="va">estimate</span><span class="op">:</span><span class="va">statistic</span>, decimals <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html">tidy</a></span><span class="op">(</span><span class="va">fit_cs</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/gt.html">gt</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/fmt_number.html">fmt_number</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="va">estimate</span><span class="op">:</span><span class="va">statistic</span>, decimals <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div id="fveadurwhe" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#fveadurwhe table {
+<div id="wsbmzsryov" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#wsbmzsryov table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#fveadurwhe thead, #fveadurwhe tbody, #fveadurwhe tfoot, #fveadurwhe tr, #fveadurwhe td, #fveadurwhe th {
+#wsbmzsryov thead, #wsbmzsryov tbody, #wsbmzsryov tfoot, #wsbmzsryov tr, #wsbmzsryov td, #wsbmzsryov th {
   border-style: none;
 }
 
-#fveadurwhe p {
+#wsbmzsryov p {
   margin: 0;
   padding: 0;
 }
 
-#fveadurwhe .gt_table {
+#wsbmzsryov .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1103,12 +1068,12 @@ The following object is masked from 'package:lubridate':
   border-left-color: #D3D3D3;
 }
 
-#fveadurwhe .gt_caption {
+#wsbmzsryov .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#fveadurwhe .gt_title {
+#wsbmzsryov .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1120,7 +1085,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-width: 0;
 }
 
-#fveadurwhe .gt_subtitle {
+#wsbmzsryov .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1132,7 +1097,7 @@ The following object is masked from 'package:lubridate':
   border-top-width: 0;
 }
 
-#fveadurwhe .gt_heading {
+#wsbmzsryov .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1144,13 +1109,13 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#fveadurwhe .gt_bottom_border {
+#wsbmzsryov .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#fveadurwhe .gt_col_headings {
+#wsbmzsryov .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1165,7 +1130,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#fveadurwhe .gt_col_heading {
+#wsbmzsryov .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1185,7 +1150,7 @@ The following object is masked from 'package:lubridate':
   overflow-x: hidden;
 }
 
-#fveadurwhe .gt_column_spanner_outer {
+#wsbmzsryov .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1197,15 +1162,15 @@ The following object is masked from 'package:lubridate':
   padding-right: 4px;
 }
 
-#fveadurwhe .gt_column_spanner_outer:first-child {
+#wsbmzsryov .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#fveadurwhe .gt_column_spanner_outer:last-child {
+#wsbmzsryov .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#fveadurwhe .gt_column_spanner {
+#wsbmzsryov .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1217,11 +1182,11 @@ The following object is masked from 'package:lubridate':
   width: 100%;
 }
 
-#fveadurwhe .gt_spanner_row {
+#wsbmzsryov .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#fveadurwhe .gt_group_heading {
+#wsbmzsryov .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1247,7 +1212,7 @@ The following object is masked from 'package:lubridate':
   text-align: left;
 }
 
-#fveadurwhe .gt_empty_group_heading {
+#wsbmzsryov .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1262,15 +1227,15 @@ The following object is masked from 'package:lubridate':
   vertical-align: middle;
 }
 
-#fveadurwhe .gt_from_md > :first-child {
+#wsbmzsryov .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#fveadurwhe .gt_from_md > :last-child {
+#wsbmzsryov .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#fveadurwhe .gt_row {
+#wsbmzsryov .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1289,7 +1254,7 @@ The following object is masked from 'package:lubridate':
   overflow-x: hidden;
 }
 
-#fveadurwhe .gt_stub {
+#wsbmzsryov .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1302,7 +1267,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#fveadurwhe .gt_stub_row_group {
+#wsbmzsryov .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1316,15 +1281,15 @@ The following object is masked from 'package:lubridate':
   vertical-align: top;
 }
 
-#fveadurwhe .gt_row_group_first td {
+#wsbmzsryov .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#fveadurwhe .gt_row_group_first th {
+#wsbmzsryov .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#fveadurwhe .gt_summary_row {
+#wsbmzsryov .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1334,16 +1299,16 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#fveadurwhe .gt_first_summary_row {
+#wsbmzsryov .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#fveadurwhe .gt_first_summary_row.thick {
+#wsbmzsryov .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#fveadurwhe .gt_last_summary_row {
+#wsbmzsryov .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1353,7 +1318,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#fveadurwhe .gt_grand_summary_row {
+#wsbmzsryov .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1363,7 +1328,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#fveadurwhe .gt_first_grand_summary_row {
+#wsbmzsryov .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1373,7 +1338,7 @@ The following object is masked from 'package:lubridate':
   border-top-color: #D3D3D3;
 }
 
-#fveadurwhe .gt_last_grand_summary_row_top {
+#wsbmzsryov .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1383,11 +1348,11 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#fveadurwhe .gt_striped {
+#wsbmzsryov .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#fveadurwhe .gt_table_body {
+#wsbmzsryov .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1396,7 +1361,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#fveadurwhe .gt_footnotes {
+#wsbmzsryov .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1410,7 +1375,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#fveadurwhe .gt_footnote {
+#wsbmzsryov .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1419,7 +1384,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#fveadurwhe .gt_sourcenotes {
+#wsbmzsryov .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1433,7 +1398,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#fveadurwhe .gt_sourcenote {
+#wsbmzsryov .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1441,72 +1406,72 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#fveadurwhe .gt_left {
+#wsbmzsryov .gt_left {
   text-align: left;
 }
 
-#fveadurwhe .gt_center {
+#wsbmzsryov .gt_center {
   text-align: center;
 }
 
-#fveadurwhe .gt_right {
+#wsbmzsryov .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#fveadurwhe .gt_font_normal {
+#wsbmzsryov .gt_font_normal {
   font-weight: normal;
 }
 
-#fveadurwhe .gt_font_bold {
+#wsbmzsryov .gt_font_bold {
   font-weight: bold;
 }
 
-#fveadurwhe .gt_font_italic {
+#wsbmzsryov .gt_font_italic {
   font-style: italic;
 }
 
-#fveadurwhe .gt_super {
+#wsbmzsryov .gt_super {
   font-size: 65%;
 }
 
-#fveadurwhe .gt_footnote_marks {
+#wsbmzsryov .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#fveadurwhe .gt_asterisk {
+#wsbmzsryov .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#fveadurwhe .gt_indent_1 {
+#wsbmzsryov .gt_indent_1 {
   text-indent: 5px;
 }
 
-#fveadurwhe .gt_indent_2 {
+#wsbmzsryov .gt_indent_2 {
   text-indent: 10px;
 }
 
-#fveadurwhe .gt_indent_3 {
+#wsbmzsryov .gt_indent_3 {
   text-indent: 15px;
 }
 
-#fveadurwhe .gt_indent_4 {
+#wsbmzsryov .gt_indent_4 {
   text-indent: 20px;
 }
 
-#fveadurwhe .gt_indent_5 {
+#wsbmzsryov .gt_indent_5 {
   text-indent: 25px;
 }
 
-#fveadurwhe .katex-display {
+#wsbmzsryov .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#fveadurwhe div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#wsbmzsryov div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1542,59 +1507,62 @@ The following object is masked from 'package:lubridate':
 <p>add residuals and other information</p>
 <div class="cell" data-output-location="column-fragment">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># augment</span></span>
-<span><span class="va">b_cs</span> <span class="op">&lt;-</span> <span class="fu">augment</span><span class="op">(</span><span class="va">fit_cs</span>, data <span class="op">=</span> <span class="va">b</span><span class="op">)</span></span>
+<span><span class="va">b_cs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html">augment</a></span><span class="op">(</span><span class="va">fit_cs</span>, data <span class="op">=</span> <span class="va">b</span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="va">avg_c</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">b_cs</span><span class="op">$</span><span class="va">tot_cholesterol</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">c</span> <span class="op">&lt;-</span> <span class="va">b</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">get_summary_stats</span><span class="op">(</span><span class="va">tot_cholesterol</span>, type <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rpkgs.datanovia.com/rstatix/reference/get_summary_stats.html">get_summary_stats</a></span><span class="op">(</span><span class="va">tot_cholesterol</span>, type <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="co"># mean chol female</span></span>
-<span><span class="va">avg_cf</span> <span class="op">&lt;-</span> <span class="fu">pull</span><span class="op">(</span><span class="va">c</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">avg_cf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">c</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
 <span></span>
 <span><span class="co"># mean chol male</span></span>
-<span><span class="va">avg_cm</span> <span class="op">&lt;-</span> <span class="fu">pull</span><span class="op">(</span><span class="va">c</span><span class="op">[</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">]</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="va">avg_cm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">c</span><span class="op">[</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">]</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="step-4-visualize-the-error-around-fit-2-pts" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="step-4-visualize-the-error-around-fit-2-pts">STEP 4: Visualize the error around fit — (2 pts)</h2>
 <div class="cell" data-output-location="column-fragment">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># plot of data with mean and colored by residuals</span></span>
-<span><span class="va">p_cs</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span></span>
+<span><span class="va">p_cs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">b_cs</span>,</span>
-<span>  <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span>, y <span class="op">=</span> <span class="va">tot_cholesterol</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span>, y <span class="op">=</span> <span class="va">tot_cholesterol</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span></span>
-<span>    position <span class="op">=</span> <span class="fu">position_jitter</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>    <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">.resid</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span></span>
+<span>    position <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/position_jitter.html">position_jitter</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">.resid</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_color_gradient2</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_color_gradient2</a></span><span class="op">(</span></span>
 <span>    low <span class="op">=</span> <span class="st">"blue"</span>,</span>
 <span>    mid <span class="op">=</span> <span class="st">"black"</span>,</span>
 <span>    high <span class="op">=</span> <span class="st">"yellow"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_hline</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_hline</a></span><span class="op">(</span></span>
 <span>    yintercept <span class="op">=</span> <span class="va">avg_c</span>,</span>
 <span>    color <span class="op">=</span> <span class="st">"darkgrey"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_segment</span><span class="op">(</span></span>
-<span>    <span class="fu">aes</span><span class="op">(</span></span>
-<span>      x <span class="op">=</span> <span class="fl">.5</span>, xend <span class="op">=</span> <span class="fl">1.5</span>,</span>
-<span>      y <span class="op">=</span> <span class="va">avg_cf</span>, yend <span class="op">=</span> <span class="va">avg_cf</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html">geom_segment</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span></span>
+<span>      x <span class="op">=</span> <span class="fl">.5</span>,</span>
+<span>      xend <span class="op">=</span> <span class="fl">1.5</span>,</span>
+<span>      y <span class="op">=</span> <span class="va">avg_cf</span>,</span>
+<span>      yend <span class="op">=</span> <span class="va">avg_cf</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    color <span class="op">=</span> <span class="st">"red"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_segment</span><span class="op">(</span></span>
-<span>    <span class="fu">aes</span><span class="op">(</span></span>
-<span>      x <span class="op">=</span> <span class="fl">1.5</span>, xend <span class="op">=</span> <span class="fl">2.5</span>,</span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html">geom_segment</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span></span>
+<span>      x <span class="op">=</span> <span class="fl">1.5</span>,</span>
+<span>      xend <span class="op">=</span> <span class="fl">2.5</span>,</span>
 <span>      y <span class="op">=</span> <span class="va">avg_cm</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    yend <span class="op">=</span> <span class="va">avg_cm</span>,</span>
 <span>    color <span class="op">=</span> <span class="st">"red"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_cowplot</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://wilkelab.org/cowplot/reference/theme_cowplot.html">theme_cowplot</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">p_cs</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
@@ -1616,24 +1584,24 @@ The following object is masked from 'package:lubridate':
 </div>
 </section><section id="step-5-visualize-the-error-around-the-null-mean-weight-2-pts" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="step-5-visualize-the-error-around-the-null-mean-weight-2-pts">STEP 5: Visualize the error around the null (mean weight) — (2 pts)</h2>
 <div class="cell" data-output-location="column-fragment">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_c</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">p_c</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">b_cs</span>,</span>
-<span>  <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span>, y <span class="op">=</span> <span class="va">tot_cholesterol</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span>, y <span class="op">=</span> <span class="va">tot_cholesterol</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_point</span><span class="op">(</span></span>
-<span>    position <span class="op">=</span> <span class="fu">position_jitter</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>    <span class="fu">aes</span><span class="op">(</span>color <span class="op">=</span> <span class="va">tot_cholesterol</span> <span class="op">-</span> <span class="va">avg_c</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html">geom_point</a></span><span class="op">(</span></span>
+<span>    position <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/position_jitter.html">position_jitter</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">tot_cholesterol</span> <span class="op">-</span> <span class="va">avg_c</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">scale_color_gradient2</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_color_gradient2</a></span><span class="op">(</span></span>
 <span>    low <span class="op">=</span> <span class="st">"blue"</span>,</span>
 <span>    mid <span class="op">=</span> <span class="st">"black"</span>,</span>
 <span>    high <span class="op">=</span> <span class="st">"yellow"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_hline</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html">geom_hline</a></span><span class="op">(</span></span>
 <span>    yintercept <span class="op">=</span> <span class="va">avg_c</span>,</span>
 <span>    color <span class="op">=</span> <span class="st">"darkgrey"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_cowplot</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://wilkelab.org/cowplot/reference/theme_cowplot.html">theme_cowplot</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">p_c</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
@@ -1645,7 +1613,7 @@ The following object is masked from 'package:lubridate':
 </div>
 </section><section id="plot-the-fit-error-and-the-null-error-as-2-panels-2-pts" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="plot-the-fit-error-and-the-null-error-as-2-panels-2-pts">Plot the fit error and the null error as 2 panels — (2 pts)</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plot_grid</span><span class="op">(</span><span class="va">p_cs</span>, <span class="va">p_c</span>, ncol <span class="op">=</span> <span class="fl">2</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"cholesterol by sex"</span>, <span class="st">"cholesterol"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://wilkelab.org/cowplot/reference/plot_grid.html">plot_grid</a></span><span class="op">(</span><span class="va">p_cs</span>, <span class="va">p_c</span>, ncol <span class="op">=</span> <span class="fl">2</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"cholesterol by sex"</span>, <span class="st">"cholesterol"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in geom_segment(aes(x = 0.5, xend = 1.5, y = avg_cf, yend = avg_cf), : All aesthetics have length 1, but the data has 1782 rows.
 ℹ Please consider using `annotate()` or provide this layer with data containing
@@ -1681,7 +1649,7 @@ The following object is masked from 'package:lubridate':
 </div>
 <p>check agains Rsq in your fit</p>
 <div class="cell" data-output-location="column-fragment">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">glance</span><span class="op">(</span><span class="va">fit_cs</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">select</span><span class="op">(</span><span class="va">r.squared</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/glance.html">glance</a></span><span class="op">(</span><span class="va">fit_cs</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">r.squared</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 1
   r.squared
@@ -1693,27 +1661,27 @@ The following object is masked from 'package:lubridate':
 <div class="cell" data-output-location="column-fragment">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># run analagous t-test</span></span>
 <span><span class="va">b</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">t_test</span><span class="op">(</span><span class="va">tot_cholesterol</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">n1</span>, <span class="va">n2</span>, <span class="va">df</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">gt</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span>  <span class="fu"><a href="https://rpkgs.datanovia.com/rstatix/reference/t_test.html">t_test</a></span><span class="op">(</span><span class="va">tot_cholesterol</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="va">sex</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">n1</span>, <span class="va">n2</span>, <span class="va">df</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/gt.html">gt</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div id="igxgoxjzcl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#igxgoxjzcl table {
+<div id="fqqxokenbx" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#fqqxokenbx table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#igxgoxjzcl thead, #igxgoxjzcl tbody, #igxgoxjzcl tfoot, #igxgoxjzcl tr, #igxgoxjzcl td, #igxgoxjzcl th {
+#fqqxokenbx thead, #fqqxokenbx tbody, #fqqxokenbx tfoot, #fqqxokenbx tr, #fqqxokenbx td, #fqqxokenbx th {
   border-style: none;
 }
 
-#igxgoxjzcl p {
+#fqqxokenbx p {
   margin: 0;
   padding: 0;
 }
 
-#igxgoxjzcl .gt_table {
+#fqqxokenbx .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1739,12 +1707,12 @@ The following object is masked from 'package:lubridate':
   border-left-color: #D3D3D3;
 }
 
-#igxgoxjzcl .gt_caption {
+#fqqxokenbx .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#igxgoxjzcl .gt_title {
+#fqqxokenbx .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1756,7 +1724,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-width: 0;
 }
 
-#igxgoxjzcl .gt_subtitle {
+#fqqxokenbx .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1768,7 +1736,7 @@ The following object is masked from 'package:lubridate':
   border-top-width: 0;
 }
 
-#igxgoxjzcl .gt_heading {
+#fqqxokenbx .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1780,13 +1748,13 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#igxgoxjzcl .gt_bottom_border {
+#fqqxokenbx .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#igxgoxjzcl .gt_col_headings {
+#fqqxokenbx .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1801,7 +1769,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#igxgoxjzcl .gt_col_heading {
+#fqqxokenbx .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1821,7 +1789,7 @@ The following object is masked from 'package:lubridate':
   overflow-x: hidden;
 }
 
-#igxgoxjzcl .gt_column_spanner_outer {
+#fqqxokenbx .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1833,15 +1801,15 @@ The following object is masked from 'package:lubridate':
   padding-right: 4px;
 }
 
-#igxgoxjzcl .gt_column_spanner_outer:first-child {
+#fqqxokenbx .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#igxgoxjzcl .gt_column_spanner_outer:last-child {
+#fqqxokenbx .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#igxgoxjzcl .gt_column_spanner {
+#fqqxokenbx .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1853,11 +1821,11 @@ The following object is masked from 'package:lubridate':
   width: 100%;
 }
 
-#igxgoxjzcl .gt_spanner_row {
+#fqqxokenbx .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#igxgoxjzcl .gt_group_heading {
+#fqqxokenbx .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1883,7 +1851,7 @@ The following object is masked from 'package:lubridate':
   text-align: left;
 }
 
-#igxgoxjzcl .gt_empty_group_heading {
+#fqqxokenbx .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1898,15 +1866,15 @@ The following object is masked from 'package:lubridate':
   vertical-align: middle;
 }
 
-#igxgoxjzcl .gt_from_md > :first-child {
+#fqqxokenbx .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#igxgoxjzcl .gt_from_md > :last-child {
+#fqqxokenbx .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#igxgoxjzcl .gt_row {
+#fqqxokenbx .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1925,7 +1893,7 @@ The following object is masked from 'package:lubridate':
   overflow-x: hidden;
 }
 
-#igxgoxjzcl .gt_stub {
+#fqqxokenbx .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1938,7 +1906,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#igxgoxjzcl .gt_stub_row_group {
+#fqqxokenbx .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1952,15 +1920,15 @@ The following object is masked from 'package:lubridate':
   vertical-align: top;
 }
 
-#igxgoxjzcl .gt_row_group_first td {
+#fqqxokenbx .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#igxgoxjzcl .gt_row_group_first th {
+#fqqxokenbx .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#igxgoxjzcl .gt_summary_row {
+#fqqxokenbx .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1970,16 +1938,16 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#igxgoxjzcl .gt_first_summary_row {
+#fqqxokenbx .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#igxgoxjzcl .gt_first_summary_row.thick {
+#fqqxokenbx .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#igxgoxjzcl .gt_last_summary_row {
+#fqqxokenbx .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1989,7 +1957,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#igxgoxjzcl .gt_grand_summary_row {
+#fqqxokenbx .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1999,7 +1967,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#igxgoxjzcl .gt_first_grand_summary_row {
+#fqqxokenbx .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2009,7 +1977,7 @@ The following object is masked from 'package:lubridate':
   border-top-color: #D3D3D3;
 }
 
-#igxgoxjzcl .gt_last_grand_summary_row_top {
+#fqqxokenbx .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2019,11 +1987,11 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#igxgoxjzcl .gt_striped {
+#fqqxokenbx .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#igxgoxjzcl .gt_table_body {
+#fqqxokenbx .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2032,7 +2000,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#igxgoxjzcl .gt_footnotes {
+#fqqxokenbx .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2046,7 +2014,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#igxgoxjzcl .gt_footnote {
+#fqqxokenbx .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -2055,7 +2023,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#igxgoxjzcl .gt_sourcenotes {
+#fqqxokenbx .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2069,7 +2037,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#igxgoxjzcl .gt_sourcenote {
+#fqqxokenbx .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -2077,72 +2045,72 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#igxgoxjzcl .gt_left {
+#fqqxokenbx .gt_left {
   text-align: left;
 }
 
-#igxgoxjzcl .gt_center {
+#fqqxokenbx .gt_center {
   text-align: center;
 }
 
-#igxgoxjzcl .gt_right {
+#fqqxokenbx .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#igxgoxjzcl .gt_font_normal {
+#fqqxokenbx .gt_font_normal {
   font-weight: normal;
 }
 
-#igxgoxjzcl .gt_font_bold {
+#fqqxokenbx .gt_font_bold {
   font-weight: bold;
 }
 
-#igxgoxjzcl .gt_font_italic {
+#fqqxokenbx .gt_font_italic {
   font-style: italic;
 }
 
-#igxgoxjzcl .gt_super {
+#fqqxokenbx .gt_super {
   font-size: 65%;
 }
 
-#igxgoxjzcl .gt_footnote_marks {
+#fqqxokenbx .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#igxgoxjzcl .gt_asterisk {
+#fqqxokenbx .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#igxgoxjzcl .gt_indent_1 {
+#fqqxokenbx .gt_indent_1 {
   text-indent: 5px;
 }
 
-#igxgoxjzcl .gt_indent_2 {
+#fqqxokenbx .gt_indent_2 {
   text-indent: 10px;
 }
 
-#igxgoxjzcl .gt_indent_3 {
+#fqqxokenbx .gt_indent_3 {
   text-indent: 15px;
 }
 
-#igxgoxjzcl .gt_indent_4 {
+#fqqxokenbx .gt_indent_4 {
   text-indent: 20px;
 }
 
-#igxgoxjzcl .gt_indent_5 {
+#fqqxokenbx .gt_indent_5 {
   text-indent: 25px;
 }
 
-#igxgoxjzcl .katex-display {
+#fqqxokenbx .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#igxgoxjzcl div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#fqqxokenbx div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -2166,27 +2134,27 @@ The following object is masked from 'package:lubridate':
 </div>
 </div>
 <div class="cell" data-output-location="column-fragment">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">tidy</span><span class="op">(</span><span class="va">fit_cs</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">term</span>, <span class="va">estimate</span>, <span class="va">statistic</span>, <span class="va">p.value</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">gt</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html">tidy</a></span><span class="op">(</span><span class="va">fit_cs</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">term</span>, <span class="va">estimate</span>, <span class="va">statistic</span>, <span class="va">p.value</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://gt.rstudio.com/reference/gt.html">gt</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div id="pzzxfswahk" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#pzzxfswahk table {
+<div id="dklmxgjjxe" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#dklmxgjjxe table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#pzzxfswahk thead, #pzzxfswahk tbody, #pzzxfswahk tfoot, #pzzxfswahk tr, #pzzxfswahk td, #pzzxfswahk th {
+#dklmxgjjxe thead, #dklmxgjjxe tbody, #dklmxgjjxe tfoot, #dklmxgjjxe tr, #dklmxgjjxe td, #dklmxgjjxe th {
   border-style: none;
 }
 
-#pzzxfswahk p {
+#dklmxgjjxe p {
   margin: 0;
   padding: 0;
 }
 
-#pzzxfswahk .gt_table {
+#dklmxgjjxe .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -2212,12 +2180,12 @@ The following object is masked from 'package:lubridate':
   border-left-color: #D3D3D3;
 }
 
-#pzzxfswahk .gt_caption {
+#dklmxgjjxe .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#pzzxfswahk .gt_title {
+#dklmxgjjxe .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -2229,7 +2197,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-width: 0;
 }
 
-#pzzxfswahk .gt_subtitle {
+#dklmxgjjxe .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -2241,7 +2209,7 @@ The following object is masked from 'package:lubridate':
   border-top-width: 0;
 }
 
-#pzzxfswahk .gt_heading {
+#dklmxgjjxe .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -2253,13 +2221,13 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#pzzxfswahk .gt_bottom_border {
+#dklmxgjjxe .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#pzzxfswahk .gt_col_headings {
+#dklmxgjjxe .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2274,7 +2242,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#pzzxfswahk .gt_col_heading {
+#dklmxgjjxe .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2294,7 +2262,7 @@ The following object is masked from 'package:lubridate':
   overflow-x: hidden;
 }
 
-#pzzxfswahk .gt_column_spanner_outer {
+#dklmxgjjxe .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2306,15 +2274,15 @@ The following object is masked from 'package:lubridate':
   padding-right: 4px;
 }
 
-#pzzxfswahk .gt_column_spanner_outer:first-child {
+#dklmxgjjxe .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#pzzxfswahk .gt_column_spanner_outer:last-child {
+#dklmxgjjxe .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#pzzxfswahk .gt_column_spanner {
+#dklmxgjjxe .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2326,11 +2294,11 @@ The following object is masked from 'package:lubridate':
   width: 100%;
 }
 
-#pzzxfswahk .gt_spanner_row {
+#dklmxgjjxe .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#pzzxfswahk .gt_group_heading {
+#dklmxgjjxe .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2356,7 +2324,7 @@ The following object is masked from 'package:lubridate':
   text-align: left;
 }
 
-#pzzxfswahk .gt_empty_group_heading {
+#dklmxgjjxe .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2371,15 +2339,15 @@ The following object is masked from 'package:lubridate':
   vertical-align: middle;
 }
 
-#pzzxfswahk .gt_from_md > :first-child {
+#dklmxgjjxe .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#pzzxfswahk .gt_from_md > :last-child {
+#dklmxgjjxe .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#pzzxfswahk .gt_row {
+#dklmxgjjxe .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2398,7 +2366,7 @@ The following object is masked from 'package:lubridate':
   overflow-x: hidden;
 }
 
-#pzzxfswahk .gt_stub {
+#dklmxgjjxe .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2411,7 +2379,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#pzzxfswahk .gt_stub_row_group {
+#dklmxgjjxe .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2425,15 +2393,15 @@ The following object is masked from 'package:lubridate':
   vertical-align: top;
 }
 
-#pzzxfswahk .gt_row_group_first td {
+#dklmxgjjxe .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#pzzxfswahk .gt_row_group_first th {
+#dklmxgjjxe .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#pzzxfswahk .gt_summary_row {
+#dklmxgjjxe .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2443,16 +2411,16 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#pzzxfswahk .gt_first_summary_row {
+#dklmxgjjxe .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#pzzxfswahk .gt_first_summary_row.thick {
+#dklmxgjjxe .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#pzzxfswahk .gt_last_summary_row {
+#dklmxgjjxe .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2462,7 +2430,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#pzzxfswahk .gt_grand_summary_row {
+#dklmxgjjxe .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2472,7 +2440,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#pzzxfswahk .gt_first_grand_summary_row {
+#dklmxgjjxe .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2482,7 +2450,7 @@ The following object is masked from 'package:lubridate':
   border-top-color: #D3D3D3;
 }
 
-#pzzxfswahk .gt_last_grand_summary_row_top {
+#dklmxgjjxe .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2492,11 +2460,11 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#pzzxfswahk .gt_striped {
+#dklmxgjjxe .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#pzzxfswahk .gt_table_body {
+#dklmxgjjxe .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2505,7 +2473,7 @@ The following object is masked from 'package:lubridate':
   border-bottom-color: #D3D3D3;
 }
 
-#pzzxfswahk .gt_footnotes {
+#dklmxgjjxe .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2519,7 +2487,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#pzzxfswahk .gt_footnote {
+#dklmxgjjxe .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -2528,7 +2496,7 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#pzzxfswahk .gt_sourcenotes {
+#dklmxgjjxe .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2542,7 +2510,7 @@ The following object is masked from 'package:lubridate':
   border-right-color: #D3D3D3;
 }
 
-#pzzxfswahk .gt_sourcenote {
+#dklmxgjjxe .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -2550,72 +2518,72 @@ The following object is masked from 'package:lubridate':
   padding-right: 5px;
 }
 
-#pzzxfswahk .gt_left {
+#dklmxgjjxe .gt_left {
   text-align: left;
 }
 
-#pzzxfswahk .gt_center {
+#dklmxgjjxe .gt_center {
   text-align: center;
 }
 
-#pzzxfswahk .gt_right {
+#dklmxgjjxe .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#pzzxfswahk .gt_font_normal {
+#dklmxgjjxe .gt_font_normal {
   font-weight: normal;
 }
 
-#pzzxfswahk .gt_font_bold {
+#dklmxgjjxe .gt_font_bold {
   font-weight: bold;
 }
 
-#pzzxfswahk .gt_font_italic {
+#dklmxgjjxe .gt_font_italic {
   font-style: italic;
 }
 
-#pzzxfswahk .gt_super {
+#dklmxgjjxe .gt_super {
   font-size: 65%;
 }
 
-#pzzxfswahk .gt_footnote_marks {
+#dklmxgjjxe .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#pzzxfswahk .gt_asterisk {
+#dklmxgjjxe .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#pzzxfswahk .gt_indent_1 {
+#dklmxgjjxe .gt_indent_1 {
   text-indent: 5px;
 }
 
-#pzzxfswahk .gt_indent_2 {
+#dklmxgjjxe .gt_indent_2 {
   text-indent: 10px;
 }
 
-#pzzxfswahk .gt_indent_3 {
+#dklmxgjjxe .gt_indent_3 {
   text-indent: 15px;
 }
 
-#pzzxfswahk .gt_indent_4 {
+#dklmxgjjxe .gt_indent_4 {
   text-indent: 20px;
 }
 
-#pzzxfswahk .gt_indent_5 {
+#dklmxgjjxe .gt_indent_5 {
   text-indent: 25px;
 }
 
-#pzzxfswahk .katex-display {
+#dklmxgjjxe .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#pzzxfswahk div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#dklmxgjjxe div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
