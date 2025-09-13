@@ -37,7 +37,6 @@ Create hierarchical clustering heatmap of pairwise pearson correlation coefficie
 # scale
 ang <- t(scale(t(ang)))
 
-
 # pairwise pearson correlation
 p_ang <- cor(ang, method = "pearson")
 
@@ -57,8 +56,7 @@ Timepoints close to each other tend to correlate strongly with each other. The 4
 Perform PCA and visualize PC1 vs PC2.Provide 1-2 observations.
 
 ```{r}
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-# pca
+#|label: pca
 pc_ang <- prcomp(ang)
 
 # gather info from summary
@@ -73,10 +71,12 @@ pca_plot_data <- pc_ang$rotation |>
 
 # plot
 ggplot(data = pca_plot_data, mapping = aes(x = PC1, y = PC2, color = ID)) +
-  geom_point() +
-  xlab(paste("PC1, %", 100 * pca_data_info["Proportion of Variance", "PC1"])) +
-  ylab(paste("PC2, %", 100 * pca_data_info["Proportion of Variance", "PC2"])) +
-  ggtitle("PCA for angII timecourse") +
+  geom_point(size = 3) +
+  labs(
+    x = paste("PC1, %", 100 * pca_data_info["Proportion of Variance", "PC1"]),
+    y = paste("PC2, %", 100 * pca_data_info["Proportion of Variance", "PC2"]),
+    title = "PCA for angII timecourse"
+  ) +
   theme_cowplot()
 ```
 
@@ -94,7 +94,6 @@ In order to do this, you will need to:
 
 ```{r}
 #| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
 # read in data
 cd <- read_tsv(here("data", "dux4_clustering_results.csv.gz"))
 
@@ -129,7 +128,7 @@ n |>
   arrange(-sampled_targets) |>
   top_n(10)
 
-ggplot(data = n, aes(x = targets)) +
+ggplot(n, aes(x = targets)) +
   geom_density() +
   geom_vline(xintercept = c5t, color = "red") +
   theme_cowplot()

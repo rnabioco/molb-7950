@@ -2,7 +2,7 @@
 title: "Chromatin accessibility II"
 subtitle: "Meta-plots and heatmaps"
 author: "{{< var instructor.block.dna >}}"
-format: revealjs
+date: last-modified
 ---
 
 ## Genomewide chromatin analysis with meta-plots and heatmaps
@@ -208,11 +208,13 @@ acc_tbl <-
   mutate(
     tss_win_sum = purrr::map(
       big_wig,
-      \(x) bed_map(
-        tss_win_tbl,
-        x,
-        win_signal = sum(value, na.rm = TRUE)
-      )
+      \(x) {
+        bed_map(
+          tss_win_tbl,
+          x,
+          win_signal = sum(value, na.rm = TRUE)
+        )
+      }
     )
   )
 

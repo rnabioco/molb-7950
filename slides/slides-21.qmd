@@ -102,7 +102,7 @@ track_info <-
       \(x, y) {
         DataTrack(
           x,
-          name = ,
+          name = y,
           background.title = "white",
           col.title = "black",
           col.axis = "black",
@@ -125,6 +125,7 @@ x_axis_trk <- GenomeAxisTrack(
 ```{r}
 #| label: plot-tracks
 #| fig.alt: "Genome browser tracks for Abf1 and Reb1 CUT&RUN data."
+#| output-location: slide
 plotTracks(
   c(
     sgd_genes_trk,
@@ -138,6 +139,12 @@ plotTracks(
   shape = "arrow",
   type = "histogram"
 )
+```
+
+```{r}
+#| label: call-peaks
+#| echo: true
+#| output-location: slide
 abf1_tbl <- read_bigwig(here("data/block-dna/CutRun_Abf1_lt120.bw"))
 total_reads <- 16e6
 
@@ -172,12 +179,6 @@ filter(
     start >= track_start &
     end <= track_end
 )
-
-peak_calls_gr <-
-  GRanges(
-    seqnames = peak_calls_sig$chrom,
-    ranges = IRanges(peak_calls_sig$start, peak_calls_sig$end)
-  )
 ```
 
 ## How do proteins recognize specific locations in the genome to bind?
@@ -190,7 +191,7 @@ There are two major approaches to defining sequence motifs enriched in a sample:
 
 ## Theory
 
-Here we'll apply a probabilistic approach (GADEM) to discover motifs in a collection of DNA sequences. During the RNA block, you'll learn about k-mer analysis, which is a form of enumerative approach.
+Here we'll apply a probabilistic approach (MEME) to discover motifs in a collection of DNA sequences. During the RNA block, you'll learn about k-mer analysis, which is a form of enumerative approach.
 
 In each case, the goal is to define a set of sequence motifs that are encriched in a set of provided sequences (i.e., peaks from CUT&RUN data) relative to a genomic background.
 
@@ -201,6 +202,7 @@ Motifs are expressed in a [Position Weight Matrix](https://en.wikipedia.org/wiki
 These PWMs can be represented as sequence logos, visually represent the amount of information provided by the motif, typically using "information content", expressed in bits.
 
 ## Theory
+
 ![LexA sequence motif](../img/block-dna/lexa-motif.png)
 
 ## Practice
@@ -211,9 +213,18 @@ We'll use the [memes](https://bioconductor.org/packages/release/bioc/html/memes.
 2.  Provide those sequences and the genomic background to `runDreme()`, which runs uses an Expectation-Maximization (EM) approach to identify and refine motifs.
 3.  Examine the discovered motifs, and plot as a logo using `ggseqlogo`.
 
+. . .
+
 ```{r}
 #| label: motif-discovery
 #| echo: true
+#| output-location: slide
+peak_calls_gr <-
+  GRanges(
+    seqnames = peak_calls_sig$chrom,
+    ranges = IRanges(peak_calls_sig$start, peak_calls_sig$end)
+  )
+
 peak_seqs <- BSgenome::getSeq(
   # provided by BSgenome.Scerevisiae.UCSC.sacCer3
   Scerevisiae,
@@ -239,6 +250,7 @@ Now let's look at the sequence logo for the top hit.
 #| label: plt-seq-logo
 #| fig.alt: "Sequence logo for the top motif discovered in Abf1 CUT&RUN peaks."
 #| echo: true
+#| output-location: slide
 #| warning: false
 motif_1 <- motif_results[[1]]
 pwm <- motif_1[[1]]@motif
