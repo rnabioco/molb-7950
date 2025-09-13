@@ -139,8 +139,6 @@ chr7 127477031 127478198 Neg2 0  -
 :::
 :::
 
-------------------------------------------------------------------------
-
 ### WIG / bedGraph {.smaller}
 
 ::: columns
@@ -190,6 +188,7 @@ Let's take a look at that it does.
 ```{r}
 #| label: bed-intersect
 #| echo: true
+#| message: false
 #| output-location: column
 library(valr)
 library(dplyr)
@@ -236,12 +235,14 @@ We'll also use the valr functions `read_bedgraph()` and `read_bigwig()`.
 ## What is in `snps` and `genes`? {.smaller}
 
 ```{r}
+#| label: valr-snps
 #| echo: true
 #| output-location: column
 head(snps)
 ```
 
 ```{r}
+#| label: valr-genes
 #| echo: true
 #| output-location: column
 head(genes)
@@ -260,8 +261,6 @@ intergenic <- bed_subtract(snps, genes)
 # find distance from intergenic snps to nearest gene
 nearby <- bed_closest(intergenic, genes)
 ```
-
-. . .
 
 Take a look at the `intergenic` and `nearby` objects in the console.
 
@@ -308,6 +307,7 @@ A typical use is to count up signals (e.g., coverage from an MNase-seq experimen
 Copy / paste these into your console.
 
 ```{r}
+#| label: bed-map-setup
 #| echo: true
 x <- tribble(
   ~chrom, ~start, ~end,
@@ -328,12 +328,14 @@ y <- tribble(
 First examine the intersecting intervals.
 
 ```{r}
+#| label: bed-intersect-2
 #| echo: true
 #| output-location: column-fragment
 bed_intersect(x, y)
 ```
 
 ```{r}
+#| label: bed-map
 #| echo: true
 #| output-location: column-fragment
 bed_map(

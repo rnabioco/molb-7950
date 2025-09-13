@@ -22,6 +22,8 @@ library(here)
 library(patchwork)
 ```
 
+. . .
+
 These are new libraries specifically for genome analysis. You learned about valr and Gviz for your homework.
 
 rtracklayer provides a few utility functions we'll use today, and TxDb.Scerevisiae.UCSC.sacCer3.sgdGene provides gene annotations for the S. cerevisiae genome.
@@ -29,6 +31,7 @@ rtracklayer provides a few utility functions we'll use today, and TxDb.Scerevisi
 ```{r}
 #| label: genome-libs
 #| message: false
+#| warning: false
 library(valr)
 library(Gviz)
 
@@ -61,22 +64,24 @@ I have performed the alignment of paired-end reads and converted all reads into 
 ## First, load the ATAC-seq reads:
 
 ```{r}
+#| label: load-atac
 #| echo: true
-#| output-location: column
 atac_tbl <- read_bed(
   here("data/block-dna/yeast_atac_chrII.bed.gz"),
 )
+
 atac_tbl
 ```
 
 ## Next, load the MNase reads.
 
 ```{r}
+#| label: load-mnase
 #| echo: true
-#| output-location: column
 mnase_tbl <- read_bed(
   here("data/block-dna/yeast_mnase_chrII.bed.gz")
 )
+
 mnase_tbl
 ```
 
@@ -99,8 +104,8 @@ Let's remind ourselves of the expectations for chromatin fragment lengths from M
 For the MNase-seq BED file, you see that there are only three columns: `chrom`, `start`, and `end`. Calculating fragment length is simple:
 
 ```{r}
+#| label: calc-frag-len
 #| echo: true
-#| output-location: column
 mutate(mnase_tbl, frag_len = end - start)
 ```
 
@@ -110,7 +115,7 @@ mutate(mnase_tbl, frag_len = end - start)
 #| echo: true
 #| warning: false
 #| output-location: slide
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "Plot showing fragment length distributions for ATAC-seq and MNase-seq data."
 acc_tbl <-
   bind_rows(
     mutate(mnase_tbl, type = "mnase"),
@@ -177,6 +182,8 @@ fragment_len_hist <- function(tbl) {
 atac_frag_lens <- fragment_len_hist(atac_tbl)
 ```
 
+---
+
 ```{r}
 #| label: inspect-frag-lens
 #| echo: true
@@ -209,7 +216,7 @@ Now let's plot the autocorrelation. First, we define a function.
 ```{r}
 #| label: fun-plot-acf-atac
 #| echo: true
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "Plot showing autocorrelation function (ACF) for ATAC-seq data."
 plot_acf <- function(tbl, title) {
   ggplot(
     tbl,
@@ -229,8 +236,9 @@ And then we make the plot.
 #| label: plot-acf-atac
 #| echo: true
 #| output-location: slide
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "Plot showing autocorrelation function (ACF) for ATAC-seq data."
 plot_atac_acf <- plot_acf(atac_acf_tbl, title = "ATAC ACF")
+
 plot_atac_acf
 ```
 
@@ -244,7 +252,7 @@ How do we confirm these bumps are interesting? Let's calculate the acf of a nega
 #| label: plot-combined-acfs
 #| echo: true
 #| output-location: slide
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "Plot showing autocorrelation function (ACF) for MNase-seq data."
 mnase_frag_lens <-
   fragment_len_hist(mnase_tbl)
 
@@ -285,14 +293,16 @@ First, we load the gene annotations from the [Saccharomyces Genome Databases](ht
 ```{r}
 #| label: load-sgd-genes
 #| echo: true
-#| output-location: column
-
 sgd_genes <-
   GeneRegionTrack(
     TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,
     chromosome = "chrII",
     start = 530811,
     end = 540885,
+    background.title = "white",
+    col.title = "black",
+    col.axis = "black",
+    fontsize = 16
   )
 
 sgd_genes
@@ -309,11 +319,11 @@ Inspect the object.
 ```{r}
 #| label: load-mnase-gr
 #| echo: true
-#| output-location: column
 mnase_nuc_gr <- import.bw(
   here("data/block-dna/yeast_mnase_134_160.bw"),
   as = "GRanges"
 )
+
 mnase_nuc_gr
 ```
 
@@ -324,11 +334,15 @@ Next, load the GRanges object as a track for Gviz to plot:
 ```{r}
 #| label: gen-mnase-track
 #| echo: true
-#| output-location: column
 mnase_nuc_trk <- DataTrack(
   mnase_nuc_gr,
-  name = "MNase_nuc"
+  name = "MNase_nuc",
+  background.title = "white",
+  col.title = "black",
+  col.axis = "black",
+  fontsize = 16
 )
+
 mnase_nuc_trk
 ```
 
@@ -340,7 +354,7 @@ Now, we can make a plot for this particular region of chrII:
 #| label: gen-track-plot
 #| echo: true
 #| output-location: slide
-
+#| fig.alt: "Genome browser-style plot showing gene annotations and MNase-seq read density over a region of chromosome II in Saccharomyces cerevisiae."
 # special track for the x-axis
 x_axis <- GenomeAxisTrack()
 
@@ -371,6 +385,7 @@ That looks great! Let's load all the other data sets.
 We can do this one of two ways. We could do it one-by-one:
 
 ```{r}
+#| label: single-import-data
 #| eval: false
 #| echo: true
 # complete the following steps for each of the four tracks
@@ -384,7 +399,7 @@ data_track <- DataTrack(big_wig, track_name)
 
 Or we can create a tibble with file and track names, and use [purrr](https://purrr.tidyverse.org/) to load and convert each one.
 
-First, we define a tibble of files an metadata.
+First, we define a tibble of files and metadata.
 
 ```{r}
 #| label: prep-import-data
@@ -407,6 +422,14 @@ track_info <-
   )
 ```
 
+---
+
+```{r}
+#| label: inspect-track-info
+#| echo: true
+track_info
+```
+
 ## Load the remaining data
 
 ```{r}
@@ -422,9 +445,26 @@ track_info <-
     data_track = purrr::map2(
       big_wig,
       track_name,
-      \(x, y) DataTrack(x, name = y)
+      \(x, y) {
+        DataTrack(
+          x,
+          name = y,
+          background.title = "white",
+          col.title = "black",
+          col.axis = "black",
+          fontsize = 16
+        )
+      }
     )
   )
+```
+
+---
+
+```{r}
+#| label: inspect-track-info-2
+#| echo: true
+track_info
 ```
 
 ## Load the remaining data
