@@ -6,11 +6,14 @@ date: last-modified
 
 ## Final Projects
 
-Throughout the DNA and RNA blocks will refer to several data sets that might be good starting points for your final project (worth 20% of your grade).
+Throughout the DNA and RNA blocks we will refer to several data sets that might
+be good starting points for your final project (worth 20% of your grade).
 
-We will ask for a sketch of the rough plan for a final project by the end of week 7 (Fri Oct 11). In addition, if you plan to work in a group, we'd like to know who you will be working with.
+We will ask for a sketch of the rough plan for a final project by the end of
+week 7 (Wed Oct 8). In addition, if you plan to work in a group, we'd like
+to know who you will be working with.
 
-**Final projects will be due Friday Nov 3. We will schedule short (5 minute) talks by each group on Oct 28 and Oct 29.**
+**Final projects will be due Monday Oct 27. We will schedule short (5 minute) talks by each group on Oct 27 and Oct 29.**
 
 ::: nonincremental
 -   [Final project overview](https://rnabioco.github.io/molb-7950/course-info/final-projects.html)
@@ -68,7 +71,7 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 ::: {.column .nonincremental width="50%"}
 -   Micrococcal nuclease is an endo/exonuclease from *Staphylococcus aureus*
 -   Efficient, **multiple turnover** enzyme that digests accessible DNA (& RNA)
--   Dependent on calcium (Ca2+)
+-   Dependent on calcium ions
 :::
 
 ::: {.column width="50%"}
@@ -109,17 +112,13 @@ Photo by [Justus Menke](https://unsplash.com/@justusmenke?utm_source=unsplash&ut
 
 ![](../img/block-dna/atac-input-comparison.png)
 
-# Analysis details
+# Data structures and tools used for analysis of chromatin mapping experiments
 
 ## Experimental workflow
 
 ![](../img/block-dna/acc-workflow.png)
 
-# Data structures and tools used for analysis of chromatin mapping experiments
-
-## File formats
-
-### BED format {.smaller}
+## BED format {.smaller}
 
 ::: columns
 ::: {.column .nonincremental width="50%"}
@@ -139,16 +138,16 @@ chr7 127477031 127478198 Neg2 0  -
 :::
 :::
 
-### WIG / bedGraph {.smaller}
+## WIG / bedGraph {.smaller}
 
 ::: columns
 ::: {.column .nonincremental width="50%"}
--   WIG and bedGraph store interval *signals*.
+- WIG and bedGraph store interval *signals*.
 
-    -   Genome sequencing coverage
-    -   Coverage of reads from MNase / ATAC-seq
+    * Genome sequencing coverage
+    * Coverage of reads from MNase / ATAC-seq
 
--   Many studies will provide genome-scale data in these formats
+- Many studies will provide genome-scale data in these formats
 :::
 
 ::: {.column width="50%"}
@@ -161,7 +160,7 @@ chr19 49302900 49303200 -0.25
 :::
 :::
 
-::: aside
+::: {.callout-note}
 bigWig is a binary form of WIG, used to store large amounts of signal in a compressed, indexed format.
 :::
 
@@ -171,7 +170,7 @@ bigWig is a binary form of WIG, used to store large amounts of signal in a compr
 ::: {.column width="50%"}
 The primary tool in the genome interval analysis is [BEDtools](https://bedtools.readthedocs.io/en/latest/) -- it's the Swiss-army knife of internal analysis.
 
-We wrote an R package called [valr](https://rnabioco.github.io/valr/) that provides the same tools, but you don't need to leave RStudio. valr provides the same tools for reading and manipulating genome intervals.
+We will use an R package called [valr](https://rnabioco.github.io/valr/) that provides the same tools, but you don't need to leave RStudio. valr provides the same tools for reading and manipulating genome intervals.
 
 `bed_intersect()` is a fundamental operation. It identifies intervals from two tibbles that intersect and reports their overlaps.
 
@@ -185,11 +184,12 @@ Let's take a look at that it does.
 
 ## `bed_intersect()` example {.smaller}
 
+First, we'll define some example intervals in `x` and `y`.
+
 ```{r}
 #| label: bed-intersect
 #| echo: true
 #| message: false
-#| output-location: column
 library(valr)
 library(dplyr)
 
@@ -203,33 +203,52 @@ y <- tribble(
   ~chrom, ~start, ~end,
   "chr1", 30,     75
 )
+```
 
+---
+
+Visual representation of the intersecting intervals.
+
+```{r}
+#| label: bed_intersect-glyph
+#| echo: false
+bed_glyph(
+  bed_intersect(x, y)
+)
+```
+
+---
+
+Tibble of the intersecting intervals.
+
+```{r}
+#| label: bed-intersect-tbl
 bed_intersect(x, y)
 ```
 
-## valr example
+::: {.callout-note}
+Note the addition of `.x` and `.y` suffixes to disamguate the input sources.
+:::
 
-You can use `read_bed()` and related functions to load genome annotations and signals.
+## `read_bed()` example
+
+You can use `read_bed()` and related `read_*` functions from valr to load genome annotations and signals.
 
 ```{r}
 #| label: valr-example
 #| echo: true
 #| warning: false
-library(valr)
-
 snps <- read_bed(
-  valr_example("hg19.snps147.chr22.bed.gz"),
-  n_fields = 6
+  valr_example("hg19.snps147.chr22.bed.gz")
 )
 
 genes <- read_bed(
-  valr_example("genes.hg19.chr22.bed.gz"),
-  n_fields = 6
+  valr_example("genes.hg19.chr22.bed.gz")
 )
 ```
 
-::: aside
-We'll also use the valr functions `read_bedgraph()` and `read_bigwig()`.
+::: {.callout-note}
+Later we'll also use the valr functions `read_bedgraph()` and `read_bigwig()`.
 :::
 
 ## What is in `snps` and `genes`? {.smaller}
@@ -237,20 +256,20 @@ We'll also use the valr functions `read_bedgraph()` and `read_bigwig()`.
 ```{r}
 #| label: valr-snps
 #| echo: true
-#| output-location: column
-head(snps)
+snps
 ```
 
 ```{r}
 #| label: valr-genes
 #| echo: true
-#| output-location: column
-head(genes)
+genes
 ```
 
 ## Interval manipulation {.smaller}
 
-Let's find and characterize intergenic SNPs. We'll use the tools `bed_substract()` and `bed_closest()`. Take a look and their examples in the documentation to see what they do.
+Let's find and characterize intergenic SNPs. We'll use the tools [`bed_substract()`](https://rnabioco.github.io/valr/reference/bed_subtract.html) and [`bed_closest()`](https://rnabioco.github.io/valr/reference/bed_closest.html). Take a look and their examples in the valr documentation to see what they do.
+
+Here, we'll ask the question: **"Which SNPs are intergenic, and how far are they from the nearest gene?"**
 
 ```{r}
 #| label: valr-ints
@@ -264,6 +283,20 @@ nearby <- bed_closest(intergenic, genes)
 
 Take a look at the `intergenic` and `nearby` objects in the console.
 
+---
+
+```{r}
+#| label: inspect-intergenic
+intergenic
+```
+
+---
+
+```{r}
+#| label: inspect-nearby
+nearby
+```
+
 ## Interval manipulation {.smaller}
 
 Now that you have overlaps and distances between SNPs and genes, you can go back to dplyr tools to generate reports.
@@ -272,8 +305,6 @@ Now that you have overlaps and distances between SNPs and genes, you can go back
 #| label: valr-dplyr
 #| echo: true
 #| output-location: column-fragment
-library(dplyr)
-
 nearby |>
   select(
     starts_with("name"),
@@ -294,7 +325,6 @@ nearby |>
 2.  Calculates summary statistics based on the intersection
 :::
 
-A typical use is to count up signals (e.g., coverage from an MNase-seq experiment) over specific regions (e.g., promoter regions).
 :::
 
 ::: {.column width="50%"}
@@ -302,9 +332,11 @@ A typical use is to count up signals (e.g., coverage from an MNase-seq experimen
 :::
 :::
 
+A typical use is to count up signals (e.g., coverage from an MNase-seq experiment) over specific regions (e.g., promoter regions).
+
 ## `bed_map()` example {.smaller}
 
-Copy / paste these into your console.
+Let's setup some example data.
 
 ```{r}
 #| label: bed-map-setup
@@ -312,14 +344,14 @@ Copy / paste these into your console.
 x <- tribble(
   ~chrom, ~start, ~end,
   "chr1", 100,    250,
-  "chr2", 250,    500
+  "chr1", 250,    500
 )
 
 y <- tribble(
   ~chrom, ~start, ~end, ~value,
   "chr1", 100,    250,  10,
   "chr1", 150,    250,  20,
-  "chr2", 250,    500,  500
+  "chr1", 250,    500,  500
 )
 ```
 
@@ -330,14 +362,32 @@ First examine the intersecting intervals.
 ```{r}
 #| label: bed-intersect-2
 #| echo: true
-#| output-location: column-fragment
 bed_intersect(x, y)
 ```
 
+---
+
+Visual representation of `bed_map()`
+
 ```{r}
-#| label: bed-map
+#| label: bed-map-glyph
+#| echo: false
+bed_glyph(
+  bed_map(
+    x, y,
+    value = sum(value)
+  ),
+  label = "value"
+)
+```
+
+---
+
+Computing multiple summaries with `bed_map()`
+
+```{r}
+#| label: bed-map-tbl
 #| echo: true
-#| output-location: column-fragment
 bed_map(
   x, y,
   .sum = sum(value),

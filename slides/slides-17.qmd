@@ -11,7 +11,7 @@ This class we'll examine chromatin accessibility patterns and begin to get a sen
 
 ## Load the libraries
 
-These are libraries we've used before. patchwork is a library for composing groups of plots.
+These are libraries we've used before.
 
 ```{r}
 #| label: load-libs
@@ -22,11 +22,12 @@ library(here)
 library(patchwork)
 ```
 
-. . .
+---
 
 These are new libraries specifically for genome analysis. You learned about valr and Gviz for your homework.
 
-rtracklayer provides a few utility functions we'll use today, and TxDb.Scerevisiae.UCSC.sacCer3.sgdGene provides gene annotations for the S. cerevisiae genome.
+- `rtracklayer` provides a few utility functions we'll use today
+- `TxDb.Scerevisiae.UCSC.sacCer3.sgdGene` provides gene annotations for the *S. cerevisiae* genome.
 
 ```{r}
 #| label: genome-libs
@@ -101,7 +102,9 @@ Let's remind ourselves of the expectations for chromatin fragment lengths from M
 
 ## Length distributions of chromatin-derived DNA fragments
 
-For the MNase-seq BED file, you see that there are only three columns: `chrom`, `start`, and `end`. Calculating fragment length is simple:
+For the MNase-seq BED file, you see that there are only three columns: `chrom`, `start`, and `end`.
+
+Calculating fragment length is simple:
 
 ```{r}
 #| label: calc-frag-len
@@ -111,10 +114,11 @@ mutate(mnase_tbl, frag_len = end - start)
 
 ## Let's use this approach to examine the fragment length distribution.
 
+First, we will combine the two data sets into a single tibble, adding a new column to indicate the type of experiment.
+
 ```{r}
 #| echo: true
 #| warning: false
-#| output-location: slide
 #| fig.alt: "Plot showing fragment length distributions for ATAC-seq and MNase-seq data."
 acc_tbl <-
   bind_rows(
@@ -122,8 +126,19 @@ acc_tbl <-
     mutate(atac_tbl, type = "atac")
   )
 
+acc_tbl
+```
+
+---
+
+```{r}
+#| label: plot-frag-len
+#| echo: true
+#| warning: false
+#| output-location: slide
 ggplot(
   acc_tbl,
+  # "end - start" is fragment length
   aes(x = end - start)
 ) +
   geom_histogram(
@@ -137,7 +152,7 @@ ggplot(
   xlim(30, 500) +
   labs(
     x = "fragment length (bp)",
-    title = "Histogram of fragment lengths from\naccessibility measurements"
+    title = "Histogram of fragment lengths"
   ) +
   theme_cowplot()
 ```
