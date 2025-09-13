@@ -405,9 +405,6 @@ chr7 127474697 127475864 Pos4 0  +
 chr7 127475864 127477031 Neg1 0  -
 chr7 127477031 127478198 Neg2 0  -</code></pre>
 </div></div>
-</section>
-<section class="slide level2">
-
 <h3 class="smaller" id="wig-bedgraph">WIG / bedGraph</h3>
 <div class="columns">
 <div class="column" style="width:50%;">
@@ -446,34 +443,21 @@ chr19 49302900 49303200 -0.25</code></pre>
 <div class="cell columns column-output-location">
 <div class="column">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="fu">library</span>(valr)</span>
-<span id="cb3-2"><a></a><span class="fu">library</span>(dplyr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-2"><a></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb3-3"><a></a></span>
+<span id="cb3-4"><a></a>x <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb3-5"><a></a>  <span class="sc">~</span>chrom, <span class="sc">~</span>start, <span class="sc">~</span>end,</span>
+<span id="cb3-6"><a></a>  <span class="st">"chr1"</span>, <span class="dv">25</span>, <span class="dv">50</span>,</span>
+<span id="cb3-7"><a></a>  <span class="st">"chr1"</span>, <span class="dv">100</span>, <span class="dv">125</span></span>
+<span id="cb3-8"><a></a>)</span>
+<span id="cb3-9"><a></a></span>
+<span id="cb3-10"><a></a>y <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb3-11"><a></a>  <span class="sc">~</span>chrom, <span class="sc">~</span>start, <span class="sc">~</span>end,</span>
+<span id="cb3-12"><a></a>  <span class="st">"chr1"</span>, <span class="dv">30</span>,     <span class="dv">75</span></span>
+<span id="cb3-13"><a></a>)</span>
+<span id="cb3-14"><a></a></span>
+<span id="cb3-15"><a></a><span class="fu">bed_intersect</span>(x, y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'dplyr'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:stats':
-
-    filter, lag</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    intersect, setdiff, setequal, union</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>x <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
-<span id="cb7-2"><a></a>  <span class="sc">~</span>chrom, <span class="sc">~</span>start, <span class="sc">~</span>end,</span>
-<span id="cb7-3"><a></a>  <span class="st">"chr1"</span>, <span class="dv">25</span>, <span class="dv">50</span>,</span>
-<span id="cb7-4"><a></a>  <span class="st">"chr1"</span>, <span class="dv">100</span>, <span class="dv">125</span></span>
-<span id="cb7-5"><a></a>)</span>
-<span id="cb7-6"><a></a></span>
-<span id="cb7-7"><a></a>y <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
-<span id="cb7-8"><a></a>  <span class="sc">~</span>chrom, <span class="sc">~</span>start, <span class="sc">~</span>end,</span>
-<span id="cb7-9"><a></a>  <span class="st">"chr1"</span>, <span class="dv">30</span>,     <span class="dv">75</span></span>
-<span id="cb7-10"><a></a>)</span>
-<span id="cb7-11"><a></a></span>
-<span id="cb7-12"><a></a><span class="fu">bed_intersect</span>(x, y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 6
   chrom start.x end.x start.y end.y .overlap
@@ -486,17 +470,17 @@ Attaching package: 'dplyr'</code></pre>
 <h2>valr example</h2>
 <p>You can use <code>read_bed()</code> and related functions to load genome annotations and signals.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a><span class="fu">library</span>(valr)</span>
-<span id="cb9-2"><a></a></span>
-<span id="cb9-3"><a></a>snps <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
-<span id="cb9-4"><a></a>  <span class="fu">valr_example</span>(<span class="st">"hg19.snps147.chr22.bed.gz"</span>),</span>
-<span id="cb9-5"><a></a>  <span class="at">n_fields =</span> <span class="dv">6</span></span>
-<span id="cb9-6"><a></a>)</span>
-<span id="cb9-7"><a></a></span>
-<span id="cb9-8"><a></a>genes <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
-<span id="cb9-9"><a></a>  <span class="fu">valr_example</span>(<span class="st">"genes.hg19.chr22.bed.gz"</span>),</span>
-<span id="cb9-10"><a></a>  <span class="at">n_fields =</span> <span class="dv">6</span></span>
-<span id="cb9-11"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="fu">library</span>(valr)</span>
+<span id="cb5-2"><a></a></span>
+<span id="cb5-3"><a></a>snps <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
+<span id="cb5-4"><a></a>  <span class="fu">valr_example</span>(<span class="st">"hg19.snps147.chr22.bed.gz"</span>),</span>
+<span id="cb5-5"><a></a>  <span class="at">n_fields =</span> <span class="dv">6</span></span>
+<span id="cb5-6"><a></a>)</span>
+<span id="cb5-7"><a></a></span>
+<span id="cb5-8"><a></a>genes <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
+<span id="cb5-9"><a></a>  <span class="fu">valr_example</span>(<span class="st">"genes.hg19.chr22.bed.gz"</span>),</span>
+<span id="cb5-10"><a></a>  <span class="at">n_fields =</span> <span class="dv">6</span></span>
+<span id="cb5-11"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 <aside><div>
@@ -506,7 +490,7 @@ Attaching package: 'dplyr'</code></pre>
 <h2>What is in <code>snps</code> and <code>genes</code>?</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="fu">head</span>(snps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a><span class="fu">head</span>(snps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 6
@@ -522,7 +506,7 @@ Attaching package: 'dplyr'</code></pre>
 </div></div>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="fu">head</span>(genes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="fu">head</span>(genes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 6
@@ -541,30 +525,28 @@ Attaching package: 'dplyr'</code></pre>
 <h2>Interval manipulation</h2>
 <p>Let’s find and characterize intergenic SNPs. We’ll use the tools <code>bed_substract()</code> and <code>bed_closest()</code>. Take a look and their examples in the documentation to see what they do.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a><span class="co"># find snps in intergenic regions</span></span>
-<span id="cb14-2"><a></a>intergenic <span class="ot">&lt;-</span> <span class="fu">bed_subtract</span>(snps, genes)</span>
-<span id="cb14-3"><a></a></span>
-<span id="cb14-4"><a></a><span class="co"># find distance from intergenic snps to nearest gene</span></span>
-<span id="cb14-5"><a></a>nearby <span class="ot">&lt;-</span> <span class="fu">bed_closest</span>(intergenic, genes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="co"># find snps in intergenic regions</span></span>
+<span id="cb10-2"><a></a>intergenic <span class="ot">&lt;-</span> <span class="fu">bed_subtract</span>(snps, genes)</span>
+<span id="cb10-3"><a></a></span>
+<span id="cb10-4"><a></a><span class="co"># find distance from intergenic snps to nearest gene</span></span>
+<span id="cb10-5"><a></a>nearby <span class="ot">&lt;-</span> <span class="fu">bed_closest</span>(intergenic, genes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="fragment">
 <p>Take a look at the <code>intergenic</code> and <code>nearby</code> objects in the console.</p>
-</div>
 </section>
 <section id="interval-manipulation-1" class="slide level2 smaller">
 <h2>Interval manipulation</h2>
 <p>Now that you have overlaps and distances between SNPs and genes, you can go back to dplyr tools to generate reports.</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb15-2"><a></a></span>
-<span id="cb15-3"><a></a>nearby <span class="sc">|&gt;</span></span>
-<span id="cb15-4"><a></a>  <span class="fu">select</span>(</span>
-<span id="cb15-5"><a></a>    <span class="fu">starts_with</span>(<span class="st">"name"</span>),</span>
-<span id="cb15-6"><a></a>    .overlap,</span>
-<span id="cb15-7"><a></a>    .dist</span>
-<span id="cb15-8"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb15-9"><a></a>  <span class="fu">filter</span>(<span class="fu">abs</span>(.dist) <span class="sc">&lt;</span> <span class="dv">5000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb11-2"><a></a></span>
+<span id="cb11-3"><a></a>nearby <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a></a>  <span class="fu">select</span>(</span>
+<span id="cb11-5"><a></a>    <span class="fu">starts_with</span>(<span class="st">"name"</span>),</span>
+<span id="cb11-6"><a></a>    .overlap,</span>
+<span id="cb11-7"><a></a>    .dist</span>
+<span id="cb11-8"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb11-9"><a></a>  <span class="fu">filter</span>(<span class="fu">abs</span>(.dist) <span class="sc">&lt;</span> <span class="dv">5000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1,047 × 4
@@ -602,18 +584,18 @@ Attaching package: 'dplyr'</code></pre>
 <h2><code>bed_map()</code> example</h2>
 <p>Copy / paste these into your console.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>x <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
-<span id="cb17-2"><a></a>  <span class="sc">~</span>chrom, <span class="sc">~</span>start, <span class="sc">~</span>end,</span>
-<span id="cb17-3"><a></a>  <span class="st">"chr1"</span>, <span class="dv">100</span>,    <span class="dv">250</span>,</span>
-<span id="cb17-4"><a></a>  <span class="st">"chr2"</span>, <span class="dv">250</span>,    <span class="dv">500</span></span>
-<span id="cb17-5"><a></a>)</span>
-<span id="cb17-6"><a></a></span>
-<span id="cb17-7"><a></a>y <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
-<span id="cb17-8"><a></a>  <span class="sc">~</span>chrom, <span class="sc">~</span>start, <span class="sc">~</span>end, <span class="sc">~</span>value,</span>
-<span id="cb17-9"><a></a>  <span class="st">"chr1"</span>, <span class="dv">100</span>,    <span class="dv">250</span>,  <span class="dv">10</span>,</span>
-<span id="cb17-10"><a></a>  <span class="st">"chr1"</span>, <span class="dv">150</span>,    <span class="dv">250</span>,  <span class="dv">20</span>,</span>
-<span id="cb17-11"><a></a>  <span class="st">"chr2"</span>, <span class="dv">250</span>,    <span class="dv">500</span>,  <span class="dv">500</span></span>
-<span id="cb17-12"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>x <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb13-2"><a></a>  <span class="sc">~</span>chrom, <span class="sc">~</span>start, <span class="sc">~</span>end,</span>
+<span id="cb13-3"><a></a>  <span class="st">"chr1"</span>, <span class="dv">100</span>,    <span class="dv">250</span>,</span>
+<span id="cb13-4"><a></a>  <span class="st">"chr2"</span>, <span class="dv">250</span>,    <span class="dv">500</span></span>
+<span id="cb13-5"><a></a>)</span>
+<span id="cb13-6"><a></a></span>
+<span id="cb13-7"><a></a>y <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb13-8"><a></a>  <span class="sc">~</span>chrom, <span class="sc">~</span>start, <span class="sc">~</span>end, <span class="sc">~</span>value,</span>
+<span id="cb13-9"><a></a>  <span class="st">"chr1"</span>, <span class="dv">100</span>,    <span class="dv">250</span>,  <span class="dv">10</span>,</span>
+<span id="cb13-10"><a></a>  <span class="st">"chr1"</span>, <span class="dv">150</span>,    <span class="dv">250</span>,  <span class="dv">20</span>,</span>
+<span id="cb13-11"><a></a>  <span class="st">"chr2"</span>, <span class="dv">250</span>,    <span class="dv">500</span>,  <span class="dv">500</span></span>
+<span id="cb13-12"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="bed_map-example-continued" class="slide level2 smaller">
@@ -621,7 +603,7 @@ Attaching package: 'dplyr'</code></pre>
 <p>First examine the intersecting intervals.</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">bed_intersect</span>(x, y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a><span class="fu">bed_intersect</span>(x, y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 7
@@ -634,11 +616,11 @@ Attaching package: 'dplyr'</code></pre>
 </div></div>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="fu">bed_map</span>(</span>
-<span id="cb20-2"><a></a>  x, y,</span>
-<span id="cb20-3"><a></a>  <span class="at">.sum =</span> <span class="fu">sum</span>(value),</span>
-<span id="cb20-4"><a></a>  <span class="at">.count =</span> <span class="fu">length</span>(value)</span>
-<span id="cb20-5"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a><span class="fu">bed_map</span>(</span>
+<span id="cb16-2"><a></a>  x, y,</span>
+<span id="cb16-3"><a></a>  <span class="at">.sum =</span> <span class="fu">sum</span>(value),</span>
+<span id="cb16-4"><a></a>  <span class="at">.count =</span> <span class="fu">length</span>(value)</span>
+<span id="cb16-5"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 5
