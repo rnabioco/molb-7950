@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.8.24">
 
   <meta name="author" content="Jay Hesselberth">
-  <meta name="dcterms.date" content="2025-09-12">
+  <meta name="dcterms.date" content="2025-09-13">
   <title>MOLB 7950 – Chromatin accessibility I</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -218,7 +218,7 @@ Jay Hesselberth
     </div>
 </div>
 
-  <p class="date">2025-09-12</p>
+  <p class="date">2025-09-13</p>
 </section>
 <section id="chromatin-accessbility-patterns-and-genome-function" class="slide level2">
 <h2>Chromatin accessbility patterns and genome function</h2>
@@ -237,15 +237,10 @@ Jay Hesselberth
 <p>rtracklayer provides a few utility functions we’ll use today, and TxDb.Scerevisiae.UCSC.sacCer3.sgdGene provides gene annotations for the S. cerevisiae genome.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a><span class="fu">library</span>(valr)</span>
-<span id="cb2-2"><a></a><span class="fu">library</span>(Gviz)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: replacing previous import
-'S4Arrays::makeNindexFromArrayViewport' by
-'DelayedArray::makeNindexFromArrayViewport' when loading
-'SummarizedExperiment'</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a><span class="fu">library</span>(rtracklayer)</span>
-<span id="cb4-2"><a></a><span class="fu">library</span>(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-2"><a></a><span class="fu">library</span>(Gviz)</span>
+<span id="cb2-3"><a></a></span>
+<span id="cb2-4"><a></a><span class="fu">library</span>(rtracklayer)</span>
+<span id="cb2-5"><a></a><span class="fu">library</span>(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="load-the-data" class="slide level2 smaller">
@@ -273,10 +268,10 @@ Jay Hesselberth
 <h2>First, load the ATAC-seq reads:</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>atac_tbl <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
-<span id="cb5-2"><a></a>  <span class="fu">here</span>(<span class="st">"data/block-dna/yeast_atac_chrII.bed.gz"</span>),</span>
-<span id="cb5-3"><a></a>)</span>
-<span id="cb5-4"><a></a>atac_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>atac_tbl <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
+<span id="cb3-2"><a></a>  <span class="fu">here</span>(<span class="st">"data/block-dna/yeast_atac_chrII.bed.gz"</span>),</span>
+<span id="cb3-3"><a></a>)</span>
+<span id="cb3-4"><a></a>atac_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 409,870 × 3
@@ -300,10 +295,10 @@ Jay Hesselberth
 <h2>Next, load the MNase reads.</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>mnase_tbl <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
-<span id="cb7-2"><a></a>  <span class="fu">here</span>(<span class="st">"data/block-dna/yeast_mnase_chrII.bed.gz"</span>)</span>
-<span id="cb7-3"><a></a>)</span>
-<span id="cb7-4"><a></a>mnase_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>mnase_tbl <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
+<span id="cb5-2"><a></a>  <span class="fu">here</span>(<span class="st">"data/block-dna/yeast_mnase_chrII.bed.gz"</span>)</span>
+<span id="cb5-3"><a></a>)</span>
+<span id="cb5-4"><a></a>mnase_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1,236,334 × 3
@@ -341,7 +336,7 @@ Jay Hesselberth
 <p>For the MNase-seq BED file, you see that there are only three columns: <code>chrom</code>, <code>start</code>, and <code>end</code>. Calculating fragment length is simple:</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a><span class="fu">mutate</span>(mnase_tbl, <span class="at">frag_len =</span> end <span class="sc">-</span> start)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="fu">mutate</span>(mnase_tbl, <span class="at">frag_len =</span> end <span class="sc">-</span> start)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1,236,334 × 4
@@ -364,30 +359,30 @@ Jay Hesselberth
 <section id="lets-use-this-approach-to-examine-the-fragment-length-distribution." class="slide level2">
 <h2>Let’s use this approach to examine the fragment length distribution.</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>acc_tbl <span class="ot">&lt;-</span></span>
-<span id="cb11-2"><a></a>  <span class="fu">bind_rows</span>(</span>
-<span id="cb11-3"><a></a>    <span class="fu">mutate</span>(mnase_tbl, <span class="at">type =</span> <span class="st">"mnase"</span>),</span>
-<span id="cb11-4"><a></a>    <span class="fu">mutate</span>(atac_tbl, <span class="at">type =</span> <span class="st">"atac"</span>)</span>
-<span id="cb11-5"><a></a>  )</span>
-<span id="cb11-6"><a></a></span>
-<span id="cb11-7"><a></a><span class="fu">ggplot</span>(</span>
-<span id="cb11-8"><a></a>  acc_tbl,</span>
-<span id="cb11-9"><a></a>  <span class="fu">aes</span>(<span class="at">x =</span> end <span class="sc">-</span> start)</span>
-<span id="cb11-10"><a></a>) <span class="sc">+</span></span>
-<span id="cb11-11"><a></a>  <span class="fu">geom_histogram</span>(</span>
-<span id="cb11-12"><a></a>    <span class="co"># single base-pair resolution</span></span>
-<span id="cb11-13"><a></a>    <span class="at">binwidth =</span> <span class="dv">1</span></span>
-<span id="cb11-14"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb11-15"><a></a>  <span class="fu">facet_grid</span>(</span>
-<span id="cb11-16"><a></a>    <span class="at">rows =</span> <span class="fu">vars</span>(type),</span>
-<span id="cb11-17"><a></a>    <span class="at">scales =</span> <span class="st">"free_y"</span></span>
-<span id="cb11-18"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb11-19"><a></a>  <span class="fu">xlim</span>(<span class="dv">30</span>, <span class="dv">500</span>) <span class="sc">+</span></span>
-<span id="cb11-20"><a></a>  <span class="fu">labs</span>(</span>
-<span id="cb11-21"><a></a>    <span class="at">x =</span> <span class="st">"fragment length (bp)"</span>,</span>
-<span id="cb11-22"><a></a>    <span class="at">title =</span> <span class="st">"Histogram of fragment lengths from</span><span class="sc">\n</span><span class="st">accessibility measurements"</span></span>
-<span id="cb11-23"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb11-24"><a></a>  <span class="fu">theme_cowplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>acc_tbl <span class="ot">&lt;-</span></span>
+<span id="cb9-2"><a></a>  <span class="fu">bind_rows</span>(</span>
+<span id="cb9-3"><a></a>    <span class="fu">mutate</span>(mnase_tbl, <span class="at">type =</span> <span class="st">"mnase"</span>),</span>
+<span id="cb9-4"><a></a>    <span class="fu">mutate</span>(atac_tbl, <span class="at">type =</span> <span class="st">"atac"</span>)</span>
+<span id="cb9-5"><a></a>  )</span>
+<span id="cb9-6"><a></a></span>
+<span id="cb9-7"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb9-8"><a></a>  acc_tbl,</span>
+<span id="cb9-9"><a></a>  <span class="fu">aes</span>(<span class="at">x =</span> end <span class="sc">-</span> start)</span>
+<span id="cb9-10"><a></a>) <span class="sc">+</span></span>
+<span id="cb9-11"><a></a>  <span class="fu">geom_histogram</span>(</span>
+<span id="cb9-12"><a></a>    <span class="co"># single base-pair resolution</span></span>
+<span id="cb9-13"><a></a>    <span class="at">binwidth =</span> <span class="dv">1</span></span>
+<span id="cb9-14"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb9-15"><a></a>  <span class="fu">facet_grid</span>(</span>
+<span id="cb9-16"><a></a>    <span class="at">rows =</span> <span class="fu">vars</span>(type),</span>
+<span id="cb9-17"><a></a>    <span class="at">scales =</span> <span class="st">"free_y"</span></span>
+<span id="cb9-18"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb9-19"><a></a>  <span class="fu">xlim</span>(<span class="dv">30</span>, <span class="dv">500</span>) <span class="sc">+</span></span>
+<span id="cb9-20"><a></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-21"><a></a>    <span class="at">x =</span> <span class="st">"fragment length (bp)"</span>,</span>
+<span id="cb9-22"><a></a>    <span class="at">title =</span> <span class="st">"Histogram of fragment lengths from</span><span class="sc">\n</span><span class="st">accessibility measurements"</span></span>
+<span id="cb9-23"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb9-24"><a></a>  <span class="fu">theme_cowplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -414,30 +409,30 @@ Jay Hesselberth
 <section class="slide level2">
 
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a>fragment_len_hist <span class="ot">&lt;-</span> <span class="cf">function</span>(tbl) {</span>
-<span id="cb12-2"><a></a>  frag_lens <span class="ot">&lt;-</span></span>
-<span id="cb12-3"><a></a>    <span class="fu">mutate</span>(</span>
-<span id="cb12-4"><a></a>      tbl,</span>
-<span id="cb12-5"><a></a>      <span class="at">frag_len =</span> end <span class="sc">-</span> start</span>
-<span id="cb12-6"><a></a>    ) <span class="sc">|&gt;</span></span>
-<span id="cb12-7"><a></a>    <span class="fu">filter</span>(</span>
-<span id="cb12-8"><a></a>      frag_len <span class="sc">&gt;=</span> <span class="dv">30</span> <span class="sc">&amp;</span></span>
-<span id="cb12-9"><a></a>        frag_len <span class="sc">&lt;=</span> <span class="dv">500</span></span>
-<span id="cb12-10"><a></a>    ) <span class="sc">|&gt;</span></span>
-<span id="cb12-11"><a></a>    <span class="fu">pull</span>(frag_len)</span>
-<span id="cb12-12"><a></a></span>
-<span id="cb12-13"><a></a>  <span class="fu">hist</span>(</span>
-<span id="cb12-14"><a></a>    frag_lens,</span>
-<span id="cb12-15"><a></a>    <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">500</span>, <span class="dv">1</span>),</span>
-<span id="cb12-16"><a></a>    <span class="at">plot =</span> <span class="cn">FALSE</span></span>
-<span id="cb12-17"><a></a>  )</span>
-<span id="cb12-18"><a></a>}</span>
-<span id="cb12-19"><a></a></span>
-<span id="cb12-20"><a></a><span class="co"># inspect the this value in the console</span></span>
-<span id="cb12-21"><a></a>atac_frag_lens <span class="ot">&lt;-</span> <span class="fu">fragment_len_hist</span>(atac_tbl)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>fragment_len_hist <span class="ot">&lt;-</span> <span class="cf">function</span>(tbl) {</span>
+<span id="cb10-2"><a></a>  frag_lens <span class="ot">&lt;-</span></span>
+<span id="cb10-3"><a></a>    <span class="fu">mutate</span>(</span>
+<span id="cb10-4"><a></a>      tbl,</span>
+<span id="cb10-5"><a></a>      <span class="at">frag_len =</span> end <span class="sc">-</span> start</span>
+<span id="cb10-6"><a></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a></a>    <span class="fu">filter</span>(</span>
+<span id="cb10-8"><a></a>      frag_len <span class="sc">&gt;=</span> <span class="dv">30</span> <span class="sc">&amp;</span></span>
+<span id="cb10-9"><a></a>        frag_len <span class="sc">&lt;=</span> <span class="dv">500</span></span>
+<span id="cb10-10"><a></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb10-11"><a></a>    <span class="fu">pull</span>(frag_len)</span>
+<span id="cb10-12"><a></a></span>
+<span id="cb10-13"><a></a>  <span class="fu">hist</span>(</span>
+<span id="cb10-14"><a></a>    frag_lens,</span>
+<span id="cb10-15"><a></a>    <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">500</span>, <span class="dv">1</span>),</span>
+<span id="cb10-16"><a></a>    <span class="at">plot =</span> <span class="cn">FALSE</span></span>
+<span id="cb10-17"><a></a>  )</span>
+<span id="cb10-18"><a></a>}</span>
+<span id="cb10-19"><a></a></span>
+<span id="cb10-20"><a></a><span class="co"># inspect the this value in the console</span></span>
+<span id="cb10-21"><a></a>atac_frag_lens <span class="ot">&lt;-</span> <span class="fu">fragment_len_hist</span>(atac_tbl)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>atac_frag_lens</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>atac_frag_lens</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$breaks
   [1]  30  31  32  33  34  35  36  37  38  39  40  41  42
@@ -714,15 +709,15 @@ attr(,"class")
 <p>The <code>density</code> slot contains a vector of densities at base-pair resolution. We will use <code>acf()</code> to calculate the autocorrelation of these values, and will store the tidied result.</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>atac_acf_tbl <span class="ot">&lt;-</span></span>
-<span id="cb15-2"><a></a>  <span class="fu">acf</span>(</span>
-<span id="cb15-3"><a></a>    atac_frag_lens<span class="sc">$</span>density,</span>
-<span id="cb15-4"><a></a>    <span class="at">lag.max =</span> <span class="dv">40</span>,</span>
-<span id="cb15-5"><a></a>    <span class="at">plot =</span> <span class="cn">FALSE</span></span>
-<span id="cb15-6"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb15-7"><a></a>  broom<span class="sc">::</span><span class="fu">tidy</span>()</span>
-<span id="cb15-8"><a></a></span>
-<span id="cb15-9"><a></a>atac_acf_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>atac_acf_tbl <span class="ot">&lt;-</span></span>
+<span id="cb13-2"><a></a>  <span class="fu">acf</span>(</span>
+<span id="cb13-3"><a></a>    atac_frag_lens<span class="sc">$</span>density,</span>
+<span id="cb13-4"><a></a>    <span class="at">lag.max =</span> <span class="dv">40</span>,</span>
+<span id="cb13-5"><a></a>    <span class="at">plot =</span> <span class="cn">FALSE</span></span>
+<span id="cb13-6"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb13-7"><a></a>  broom<span class="sc">::</span><span class="fu">tidy</span>()</span>
+<span id="cb13-8"><a></a></span>
+<span id="cb13-9"><a></a>atac_acf_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 41 × 2
@@ -746,22 +741,22 @@ attr(,"class")
 <h2>Autocorrelation</h2>
 <p>Now let’s plot the autocorrelation. First, we define a function.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>plot_acf <span class="ot">&lt;-</span> <span class="cf">function</span>(tbl, title) {</span>
-<span id="cb17-2"><a></a>  <span class="fu">ggplot</span>(</span>
-<span id="cb17-3"><a></a>    tbl,</span>
-<span id="cb17-4"><a></a>    <span class="fu">aes</span>(lag, acf)</span>
-<span id="cb17-5"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb17-6"><a></a>    <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb17-7"><a></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb17-8"><a></a>    <span class="fu">theme_minimal_grid</span>() <span class="sc">+</span></span>
-<span id="cb17-9"><a></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">21</span>), <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb17-10"><a></a>    <span class="fu">labs</span>(<span class="at">title =</span> title)</span>
-<span id="cb17-11"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>plot_acf <span class="ot">&lt;-</span> <span class="cf">function</span>(tbl, title) {</span>
+<span id="cb15-2"><a></a>  <span class="fu">ggplot</span>(</span>
+<span id="cb15-3"><a></a>    tbl,</span>
+<span id="cb15-4"><a></a>    <span class="fu">aes</span>(lag, acf)</span>
+<span id="cb15-5"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb15-6"><a></a>    <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb15-7"><a></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb15-8"><a></a>    <span class="fu">theme_minimal_grid</span>() <span class="sc">+</span></span>
+<span id="cb15-9"><a></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">21</span>), <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb15-10"><a></a>    <span class="fu">labs</span>(<span class="at">title =</span> title)</span>
+<span id="cb15-11"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>And then we make the plot.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>plot_atac_acf <span class="ot">&lt;-</span> <span class="fu">plot_acf</span>(atac_acf_tbl, <span class="at">title =</span> <span class="st">"ATAC ACF"</span>)</span>
-<span id="cb18-2"><a></a>plot_atac_acf</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a>plot_atac_acf <span class="ot">&lt;-</span> <span class="fu">plot_acf</span>(atac_acf_tbl, <span class="at">title =</span> <span class="st">"ATAC ACF"</span>)</span>
+<span id="cb16-2"><a></a>plot_atac_acf</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -778,21 +773,21 @@ attr(,"class")
 <p>So, it looks like there significant bumps in autocorrelation at 10 and 21 bp positions, indicating that ATAC length distribution is periodic.</p>
 <p>How do we confirm these bumps are interesting? Let’s calculate the acf of a negative control – the length distribution of the MNase data.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a>mnase_frag_lens <span class="ot">&lt;-</span></span>
-<span id="cb19-2"><a></a>  <span class="fu">fragment_len_hist</span>(mnase_tbl)</span>
-<span id="cb19-3"><a></a></span>
-<span id="cb19-4"><a></a>mnase_acf_tbl <span class="ot">&lt;-</span></span>
-<span id="cb19-5"><a></a>  <span class="fu">acf</span>(</span>
-<span id="cb19-6"><a></a>    mnase_frag_lens<span class="sc">$</span>density,</span>
-<span id="cb19-7"><a></a>    <span class="at">lag.max =</span> <span class="dv">40</span>,</span>
-<span id="cb19-8"><a></a>    <span class="at">plot =</span> <span class="cn">FALSE</span></span>
-<span id="cb19-9"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb19-10"><a></a>  broom<span class="sc">::</span><span class="fu">tidy</span>()</span>
-<span id="cb19-11"><a></a></span>
-<span id="cb19-12"><a></a>plot_mnase_acf <span class="ot">&lt;-</span> <span class="fu">plot_acf</span>(mnase_acf_tbl, <span class="at">title =</span> <span class="st">"MNase ACF"</span>)</span>
-<span id="cb19-13"><a></a></span>
-<span id="cb19-14"><a></a><span class="co"># patchwork plot</span></span>
-<span id="cb19-15"><a></a>plot_atac_acf <span class="sc">&amp;</span> plot_mnase_acf</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>mnase_frag_lens <span class="ot">&lt;-</span></span>
+<span id="cb17-2"><a></a>  <span class="fu">fragment_len_hist</span>(mnase_tbl)</span>
+<span id="cb17-3"><a></a></span>
+<span id="cb17-4"><a></a>mnase_acf_tbl <span class="ot">&lt;-</span></span>
+<span id="cb17-5"><a></a>  <span class="fu">acf</span>(</span>
+<span id="cb17-6"><a></a>    mnase_frag_lens<span class="sc">$</span>density,</span>
+<span id="cb17-7"><a></a>    <span class="at">lag.max =</span> <span class="dv">40</span>,</span>
+<span id="cb17-8"><a></a>    <span class="at">plot =</span> <span class="cn">FALSE</span></span>
+<span id="cb17-9"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb17-10"><a></a>  broom<span class="sc">::</span><span class="fu">tidy</span>()</span>
+<span id="cb17-11"><a></a></span>
+<span id="cb17-12"><a></a>plot_mnase_acf <span class="ot">&lt;-</span> <span class="fu">plot_acf</span>(mnase_acf_tbl, <span class="at">title =</span> <span class="st">"MNase ACF"</span>)</span>
+<span id="cb17-13"><a></a></span>
+<span id="cb17-14"><a></a><span class="co"># patchwork plot</span></span>
+<span id="cb17-15"><a></a>plot_atac_acf <span class="sc">&amp;</span> plot_mnase_acf</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -823,15 +818,15 @@ attr(,"class")
 <p>First, we load the gene annotations from the <a href="https://yeastgenome.org">Saccharomyces Genome Databases</a> (SGD).</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>sgd_genes <span class="ot">&lt;-</span></span>
-<span id="cb20-2"><a></a>  <span class="fu">GeneRegionTrack</span>(</span>
-<span id="cb20-3"><a></a>    TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,</span>
-<span id="cb20-4"><a></a>    <span class="at">chromosome =</span> <span class="st">"chrII"</span>,</span>
-<span id="cb20-5"><a></a>    <span class="at">start =</span> <span class="dv">530811</span>,</span>
-<span id="cb20-6"><a></a>    <span class="at">end =</span> <span class="dv">540885</span>,</span>
-<span id="cb20-7"><a></a>  )</span>
-<span id="cb20-8"><a></a></span>
-<span id="cb20-9"><a></a>sgd_genes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>sgd_genes <span class="ot">&lt;-</span></span>
+<span id="cb18-2"><a></a>  <span class="fu">GeneRegionTrack</span>(</span>
+<span id="cb18-3"><a></a>    TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,</span>
+<span id="cb18-4"><a></a>    <span class="at">chromosome =</span> <span class="st">"chrII"</span>,</span>
+<span id="cb18-5"><a></a>    <span class="at">start =</span> <span class="dv">530811</span>,</span>
+<span id="cb18-6"><a></a>    <span class="at">end =</span> <span class="dv">540885</span>,</span>
+<span id="cb18-7"><a></a>  )</span>
+<span id="cb18-8"><a></a></span>
+<span id="cb18-9"><a></a>sgd_genes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
 <pre><code>GeneRegionTrack 'GeneRegionTrack'
@@ -848,11 +843,11 @@ attr(,"class")
 <p>(What is “GRanges”?)</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>mnase_nuc_gr <span class="ot">&lt;-</span> <span class="fu">import.bw</span>(</span>
-<span id="cb22-2"><a></a>  <span class="fu">here</span>(<span class="st">"data/block-dna/yeast_mnase_134_160.bw"</span>),</span>
-<span id="cb22-3"><a></a>  <span class="at">as =</span> <span class="st">"GRanges"</span></span>
-<span id="cb22-4"><a></a>)</span>
-<span id="cb22-5"><a></a>mnase_nuc_gr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>mnase_nuc_gr <span class="ot">&lt;-</span> <span class="fu">import.bw</span>(</span>
+<span id="cb20-2"><a></a>  <span class="fu">here</span>(<span class="st">"data/block-dna/yeast_mnase_134_160.bw"</span>),</span>
+<span id="cb20-3"><a></a>  <span class="at">as =</span> <span class="st">"GRanges"</span></span>
+<span id="cb20-4"><a></a>)</span>
+<span id="cb20-5"><a></a>mnase_nuc_gr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 81160 ranges and 1 metadata column:
@@ -879,11 +874,11 @@ attr(,"class")
 <p>Next, load the GRanges object as a track for Gviz to plot:</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a>mnase_nuc_trk <span class="ot">&lt;-</span> <span class="fu">DataTrack</span>(</span>
-<span id="cb24-2"><a></a>  mnase_nuc_gr,</span>
-<span id="cb24-3"><a></a>  <span class="at">name =</span> <span class="st">"MNase_nuc"</span></span>
-<span id="cb24-4"><a></a>)</span>
-<span id="cb24-5"><a></a>mnase_nuc_trk</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>mnase_nuc_trk <span class="ot">&lt;-</span> <span class="fu">DataTrack</span>(</span>
+<span id="cb22-2"><a></a>  mnase_nuc_gr,</span>
+<span id="cb22-3"><a></a>  <span class="at">name =</span> <span class="st">"MNase_nuc"</span></span>
+<span id="cb22-4"><a></a>)</span>
+<span id="cb22-5"><a></a>mnase_nuc_trk</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column">
 <div class="cell-output cell-output-stdout">
 <pre><code>DataTrack 'MNase_nuc'
@@ -899,22 +894,22 @@ attr(,"class")
 <h2>Vizualize a genomic region</h2>
 <p>Now, we can make a plot for this particular region of chrII:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="co"># special track for the x-axis</span></span>
-<span id="cb26-2"><a></a>x_axis <span class="ot">&lt;-</span> <span class="fu">GenomeAxisTrack</span>()</span>
-<span id="cb26-3"><a></a></span>
-<span id="cb26-4"><a></a><span class="fu">plotTracks</span>(</span>
-<span id="cb26-5"><a></a>  <span class="fu">c</span>(</span>
-<span id="cb26-6"><a></a>    sgd_genes,</span>
-<span id="cb26-7"><a></a>    mnase_nuc_trk,</span>
-<span id="cb26-8"><a></a>    x_axis</span>
-<span id="cb26-9"><a></a>  ),</span>
-<span id="cb26-10"><a></a>  <span class="at">from =</span> <span class="dv">530811</span>,</span>
-<span id="cb26-11"><a></a>  <span class="at">to =</span> <span class="dv">540885</span>,</span>
-<span id="cb26-12"><a></a>  <span class="at">chromosome =</span> <span class="st">"chrII"</span>,</span>
-<span id="cb26-13"><a></a>  <span class="at">transcriptAnnotation =</span> <span class="st">"gene"</span>,</span>
-<span id="cb26-14"><a></a>  <span class="at">shape =</span> <span class="st">"arrow"</span>,</span>
-<span id="cb26-15"><a></a>  <span class="at">type =</span> <span class="st">"histogram"</span></span>
-<span id="cb26-16"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a><span class="co"># special track for the x-axis</span></span>
+<span id="cb24-2"><a></a>x_axis <span class="ot">&lt;-</span> <span class="fu">GenomeAxisTrack</span>()</span>
+<span id="cb24-3"><a></a></span>
+<span id="cb24-4"><a></a><span class="fu">plotTracks</span>(</span>
+<span id="cb24-5"><a></a>  <span class="fu">c</span>(</span>
+<span id="cb24-6"><a></a>    sgd_genes,</span>
+<span id="cb24-7"><a></a>    mnase_nuc_trk,</span>
+<span id="cb24-8"><a></a>    x_axis</span>
+<span id="cb24-9"><a></a>  ),</span>
+<span id="cb24-10"><a></a>  <span class="at">from =</span> <span class="dv">530811</span>,</span>
+<span id="cb24-11"><a></a>  <span class="at">to =</span> <span class="dv">540885</span>,</span>
+<span id="cb24-12"><a></a>  <span class="at">chromosome =</span> <span class="st">"chrII"</span>,</span>
+<span id="cb24-13"><a></a>  <span class="at">transcriptAnnotation =</span> <span class="st">"gene"</span>,</span>
+<span id="cb24-14"><a></a>  <span class="at">shape =</span> <span class="st">"arrow"</span>,</span>
+<span id="cb24-15"><a></a>  <span class="at">type =</span> <span class="st">"histogram"</span></span>
+<span id="cb24-16"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -938,11 +933,11 @@ attr(,"class")
 <h2>Load the remaining data</h2>
 <p>We can do this one of two ways. We could do it one-by-one:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="co"># complete the following steps for each of the four tracks</span></span>
-<span id="cb27-2"><a></a>file_name <span class="ot">&lt;-</span> <span class="st">"yeast_mnase_lt50.bw"</span></span>
-<span id="cb27-3"><a></a>track_name <span class="ot">&lt;-</span> <span class="st">"MNase_Short"</span></span>
-<span id="cb27-4"><a></a>big_wig <span class="ot">&lt;-</span> <span class="fu">import.bw</span>(<span class="fu">here</span>(<span class="st">"data/block-dna"</span>, file_name))</span>
-<span id="cb27-5"><a></a>data_track <span class="ot">&lt;-</span> <span class="fu">DataTrack</span>(big_wig, track_name)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="co"># complete the following steps for each of the four tracks</span></span>
+<span id="cb25-2"><a></a>file_name <span class="ot">&lt;-</span> <span class="st">"yeast_mnase_lt50.bw"</span></span>
+<span id="cb25-3"><a></a>track_name <span class="ot">&lt;-</span> <span class="st">"MNase_Short"</span></span>
+<span id="cb25-4"><a></a>big_wig <span class="ot">&lt;-</span> <span class="fu">import.bw</span>(<span class="fu">here</span>(<span class="st">"data/block-dna"</span>, file_name))</span>
+<span id="cb25-5"><a></a>data_track <span class="ot">&lt;-</span> <span class="fu">DataTrack</span>(big_wig, track_name)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section class="slide level2">
@@ -950,58 +945,58 @@ attr(,"class")
 <p>Or we can create a tibble with file and track names, and use <a href="https://purrr.tidyverse.org/">purrr</a> to load and convert each one.</p>
 <p>First, we define a tibble of files an metadata.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a>track_info <span class="ot">&lt;-</span></span>
-<span id="cb28-2"><a></a>  <span class="fu">tibble</span>(</span>
-<span id="cb28-3"><a></a>    <span class="at">file_name =</span> <span class="fu">c</span>(</span>
-<span id="cb28-4"><a></a>      <span class="st">"yeast_mnase_lt50.bw"</span>,</span>
-<span id="cb28-5"><a></a>      <span class="st">"yeast_mnase_134_160.bw"</span>,</span>
-<span id="cb28-6"><a></a>      <span class="st">"yeast_atac_lt120.bw"</span>,</span>
-<span id="cb28-7"><a></a>      <span class="st">"yeast_atac_gt120.bw"</span></span>
-<span id="cb28-8"><a></a>    ),</span>
-<span id="cb28-9"><a></a>    <span class="at">file_path =</span> <span class="fu">here</span>(<span class="st">"data/block-dna"</span>, file_name),</span>
-<span id="cb28-10"><a></a>    <span class="at">track_name =</span> <span class="fu">c</span>(</span>
-<span id="cb28-11"><a></a>      <span class="st">"MNase_Short"</span>,</span>
-<span id="cb28-12"><a></a>      <span class="st">"MNase_Long"</span>,</span>
-<span id="cb28-13"><a></a>      <span class="st">"ATAC_Short"</span>,</span>
-<span id="cb28-14"><a></a>      <span class="st">"ATAC_Long"</span></span>
-<span id="cb28-15"><a></a>    )</span>
-<span id="cb28-16"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a>track_info <span class="ot">&lt;-</span></span>
+<span id="cb26-2"><a></a>  <span class="fu">tibble</span>(</span>
+<span id="cb26-3"><a></a>    <span class="at">file_name =</span> <span class="fu">c</span>(</span>
+<span id="cb26-4"><a></a>      <span class="st">"yeast_mnase_lt50.bw"</span>,</span>
+<span id="cb26-5"><a></a>      <span class="st">"yeast_mnase_134_160.bw"</span>,</span>
+<span id="cb26-6"><a></a>      <span class="st">"yeast_atac_lt120.bw"</span>,</span>
+<span id="cb26-7"><a></a>      <span class="st">"yeast_atac_gt120.bw"</span></span>
+<span id="cb26-8"><a></a>    ),</span>
+<span id="cb26-9"><a></a>    <span class="at">file_path =</span> <span class="fu">here</span>(<span class="st">"data/block-dna"</span>, file_name),</span>
+<span id="cb26-10"><a></a>    <span class="at">track_name =</span> <span class="fu">c</span>(</span>
+<span id="cb26-11"><a></a>      <span class="st">"MNase_Short"</span>,</span>
+<span id="cb26-12"><a></a>      <span class="st">"MNase_Long"</span>,</span>
+<span id="cb26-13"><a></a>      <span class="st">"ATAC_Short"</span>,</span>
+<span id="cb26-14"><a></a>      <span class="st">"ATAC_Long"</span></span>
+<span id="cb26-15"><a></a>    )</span>
+<span id="cb26-16"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="load-the-remaining-data-2" class="slide level2">
 <h2>Load the remaining data</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a>track_info <span class="ot">&lt;-</span></span>
-<span id="cb29-2"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb29-3"><a></a>    track_info,</span>
-<span id="cb29-4"><a></a>    <span class="at">big_wig =</span> purrr<span class="sc">::</span><span class="fu">map</span>(</span>
-<span id="cb29-5"><a></a>      file_path,</span>
-<span id="cb29-6"><a></a>      \(x) <span class="fu">import.bw</span>(x, <span class="at">as =</span> <span class="st">"GRanges"</span>)</span>
-<span id="cb29-7"><a></a>    ),</span>
-<span id="cb29-8"><a></a>    <span class="at">data_track =</span> purrr<span class="sc">::</span><span class="fu">map2</span>(</span>
-<span id="cb29-9"><a></a>      big_wig,</span>
-<span id="cb29-10"><a></a>      track_name,</span>
-<span id="cb29-11"><a></a>      \(x, y) <span class="fu">DataTrack</span>(x, <span class="at">name =</span> y)</span>
-<span id="cb29-12"><a></a>    )</span>
-<span id="cb29-13"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a>track_info <span class="ot">&lt;-</span></span>
+<span id="cb27-2"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb27-3"><a></a>    track_info,</span>
+<span id="cb27-4"><a></a>    <span class="at">big_wig =</span> purrr<span class="sc">::</span><span class="fu">map</span>(</span>
+<span id="cb27-5"><a></a>      file_path,</span>
+<span id="cb27-6"><a></a>      \(x) <span class="fu">import.bw</span>(x, <span class="at">as =</span> <span class="st">"GRanges"</span>)</span>
+<span id="cb27-7"><a></a>    ),</span>
+<span id="cb27-8"><a></a>    <span class="at">data_track =</span> purrr<span class="sc">::</span><span class="fu">map2</span>(</span>
+<span id="cb27-9"><a></a>      big_wig,</span>
+<span id="cb27-10"><a></a>      track_name,</span>
+<span id="cb27-11"><a></a>      \(x, y) <span class="fu">DataTrack</span>(x, <span class="at">name =</span> y)</span>
+<span id="cb27-12"><a></a>    )</span>
+<span id="cb27-13"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="load-the-remaining-data-3" class="slide level2">
 <h2>Load the remaining data</h2>
 <p>Now, we just have to make a list of tracks to plot and Gviz takes care of the rest.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="fu">plotTracks</span>(</span>
-<span id="cb30-2"><a></a>  <span class="fu">c</span>(</span>
-<span id="cb30-3"><a></a>    sgd_genes,</span>
-<span id="cb30-4"><a></a>    track_info<span class="sc">$</span>data_track</span>
-<span id="cb30-5"><a></a>  ),</span>
-<span id="cb30-6"><a></a>  <span class="at">from =</span> <span class="dv">530811</span>,</span>
-<span id="cb30-7"><a></a>  <span class="at">to =</span> <span class="dv">540885</span>,</span>
-<span id="cb30-8"><a></a>  <span class="at">chromosome =</span> <span class="st">"chrII"</span>,</span>
-<span id="cb30-9"><a></a>  <span class="at">transcriptAnnotation =</span> <span class="st">"gene"</span>,</span>
-<span id="cb30-10"><a></a>  <span class="at">shape =</span> <span class="st">"arrow"</span>,</span>
-<span id="cb30-11"><a></a>  <span class="at">type =</span> <span class="st">"histogram"</span></span>
-<span id="cb30-12"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a><span class="fu">plotTracks</span>(</span>
+<span id="cb28-2"><a></a>  <span class="fu">c</span>(</span>
+<span id="cb28-3"><a></a>    sgd_genes,</span>
+<span id="cb28-4"><a></a>    track_info<span class="sc">$</span>data_track</span>
+<span id="cb28-5"><a></a>  ),</span>
+<span id="cb28-6"><a></a>  <span class="at">from =</span> <span class="dv">530811</span>,</span>
+<span id="cb28-7"><a></a>  <span class="at">to =</span> <span class="dv">540885</span>,</span>
+<span id="cb28-8"><a></a>  <span class="at">chromosome =</span> <span class="st">"chrII"</span>,</span>
+<span id="cb28-9"><a></a>  <span class="at">transcriptAnnotation =</span> <span class="st">"gene"</span>,</span>
+<span id="cb28-10"><a></a>  <span class="at">shape =</span> <span class="st">"arrow"</span>,</span>
+<span id="cb28-11"><a></a>  <span class="at">type =</span> <span class="st">"histogram"</span></span>
+<span id="cb28-12"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
