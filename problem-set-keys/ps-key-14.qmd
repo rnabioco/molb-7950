@@ -6,7 +6,8 @@ editor: visual
 ---
 
 ```{r}
-#| echo: false
+#| echo: true
+#| message: false
 library(tidyverse)
 library(rstatix)
 library(ggpubr)
@@ -18,11 +19,18 @@ library(broom)
 ```
 
 ```{r}
-biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+biochem <- read_tsv(
+  "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt",
+  show_col_types = FALSE
+) |>
   janitor::clean_names()
 
 # simplify names a bit more
-colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
+colnames(biochem) <- gsub(
+  pattern = "biochem_",
+  replacement = "",
+  colnames(biochem)
+)
 
 # we are going to simplify this a bit and only keep some columns
 keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
@@ -30,7 +38,11 @@ biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
-weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
+weight <- read_tsv(
+  "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight",
+  col_names = F,
+  show_col_types = FALSE
+)
 
 # add column names
 colnames(weight) <- c("subject_name", "weight")
@@ -90,7 +102,6 @@ add residuals and other information
 #| echo: true
 #| output-location: column-fragment
 
-
 # augment
 b_cs <- augment(fit_cs, data = b)
 
@@ -117,7 +128,6 @@ avg_cm <- pull(c[2, 4])
 #| output-location: column-fragment
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 
-
 # plot of data with mean and colored by residuals
 p_cs <- ggplot(
   b_cs,
@@ -138,14 +148,17 @@ p_cs <- ggplot(
   ) +
   geom_segment(
     aes(
-      x = .5, xend = 1.5,
-      y = avg_cf, yend = avg_cf
+      x = .5,
+      xend = 1.5,
+      y = avg_cf,
+      yend = avg_cf
     ),
     color = "red"
   ) +
   geom_segment(
     aes(
-      x = 1.5, xend = 2.5,
+      x = 1.5,
+      xend = 2.5,
       y = avg_cm
     ),
     yend = avg_cm,

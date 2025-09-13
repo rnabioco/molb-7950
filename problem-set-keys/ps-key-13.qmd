@@ -6,7 +6,8 @@ editor: visual
 ---
 
 ```{r}
-#| echo: false
+#| echo: true
+#| message: false
 library(tidyverse)
 library(rstatix)
 library(ggpubr)
@@ -17,11 +18,18 @@ library(broom)
 ```
 
 ```{r}
-biochem <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt", show_col_types = FALSE) |>
+biochem <- read_tsv(
+  "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt",
+  show_col_types = FALSE
+) |>
   janitor::clean_names()
 
 # simplify names a bit more
-colnames(biochem) <- gsub(pattern = "biochem_", replacement = "", colnames(biochem))
+colnames(biochem) <- gsub(
+  pattern = "biochem_",
+  replacement = "",
+  colnames(biochem)
+)
 
 # we are going to simplify this a bit and only keep some columns
 keep <- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]
@@ -29,7 +37,11 @@ biochem <- biochem[, keep]
 
 # get weights for each individual mouse
 # careful: did not come with column names
-weight <- read_tsv("http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight", col_names = F, show_col_types = FALSE)
+weight <- read_tsv(
+  "http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight",
+  col_names = F,
+  show_col_types = FALSE
+)
 
 # add column names
 colnames(weight) <- c("subject_name", "weight")
