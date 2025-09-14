@@ -359,7 +359,7 @@ hur_annot <- annotate_regions(
   annotations = annotations,
   ignore.strand = FALSE,
   quiet = FALSE
-) %>%
+) |>
   data.frame()
 
 
@@ -378,7 +378,7 @@ myInfo <- c(
   "annot.type"
 )
 
-hur_annot <- hur_annot[, myInfo] %>%
+hur_annot <- hur_annot[, myInfo] |>
   unique()
 
 # getting rid of the "hg19_genes_" string to simplify `annot.type`
@@ -454,11 +454,11 @@ random_sites_annot <- annotate_regions(
   annotations = annotations,
   ignore.strand = FALSE,
   quiet = FALSE
-) %>%
+) |>
   data.frame()
 
 # select cols, keep unique
-random_sites_annot <- random_sites_annot[, myInfo] %>%
+random_sites_annot <- random_sites_annot[, myInfo] |>
   unique()
 
 # clean names
@@ -486,7 +486,7 @@ site_dist <- bind_cols(
   region = names(table(hur_annot$annot.type)),
   observed = table(hur_annot$annot.type),
   expected = table(random_sites_annot$annot.type)
-) %>%
+) |>
   mutate(enrichment = observed / expected) # calculate enrichment
 
 
@@ -498,7 +498,7 @@ site_dist_long <- pivot_longer(
 colnames(site_dist_long) <- c("region", "type", "value")
 
 # plot counts for parclip vs random barplot
-# ggplot(site_dist_long %>% filter(type!="enrichment"),
+# ggplot(site_dist_long |> filter(type!="enrichment"),
 #        aes(y = value, x = region, fill = type)) +
 #   geom_bar(stat="identity", position=position_dodge()) +
 #   scale_fill_manual(values=c("black","red")) +
@@ -506,7 +506,7 @@ colnames(site_dist_long) <- c("region", "type", "value")
 
 # plot enrichment barplot
 ggplot(
-  site_dist_long %>% filter(type == "enrichment"),
+  site_dist_long |> filter(type == "enrichment"),
   aes(y = value, x = region)
 ) +
   geom_bar(stat = "identity") +
@@ -556,7 +556,7 @@ Since HuR preferentially binds to 3' UTRs, that is the region we will focus on.
 
 # create a Grange for 3' UTRs
 hur_3utr <- makeGRangesFromDataFrame(
-  df = hur_annot %>% filter(annot.type == "3UTRs"),
+  df = hur_annot |> filter(annot.type == "3UTRs"),
   ignore.strand = F,
   seqnames.field = "seqnames",
   start.field = "start",
@@ -574,8 +574,8 @@ hur_utr3_6mer <- oligonucleotideFrequency(
   width = 6,
   as.prob = F,
   simplify.as = "matrix"
-) %>%
-  colSums(.) %>%
+) |>
+  colSums(.) |>
   as.data.frame()
 
 colnames(hur_utr3_6mer) <- "hur_utr_count"
@@ -609,8 +609,8 @@ utr3_6mer <- oligonucleotideFrequency(
   width = 6,
   as.prob = F,
   simplify.as = "matrix"
-) %>%
-  colSums(.) %>%
+) |>
+  colSums(.) |>
   as.data.frame()
 
 colnames(utr3_6mer) <- "utr_count"
@@ -667,8 +667,8 @@ Not just AU-rich...
 #| echo: true
 #| label: seq-enrich-table
 
-utr3_df %>%
-  rownames_to_column(var = "6mer") %>%
-  arrange(-hur_enrich) %>%
+utr3_df |>
+  rownames_to_column(var = "6mer") |>
+  arrange(-hur_enrich) |>
   gt()
 ```
