@@ -1,0 +1,155 @@
+---
+title: "Mapping chromatin structure and transactions"
+author: "{{< var instructor.block.dna >}}"
+date: last-modified
+---
+
+## Interval analysis {.smaller}
+
+## `bed_intersect()` example {.smaller}
+
+First, we'll define some example intervals in `x` and `y`.
+
+```{r}
+#| label: bed-intersect
+#| echo: true
+#| message: false
+```
+
+---
+
+Visual representation of the intersecting intervals.
+
+```{r}
+#| label: bed_intersect-glyph
+#| echo: false
+```
+
+---
+
+Tibble of the intersecting intervals.
+
+```{r}
+#| label: bed-intersect-tbl
+```
+
+::: {.callout-note}
+Note the addition of `.x` and `.y` suffixes to disamguate the input sources.
+:::
+
+## `read_bed()` example
+
+Rse `read_bed()` to load genome annotations and signals.
+
+```{r}
+#| label: valr-example
+#| echo: true
+#| warning: false
+```
+
+::: {.callout-note}
+You'll also use `read_bedgraph()` and `read_bigwig()` on your problem set.
+:::
+
+## What is in `snps` and `genes`? {.smaller}
+
+```{r}
+#| label: valr-snps
+#| echo: true
+```
+
+```{r}
+#| label: valr-genes
+#| echo: true
+```
+
+## Interval manipulation {.smaller}
+
+Let's find and characterize intergenic SNPs. We'll use the tools [`bed_substract()`](https://rnabioco.github.io/valr/reference/bed_subtract.html) and [`bed_closest()`](https://rnabioco.github.io/valr/reference/bed_closest.html). Take a look and their examples in the valr documentation to see what they do.
+
+Here, we'll ask the question: **"Which SNPs are intergenic, and how far are they from the nearest gene?"**
+
+```{r}
+#| label: valr-ints
+#| echo: true
+```
+
+Take a look at the `intergenic` and `nearby` objects in the console.
+
+---
+
+```{r}
+#| label: inspect-intergenic
+```
+
+---
+
+```{r}
+#| label: inspect-nearby
+```
+
+## Interval manipulation {.smaller}
+
+Now that you have overlaps and distances between SNPs and genes, you can go back to dplyr tools to generate reports.
+
+```{r}
+#| label: valr-dplyr
+#| echo: true
+#| output-location: column-fragment
+```
+
+## `bed_map()` example
+
+::: columns
+::: {.column width="50%"}
+`bed_map()` does two things in order:
+
+::: nonincremental
+1.  It identifies intersecting intervals between `x` and `y`
+2.  Calculates summary statistics based on the intersection
+:::
+
+:::
+
+::: {.column width="50%"}
+![](../img/block-dna/map-glyph.png)
+:::
+:::
+
+A typical use is to count up signals (e.g., coverage from an MNase-seq experiment) over specific regions (e.g., promoter regions).
+
+## `bed_map()` example {.smaller}
+
+Let's setup some example data.
+
+```{r}
+#| label: bed-map-setup
+#| echo: true
+```
+
+## `bed_map()` example continued {.smaller}
+
+First examine the intersecting intervals.
+
+```{r}
+#| label: bed-intersect-2
+#| echo: true
+```
+
+---
+
+Visual representation of `bed_map()`
+
+```{r}
+#| label: bed-map-glyph
+#| echo: false
+```
+
+---
+
+Computing multiple summaries with `bed_map()`
+
+```{r}
+#| label: bed-map-tbl
+#| echo: true
+```
