@@ -12,10 +12,13 @@ library(rstatix)
 library(pheatmap)
 library(janitor)
 library(here)
+library(cowplot)
+library(GeneOverlap)
 ```
 
 ```{r}
-#| eval: false
+#| label: prep data
+
 ang <- read_csv(here("data/bootcamp/edger.csv.gz")) |>
   clean_names() |>
   filter(fdr < 0.05) |>
@@ -29,60 +32,158 @@ colnames(ang) <- gsub(pattern = "log_fc_", "", colnames(ang))
 
 Make sure to run the chunk above. The data represent the avg fold change in gene expression for an angiotensin II time course (.25, .5, .75, 1, 1.5, 2, 3, 4, 6, 8, 24 hrs) compared to unstimulated.
 
-## correlation
+## correlation --- (7 pts)
 
 Create hierarchical clustering heatmap of pairwise pearson correlation coefficients. And provide 1-2 observations.
 
 ```{r}
-# scale
+#| label: clustering correlations
+#| eval: false
+
+# scale ang (remember the transpose trick)
 
 # pairwise pearson correlation
 
 # make heatmap
+
 ```
 
 Timepoints close to each other tend to correlate strongly with each other. The 4,6, and 8 hr time points are the most different from all others.
 
-## PCA
+## PCA --- (7 pts)
 
 Perform PCA and visualize PC1 vs PC2.Provide 1-2 observations.
 
 ```{r}
-# pca
+#|label: pca
+pc_ang <- prcomp(ang)
 
 # gather info from summary
+pca_data_info <- summary(pc_ang)$importance |> as.data.frame()
+
+pca_data_info <- round(x = pca_data_info, digits = 3)
 
 # we make a dataframe out of the rotations and will use this to plot
+pca_plot_data <- pc_ang$rotation |>
+  as.data.frame() |>
+  rownames_to_column(var = "ID")
 
 # plot
+ggplot(data = pca_plot_data, mapping = aes(x = PC1, y = PC2, color = ID)) +
+  geom_point(size = 3) +
+  labs(
+    x = paste("PC1, %", 100 * pca_data_info["Proportion of Variance", "PC1"]),
+    y = paste("PC2, %", 100 * pca_data_info["Proportion of Variance", "PC2"]),
+    title = "PCA for angII timecourse"
+  ) +
+  theme_cowplot()
 ```
 
-## Calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling {.smaller}
+There is a a circular patter that seems to correspond to the timepoints. Interestingly, 24 appears to group back with 0.25 indicating the system is resetting w/respect to RNA levels.
 
-In order to do this, you will need to:
+## Calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling --- (6 pts) {.smaller}
 
-1.  Identify which cluster is the most enriched for DUX4 targets.
-    -   Determine how many genes are in the cluster. You will need to know this to figure out how many genes to sample from the whole data set.
-    -   Determine how many of the genes in the cluster are DUX4 targets. This is the metric that you are interested in comparing between the null distribution and your observation.
-2.  Generate 1000 random sample of the proper size from all genes and find out how many of them are DUX4 targets.
-3.  Visualize the distribution of DUX4 targets in these 1000 random (your null distribution) and overlay the number of DUX4 targets you observed in the cluster that was most enriched for DUX4 targets.
+step 1:
+
+-   identify which cluster is the most enriched for DUX4 targets using `Geneoverlap`.
+-   assign the cluster number as a variable named `c` to use later.
 
 ```{r}
+#| label: step 1
+#| eval: false
+#| 
 # read in data
 cd <- read_tsv(here("data", "dux4_clustering_results.csv.gz"))
 
-# how many genes are in cluster of interest?
+# list of genes by dux4 targeting
+duxList <- split(cd$gene_symbol, cd$??)
 
-# how many dux targets are in cluster interest?
+# list of genes by clustering
+clustList <- split(cd$gene_symbol, as.factor(cd$??))
 
-# initialize empty vector
+# calculate all overlaps between dux targets and clusters
+gom.duxclust <- newGOM(??List,
+                       ??List,
+                       genome.size = nrow(cd)
+                       )
+
+# retrieve p-values for each cluster and sort
+getMatrix(gom.duxclust, "pval") |>
+  t() |>
+  as.data.frame() |>
+  rownames_to_column(var = "clust") |>
+  as.tibble() |>
+  arrange(target)
+
+# which cluster has the lowest p-value? 1 or 4 or 5...
+c <- ??
+```
+
+step 2:
+
+-   determine the number of total genes in that cluster. save this as a variable named `cN` to use later. you will need to know this to figure out how many genes to sample from the whole data set. the size matching will make it so the random samples in your null distribution is better matched to your observation specific to the cluster of interest.
+
+-   determine the number of DUX4 targets in the cluster. save this as a variable named `cNt` to use later. this is the number that you are interested in comparing between the null distribution and your observation. remember, the p-value tells you the probability that the null hypothesis could generate an equal or more extreme observation.
+
+```{r}
+#| label: step 2
+#| eval: false
+#| 
+# how many genes are in cluster 5?
+cN <- cd |>
+  filter(Cluster == c) |>
+  nrow()
+
+# how many dux targets are in cluster 5?
+cNt <- cd |>
+  filter(Cluster == c & target == "target") |>
+  nrow()
+
+```
+
+step 3:
+
+generate 1000 random sample of the size `cN` from all genes in the data set, and for each random sample save the number of genes that are DUX4 targets. this is your null distribution.
+
+visualize the distribution of the \# of DUX4 targets in these 1000 random (your null distribution) and overlay the number of DUX4 targets you observed in the cluster that was most enriched for DUX4 targets, `cNt`.
+
+```{r}
+#| label: step 2
+#| eval: false
+#| 
+# first simplify the problem by figuring out the # of DUX4 targets for 1 random sample
+sample_n(tbl = cd, size = ??) |>
+  filter(target == "??") |>
+  nrow()
+  
+
+# create an empty vector for storing the # dux targets for each iteration. call this `sampled_targets`
 sampled_targets <- vector()
 
-# randomly sample # genes above from data 1000x and tally number of dux4 targets each random sampling
+# then use a for loop to do it 1000 times and save the results in `sampled_targets`
 
-# plot
+for (i in 1:1000) {
+  sampled_targets[i] <- ??? # hint see simplification
+}
+
+# create a density plot using sampled targets and add a vertical line at `cNt`
+ggplot(n, aes(x = ??)) +
+  geom_density() +
+  geom_vline(xintercept = ??, color = "red") +
+  theme_cowplot()
+
+# how many times did a simulation have more dux4 targets than `cNt`
+sampled_targets[sampled_targets > ??] |>
+  length()
+
 ```
 
 ### What is the p-value?
 
+p \< 0.001
+
 ### What is your interpretation?
+
+The null hypothesis that the number of DUX4 targets in cluster 5 IS NOT WELL SUPPORTED.
+
+The number of DUX4 targets in c5 is very unlikely to be explained by chance.
