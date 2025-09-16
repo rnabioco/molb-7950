@@ -149,7 +149,6 @@ library(valr)
 # genome viz
 library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 library(Gviz)
-library(rtracklayer)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
@@ -202,7 +201,7 @@ track_info <-
     file_path = here("data/block-dna", file_name),
     big_wig = purrr::map(
       file_path,
-      ~ import.bw(.x, as = "GRanges")
+      \(x) read_bigwig(x, as = "GRanges")
     ),
     data_track = purrr::map2(
       big_wig,
