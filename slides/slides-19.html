@@ -247,7 +247,7 @@ Jay Hesselberth
 <li class="fragment"><code>yeast_tss_chrII.bed.gz</code> contains transcription start sites (TSS) for genes on yeast chromosome 2.</li>
 <li class="fragment"><code>sacCer3.chrom.sizes</code> contains the sizes of all yeast chromosomes, needed for some of the calculations we’ll do. We’ll grab this from the UCSC download site.</li>
 </ul>
-<p><code>read_bed()</code> and <code>read_genom()</code> are valr functions.</p>
+<p><code>read_bed()</code> and <code>read_genome()</code> are valr functions.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a>yeast_tss <span class="ot">&lt;-</span> <span class="fu">read_bed</span>(</span>
 <span id="cb2-2"><a></a>  <span class="fu">here</span>(<span class="st">"data/block-dna/yeast_tss_chrII.bed.gz"</span>)</span>
@@ -257,47 +257,109 @@ Jay Hesselberth
 <span id="cb2-6"><a></a>genome <span class="ot">&lt;-</span> <span class="fu">read_genome</span>(url)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
+<section class="slide level2">
+
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>yeast_tss</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 337 × 6
+   chrom start   end name    score strand
+   &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; 
+ 1 chrII 10550 10551 YBL107C .     -     
+ 2 chrII 13945 13946 YBL106C .     -     
+ 3 chrII 17965 17966 YBL105C .     -     
+ 4 chrII 21297 21298 YBL104C .     -     
+ 5 chrII 23789 23790 YBL103C .     -     
+ 6 chrII 24009 24010 YBL102W .     +     
+ 7 chrII 28582 28583 YBL101C .     -     
+ 8 chrII 36765 36766 YBL099W .     +     
+ 9 chrII 39124 39125 YBL098W .     +     
+10 chrII 40780 40781 YBL097W .     +     
+# ℹ 327 more rows</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>genome</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 17 × 2
+   chrom      size
+   &lt;chr&gt;     &lt;dbl&gt;
+ 1 chrIV   1531933
+ 2 chrXV   1091291
+ 3 chrVII  1090940
+ 4 chrXII  1078177
+ 5 chrXVI   948066
+ 6 chrXIII  924431
+ 7 chrII    813184
+ 8 chrXIV   784333
+ 9 chrX     745751
+10 chrXI    666816
+11 chrV     576874
+12 chrVIII  562643
+13 chrIX    439888
+14 chrIII   316620
+15 chrVI    270161
+16 chrI     230218
+17 chrM      85779</code></pre>
+</div>
+</div>
+</section>
 <section id="load-signals" class="slide level2 smaller">
 <h2>Load signals</h2>
 <p>Next we’ll load bigWigs for the ATAC and MNase experiments, containing either short or long fragments.</p>
 <p>Recall that the information encoded in short and long fragments should be reflected in our interpretations.</p>
 <p>First, we make a tibble of file paths and metadata.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a>acc_tbl <span class="ot">&lt;-</span></span>
-<span id="cb3-2"><a></a>  <span class="fu">tibble</span>(</span>
-<span id="cb3-3"><a></a>    <span class="at">file_name =</span> <span class="fu">c</span>(</span>
-<span id="cb3-4"><a></a>      <span class="st">"yeast_mnase_lt50.bw"</span>,</span>
-<span id="cb3-5"><a></a>      <span class="st">"yeast_mnase_134_160.bw"</span>,</span>
-<span id="cb3-6"><a></a>      <span class="st">"yeast_atac_lt120.bw"</span>,</span>
-<span id="cb3-7"><a></a>      <span class="st">"yeast_atac_gt120.bw"</span></span>
-<span id="cb3-8"><a></a>    ),</span>
-<span id="cb3-9"><a></a>    <span class="at">sample_type =</span> <span class="fu">c</span>(</span>
-<span id="cb3-10"><a></a>      <span class="st">"MNase_Short"</span>,</span>
-<span id="cb3-11"><a></a>      <span class="st">"MNase_Long"</span>,</span>
-<span id="cb3-12"><a></a>      <span class="st">"ATAC_Short"</span>,</span>
-<span id="cb3-13"><a></a>      <span class="st">"ATAC_Long"</span></span>
-<span id="cb3-14"><a></a>    )</span>
-<span id="cb3-15"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb3-16"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb3-17"><a></a>    <span class="at">file_path =</span> <span class="fu">here</span>(<span class="st">"data/block-dna"</span>, file_name)</span>
-<span id="cb3-18"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>acc_tbl <span class="ot">&lt;-</span></span>
+<span id="cb7-2"><a></a>  <span class="fu">tibble</span>(</span>
+<span id="cb7-3"><a></a>    <span class="at">file_name =</span> <span class="fu">c</span>(</span>
+<span id="cb7-4"><a></a>      <span class="st">"yeast_mnase_lt50.bw"</span>,</span>
+<span id="cb7-5"><a></a>      <span class="st">"yeast_mnase_134_160.bw"</span>,</span>
+<span id="cb7-6"><a></a>      <span class="st">"yeast_atac_lt120.bw"</span>,</span>
+<span id="cb7-7"><a></a>      <span class="st">"yeast_atac_gt120.bw"</span></span>
+<span id="cb7-8"><a></a>    ),</span>
+<span id="cb7-9"><a></a>    <span class="at">sample_type =</span> <span class="fu">c</span>(</span>
+<span id="cb7-10"><a></a>      <span class="st">"MNase_Short"</span>,</span>
+<span id="cb7-11"><a></a>      <span class="st">"MNase_Long"</span>,</span>
+<span id="cb7-12"><a></a>      <span class="st">"ATAC_Short"</span>,</span>
+<span id="cb7-13"><a></a>      <span class="st">"ATAC_Long"</span></span>
+<span id="cb7-14"><a></a>    )</span>
+<span id="cb7-15"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-16"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb7-17"><a></a>    <span class="at">file_path =</span> <span class="fu">here</span>(<span class="st">"data/block-dna"</span>, file_name)</span>
+<span id="cb7-18"><a></a>  )</span>
+<span id="cb7-19"><a></a></span>
+<span id="cb7-20"><a></a>acc_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+
 </section>
-<section class="slide level2">
+<section id="load-signals-output" class="slide level2 smaller output-location-slide"><h2>Load signals</h2><div class="cell output-location-slide">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+  file_name              sample_type file_path              
+  &lt;chr&gt;                  &lt;chr&gt;       &lt;chr&gt;                  
+1 yeast_mnase_lt50.bw    MNase_Short /Users/jayhesselberth/…
+2 yeast_mnase_134_160.bw MNase_Long  /Users/jayhesselberth/…
+3 yeast_atac_lt120.bw    ATAC_Short  /Users/jayhesselberth/…
+4 yeast_atac_gt120.bw    ATAC_Long   /Users/jayhesselberth/…</code></pre>
+</div>
+</div></section><section class="slide level2">
 
 <p>Next, we need to read in the bigWig files. We use <code>purrr::map</code> to apply <code>read_bigwig()</code> to each of the bigWig files, and store the results in a new column called <code>big_wig</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>acc_tbl <span class="ot">&lt;-</span></span>
-<span id="cb4-2"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb4-3"><a></a>    acc_tbl,</span>
-<span id="cb4-4"><a></a>    <span class="at">big_wig =</span> purrr<span class="sc">::</span><span class="fu">map</span>(</span>
-<span id="cb4-5"><a></a>      file_path,</span>
-<span id="cb4-6"><a></a>      \(x) <span class="fu">read_bigwig</span>(x)</span>
-<span id="cb4-7"><a></a>    )</span>
-<span id="cb4-8"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb4-9"><a></a>  <span class="fu">select</span>(sample_type, big_wig)</span>
-<span id="cb4-10"><a></a></span>
-<span id="cb4-11"><a></a>acc_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>acc_tbl <span class="ot">&lt;-</span></span>
+<span id="cb9-2"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-3"><a></a>    acc_tbl,</span>
+<span id="cb9-4"><a></a>    <span class="at">big_wig =</span> purrr<span class="sc">::</span><span class="fu">map</span>(</span>
+<span id="cb9-5"><a></a>      file_path,</span>
+<span id="cb9-6"><a></a>      \(x) <span class="fu">read_bigwig</span>(x)</span>
+<span id="cb9-7"><a></a>    )</span>
+<span id="cb9-8"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-9"><a></a>  <span class="fu">select</span>(sample_type, big_wig)</span>
+<span id="cb9-10"><a></a></span>
+<span id="cb9-11"><a></a>acc_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+</section>
+<section id="" class="slide level2 output-location-slide"><div class="cell output-location-slide">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 2
   sample_type big_wig              
@@ -307,9 +369,7 @@ Jay Hesselberth
 3 ATAC_Short  &lt;tibble [44,852 × 4]&gt;
 4 ATAC_Long   &lt;tibble [51,906 × 4]&gt;</code></pre>
 </div>
-</div>
-</section>
-<section>
+</div></section><section>
 <section id="meta-plots" class="title-slide slide level1 center">
 <h1>Meta-plots</h1>
 
@@ -353,21 +413,19 @@ Jay Hesselberth
 <img data-src="../img/block-dna/metaplot-workflow.png" class="r-stretch quarto-figure-center"><p class="caption">Metaplot workflow overview</p></section>
 <section id="chromatin-accessibility-around-transcription-start-sites-tsss" class="slide level2 smaller">
 <h2>Chromatin accessibility around transcription start sites (TSSs)</h2>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>region_size_total <span class="ot">&lt;-</span> <span class="dv">1500</span></span>
-<span id="cb6-2"><a></a>region_size_half <span class="ot">&lt;-</span> region_size_total <span class="sc">/</span> <span class="dv">2</span></span>
-<span id="cb6-3"><a></a>win_size <span class="ot">&lt;-</span> <span class="dv">10</span></span>
-<span id="cb6-4"><a></a></span>
-<span id="cb6-5"><a></a><span class="co"># need a function that generates a sequence of numbers</span></span>
-<span id="cb6-6"><a></a>win_coords <span class="ot">&lt;-</span> <span class="fu">seq</span>(</span>
-<span id="cb6-7"><a></a>  <span class="sc">-</span>region_size_half,</span>
-<span id="cb6-8"><a></a>  region_size_half,</span>
-<span id="cb6-9"><a></a>  win_size</span>
-<span id="cb6-10"><a></a>)</span>
-<span id="cb6-11"><a></a></span>
-<span id="cb6-12"><a></a>win_coords</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>region_size_total <span class="ot">&lt;-</span> <span class="dv">1500</span></span>
+<span id="cb11-2"><a></a>region_size_half <span class="ot">&lt;-</span> region_size_total <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb11-3"><a></a>win_size <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb11-4"><a></a></span>
+<span id="cb11-5"><a></a><span class="co"># need a function that generates a sequence of numbers</span></span>
+<span id="cb11-6"><a></a>win_coords <span class="ot">&lt;-</span> <span class="fu">seq</span>(</span>
+<span id="cb11-7"><a></a>  <span class="sc">-</span>region_size_half,</span>
+<span id="cb11-8"><a></a>  region_size_half,</span>
+<span id="cb11-9"><a></a>  win_size</span>
+<span id="cb11-10"><a></a>)</span>
+<span id="cb11-11"><a></a></span>
+<span id="cb11-12"><a></a>win_coords</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  [1] -750 -740 -730 -720 -710 -700 -690 -680 -670 -660 -650
  [12] -640 -630 -620 -610 -600 -590 -580 -570 -560 -550 -540
@@ -384,17 +442,15 @@ Jay Hesselberth
 [133]  570  580  590  600  610  620  630  640  650  660  670
 [144]  680  690  700  710  720  730  740  750</code></pre>
 </div>
-</div></div>
+</div>
 </section>
 <section id="chromatin-accessibility-around-transcription-start-sites-tsss-1" class="slide level2 smaller">
 <h2>Chromatin accessibility around transcription start sites (TSSs)</h2>
 <p>Next, we’ll use two valr functions to expand the window of the reference point (<code>bed_slop()</code>) and then break those windows into evenly spaced intervals (<code>bed_makewindows()</code>).</p>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>yeast_tss <span class="sc">|&gt;</span></span>
-<span id="cb8-2"><a></a>  <span class="fu">bed_slop</span>(genome, <span class="at">both =</span> region_size_half) <span class="sc">|&gt;</span></span>
-<span id="cb8-3"><a></a>  <span class="fu">bed_makewindows</span>(<span class="at">win_size =</span> win_size)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>yeast_tss <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a></a>  <span class="fu">bed_slop</span>(genome, <span class="at">both =</span> region_size_half) <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a></a>  <span class="fu">bed_makewindows</span>(<span class="at">win_size =</span> win_size)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 50,887 × 7
    chrom start   end name    score strand .win_id
@@ -411,48 +467,70 @@ Jay Hesselberth
 10 chrII  9890  9900 YBL107C .     -           10
 # ℹ 50,877 more rows</code></pre>
 </div>
-</div></div>
+</div>
 </section>
 <section id="chromatin-accessibility-around-transcription-start-sites-tsss-2" class="slide level2">
 <h2>Chromatin accessibility around transcription start sites (TSSs)</h2>
 <p>At this point, we also address the fact that the TSS data are stranded. Can someone describe what the issue is here, based on the figure above?</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>tss_win_tbl <span class="ot">&lt;-</span></span>
-<span id="cb10-2"><a></a>  yeast_tss <span class="sc">|&gt;</span></span>
-<span id="cb10-3"><a></a>  <span class="fu">bed_slop</span>(genome, <span class="at">both =</span> region_size_half) <span class="sc">|&gt;</span></span>
-<span id="cb10-4"><a></a>  <span class="fu">bed_makewindows</span>(<span class="at">win_size =</span> win_size) <span class="sc">|&gt;</span></span>
-<span id="cb10-5"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb10-6"><a></a>    <span class="at">win_coord =</span> <span class="fu">case_when</span>(</span>
-<span id="cb10-7"><a></a>      strand <span class="sc">==</span> <span class="st">"-"</span> <span class="sc">~</span> <span class="fu">rev</span>(win_coords),</span>
-<span id="cb10-8"><a></a>      <span class="at">.default =</span> win_coords</span>
-<span id="cb10-9"><a></a>    ),</span>
-<span id="cb10-10"><a></a>    <span class="at">.by =</span> name</span>
-<span id="cb10-11"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb10-12"><a></a>  <span class="fu">select</span>(<span class="sc">-</span>.win_id, <span class="sc">-</span>score, <span class="sc">-</span>strand)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>tss_win_tbl <span class="ot">&lt;-</span></span>
+<span id="cb15-2"><a></a>  yeast_tss <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a></a>  <span class="fu">bed_slop</span>(genome, <span class="at">both =</span> region_size_half) <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a></a>  <span class="fu">bed_makewindows</span>(<span class="at">win_size =</span> win_size) <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb15-6"><a></a>    <span class="at">win_coord =</span> <span class="fu">case_when</span>(</span>
+<span id="cb15-7"><a></a>      strand <span class="sc">==</span> <span class="st">"-"</span> <span class="sc">~</span> <span class="fu">rev</span>(win_coords),</span>
+<span id="cb15-8"><a></a>      <span class="at">.default =</span> win_coords</span>
+<span id="cb15-9"><a></a>    ),</span>
+<span id="cb15-10"><a></a>    <span class="at">.by =</span> name</span>
+<span id="cb15-11"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb15-12"><a></a>  <span class="fu">select</span>(<span class="sc">-</span>.win_id, <span class="sc">-</span>score, <span class="sc">-</span>strand)</span>
+<span id="cb15-13"><a></a></span>
+<span id="cb15-14"><a></a>tss_win_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+
 </section>
-<section id="chromatin-accessibility-around-transcription-start-sites-tsss-3" class="slide level2 smaller">
+<section id="chromatin-accessibility-around-transcription-start-sites-tsss-2-output" class="slide level2 output-location-slide"><h2>Chromatin accessibility around transcription start sites (TSSs)</h2><div class="cell output-location-slide">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 50,887 × 5
+   chrom start   end name    win_coord
+   &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;       &lt;dbl&gt;
+ 1 chrII  9800  9810 YBL107C       750
+ 2 chrII  9810  9820 YBL107C       740
+ 3 chrII  9820  9830 YBL107C       730
+ 4 chrII  9830  9840 YBL107C       720
+ 5 chrII  9840  9850 YBL107C       710
+ 6 chrII  9850  9860 YBL107C       700
+ 7 chrII  9860  9870 YBL107C       690
+ 8 chrII  9870  9880 YBL107C       680
+ 9 chrII  9880  9890 YBL107C       670
+10 chrII  9890  9900 YBL107C       660
+# ℹ 50,877 more rows</code></pre>
+</div>
+</div></section><section id="chromatin-accessibility-around-transcription-start-sites-tsss-3" class="slide level2 smaller">
 <h2>Chromatin accessibility around transcription start sites (TSSs)</h2>
 <p>This next step uses valr <code>bed_map()</code>, to calculate the total signal for each window by intersecting signals from the bigWig files.</p>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>acc_tbl <span class="ot">&lt;-</span></span>
-<span id="cb11-2"><a></a>  acc_tbl <span class="sc">|&gt;</span></span>
-<span id="cb11-3"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb11-4"><a></a>    <span class="at">tss_win_sum =</span> purrr<span class="sc">::</span><span class="fu">map</span>(</span>
-<span id="cb11-5"><a></a>      big_wig,</span>
-<span id="cb11-6"><a></a>      \(x) {</span>
-<span id="cb11-7"><a></a>        <span class="fu">bed_map</span>(</span>
-<span id="cb11-8"><a></a>          tss_win_tbl,</span>
-<span id="cb11-9"><a></a>          x,</span>
-<span id="cb11-10"><a></a>          <span class="at">win_signal =</span> <span class="fu">sum</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb11-11"><a></a>        )</span>
-<span id="cb11-12"><a></a>      }</span>
-<span id="cb11-13"><a></a>    )</span>
-<span id="cb11-14"><a></a>  )</span>
-<span id="cb11-15"><a></a></span>
-<span id="cb11-16"><a></a>acc_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>acc_tbl <span class="ot">&lt;-</span></span>
+<span id="cb17-2"><a></a>  acc_tbl <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb17-4"><a></a>    <span class="at">tss_win_sum =</span> purrr<span class="sc">::</span><span class="fu">map</span>(</span>
+<span id="cb17-5"><a></a>      big_wig,</span>
+<span id="cb17-6"><a></a>      \(x) {</span>
+<span id="cb17-7"><a></a>        <span class="fu">bed_map</span>(</span>
+<span id="cb17-8"><a></a>          tss_win_tbl,</span>
+<span id="cb17-9"><a></a>          x,</span>
+<span id="cb17-10"><a></a>          <span class="at">win_signal =</span> <span class="fu">sum</span>(value, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-11"><a></a>        )</span>
+<span id="cb17-12"><a></a>      }</span>
+<span id="cb17-13"><a></a>    )</span>
+<span id="cb17-14"><a></a>  )</span>
+<span id="cb17-15"><a></a></span>
+<span id="cb17-16"><a></a>acc_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+</section>
+<section id="chromatin-accessibility-around-transcription-start-sites-tsss-3-output" class="slide level2 smaller output-location-slide"><h2>Chromatin accessibility around transcription start sites (TSSs)</h2><div class="cell output-location-slide">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 4 × 3
   sample_type big_wig               tss_win_sum          
@@ -462,26 +540,26 @@ Jay Hesselberth
 3 ATAC_Short  &lt;tibble [44,852 × 4]&gt; &lt;tibble [50,887 × 6]&gt;
 4 ATAC_Long   &lt;tibble [51,906 × 4]&gt; &lt;tibble [50,887 × 6]&gt;</code></pre>
 </div>
-</div></div>
-</section>
-<section id="chromatin-accessibility-around-transcription-start-sites-tsss-4" class="slide level2 smaller">
+</div></section><section id="chromatin-accessibility-around-transcription-start-sites-tsss-4" class="slide level2 smaller">
 <h2>Chromatin accessibility around transcription start sites (TSSs)</h2>
 <p>Once we have the values from <code>bed_map()</code>, we can group by <code>win_coord</code> and calculate a summary statistic for each window.</p>
 <p>Remember that <code>win_coord</code> is the same relative position for each TSS, so these numbers represent a composite signal a the same position across all TSS.</p>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>tss_meta_tbl <span class="ot">&lt;-</span></span>
-<span id="cb13-2"><a></a>  <span class="fu">select</span>(acc_tbl, sample_type, tss_win_sum) <span class="sc">|&gt;</span></span>
-<span id="cb13-3"><a></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> <span class="fu">c</span>(tss_win_sum)) <span class="sc">|&gt;</span></span>
-<span id="cb13-4"><a></a>  <span class="fu">summarize</span>(</span>
-<span id="cb13-5"><a></a>    <span class="at">win_mean =</span> <span class="fu">mean</span>(win_signal, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb13-6"><a></a>    <span class="at">win_sd =</span> <span class="fu">sd</span>(win_signal, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb13-7"><a></a>    <span class="at">.by =</span> <span class="fu">c</span>(win_coord, sample_type)</span>
-<span id="cb13-8"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb13-9"><a></a>  <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">win_mean =</span> <span class="dv">0</span>, <span class="at">win_sd =</span> <span class="dv">0</span>))</span>
-<span id="cb13-10"><a></a></span>
-<span id="cb13-11"><a></a>tss_meta_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a>tss_meta_tbl <span class="ot">&lt;-</span></span>
+<span id="cb19-2"><a></a>  <span class="fu">select</span>(acc_tbl, sample_type, tss_win_sum) <span class="sc">|&gt;</span></span>
+<span id="cb19-3"><a></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> <span class="fu">c</span>(tss_win_sum)) <span class="sc">|&gt;</span></span>
+<span id="cb19-4"><a></a>  <span class="fu">summarize</span>(</span>
+<span id="cb19-5"><a></a>    <span class="at">win_mean =</span> <span class="fu">mean</span>(win_signal, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-6"><a></a>    <span class="at">win_sd =</span> <span class="fu">sd</span>(win_signal, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-7"><a></a>    <span class="at">.by =</span> <span class="fu">c</span>(win_coord, sample_type)</span>
+<span id="cb19-8"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb19-9"><a></a>  <span class="fu">replace_na</span>(<span class="fu">list</span>(<span class="at">win_mean =</span> <span class="dv">0</span>, <span class="at">win_sd =</span> <span class="dv">0</span>))</span>
+<span id="cb19-10"><a></a></span>
+<span id="cb19-11"><a></a>tss_meta_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+</section>
+<section id="chromatin-accessibility-around-transcription-start-sites-tsss-4-output" class="slide level2 smaller output-location-slide"><h2>Chromatin accessibility around transcription start sites (TSSs)</h2><div class="cell output-location-slide">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 604 × 4
    win_coord sample_type win_mean win_sd
@@ -498,41 +576,39 @@ Jay Hesselberth
 10       660 MNase_Short     281.   360.
 # ℹ 594 more rows</code></pre>
 </div>
-</div></div>
-</section>
-<section id="meta-plot-of-signals-around-tsss" class="slide level2 smaller">
+</div></section><section id="meta-plot-of-signals-around-tsss" class="slide level2 smaller">
 <h2>Meta-plot of signals around TSSs</h2>
 <p>Finally, let’s plot the data relative to TSS for each of the windows.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>n_tss <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(yeast_tss<span class="sc">$</span>name))</span>
-<span id="cb15-2"><a></a></span>
-<span id="cb15-3"><a></a><span class="fu">ggplot</span>(</span>
-<span id="cb15-4"><a></a>  tss_meta_tbl,</span>
-<span id="cb15-5"><a></a>  <span class="fu">aes</span>(</span>
-<span id="cb15-6"><a></a>    <span class="at">x =</span> win_coord,</span>
-<span id="cb15-7"><a></a>    <span class="at">y =</span> win_mean</span>
-<span id="cb15-8"><a></a>  )</span>
-<span id="cb15-9"><a></a>) <span class="sc">+</span></span>
-<span id="cb15-10"><a></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb15-11"><a></a>  <span class="fu">facet_wrap</span>(</span>
-<span id="cb15-12"><a></a>    <span class="sc">~</span>sample_type,</span>
-<span id="cb15-13"><a></a>    <span class="at">nrow =</span> <span class="dv">2</span>,</span>
-<span id="cb15-14"><a></a>    <span class="at">scales =</span> <span class="st">"free_y"</span></span>
-<span id="cb15-15"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb15-16"><a></a>  <span class="fu">theme_minimal_grid</span>() <span class="sc">+</span></span>
-<span id="cb15-17"><a></a>  <span class="fu">theme</span>(</span>
-<span id="cb15-18"><a></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(</span>
-<span id="cb15-19"><a></a>      <span class="at">angle =</span> <span class="dv">45</span>,</span>
-<span id="cb15-20"><a></a>      <span class="at">vjust =</span> <span class="dv">1</span>,</span>
-<span id="cb15-21"><a></a>      <span class="at">hjust =</span> <span class="dv">1</span></span>
-<span id="cb15-22"><a></a>    )</span>
-<span id="cb15-23"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb15-24"><a></a>  <span class="fu">labs</span>(</span>
-<span id="cb15-25"><a></a>    <span class="at">x =</span> <span class="st">"Position relative to TSS (bp)"</span>,</span>
-<span id="cb15-26"><a></a>    <span class="at">y =</span> <span class="st">"Signal (mean of window sums)"</span>,</span>
-<span id="cb15-27"><a></a>    <span class="at">title =</span> <span class="st">"Chromatin accessibility around transcription start sites"</span>,</span>
-<span id="cb15-28"><a></a>    <span class="at">subtitle =</span> <span class="fu">glue</span>(<span class="st">"{n_tss} features on S. cerevisiae chrII"</span>)</span>
-<span id="cb15-29"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>n_tss <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(yeast_tss<span class="sc">$</span>name))</span>
+<span id="cb21-2"><a></a></span>
+<span id="cb21-3"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb21-4"><a></a>  tss_meta_tbl,</span>
+<span id="cb21-5"><a></a>  <span class="fu">aes</span>(</span>
+<span id="cb21-6"><a></a>    <span class="at">x =</span> win_coord,</span>
+<span id="cb21-7"><a></a>    <span class="at">y =</span> win_mean</span>
+<span id="cb21-8"><a></a>  )</span>
+<span id="cb21-9"><a></a>) <span class="sc">+</span></span>
+<span id="cb21-10"><a></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb21-11"><a></a>  <span class="fu">facet_wrap</span>(</span>
+<span id="cb21-12"><a></a>    <span class="sc">~</span>sample_type,</span>
+<span id="cb21-13"><a></a>    <span class="at">nrow =</span> <span class="dv">2</span>,</span>
+<span id="cb21-14"><a></a>    <span class="at">scales =</span> <span class="st">"free_y"</span></span>
+<span id="cb21-15"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb21-16"><a></a>  <span class="fu">theme_minimal_grid</span>() <span class="sc">+</span></span>
+<span id="cb21-17"><a></a>  <span class="fu">theme</span>(</span>
+<span id="cb21-18"><a></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(</span>
+<span id="cb21-19"><a></a>      <span class="at">angle =</span> <span class="dv">45</span>,</span>
+<span id="cb21-20"><a></a>      <span class="at">vjust =</span> <span class="dv">1</span>,</span>
+<span id="cb21-21"><a></a>      <span class="at">hjust =</span> <span class="dv">1</span></span>
+<span id="cb21-22"><a></a>    )</span>
+<span id="cb21-23"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb21-24"><a></a>  <span class="fu">labs</span>(</span>
+<span id="cb21-25"><a></a>    <span class="at">x =</span> <span class="st">"Position relative to TSS (bp)"</span>,</span>
+<span id="cb21-26"><a></a>    <span class="at">y =</span> <span class="st">"Signal (mean of window sums)"</span>,</span>
+<span id="cb21-27"><a></a>    <span class="at">title =</span> <span class="st">"Chromatin accessibility around transcription start sites"</span>,</span>
+<span id="cb21-28"><a></a>    <span class="at">subtitle =</span> <span class="fu">glue</span>(<span class="st">"{n_tss} features on S. cerevisiae chrII"</span>)</span>
+<span id="cb21-29"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -571,9 +647,9 @@ Jay Hesselberth
 <h2>Heatmap of signals around TSSs</h2>
 <p>We’re going to plot a heatmap of the “MNase_Long” data. There are two ways to get these data</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a>mnase_tbl <span class="ot">&lt;-</span> acc_tbl[acc_tbl<span class="sc">$</span>sample_type <span class="sc">==</span> <span class="st">"MNase_Long"</span>, ]<span class="sc">$</span>tss_win_sum[[<span class="dv">1</span>]]</span>
-<span id="cb16-2"><a></a></span>
-<span id="cb16-3"><a></a>mnase_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>mnase_tbl <span class="ot">&lt;-</span> acc_tbl[acc_tbl<span class="sc">$</span>sample_type <span class="sc">==</span> <span class="st">"MNase_Long"</span>, ]<span class="sc">$</span>tss_win_sum[[<span class="dv">1</span>]]</span>
+<span id="cb22-2"><a></a></span>
+<span id="cb22-3"><a></a>mnase_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 50,887 × 6
    chrom start   end name    win_coord win_signal
@@ -594,18 +670,16 @@ Jay Hesselberth
 </section>
 <section id="or-using-dplyr-tidyr" class="slide level2 smaller">
 <h2>Or, using dplyr / tidyr:</h2>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a>mnase_tbl <span class="ot">&lt;-</span></span>
-<span id="cb18-2"><a></a>  <span class="fu">filter</span>(</span>
-<span id="cb18-3"><a></a>    acc_tbl,</span>
-<span id="cb18-4"><a></a>    sample_type <span class="sc">==</span> <span class="st">"MNase_Long"</span></span>
-<span id="cb18-5"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb18-6"><a></a>  <span class="fu">select</span>(<span class="sc">-</span>big_wig) <span class="sc">|&gt;</span></span>
-<span id="cb18-7"><a></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> <span class="fu">c</span>(tss_win_sum))</span>
-<span id="cb18-8"><a></a></span>
-<span id="cb18-9"><a></a>mnase_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a>mnase_tbl <span class="ot">&lt;-</span></span>
+<span id="cb24-2"><a></a>  <span class="fu">filter</span>(</span>
+<span id="cb24-3"><a></a>    acc_tbl,</span>
+<span id="cb24-4"><a></a>    sample_type <span class="sc">==</span> <span class="st">"MNase_Long"</span></span>
+<span id="cb24-5"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb24-6"><a></a>  <span class="fu">select</span>(<span class="sc">-</span>big_wig) <span class="sc">|&gt;</span></span>
+<span id="cb24-7"><a></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> <span class="fu">c</span>(tss_win_sum))</span>
+<span id="cb24-8"><a></a></span>
+<span id="cb24-9"><a></a>mnase_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 50,887 × 7
    sample_type chrom start   end name   win_coord win_signal
@@ -622,30 +696,30 @@ Jay Hesselberth
 10 MNase_Long  chrII  9890  9900 YBL10…       660       276.
 # ℹ 50,877 more rows</code></pre>
 </div>
-</div></div>
+</div>
 </section>
 <section id="heatmap-of-signals-around-tsss-2" class="slide level2 smaller">
 <h2>Heatmap of signals around TSSs</h2>
 <p>Either way, now we need to reformat the data.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>mnase_tbl_wide <span class="ot">&lt;-</span></span>
-<span id="cb20-2"><a></a>  mnase_tbl <span class="sc">|&gt;</span></span>
-<span id="cb20-3"><a></a>  <span class="fu">select</span>(</span>
-<span id="cb20-4"><a></a>    name,</span>
-<span id="cb20-5"><a></a>    win_coord,</span>
-<span id="cb20-6"><a></a>    win_signal</span>
-<span id="cb20-7"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb20-8"><a></a>  <span class="fu">arrange</span>(name, win_coord) <span class="sc">|&gt;</span></span>
-<span id="cb20-9"><a></a>  <span class="fu">replace_na</span>(</span>
-<span id="cb20-10"><a></a>    <span class="fu">list</span>(<span class="at">win_signal =</span> <span class="dv">0</span>)</span>
-<span id="cb20-11"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb20-12"><a></a>  <span class="fu">pivot_wider</span>(</span>
-<span id="cb20-13"><a></a>    <span class="at">id_cols =</span> name,</span>
-<span id="cb20-14"><a></a>    <span class="at">names_from =</span> <span class="st">"win_coord"</span>,</span>
-<span id="cb20-15"><a></a>    <span class="at">values_from =</span> <span class="st">"win_signal"</span></span>
-<span id="cb20-16"><a></a>  )</span>
-<span id="cb20-17"><a></a></span>
-<span id="cb20-18"><a></a>mnase_tbl_wide</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a>mnase_tbl_wide <span class="ot">&lt;-</span></span>
+<span id="cb26-2"><a></a>  mnase_tbl <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a></a>  <span class="fu">select</span>(</span>
+<span id="cb26-4"><a></a>    name,</span>
+<span id="cb26-5"><a></a>    win_coord,</span>
+<span id="cb26-6"><a></a>    win_signal</span>
+<span id="cb26-7"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb26-8"><a></a>  <span class="fu">arrange</span>(name, win_coord) <span class="sc">|&gt;</span></span>
+<span id="cb26-9"><a></a>  <span class="fu">replace_na</span>(</span>
+<span id="cb26-10"><a></a>    <span class="fu">list</span>(<span class="at">win_signal =</span> <span class="dv">0</span>)</span>
+<span id="cb26-11"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb26-12"><a></a>  <span class="fu">pivot_wider</span>(</span>
+<span id="cb26-13"><a></a>    <span class="at">id_cols =</span> name,</span>
+<span id="cb26-14"><a></a>    <span class="at">names_from =</span> <span class="st">"win_coord"</span>,</span>
+<span id="cb26-15"><a></a>    <span class="at">values_from =</span> <span class="st">"win_signal"</span></span>
+<span id="cb26-16"><a></a>  )</span>
+<span id="cb26-17"><a></a></span>
+<span id="cb26-18"><a></a>mnase_tbl_wide</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -676,17 +750,17 @@ Jay Hesselberth
 <h2>Heatmap of signals around TSSs</h2>
 <p>Once we have the data reformatted, we just convert to a matrix and feed it to <code>ComplexHeatmap::Heatmap()</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>mnase_mtx <span class="ot">&lt;-</span></span>
-<span id="cb22-2"><a></a>  <span class="fu">select</span>(mnase_tbl_wide, <span class="sc">-</span>name) <span class="sc">|&gt;</span></span>
-<span id="cb22-3"><a></a>  <span class="fu">as.matrix</span>()</span>
-<span id="cb22-4"><a></a></span>
-<span id="cb22-5"><a></a>ComplexHeatmap<span class="sc">::</span><span class="fu">Heatmap</span>(</span>
-<span id="cb22-6"><a></a>  mnase_mtx,</span>
-<span id="cb22-7"><a></a>  <span class="at">cluster_columns =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb22-8"><a></a>  <span class="at">show_row_dend =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb22-9"><a></a>  <span class="at">show_column_names =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb22-10"><a></a>  <span class="at">show_heatmap_legend =</span> <span class="cn">FALSE</span></span>
-<span id="cb22-11"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a>mnase_mtx <span class="ot">&lt;-</span></span>
+<span id="cb28-2"><a></a>  <span class="fu">select</span>(mnase_tbl_wide, <span class="sc">-</span>name) <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a></a>  <span class="fu">as.matrix</span>()</span>
+<span id="cb28-4"><a></a></span>
+<span id="cb28-5"><a></a>ComplexHeatmap<span class="sc">::</span><span class="fu">Heatmap</span>(</span>
+<span id="cb28-6"><a></a>  mnase_mtx,</span>
+<span id="cb28-7"><a></a>  <span class="at">cluster_columns =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb28-8"><a></a>  <span class="at">show_row_dend =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb28-9"><a></a>  <span class="at">show_column_names =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb28-10"><a></a>  <span class="at">show_heatmap_legend =</span> <span class="cn">FALSE</span></span>
+<span id="cb28-11"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
