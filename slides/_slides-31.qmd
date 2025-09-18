@@ -4,7 +4,6 @@ subtitle: "Introduction and Quality Control"
 author: "Kristen Wells"
 ---
 
-
 ```{r}
 #| label: packages
 #| echo: false
@@ -14,14 +13,11 @@ author: "Kristen Wells"
 
 library(here)
 library(ggplot2)
-#library(DiagrammeR)
 #library(SingleCellExperiment)
 #library(scater)
 #library(AnnotationHub)
 #library(Matrix)
 #library(scran)
-
-img_dir <- "../img/block-rna"
 ```
 
 
@@ -147,74 +143,61 @@ Many others: ATAC, spatial transcriptomics, DNA sequencing, etc. (see [Integrati
 
 ## Overview of analysis steps
 
-```{r}
-#| out-height: '50%'
-#| out-width: '60%'
-grViz(
-  "
-digraph workflow {
-  graph [layout = dot,
-         rankdir = TB]
+```{mermaid}
+flowchart TB
+    %% Green nodes
+    cr["Process FASTQ to UMI count matrix<br/>(Cellranger, Alevin, or STARsolo)"]
 
-  node [shape = cicle,
-        style = filled,
-        fontcolor = black,
-        fontname = 'Helvetica']
+    %% Blue nodes
+    cell_qc["QC cells<br/>(% mitochondrial UMIs,<br/># of UMIs/Genes,<br/>remove empty droplets)"]
+    norm["Normalize UMI counts<br/>(Normalize by deconvolution)"]
+    markers["Discover cell type markers"]
+    annot["Annotate cell types"]
 
-  # green
-  node [fillcolor = '#009E73']
-  cr [label = 'Process FASTQ to UMI count matrix\n(Cellranger, Alevin, or STARsolo)']
+    %% Yellow nodes
+    feature["Identify variable genes<br/>(a.k.a Feature selection)"]
+    dim_red["Dimensionality reduction (PCA)"]
+    cluster["Clustering<br/>(using Shared Nearest Neighbors)"]
+    viz["Make 2D-Visualization<br/>(PCA, UMAP, tSNE<br/>Force-directed graph)"]
+    traj["Trajectory Inference<br/>(Slingshot,<br/>PAGA, scVelo)"]
 
-  # blue
-  node [fillcolor = '#56B4E9']
-  cell_qc [label = 'QC cells\n (% mitochondrial UMIs,\n# of UMIs/Genes,\nremove empty droplets)']
-  norm [label = 'Normalize UMI counts\n(Normalize by deconvolution)']
+    %% Orange nodes
+    downstream["Downstream analysis<br/>(Differential expression,<br/>Shifts in cell type composition,<br/>Find new cell-types/states)"]
 
-  # yellow
-  node [fillcolor = '#F0E442']
-  feature [label = 'Identify variable genes\n(a.k.a Feature selection)']
-  dim_red [label = 'Dimensionality reduction (PCA)']
-  cluster [label = 'Clustering\n (using Shared Nearest Neighbors)']
-  viz [label = 'Make 2D-Visualization\n(PCA, UMAP, tSNE\nForce-directed graph)']
-  traj [label = 'Trajectory Inference\n(Slingshot,\nPAGA, scVelo)']
+    %% Main workflow connections
+    cr --> cell_qc
+    cell_qc --> norm
+    norm --> feature
+    norm --> markers
+    feature --> dim_red
+    dim_red --> cluster
+    dim_red --> traj
+    dim_red --> viz
+    cluster --> markers
+    markers --> annot
 
-  # blue
-  node [fillcolor = '#56B4E9']
+    %% Feedback loops (dashed grey)
+    annot -.-> cell_qc
+    annot -.-> feature
+    annot -.-> dim_red
+    annot -.-> cluster
+    annot --> downstream
 
-  markers [label = 'Discover cell type markers']
-  annot [label = 'Annotate cell types']
+    %% Edge labels
+    cr -.-|"Load into<br/>SingleCellExperiment"| cell_qc
+    annot -.-|"Repeat<br/>as needed"| cell_qc
 
-  # orange
-  node [fillcolor = '#E69F00']
-  downstream  [label = 'Downstream analysis\n(Differential expression,\nShifts in cell type composition,\n Find new cell-types/states)']
+    %% Color styling
+    classDef green fill:#009E73,stroke:#000,stroke-width:2px,color:#000
+    classDef blue fill:#56B4E9,stroke:#000,stroke-width:2px,color:#000
+    classDef yellow fill:#F0E442,stroke:#000,stroke-width:2px,color:#000
+    classDef orange fill:#E69F00,stroke:#000,stroke-width:2px,color:#000
 
-  edge [color = black
-        fontname = 'Helvetica']
-
-  cr -> cell_qc [label = 'Load into \nSingleCellExperiment']
-  cell_qc -> norm
-  norm -> feature
-  norm -> markers
-  feature -> dim_red
-  dim_red -> cluster
-  dim_red -> traj
-  dim_red -> viz
-  cluster -> markers
-  markers -> annot
-
-  edge [color = 'grey'
-        style = 'dashed']
-  annot -> cell_qc [label = 'Repeat\n as needed']
-  annot -> feature
-  annot -> dim_red
-  annot -> cluster
-  annot -> downstream
-}"
-)
+    class cr green
+    class cell_qc,norm,markers,annot blue
+    class feature,dim_red,cluster,viz,traj yellow
+    class downstream orange
 ```
-
-
-
 
 ## From raw reads to a UMI count matrix
 
@@ -234,7 +217,6 @@ digraph workflow {
 - [`STAR-solo`](https://github.com/alexdobin/STAR/blob/master/docs/STARsolo.md) (From the STAR developers)
 
 :::
-
 
 ::::
 
@@ -256,8 +238,6 @@ Commands:
      swim       : perform super-secret operation
      quantmerge : merge multiple quantifications into a single file
 ```
-
-
 
 ## Alevin
 
@@ -292,8 +272,6 @@ Can generate interactive QC reports using [alevinQC](https://csoneson.github.io/
 
 [PBMC QC report](../data/block-rna/scrna/qc/pbmc/alevinReport.html)
 
-
-
 ## QC: cell or empty droplet? {.smaller}
 
 :::: {.columns}
@@ -319,10 +297,17 @@ detected, but only 1-10k cells are loaded
 #| fig-height: 9
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 library(alevinQC)
-alevin <- readAlevinQC(baseDir = here("data/block-rna/scrna/pbmc"))
+
+alevin <- readAlevinQC(
+  baseDir = here("data/block-rna/scrna/pbmc")
+)
+
 cell_counts <- alevin$cbTable
 
-ggplot(cell_counts, aes(ranking, originalFreq)) +
+ggplot(
+  cell_counts,
+  aes(ranking, originalFreq)
+) +
   geom_point(size = 0.1) +
   scale_x_log10(labels = scales::comma, breaks = c(10, 1000, 10000, 100000)) +
   scale_y_log10() +
@@ -347,6 +332,7 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
 #| fig-height: 9
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 frst_dev <- max(cell_counts$ranking[cell_counts$inFirstWhiteList])
+
 ggplot(cell_counts, aes(ranking, originalFreq)) +
   geom_point(size = 0.1) +
   scale_x_log10(labels = scales::comma, breaks = c(10, 1000, 10000, 100000)) +
@@ -385,8 +371,6 @@ ggplot(cell_counts, aes(ranking, originalFreq)) +
 
 ```{r}
 #| label: plot-label
-#| fig-width: 9
-#| fig-height: 9
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 ggplot(cell_counts, aes(ranking, originalFreq)) +
   geom_point(aes(color = inFinalWhiteList), size = 0.1) +
@@ -1049,63 +1033,48 @@ sce
 
 ## Analysis workflow
 
-```{r}
-#| out-height: "100%"
-#| out-width: "100%"
-grViz(
-  "
-digraph workflow {
-  graph [layout = dot,
-         rankdir = LR]
+```{mermaid}
+flowchart LR
+    %% Green nodes
+    load["Import data<br/>tximport::tximport()<br/>SingleCellExperiment()<br/>counts()"]
 
-  node [shape = cicle,
-        style = filled,
-        fontcolor = black,
-        fontname = 'Helvetica']
+    %% Blue nodes
+    cell_qc["QC cells<br/>addPerCellQCMetrics()<br/>plotColData()"]
+    norm["Normalize UMI counts<br/>quickCluster()<br/>computeSumFactors()<br/>logNormCounts()"]
+    markers["Discover cell type markers<br/>scoreMarkers()"]
+    annot["Annotate cell types<br/>clustifyr and SingleR"]
 
-  # green
-  node [fillcolor = '#009E73']
-  load [label= 'Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()']
+    %% Yellow nodes
+    feature["Identify variable genes<br/>modelGeneVarByPoisson()<br/>getTopHVGs()"]
+    dim_red["Dimensionality reduction via PCA<br/>runPCA()"]
+    cluster["Clustering<br/>clusterCells()"]
+    viz["Make 2D-Visualization<br/>runUMAP()"]
 
-  # blue
-  node [fillcolor = '#56B4E9']
-  cell_qc [label = 'QC cells\n addPerCellQCMetrics()\n plotColData()']
-  norm [label = 'Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()']
+    %% Main workflow connections
+    load --> cell_qc
+    cell_qc --> norm
+    norm --> feature
+    norm --> markers
+    feature --> dim_red
+    dim_red --> cluster
+    dim_red --> viz
+    cluster --> markers
+    markers --> annot
 
-  # yellow
-  node [fillcolor = '#F0E442']
-  feature [label = 'Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()']
-  dim_red [label = 'Dimensionality reduction via PCA \n runPCA()']
-  cluster [label = 'Clustering\n clusterCells()']
-  viz [label = 'Make 2D-Visualization\nrunUMAP()']
+    %% Feedback loops (dashed grey)
+    annot -.-> cell_qc
+    annot -.-> feature
+    annot -.-> dim_red
+    annot -.-> cluster
 
-  # blue
-  node [fillcolor = '#56B4E9']
+    %% Styling
+    classDef green fill:#009E73,stroke:#000,stroke-width:1px,color:#000
+    classDef blue fill:#56B4E9,stroke:#000,stroke-width:1px,color:#000
+    classDef yellow fill:#F0E442,stroke:#000,stroke-width:1px,color:#000
 
-  markers [label = 'Discover cell type markers \nscoreMarkers()']
-  annot [label = 'Annotate cell types\nclustifyr and SingleR']
-
-  edge [color = black
-        fontname = 'Helvetica']
-
-  load -> cell_qc
-  cell_qc -> norm
-  norm -> feature
-  norm -> markers
-  feature -> dim_red
-  dim_red -> cluster
-  dim_red -> viz
-  cluster -> markers
-  markers -> annot
-
-  edge [color = 'grey'
-        style = 'dashed']
-  annot -> cell_qc [label = 'Repeat\n as needed']
-  annot -> feature
-  annot -> dim_red
-  annot -> cluster
-}"
-)
+    class load green
+    class cell_qc,norm,markers,annot blue
+    class feature,dim_red,cluster,viz yellow
 ```
 
 ## Normalization `r emo::ji("keyboard")`
@@ -1118,7 +1087,7 @@ digraph workflow {
 #| echo: true
 # set seed for functions with a randomized component
 # to obtain the same result each execution
-set.seed(20231023)
+set.seed(42)
 sce <- runPCA(sce, exprs_values = "counts", name = "count_PCA")
 ```
 
@@ -1169,7 +1138,7 @@ ggplot(plot_df, aes(count_PCA.1, sum)) +
 ```{r}
 #| echo: true
 #| warning: false
-set.seed(20231023)
+set.seed(42)
 clusters <- quickCluster(sce)
 sce <- computeSumFactors(sce, clusters = clusters)
 sce <- logNormCounts(sce)
@@ -1185,7 +1154,7 @@ Plot the PCA with normalization
 
 ```{r}
 #| echo: true
-set.seed(20231023)
+set.seed(42)
 sce <- runPCA(sce, exprs_values = "logcounts", name = "PCA")
 plotReducedDim(sce, "PCA", colour_by = "sum")
 ```

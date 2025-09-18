@@ -90,7 +90,7 @@ hur_annot <- annotate_regions(
   annotations = annotations,
   ignore.strand = FALSE,
   quiet = FALSE
-) %>%
+) |>
   data.frame()
 
 # keep only columns we need
@@ -104,7 +104,7 @@ myInfo <- c(
   "annot.type"
 )
 
-hur_annot <- hur_annot[, myInfo] %>%
+hur_annot <- hur_annot[, myInfo] |>
   unique()
 
 # getting rid of the "hg19_genes_" string to simplify `annot.type`
@@ -128,20 +128,20 @@ Now we want to get the following info:
 #| output-location: column-fragment
 
 # count the # sites per gene and annotation cat
-hur_gene_clip <- hur_annot %>%
-  filter(annot.type != "intergenic") %>%
-  group_by(annot.symbol, annot.type) %>%
-  dplyr::count() %>%
+hur_gene_clip <- hur_annot |>
+  filter(annot.type != "intergenic") |>
+  group_by(annot.symbol, annot.type) |>
+  dplyr::count() |>
   pivot_wider(names_from = annot.type, values_from = n)
 
-hur_gene_clip <- hur_gene_clip %>%
+hur_gene_clip <- hur_gene_clip |>
   mutate_if(is.numeric, replace_na, replace = 0)
 
 # new column w/total # sites
 hur_gene_clip$total <- rowSums(hur_gene_clip[, -1])
 
 # remove symbols that are NA
-hur_gene_clip <- hur_gene_clip %>%
+hur_gene_clip <- hur_gene_clip |>
   filter(annot.symbol != "NA")
 
 # rename cols
@@ -159,13 +159,13 @@ colnames(hur_gene_clip)[3:4] <- c("utr3", "utr5")
 #| output-location: column-fragment
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 
-hur_gene_clip_long <- hur_gene_clip %>%
+hur_gene_clip_long <- hur_gene_clip |>
   pivot_longer(-Symbol)
 
 colnames(hur_gene_clip_long) <- c("symbol", "region", "sites")
 
 ggplot(
-  hur_gene_clip_long %>% filter(region != "total"),
+  hur_gene_clip_long |> filter(region != "total"),
   aes(sites, fill = region)
 ) +
   geom_histogram() +
@@ -183,7 +183,7 @@ ggplot(
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 
 # how many genes have both intron and/or 3' UTR sites
-site_combo <- hur_gene_clip[, 2:5] %>%
+site_combo <- hur_gene_clip[, 2:5] |>
   mutate(
     type = case_when(
       introns > 0 & utr3 > 0 ~ "intron_utr3",
@@ -230,8 +230,8 @@ HuR$Gene <- rownames(HuR) # new column gene ids
 HuR <- left_join(HuR, gene_info[c(2, 11)], by = "Gene") # Symbol
 
 # Filter for expression
-hur_filt_rnaseq <- HuR %>%
-  dplyr::filter(rowMeans(HuR[, 1:4]) > 1) %>%
+hur_filt_rnaseq <- HuR |>
+  dplyr::filter(rowMeans(HuR[, 1:4]) > 1) |>
   dplyr::select(-Gene)
 ```
 
@@ -247,10 +247,10 @@ hur_filt_rnaseq <- HuR %>%
 kd_clip <- left_join(hur_filt_rnaseq, hur_gene_clip, by = "Symbol")
 
 # convert all NA to 0
-kd_clip <- kd_clip %>% mutate_if(is.numeric, replace_na, replace = 0)
+kd_clip <- kd_clip |> mutate_if(is.numeric, replace_na, replace = 0)
 
 # calculate log fold changes
-kd_clip <- kd_clip %>%
+kd_clip <- kd_clip |>
   mutate(
     lfc_mature = log2(Mature_siGFP) - log2(Mature_siHuR),
     lfc_primary = log2(Primary_siGFP) - log2(Primary_siHuR)
@@ -369,7 +369,7 @@ fit_bins <- lm(
 )
 
 # examine estimates and p-vals
-tidy(fit_bins) %>%
+tidy(fit_bins) |>
   gt()
 ```
 
@@ -384,14 +384,14 @@ tidy(fit_bins) %>%
 #| output-location: column-fragment
 
 # mean lfc of mRNAs with no 3' UTR binding sites
-ref_mean <- kd_clip_targets %>%
-  filter(utr3_bin == "0") %>%
-  pull(lfc_mature) %>%
+ref_mean <- kd_clip_targets |>
+  filter(utr3_bin == "0") |>
+  pull(lfc_mature) |>
   mean()
 
 
 # examine estimates and p-vals
-tidy(fit_bins) %>%
+tidy(fit_bins) |>
   ggplot(
     data = .,
     aes(

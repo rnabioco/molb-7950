@@ -4,12 +4,11 @@ author: "{{< var instructor.block.rna >}}"
 ---
 
 ```{r}
-#| label: packages
+#| label: load-libs
 #| echo: false
 #| include: false
 #| message: false
 #| warning: false
-
 library(tidyverse)
 library(cowplot)
 library(here)
@@ -43,13 +42,11 @@ We know this because each of those reads cross a **splice junction** that is eit
 
 > What does the red read tell us?  What would a read that unambiguously told us that exon2 was *excluded* look like?
 
-
 ## Strategy in action {.smaller}
 
 Example of reads mapped to the area surrounding an alternative exon (the middle exon).  The height of the red and blue area corresponds to the number of read coverage. The red and blue lines connecting exons represent the number of reads that span that junction. So for the blue condition, there are 347 reads (91 + 256) that support the inclusion of this exon, while 81 reads support its exclusion.  In the red condition, this exon is less often excluded as 296 reads (65 + 231) support its inclusion while 130 support its exclusion. *Think about how often an exon was included in a sample as a ratio between the inclusion- and exclusion-supporting reads*.
 
 ![](/img/block-rna/sashimi.png){width=50%}
-
 
 ## Workflow {.smaller}
 
@@ -275,7 +272,6 @@ The **ninth** field is the *template length*, abbreviated TLEN. This is the dist
 
 If you know a little bit about how RNAseq libraries are made, you might know that transcripts are fragmented, usually to lengths of 200-500 nt. Given that this read is stretching over 3 kb along the reference sequence, it's a good bet that it is spanning an intron that is present in the reference but had been removed in the RNA molecule i.e. it was spliced out!
 
-
 ## Workflow {.smaller}
 
 Now that we have aligned with `STAR`, we can calculate exon inclusion with `rMATS`. As is often the case with bioinformatic tools, `rMATS` is not the only tool that you can use to look at alternative splicing, but it has been around for a while and has been thoroughly tested.
@@ -310,12 +306,8 @@ In this diagram, the exon in gray can either be included or skipped to produced 
 There are other types of alternative splicing besides skipped exons. In each case, $\psi$ is defined as the fraction of transcript in which the white sequence is included.
 
 Since we have already determined where in the genome RNAseq reads came from using `STAR`, we will now use `rMATS` to take those locations and combine it with information about the locations of alternative exons to quantify the inclusion of each alternative exon.
-
-
 :::
 :::
-
-
 
 ## Running rMATS {.smaller}
 
@@ -419,37 +411,28 @@ The numbers from `[S|I]JC_SAMPLE_X ` could be useful for filtering events based 
 ## rMATS output {.smaller}
 
 ```{r}
-#| eval: true
-#| echo: true
 #| label: read-rmats
-
-psis <- read.table(
-  here("data/block-rna/rMATS/SE.MATS.JC.txt.gz"),
-  header = T
-) %>%
-  # Get rid of columns we aren't really going to use.
+#| echo: true
+#| message = false
+psis <-
+  read_tsv(
+    here("data/block-rna/rMATS/SE.MATS.JC.txt.gz"),
+  ) |>
+  # Select only the columns we care about
   dplyr::select(
-    .,
     c(
-      "ID",
-      "geneSymbol",
-      "IJC_SAMPLE_1",
-      "SJC_SAMPLE_1",
-      "IJC_SAMPLE_2",
-      "SJC_SAMPLE_2",
-      "FDR",
-      "IncLevel1",
-      "IncLevel2",
-      "IncLevelDifference"
+      ID = ID...1,
+      geneSymbol,
+      contains("SAMPLE"),
+      FDR,
+      starts_with("Inc")
     )
   )
 
-head(psis)
+psis
 ```
 
 We will only consider events where there are *at least* 20 informative reads that tell us about the inclusion of the exon `IJC + SJC > 20` in **every replicate**. For example, for event '5' (gene Neil1) above, Sample 1 replicates have 12, 6, 9, and 5 reads while Sample 2 replicates have 10, 8, 14, and 0 reads.  I would want to require that all of 12, 6, 9, 5, 10, 8, 14, and 0 are greater than 20 in order to worry about this event.  Otherwise, I conclude that we don't have enough data to accurately conclude anything about this event.
-
-
 
 ## tidy rMATS output {.smaller}
 
@@ -457,43 +440,32 @@ We will only consider events where there are *at least* 20 informative reads tha
 #| eval: true
 #| echo: true
 #| label: tidy-rmats
+psis <- psis |>
+  separate_wider_delim(
+    cols = c(IJC_SAMPLE_1, SJC_SAMPLE_1, IJC_SAMPLE_2, SJC_SAMPLE_2),
+    delim = ",",
+    names_sep = "",
+    too_few = "align_start"
+  ) |>
+  rename_with(
+    \(x) {
+      case_when(
+        str_detect(x, "IJC_SAMPLE_1_(\\d+)") ~
+          str_replace(x, "IJC_SAMPLE_1_(\\d+)", "IJC_S1R\\1"),
+        str_detect(x, "SJC_SAMPLE_1_(\\d+)") ~
+          str_replace(x, "SJC_SAMPLE_1_(\\d+)", "SJC_S1R\\1"),
+        str_detect(x, "IJC_SAMPLE_2_(\\d+)") ~
+          str_replace(x, "IJC_SAMPLE_2_(\\d+)", "IJC_S2R\\1"),
+        str_detect(x, "SJC_SAMPLE_2_(\\d+)") ~
+          str_replace(x, "SJC_SAMPLE_2_(\\d+)", "SJC_S2R\\1"),
+        .default = x
+      )
+    }
+  ) |>
+  # Convert to numeric
+  mutate(across(starts_with(c("IJC_", "SJC_")), as.numeric))
 
-psis <- psis %>%
-  # Split the replicate read counts that are separated by commas into different columns
-  separate(
-    .,
-    col = IJC_SAMPLE_1,
-    into = c("IJC_S1R1", "IJC_S1R2", "IJC_S1R3", "IJC_S1R4"),
-    sep = ",",
-    remove = T,
-    convert = T
-  ) %>%
-  separate(
-    .,
-    col = SJC_SAMPLE_1,
-    into = c("SJC_S1R1", "SJC_S1R2", "SJC_S1R3", "SJC_S1R4"),
-    sep = ",",
-    remove = T,
-    convert = T
-  ) %>%
-  separate(
-    .,
-    col = IJC_SAMPLE_2,
-    into = c("IJC_S2R1", "IJC_S2R2", "IJC_S2R3", "IJC_S2R4"),
-    sep = ",",
-    remove = T,
-    convert = T
-  ) %>%
-  separate(
-    .,
-    col = SJC_SAMPLE_2,
-    into = c("SJC_S2R1", "SJC_S2R2", "SJC_S2R3", "SJC_S2R4"),
-    sep = ",",
-    remove = T,
-    convert = T
-  )
-
-head(psis)
+psis
 ```
 
 
@@ -501,31 +473,21 @@ head(psis)
 
 
 ```{r}
+#| label: filt-rmats
 #| eval: true
 #| echo: true
-#| label: filt-rmats
-
-psis_filt <- psis %>%
-  mutate(., S1R1counts = IJC_S1R1 + SJC_S1R1) %>%
-  mutate(., S1R2counts = IJC_S1R2 + SJC_S1R2) %>%
-  mutate(., S1R3counts = IJC_S1R3 + SJC_S1R3) %>%
-  mutate(., S1R4counts = IJC_S1R4 + SJC_S1R4) %>%
-  mutate(., S2R1counts = IJC_S2R1 + SJC_S2R1) %>%
-  mutate(., S2R2counts = IJC_S2R2 + SJC_S2R2) %>%
-  mutate(., S2R3counts = IJC_S2R3 + SJC_S2R3) %>%
-  mutate(., S2R4counts = IJC_S2R4 + SJC_S2R4) %>%
-  # Filter on read counts
-  filter(
-    .,
-    S1R1counts >= 20 &
-      S1R2counts >= 20 &
-      S1R3counts >= 20 &
-      S1R4counts >= 20 &
-      S2R1counts >= 20 &
-      S2R2counts >= 20 &
-      S2R3counts >= 20 &
-      S2R4counts >= 20
-  )
+psis_filt <- psis |>
+  mutate(
+    S1R1counts = IJC_SAMPLE_11 + SJC_SAMPLE_11,
+    S1R2counts = IJC_SAMPLE_12 + SJC_SAMPLE_12,
+    S1R3counts = IJC_SAMPLE_13 + SJC_SAMPLE_13,
+    S1R4counts = IJC_SAMPLE_14 + SJC_SAMPLE_14,
+    S2R1counts = IJC_SAMPLE_21 + SJC_SAMPLE_21,
+    S2R2counts = IJC_SAMPLE_22 + SJC_SAMPLE_22,
+    S2R3counts = IJC_SAMPLE_23 + SJC_SAMPLE_23,
+    S2R4counts = IJC_SAMPLE_24 + SJC_SAMPLE_24
+  ) |>
+  filter(if_all(ends_with("counts"), ~ .x >= 20))
 
 head(psis_filt)
 ```
@@ -536,63 +498,60 @@ head(psis_filt)
 Exons whose inclusion is not regulated tend to have PSI values that are either very close to 0 or very close to 1 (i.e. these exons are pretty much always included or always skipped). Exons whose inclusion is regulated tend to have PSI values that are more evenly spread between 0 and 1. Do see this in our data?
 
 ```{r}
-#| eval: true
-#| echo: true
 #| label: plot-psis
+#| echo: true
 #| output-location: slide
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-
-psis_filt_psi <- psis_filt %>%
-  # Separate psi value replicates into individual columns
-  separate(
-    .,
+psis_filt_psi <- psis_filt |>
+  separate_wider_delim(
     col = IncLevel1,
-    into = c("PSI_S1R1", "PSI_S1R2", "PSI_S1R3", "PSI_S1R4"),
-    sep = ",",
-    remove = T,
-    convert = T
-  ) %>%
-  separate(
-    .,
+    delim = ",",
+    names = c("PSI_S1R1", "PSI_S1R2", "PSI_S1R3", "PSI_S1R4")
+  ) |>
+  separate_wider_delim(
     col = IncLevel2,
-    into = c("PSI_S2R1", "PSI_S2R2", "PSI_S2R3", "PSI_S2R4"),
-    sep = ",",
-    remove = T,
-    convert = T
-  ) %>%
-  # Select the columns we want
-  dplyr::select(., c(contains("PSI"), FDR))
+    delim = ",",
+    names = c("PSI_S2R1", "PSI_S2R2", "PSI_S2R3", "PSI_S2R4")
+  ) |>
+  select(contains("PSI"), FDR) |>
+  mutate(across(starts_with("PSI"), as.numeric))
 
 # Turn data from wide format into long format for plotting purposes
-
-psis_filt_psi_long <- gather(
-  psis_filt_psi,
-  key = sample,
-  value = psi,
-  PSI_S1R1:PSI_S2R4
-) %>%
-  # For each row, mark whether that replicate came from Condition 1 (RBFOXkd) or Condition2 (Controlkd)
-  # We can tell that by asking if the substring 'S1' is somewhere in 'sample'
+psis_filt_psi_long <- psis_filt_psi |>
+  pivot_longer(
+    cols = PSI_S1R1:PSI_S2R4,
+    names_to = "sample",
+    values_to = "psi"
+  ) |>
   mutate(
-    .,
-    condition = ifelse(grepl("S1", sample), "RBFOX2kd", "Controlkd")
-  ) %>%
-  # Make a column indicating whether the FDR in this row is significant
-  mutate(., sig = ifelse(FDR < 0.05, "yes", "no"))
+    condition = if_else(str_detect(sample, "S1"), "RBFOX2kd", "Controlkd"),
+    sig = if_else(FDR < 0.05, "yes", "no")
+  )
+```
 
+```{r}
+#| label: plot-psis-2
+#| echo: true
+#| output-location: slide
 # Plot
 colors <- c("DarkOrange", "DarkViolet")
 
 ggplot(
   psis_filt_psi_long,
-  aes(x = psi, linetype = condition, color = sig)
+  aes(
+    x = psi,
+    linetype = condition,
+    color = sig
+  )
 ) +
   geom_density() +
   theme_cowplot() +
-  facet_wrap(~sig, scales = "free_y", nrow = 2) +
+  facet_wrap(
+    ~sig,
+    scales = "free_y",
+    nrow = 2
+  ) +
   scale_color_manual(values = colors)
 ```
-
 
 ## PCA of PSI values {.smaller}
 
@@ -606,14 +565,25 @@ Just as we did with gene expression values, we can monitor the quality of this d
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 
 # Make a matrix of psi values
-psis.matrix <- dplyr::select(psis_filt_psi, -FDR) %>% na.omit(.)
+psis_mtx <-
+  select(psis_filt_psi, -FDR) |>
+  drop_na()
 
 # Use prcomp() to derive principle component coordinants of PSI values
-psi.pca <- prcomp(t(psis.matrix))
+psi_pca <- prcomp(t(psis_mtx))
 
 # Add annotations of the conditions to the samples
-psi.pca.pc <- data.frame(psi.pca$x, sample = colnames(psis.matrix)) %>%
-  mutate(., condition = ifelse(grepl("S1", sample), "RBFOX2kd", "Controlkd"))
+psi_pca_pc <-
+  tibble(
+    pc = psi_pca$x,
+    sample = colnames(psis_mtx)
+  ) |>
+  mutate(
+    condition = case_when(
+      grepl("S1", sample) ~ "RBFOX2kd",
+      .default = "Controlkd"
+    )
+  )
 
 # Get the amount of variances contained within PC1 and PC2
 psi.pca.summary <- summary(psi.pca)$importance
@@ -623,18 +593,23 @@ pc2var <- round(psi.pca.summary[2, 2] * 100, 1)
 # Plot PCA data
 ggplot(
   psi.pca.pc,
-  aes(x = PC1, y = PC2, shape = condition, color = condition)
+  aes(
+    x = PC1,
+    y = PC2,
+    shape = condition,
+    color = condition
+  )
 ) +
   geom_point(size = 5) +
   scale_color_manual(values = colors) +
-  xlab(paste("PC1,", pc1var, "% explained var.")) +
-  ylab(paste("PC2,", pc2var, "% explained var.")) +
+  labs(
+    x = paste("PC1,", pc1var, "% explained var."),
+    y = paste("PC2,", pc2var, "% explained var.")
+  ) +
   theme_cowplot()
 ```
 
-
-## heatmap of psi events
-
+## Heatmap of psi events
 
 ```{r}
 #| eval: true
@@ -643,8 +618,8 @@ ggplot(
 #| output-location: slide
 
 # Filter only significant events
-psi_sig <- psis_filt_psi %>%
-  filter(FDR < 0.05) %>%
+psi_sig <- psis_filt_psi |>
+  filter(FDR < 0.05) |>
   select(-FDR)
 
 # row scaled heatmap
@@ -652,6 +627,6 @@ pheatmap(
   mat = psi_sig,
   clustering_method = "ward.D2",
   scale = "row",
-  show_rownames = F
+  show_rownames = FALSE
 )
 ```

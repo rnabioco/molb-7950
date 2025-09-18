@@ -10,18 +10,17 @@ author: "Kristen Wells"
 #| include: false
 #| message: false
 #| warning: false
-
 library(here)
 library(ggplot2)
-library(DiagrammeR)
+library(cowplot)
+library(patchwork)
+
 library(SingleCellExperiment)
 library(scater)
 library(scran)
 library(AnnotationHub)
 library(Matrix)
-library(cowplot)
 ```
-
 
 ## Contact Info
 
@@ -66,64 +65,48 @@ RBI Informatics Fellows [Office hours](https://medschool.cuanschutz.edu/rbi/trai
 
 ::: {.column width="50%}
 
-```{r}
-#| echo: false
-#| out-height: '70%'
-#| out-width: '70%'
+```{mermaid}
+flowchart LR
+    %% Green nodes
+    load["Import data<br/>tximport::tximport()<br/>SingleCellExperiment()<br/>counts()"]
 
-library(DiagrammeR)
-grViz("
-digraph workflow {
-  graph [layout = dot,
-         rankdir = TD]
+    %% Blue nodes
+    cell_qc["QC cells<br/>addPerCellQCMetrics()<br/>plotColData()"]
+    norm["Normalize UMI counts<br/>quickCluster()<br/>computeSumFactors()<br/>logNormCounts()"]
+    markers["Discover cell type markers<br/>scoreMarkers()"]
+    annot["Annotate cell types<br/>clustifyr and SingleR"]
 
-  node [shape = cicle,
-        style = filled,
-        fontcolor = black,
-        fontname = 'Helvetica']
+    %% Yellow nodes
+    feature["Identify variable genes<br/>modelGeneVarByPoisson()<br/>getTopHVGs()"]
+    dim_red["Dimensionality reduction via PCA<br/>runPCA()"]
+    cluster["Clustering<br/>clusterCells()"]
+    viz["Make 2D-Visualization<br/>runUMAP()"]
 
-  # green
-  node [fillcolor = '#009E73']
-  load [label= 'Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()']
+    %% Main workflow connections
+    load --> cell_qc
+    cell_qc --> norm
+    norm --> feature
+    norm --> markers
+    feature --> dim_red
+    dim_red --> cluster
+    dim_red --> viz
+    cluster --> markers
+    markers --> annot
 
-  # blue
-  node [fillcolor = '#56B4E9']
-  cell_qc [label = 'QC cells\n addPerCellQCMetrics()\n plotColData()']
-  norm [label = 'Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()']
+    %% Feedback loops (dashed grey)
+    annot -.-> cell_qc
+    annot -.-> feature
+    annot -.-> dim_red
+    annot -.-> cluster
 
-  # yellow
-  node [fillcolor = '#F0E442']
-  feature [label = 'Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()']
-  dim_red [label = 'Dimensionality reduction via PCA \n runPCA()']
-  cluster [label = 'Clustering\n clusterCells()']
-  viz [label = 'Make 2D-Visualization\nrunUMAP()']
+    %% Styling
+    classDef green fill:#009E73,stroke:#000,stroke-width:1px,color:#000
+    classDef blue fill:#56B4E9,stroke:#000,stroke-width:1px,color:#000
+    classDef yellow fill:#F0E442,stroke:#000,stroke-width:1px,color:#000
 
-  # blue
-  node [fillcolor = '#56B4E9']
-
-  markers [label = 'Discover cell type markers \nscoreMarkers()']
-  annot [label = 'Annotate cell types\nclustifyr and SingleR']
-
-  edge [color = black
-        fontname = 'Helvetica']
-
-  load -> cell_qc
-  cell_qc -> norm
-  norm -> feature
-  norm -> markers
-  feature -> dim_red
-  dim_red -> cluster
-  dim_red -> viz
-  cluster -> markers
-  markers -> annot
-
-  edge [color = 'grey'
-        style = 'dashed']
-  annot -> cell_qc [label = 'Repeat\n as needed']
-  annot -> feature
-  annot -> dim_red
-  annot -> cluster
-}")
+    class load green
+    class cell_qc,norm,markers,annot blue
+    class feature,dim_red,cluster,viz yellow
 ```
 
 :::
@@ -182,7 +165,6 @@ mrks <- scoreMarkers(sce, sce$clusters)
 #| warning: false
 #| message: false
 #| echo: true
-
 # load data
 library(tximport)
 tx <- tximport(
@@ -214,8 +196,11 @@ sce <- sce[rowData(sce)$n_cells >= 10, ]
 
 # basic QC
 is_mito <- startsWith(rowData(sce)$gene, "MT-")
+
 sce <- addPerCellQCMetrics(sce, subsets = list(Mito = is_mito))
+
 sce$pass_qc <- sce$subsets_Mito_percent < 20 & sce$sum > 1000 & sce$detected > 500
+
 sce <- sce[, sce$pass_qc]
 ```
 
@@ -234,7 +219,7 @@ with a pseudocount.
 #| warning: false
 #| echo: true
 
-set.seed(20231023)
+set.seed(42)
 clusters <- quickCluster(sce)
 sce <- computeSumFactors(sce, clusters = clusters)
 sce <- logNormCounts(sce)
@@ -272,7 +257,7 @@ logcounts(sce)[50:60, 1:4]
 ```{r}
 #| echo: true
 
-set.seed(00010101)
+set.seed(42)
 dec <- modelGeneVarByPoisson(sce)
 top <- getTopHVGs(dec, prop = 0.1)
 top[1:4]
@@ -365,6 +350,7 @@ In this two dimensional space, PCA minimizes the distances from a line and every
 library(MASS)
 library(ggrepel)
 library(dplyr)
+
 # generate some correlated variables, scale, and make tidy
 set.seed(42)
 sim <- MASS::mvrnorm(

@@ -9,7 +9,6 @@ author: "{{< var instructor.block.rna >}}"
 #| include: false
 #| message: false
 #| warning: false
-
 library(tidyverse)
 library(cowplot)
 library(here)
@@ -62,7 +61,7 @@ t2g <- biomaRt::getBM(
 
 # maps systematic to common gene names
 gene_name_map <- t2g |>
-  dplyr::select(-ensembl_transcript_id) |>
+  select(-ensembl_transcript_id) |>
   unique()
 ```
 
@@ -71,35 +70,36 @@ gene_name_map <- t2g |>
 Now we can read in the transcript-level data and collapse to gene-level data with `tximport`
 
 ```{r}
-#| echo: true
-#| eval: true
 #| label: metadata
-
-metadata <- data.frame(
-  sample_id = list.files(
+#| echo: true
+metadata <- tibble(
+  sample_id = fs::dir_ls(
     here("data/block-rna/differentiation_salmonouts"),
-    pattern = "^DIV"
-  ),
-  salmon_dirs = list.files(
+    regexp = "^DIV",
+    type = "directory"
+  ) |>
+    fs::path_file(),
+  salmon_dirs = fs::dir_ls(
     here("data/block-rna/differentiation_salmonouts"),
-    recursive = T,
-    pattern = "quant.sf",
-    full.names = T
+    recurse = TRUE,
+    regexp = "quant\\.sf$"
   )
 ) |>
-  separate(
+  separate_wider_delim(
     col = sample_id,
-    into = c("timepoint", "rep"),
-    sep = "\\.",
-    remove = F
+    delim = ".",
+    names = c("timepoint", "rep"),
+    too_few = "align_start"
   )
 
-metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep)
+metadata$rep <- str_replace(metadata$rep, "Rep", "")
 
 rownames(metadata) <- metadata$sample_id
 
 metadata <- metadata |>
-  filter(timepoint %in% c("DIV0", "DIV7"))
+  filter(
+    timepoint %in% c("DIV0", "DIV7")
+  )
 
 salmdir <- metadata$salmon_dirs
 names(salmdir) <- metadata$sample_id
@@ -116,9 +116,8 @@ txi <- tximport(
 ## Filter lowly expressed genes
 
 ```{r}
+#| label: remove-low-genes
 #| echo: true
-#| eval: true
-#| label: remove low genes
 
 # examine distribution of TPMs
 hist(log2(1 + rowSums(txi$abundance)), breaks = 40)
@@ -133,12 +132,8 @@ keepG <- txi$abundance[log2(1 + rowSums(txi$abundance)) > 4.5, ] |>
 There are essentially two steps to using `DESeq2`. The first involves creating a `DESeqDataSet` from your data. Luckily, if you have a `tximport` object, which we do in the form of `txi`, then this becomes easy.
 
 ```{r}
-#| echo: true
-#| eval: true
 #| label: deseq-object
-
-# metadata$timepoint <- as.factor(metadata$timepoint)
-
+#| echo: true
 ddsTxi <- DESeqDataSetFromTximport(
   txi,
   colData = metadata,
@@ -153,13 +148,13 @@ ddsTxi <- ddsTxi[keepG, ]
 
 You can see that `DESeqDataSetFromTximport` wants three things. The first is our `tximport` object. The second is the dataframe we made that relates samples and conditions (or in this case timepoints). The last is something called a **design formula**. A design formula contains all of the variables that will go into `DESeq2`'s model. The formula starts with a tilde and then has variables separated by a plus sign think `lm()`. It is common practice, and in fact basically required with `DESeq2`, to put the variable of interest last. In our case, that's trivial because we only have one: timepoint. So our design formula is very simple:
 
-```
+```r
 design = ~ timepoint
 ```
 
 Your design formula should ideally include **all of the sources of variation in your data**. For example, let's say that here we thought there was a batch effect with the replicates. Maybe all of the Rep1 samples were prepped and sequenced on a different day than the Rep2 samples and so on. We could potentially account for this in `DESeq2`'s model with the following forumula:
 
-```
+```r
 design = ~ rep + timepoint
 ```
 
@@ -170,9 +165,8 @@ Here, timepoint is still the variable of interest, but we are controlling for di
 We can see here that `DESeq2` is taking the counts produced by `tximport` for gene quantifications. There are 52346 genes (rows) here and 7 samples (columns). Now using this ddsTxi object, we can run `DESeq2`.
 
 ```{r}
-#| echo: true
-#| eval: true
 #| label: deseq
+#| echo: true
 
 # create DESeq object
 dds <- DESeq(ddsTxi)
@@ -193,9 +187,8 @@ The lexographically first condition will be the numerator. I find it easier to e
 ## Contrasts to get results {.smaller}
 
 ```{r}
-#| echo: true
-#| eval: true
 #| label: deseq-results
+#| echo: true
 
 # For contrast, we give three strings: the factor we are interested in, the numerator, and the denominator
 results(dds, contrast = c("timepoint", "DIV7", "DIV0"))
@@ -210,10 +203,8 @@ log2FoldChange is self-explanatory. padj is the Benjamini-Hochberg corrected pva
 Let's do a little work on this data frame to make it slightly cleaner and more informative.
 
 ```{r}
-#| echo: true
-#| eval: true
 #| label: results-1
-
+#| echo: true
 diff <-
   results(
     dds,
@@ -223,13 +214,13 @@ diff <-
   as.data.frame() |>
   # Move ensembl gene IDs into their own column
   rownames_to_column(var = "ensembl_gene_id") |>
+  as_tibble() |>
   # drop unused columns
-  dplyr::select(-c(baseMean, lfcSE, stat, pvalue)) |>
+  select(-c(baseMean, lfcSE, stat, pvalue)) |>
   # Merge this with a table relating ensembl_gene_id with gene short names
   inner_join(gene_name_map) |>
   # Rename external_gene_name column
-  dplyr::rename(gene = external_gene_name) |>
-  as_tibble()
+  rename(gene = external_gene_name)
 ```
 
 ## How many are significant {.smaller}
@@ -237,9 +228,8 @@ diff <-
 OK now we have a table of gene expression results. How many genes are significantly up/down regulated between these two timepoints? We will use 0.01 as an FDR (p.adj) cutoff.
 
 ```{r}
-#| echo: true
-#| eval: true
 #| label: results-1-sig
+#| echo: true
 
 # number of upregulated genes
 nrow(filter(diff, padj < 0.01 & log2FoldChange > 0))
@@ -253,9 +243,8 @@ nrow(filter(diff, padj < 0.01 & log2FoldChange < 0))
 Let's make a volcano plot of these results.
 
 ```{r}
-#| echo: true
-#| eval: true
 #| label: volcano-1
+#| echo: true
 #| output-location: slide
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
 
@@ -313,13 +302,13 @@ diff_lfc <-
   as.data.frame() |>
   # Move ensembl gene IDs into their own column
   rownames_to_column(var = "ensembl_gene_id") |>
+  as_tibble() |>
   # drop unused columns
-  dplyr::select(-c(baseMean, lfcSE, stat, pvalue)) |>
+  select(-c(baseMean, lfcSE, stat, pvalue)) |>
   # Merge this with a table relating ensembl_gene_id with gene short names
   inner_join(gene_name_map) |>
   # Rename external_gene_name column
-  dplyr::rename(gene = external_gene_name) |>
-  as_tibble()
+  rename(gene = external_gene_name)
 
 # number of upregulated genes
 nrow(
@@ -370,12 +359,10 @@ diff_lfc_sig |>
 ## Filtered Volcano {.smaller}
 
 ```{r}
-#| echo: true
-#| eval: true
 #| label: plot-2
+#| echo: true
 #| output-location: slide
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
-
 ggplot(
   diff_lfc_sig,
   aes(
@@ -427,12 +414,17 @@ Let's plot the expression of Klf4, Sox2, Bdnf, and Dlg4 in our samples.
 tpms <- txi$abundance |>
   as.data.frame() |>
   rownames_to_column(var = "ensembl_gene_id") |>
+  as_tibble() |>
   inner_join(gene_name_map) |>
-  dplyr::rename(gene = external_gene_name) |>
+  rename(gene = external_gene_name) |>
   # Filter for genes we are interested in
   filter(gene %in% c("Klf4", "Sox2", "Bdnf", "Dlg4")) |>
   pivot_longer(-c(ensembl_gene_id, gene)) |>
-  separate(col = name, into = c("condition", "rep"), sep = "\\.")
+  sepeate_wider_delim(
+    col = name,
+    delim = ".",
+    names = c("condition", "rep")
+  )
 
 gt(tpms)
 ```
@@ -482,7 +474,6 @@ We can use `biomaRt` to get all genes that belong to each of these categories. T
 #| echo: true
 #| eval: true
 #| label: biomart-pathways
-
 pluripotencygenes <- getBM(
   attributes = c("ensembl_gene_id"),
   filters = c("go_parent_term"),
@@ -536,21 +527,14 @@ diff_paths <-
       ensembl_gene_id %in% cellcyclegenes$ensembl_gene_id ~ "cellcycle",
       ensembl_gene_id %in% neurongenes$ensembl_gene_id ~ "neurondiff",
       .default = "none"
+    ),
+    # Reorder these for plotting purposes
+    annot = factor(
+      annot,
+      levels = c("none", "cellcycle", "pluripotency", "neurondiff")
     )
   ) |>
-  drop_na() # drop na
-
-# Reorder these for plotting purposes
-diff_paths$annot <-
-  factor(
-    diff_paths$annot,
-    levels = c(
-      "none",
-      "cellcycle",
-      "pluripotency",
-      "neurondiff"
-    )
-  )
+  drop_na()
 ```
 
 ## Are there significant differences? {.smaller}
@@ -561,13 +545,11 @@ OK we've got our table, now we are going to ask if the log2FoldChange values for
 #| echo: true
 #| eval: true
 #| label: sig-pathways
-
 pvals <- rstatix::wilcox_test(
   data = diff_paths,
   log2FoldChange ~ annot,
   ref.group = "none"
 )
-
 
 p.pluripotency <- pvals |>
   filter(group2 == "pluripotency") |>
@@ -577,7 +559,6 @@ p.cellcycle <- pvals |>
   filter(group2 == "cellcycle") |>
   pull(p.adj)
 
-
 p.neurondiff <- pvals |>
   filter(group2 == "neurondiff") |>
   pull(p.adj)
@@ -586,13 +567,11 @@ p.neurondiff <- pvals |>
 ## plot pathway differences {.smaller}
 
 ```{r}
-#| echo: true
-#| eval: true
 #| label: plot-diff-results
+#| echo: true
 #| warning: false
 #| output-location: slide
 #| fig.alt: "Description of the plot - PLEASE FILL IN"
-
 ggplot(
   diff_paths,
   aes(
@@ -658,15 +637,15 @@ Bottom = downregulated
 3.  Run GSEA
 
 ```{r}
+#| label: prep-gsea
 #| echo: true
 #| eval: true
-#| label: prep-gsea
 #| output-location: slide
 
 # retrieve hallmark gene set from msigdb
 mouse_hallmark <- msigdbr(species = "Mus musculus") %>%
   filter(gs_cat == "H") %>%
-  dplyr::select(gs_name, gene_symbol)
+  select(gs_name, gene_symbol)
 
 # create a list of gene LFCs
 rankedgenes <- diff_lfc %>% pull(log2FoldChange)
@@ -684,9 +663,8 @@ rankedgenes <- rankedgenes[!duplicated(names(rankedgenes))]
 ## Run GSEA {.smaller}
 
 ```{r}
-#| echo: true
-#| eval: true
 #| label: run-gsea
+#| echo: true
 #| output-location: slide
 
 # run gsea
