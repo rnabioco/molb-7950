@@ -35,7 +35,7 @@ library(valr)
 library(ComplexHeatmap)
 ```
 
-## Load data
+## Load data {.smaller}
 
 First, we need to load relevant files:
 
@@ -61,6 +61,7 @@ Next we'll load bigWigs for the ATAC and MNase experiments, containing either sh
 
 Recall that the information encoded in short and long fragments should be reflected in our interpretations.
 
+First, we make a tibble of file paths and metadata.
 ```{r}
 #| label: load-bigwigs
 #| echo: true
@@ -80,16 +81,40 @@ acc_tbl <-
     )
   ) |>
   mutate(
-    file_path = here("data/block-dna", file_name),
+    file_path = here("data/block-dna", file_name)
+  )
+```
+
+---
+
+Next, we need to read in the bigWig files. We use `purrr::map` to apply `read_bigwig()`
+to each of the bigWig files, and store the results in a new column called `big_wig`.
+
+```{r}
+acc_tbl <-
+  mutate(
+    acc_tbl,
     big_wig = purrr::map(
       file_path,
       \(x) read_bigwig(x)
     )
   ) |>
   select(sample_type, big_wig)
+
+acc_tbl
 ```
 
 # Meta-plots
+
+## WHY meta-plots and heatmaps?
+
+Meta-plots and heatmaps are useful for visualizing patterns of signal across many
+loci at the same time.
+
+This is particularly useful for chromatin data, where we often want to
+understand how chromatin structure varies across many genes or regulatory elements
+that share a common reference point, like transcription start sites (TSS) or
+nucleosomal midpoints.
 
 ## Setting up regions for a meta-plot
 
@@ -121,9 +146,6 @@ spans some distance both up- and downstream of the reference points.
 Once the window size has been decided, the next step is to make "sub-windows"
 around a reference point. If gene features are involved, we also need to take
 strand into account.
-
-(The state of genome annotation directly influences the quality of the meta-plot
-or heatmap.)
 
 ## Setting up regions for a meta-plot
 
@@ -254,7 +276,7 @@ Finally, let's plot the data relative to TSS for each of the windows.
 #| label: plot-meta-signals
 #| echo: true
 #| output-location: slide
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "Plot of chromatin accessibility around transcription start sites (TSS) in S. cerevisiae chrII, faceted by sample type."
 n_tss <- length(unique(yeast_tss$name))
 
 ggplot(
