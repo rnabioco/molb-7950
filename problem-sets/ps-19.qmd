@@ -1,0 +1,284 @@
+---
+title: "DNA Block - Problem Set 19"
+format:
+  html:
+    embed-resources: true
+    code-fold: true
+execute:
+  echo: true
+---
+
+## Problem Set
+
+Total points: 20.
+
+For this problem set, you will explore the relationship between
+
+## Load libraries
+
+Start by loading libraries you need analysis in the code chunk below.
+
+```{r}
+#| label: load-libs
+
+```
+
+Load the data from the MNase-seq experiment.
+
+```{r}
+#| label: load-mnase-bed
+#| eval: false
+mnase_tbl <- read_bed(___)
+```
+
+In class we learned that MNase digestion yields nucleosomal "footprints" of \~150 bp in size. I've added blue vertical lines to emphasize positions of the major peak (intact nucleosomes) as well as smaller "sub-nucleosomal" peak.
+
+![](img/ps-17-mnase-histogram.png)
+
+We can calculate the counts for the histogram above and more precisely determine the maximum signal using `which.max()` to identify the *index* of the maximum value in a vector (*not* the value itself!):
+
+```{r}
+#| label: frag-hist
+#| eval: false
+frag_hist <-
+  mnase_tbl |>
+  mutate(frag_len = ___) |>
+  count(frag_len)
+
+# `which.max` takes a vector and gives us the index of the maximum value
+max_idx <- which.max(___)
+
+# now we can use that index to find the most abundant fragment size
+ncp_max <- frag_hist$frag_len[max_idx]
+```
+
+So this tells us that that the most abundant fragment size in the library is ** ___ *** bp.
+
+## Question 1
+
+Let's take a closer look at the some of the smaller fragments in the MNase experiment. In particular, let's zoom in on the populations of fragments that are smaller than 1 nucleosome in size, the peak between 85 and 95 bp (the left-most blue vertical line).
+
+1.  Use the above strategy to precisely determine the peak of this smaller size range. How big are those fragments? These are called "sub-nucleosomal" fragments.
+
+```{r}
+#| label: frag-hist-sub
+#| eval: false
+frag_hist_sub <- filter(
+  frag_hist,
+  ___
+)
+
+n_max_sub <- which.max(___)
+# use the strategy above to identify the position of maximum signal
+subnuc_max <- ___
+```
+
+**Answer:**
+
+The maximum size of sub-nucleosomal fragments is at ___ bp.
+
+2.  Do this one more time, and identify the position of maximum signal in the disome peak (i.e., the fragments protected by two nucleosomes).
+
+```{r}
+#| label: frag-hist-disome
+#| eval: false
+frag_hist_di <- filter(
+  frag_hist,
+  ___
+)
+
+n_max_di <- which.max(___)
+dinuc_max <- ___
+```
+
+3.  Recreate the histogram using ggplot2 (using relevant code from class 17) and
+    add the blue vertical lines at the peak positions you calculated,
+    including the position of the disomes above.
+
+```{r}
+#| label: plt-frag-hist
+#| eval: false
+ggplot(
+  mnase_tbl,
+  aes(x = ___)
+) +
+  geom_histogram(
+    # single base-pair resolution
+    binwidth = ___
+  ) +
+  labs(
+    x = "___",
+    title = "___"
+  ) +
+  theme_cowplot() +
+  geom_vline(
+    xintercept = ___,
+    color = "blue"
+  )
+```
+
+## Question 2 -- 13 points
+
+Next we're going to look at *where* these sub-sucleosomes are with respect to
+intact nucleosomes.
+
+Our strategy will be to compare the density of sub-nucleosomes relative to
+the mid-points of previously mapped nucleosomes. Specifically, our reference point will be the midpoints of the +1 nucleosomes.
+
+So you'll make a metaplot, but instead of using transcription start sites as the reference point, we'll use the midpoints of the +1 nucleosome, and instead of MNase-seq signal density, you'll count up the number of individual reads that intersect with windows around those midpoints.
+
+1.  First, load the relevant data. We'll re-use the `yeast_mnase_chrII.bed.gz` data you loaded above, plus you'll need to load two other files:
+
+    -   a "genome" file, `sacCer3.chrom.sizes`
+    -   a BED file, `yeast_p1_chrII.bed.gz` which contains the mid-points of the +1 nucleosomes on chromosome 2. Recall that the +1 nucleosome is the nucleosome downstream of the transcription start site.
+
+```{r}
+#| label: load-data-2
+#| eval: false
+genome <- read_genome(___)
+
+p1_tbl <- read_bed(___)
+```
+
+2.  Next, we need the mid-points of nucleosomes for comparison. The following function needs fixing.
+
+```{r}
+#| label: calc-midpoints
+#| eval: false
+calc_mids <- function(tbl, min_len, max_len) {
+  tbl |>
+    mutate(
+      frag_len = ___
+    ) |>
+    filter(
+      ___
+    ) |>
+    mutate(
+      midpoint = ___
+    ) |>
+    select(chrom, midpoint) |>
+    rename(start = midpoint) |>
+    mutate(end = start + 1)
+}
+```
+
+3.  Now use this function to calculate the midpoints of the intact nucleosome fragments (around 149 bp) and the sub-nucleosomal fragments (around 90 bp). Expand these midpoints by 20 bp on either side using `bed_slop()`, since we'll be looking for intersections with these intervals.
+
+```{r}
+#| label: ncp-midpoints
+#| eval: false
+ncp_mids_tbl <-
+  # specify the min and the max sizes, expanding out from the max size 3 bp in each direction to capture the peak
+  calc_mids(mnase_tbl, ___, ___) |>
+  # now expand out by 20 bp on either side
+  bed_slop(___, ___)
+
+subnuc_mids_tbl <-
+  calc_mids(mnase_tbl, ___, ___) |>
+  bed_slop(___, ___)
+```
+
+4.  Next, we need to make the intervals for the metaplot. We'll look 100 bp up- and downstream of the +1 nucleosome positions, and make windows that are **1 bp** in size.
+
+```{r}
+#| label: metaplot-windows
+#| eval: false
+p1_win_tbl <-
+  bed_slop(
+    p1_tbl,
+    ___,
+    ___
+  ) |>
+  bed_makewindows(
+    ___
+  )
+```
+
+5.  Almost there! Now you just need to identify the number of short and long nuclesome fragments (based on their midpoints) that intersect with the +1 nucleosomes you defined above.
+
+    Use `bed_intersect()` to identify fragments that overlap, and then just count the number of fragments per `.win_id` (don't forget the .`.x` suffix). Note you will do this separately for the short and long fragments.
+
+```{r}
+#| label: ncp-summaries
+#| eval: false
+ncp_mids_summary_tbl <-
+  bed_intersect(
+    p1_win_tbl,
+    ncp_mids_tbl
+  ) |>
+  count(.win_id.x) |>
+  mutate(type = "Intact nucleosomes (~149 bp)")
+
+subnuc_mids_summary_tbl <-
+  bed_intersect(
+    p1_win_tbl,
+    subnuc_mids_tbl
+  ) |>
+  count(.win_id.x) |>
+  mutate(type = "Sub-nucleosomes (~90 bp)")
+```
+
+6.  The following joins the tables you made together, and makes the x-axis more informative, by converting to position rather than window ID.
+
+```{r}
+#| label: update-windows
+#| eval: false
+win_ids <- seq(-100, 100, 1)
+
+all_tbl <- bind_rows(
+  ncp_mids_summary_tbl,
+  subnuc_mids_summary_tbl
+) |>
+  mutate(win_ids = win_ids, .by = "type")
+```
+
+7.  Finally, we plot the data with position on the x-axis, and count on the y-axis.
+
+```{r}
+#| label: plt-ncp-density
+#| eval: false
+ggplot(
+  all_tbl,
+  aes(x = win_ids, y = n)
+) +
+  # add a line representing nucleosome density
+  geom_line(
+    linewidth = 1,
+    color = "red"
+  ) +
+  # facet by type of fragment
+  facet_wrap(
+    ~type,
+    scales = "free_y"
+  ) +
+  theme_minimal_grid() +
+  labs(
+    x = "Position relative to +1 nucleosome midpoints",
+    y = "Number of intersecting fragments",
+    title = "Fragment density around +1 nucleosome midpoints"
+  )
+```
+
+Your plot should look like this:
+
+![](img/ps-17-nucleosome-histograms.png)
+
+## Interpretation
+
+How do you interpret these plots?
+
+Rationalize the pattern for intact nucleosomes. What pattern did you expect to see?
+
+**Answer:**
+
+Rationalize the pattern for sub-nucleosome. How would you describe the positions of sub-nucleosomal fragments, relative to the +1 nucleosome midpoints? What might this mean with respect to gene transcription?
+
+**Answer:**
+
+What do the differences between signal magnitudes (reflected by the y-axis) mean?
+
+**Answer:**
+
+## Submit
+
+Be sure to click the "Render" button to render the HTML output. Then paste the URL of this Posit Cloud project into the problem set on Canvas.
