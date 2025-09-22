@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.8.24">
 
   <meta name="author" content="Jay Hesselberth">
-  <meta name="dcterms.date" content="2025-09-21">
+  <meta name="dcterms.date" content="2025-09-22">
   <title>MOLB 7950 – Where do proteins bind in the genome?</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -215,7 +215,7 @@ Jay Hesselberth
     </div>
 </div>
 
-  <p class="date">2025-09-21</p>
+  <p class="date">2025-09-22</p>
 </section>
 <section id="what-to-map-and-how-to-map-it" class="slide level2">
 <h2>What to map and how to map it?</h2>
@@ -253,8 +253,8 @@ Jay Hesselberth
 <img data-src="../img/block-dna/cut-and-run.png" class="quarto-figure quarto-figure-center r-stretch"></section>
 <section id="section-3" class="slide level2">
 <h2></h2>
-<p><img data-src="../img/block-dna/chip-resolution-comparison.png"> {fig-align=“center”}</p>
-</section>
+
+<img data-src="../img/block-dna/chip-resolution-comparison.png" class="quarto-figure quarto-figure-center r-stretch"></section>
 <section id="comparison-of-factor-centric-methods" class="slide level2 smaller">
 <h2>Comparison of factor-centric methods</h2>
 <div class="columns">
@@ -294,10 +294,12 @@ Jay Hesselberth
 <h1>Workflow</h1>
 
 </section>
+<section id="analysis-overview" class="slide level2 smaller">
+<h2>Analysis overview</h2>
 <h3 id="fastq-files">FASTQ files</h3>
 <ul>
-<li class="fragment"><p>Adapter trimming</p></li>
-<li class="fragment"><p>Aligning to the genome</p></li>
+<li class="fragment">Adapter trimming</li>
+<li class="fragment">Aligning to the genome</li>
 </ul>
 <h3 id="bed-files">Bed files</h3>
 <ul>
@@ -305,11 +307,12 @@ Jay Hesselberth
 </ul>
 <h3 id="read-density-wigbedgraph">Read density (wig/bedgraph)</h3>
 <ul>
-<li class="fragment"><p>Call peaks</p></li>
-<li class="fragment"><p>Meta analysis</p></li>
-<li class="fragment"><p>Identify motifs</p></li>
-<li class="fragment"><p>Compare perturbations to control, compare to other datasets</p></li>
+<li class="fragment">Call peaks</li>
+<li class="fragment">Meta analysis</li>
+<li class="fragment">Identify motifs</li>
+<li class="fragment">Compare perturbations to control, compare to other datasets</li>
 </ul>
+</section>
 <section id="example-data-ctcf-cutrun-in-k562-cells" class="slide level2">
 <h2>Example data: CTCF CUT&amp;RUN in K562 cells</h2>
 
@@ -432,7 +435,7 @@ Jay Hesselberth
 <span id="cb4-30"><a></a>          <span class="at">background.title =</span> <span class="st">"white"</span>,</span>
 <span id="cb4-31"><a></a>          <span class="at">col.title =</span> <span class="st">"black"</span>,</span>
 <span id="cb4-32"><a></a>          <span class="at">col.axis =</span> <span class="st">"black"</span>,</span>
-<span id="cb4-33"><a></a>          <span class="at">fontsize =</span> <span class="dv">16</span></span>
+<span id="cb4-33"><a></a>          <span class="at">fontsize =</span> <span class="dv">12</span></span>
 <span id="cb4-34"><a></a>        )</span>
 <span id="cb4-35"><a></a>      }</span>
 <span id="cb4-36"><a></a>    )</span>
@@ -450,10 +453,10 @@ Jay Hesselberth
 <span id="cb5-5"><a></a>  <span class="at">fontsize =</span> <span class="dv">16</span></span>
 <span id="cb5-6"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>Now that we have tracks loaded, we can make a plot.</p>
 </section>
 <section id="examine-genome-coverage-3" class="slide level2">
 <h2>Examine genome coverage</h2>
-<p>Now that we have tracks loaded, we can make a plot.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a><span class="fu">plotTracks</span>(</span>
 <span id="cb6-2"><a></a>  <span class="fu">c</span>(</span>
@@ -490,7 +493,7 @@ Jay Hesselberth
 <h2>Peak calling</h2>
 <p>A conceptually simple approach to identification of regions containing “peaks” where a transcription factor was bound is available in the MACS software (<a href="">paper</a>, <a href="">github</a>). There’s also a nice <a href="https://hbctraining.github.io/Intro-to-ChIPseq/lessons/05_peak_calling_macs.html">blog post</a> covering the main ideas.</p>
 </section>
-<section id="theory" class="slide level2">
+<section id="theory" class="slide level2 smaller">
 <h2>Theory</h2>
 <p>The Poisson distribution is a discrete probability distribution of the form:</p>
 <p><span class="math display">\[ P_\lambda (X=k) = \frac{ \lambda^k }{ k! * e^{-\lambda} } \]</span></p>
@@ -498,11 +501,11 @@ Jay Hesselberth
 <p>The R functions <code>dpois()</code>, <code>ppois()</code>, and <code>rpois()</code> provide access to the density, distribution, and random generation for the Poisson distribution.</p>
 <p>Look over the <code>?dpois</code> documentation.</p>
 </section>
-<section id="theory-1" class="slide level2">
+<section id="theory-1" class="slide level2 smaller">
 <h2>Theory</h2>
 
 <img data-src="slides-20_files/figure-revealjs/plot-poisson-1.png" alt="Poisson distributions with different lambda values" width="960" class="r-stretch"></section>
-<section id="practice" class="slide level2">
+<section id="practice" class="slide level2 smaller">
 <h2>Practice</h2>
 <p>Here, we model read coverage using the Poisson distribution. Given some genome size <span class="math inline">\(G\)</span> and and a number of reads collected <span class="math inline">\(N\)</span>, we can approximate <span class="math inline">\(\lambda\)</span> from <span class="math inline">\(N/G\)</span>.</p>
 <p>MACS uses this value (the “genomewide” lambda) and also calculates several “local” lambda values to account for variation among genomic regions. We’ll just use the genomewide lambda, which provides a conservative threshold for peak calling.</p>
@@ -535,7 +538,7 @@ Jay Hesselberth
 <span id="cb7-22"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="p-values" class="slide level2">
+<section id="p-values" class="slide level2 smaller">
 <h2>P-values</h2>
 <p>Let’s take a look at a plot of the p-value across a chromosome. What do you notice about this plot, when compared to the coverage of the CUT&amp;RUN coverage above?</p>
 <div class="cell">
@@ -549,11 +552,7 @@ Jay Hesselberth
 </div>
 
 </section>
-<section id="p-values-output" class="slide level2 output-location-slide"><h2>P-values</h2><div class="cell output-location-slide">
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 86357 rows containing missing values or values
-outside the scale range (`geom_line()`).</code></pre>
-</div>
+<section id="p-values-output" class="slide level2 smaller output-location-slide"><h2>P-values</h2><div class="cell output-location-slide">
 <div class="cell-output-display">
 <div>
 <figure>
@@ -561,29 +560,29 @@ outside the scale range (`geom_line()`).</code></pre>
 </figure>
 </div>
 </div>
-</div></section><section id="peaks" class="slide level2">
+</div></section><section id="peaks" class="slide level2 smaller">
 <h2>Peaks</h2>
 <p>How many peaks are called in this region?</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="co"># most stringent cut-off</span></span>
-<span id="cb10-2"><a></a>peak_calls_sig <span class="ot">&lt;-</span></span>
-<span id="cb10-3"><a></a>  <span class="fu">filter</span>(</span>
-<span id="cb10-4"><a></a>    peak_calls,</span>
-<span id="cb10-5"><a></a>    fdr <span class="sc">==</span> <span class="dv">0</span></span>
-<span id="cb10-6"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb10-7"><a></a>  <span class="co"># collapse neighboring, significant sites</span></span>
-<span id="cb10-8"><a></a>  <span class="fu">bed_merge</span>(<span class="at">max_dist =</span> <span class="dv">20</span>)</span>
-<span id="cb10-9"><a></a></span>
-<span id="cb10-10"><a></a><span class="fu">filter</span>(</span>
-<span id="cb10-11"><a></a>  peak_calls_sig,</span>
-<span id="cb10-12"><a></a>  chrom <span class="sc">==</span> <span class="st">"chrII"</span> <span class="sc">&amp;</span></span>
-<span id="cb10-13"><a></a>    start <span class="sc">&gt;=</span> track_start <span class="sc">&amp;</span></span>
-<span id="cb10-14"><a></a>    end <span class="sc">&lt;=</span> track_end</span>
-<span id="cb10-15"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a><span class="co"># most stringent cut-off</span></span>
+<span id="cb9-2"><a></a>peak_calls_sig <span class="ot">&lt;-</span></span>
+<span id="cb9-3"><a></a>  <span class="fu">filter</span>(</span>
+<span id="cb9-4"><a></a>    peak_calls,</span>
+<span id="cb9-5"><a></a>    fdr <span class="sc">==</span> <span class="dv">0</span></span>
+<span id="cb9-6"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-7"><a></a>  <span class="co"># collapse neighboring, significant sites</span></span>
+<span id="cb9-8"><a></a>  <span class="fu">bed_merge</span>(<span class="at">max_dist =</span> <span class="dv">20</span>)</span>
+<span id="cb9-9"><a></a></span>
+<span id="cb9-10"><a></a><span class="fu">filter</span>(</span>
+<span id="cb9-11"><a></a>  peak_calls_sig,</span>
+<span id="cb9-12"><a></a>  chrom <span class="sc">==</span> <span class="st">"chrII"</span> <span class="sc">&amp;</span></span>
+<span id="cb9-13"><a></a>    start <span class="sc">&gt;=</span> track_start <span class="sc">&amp;</span></span>
+<span id="cb9-14"><a></a>    end <span class="sc">&lt;=</span> track_end</span>
+<span id="cb9-15"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
-<section id="peaks-output" class="slide level2 output-location-slide"><h2>Peaks</h2><div class="cell output-location-slide">
+<section id="peaks-output" class="slide level2 smaller output-location-slide"><h2>Peaks</h2><div class="cell output-location-slide">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 3
   chrom  start    end
@@ -594,62 +593,55 @@ outside the scale range (`geom_line()`).</code></pre>
 4 chrII 136181 136264
 5 chrII 141070 141121</code></pre>
 </div>
-</div></section><section id="visualize" class="slide level2">
+</div></section><section id="visualize" class="slide level2 smaller">
 <h2>Visualize</h2>
 <p>Let’s visualize these peaks in the context of genomic CUT&amp;RUN signal. We need to define an <code>AnnotationTrack</code> with the peak intervals, which we can plot against the CUT&amp;RUN coverage we defined above.</p>
-<p>Let us load the data:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="co"># need a GRanges object to convert to an AnnotationTrack</span></span>
-<span id="cb12-2"><a></a>peak_calls_gr <span class="ot">&lt;-</span></span>
-<span id="cb12-3"><a></a>  <span class="fu">GRanges</span>(</span>
-<span id="cb12-4"><a></a>    <span class="at">seqnames =</span> peak_calls_sig<span class="sc">$</span>chrom,</span>
-<span id="cb12-5"><a></a>    <span class="at">ranges =</span> <span class="fu">IRanges</span>(peak_calls_sig<span class="sc">$</span>start, peak_calls_sig<span class="sc">$</span>end)</span>
-<span id="cb12-6"><a></a>  )</span>
-<span id="cb12-7"><a></a></span>
-<span id="cb12-8"><a></a>peak_calls_trk <span class="ot">&lt;-</span></span>
-<span id="cb12-9"><a></a>  <span class="fu">AnnotationTrack</span>(</span>
-<span id="cb12-10"><a></a>    peak_calls_gr,</span>
-<span id="cb12-11"><a></a>    <span class="at">name =</span> <span class="st">"Peak calls"</span>,</span>
-<span id="cb12-12"><a></a>    <span class="at">fill =</span> <span class="st">"red"</span>,</span>
-<span id="cb12-13"><a></a>    <span class="at">background.title =</span> <span class="st">"white"</span>,</span>
-<span id="cb12-14"><a></a>    <span class="at">col.title =</span> <span class="st">"red"</span>,</span>
-<span id="cb12-15"><a></a>    <span class="at">fontsize =</span> <span class="dv">16</span>,</span>
-<span id="cb12-16"><a></a>    <span class="at">rotation.title =</span> <span class="dv">0</span></span>
-<span id="cb12-17"><a></a>  )</span>
-<span id="cb12-18"><a></a></span>
-<span id="cb12-19"><a></a>abf1_short_trk <span class="ot">&lt;-</span></span>
-<span id="cb12-20"><a></a>  <span class="fu">filter</span>(</span>
-<span id="cb12-21"><a></a>    track_info,</span>
-<span id="cb12-22"><a></a>    sample_type <span class="sc">==</span> <span class="st">"Abf1_Short"</span></span>
-<span id="cb12-23"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb12-24"><a></a>  <span class="fu">pull</span>(data_track)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="co"># need a GRanges object to convert to an AnnotationTrack</span></span>
+<span id="cb11-2"><a></a>peak_calls_gr <span class="ot">&lt;-</span></span>
+<span id="cb11-3"><a></a>  <span class="fu">GRanges</span>(</span>
+<span id="cb11-4"><a></a>    <span class="at">seqnames =</span> peak_calls_sig<span class="sc">$</span>chrom,</span>
+<span id="cb11-5"><a></a>    <span class="at">ranges =</span> <span class="fu">IRanges</span>(peak_calls_sig<span class="sc">$</span>start, peak_calls_sig<span class="sc">$</span>end)</span>
+<span id="cb11-6"><a></a>  )</span>
+<span id="cb11-7"><a></a></span>
+<span id="cb11-8"><a></a>peak_calls_trk <span class="ot">&lt;-</span></span>
+<span id="cb11-9"><a></a>  <span class="fu">AnnotationTrack</span>(</span>
+<span id="cb11-10"><a></a>    peak_calls_gr,</span>
+<span id="cb11-11"><a></a>    <span class="at">name =</span> <span class="st">"Peak calls"</span>,</span>
+<span id="cb11-12"><a></a>    <span class="at">fill =</span> <span class="st">"red"</span>,</span>
+<span id="cb11-13"><a></a>    <span class="at">background.title =</span> <span class="st">"white"</span>,</span>
+<span id="cb11-14"><a></a>    <span class="at">col.title =</span> <span class="st">"red"</span>,</span>
+<span id="cb11-15"><a></a>    <span class="at">fontsize =</span> <span class="dv">16</span>,</span>
+<span id="cb11-16"><a></a>    <span class="at">rotation.title =</span> <span class="dv">0</span></span>
+<span id="cb11-17"><a></a>  )</span>
+<span id="cb11-18"><a></a></span>
+<span id="cb11-19"><a></a>abf1_short_trk <span class="ot">&lt;-</span></span>
+<span id="cb11-20"><a></a>  <span class="fu">filter</span>(</span>
+<span id="cb11-21"><a></a>    track_info,</span>
+<span id="cb11-22"><a></a>    sample_type <span class="sc">==</span> <span class="st">"Abf1_Short"</span></span>
+<span id="cb11-23"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb11-24"><a></a>  <span class="fu">pull</span>(data_track)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="fu">plotTracks</span>(</span>
+<span id="cb12-2"><a></a>  <span class="fu">c</span>(</span>
+<span id="cb12-3"><a></a>    sgd_genes_trk,</span>
+<span id="cb12-4"><a></a>    abf1_short_trk,</span>
+<span id="cb12-5"><a></a>    peak_calls_trk,</span>
+<span id="cb12-6"><a></a>    x_axis_trk</span>
+<span id="cb12-7"><a></a>  ),</span>
+<span id="cb12-8"><a></a>  <span class="at">from =</span> track_start,</span>
+<span id="cb12-9"><a></a>  <span class="at">to =</span> track_end,</span>
+<span id="cb12-10"><a></a>  <span class="at">chromosome =</span> <span class="st">"chrII"</span>,</span>
+<span id="cb12-11"><a></a>  <span class="at">transcriptAnnotation =</span> <span class="st">"gene"</span>,</span>
+<span id="cb12-12"><a></a>  <span class="at">shape =</span> <span class="st">"arrow"</span>,</span>
+<span id="cb12-13"><a></a>  <span class="at">type =</span> <span class="st">"histogram"</span></span>
+<span id="cb12-14"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
-<section id="visualize-output" class="slide level2 output-location-slide"><h2>Visualize</h2><div class="cell output-location-slide">
-
-</div></section><section id="visualize-1" class="slide level2">
-<h2>Visualize</h2>
-<p>And plot:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a><span class="fu">plotTracks</span>(</span>
-<span id="cb13-2"><a></a>  <span class="fu">c</span>(</span>
-<span id="cb13-3"><a></a>    sgd_genes_trk,</span>
-<span id="cb13-4"><a></a>    abf1_short_trk,</span>
-<span id="cb13-5"><a></a>    peak_calls_trk,</span>
-<span id="cb13-6"><a></a>    x_axis_trk</span>
-<span id="cb13-7"><a></a>  ),</span>
-<span id="cb13-8"><a></a>  <span class="at">from =</span> track_start,</span>
-<span id="cb13-9"><a></a>  <span class="at">to =</span> track_end,</span>
-<span id="cb13-10"><a></a>  <span class="at">chromosome =</span> <span class="st">"chrII"</span>,</span>
-<span id="cb13-11"><a></a>  <span class="at">transcriptAnnotation =</span> <span class="st">"gene"</span>,</span>
-<span id="cb13-12"><a></a>  <span class="at">shape =</span> <span class="st">"arrow"</span>,</span>
-<span id="cb13-13"><a></a>  <span class="at">type =</span> <span class="st">"histogram"</span></span>
-<span id="cb13-14"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-
-</section>
-<section id="visualize-1-output" class="slide level2 output-location-slide"><h2>Visualize</h2><div class="cell output-location-slide">
+<section id="visualize-output" class="slide level2 smaller output-location-slide"><h2>Visualize</h2><div class="cell output-location-slide">
 <div class="cell-output-display">
 <div>
 <figure>
@@ -657,6 +649,8 @@ outside the scale range (`geom_line()`).</code></pre>
 </figure>
 </div>
 </div>
+</div></section><section id="visualize-output" class="slide level2 smaller output-location-slide"><h2>Visualize</h2><div class="cell output-location-slide">
+
 </div></section><section id="questions-2" class="slide level2">
 <h2>Questions</h2>
 <ol type="1">
