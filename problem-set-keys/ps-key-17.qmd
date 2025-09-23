@@ -1,0 +1,215 @@
+---
+title: "DNA Block - Problem Set 17"
+format:
+  html:
+    code-fold: true
+    embed-resources: true
+---
+
+## Problem Set
+
+You have two tasks for this problem set.
+
+Each problem below is worth **20 points**.
+
+## Setup
+
+Load libraries you'll need for analysis below. You'll need the `tidyverse` and `valr` packages.
+
+```{r}
+#| label: load-libs
+#| message: false
+library(tidyverse)
+library(valr)
+```
+
+## Question 1 -- 5 points
+
+We'll work with a few different files for the next questions.
+
+- `hg19.refGene.chr22.bed.gz` is a BED12 file containing RefSeq gene (mRNA) information for chr22.
+- `hg19.rmsk.chr22.bed.gz` is a BED6 containing repetitive elements in the human genome.
+- `hg19.dnase1.bw` is a bigWig file containing DNaseI signal.
+
+You can find the path to each with `valr_example()`. Load each one invdividually using the `read_*` functions.
+
+```{r}
+#| label: q1-read-files
+gene_tbl <- read_bed(
+  valr_example("hg19.refGene.chr22.bed.gz")
+)
+
+rmsk_tbl <- read_bed(
+  valr_example("hg19.rmsk.chr22.bed.gz")
+)
+
+dnase_tbl <- read_bigwig(
+  valr_example("hg19.dnase1.bw")
+)
+```
+
+Some valr functions require a "genome" file, which is just a tibble of chromosome names and sizes.
+
+The hg19 genome file is available at `valr_example("hg19.chrom.sizes.gz")`. Use `read_genome()` to load it.
+
+Inspect the genome tibble. How many columns does it have? What is the largest chromosome?
+
+```{r}
+#| label: q1-read-genome
+genome <- read_genome(
+  valr_example("hg19.chrom.sizes.gz")
+)
+
+largest_chrom <-
+  arrange(genome, desc(size)) |>
+  pull(chrom) |>
+  head(1)
+```
+
+**Answers:**
+
+There are **`r ncol(genome)`** columns in the genome tibble and the largest chromosome is **`r largest_chrom`**.
+
+## Question 2 -- 5 points
+
+Which repeat class covers the largest amount of chromosome 22? You
+need to calculate the sum of the sizes of all intervals in each repeat class.
+
+A common pattern for this is e.g. `arrange(desc(size))`+ `pull(name)` + `head(1)`.
+
+You could also use `slice_max(size, n = 1))` + `pull(name)` + `head(1)`.
+
+```{r}
+#| label: q2-repeats
+rpt_coverage_tbl <-
+  rmsk_tbl |>
+  mutate(
+    interval_size = end - start
+  ) |>
+  summarize(
+    total_size = sum(interval_size),
+    .by = name
+  )
+
+rpt_high_cov <- rpt_coverage_tbl |>
+  arrange(desc(total_size)) |>
+  pull(name) |>
+  head(1)
+
+# or this way, don't need to arrange first
+rpt_high_cov <- rpt_coverage_tbl |>
+  slice_max(total_size, n = 1) |>
+  pull(name) |>
+  head(1)
+```
+
+**Answer:**
+
+The repeat class with the highest coverage is `r rpt_high_cov`.
+
+## Question 3
+
+Which promoter has the highest DNase I accessibility?
+
+1. Use the `create_tss()` function to generate transcription start sites from
+   the refGene annotations. How big are these intervals?
+
+2. Generate promoter regions with `bed_slop()`, adding 500 bp up- and downstream
+   of the TSS. `bed_slop()` requires the genome file above.
+
+3. Use `bed_map()` to calculate the total (i.e., summed) DNase I signal in the
+   promoters (the `score` column in the DNase file).
+
+Which gene has the highest DNase I in the region you defined above?
+
+
+
+```{r}
+#| label: q3-promoter-signal
+tss_tbl <- create_tss(gene_tbl)
+
+promoter_tbl <- bed_slop(
+  tss_tbl,
+  genome,
+  both = 500
+)
+
+promoter_dnase_tbl <-
+  bed_map(
+    promoter_tbl,
+    dnase_tbl,
+    score_sum = sum(value)
+  ) |>
+  replace_na(list(score_sum = 0))
+
+gene_high_dnase <-
+  promoter_dnase_tbl |>
+  arrange(desc(score_sum)) |>
+  pull(name) |>
+  head(1)
+```
+
+**Answer:**
+
+The gene with the highest DNase I signal in its promoter is `r gene_high_dnase`.
+
+## Question 4
+
+**Is DNase I accessibility in promoters significantly higher than expected by chance?**
+
+1. Calculate the mean DNase I signal across all promoters from **Question 3**.
+
+1. Use `bed_shuffle()` to generate 1000 random intervals of the same size as your promoters.
+   You'll need to provide the genome file from above.
+
+1. Use `bed_map()` to calculate DNase I signal in these random regions.
+
+1. Calculate what fraction of random regions have mean DNase I signal greater than
+   or equal to your observed promoter mean. This is your empirical p-value.
+
+```{r}
+#| label: q4-empirical-pval
+# Calculate observed mean DNase I signal across all promoters
+observed_mean <- mean(promoter_dnase_tbl$score_sum, na.rm = TRUE)
+
+# Generate 1000 random intervals and calculate their DNase I signals
+set.seed(42)
+n_permutations <- 1000
+
+random_signals <- map_dbl(
+  1:n_permutations,
+  \(x) {
+    # Shuffle promoter intervals to random positions
+    random_intervals <- bed_shuffle(promoter_tbl, genome)
+
+    # Calculate DNase I signal in random regions
+    random_dnase <- bed_map(
+      random_intervals,
+      dnase_tbl,
+      score_sum = sum(value)
+    ) |>
+      replace_na(list(score_sum = 0))
+
+    # Return mean signal for this permutation
+    mean(random_dnase$score_sum, na.rm = TRUE)
+  }
+)
+
+# Count how many random signals are >= observed mean
+#
+# `random_signals >= observed_mean` is a vector of TRUE/FALSE values
+n_extreme <- sum(random_signals >= observed_mean)
+
+# Calculate empirical p-value as proportion
+empirical_p <- n_extreme / length(random_signals)
+```
+
+**Answer:**
+
+The observed mean DNase I signal in promoters is `r round(observed_mean, 3)`, the mean of random signals is `r round(mean(random_signals), 3)`, and the empirical p-value is `r empirical_p`, so DNase I accessibility in promoters is significantly higher than expected by chance.
+
+## Submit
+
+Be sure to click the "Render" button to render the HTML output.
+
+Then paste the URL of this Posit Cloud project into the problem set on Canvas.
