@@ -35,14 +35,14 @@ library(valr)
 library(ComplexHeatmap)
 ```
 
-## Load data
+## Load data {.smaller}
 
 First, we need to load relevant files:
 
 -   `yeast_tss_chrII.bed.gz` contains transcription start sites (TSS) for genes on yeast chromosome 2.
 -   `sacCer3.chrom.sizes` contains the sizes of all yeast chromosomes, needed for some of the calculations we'll do. We'll grab this from the UCSC download site.
 
-`read_bed()` and `read_genom()` are valr functions.
+`read_bed()` and `read_genome()` are valr functions.
 
 ```{r}
 #| label: load-data
@@ -55,14 +55,26 @@ url <- "https://hgdownload.soe.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.chrom
 genome <- read_genome(url)
 ```
 
+---
+
+```{r}
+#| label: inspect-data
+#| echo: true
+yeast_tss
+
+genome
+```
+
 ## Load signals {.smaller}
 
 Next we'll load bigWigs for the ATAC and MNase experiments, containing either short or long fragments.
 
 Recall that the information encoded in short and long fragments should be reflected in our interpretations.
 
+First, we make a tibble of file paths and metadata.
 ```{r}
 #| label: load-bigwigs
+#| output-location: slide
 #| echo: true
 acc_tbl <-
   tibble(
@@ -80,16 +92,43 @@ acc_tbl <-
     )
   ) |>
   mutate(
-    file_path = here("data/block-dna", file_name),
+    file_path = here("data/block-dna", file_name)
+  )
+
+acc_tbl
+```
+
+---
+
+Next, we need to read in the bigWig files. We use `purrr::map` to apply `read_bigwig()`
+to each of the bigWig files, and store the results in a new column called `big_wig`.
+
+```{r}
+#| output-location: slide
+acc_tbl <-
+  mutate(
+    acc_tbl,
     big_wig = purrr::map(
       file_path,
       \(x) read_bigwig(x)
     )
   ) |>
   select(sample_type, big_wig)
+
+acc_tbl
 ```
 
 # Meta-plots
+
+## WHY meta-plots and heatmaps?
+
+Meta-plots and heatmaps are useful for visualizing patterns of signal across many
+loci at the same time.
+
+This is particularly useful for chromatin data, where we often want to
+understand how chromatin structure varies across many genes or regulatory elements
+that share a common reference point, like transcription start sites (TSS) or
+nucleosomal midpoints.
 
 ## Setting up regions for a meta-plot
 
@@ -122,9 +161,6 @@ Once the window size has been decided, the next step is to make "sub-windows"
 around a reference point. If gene features are involved, we also need to take
 strand into account.
 
-(The state of genome annotation directly influences the quality of the meta-plot
-or heatmap.)
-
 ## Setting up regions for a meta-plot
 
 For small features like transcription factor binding sites (8-20 bp), you might
@@ -143,7 +179,6 @@ of a set of reference points.
 
 ```{r}
 #| label: create-tss-coords
-#| output-location: column
 #| echo: true
 region_size_total <- 1500
 region_size_half <- region_size_total / 2
@@ -168,7 +203,6 @@ point (`bed_slop()`) and then break those windows into evenly spaced intervals
 ```{r}
 #| label: tss-slop-mw
 #| echo: true
-#| output-location: column
 yeast_tss |>
   bed_slop(genome, both = region_size_half) |>
   bed_makewindows(win_size = win_size)
@@ -180,6 +214,7 @@ At this point, we also address the fact that the TSS data are stranded. Can some
 
 ```{r}
 #| label: create-tss-windows
+#| output-location: slide
 tss_win_tbl <-
   yeast_tss |>
   bed_slop(genome, both = region_size_half) |>
@@ -192,6 +227,8 @@ tss_win_tbl <-
     .by = name
   ) |>
   select(-.win_id, -score, -strand)
+
+tss_win_tbl
 ```
 
 ## Chromatin accessibility around transcription start sites (TSSs) {.smaller}
@@ -202,7 +239,7 @@ window by intersecting signals from the bigWig files.
 ```{r}
 #| label: map-signals
 #| echo: true
-#| output-location: column
+#| output-location: slide
 acc_tbl <-
   acc_tbl |>
   mutate(
@@ -232,7 +269,7 @@ numbers represent a composite signal a the same position across all TSS.
 ```{r}
 #| label: calc-win-stats
 #| echo: true
-#| output-location: column
+#| output-location: slide
 tss_meta_tbl <-
   select(acc_tbl, sample_type, tss_win_sum) |>
   unnest(cols = c(tss_win_sum)) |>
@@ -254,7 +291,7 @@ Finally, let's plot the data relative to TSS for each of the windows.
 #| label: plot-meta-signals
 #| echo: true
 #| output-location: slide
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "Plot of chromatin accessibility around transcription start sites (TSS) in S. cerevisiae chrII, faceted by sample type."
 n_tss <- length(unique(yeast_tss$name))
 
 ggplot(
@@ -325,7 +362,6 @@ mnase_tbl
 ```{r}
 #| label: heatmap-data-tidy
 #| echo: true
-#| output-location: column
 mnase_tbl <-
   filter(
     acc_tbl,

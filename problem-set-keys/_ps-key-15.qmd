@@ -13,9 +13,12 @@ library(pheatmap)
 library(janitor)
 library(here)
 library(cowplot)
+library(GeneOverlap)
 ```
 
 ```{r}
+#| label: prep data
+
 ang <- read_csv(here("data/bootcamp/edger.csv.gz")) |>
   clean_names() |>
   filter(fdr < 0.05) |>
@@ -34,7 +37,9 @@ Make sure to run the chunk above. The data represent the avg fold change in gene
 Create hierarchical clustering heatmap of pairwise pearson correlation coefficients. And provide 1-2 observations.
 
 ```{r}
-# scale
+#| label: clustering correlations
+
+#  scale ang (remember the transpose trick)
 ang <- t(scale(t(ang)))
 
 # pairwise pearson correlation
@@ -56,7 +61,10 @@ Timepoints close to each other tend to correlate strongly with each other. The 4
 Perform PCA and visualize PC1 vs PC2.Provide 1-2 observations.
 
 ```{r}
-#|label: pca
+#| label: pca
+#| eval: false
+
+
 pc_ang <- prcomp(ang)
 
 # gather info from summary
@@ -84,54 +92,101 @@ There is a a circular patter that seems to correspond to the timepoints. Interes
 
 ## Calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling --- (6 pts) {.smaller}
 
-In order to do this, you will need to:
+step 1:
 
-1.  Identify which cluster is the most enriched for DUX4 targets.
-    -   Determine how many genes are in the cluster. You will need to know this to figure out how many genes to sample from the whole data set.
-    -   Determine how many of the genes in the cluster are DUX4 targets. This is the metric that you are interested in comparing between the null distribution and your observation.
-2.  Generate 1000 random sample of the proper size from all genes and find out how many of them are DUX4 targets.
-3.  Visualize the distribution of DUX4 targets in these 1000 random (your null distribution) and overlay the number of DUX4 targets you observed in the cluster that was most enriched for DUX4 targets.
+-   identify which cluster is the most enriched for DUX4 targets using `Geneoverlap`.
+-   assign the cluster number as a variable named `c` to use later.
 
 ```{r}
+#| label: step 1
 #| eval: false
+#| 
 # read in data
 cd <- read_tsv(here("data", "dux4_clustering_results.csv.gz"))
 
+# list of genes by dux4 targeting
+duxList <- split(cd$gene_symbol, cd$target)
+
+# list of genes by clustering
+clustList <- split(cd$gene_symbol, as.factor(cd$Cluster))
+
+# calculate all overlaps between lists
+gom.duxclust <- newGOM(duxList,
+                       clustList,
+                       genome.size = nrow(cd)
+                       )
+
+# retrieve p-values for each cluster and sort
+getMatrix(gom.duxclust, "pval") |>
+  t() |>
+  as.data.frame() |>
+  rownames_to_column(var = "clust") |>
+  as.tibble() |>
+  arrange(target)
+
+# which cluster has the lowest p-value?
+c <- 5
+```
+
+step 2:
+
+-   determine the number of total genes in that cluster. save this as a variable named `cN` to use later. you will need to know this to figure out how many genes to sample from the whole data set. the size matching will make it so the random samples in your null distribution is better matched to your observation specific to the cluster of interest.
+
+-   determine the number of DUX4 targets in the cluster. save this as a variable named `cNt` to use later. this is the number that you are interested in comparing between the null distribution and your observation. remember, the p-value tells you the probability that the null hypothesis could generate an equal or more extreme observation.
+
+```{r}
+#| label: step 2
+#| eval: false
+#| 
 # how many genes are in cluster 5?
-c5 <- cd |>
+cN <- cd |>
   filter(Cluster == "5") |>
   nrow()
 
 # how many dux targets are in cluster 5?
-c5t <- cd |>
+cNt <- cd |>
   filter(Cluster == "5" & target == "target") |>
   nrow()
 
+```
+
+step 3:
+
+generate 1000 random sample of the size `cN` from all genes in the data set, and for each random sample save the number of genes that are DUX4 targets. this is your null distribution.
+
+visualize the distribution of the \# of DUX4 targets in these 1000 random (your null distribution) and overlay the number of DUX4 targets you observed in the cluster that was most enriched for DUX4 targets, `cNt`.
+
+```{r}
+#| label: step 3
+#| eval: false
+#| 
+# first simplify the problem by figuring out the # of DUX4 targets for 1 random sample
+sample_n(tbl = cd, size = cN) |>
+  filter(target == "target") |>
+  nrow()
+  
+
+# create an empty vector for storing the # dux targets for each iteration. call this `sampled_targets`
 sampled_targets <- vector()
 
+
+# then use a for loop to do it 1000 times and save the results in `sampled_targets`
+
 for (i in 1:1000) {
-  sampled_targets[i] <- sample_n(tbl = cd, size = c5) |>
-    group_by(target) |>
-    tally() |>
-    # need this so all groups have at least 1.
-    mutate(n = n + 1) |>
-    filter(target == "target") |>
-    pull(n)
+  sampled_targets[i] <- sample_n(tbl = cd, size = cN) |>
+  filter(target == "target") |>
+  nrow()
 }
 
-n <- tibble(
-  targets = sampled_targets,
-  type = "null"
-)
-
-n |>
-  arrange(-sampled_targets) |>
-  top_n(10)
-
-ggplot(n, aes(x = targets)) +
+ggplot(n, aes(x = sampled_targets)) +
   geom_density() +
-  geom_vline(xintercept = c5t, color = "red") +
+  geom_vline(xintercept = cNt, color = "red") +
   theme_cowplot()
+
+# how many times did a simulation have more dux4 targets than `cNt`
+sampled_targets[sampled_targets > cNt] |>
+  length()
+
 ```
 
 ### What is the p-value?
@@ -140,6 +195,6 @@ p \< 0.001
 
 ### What is your interpretation?
 
-The null hypothesis that the number of DUX4 targets in c5t can be explained by chance - IS NOT WELL SUPPORTED.
+The null hypothesis that the number of DUX4 targets in cluster 5 IS NOT WELL SUPPORTED.
 
-The number of DUX4 targets in c5t CANNOT be explained by chance.
+The number of DUX4 targets in c5 is very unlikely to be explained by chance.

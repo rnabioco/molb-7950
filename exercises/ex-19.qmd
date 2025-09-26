@@ -1,0 +1,269 @@
+---
+title: "Chromatin accessibility II"
+subtitle: "Meta-plots and heatmaps"
+author: "{{< var instructor.block.dna >}}"
+date: last-modified
+---
+
+## Genomewide chromatin analysis with meta-plots and heatmaps
+
+Last class we saw what the different methods to profile chromatin
+accessibility can tell us about general chromatin structure and possible regulation
+at specific regions in a small portion of a chromosome.
+
+We also want to make sure these conclusions are valid throughout the genome.
+Since we want to keep the file sizes small, we will ask if they are valid across
+an entire chromosome.
+
+## Load libraries {.smaller}
+
+First we will plot the profiles of all our data sets relative to the
+transcription start site (TSS), where all the action seems to be happening.
+
+```{r}
+#| label: load-libs
+#| message: false
+#| echo: true
+
+```
+
+## Load data {.smaller}
+
+First, we need to load relevant files:
+
+-   `yeast_tss_chrII.bed.gz` contains transcription start sites (TSS) for genes on yeast chromosome 2.
+-   `sacCer3.chrom.sizes` contains the sizes of all yeast chromosomes, needed for some of the calculations we'll do. We'll grab this from the UCSC download site.
+
+`read_bed()` and `read_genom()` are valr functions.
+
+```{r}
+#| label: load-data
+#| echo: true
+
+```
+
+## Load signals {.smaller}
+
+Next we'll load bigWigs for the ATAC and MNase experiments, containing either short or long fragments.
+
+Recall that the information encoded in short and long fragments should be reflected in our interpretations.
+
+First, we make a tibble of file paths and metadata.
+```{r}
+#| label: load-bigwigs
+#| echo: true
+
+```
+
+---
+
+Next, we need to read in the bigWig files. We use `purrr::map` to apply `read_bigwig()`
+to each of the bigWig files, and store the results in a new column called `big_wig`.
+
+```{r}
+
+```
+
+# Meta-plots
+
+## WHY meta-plots and heatmaps?
+
+Meta-plots and heatmaps are useful for visualizing patterns of signal across many
+loci at the same time.
+
+This is particularly useful for chromatin data, where we often want to
+understand how chromatin structure varies across many genes or regulatory elements
+that share a common reference point, like transcription start sites (TSS) or
+nucleosomal midpoints.
+
+## Setting up regions for a meta-plot
+
+Next, we need to set up some windows for analyzing signal relative to each TSS.
+This is an important step that will ultimately impact our interpretations.
+
+In genomic meta-plots, you first decide on a window size relevant to the
+features you are measuring, and then make "windows" around a reference point,
+spanning some distance both up- and downstream. If the features involve gene
+features, we also need to take strand into account.
+
+## Setting up regions for a meta-plot
+
+Reference points could be:
+
+- transcription start or end sites
+- boundaries of exons and introns
+- enhancers
+- centromeres and telomeres
+
+## Setting up regions for a meta-plot
+
+The window size should be relevant the reference points, such that small- or
+large-scale features are emphasized in the plot. Moreover, the window typically
+spans some distance both up- and downstream of the reference points.
+
+## Setting up regions for a meta-plot
+
+Once the window size has been decided, the next step is to make "sub-windows"
+around a reference point. If gene features are involved, we also need to take
+strand into account.
+
+## Setting up regions for a meta-plot
+
+For small features like transcription factor binding sites (8-20 bp), you might
+set up smaller windows (maybe 1 bp) at a distance \~20 bp up- and downstream of
+a reference point.
+
+For larger features like nucleosome positions or chromatin domains, you might
+set up larger windows (\~200 bp) at distances up to \~10 kbp up- and downstream
+of a set of reference points.
+
+## Metaplot workflow
+
+![Metaplot workflow overview](../img/block-dna/metaplot-workflow.png)
+
+## Chromatin accessibility around transcription start sites (TSSs) {.smaller}
+
+```{r}
+#| label: create-tss-coords
+#| output-location: column
+#| echo: true
+
+```
+
+## Chromatin accessibility around transcription start sites (TSSs) {.smaller}
+
+Next, we'll use two valr functions to expand the window of the reference
+point (`bed_slop()`) and then break those windows into evenly spaced intervals
+(`bed_makewindows()`).
+
+```{r}
+#| label: tss-slop-mw
+#| echo: true
+#| output-location: column
+
+```
+
+## Chromatin accessibility around transcription start sites (TSSs)
+
+At this point, we also address the fact that the TSS data are stranded. Can someone describe what the issue is here, based on the figure above?
+
+```{r}
+#| label: create-tss-windows
+
+```
+
+## Chromatin accessibility around transcription start sites (TSSs) {.smaller}
+
+This next step uses valr `bed_map()`, to calculate the total signal for each
+window by intersecting signals from the bigWig files.
+
+```{r}
+#| label: map-signals
+#| echo: true
+#| output-location: column
+
+```
+
+## Chromatin accessibility around transcription start sites (TSSs) {.smaller}
+
+Once we have the values from `bed_map()`, we can group by `win_coord` and
+calculate a summary statistic for each window.
+
+Remember that `win_coord` is the same relative position for each TSS, so these
+numbers represent a composite signal a the same position across all TSS.
+
+```{r}
+#| label: calc-win-stats
+#| echo: true
+#| output-location: column
+
+```
+
+## Meta-plot of signals around TSSs {.smaller}
+
+Finally, let's plot the data relative to TSS for each of the windows.
+
+```{r}
+#| label: plot-meta-signals
+#| echo: true
+#| output-location: slide
+#| fig.alt: "Plot of chromatin accessibility around transcription start sites (TSS) in S. cerevisiae chrII, faceted by sample type."
+
+```
+
+## Interpreting the meta-plots
+
+- What is the direction of transcription in these meta-plots?
+
+- What are the features of chromatin near TSS measured by these different experimental conditions?
+
+- How do you interpret the increased signal of the +1 nucleosome in the "MNase_Long" condition, relative to e.g. -1, +2, +3, etc.?
+
+- What are the differences in ATAC and MNase treatments that lead to these distinctive patterns?
+
+# Heatmaps
+
+## Heatmap of signals around TSSs
+
+To generate a heatmap, we need to reformat our data slightly.
+
+Take a look at `acc_tbl` and think about how you might reorganize the following way:
+
+- rows contain the data for individual loci (i.e., each TSS)
+- columns are ordered positions relative to the TSS (i.e., most upstream to most downstream)
+
+## Heatmap of signals around TSSs {.smaller}
+
+We're going to plot a heatmap of the "MNase_Long" data. There are two ways
+to get these data
+
+```{r}
+#| label: heatmap-data-base
+#| echo: true
+
+```
+
+## Or, using dplyr / tidyr: {.smaller}
+
+```{r}
+#| label: heatmap-data-tidy
+#| echo: true
+#| output-location: column
+
+```
+
+## Heatmap of signals around TSSs {.smaller}
+
+Either way, now we need to reformat the data.
+
+```{r}
+#| label: pivot-heatmap-tbl
+#| echo: true
+#| output-location: slide
+
+```
+
+## Heatmap of signals around TSSs
+
+Once we have the data reformatted, we just convert to a matrix and feed it to
+`ComplexHeatmap::Heatmap()`.
+
+```{r}
+#| label: heatmap-matrix-plot
+#| echo: true
+#| output-location: slide
+
+```
+
+## Interpreting meta-plots and heatmaps
+
+It's worth considering what meta-plots and heatmaps *can* and *can't* tell you.
+
+1.  What are the similarities and differences between heatmaps and meta-plots?
+
+2.  What types of conclusions can you draw from each type of plot?
+
+3.  What are some features of MNase-seq and ATAC-seq that become more clear when
+looking across many loci at the same time?
+
+4.  What are some hypotheses you can generate based on these plots?

@@ -12,21 +12,24 @@ Create a new template project and manually install packages.
 
 ### renv
 
-While renv is a nice idea and is helpful for local development, in practice
-it doesn't seem robust enough on Posit Cloud.
-
-If you wanted to try using renv, clone the direction and then run `renv::activate()` and `renv::restore()`, which will install project
+Clone a fresh repo and then run `renv::activate()` and `renv::restore()`, which will install project
 packages in a project-local library under `renv/`.
 
-If you add new libraries to your content, run `renv::snapshot()`, follow
+When you add new libraries to your content, run `renv::snapshot()`, follow
 instructions to `renv::install()` if needed, and then be sure to commit the
 `renv.lock` file.
 
-You can also trying using `pak` for installation by setting
-`RENV_CONFIG_PAK_ENABLED = TRUE` in the user's `.Renviron` file
-(`usethis::edit_r_environ()`) to use pak installation,
-which is a lot faster ([issue](https://github.com/rstudio/renv/issues/1210)).
-In practice, pak with renv seems a bit flaky.
+It is sometimes help to do this when CRAN versions are updated nightly, causing
+GHA builds to fail, as e.g. a Mac version might be available before Linux (ubuntu on GHA).
+In these case, you can just install that most recent working version i.e. `renv::install("tidyverse@1.0.1")`.
+
+I **do not** recommend using renv on Posit Cloud, it seems flakier there. Just make Project templates
+and install packages individually. I recommend using pak there:
+
+```r
+install.packages("pak")
+pak::pak("tidyverse")
+```
 
 ## Previewing content
 

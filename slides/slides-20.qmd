@@ -41,7 +41,7 @@ date: last-modified
 
 ##
 
-![](../img/block-dna/chip-resolution-comparison.png) {fig-align="center"}
+![](../img/block-dna/chip-resolution-comparison.png){fig-align="center"}
 
 ## Comparison of factor-centric methods {.smaller}
 
@@ -61,33 +61,27 @@ date: last-modified
 
 # Workflow
 
+## Analysis overview {.smaller}
+
 ### FASTQ files
 
--   Adapter trimming
-
--   Aligning to the genome
+- Adapter trimming
+- Aligning to the genome
 
 ### Bed files
 
--   Generate read density genome-wide
+- Generate read density genome-wide
 
 ### Read density (wig/bedgraph)
 
--   Call peaks
+- Call peaks
+- Meta analysis
+- Identify motifs
+- Compare perturbations to control, compare to other datasets
 
--   Meta analysis
+## Example data: CTCF CUT&RUN in K562 cells {.smaller}
 
--   Identify motifs
-
--   Compare perturbations to control, compare to other datasets
-
-## Example data: CTCF CUT&RUN in K562 cells
-
-![](../img/block-dna/ctcf_cut_run_track.png){fig-align="center" width="800"}
-
-## Example data: CTCF CUT&RUN in K562 cells
-
-![](../img/block-dna/ctcf_cut_run_meta.png){fig-align="center" width="106"}
+![](../img/block-dna/ctcf_cut_run_meta.png){fig-align="center"}
 
 (from Skene and Henikoff, eLIFE 2017)
 
@@ -149,7 +143,6 @@ library(valr)
 # genome viz
 library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 library(Gviz)
-library(rtracklayer)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
@@ -202,7 +195,7 @@ track_info <-
     file_path = here("data/block-dna", file_name),
     big_wig = purrr::map(
       file_path,
-      ~ import.bw(.x, as = "GRanges")
+      \(x) read_bigwig(x, as = "GRanges")
     ),
     data_track = purrr::map2(
       big_wig,
@@ -214,7 +207,7 @@ track_info <-
           background.title = "white",
           col.title = "black",
           col.axis = "black",
-          fontsize = 16
+          fontsize = 12
         )
       }
     )
@@ -235,8 +228,9 @@ x_axis_trk <- GenomeAxisTrack(
 )
 ```
 
-## Examine genome coverage
 Now that we have tracks loaded, we can make a plot.
+
+## Examine genome coverage
 
 ```{r}
 #| label: plot-tracks
@@ -267,7 +261,7 @@ plotTracks(
 
 A conceptually simple approach to identification of regions containing "peaks" where a transcription factor was bound is available in the MACS software ([paper](), [github]()). There's also a nice [blog post](https://hbctraining.github.io/Intro-to-ChIPseq/lessons/05_peak_calling_macs.html) covering the main ideas.
 
-## Theory
+## Theory {.smaller}
 
 The Poisson distribution is a discrete probability distribution of the form:
 
@@ -279,7 +273,7 @@ The R functions `dpois()`, `ppois()`, and `rpois()` provide access to the densit
 
 Look over the `?dpois` documentation.
 
-## Theory
+## Theory {.smaller}
 
 ```{r}
 #| label: plot-poisson
@@ -318,7 +312,7 @@ ggplot(
   )
 ```
 
-## Practice
+## Practice {.smaller}
 
 Here, we model read coverage using the Poisson distribution. Given some genome size $G$ and and a number of reads collected $N$, we can approximate $\lambda$ from $N/G$.
 
@@ -355,13 +349,14 @@ peak_calls <-
   )
 ```
 
-## P-values
+## P-values {.smaller}
 
 Let's take a look at a plot of the p-value across a chromosome. What do you notice about this plot, when compared to the coverage of the CUT&RUN coverage above?
 
 ```{r}
 #| label: plot-p-vals
 #| echo: true
+#| warning: false
 #| output-location: slide
 #| fig.alt: "Peak calls based on Poisson p-values"
 ggplot(
@@ -373,7 +368,7 @@ ggplot(
   theme_cowplot()
 ```
 
-## Peaks
+## Peaks {.smaller}
 
 How many peaks are called in this region?
 
@@ -398,11 +393,9 @@ filter(
 )
 ```
 
-## Visualize
+## Visualize {.smaller}
 
 Let's visualize these peaks in the context of genomic CUT&RUN signal. We need to define an `AnnotationTrack` with the peak intervals, which we can plot against the CUT&RUN coverage we defined above.
-
-Let us load the data:
 
 ```{r}
 #| label: plot-peaks
@@ -433,10 +426,6 @@ abf1_short_trk <-
   ) |>
   pull(data_track)
 ```
-
-## Visualize
-
-And plot:
 
 ```{r}
 #| label: plot-peaks-2

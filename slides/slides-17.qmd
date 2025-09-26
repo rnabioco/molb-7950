@@ -26,8 +26,7 @@ library(patchwork)
 
 These are new libraries specifically for genome analysis. You learned about valr and Gviz for your homework.
 
-- `rtracklayer` provides a few utility functions we'll use today
-- `TxDb.Scerevisiae.UCSC.sacCer3.sgdGene` provides gene annotations for the *S. cerevisiae* genome.
+`TxDb.Scerevisiae.UCSC.sacCer3.sgdGene` provides gene annotations for the *S. cerevisiae* genome.
 
 ```{r}
 #| label: genome-libs
@@ -35,8 +34,6 @@ These are new libraries specifically for genome analysis. You learned about valr
 #| warning: false
 library(valr)
 library(Gviz)
-
-library(rtracklayer)
 library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 ```
 
@@ -74,7 +71,9 @@ atac_tbl <- read_bed(
 atac_tbl
 ```
 
-## Next, load the MNase reads.
+## Next, load the MNase reads. {.smaller}
+
+Working with a small genome is a huge advantage -- we can study the whole chromosome in this class.
 
 ```{r}
 #| label: load-mnase
@@ -86,7 +85,6 @@ mnase_tbl <- read_bed(
 mnase_tbl
 ```
 
-Working with a small genome is a huge advantage -- we can study the whole chromosome in this class.
 
 ## Expectations for chromatin fragment lengths
 
@@ -224,7 +222,7 @@ atac_acf_tbl <-
 atac_acf_tbl
 ```
 
-## Autocorrelation
+## Autocorrelation {.smaller}
 
 Now let's plot the autocorrelation. First, we define a function.
 
@@ -235,22 +233,29 @@ Now let's plot the autocorrelation. First, we define a function.
 plot_acf <- function(tbl, title) {
   ggplot(
     tbl,
-    aes(lag, acf)
+    aes(
+      x = lag,
+      y = acf
+    )
   ) +
     geom_point(size = 2) +
     geom_line() +
     theme_minimal_grid() +
-    geom_vline(xintercept = c(10, 21), color = "red") +
+    geom_vline(
+      xintercept = c(10, 21),
+      color = "red"
+    ) +
     labs(title = title)
 }
 ```
+
+---
 
 And then we make the plot.
 
 ```{r}
 #| label: plot-acf-atac
 #| echo: true
-#| output-location: slide
 #| fig.alt: "Plot showing autocorrelation function (ACF) for ATAC-seq data."
 plot_atac_acf <- plot_acf(atac_acf_tbl, title = "ATAC ACF")
 
@@ -301,7 +306,7 @@ We can see a monotonic decrease in the MNase-seq data, which confirms that the b
 
 We will use [Gviz](https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html#2_Basic_Features) to visualize read densities relative to a reference.
 
-## Load tracks
+## Load tracks {.smaller}
 
 First, we load the gene annotations from the [Saccharomyces Genome Databases](https://yeastgenome.org) (SGD).
 
@@ -325,7 +330,8 @@ sgd_genes
 
 ## Import bigWig {.smaller}
 
-Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using `rtracklayer::import.bw()`.
+Next, import the bigwig file containing yeast nucleosome-sized fragments
+(via MNase-seq) using `valr::read_bigwig()`.
 
 Inspect the object.
 
@@ -334,7 +340,7 @@ Inspect the object.
 ```{r}
 #| label: load-mnase-gr
 #| echo: true
-mnase_nuc_gr <- import.bw(
+mnase_nuc_gr <- read_bigwig(
   here("data/block-dna/yeast_mnase_134_160.bw"),
   as = "GRanges"
 )
@@ -342,7 +348,7 @@ mnase_nuc_gr <- import.bw(
 mnase_nuc_gr
 ```
 
-## Load track
+## Load track {.smaller}
 
 Next, load the GRanges object as a track for Gviz to plot:
 
@@ -360,6 +366,8 @@ mnase_nuc_trk <- DataTrack(
 
 mnase_nuc_trk
 ```
+
+# Genome-wide views of chromatin structure
 
 ## Vizualize a genomic region {.smaller}
 
@@ -392,10 +400,10 @@ plotTracks(
 
 That looks great! Let's load all the other data sets.
 
-1.  Load each bigWig as a GRanges object with `rtracklayer::import.bw()`
+1.  Load each bigWig as a GRanges object with `valr::read_bigwig()`
 2.  Convert each to a `Gviz::DataTrack()` for plotting
 
-## Load the remaining data
+## Load the remaining data {.smaller}
 
 We can do this one of two ways. We could do it one-by-one:
 
@@ -406,7 +414,12 @@ We can do this one of two ways. We could do it one-by-one:
 # complete the following steps for each of the four tracks
 file_name <- "yeast_mnase_lt50.bw"
 track_name <- "MNase_Short"
-big_wig <- import.bw(here("data/block-dna", file_name))
+
+big_wig <- read_bigwig(
+  here("data/block-dna", file_name),
+  as = "GRanges"
+)
+
 data_track <- DataTrack(big_wig, track_name)
 ```
 
@@ -455,7 +468,7 @@ track_info <-
     track_info,
     big_wig = purrr::map(
       file_path,
-      \(x) import.bw(x, as = "GRanges")
+      \(x) read_bigwig(x, as = "GRanges")
     ),
     data_track = purrr::map2(
       big_wig,
@@ -467,7 +480,7 @@ track_info <-
           background.title = "white",
           col.title = "black",
           col.axis = "black",
-          fontsize = 16
+          fontsize = 11
         )
       }
     )
@@ -482,7 +495,7 @@ track_info <-
 track_info
 ```
 
-## Load the remaining data
+## Load the remaining data {.smaller}
 
 Now, we just have to make a list of tracks to plot and Gviz takes care of the rest.
 

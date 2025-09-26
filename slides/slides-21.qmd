@@ -37,7 +37,7 @@ bedGraphToBigWig Abf1.bg sacCer3.chrom.sizes Abf1.bw
 
 The bigWig files are available here in the `data/` directory.
 
-# CUT&RUN analysis
+# CUT&RUN analysis {.smaller}
 
 ```{r}
 #| label: load-libs
@@ -49,13 +49,14 @@ library(valr)
 # genome viz
 library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
 library(Gviz)
-library(rtracklayer)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
 library(memes)
 library(ggseqlogo)
 ```
+
+---
 
 ```{r}
 #| label: make-tracks
@@ -73,7 +74,11 @@ sgd_genes_trk <-
     col.title = "black",
     fontsize = 16
   )
+```
 
+---
+
+```{r}
 # signal tracks
 track_info <-
   tibble(
@@ -94,7 +99,7 @@ track_info <-
     file_path = here("data/block-dna", file_name),
     big_wig = purrr::map(
       file_path,
-      \(x) import.bw(x, as = "GRanges")
+      \(x) read_bigwig(x, as = "GRanges")
     ),
     data_track = purrr::map2(
       big_wig,
@@ -121,6 +126,7 @@ x_axis_trk <- GenomeAxisTrack(
 )
 ```
 
+---
 
 ```{r}
 #| label: plot-tracks
@@ -140,6 +146,8 @@ plotTracks(
   type = "histogram"
 )
 ```
+
+## Peak calling {.smaller}
 
 ```{r}
 #| label: call-peaks
@@ -164,7 +172,11 @@ peak_calls <-
     # convert p-values to FDR
     fdr = p.adjust(pval, method = "fdr")
   )
+```
 
+---
+
+```{r}
 peak_calls_sig <-
   filter(
     peak_calls,
@@ -213,7 +225,7 @@ We'll use the [memes](https://bioconductor.org/packages/release/bioc/html/memes.
 2.  Provide those sequences and the genomic background to `runDreme()`, which runs uses an Expectation-Maximization (EM) approach to identify and refine motifs.
 3.  Examine the discovered motifs, and plot as a logo using `ggseqlogo`.
 
-. . .
+---
 
 ```{r}
 #| label: motif-discovery
@@ -244,6 +256,8 @@ motif_results <- runStreme(
 # look at the consensus motifs
 motif_results
 ```
+
+## Plot the logo
 
 Now let's look at the sequence logo for the top hit.
 
