@@ -379,26 +379,29 @@ Jay Hesselberth
 <span id="cb6-16"><a></a>    <span class="at">pval =</span> <span class="fu">dpois</span>(value, genome_lambda),</span>
 <span id="cb6-17"><a></a>    <span class="co"># convert p-values to FDR</span></span>
 <span id="cb6-18"><a></a>    <span class="at">fdr =</span> <span class="fu">p.adjust</span>(pval, <span class="at">method =</span> <span class="st">"fdr"</span>)</span>
-<span id="cb6-19"><a></a>  )</span>
-<span id="cb6-20"><a></a></span>
-<span id="cb6-21"><a></a>peak_calls_sig <span class="ot">&lt;-</span></span>
-<span id="cb6-22"><a></a>  <span class="fu">filter</span>(</span>
-<span id="cb6-23"><a></a>    peak_calls,</span>
-<span id="cb6-24"><a></a>    fdr <span class="sc">==</span> <span class="dv">0</span></span>
-<span id="cb6-25"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb6-26"><a></a>  <span class="co"># collapse neighboring, significant sites</span></span>
-<span id="cb6-27"><a></a>  <span class="fu">bed_merge</span>(<span class="at">max_dist =</span> <span class="dv">20</span>)</span>
-<span id="cb6-28"><a></a></span>
-<span id="cb6-29"><a></a><span class="fu">filter</span>(</span>
-<span id="cb6-30"><a></a>  peak_calls_sig,</span>
-<span id="cb6-31"><a></a>  chrom <span class="sc">==</span> <span class="st">"chrII"</span> <span class="sc">&amp;</span></span>
-<span id="cb6-32"><a></a>    start <span class="sc">&gt;=</span> track_start <span class="sc">&amp;</span></span>
-<span id="cb6-33"><a></a>    end <span class="sc">&lt;=</span> track_end</span>
-<span id="cb6-34"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-19"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
 <section id="peak-calling-output" class="slide level2 smaller output-location-slide"><h2>Peak calling</h2><div class="cell output-location-slide">
+
+</div></section><section class="slide level2">
+
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>peak_calls_sig <span class="ot">&lt;-</span></span>
+<span id="cb7-2"><a></a>  <span class="fu">filter</span>(</span>
+<span id="cb7-3"><a></a>    peak_calls,</span>
+<span id="cb7-4"><a></a>    fdr <span class="sc">==</span> <span class="dv">0</span></span>
+<span id="cb7-5"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-6"><a></a>  <span class="co"># collapse neighboring, significant sites</span></span>
+<span id="cb7-7"><a></a>  <span class="fu">bed_merge</span>(<span class="at">max_dist =</span> <span class="dv">20</span>)</span>
+<span id="cb7-8"><a></a></span>
+<span id="cb7-9"><a></a><span class="fu">filter</span>(</span>
+<span id="cb7-10"><a></a>  peak_calls_sig,</span>
+<span id="cb7-11"><a></a>  chrom <span class="sc">==</span> <span class="st">"chrII"</span> <span class="sc">&amp;</span></span>
+<span id="cb7-12"><a></a>    start <span class="sc">&gt;=</span> track_start <span class="sc">&amp;</span></span>
+<span id="cb7-13"><a></a>    end <span class="sc">&lt;=</span> track_end</span>
+<span id="cb7-14"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 3
   chrom  start    end
@@ -409,7 +412,9 @@ Jay Hesselberth
 4 chrII 136181 136264
 5 chrII 141070 141121</code></pre>
 </div>
-</div></section><section id="how-do-proteins-recognize-specific-locations-in-the-genome-to-bind" class="slide level2">
+</div>
+</section>
+<section id="how-do-proteins-recognize-specific-locations-in-the-genome-to-bind" class="slide level2">
 <h2>How do proteins recognize specific locations in the genome to bind?</h2>
 </section>
 <section id="motif-discovery" class="slide level2">
@@ -445,39 +450,39 @@ Jay Hesselberth
 <section class="slide level2">
 
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>peak_calls_gr <span class="ot">&lt;-</span></span>
-<span id="cb8-2"><a></a>  <span class="fu">GRanges</span>(</span>
-<span id="cb8-3"><a></a>    <span class="at">seqnames =</span> peak_calls_sig<span class="sc">$</span>chrom,</span>
-<span id="cb8-4"><a></a>    <span class="at">ranges =</span> <span class="fu">IRanges</span>(peak_calls_sig<span class="sc">$</span>start, peak_calls_sig<span class="sc">$</span>end)</span>
-<span id="cb8-5"><a></a>  )</span>
-<span id="cb8-6"><a></a></span>
-<span id="cb8-7"><a></a>peak_seqs <span class="ot">&lt;-</span> BSgenome<span class="sc">::</span><span class="fu">getSeq</span>(</span>
-<span id="cb8-8"><a></a>  <span class="co"># provided by BSgenome.Scerevisiae.UCSC.sacCer3</span></span>
-<span id="cb8-9"><a></a>  Scerevisiae,</span>
-<span id="cb8-10"><a></a>  peak_calls_gr</span>
-<span id="cb8-11"><a></a>)</span>
-<span id="cb8-12"><a></a></span>
-<span id="cb8-13"><a></a>motif_results <span class="ot">&lt;-</span> <span class="fu">runStreme</span>(</span>
-<span id="cb8-14"><a></a>  <span class="at">input =</span> peak_seqs,</span>
-<span id="cb8-15"><a></a>  <span class="at">control =</span> <span class="st">"shuffle"</span>, <span class="co"># use shuffled sequences as control</span></span>
-<span id="cb8-16"><a></a>  <span class="at">minw =</span> <span class="dv">6</span>, <span class="co"># minimum motif width</span></span>
-<span id="cb8-17"><a></a>  <span class="at">maxw =</span> <span class="dv">12</span>, <span class="co"># maximum motif width</span></span>
-<span id="cb8-18"><a></a>  <span class="at">nmotifs =</span> <span class="dv">5</span>, <span class="co"># number of motifs to find</span></span>
-<span id="cb8-19"><a></a>  <span class="at">seed =</span> <span class="dv">42</span></span>
-<span id="cb8-20"><a></a>)</span>
-<span id="cb8-21"><a></a></span>
-<span id="cb8-22"><a></a><span class="co"># look at the consensus motifs</span></span>
-<span id="cb8-23"><a></a>motif_results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>peak_calls_gr <span class="ot">&lt;-</span></span>
+<span id="cb9-2"><a></a>  <span class="fu">GRanges</span>(</span>
+<span id="cb9-3"><a></a>    <span class="at">seqnames =</span> peak_calls_sig<span class="sc">$</span>chrom,</span>
+<span id="cb9-4"><a></a>    <span class="at">ranges =</span> <span class="fu">IRanges</span>(peak_calls_sig<span class="sc">$</span>start, peak_calls_sig<span class="sc">$</span>end)</span>
+<span id="cb9-5"><a></a>  )</span>
+<span id="cb9-6"><a></a></span>
+<span id="cb9-7"><a></a>peak_seqs <span class="ot">&lt;-</span> BSgenome<span class="sc">::</span><span class="fu">getSeq</span>(</span>
+<span id="cb9-8"><a></a>  <span class="co"># provided by BSgenome.Scerevisiae.UCSC.sacCer3</span></span>
+<span id="cb9-9"><a></a>  Scerevisiae,</span>
+<span id="cb9-10"><a></a>  peak_calls_gr</span>
+<span id="cb9-11"><a></a>)</span>
+<span id="cb9-12"><a></a></span>
+<span id="cb9-13"><a></a>motif_results <span class="ot">&lt;-</span> <span class="fu">runStreme</span>(</span>
+<span id="cb9-14"><a></a>  <span class="at">input =</span> peak_seqs,</span>
+<span id="cb9-15"><a></a>  <span class="at">control =</span> <span class="st">"shuffle"</span>, <span class="co"># use shuffled sequences as control</span></span>
+<span id="cb9-16"><a></a>  <span class="at">minw =</span> <span class="dv">6</span>, <span class="co"># minimum motif width</span></span>
+<span id="cb9-17"><a></a>  <span class="at">maxw =</span> <span class="dv">12</span>, <span class="co"># maximum motif width</span></span>
+<span id="cb9-18"><a></a>  <span class="at">nmotifs =</span> <span class="dv">5</span>, <span class="co"># number of motifs to find</span></span>
+<span id="cb9-19"><a></a>  <span class="at">seed =</span> <span class="dv">42</span></span>
+<span id="cb9-20"><a></a>)</span>
+<span id="cb9-21"><a></a></span>
+<span id="cb9-22"><a></a><span class="co"># look at the consensus motifs</span></span>
+<span id="cb9-23"><a></a>motif_results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 <p>Now let’s look at the sequence logo for the top hit.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>motif_1 <span class="ot">&lt;-</span> motif_results[[<span class="dv">1</span>]]</span>
-<span id="cb9-2"><a></a>pwm <span class="ot">&lt;-</span> motif_1[[<span class="dv">1</span>]]<span class="sc">@</span>motif</span>
-<span id="cb9-3"><a></a></span>
-<span id="cb9-4"><a></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb9-5"><a></a>  <span class="fu">geom_logo</span>(pwm) <span class="sc">+</span></span>
-<span id="cb9-6"><a></a>  <span class="fu">theme_logo</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>motif_1 <span class="ot">&lt;-</span> motif_results[[<span class="dv">1</span>]]</span>
+<span id="cb10-2"><a></a>pwm <span class="ot">&lt;-</span> motif_1[[<span class="dv">1</span>]]<span class="sc">@</span>motif</span>
+<span id="cb10-3"><a></a></span>
+<span id="cb10-4"><a></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb10-5"><a></a>  <span class="fu">geom_logo</span>(pwm) <span class="sc">+</span></span>
+<span id="cb10-6"><a></a>  <span class="fu">theme_logo</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
