@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.8.24">
 
   <meta name="author" content="Jay Hesselberth">
-  <meta name="dcterms.date" content="2025-09-23">
+  <meta name="dcterms.date" content="2025-09-26">
   <title>MOLB 7950 – Factor-centric chromatin analysis</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -215,7 +215,7 @@ Jay Hesselberth
     </div>
 </div>
 
-  <p class="date">2025-09-23</p>
+  <p class="date">2025-09-26</p>
 </section>
 <section id="where-do-transcription-factors-bind-in-the-genome" class="slide level2">
 <h2>Where do transcription factors bind in the genome?</h2>
@@ -245,7 +245,7 @@ Jay Hesselberth
 <p>The bigWig files are available here in the <code>data/</code> directory.</p>
 </section>
 <section>
-<section id="cutrun-analysis" class="title-slide slide level1 center">
+<section id="cutrun-analysis" class="title-slide slide level1 smaller center">
 <h1>CUT&amp;RUN analysis</h1>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a><span class="fu">library</span>(tidyverse)</span>
@@ -278,109 +278,127 @@ Jay Hesselberth
 <span id="cb3-11"><a></a>    <span class="at">background.title =</span> <span class="st">"white"</span>,</span>
 <span id="cb3-12"><a></a>    <span class="at">col.title =</span> <span class="st">"black"</span>,</span>
 <span id="cb3-13"><a></a>    <span class="at">fontsize =</span> <span class="dv">16</span></span>
-<span id="cb3-14"><a></a>  )</span>
-<span id="cb3-15"><a></a></span>
-<span id="cb3-16"><a></a><span class="co"># signal tracks</span></span>
-<span id="cb3-17"><a></a>track_info <span class="ot">&lt;-</span></span>
-<span id="cb3-18"><a></a>  <span class="fu">tibble</span>(</span>
-<span id="cb3-19"><a></a>    <span class="at">file_name =</span> <span class="fu">c</span>(</span>
-<span id="cb3-20"><a></a>      <span class="st">"CutRun_Reb1_lt120.bw"</span>,</span>
-<span id="cb3-21"><a></a>      <span class="st">"CutRun_Abf1_lt120.bw"</span>,</span>
-<span id="cb3-22"><a></a>      <span class="st">"CutRun_Reb1_gt150.bw"</span>,</span>
-<span id="cb3-23"><a></a>      <span class="st">"CutRun_Abf1_gt150.bw"</span></span>
-<span id="cb3-24"><a></a>    ),</span>
-<span id="cb3-25"><a></a>    <span class="at">sample_type =</span> <span class="fu">c</span>(</span>
-<span id="cb3-26"><a></a>      <span class="st">"Reb1_Short"</span>,</span>
-<span id="cb3-27"><a></a>      <span class="st">"Abf1_Short"</span>,</span>
-<span id="cb3-28"><a></a>      <span class="st">"Reb1_Long"</span>,</span>
-<span id="cb3-29"><a></a>      <span class="st">"Abf1_Long"</span></span>
-<span id="cb3-30"><a></a>    )</span>
-<span id="cb3-31"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb3-32"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb3-33"><a></a>    <span class="at">file_path =</span> <span class="fu">here</span>(<span class="st">"data/block-dna"</span>, file_name),</span>
-<span id="cb3-34"><a></a>    <span class="at">big_wig =</span> purrr<span class="sc">::</span><span class="fu">map</span>(</span>
-<span id="cb3-35"><a></a>      file_path,</span>
-<span id="cb3-36"><a></a>      \(x) <span class="fu">read_bigwig</span>(x, <span class="at">as =</span> <span class="st">"GRanges"</span>)</span>
-<span id="cb3-37"><a></a>    ),</span>
-<span id="cb3-38"><a></a>    <span class="at">data_track =</span> purrr<span class="sc">::</span><span class="fu">map2</span>(</span>
-<span id="cb3-39"><a></a>      big_wig,</span>
-<span id="cb3-40"><a></a>      sample_type,</span>
-<span id="cb3-41"><a></a>      \(x, y) {</span>
-<span id="cb3-42"><a></a>        <span class="fu">DataTrack</span>(</span>
-<span id="cb3-43"><a></a>          x,</span>
-<span id="cb3-44"><a></a>          <span class="at">name =</span> y,</span>
-<span id="cb3-45"><a></a>          <span class="at">background.title =</span> <span class="st">"white"</span>,</span>
-<span id="cb3-46"><a></a>          <span class="at">col.title =</span> <span class="st">"black"</span>,</span>
-<span id="cb3-47"><a></a>          <span class="at">col.axis =</span> <span class="st">"black"</span>,</span>
-<span id="cb3-48"><a></a>          <span class="at">fontsize =</span> <span class="dv">16</span></span>
-<span id="cb3-49"><a></a>        )</span>
-<span id="cb3-50"><a></a>      }</span>
-<span id="cb3-51"><a></a>    )</span>
-<span id="cb3-52"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb3-53"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(sample_type, big_wig, data_track)</span>
-<span id="cb3-54"><a></a></span>
-<span id="cb3-55"><a></a><span class="co"># x-axis track</span></span>
-<span id="cb3-56"><a></a>x_axis_trk <span class="ot">&lt;-</span> <span class="fu">GenomeAxisTrack</span>(</span>
-<span id="cb3-57"><a></a>  <span class="at">col =</span> <span class="st">"black"</span>,</span>
-<span id="cb3-58"><a></a>  <span class="at">col.axis =</span> <span class="st">"black"</span>,</span>
-<span id="cb3-59"><a></a>  <span class="at">fontsize =</span> <span class="dv">16</span></span>
-<span id="cb3-60"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-14"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a><span class="fu">plotTracks</span>(</span>
-<span id="cb4-2"><a></a>  <span class="fu">c</span>(</span>
-<span id="cb4-3"><a></a>    sgd_genes_trk,</span>
-<span id="cb4-4"><a></a>    track_info<span class="sc">$</span>data_track,</span>
-<span id="cb4-5"><a></a>    x_axis_trk</span>
-<span id="cb4-6"><a></a>  ),</span>
-<span id="cb4-7"><a></a>  <span class="at">from =</span> track_start,</span>
-<span id="cb4-8"><a></a>  <span class="at">to =</span> track_end,</span>
-<span id="cb4-9"><a></a>  <span class="at">chromosome =</span> <span class="st">"chrII"</span>,</span>
-<span id="cb4-10"><a></a>  <span class="at">transcriptAnnotation =</span> <span class="st">"gene"</span>,</span>
-<span id="cb4-11"><a></a>  <span class="at">shape =</span> <span class="st">"arrow"</span>,</span>
-<span id="cb4-12"><a></a>  <span class="at">type =</span> <span class="st">"histogram"</span></span>
-<span id="cb4-13"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
+</section>
+<section class="slide level2">
 
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a>abf1_tbl <span class="ot">&lt;-</span> <span class="fu">read_bigwig</span>(<span class="fu">here</span>(<span class="st">"data/block-dna/CutRun_Abf1_lt120.bw"</span>))</span>
-<span id="cb5-2"><a></a>total_reads <span class="ot">&lt;-</span> <span class="fl">16e6</span></span>
-<span id="cb5-3"><a></a></span>
-<span id="cb5-4"><a></a>genome <span class="ot">&lt;-</span> <span class="fu">read_genome</span>(<span class="fu">here</span>(<span class="st">"data/block-dna/sacCer3.chrom.sizes"</span>))</span>
-<span id="cb5-5"><a></a>genome_size <span class="ot">&lt;-</span> <span class="fu">sum</span>(genome<span class="sc">$</span>size)</span>
-<span id="cb5-6"><a></a></span>
-<span id="cb5-7"><a></a>genome_lambda <span class="ot">&lt;-</span> total_reads <span class="sc">/</span> genome_size</span>
-<span id="cb5-8"><a></a>peak_calls <span class="ot">&lt;-</span></span>
-<span id="cb5-9"><a></a>  abf1_tbl <span class="sc">|&gt;</span></span>
-<span id="cb5-10"><a></a>  <span class="co"># define single-base sites</span></span>
-<span id="cb5-11"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb5-12"><a></a>    <span class="at">midpoint =</span> start <span class="sc">+</span> <span class="fu">round</span>((end <span class="sc">-</span> start) <span class="sc">/</span> <span class="dv">2</span>),</span>
-<span id="cb5-13"><a></a>    <span class="at">start =</span> midpoint,</span>
-<span id="cb5-14"><a></a>    <span class="at">end =</span> start <span class="sc">+</span> <span class="dv">1</span>,</span>
-<span id="cb5-15"><a></a>    <span class="co"># use the poisson to calculate a p-value with the genome-wide lambda</span></span>
-<span id="cb5-16"><a></a>    <span class="at">pval =</span> <span class="fu">dpois</span>(value, genome_lambda),</span>
-<span id="cb5-17"><a></a>    <span class="co"># convert p-values to FDR</span></span>
-<span id="cb5-18"><a></a>    <span class="at">fdr =</span> <span class="fu">p.adjust</span>(pval, <span class="at">method =</span> <span class="st">"fdr"</span>)</span>
-<span id="cb5-19"><a></a>  )</span>
-<span id="cb5-20"><a></a></span>
-<span id="cb5-21"><a></a>peak_calls_sig <span class="ot">&lt;-</span></span>
-<span id="cb5-22"><a></a>  <span class="fu">filter</span>(</span>
-<span id="cb5-23"><a></a>    peak_calls,</span>
-<span id="cb5-24"><a></a>    fdr <span class="sc">==</span> <span class="dv">0</span></span>
-<span id="cb5-25"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb5-26"><a></a>  <span class="co"># collapse neighboring, significant sites</span></span>
-<span id="cb5-27"><a></a>  <span class="fu">bed_merge</span>(<span class="at">max_dist =</span> <span class="dv">20</span>)</span>
-<span id="cb5-28"><a></a></span>
-<span id="cb5-29"><a></a><span class="fu">filter</span>(</span>
-<span id="cb5-30"><a></a>  peak_calls_sig,</span>
-<span id="cb5-31"><a></a>  chrom <span class="sc">==</span> <span class="st">"chrII"</span> <span class="sc">&amp;</span></span>
-<span id="cb5-32"><a></a>    start <span class="sc">&gt;=</span> track_start <span class="sc">&amp;</span></span>
-<span id="cb5-33"><a></a>    end <span class="sc">&lt;=</span> track_end</span>
-<span id="cb5-34"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a><span class="co"># signal tracks</span></span>
+<span id="cb4-2"><a></a>track_info <span class="ot">&lt;-</span></span>
+<span id="cb4-3"><a></a>  <span class="fu">tibble</span>(</span>
+<span id="cb4-4"><a></a>    <span class="at">file_name =</span> <span class="fu">c</span>(</span>
+<span id="cb4-5"><a></a>      <span class="st">"CutRun_Reb1_lt120.bw"</span>,</span>
+<span id="cb4-6"><a></a>      <span class="st">"CutRun_Abf1_lt120.bw"</span>,</span>
+<span id="cb4-7"><a></a>      <span class="st">"CutRun_Reb1_gt150.bw"</span>,</span>
+<span id="cb4-8"><a></a>      <span class="st">"CutRun_Abf1_gt150.bw"</span></span>
+<span id="cb4-9"><a></a>    ),</span>
+<span id="cb4-10"><a></a>    <span class="at">sample_type =</span> <span class="fu">c</span>(</span>
+<span id="cb4-11"><a></a>      <span class="st">"Reb1_Short"</span>,</span>
+<span id="cb4-12"><a></a>      <span class="st">"Abf1_Short"</span>,</span>
+<span id="cb4-13"><a></a>      <span class="st">"Reb1_Long"</span>,</span>
+<span id="cb4-14"><a></a>      <span class="st">"Abf1_Long"</span></span>
+<span id="cb4-15"><a></a>    )</span>
+<span id="cb4-16"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-17"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-18"><a></a>    <span class="at">file_path =</span> <span class="fu">here</span>(<span class="st">"data/block-dna"</span>, file_name),</span>
+<span id="cb4-19"><a></a>    <span class="at">big_wig =</span> purrr<span class="sc">::</span><span class="fu">map</span>(</span>
+<span id="cb4-20"><a></a>      file_path,</span>
+<span id="cb4-21"><a></a>      \(x) <span class="fu">read_bigwig</span>(x, <span class="at">as =</span> <span class="st">"GRanges"</span>)</span>
+<span id="cb4-22"><a></a>    ),</span>
+<span id="cb4-23"><a></a>    <span class="at">data_track =</span> purrr<span class="sc">::</span><span class="fu">map2</span>(</span>
+<span id="cb4-24"><a></a>      big_wig,</span>
+<span id="cb4-25"><a></a>      sample_type,</span>
+<span id="cb4-26"><a></a>      \(x, y) {</span>
+<span id="cb4-27"><a></a>        <span class="fu">DataTrack</span>(</span>
+<span id="cb4-28"><a></a>          x,</span>
+<span id="cb4-29"><a></a>          <span class="at">name =</span> y,</span>
+<span id="cb4-30"><a></a>          <span class="at">background.title =</span> <span class="st">"white"</span>,</span>
+<span id="cb4-31"><a></a>          <span class="at">col.title =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-32"><a></a>          <span class="at">col.axis =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-33"><a></a>          <span class="at">fontsize =</span> <span class="dv">16</span></span>
+<span id="cb4-34"><a></a>        )</span>
+<span id="cb4-35"><a></a>      }</span>
+<span id="cb4-36"><a></a>    )</span>
+<span id="cb4-37"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-38"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(sample_type, big_wig, data_track)</span>
+<span id="cb4-39"><a></a></span>
+<span id="cb4-40"><a></a><span class="co"># x-axis track</span></span>
+<span id="cb4-41"><a></a>x_axis_trk <span class="ot">&lt;-</span> <span class="fu">GenomeAxisTrack</span>(</span>
+<span id="cb4-42"><a></a>  <span class="at">col =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-43"><a></a>  <span class="at">col.axis =</span> <span class="st">"black"</span>,</span>
+<span id="cb4-44"><a></a>  <span class="at">fontsize =</span> <span class="dv">16</span></span>
+<span id="cb4-45"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section class="slide level2">
+
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="fu">plotTracks</span>(</span>
+<span id="cb5-2"><a></a>  <span class="fu">c</span>(</span>
+<span id="cb5-3"><a></a>    sgd_genes_trk,</span>
+<span id="cb5-4"><a></a>    track_info<span class="sc">$</span>data_track,</span>
+<span id="cb5-5"><a></a>    x_axis_trk</span>
+<span id="cb5-6"><a></a>  ),</span>
+<span id="cb5-7"><a></a>  <span class="at">from =</span> track_start,</span>
+<span id="cb5-8"><a></a>  <span class="at">to =</span> track_end,</span>
+<span id="cb5-9"><a></a>  <span class="at">chromosome =</span> <span class="st">"chrII"</span>,</span>
+<span id="cb5-10"><a></a>  <span class="at">transcriptAnnotation =</span> <span class="st">"gene"</span>,</span>
+<span id="cb5-11"><a></a>  <span class="at">shape =</span> <span class="st">"arrow"</span>,</span>
+<span id="cb5-12"><a></a>  <span class="at">type =</span> <span class="st">"histogram"</span></span>
+<span id="cb5-13"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
 <section id="" class="slide level2 output-location-slide"><div class="cell output-location-slide">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-21_files/figure-revealjs/plot-tracks-1.png" alt="Genome browser tracks for Abf1 and Reb1 CUT&amp;RUN data." width="960"></p>
+</figure>
+</div>
+</div>
+</div></section><section id="peak-calling" class="slide level2 smaller">
+<h2>Peak calling</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>abf1_tbl <span class="ot">&lt;-</span> <span class="fu">read_bigwig</span>(<span class="fu">here</span>(<span class="st">"data/block-dna/CutRun_Abf1_lt120.bw"</span>))</span>
+<span id="cb6-2"><a></a>total_reads <span class="ot">&lt;-</span> <span class="fl">16e6</span></span>
+<span id="cb6-3"><a></a></span>
+<span id="cb6-4"><a></a>genome <span class="ot">&lt;-</span> <span class="fu">read_genome</span>(<span class="fu">here</span>(<span class="st">"data/block-dna/sacCer3.chrom.sizes"</span>))</span>
+<span id="cb6-5"><a></a>genome_size <span class="ot">&lt;-</span> <span class="fu">sum</span>(genome<span class="sc">$</span>size)</span>
+<span id="cb6-6"><a></a></span>
+<span id="cb6-7"><a></a>genome_lambda <span class="ot">&lt;-</span> total_reads <span class="sc">/</span> genome_size</span>
+<span id="cb6-8"><a></a>peak_calls <span class="ot">&lt;-</span></span>
+<span id="cb6-9"><a></a>  abf1_tbl <span class="sc">|&gt;</span></span>
+<span id="cb6-10"><a></a>  <span class="co"># define single-base sites</span></span>
+<span id="cb6-11"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb6-12"><a></a>    <span class="at">midpoint =</span> start <span class="sc">+</span> <span class="fu">round</span>((end <span class="sc">-</span> start) <span class="sc">/</span> <span class="dv">2</span>),</span>
+<span id="cb6-13"><a></a>    <span class="at">start =</span> midpoint,</span>
+<span id="cb6-14"><a></a>    <span class="at">end =</span> start <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb6-15"><a></a>    <span class="co"># use the poisson to calculate a p-value with the genome-wide lambda</span></span>
+<span id="cb6-16"><a></a>    <span class="at">pval =</span> <span class="fu">dpois</span>(value, genome_lambda),</span>
+<span id="cb6-17"><a></a>    <span class="co"># convert p-values to FDR</span></span>
+<span id="cb6-18"><a></a>    <span class="at">fdr =</span> <span class="fu">p.adjust</span>(pval, <span class="at">method =</span> <span class="st">"fdr"</span>)</span>
+<span id="cb6-19"><a></a>  )</span>
+<span id="cb6-20"><a></a></span>
+<span id="cb6-21"><a></a>peak_calls_sig <span class="ot">&lt;-</span></span>
+<span id="cb6-22"><a></a>  <span class="fu">filter</span>(</span>
+<span id="cb6-23"><a></a>    peak_calls,</span>
+<span id="cb6-24"><a></a>    fdr <span class="sc">==</span> <span class="dv">0</span></span>
+<span id="cb6-25"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb6-26"><a></a>  <span class="co"># collapse neighboring, significant sites</span></span>
+<span id="cb6-27"><a></a>  <span class="fu">bed_merge</span>(<span class="at">max_dist =</span> <span class="dv">20</span>)</span>
+<span id="cb6-28"><a></a></span>
+<span id="cb6-29"><a></a><span class="fu">filter</span>(</span>
+<span id="cb6-30"><a></a>  peak_calls_sig,</span>
+<span id="cb6-31"><a></a>  chrom <span class="sc">==</span> <span class="st">"chrII"</span> <span class="sc">&amp;</span></span>
+<span id="cb6-32"><a></a>    start <span class="sc">&gt;=</span> track_start <span class="sc">&amp;</span></span>
+<span id="cb6-33"><a></a>    end <span class="sc">&lt;=</span> track_end</span>
+<span id="cb6-34"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+</section>
+<section id="peak-calling-output" class="slide level2 smaller output-location-slide"><h2>Peak calling</h2><div class="cell output-location-slide">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 3
   chrom  start    end
@@ -390,14 +408,6 @@ Jay Hesselberth
 3 chrII 124916 124949
 4 chrII 136181 136264
 5 chrII 141070 141121</code></pre>
-</div>
-</div></section><section id="" class="slide level2 output-location-slide"><div class="cell output-location-slide">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-21_files/figure-revealjs/plot-tracks-1.png" alt="Genome browser tracks for Abf1 and Reb1 CUT&amp;RUN data." width="960"></p>
-</figure>
-</div>
 </div>
 </div></section><section id="how-do-proteins-recognize-specific-locations-in-the-genome-to-bind" class="slide level2">
 <h2>How do proteins recognize specific locations in the genome to bind?</h2>
@@ -431,49 +441,209 @@ Jay Hesselberth
 <li class="fragment">Provide those sequences and the genomic background to <code>runDreme()</code>, which runs uses an Expectation-Maximization (EM) approach to identify and refine motifs.</li>
 <li class="fragment">Examine the discovered motifs, and plot as a logo using <code>ggseqlogo</code>.</li>
 </ol>
-<div class="fragment">
+</section>
+<section class="slide level2">
+
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>peak_calls_gr <span class="ot">&lt;-</span></span>
-<span id="cb7-2"><a></a>  <span class="fu">GRanges</span>(</span>
-<span id="cb7-3"><a></a>    <span class="at">seqnames =</span> peak_calls_sig<span class="sc">$</span>chrom,</span>
-<span id="cb7-4"><a></a>    <span class="at">ranges =</span> <span class="fu">IRanges</span>(peak_calls_sig<span class="sc">$</span>start, peak_calls_sig<span class="sc">$</span>end)</span>
-<span id="cb7-5"><a></a>  )</span>
-<span id="cb7-6"><a></a></span>
-<span id="cb7-7"><a></a>peak_seqs <span class="ot">&lt;-</span> BSgenome<span class="sc">::</span><span class="fu">getSeq</span>(</span>
-<span id="cb7-8"><a></a>  <span class="co"># provided by BSgenome.Scerevisiae.UCSC.sacCer3</span></span>
-<span id="cb7-9"><a></a>  Scerevisiae,</span>
-<span id="cb7-10"><a></a>  peak_calls_gr</span>
-<span id="cb7-11"><a></a>)</span>
-<span id="cb7-12"><a></a></span>
-<span id="cb7-13"><a></a>motif_results <span class="ot">&lt;-</span> <span class="fu">runStreme</span>(</span>
-<span id="cb7-14"><a></a>  <span class="at">input =</span> peak_seqs,</span>
-<span id="cb7-15"><a></a>  <span class="at">control =</span> <span class="st">"shuffle"</span>, <span class="co"># use shuffled sequences as control</span></span>
-<span id="cb7-16"><a></a>  <span class="at">minw =</span> <span class="dv">6</span>, <span class="co"># minimum motif width</span></span>
-<span id="cb7-17"><a></a>  <span class="at">maxw =</span> <span class="dv">12</span>, <span class="co"># maximum motif width</span></span>
-<span id="cb7-18"><a></a>  <span class="at">nmotifs =</span> <span class="dv">5</span>, <span class="co"># number of motifs to find</span></span>
-<span id="cb7-19"><a></a>  <span class="at">seed =</span> <span class="dv">42</span></span>
-<span id="cb7-20"><a></a>)</span>
-<span id="cb7-21"><a></a></span>
-<span id="cb7-22"><a></a><span class="co"># look at the consensus motifs</span></span>
-<span id="cb7-23"><a></a>motif_results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>peak_calls_gr <span class="ot">&lt;-</span></span>
+<span id="cb8-2"><a></a>  <span class="fu">GRanges</span>(</span>
+<span id="cb8-3"><a></a>    <span class="at">seqnames =</span> peak_calls_sig<span class="sc">$</span>chrom,</span>
+<span id="cb8-4"><a></a>    <span class="at">ranges =</span> <span class="fu">IRanges</span>(peak_calls_sig<span class="sc">$</span>start, peak_calls_sig<span class="sc">$</span>end)</span>
+<span id="cb8-5"><a></a>  )</span>
+<span id="cb8-6"><a></a></span>
+<span id="cb8-7"><a></a>peak_seqs <span class="ot">&lt;-</span> BSgenome<span class="sc">::</span><span class="fu">getSeq</span>(</span>
+<span id="cb8-8"><a></a>  <span class="co"># provided by BSgenome.Scerevisiae.UCSC.sacCer3</span></span>
+<span id="cb8-9"><a></a>  Scerevisiae,</span>
+<span id="cb8-10"><a></a>  peak_calls_gr</span>
+<span id="cb8-11"><a></a>)</span>
+<span id="cb8-12"><a></a></span>
+<span id="cb8-13"><a></a>motif_results <span class="ot">&lt;-</span> <span class="fu">runStreme</span>(</span>
+<span id="cb8-14"><a></a>  <span class="at">input =</span> peak_seqs,</span>
+<span id="cb8-15"><a></a>  <span class="at">control =</span> <span class="st">"shuffle"</span>, <span class="co"># use shuffled sequences as control</span></span>
+<span id="cb8-16"><a></a>  <span class="at">minw =</span> <span class="dv">6</span>, <span class="co"># minimum motif width</span></span>
+<span id="cb8-17"><a></a>  <span class="at">maxw =</span> <span class="dv">12</span>, <span class="co"># maximum motif width</span></span>
+<span id="cb8-18"><a></a>  <span class="at">nmotifs =</span> <span class="dv">5</span>, <span class="co"># number of motifs to find</span></span>
+<span id="cb8-19"><a></a>  <span class="at">seed =</span> <span class="dv">42</span></span>
+<span id="cb8-20"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 <p>Now let’s look at the sequence logo for the top hit.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>motif_1 <span class="ot">&lt;-</span> motif_results[[<span class="dv">1</span>]]</span>
-<span id="cb8-2"><a></a>pwm <span class="ot">&lt;-</span> motif_1[[<span class="dv">1</span>]]<span class="sc">@</span>motif</span>
-<span id="cb8-3"><a></a></span>
-<span id="cb8-4"><a></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb8-5"><a></a>  <span class="fu">geom_logo</span>(pwm) <span class="sc">+</span></span>
-<span id="cb8-6"><a></a>  <span class="fu">theme_logo</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>motif_1 <span class="ot">&lt;-</span> motif_results[[<span class="dv">1</span>]]</span>
+<span id="cb21-2"><a></a>pwm <span class="ot">&lt;-</span> motif_1[[<span class="dv">1</span>]]<span class="sc">@</span>motif</span>
+<span id="cb21-3"><a></a></span>
+<span id="cb21-4"><a></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb21-5"><a></a>  <span class="fu">geom_logo</span>(pwm) <span class="sc">+</span></span>
+<span id="cb21-6"><a></a>  <span class="fu">theme_logo</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
-</div>
 </section>
-<section id="practice-output" class="slide level2 output-location-slide"><h2>Practice</h2><div class="cell output-location-slide">
+<section id="" class="slide level2 output-location-slide"><div class="cell output-location-slide">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-21_files/figure-revealjs/plt-seq-logo-1.png" alt="Sequence logo for the top motif discovered in Abf1 CUT&amp;RUN peaks." width="960"></p>
+</figure>
+</div>
+</div>
+</div></section><section id="" class="slide level2 output-location-slide"><div class="cell output-location-slide">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
 
-</div></section><section id="practice-output" class="slide level2 output-location-slide"><h2>Practice</h2><div class="cell output-location-slide">
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
 
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Ignoring sequence '&gt;' because it is too short (4 &lt; 6).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Ignoring sequence '&gt;' because it is too short (4 &lt; 6).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: p-values will be inaccurate if primary and control</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Ignoring sequence '&gt;' because it is too short (4 &lt; 6).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).
+
+Warning: Ignoring sequence '&gt;' because it is too short (2 &lt; 6).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Ignoring sequence '&gt;' because it is too short (4 &lt; 6).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: p-values will be inaccurate if primary and control</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="co"># look at the consensus motifs</span></span>
+<span id="cb19-2"><a></a>motif_results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        motif             name  altname
+m01_CGTRHAWARTGA &lt;mot:m01_..&gt; m01_CGTRHAWARTGA STREME-1
+m02_GTGGGTGAAYR  &lt;mot:m02_..&gt;  m02_GTGGGTGAAYR STREME-2
+m03_AGCGTCAAGG   &lt;mot:m03_..&gt;   m03_AGCGTCAAGG STREME-3
+m04_AACAGGAAAT   &lt;mot:m04_..&gt;   m04_AACAGGAAAT STREME-4
+m05_AAAATAGGCAA  &lt;mot:m05_..&gt;  m05_AAAATAGGCAA STREME-5
+                    consensus alphabet strand  icscore
+m01_CGTRHAWARTGA CGTNNAWARTGA      DNA     +- 12.68197
+m02_GTGGGTGAAYR   GTGGGTGAAYR      DNA     +- 15.44627
+m03_AGCGTCAAGG     AGCGTCAAGG      DNA     +- 18.04434
+m04_AACAGGAAAT     AACAGGAAAT      DNA     +- 16.54143
+m05_AAAATAGGCAA   AAAATAGGCAM      DNA     +- 19.10847
+                 nsites   pval type pseudocount
+m01_CGTRHAWARTGA    332 0.0004  PCM           0
+m02_GTGGGTGAAYR      26 0.3400  PCM           0
+m03_AGCGTCAAGG       23 0.4800  PCM           0
+m04_AACAGGAAAT       22 0.4800  PCM           0
+m05_AAAATAGGCAA      24 0.7000  PCM           0
+                          bkg width initial_width
+m01_CGTRHAWARTGA 0.282, 0....    12             7
+m02_GTGGGTGAAYR  0.282, 0....    11             9
+m03_AGCGTCAAGG   0.282, 0....    10             4
+m04_AACAGGAAAT   0.282, 0....    10            11
+m05_AAAATAGGCAA  0.282, 0....    11             9
+                         seed score_threshold pos_count
+m01_CGTRHAWARTGA CGTACAAAATGA         8.97667        28
+m02_GTGGGTGAAYR   GTGGGTGAACA         11.9338         3
+m03_AGCGTCAAGG     AGCGTCAAGG         13.6991         2
+m04_AACAGGAAAT     AACAGGAAAT         12.4006         2
+m05_AAAATAGGCAA   AAAATAGGCGC         10.4653         1
+                 neg_count  log_pval log_evalue   evalue
+m01_CGTRHAWARTGA         1   -3.3991   -2.70013 2.0e-003
+m02_GTGGGTGAAYR          0 -0.471735   0.227235 1.7e+000
+m03_AGCGTCAAGG           0  -0.31645    0.38252 2.4e+000
+m04_AACAGGAAAT           0  -0.31645    0.38252 2.4e+000
+m05_AAAATAGGCAA          0 -0.157245   0.541725 3.5e+000
+                 dtc bernoulli train_pos_count
+m01_CGTRHAWARTGA  -1       0.5             304
+m02_GTGGGTGAAYR   -1       0.5              23
+m03_AGCGTCAAGG    -1       0.5              21
+m04_AACAGGAAAT    -1       0.5              20
+m05_AAAATAGGCAA   -1       0.5              23
+                 train_neg_count train_log_pval train_pval
+m01_CGTRHAWARTGA              18       -67.7805    1.7e-68
+m02_GTGGGTGAAYR                0       -6.92369    1.2e-07
+m03_AGCGTCAAGG                 0       -6.32163    4.8e-07
+m04_AACAGGAAAT                 0        -6.0206    9.5e-07
+m05_AAAATAGGCAA                0       -6.92369    1.2e-07
+                 train_dtc train_bernoulli npassing
+m01_CGTRHAWARTGA        -1             0.5      332
+m02_GTGGGTGAAYR         -1             0.5       26
+m03_AGCGTCAAGG          -1             0.5       23
+m04_AACAGGAAAT          -1             0.5       22
+m05_AAAATAGGCAA         -1             0.5       24
+                 is_palindromic elapsed_time total_sites
+m01_CGTRHAWARTGA             no          0.3         304
+m02_GTGGGTGAAYR              no          1.1          23
+m03_AGCGTCAAGG               no          0.8          21
+m04_AACAGGAAAT               no          1.4          20
+m05_AAAATAGGCAA              no          0.6          23
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             site_distr
+m01_CGTRHAWARTGA     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 3 3 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 1 1 0 0 1 1 0 0 0 2 0 1 1 0 0 0 0 1 1 1 1 0 0 1 1 0 1 0 1 6 5 3 2 3 4 4 3 5 6 4 3 4 2 4 5 5 9 6 4 3 4 8 4 7 9 8 8 5 9 7 4 7 6 5 4 9 3 4 10 4 5 5 5 2 3 1 1 0 3 2 2 4 1 0 3 2 1 2 0 0 1 0 0 0 2 0 0 1 0 1 0 0 0 1 1 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 1 0 2 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+m02_GTGGGTGAAYR     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 1 0 2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 1 0 0 0 0 1 0 1 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 3 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+m03_AGCGTCAAGG    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 3 3 0 0 0 0 1 1 1 0 0 0 1 0 1 0 1 0 0 1 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+m04_AACAGGAAAT    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 2 3 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 1 0 2 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+m05_AAAATAGGCAA     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 2 3 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 1 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+                 max_sites        site_hist
+m01_CGTRHAWARTGA         5  0 235 54 14 0 1
+m02_GTGGGTGAAYR          1             0 23
+m03_AGCGTCAAGG           1             0 21
+m04_AACAGGAAAT           1             0 20
+m05_AAAATAGGCAA          1             0 23
+
+[Hidden empty columns: family, organism, bkgsites, qval,
+  eval.]</code></pre>
+</div>
 </div></section><section id="questions" class="slide level2">
 <h2>Questions</h2>
 <ol type="1">
