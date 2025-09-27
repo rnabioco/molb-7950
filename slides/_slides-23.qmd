@@ -4,9 +4,9 @@ author: "{{< var instructor.block.rna >}}"
 ---
 
 ```{r}
+#| label: load-libs
 #| echo: false
 #| include: false
-
 library(tidyverse)
 library(biomaRt)
 library(here)
@@ -192,7 +192,7 @@ So there are 2885 rows of goodies about the mouse genome and its relationship to
 I'm going to through one more attribute in: external_gene_name. Those are usually more informative than ensembl IDs.
 
 ```{r}
-#| label: maket2g
+#| label: make-t2g
 #| eval: true
 
 t2g <- biomaRt::getBM(
@@ -205,7 +205,7 @@ t2g <- biomaRt::getBM(
 )
 
 # write_tsv(x = t2g, file = here("data","block-rna","t2g.tsv.gz"))
-# t2g <- read_tsv(here("data","block-rna","t2g.tsv.gz"))
+t2g <- read_tsv(here("data", "block-rna", "t2g.tsv.gz"))
 
 gt(t2g[1:20, ])
 ```
@@ -215,7 +215,8 @@ gt(t2g[1:20, ])
 Alright this looks good! We are going to split this into two tables. One that contains transcript ID and gene ID, and the other that contains gene ID and gene name.
 
 ```{r}
-t2g <- t2g |> dplyr::select(ensembl_transcript_id, ensembl_gene_id)
+t2g <- t2g |>
+  select(ensembl_transcript_id, ensembl_gene_id)
 ```
 
 ## Getting gene level expression data with `tximport` {.smaller}
@@ -234,23 +235,25 @@ First, we have to tell it where the salmon quantification files (the `quant.sf.g
 
 # The directory where all of the sample-specific salmon subdirectories live
 
-metadata <- data.frame(
-  sample_id = list.files(
+metadata <- tibble(
+  salmon_dirs = fs::dir_ls(
     here("data/block-rna/differentiation_salmonouts"),
-    pattern = "^DIV"
-  ),
-  salmon_dirs = list.files(
-    here("data/block-rna/differentiation_salmonouts"),
-    recursive = T,
-    pattern = "quant.sf",
-    full.names = T
+    recurse = TRUE,
+    glob = "*quant.sf"
   )
 ) |>
-  separate(col = sample_id, into = c("samp", "rep"), sep = "\\.", remove = F)
-
-metadata$rep <- gsub(pattern = "Rep", replacement = "", metadata$rep)
-
-rownames(metadata) <- metadata$sample_id
+  mutate(
+    sample_id = fs::path_file(fs::path_dir(salmon_dirs))
+  ) |>
+  filter(str_starts(sample_id, "DIV")) |>
+  separate_wider_delim(
+    col = sample_id,
+    delim = ".",
+    names = c("samp", "rep"),
+    too_few = "align_start"
+  ) |>
+  mutate(rep = str_remove(rep, "Rep")) |>
+  column_to_rownames("sample_id")
 ```
 
 ## Gene expression data with `tximport` {.smaller}
@@ -358,13 +361,15 @@ tpms.tx.ENSMUSG00000020634 <- filter(
   tpms.txs,
   ensembl_gene_id == "ENSMUSG00000020634"
 )
+
 sumoftxtpm <- sum(tpms.tx.ENSMUSG00000020634$DIVminus8.Rep1)
 
 # Get gene level tpm value of ENSMUSG00000020634
 genetpm <- filter(
   tpms.genes,
   ensembl_gene_id == "ENSMUSG00000020634"
-)$DIVminus8.Rep1
+) |>
+  pull(DIVminus8.Rep1)
 
 # Are they the same?
 sumoftxtpm
@@ -403,7 +408,9 @@ r.spearman <- cor.test(
   tpms$DIVminus8.Rep1,
   tpms$DIVminus8.Rep2,
   method = "spearman"
-)$estimate[[1]]
+) |>
+  pull(estimate) |>
+  head(1)
 
 r.spearman <- signif(r.spearman, 2)
 
@@ -437,7 +444,7 @@ So, for now, we will take another approach of simply using an expression thresho
 
 # Since we are plotting log TPM values we will only keep for genes that have expression of at least 1 TPM in both samples
 tpms.2samplecor <-
-  dplyr::select(tpms, c(ensembl_gene_id, DIVminus8.Rep1, DIVminus8.Rep2)) |>
+  select(tpms, c(ensembl_gene_id, DIVminus8.Rep1, DIVminus8.Rep2)) |>
   filter(DIVminus8.Rep1 >= 1 & DIVminus8.Rep2 >= 1)
 
 # pull the correlation coefficient
@@ -457,7 +464,12 @@ ggplot(
 ) +
   geom_point() +
   theme_classic() +
-  annotate("text", x = 2, y = 1, label = paste0("R = ", r.spearman))
+  annotate(
+    "text",
+    x = 2,
+    y = 1,
+    label = paste0("R = ", r.spearman)
+  )
 ```
 
 ## Filtering lowly expressed genes {.smaller}
@@ -474,7 +486,7 @@ tpms.cutoff <-
   # Meaning that at least 15 samples passed the threshold
   filter(nSamples >= 15) |>
   # Get rid of the nSamples column
-  dplyr::select(-nSamples)
+  select(-nSamples)
 
 nrow(tpms)
 nrow(tpms.cutoff)
@@ -488,7 +500,7 @@ Now we can use the `cor` function to calculate pairwise correlations in a .red\[
 #| label: make-matrix
 #| eval: true
 tpms.cutoff.matrix <-
-  dplyr::select(tpms.cutoff, -ensembl_gene_id) |>
+  select(tpms.cutoff, -ensembl_gene_id) |>
   as.matrix()
 
 tpms.cor <- cor(tpms.cutoff.matrix, method = "spearman")
