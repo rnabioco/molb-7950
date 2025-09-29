@@ -15,6 +15,10 @@ library(pheatmap)
 library(gt)
 library(ggrepel)
 library(cowplot)
+
+library(conflicted)
+conflicts_prefer(dplyr::select)
+conflicts_prefer(dplyr::filter)
 ```
 
 ## Learning Objectives {.smaller}
@@ -135,8 +139,6 @@ listMarts(
 I encourage you to see what is in each mart, but for now we are only going to use ENSEMBL_MART_ENSEMBL.
 
 ```{r}
-#| label: choosemart
-#| eval: true
 #| label: choose-mart
 #| eval: true
 mart <- biomaRt::useMart(
@@ -250,7 +252,8 @@ metadata <- tibble(
     col = sample_id,
     delim = ".",
     names = c("samp", "rep"),
-    too_few = "align_start"
+    too_few = "align_start",
+    cols_remove = FALSE
   ) |>
   mutate(rep = str_remove(rep, "Rep")) |>
   column_to_rownames("sample_id")
@@ -544,7 +547,7 @@ With our cutoff as it is now (genes have to have expression of at least 1 TPM in
 #| label: make-pca-matrix
 #| eval: true
 tpms.cutoff.matrix <-
-  dplyr::select(tpms.cutoff, -ensembl_gene_id) |>
+  select(tpms.cutoff, -ensembl_gene_id) |>
   as.matrix()
 
 # Add pseudocount and take log2
