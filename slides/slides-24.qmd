@@ -642,9 +642,9 @@ Bottom = downregulated
 #| eval: true
 #| output-location: slide
 
-# retrieve hallmark gene set from msigdb
+# retrieve hallmark gene sets from msigdb
 mouse_hallmark <- msigdbr(species = "Mus musculus") |>
-  filter(gs_collection == "H") |>
+  filter(gs_collection == "H") |> # "H" is hallmark
   select(gs_name, gene_symbol)
 
 # create a list of gene LFCs
@@ -667,6 +667,8 @@ rankedgenes <- rankedgenes[!duplicated(names(rankedgenes))]
 #| echo: true
 #| eval: false
 #| output-location: slide
+
+# rankedgenes[!names(rankedgenes) == ""]
 
 # run gsea
 div7vs0 <- GSEA(
