@@ -575,25 +575,26 @@ psi_pca <- prcomp(t(psis_mtx))
 
 # Add annotations of the conditions to the samples
 psi_pca_pc <-
-  tibble(
-    pc = psi_pca$x,
+  data.frame(
+    psi_pca$x,
     sample = colnames(psis_mtx)
-  ) |>
+  ) |> 
   mutate(
     condition = case_when(
       grepl("S1", sample) ~ "RBFOX2kd",
       .default = "Controlkd"
     )
-  )
+  ) 
+
 
 # Get the amount of variances contained within PC1 and PC2
-psi.pca.summary <- summary(psi.pca)$importance
+psi.pca.summary <- summary(psi_pca)$importance
 pc1var <- round(psi.pca.summary[2, 1] * 100, 1)
 pc2var <- round(psi.pca.summary[2, 2] * 100, 1)
 
 # Plot PCA data
 ggplot(
-  psi.pca.pc,
+  psi_pca_pc,
   aes(
     x = PC1,
     y = PC2,
