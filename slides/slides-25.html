@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.8.25">
 
   <meta name="author" content="Neel Mukherjee">
-  <meta name="dcterms.date" content="2025-10-12">
+  <meta name="dcterms.date" content="2025-10-15">
   <title>MOLB 7950 – Alternative splicing</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -215,7 +215,7 @@ Neel Mukherjee
     </div>
 </div>
 
-  <p class="date">2025-10-12</p>
+  <p class="date">2025-10-15</p>
 </section>
 <section id="overview" class="slide level2 smaller">
 <h2>Overview</h2>
@@ -295,12 +295,12 @@ Neel Mukherjee
 
 <img data-src="../img/block-rna/gff.png" class="r-stretch"><p>Each line corresponds to one feature. This is a tab-delimited text file. There are only a few columns that we care about:</p>
 <ul>
-<li class="fragment">Column 1: chromosome</li>
-<li class="fragment">Column 2: source</li>
-<li class="fragment">Column 3: feature type</li>
-<li class="fragment">Column 4: feature start</li>
-<li class="fragment">Column 5: feature end</li>
-<li class="fragment">Column 7: strand (you aren’t in DNA land anymore…strand matters)</li>
+<li>Column 1: chromosome</li>
+<li>Column 2: source</li>
+<li>Column 3: feature type</li>
+<li>Column 4: feature start</li>
+<li>Column 5: feature end</li>
+<li>Column 7: strand (you aren’t in DNA land anymore…strand matters)</li>
 </ul>
 </section>
 <section id="annotation-files-1" class="slide level2 smaller">
@@ -312,13 +312,13 @@ Neel Mukherjee
 <h2>Make STAR index</h2>
 <p>OK now we are ready to make our index. There relevant options we will need to pay attention to when doing this are shown below:</p>
 <ul>
-<li class="fragment"><strong>–runMode</strong> genomeGenerate (we are making an index, not aligning reads)</li>
-<li class="fragment"><strong>–genomeDir</strong> /path/to/genomeDir (where you want STAR to put this index we are making)</li>
-<li class="fragment"><strong>–genomeFastaFiles</strong> /path/to/genomesequence (genome sequence as fasta, either one file or multiple)</li>
-<li class="fragment"><strong>–sjdbGTFfile</strong> /path/to/annotations.gff (yes it says gtf, but we are going to use a gff format)</li>
-<li class="fragment"><strong>–sjdbOverhang</strong> 100 (100 will usually be a good value here, the recommended value is readLength - 1)</li>
-<li class="fragment"><strong>–sjdbGTFtagExonParentTranscript</strong> Parent (we have to specify this because we are using a gff annotation and this is how gff files denote relationships)</li>
-<li class="fragment"><strong>–genomeSAindexNbases</strong> 11 (don’t worry about this one, we are specifying it because we are using an artificially small genome in this example)</li>
+<li><strong>–runMode</strong> genomeGenerate (we are making an index, not aligning reads)</li>
+<li><strong>–genomeDir</strong> /path/to/genomeDir (where you want STAR to put this index we are making)</li>
+<li><strong>–genomeFastaFiles</strong> /path/to/genomesequence (genome sequence as fasta, either one file or multiple)</li>
+<li><strong>–sjdbGTFfile</strong> /path/to/annotations.gff (yes it says gtf, but we are going to use a gff format)</li>
+<li><strong>–sjdbOverhang</strong> 100 (100 will usually be a good value here, the recommended value is readLength - 1)</li>
+<li><strong>–sjdbGTFtagExonParentTranscript</strong> Parent (we have to specify this because we are using a gff annotation and this is how gff files denote relationships)</li>
+<li><strong>–genomeSAindexNbases</strong> 11 (don’t worry about this one, we are specifying it because we are using an artificially small genome in this example)</li>
 </ul>
 </section>
 <section id="make-star-index-1" class="slide level2 smaller">
@@ -332,12 +332,12 @@ Neel Mukherjee
 <h2>STAR: align reads</h2>
 <p>Now that we have our index we are ready to align our reads. The options we need to pay attention to here are:</p>
 <ul>
-<li class="fragment"><strong>–runMode</strong> alignReads (we are aligning this time)</li>
-<li class="fragment"><strong>–genomeDir</strong> /path/to/genomeDir (a path to the index we made in the previous step)</li>
-<li class="fragment"><strong>–readFilesIn</strong> /path/to/forwardreads /path/to/reversereads (paths to our fastqs, separated by a space)</li>
-<li class="fragment"><strong>–readFilesCommand</strong> gunzip -c (our reads our gzipped so we need to tell STAR how to read them)</li>
-<li class="fragment"><strong>–outFileNamePrefix</strong> path/to/outputdir (where to put the results)</li>
-<li class="fragment"><strong>–outSAMtype</strong> BAM SortedByCoordinate (the format of the alignment output, more on this later)</li>
+<li><strong>–runMode</strong> alignReads (we are aligning this time)</li>
+<li><strong>–genomeDir</strong> /path/to/genomeDir (a path to the index we made in the previous step)</li>
+<li><strong>–readFilesIn</strong> /path/to/forwardreads /path/to/reversereads (paths to our fastqs, separated by a space)</li>
+<li><strong>–readFilesCommand</strong> gunzip -c (our reads our gzipped so we need to tell STAR how to read them)</li>
+<li><strong>–outFileNamePrefix</strong> path/to/outputdir (where to put the results)</li>
+<li><strong>–outSAMtype</strong> BAM SortedByCoordinate (the format of the alignment output, more on this later)</li>
 </ul>
 <p>Now we are ready to align our reads.</p>
 </section>
@@ -377,10 +377,10 @@ Neel Mukherjee
 
 <img data-src="../img/block-rna/sam_example.png" class="r-stretch"><p>The <strong>second</strong> field is a bitwise flag. It is a sum of integers where each integer tells us something about the read. Every possible value of this flag is a unique combination of the informative integers. You can see what each of these integers are and what they mean in the <a href="https://samtools.github.io/hts-specs/SAMv1.pdf">SAM format specification</a>. There is also a handy calculator that you can plug your value into and it will tell you what your flag means <a href="https://www.samformat.info/sam-format-flag">here</a>. If we put our first flag, 163, in there it tell us that this read is:</p>
 <ul>
-<li class="fragment">The second read in a mate pair (128)</li>
-<li class="fragment">On the opposite strand of its mate pair (32)</li>
-<li class="fragment">Is mapped and properly paired (2)</li>
-<li class="fragment">Is paired (1)</li>
+<li>The second read in a mate pair (128)</li>
+<li>On the opposite strand of its mate pair (32)</li>
+<li>Is mapped and properly paired (2)</li>
+<li>Is paired (1)</li>
 </ul>
 <p>If you put the flag value for the second read into the calculator, what do you get?</p>
 </section>
@@ -395,9 +395,9 @@ Neel Mukherjee
 
 <img data-src="../img/block-rna/sam_example.png" class="r-stretch"><p>The <strong>sixth</strong> field is called the CIGAR string. This is a string of characters that tells you a little bit about <em>how</em> the query aligns to the reference. Again, details can be found in the <a href="https://samtools.github.io/hts-specs/SAMv1.pdf">SAM format specification</a>. The CIGAR string for the first read can be interpreted as follows:</p>
 <ul>
-<li class="fragment">The first 67 bases in the query align to the reference.</li>
-<li class="fragment">There is then a gap in the reference of 3415 nt.</li>
-<li class="fragment">Then the query starts to match again, and does so for the next 84 nt.</li>
+<li>The first 67 bases in the query align to the reference.</li>
+<li>There is then a gap in the reference of 3415 nt.</li>
+<li>Then the query starts to match again, and does so for the next 84 nt.</li>
 </ul>
 <p>These are paired end 151 nt reads, so it makes sense that 67 + 84 = 151.</p>
 <p>In not so shocking news, the top read’s mate (the second read) also has a gap in the reference of 3415 nt. As you might have guessed, these reads are spanning the same intron, which you would expect reads from the same mate pair to do.</p>
@@ -450,12 +450,12 @@ Neel Mukherjee
 </blockquote>
 <p>Here are the most relevant options when running <code>rMATS</code>. See the documentation <a href="https://github.com/Xinglab/rmats-turbo/blob/v4.1.0/README.md">here</a>.</p>
 <ul>
-<li class="fragment"><strong>–b1</strong> /path/to/b1.txt (path to a text file that contains paths to all BAM files for samples in condition 1)</li>
-<li class="fragment"><strong>–b2</strong> /path/to/b2.txt (path to a text file that contains paths to all BAM files for samples in condition 2)</li>
-<li class="fragment"><strong>–gtf</strong> /path/to/gtf (path to the gtf genome annotation)</li>
-<li class="fragment"><strong>-t</strong> readtype (single or paired)</li>
-<li class="fragment"><strong>–readlength</strong> readlength</li>
-<li class="fragment"><strong>–od</strong> /path/to/output (output directory)</li>
+<li><strong>–b1</strong> /path/to/b1.txt (path to a text file that contains paths to all BAM files for samples in condition 1)</li>
+<li><strong>–b2</strong> /path/to/b2.txt (path to a text file that contains paths to all BAM files for samples in condition 2)</li>
+<li><strong>–gtf</strong> /path/to/gtf (path to the gtf genome annotation)</li>
+<li><strong>-t</strong> readtype (single or paired)</li>
+<li><strong>–readlength</strong> readlength</li>
+<li><strong>–od</strong> /path/to/output (output directory)</li>
 </ul>
 </section>
 <section id="looking-at-rmats-output" class="slide level2 smaller">
@@ -478,11 +478,11 @@ Neel Mukherjee
 <div class="column" style="width:40%;">
 <p>If we look at <code>SE.MATS.JC.txt</code> file the column names are at the top. Let’s go through some of the more important columns:</p>
 <ul>
-<li class="fragment"><strong>ID</strong> A unique identifier for this event.</li>
-<li class="fragment"><strong>chr</strong> chromosome</li>
-<li class="fragment"><strong>strand</strong> strand (+ or -)</li>
-<li class="fragment"><strong>exonStart_0base</strong> the coordinate of the beginning of the alternative exon (using 0-based coordinates)</li>
-<li class="fragment"><strong>exonEnd</strong> the coordinate of the end of the alternative exon</li>
+<li><strong>ID</strong> A unique identifier for this event.</li>
+<li><strong>chr</strong> chromosome</li>
+<li><strong>strand</strong> strand (+ or -)</li>
+<li><strong>exonStart_0base</strong> the coordinate of the beginning of the alternative exon (using 0-based coordinates)</li>
+<li><strong>exonEnd</strong> the coordinate of the end of the alternative exon</li>
 </ul>
 </div><div class="column" style="width:60%;">
 <p><img data-src="../img/block-rna/rmats_out.png"></p>
@@ -493,10 +493,10 @@ Neel Mukherjee
 <div class="columns">
 <div class="column" style="width:40%;">
 <ul>
-<li class="fragment"><strong>upstreamES</strong> the coordinate of the beginning of the exon immediately upstream of the alternative exon</li>
-<li class="fragment"><strong>upstreamEE</strong> the coordinate of the end of the exon immediately upstream of the alternative exon</li>
-<li class="fragment"><strong>downstreamES</strong> the coordinate of the beginning of the exon immediately downstream of the alternative exon</li>
-<li class="fragment"><strong>downstreamEE</strong> the coordinate of the end of the exon immediately downstream of the alternative exon</li>
+<li><strong>upstreamES</strong> the coordinate of the beginning of the exon immediately upstream of the alternative exon</li>
+<li><strong>upstreamEE</strong> the coordinate of the end of the exon immediately upstream of the alternative exon</li>
+<li><strong>downstreamES</strong> the coordinate of the beginning of the exon immediately downstream of the alternative exon</li>
+<li><strong>downstreamEE</strong> the coordinate of the end of the exon immediately downstream of the alternative exon</li>
 </ul>
 </div><div class="column" style="width:60%;">
 <p><img data-src="../img/block-rna/rmats_out.png"></p>
@@ -506,19 +506,19 @@ Neel Mukherjee
 <h2>rMATS output</h2>
 <p>Notice that with these coordinates and the sequence of the genome, you could derive the sequences flanking each of these exons. That could be useful, perhaps, if you wanted to ask if there were short sequences (kmers) enriched near exons whose inclusion was sensitive to RBFOX2 loss versus exons whose inclusion was insensitive.</p>
 <ul>
-<li class="fragment"><strong>IJC_SAMPLE_X</strong> the number of read counts that support inclusion of the exon is sample X (four numbers, one for each replicate, each separated by a comma)</li>
-<li class="fragment"><strong>SJC_SAMPLE_X</strong> same thing, but for read counts that support the exclusion of the exon</li>
+<li><strong>IJC_SAMPLE_X</strong> the number of read counts that support inclusion of the exon is sample X (four numbers, one for each replicate, each separated by a comma)</li>
+<li><strong>SJC_SAMPLE_X</strong> same thing, but for read counts that support the exclusion of the exon</li>
 </ul>
 </section>
 <section id="rmats-output-4" class="slide level2 smaller">
 <h2>rMATS output</h2>
 <p>The numbers from <code>[S|I]JC_SAMPLE_X</code> could be useful for filtering events based on coverage. Say, for example, that we were looking at an event that when we combined IJC and SJC counts for each replicate we got something like 2,4,1,5. That would mean that in the replicates for this condition, we only had 2, 4, 1, and 5 reads that tell us anything about the status of this exon. That’s pretty low, so I would argue that we really wouldn’t want to consider this event at all since we don’t have much confidence that we know anything about its inclusion.</p>
 <ul>
-<li class="fragment"><strong>PValue</strong> The pvalue asking if the PSI values for this event between the two conditions is statistically significantly different</li>
-<li class="fragment"><strong>FDR</strong> The p value, after it has been corrected for multiple hypothesis testing. This is the significance value you would want to filter on.</li>
-<li class="fragment"><strong>IncLevel1</strong> PSI values for the replicates in condition 1 (in this case, condition 1 is RBFOX shRNA).</li>
-<li class="fragment"><strong>IncLevel2</strong> PSI values for the replicates in condition 2 (in this case, condition 2 is Control shRNA).</li>
-<li class="fragment"><strong>IncLevelDifference</strong> Difference in PSI values between conditions (Condition 1 - Condition 2).</li>
+<li><strong>PValue</strong> The pvalue asking if the PSI values for this event between the two conditions is statistically significantly different</li>
+<li><strong>FDR</strong> The p value, after it has been corrected for multiple hypothesis testing. This is the significance value you would want to filter on.</li>
+<li><strong>IncLevel1</strong> PSI values for the replicates in condition 1 (in this case, condition 1 is RBFOX shRNA).</li>
+<li><strong>IncLevel2</strong> PSI values for the replicates in condition 2 (in this case, condition 2 is Control shRNA).</li>
+<li><strong>IncLevelDifference</strong> Difference in PSI values between conditions (Condition 1 - Condition 2).</li>
 </ul>
 </section>
 <section id="rmats-output-5" class="slide level2 smaller">
