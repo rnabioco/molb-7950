@@ -1,0 +1,818 @@
+---
+title: "Data Sharing, Version Control & HPC"
+---
+
+## Today's Topics {.smaller}
+
+1. Uploading Raw Data to Repositories
+   - NCBI GEO
+   - Zenodo
+
+2. Git & GitHub: Why Version Control Matters
+
+3. High-Performance Computing with Slurm
+
+4. Starting an Informatics Analysis
+
+5. Building Interactive Shiny Dashboards
+
+---
+
+# Part 1: Data Repositories {background-color="#43464B"}
+
+## Why Share Raw Data? {.smaller}
+
+**Reproducibility & Transparency**
+
+- Enables others to validate your findings
+- Required by many journals and funding agencies
+- Facilitates meta-analyses and reuse
+- Builds trust in scientific research
+
+**Long-term Preservation**
+
+- Institutional storage may not persist
+- Specialized repositories ensure data longevity
+- Structured metadata improves discoverability
+
+---
+
+## NCBI GEO (Gene Expression Omnibus) {.smaller}
+
+**Best for:** Genomics data (RNA-seq, ChIP-seq, microarrays, etc.)
+
+**Key Features:**
+
+- Domain-specific repository for high-throughput genomics
+- Assigns stable accession numbers (GSE, GSM)
+- Integrated with NCBI databases
+- Free and widely recognized
+
+**What to Upload:**
+
+- Raw sequencing files (FASTQ)
+- Processed data (count matrices, normalized data)
+- Sample metadata and experimental protocols
+
+---
+
+## GEO Submission Process {.smaller}
+
+1. **Prepare metadata:** Sample information, protocols, experimental design
+2. **Upload data:** Use FTP for large files
+3. **Complete forms:** Through GEO submission portal
+4. **Review:** GEO curators check your submission
+5. **Get accession:** Receives GSE number (e.g., GSE123456)
+
+**Resources:**
+
+- [GEO Submission Guide](https://www.ncbi.nlm.nih.gov/geo/info/submission.html)
+- [GEO FAQ](https://www.ncbi.nlm.nih.gov/geo/info/faq.html)
+
+---
+
+## Zenodo {.smaller}
+
+**Best for:** General research data, code, manuscripts, protocols
+
+**Key Features:**
+
+- General-purpose repository (any file type)
+- DOI assignment for easy citation
+- GitHub integration for automatic releases
+- Free up to 50 GB per dataset
+- Long-term preservation (CERN-backed)
+
+**What to Upload:**
+
+- Supplementary data files
+- Analysis code and scripts
+- Protocols and documentation
+- Non-genomics datasets
+
+---
+
+## Zenodo Upload Process {.smaller}
+
+1. **Create account:** Link with ORCID or GitHub
+2. **Create upload:** Click "New upload"
+3. **Add files:** Drag and drop or select
+4. **Add metadata:** Title, authors, description, keywords
+5. **Choose license:** CC-BY, MIT, etc.
+6. **Publish:** Receives permanent DOI
+
+**Pro tip:** Connect GitHub repo to auto-create Zenodo releases
+
+**Resources:**
+
+- [Zenodo Documentation](https://help.zenodo.org/)
+- [Zenodo + GitHub Guide](https://docs.github.com/en/repositories/archiving-a-github-repository/referencing-and-citing-content)
+
+---
+
+## Choosing: GEO vs Zenodo {.smaller}
+
+| Feature | NCBI GEO | Zenodo |
+|---------|----------|---------|
+| **Best for** | Genomics data | General data/code |
+| **File types** | FASTQ, BAM, etc. | Any |
+| **Metadata** | Structured, genomics-focused | Flexible |
+| **DOI** | No (uses accession) | Yes |
+| **Size limit** | Large files OK | 50 GB per dataset |
+| **Journal preference** | Required for genomics | Accepted for supplements |
+
+**Strategy:** Use GEO for raw genomics data, Zenodo for everything else
+
+---
+
+# Part 2: Git & GitHub {background-color="#43464B"}
+
+## Why Use Version Control? {.smaller}
+
+**The Problem Without Git:**
+
+```
+analysis_final.R
+analysis_final_v2.R
+analysis_final_v2_actually_final.R
+analysis_final_v2_actually_final_USE_THIS.R
+```
+
+**Collaboration nightmares:**
+
+- "Which version did you edit?"
+- "I accidentally deleted the working code"
+- "What changed between yesterday and today?"
+
+---
+
+## Git: Time Machine for Code {.smaller}
+
+**What Git Does:**
+
+- Tracks every change to your files
+- Lets you revert to any previous version
+- Shows who changed what and when
+- Enables parallel development (branches)
+- Merges changes from multiple people
+
+**GitHub: Social Network for Git**
+
+- Hosts your Git repositories online
+- Enables collaboration
+- Provides issue tracking and project management
+- Makes your work discoverable and citable
+
+---
+
+## Why Bioinformaticians Need Git {.smaller}
+
+**Reproducibility:**
+
+- Exact version of analysis code tied to publication
+- Document what changed and why (commit messages)
+
+**Collaboration:**
+
+- Multiple people working on same analysis
+- Advisor reviews and suggests changes
+
+**Experimentation:**
+
+- Try new approaches without breaking working code
+- Switch between different analysis strategies
+
+**Backup:**
+
+- Code is safe even if laptop dies
+- Accessible from any computer
+
+---
+
+## Git Basics: Key Concepts {.smaller}
+
+**Repository (repo):** Project folder tracked by Git
+
+**Commit:** Snapshot of your project at a point in time
+
+**Branch:** Parallel version of your code
+
+**Remote:** Online copy (GitHub, GitLab)
+
+**Common Workflow:**
+
+1. Make changes to files
+2. Stage changes (`git add`)
+3. Commit with descriptive message (`git commit`)
+4. Push to GitHub (`git push`)
+
+---
+
+## Learning Git & GitHub {.smaller}
+
+**Essential Resources:**
+
+- [Happy Git and GitHub for the useR](https://happygitwithr.com/) - Excellent beginner guide
+- [GitHub Skills](https://skills.github.com/) - Interactive tutorials
+- [Software Carpentry: Git](https://swcarpentry.github.io/git-novice/) - Comprehensive workshop materials
+- [Oh Sh*t, Git!?!](https://ohshitgit.com/) - Fixing common mistakes
+
+**Practice:**
+
+- Start with your own project (private repo OK)
+- Make small, frequent commits
+- Write clear commit messages
+- Don't be afraid to make mistakes - everything is reversible!
+
+---
+
+## Git Best Practices {.smaller}
+
+**Commit Messages:**
+
+```bash
+# Good
+git commit -m "Add quality filtering step for low-count genes"
+
+# Bad
+git commit -m "updated code"
+```
+
+**What to Track:**
+
+- ✅ Code (.R, .py, .qmd)
+- ✅ Documentation (README.md)
+- ✅ Small data files (<100 MB)
+- ❌ Large raw data files (use data repositories)
+- ❌ Temporary files (.Rhistory, .DS_Store)
+
+**Use .gitignore** to exclude unwanted files
+
+---
+
+# Part 3: High-Performance Computing {background-color="#43464B"}
+
+## Why Use Compute Clusters? {.smaller}
+
+**Your laptop is great, but...**
+
+- Limited CPU cores (4-16 typically)
+- Limited RAM (8-64 GB typically)
+- Takes days/weeks for large analyses
+- Can't use laptop for anything else
+
+**HPC Clusters provide:**
+
+- Hundreds of CPU cores
+- Terabytes of RAM
+- Parallel processing
+- Dedicated resources for your job
+
+---
+
+## CU Boulder Alpine Cluster {.smaller}
+
+**Access:** Available to CU Boulder researchers
+
+**Resources:**
+
+- 380+ compute nodes
+- 10,000+ CPU cores
+- 40+ TB total RAM
+- GPU nodes for deep learning
+
+**Getting Started:**
+
+1. [Request access](https://www.colorado.edu/rc/getting-started)
+2. Complete training requirements
+3. Connect via SSH
+
+**Documentation:** [https://curc.readthedocs.io/](https://curc.readthedocs.io/)
+
+---
+
+## Slurm: Job Scheduler {.smaller}
+
+**What is Slurm?**
+
+- Manages compute resources on clusters
+- Queues your jobs
+- Allocates CPUs, memory, time
+- Runs jobs when resources available
+
+**Why not just run directly?**
+
+- Prevents resource conflicts
+- Fair sharing among users
+- Optimizes cluster efficiency
+- Tracks usage and billing
+
+---
+
+## Basic Slurm Commands {.smaller}
+
+```bash
+# Submit a job
+sbatch my_job.sh
+
+# Check job status
+squeue -u $USER
+
+# Cancel a job
+scancel <job_id>
+
+# View job details
+scontrol show job <job_id>
+
+# Check completed jobs
+sacct -u $USER
+```
+
+---
+
+## Slurm Job Script Example {.smaller}
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=rnaseq_align
+#SBATCH --nodes=1
+#SBATCH --ntasks=8           # 8 CPU cores
+#SBATCH --mem=32G            # 32 GB RAM
+#SBATCH --time=04:00:00      # 4 hours max
+#SBATCH --output=align_%j.out
+#SBATCH --error=align_%j.err
+
+# Load required modules
+module load star/2.7.10
+
+# Run analysis
+STAR --genomeDir /path/to/genome \
+     --readFilesIn sample.fastq.gz \
+     --runThreadN 8 \
+     --outFileNamePrefix output_
+```
+
+---
+
+## Alpine-Specific Resources {.smaller}
+
+**Documentation:**
+
+- [Alpine Quick Start](https://curc.readthedocs.io/en/latest/clusters/alpine/quick-start.html)
+- [Running Jobs](https://curc.readthedocs.io/en/latest/running-jobs/batch-jobs.html)
+- [Software Modules](https://curc.readthedocs.io/en/latest/compute/modules.html)
+
+**Getting Help:**
+
+- Email: rc-help@colorado.edu
+- Office Hours: Check RC website
+- Slack: CU Research Computing workspace
+
+**Best Practices:**
+
+- Test with small jobs first
+- Request appropriate resources (don't waste)
+- Use `/scratch` for temporary files
+
+---
+
+# Part 5: Shiny Dashboards {background-color="#43464B"}
+
+## Why Build Shiny Dashboards? {.smaller}
+
+**Make Your Data Interactive:**
+
+- Explore data without writing code
+- Share results with non-programmers
+- Quick prototyping and visualization
+- Engage stakeholders and collaborators
+
+**Use Cases:**
+
+- Quality control reports
+- Exploratory data analysis
+- Result dissemination
+- Teaching and demonstrations
+- Interactive figures for publications
+
+---
+
+## Shiny Basics {.smaller}
+
+**What is Shiny?**
+
+- R package for building interactive web applications
+- No web development experience needed
+- Works with R (shiny) and Python (shiny for python)
+
+**Two Main Components:**
+
+1. **UI (User Interface):** What users see and interact with
+2. **Server:** The logic that processes inputs and generates outputs
+
+**Reactivity:** Outputs automatically update when inputs change
+
+---
+
+## Shiny with Penguins Dataset {.smaller}
+
+**Palmer Penguins:** Perfect dataset for learning Shiny
+
+- 344 penguins, 3 species
+- Measurements: bill length/depth, flipper length, body mass
+- Categorical: species, island, sex
+
+**We'll Build:**
+
+- Interactive scatter plots
+- Species filtering
+- Summary statistics
+- Downloadable plots
+
+---
+
+## Basic Shiny App Structure {.smaller}
+
+```r
+library(shiny)
+library(tidyverse)
+library(palmerpenguins)
+
+ui <- fluidPage(
+  titlePanel("Palmer Penguins Explorer"),
+
+  sidebarLayout(
+    sidebarPanel(
+      # Inputs go here
+    ),
+    mainPanel(
+      # Outputs go here
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  # Reactive logic goes here
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+---
+
+## Penguins Dashboard: UI {.smaller}
+
+```r
+ui <- fluidPage(
+  titlePanel("Palmer Penguins Explorer"),
+
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("x_var", "X-axis variable:",
+                  choices = c("bill_length_mm", "bill_depth_mm",
+                             "flipper_length_mm", "body_mass_g")),
+
+      selectInput("y_var", "Y-axis variable:",
+                  choices = c("bill_length_mm", "bill_depth_mm",
+                             "flipper_length_mm", "body_mass_g"),
+                  selected = "bill_depth_mm"),
+
+      checkboxGroupInput("species", "Select species:",
+                        choices = c("Adelie", "Chinstrap", "Gentoo"),
+                        selected = c("Adelie", "Chinstrap", "Gentoo"))
+    ),
+
+    mainPanel(
+      plotOutput("scatter_plot"),
+      tableOutput("summary_table")
+    )
+  )
+)
+```
+
+---
+
+## Penguins Dashboard: Server {.smaller}
+
+```r
+server <- function(input, output, session) {
+
+  # Reactive filtered data
+  filtered_data <- reactive({
+    penguins |>
+      filter(species %in% input$species) |>
+      drop_na()
+  })
+
+  # Scatter plot
+  output$scatter_plot <- renderPlot({
+    ggplot(filtered_data(),
+           aes(x = .data[[input$x_var]],
+               y = .data[[input$y_var]],
+               color = species)) +
+      geom_point(size = 3, alpha = 0.7) +
+      labs(x = input$x_var, y = input$y_var) +
+      theme_minimal()
+  })
+
+  # Summary table
+  output$summary_table <- renderTable({
+    filtered_data() |>
+      group_by(species) |>
+      summarize(n = n(), .groups = "drop")
+  })
+}
+```
+
+---
+
+## Enhanced Features {.smaller}
+
+**Add More Interactivity:**
+
+```r
+# In UI sidebarPanel:
+sliderInput("point_size", "Point size:",
+            min = 1, max = 5, value = 3),
+
+checkboxInput("show_smooth", "Show trend line", FALSE),
+
+downloadButton("download_plot", "Download Plot")
+
+# In server:
+output$download_plot <- downloadHandler(
+  filename = function() {
+    paste0("penguins_plot_", Sys.Date(), ".png")
+  },
+  content = function(file) {
+    ggsave(file, plot = current_plot(),
+           width = 8, height = 6)
+  }
+)
+```
+
+---
+
+## Testing Your Shiny App {.smaller}
+
+**Development Workflow:**
+
+1. **Run locally:** Click "Run App" in RStudio/Positron
+2. **Test interactivity:** Try all inputs and edge cases
+3. **Check performance:** Does it respond quickly?
+4. **Iterate:** Refine based on user feedback
+
+**Debugging Tips:**
+
+- Use `print()` or `browser()` in server function
+- Check R console for error messages
+- Use reactive log: `options(shiny.reactlog = TRUE)`
+
+---
+
+## Deploying Shiny Apps {.smaller}
+
+**Options:**
+
+1. **shinyapps.io:** Free tier available, easy deployment
+2. **Posit Connect:** For organizations (CU may have this)
+3. **Shiny Server:** Self-hosted option
+4. **Docker containers:** For reproducible deployment
+
+**Quick Deploy to shinyapps.io:**
+
+```r
+library(rsconnect)
+
+# First time setup
+rsconnect::setAccountInfo(name = 'your_account',
+                          token = 'your_token',
+                          secret = 'your_secret')
+
+# Deploy
+rsconnect::deployApp(appDir = "path/to/app")
+```
+
+---
+
+## Shiny Learning Resources {.smaller}
+
+**Getting Started:**
+
+- [Mastering Shiny](https://mastering-shiny.org/) - Free online book by Hadley Wickham
+- [Shiny Posit](https://shiny.posit.co/) - Official documentation and gallery
+- [Shiny Contest Gallery](https://shiny.posit.co/blog/posts/shiny-contest-2024/) - Inspiration from community
+
+**For Bioinformatics:**
+
+- [Genome Nexus](https://www.genomenexus.org/) - Example genomics dashboard
+- Many Bioconductor packages have built-in Shiny apps
+
+**Practice:** Start simple, add features incrementally
+
+---
+
+## Using Positron Assistant {.smaller} for Shiny {.smaller}
+
+**I can help you:**
+
+- Generate app templates
+- Add new UI components
+- Write reactive logic
+- Debug reactivity issues
+- Suggest layout improvements
+- Optimize performance
+
+**Example prompts:**
+
+> "Create a Shiny app to visualize my RNA-seq results with a volcano plot"
+
+> "Add a download button for the filtered data table"
+
+> "Why isn't my plot updating when I change the input?"
+
+**Note:** For running apps, use the Shiny Assistant (`@shiny`)
+
+---
+
+# Part 4: Starting an Analysis {background-color="#43464B"}
+
+## Analysis Workflow Structure {.smaller}
+
+**Recommended Project Organization:**
+
+```
+my_project/
+├── README.md                 # Project overview
+├── data/
+│   ├── raw/                 # Original, untouched data
+│   └── processed/           # Cleaned, filtered data
+├── scripts/
+│   ├── 01_download_data.sh
+│   ├── 02_quality_control.R
+│   └── 03_analysis.R
+├── results/
+│   ├── figures/
+│   └── tables/
+├── docs/                     # Documentation, notes
+└── environment/             # Conda/renv files
+```
+
+---
+
+## Starting with Raw Data: Checklist {.smaller}
+
+**Before You Begin:**
+
+1. ✅ Understand your data type and format
+2. ✅ Set up project directory structure
+3. ✅ Initialize Git repository
+4. ✅ Create README with project description
+5. ✅ Document data sources and accession numbers
+6. ✅ Set up computational environment (conda, renv)
+
+**First Analysis Steps:**
+
+1. Download/access raw data
+2. Quality control and assessment
+3. Document decisions and parameters
+4. Commit code regularly
+
+---
+
+## Using Positron Assistant
+
+**What is Positron?**
+
+- Next-generation IDE for data science
+- Built for R and Python
+- Integrated AI assistant (that's me!)
+
+**How I Can Help You Start:**
+
+1. **Project setup:** Create directory structure
+2. **Code scaffolding:** Generate template scripts
+3. **Quality control:** Write QC code for your data type
+4. **Troubleshooting:** Debug errors and issues
+5. **Best practices:** Suggest improvements
+
+---
+
+## Example: Starting RNA-seq Analysis {.smaller}
+
+**Ask Positron Assistant:**
+
+> "I have raw RNA-seq FASTQ files. Help me set up a project and write a quality control script using FastQC"
+
+**I can help with:**
+
+- Creating organized project structure
+- Writing Slurm submission scripts
+- Generating QC and alignment code
+- Setting up conda environments
+- Creating README templates
+- Explaining parameters and options
+
+**Remember:** I can see your files, variables, and session info - share context!
+
+---
+
+## Working with Positron Assistant {.smaller}
+
+**Tips for Better Assistance:**
+
+1. **Be specific:** "Write a script to align FASTQ files using STAR" vs. "help with alignment"
+2. **Provide context:** Share error messages, file formats, data types
+3. **Iterate:** Start simple, then refine
+4. **Ask for explanations:** "Why did you use this parameter?"
+5. **Request documentation:** "Add comments explaining this code"
+
+**I can help with:**
+
+- R (tidyverse, Bioconductor)
+- Python (polars, numpy, pandas)
+- Bash scripting
+- Git commands
+- Documentation
+
+---
+
+## Example Interaction {.smaller}
+
+**You:** "I need to set up a new RNA-seq project with data from GEO accession GSE123456"
+
+**I provide:**
+
+```bash
+# Project structure
+mkdir -p rnaseq_project/{data/raw,scripts,results,docs}
+cd rnaseq_project
+git init
+
+# Download script
+# scripts/01_download_geo.sh with SRA toolkit commands
+
+# README template with project details
+
+# Next steps and QC recommendations
+```
+
+**You can then ask:** "Now write a FastQC script for these files"
+
+---
+
+## Putting It All Together {.smaller}
+
+**Complete Workflow:**
+
+1. **Set up project** → Use Positron Assistant
+2. **Initialize Git** → Track changes from day 1
+3. **Download data** → Document source (GEO accession)
+4. **Write analysis scripts** → Get help from Assistant
+5. **Run on HPC** → Use Slurm on Alpine
+6. **Analyze and visualize** → Iterate with version control
+7. **Upload results** → Share data (Zenodo) and code (GitHub)
+
+**Every step is reproducible and documented!**
+
+---
+
+## Resources Summary {.smaller}
+
+**Data Repositories:**
+
+- NCBI GEO: https://www.ncbi.nlm.nih.gov/geo/
+- Zenodo: https://zenodo.org/
+
+**Git & GitHub:**
+
+- Happy Git with R: https://happygitwithr.com/
+- GitHub Skills: https://skills.github.com/
+
+**CU Alpine:**
+
+- Documentation: https://curc.readthedocs.io/
+- Support: rc-help@colorado.edu
+
+**Positron:**
+
+- User Guide: https://positron.posit.co/
+
+---
+
+## Questions? {.smaller}
+
+**Key Takeaways:**
+
+1. Share your data in appropriate repositories
+2. Use Git from the start - your future self will thank you
+3. Leverage HPC for large-scale analyses
+4. Start organized - structure matters
+5. Use Positron Assistant as your coding partner
+6. Build Shiny apps to share your results interactively
+
+**Next Steps:**
+
+- Practice Git basics with a small project
+- Request Alpine access if you haven't
+- Try setting up your next analysis with Positron Assistant
