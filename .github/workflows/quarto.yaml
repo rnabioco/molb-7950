@@ -23,15 +23,16 @@ jobs:
         run: |
           quarto add --no-prompt quarto-ext/fontawesome
           quarto add --no-prompt sellorm/quarto-social-embeds
-          quarto add --no-prompt r-wasm/quarto-drop
+          # quarto add --no-prompt r-wasm/quarto-drop
           quarto add --no-prompt quarto-ext/pointer
-          quarto add --no-prompt r-wasm/quarto-live
+          # quarto add --no-prompt r-wasm/quarto-live
+          quarto add --no-prompt gadenbuie/quarto-auto-dark
 
       - name: 🔧 Install R
         uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
-          r-version: 'renv'
+          r-version: "renv"
 
       - name: 🔁 Install system dependencies
         run: |
@@ -63,10 +64,10 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: nwtgck/actions-netlify@v3.0
         with:
-          publish-dir: './_site'
+          publish-dir: "./_site"
           production-branch: main
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: 'Deploy from GHA: ${{ github.event.pull_request.title || github.event.head_commit.message }} (${{ github.sha }})'
+          deploy-message: "Deploy from GHA: ${{ github.event.pull_request.title || github.event.head_commit.message }} (${{ github.sha }})"
           enable-commit-comment: false
           enable-github-deployment: false
         env:
