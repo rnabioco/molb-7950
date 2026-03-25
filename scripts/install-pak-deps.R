@@ -13,19 +13,30 @@ if (!requireNamespace("remotes", quietly = TRUE)) {
   install.packages("remotes")
 }
 
+# Helper: only install if not already available
+install_if_missing <- function(pkgs, ...) {
+  missing <- pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
+  if (length(missing) > 0) {
+    BiocManager::install(missing, update = FALSE, ask = FALSE, ...)
+  }
+}
+
 # GitHub-only packages
-remotes::install_github("hadley/emo", upgrade = "never")
-remotes::install_github("rnabioco/cpp11bigwig", upgrade = "never")
+if (!requireNamespace("emo", quietly = TRUE)) {
+  remotes::install_github("hadley/emo", upgrade = "never")
+}
+if (!requireNamespace("cpp11bigwig", quietly = TRUE)) {
+  remotes::install_github("rnabioco/cpp11bigwig", upgrade = "never")
+}
 
 # CRAN packages where conda-forge version is too old
-install.packages("valr")
-install.packages("Seurat")
+install_if_missing(c("valr", "Seurat"))
 
 # Bioconductor packages missing osx-arm64 builds (linux-64 gets them from conda)
-BiocManager::install(c(
+install_if_missing(c(
   "alevinQC",
   "memes",
   "scran",
   "universalmotif",
   "DropletUtils"
-), update = FALSE, ask = FALSE)
+))
