@@ -21,14 +21,11 @@ remotes::install_github("rnabioco/cpp11bigwig", upgrade = "never")
 install.packages("valr")
 install.packages("Seurat")
 
-# Bioconductor packages not on bioconda or missing osx-arm64 builds
+# Bioconductor packages missing osx-arm64 builds (linux-64 gets them from conda)
 BiocManager::install(c(
-  # rGADEM removed from Bioconductor 3.22
-  "universalmotif",
-  "DropletUtils",
-  "scran",
-  "memes",
   "alevinQC",
-  "clustifyr",
-  "clustifyrdatahub"
+  "memes",
+  "scran",
+  "universalmotif",
+  "DropletUtils"
 ), update = FALSE, ask = FALSE)
