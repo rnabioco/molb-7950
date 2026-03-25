@@ -77,9 +77,11 @@ mutate(speed = distance / air_time)
 
 ### R Environment
 
-- The project uses `renv` for package management
-- Check `renv.lock` for exact package versions
-- Use packages already included in the environment
+- The project uses `pixi` for environment management (`pixi.toml`, `pixi.lock`)
+- conda-forge provides CRAN packages, bioconda provides Bioconductor packages
+- Packages not on conda are installed via `BiocManager`/`remotes` (see `scripts/install-pak-deps.R`)
+- Use `pixi run render` to build the site, `pixi run preview` for local preview
+- Use `pixi run install-pak-deps` after cloning to install fallback packages
 - Follow established data loading patterns from `data-raw/` scripts
 
 ### Quality Assurance

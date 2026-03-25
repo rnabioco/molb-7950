@@ -6,25 +6,25 @@ Course materials for "MOLB 7950: Informatics and Statistics for Molecular Biolog
 
 ## Installing local packages
 
+### pixi
+
+Clone the repo, install [pixi](https://pixi.sh), then:
+
+```bash
+pixi install
+pixi run install-pak-deps
+```
+
+This sets up R, Quarto, bioinformatics CLI tools, and all R packages. Packages
+not available on conda-forge/bioconda are installed via `pak` (see
+`scripts/install-pak-deps.R`).
+
+To add a new package, either add it to `pixi.toml` (if on conda-forge/bioconda)
+or to `scripts/install-pak-deps.R` (if not), then commit `pixi.lock`.
+
 ### Posit Cloud
 
-Create a new template project and manually install packages.
-
-### renv
-
-Clone a fresh repo and then run `renv::activate()` and `renv::restore()`, which will install project
-packages in a project-local library under `renv/`.
-
-When you add new libraries to your content, run `renv::snapshot()`, follow
-instructions to `renv::install()` if needed, and then be sure to commit the
-`renv.lock` file.
-
-It is sometimes help to do this when CRAN versions are updated nightly, causing
-GHA builds to fail, as e.g. a Mac version might be available before Linux (ubuntu on GHA).
-In these case, you can just install that most recent working version i.e. `renv::install("tidyverse@1.0.1")`.
-
-I **do not** recommend using renv on Posit Cloud, it seems flakier there. Just make Project templates
-and install packages individually. I recommend using pak there:
+Create a new template project and manually install packages with `pak`:
 
 ```r
 install.packages("pak")
