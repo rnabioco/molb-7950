@@ -38,5 +38,11 @@ install_if_missing(c(
   "memes",
   "scran",
   "universalmotif",
-  "DropletUtils"
+  "DropletUtils",
+  "GO.db",
+  "TxDb.Hsapiens.UCSC.hg19.knownGene",
+  "org.Hs.eg.db",
+  "BSgenome.Hsapiens.UCSC.hg19",
+  "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene",
+  "BSgenome.Scerevisiae.UCSC.sacCer3"
 ))
