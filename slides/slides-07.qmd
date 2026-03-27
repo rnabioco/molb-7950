@@ -1,393 +1,435 @@
 ---
 title: "R Bootcamp - Class 7"
-subtitle: "Tidyverse odds & ends"
+subtitle: "tidyverse odds & ends"
 author: "{{< var instructor.block.bootcamp-r >}}"
 ---
 
-## Class 7 outline
-
-* String manipulation with `stringr`
-* Factor operations with `forcats`
-* Join functions with `dplyr`
-* Advanced plotting with `ggplot2`
-
-## Setup
-
 ```{r}
-#| message: false
+#| include: false
 library(tidyverse)
-library(here)
 library(cowplot)
-
-# set the theme for all plots
-theme_set(theme_cowplot())
-
-# overwrite as tibble
-penguins <- as_tibble(penguins)
+library(here)
 ```
 
-# String operations
+## Class 7 outline
 
-## Combining strings with `str_c()`
+* Accessing data in vectors (Exercise)
+* other tidyverse packages (stringr & forcats)
+* dplyr table joins (Exercise)
+* ggplot2 scale functions
+* ggplot2 multi-panel figures (Exercise)
+* ggplot2 saving figures
+
+# Accessing data in vectors
+
+## Using `[`, `[[`, and `$` {.smaller}
 
 ```{r}
 #| echo: true
-#| output-location: fragment
-str_c("letter: ", letters[1:5])
+#| output-location: column-fragment
+# `hp` vector from mtcars
+mtcars$hp
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# columns by name
+mtcars[c("hp", "mpg")]
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# first 10 items in hp
+hp <- mtcars$hp
+hp[1:10]
 ```
 
 ---
 
 ```{r}
+#| eval: false
 #| echo: true
-#| output-location: fragment
-penguins |>
-  mutate(
-    id = str_c(species, island, sep = "_"),
-    label = str_c(species, " (", year, ")")
-  ) |>
-  select(species, island, year, id, label)
+#| output-location: column-fragment
+# 2 ways to get the 10th value
+hp[10]
+hp[[10]]
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| error: true
+#| output-location: column-fragment
+# this is an error
+hp[[1:10]]
+```
+
+. . .
+
+`[` can return a range, `[[` returns a single value.
+
+## vector selection with logic {.smaller}
+
+one-step filtering.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+hp[hp > 100]
+```
+
+. . .
+
+two-step filtering. same result.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# get a vector of T/F values
+x <- hp > 100
+x
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+# use that vector to index the original
+hp[x]
+```
+
+. . .
+
+also can use with `is.na()` to identify / exclude `NA` values in a vector.
+
+---
+
+Use `sum()` to figure out how many are `TRUE`.
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+x <- hp > 100
+
+# how many are TRUE?
+sum(x)
+```
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+length(hp[x])
+```
+
+# other tidyverse libraries
+
+## string operations with stringr {.smaller}
+
+stringr provides several useful functions for operating on strings.
+
+See the [stringr cheatsheet](https://github.com/rstudio/cheatsheets/blob/main/strings.pdf)
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+str_c("letter: ", letters[1:5])
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+ids <- c("x-1", "x-2", "y-1", "y-2")
+str_split(ids, "-")
+
+# just the first parts
+# str_split_i(ids, '-', 1)
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+str_detect("A", LETTERS[1:5])
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+str_pad(
+  1:10,
+  width = 2,
+  side = "left",
+  pad = 0
+)
 ```
 
 ::: {.notes}
 `str_c()` is similar to `paste` and `paste0` but the behavior is more consistent.
 :::
 
-## Detecting patterns with `str_detect()`
+## forcats operations for factors {.smaller}
+
+forcats provides several utilities for working with factors.
+
+See the [forcats cheatsheet](https://github.com/rstudio/cheatsheets/blob/main/factors.pdf)
 
 ```{r}
 #| echo: true
-#| output-location: fragment
-str_detect("A", LETTERS[1:10])
+#| output-location: column-fragment
+library(palmerpenguins)
+penguins[1:3]
 ```
 
 ---
 
 ```{r}
 #| echo: true
-#| output-location: fragment
-mtcars_tbl <-
-  rownames_to_column(mtcars, "name") |>
-  as_tibble()
-
-# find the Mercedes Benz's
-filter(
-  mtcars_tbl,
-  str_detect(name, "Merc")
-)
-```
-
-## Splitting strings with `str_split()` {.smaller}
-
-```{r}
-#| echo: true
-#| output-location: fragment
-ids <- c("x-1", "x-2", "y-1", "y-2")
-str_split(ids, "-")
-
-# just the first parts
-str_split_i(ids, '-', 1)
-```
-
----
-
-```{r}
-#| echo: true
-#| output-location: fragment
-# create some sample data
-df <- tribble(
-  ~ sample_ids,
-  "gene_1_treatment",
-  "gene_2_control",
-  "gene_3_treatment"
-)
-
-mutate(
-  df,
-  split_parts = str_split(sample_ids, "_"),
-  gene_part = map_chr(split_parts, ~ .x[1]),
-  number_part = map_chr(split_parts, ~ .x[2]),
-  condition = map_chr(split_parts, ~ .x[3])
-)
-```
-
-# Factor operations
-
-## Counting factor levels with `fct_count()`
-
-```{r}
-#| echo: true
-#| output-location: fragment
-# equivalent with dplyr
-penguins |>
-  count(species)
-```
-
-```{r}
-#| echo: true
-#| output-location: fragment
+#| output-location: column-fragment
 fct_count(penguins$species)
 ```
 
-## Reordering factors with `fct_reorder()`
+. . .
 
 ```{r}
 #| echo: true
-#| warning: false
-#| output-location: slide
-#| fig.alt: "Bar plot showing penguin species counts, ordered by frequency from lowest to highest"
-ggplot(
-  penguins,
-  aes(
-    x = species,
-    y = body_mass
-  )
-) +
-  geom_boxplot(
-    fill = "grey50"
-  )
+#| output-location: column-fragment
+fct_lump_min(
+  penguins$species,
+  min = 150
+) |>
+  fct_count()
 ```
+
+::: aside
+`dplyr::count()` is a more flexible alternative to `forcats::fct_count()`
+:::
 
 ---
 
+## Use forcats to reorder data in plots {.smaller}
+
 ```{r}
 #| echo: true
-#| warning: false
-#| output-location: slide
-#| fig.alt: "Bar plot showing penguin species counts, ordered by frequency from lowest to highest"
+#| output-location: column-fragment
+#| fig.alt: "Description of the plot - PLEASE FILL IN"
 ggplot(
-  penguins,
+  mpg,
+  aes(
+    x = class,
+    y = hwy
+  )
+) +
+  geom_boxplot()
+```
+
+. . .
+
+```{r}
+#| echo: true
+#| output-location: column-fragment
+#| fig.alt: "Description of the plot - PLEASE FILL IN"
+ggplot(
+  mpg,
   aes(
     x = fct_reorder(
-      species,
-      body_mass,
-      .fun = sd,
-      na.rm = TRUE
+      class,
+      hwy,
+      .fun = median
     ),
-    y = body_mass
+    y = hwy
   )
 ) +
-  geom_boxplot(
-    fill = "grey50"
-  )
+  geom_boxplot()
 ```
 
-## Lumping infrequent levels with `fct_lump()`
-
-```{r}
-#| echo: true
-#| output-location: fragment
-# create some sample data with many levels.
-# how many rows / cols are in this tibble?
-sample_data <-
-  tibble(
-    category = factor(
-      sample(
-        letters[1:10],
-        100,
-        replace = TRUE
-      )
-    )
-  )
-```
-
----
-
-```{r}
-#| echo: true
-#| output-location: column-fragment
-mutate(
-  sample_data,
-  lumped = fct_lump_n(
-    category,
-    n = 3
-  )
-)
-```
-
----
-
-```{r}
-#| echo: true
-#| output-location: column-fragment
-mutate(
-  sample_data,
-  lumped = fct_lump_n(
-    category,
-    n = 3
-  )
-) |>
-  count(lumped)
-```
-
-::: {.aside}
-Do your numbers look different? `sample()` is not reproducible by default.
+::: aside
+[FAQ on rordering in ggplot2](https://ggplot2.tidyverse.org/articles/faq-reordering.html)
 :::
 
-## Aside on `sample()` and reproducibility {.smaller}
+# dplyr
 
-```{r}
-#| echo: true
-#| output-location: fragment
-# run this several times
-sample(0:100, 10)
+## Advanced summarizing with `across()`
 
-sample(0:100, 10)
-```
-
----
-
-```{r}
-#| echo: true
-#| output-location: fragment
-# now make `sample()` reproducible.
-# you have the set the seed each time.
-
-set.seed(42) # set the seed for reproducibility
-sample(0:100, 10)
-
-set.seed(42)
-sample(0:100, 10)
-
-sample(0:100, 10)
-```
-
-::: {.aside}
-this also applies to `rnorm()`, `runif()`, and other random number generation functions.
-:::
-
-# Join operations
-
-## Setup
-
-Open up the [tidyexplain](https://www.garrickadenbuie.com/project/tidyexplain/) page.
-
-## Understanding joins
-
-Joins combine data from two tables based on matching keys.
+Apply functions to multiple columns at once.
 
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-band_members
-```
-```{r}
-#| echo: true
-#| output-location: column-fragment
-band_instruments
-```
-
-## `left_join()` - keep all rows from left table
-
-Most common join - keeps all observations from the "primary" table.
-
-```{r}
-#| echo: true
-#| output-location: column-fragment
-band_members |>
-  left_join(
-    band_instruments,
-    by = "name"
+library(palmerpenguins)
+penguins |>
+  group_by(species) |>
+  summarise(
+    across(
+      c(bill_length_mm, bill_depth_mm, flipper_length_mm),
+      list(mean = ~ mean(.x, na.rm = TRUE), sd = ~ sd(.x, na.rm = TRUE))
+    ),
+    .groups = "drop"
   )
 ```
 
-## `inner_join()` - keep only matching rows
+## Multiple grouping variables
 
-Only keeps rows that exist in both tables.
-
-```{r}
-#| echo: true
-#| output-location: column-fragment
-band_members |>
-  inner_join(
-    band_instruments,
-    by = "name"
-  )
-```
-
-## `full_join()` - keep all rows from both tables
+Complex grouping for detailed analysis.
 
 ```{r}
 #| echo: true
 #| output-location: column-fragment
-band_members |>
-  full_join(
-    band_instruments,
-    by = "name"
-  )
+penguins |>
+  group_by(species, island, year) |>
+  summarise(
+    n_penguins = n(),
+    avg_mass = mean(body_mass_g, na.rm = TRUE),
+    mass_range = max(body_mass_g, na.rm = TRUE) -
+      min(body_mass_g, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(desc(avg_mass))
 ```
 
-Keeps everything, filling missing values with `NA`.
+# ggplot2
 
-# Advanced plotting
-
-## Setup
-
-```{r}
-#| message: false
-library(patchwork)
-```
-
-## scale functions in ggplot2 {.smaller}
+## scale functions in ggplot2
 
 - `scale_color_brewer()` and `scale_fill_brewer()` control `color` and `fill` aesthetics.
 - See available [ggplot2 brewer palettes](https://ggplot2.tidyverse.org/reference/scale_brewer.html#palettes)
 
+. . .
+
 ```{r}
 #| echo: true
-#| message: false
-#| output-location: slide
-#| fig.alt: "Example of a ggplot2 scatter plot with points colored by number of cylinders, using the cowplot theme"
-p1 <- ggplot(
-  mtcars_tbl,
+#| output-location: column
+#| fig.alt: "Description of the plot - PLEASE FILL IN"
+p <- ggplot(
+  mtcars,
   aes(
     x = mpg,
     y = hp,
-    # why do we `factor` here?
     color = factor(cyl)
   )
 ) +
-  geom_point(size = 5)
+  geom_point(size = 3) +
+  theme_cowplot()
 
-p1
+p
 ```
 
----
+## scale functions in ggplot2 {.smaller}
 
 ```{r}
 #| echo: true
-#| output-location: fragment
-p1 + scale_color_brewer(palette = "Set1")
+#| output-location: column-fragment
+p + scale_color_brewer(palette = "Set1")
 ```
-
----
 
 ```{r}
 #| echo: true
-#| output-location: fragment
-p1 + scale_color_brewer(palette = "Dark2")
+#| output-location: column-fragment
+p + scale_color_brewer(palette = "Dark2")
 ```
 
-## Combining multiple plots into a figure? {.smaller}
-
-Use the [`{patchwork}` package](https://patchwork.data-imaginist.com/).
+## Set up a points plot {.smaller}
 
 ```{r}
 #| echo: true
-#| message: false
+#| output-location: column-fragment
+#| fig.alt: "Description of the plot - PLEASE FILL IN"
+diamonds_subset <- sample_n(diamonds, 1000)
+
+p <- ggplot(
+  diamonds_subset,
+  aes(
+    x = carat,
+    y = price,
+    color = cut
+  )
+) +
+  geom_point(alpha = 0.8) +
+  theme_cowplot()
+
+p + geom_line()
+```
+
+## How to combine multiple plots into a figure? {.smaller}
+
+```{r}
+#| echo: true
 #| output-location: slide
-#| fig.alt: "Example of combining multiple ggplot2 plots into a single figure using the patchwork package"
-(p1 + p1) /
-  (p1 + p1) +
-  plot_annotation(tag_levels = 'A') +
-  plot_layout(guides = 'collect')
+#| fig.alt: "Description of the plot - PLEASE FILL IN"
+# `plot_grid()` is from `cowplot`
+plot_grid(
+  p,
+  p,
+  p,
+  p,
+  labels = c(
+    "A",
+    "B",
+    "C",
+    "D"
+  ),
+  nrow = 2
+)
 ```
 
-## Saving plots
+::: aside
+[patchwork](https://github.com/thomasp85/patchwork) is a related library that uses arithmetic syntax (`a + b | c`)
+:::
+
+## We have 4 legends - can they be condensed? {.smaller}
+
+Yes, but it is not exactly straightforward.
+
+```{r}
+#| echo: true
+#| output-location: slide
+#| fig.alt: "Description of the plot - PLEASE FILL IN"
+# fetch the legend for `p1`
+legend <- get_legend(
+  p + theme(legend.position = "bottom")
+)
+
+p <- p + theme(legend.position = "none")
+
+# first `plot_grid` builds the panels
+panels <- plot_grid(
+  p,
+  p,
+  p,
+  p,
+  labels = c(
+    "A",
+    "B",
+    "C",
+    "D"
+  ),
+  nrow = 2
+)
+
+# second `plot_grid` adds the legend to the panels
+plot_grid(
+  panels,
+  legend,
+  ncol = 1,
+  rel_heights = c(1, .1)
+)
+```
+
+## Saving plots (Exercise 18)
 
 Saves last plot as 5' x 5' file named `plot_final.png` in working directory.
 
-Matches file type to file extension (`*.png`, `*.jpeg`, `*.pdf`).
+Matches file type to file extension.
 
 ```{r}
 #| echo: true
@@ -395,51 +437,8 @@ Matches file type to file extension (`*.png`, `*.jpeg`, `*.pdf`).
 # default is to save last plot in the buffer
 # can also specify with the `plot` argument
 ggsave(
-  filename = here("img/plot_final.png"),
-  plot = last_plot(),
+  here("img/plot_final.png"),
   width = 5,
   height = 5
 )
-```
-
-# Displaying data in tables
-
-We'll use a couple of approaches to display data in tables instead of graphs, which
-can be useful for reports or presentations.
-
-## Using `knitr::kable()`
-
-```{r}
-#| echo: true
-#| output-location: slide
-library(knitr) # also loaded with library(tidyverse)
-
-kable(
-  penguins |>
-    select(species, island, body_mass) |>
-    head(10),
-  caption = "First 10 rows of the penguins dataset"
-)
-```
-
-## Using `gt`
-
-```{r}
-#| echo: true
-#| message: false
-#| output-location: slide
-#| html-table-processing: none
-library(gt)
-
-gt(
-  penguins |>
-    select(species, island, body_mass)
-) |>
-  tab_header(
-    title = "The {penguins} dataset"
-  ) |>
-  opt_interactive(
-    use_pagination = TRUE,
-    use_filters = TRUE
-  )
 ```

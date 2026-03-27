@@ -44,5 +44,8 @@ install_if_missing(c(
   "org.Hs.eg.db",
   "BSgenome.Hsapiens.UCSC.hg19",
   "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene",
-  "BSgenome.Scerevisiae.UCSC.sacCer3"
+  "BSgenome.Scerevisiae.UCSC.sacCer3",
+  "clustifyrdatahub",
+  "rGADEM",
+  "seqLogo"
 ))
