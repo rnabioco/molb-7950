@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.8.27">
 
   <meta name="author" content="Matthew Taliaferro">
-  <meta name="dcterms.date" content="2026-03-26">
+  <meta name="dcterms.date" content="2026-03-27">
   <title>MOLB 7950 – R Bootcamp - Class 7</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -190,18 +190,11 @@
       margin-right: 0; 
     }
   </style>
-  <script src="../site_libs/core-js-2.5.3/shim.min.js"></script>
-  <script src="../site_libs/react-18.2.0/react.min.js"></script>
-  <script src="../site_libs/react-18.2.0/react-dom.min.js"></script>
-  <script src="../site_libs/reactwidget-2.0.0/react-tools.js"></script>
-  <script src="../site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
-  <link href="../site_libs/reactable-0.4.4/reactable.css" rel="stylesheet">
-  <script src="../site_libs/reactable-binding-0.4.4/reactable.js"></script>
 <meta property="og:title" content="R Bootcamp - Class 7 – MOLB 7950">
-<meta property="og:description" content="Tidyverse odds &amp; ends">
+<meta property="og:description" content="tidyverse odds &amp; ends">
 <meta property="og:site_name" content="MOLB 7950">
 <meta name="twitter:title" content="R Bootcamp - Class 7 – MOLB 7950">
-<meta name="twitter:description" content="Tidyverse odds &amp; ends">
+<meta name="twitter:description" content="tidyverse odds &amp; ends">
 <meta name="twitter:image" content="https://rnabioco.github.io/molb-7950/slides/images/twitter-card.png">
 <meta name="twitter:creator" content="@rnabioco">
 <meta name="twitter:card" content="summary_large_image">
@@ -212,7 +205,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">R Bootcamp - Class 7</h1>
-  <p class="subtitle">Tidyverse odds &amp; ends</p>
+  <p class="subtitle">tidyverse odds &amp; ends</p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -225,138 +218,208 @@ Matthew Taliaferro
     </div>
 </div>
 
-  <p class="date">2026-03-26</p>
+  <p class="date">2026-03-27</p>
 </section>
 <section id="class-7-outline" class="slide level2">
 <h2>Class 7 outline</h2>
 <ul>
-<li>String manipulation with <code>stringr</code></li>
-<li>Factor operations with <code>forcats</code></li>
-<li>Join functions with <code>dplyr</code></li>
-<li>Advanced plotting with <code>ggplot2</code></li>
+<li>Accessing data in vectors (Exercise)</li>
+<li>other tidyverse packages (stringr &amp; forcats)</li>
+<li>dplyr table joins (Exercise)</li>
+<li>ggplot2 scale functions</li>
+<li>ggplot2 multi-panel figures (Exercise)</li>
+<li>ggplot2 saving figures</li>
 </ul>
 </section>
-<section id="setup" class="slide level2">
-<h2>Setup</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a></a><span class="fu">library</span>(here)</span>
-<span id="cb1-3"><a></a><span class="fu">library</span>(cowplot)</span>
-<span id="cb1-4"><a></a></span>
-<span id="cb1-5"><a></a><span class="co"># set the theme for all plots</span></span>
-<span id="cb1-6"><a></a><span class="fu">theme_set</span>(<span class="fu">theme_cowplot</span>())</span>
-<span id="cb1-7"><a></a></span>
-<span id="cb1-8"><a></a><span class="co"># overwrite as tibble</span></span>
-<span id="cb1-9"><a></a>penguins <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(penguins)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
 <section>
-<section id="string-operations" class="title-slide slide level1 center">
-<h1>String operations</h1>
+<section id="accessing-data-in-vectors" class="title-slide slide level1 center">
+<h1>Accessing data in vectors</h1>
 
 </section>
-<section id="combining-strings-with-str_c" class="slide level2">
-<h2>Combining strings with <code>str_c()</code></h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a></a><span class="fu">str_c</span>(<span class="st">"letter: "</span>, letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="using-and" class="slide level2 smaller">
+<h2>Using <code>[</code>, <code>[[</code>, and <code>$</code></h2>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="co"># `hp` vector from mtcars</span></span>
+<span id="cb1-2"><a></a>mtcars<span class="sc">$</span>hp</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 110 110  93 110 175 105 245  62  95 123 123 180 180 180
+[15] 205 215 230  66  52  65  97 150 150 245 175  66  91 113
+[29] 264 175 335 109</code></pre>
 </div>
-<div class="cell fragment">
+</div></div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="co"># columns by name</span></span>
+<span id="cb3-2"><a></a>mtcars[<span class="fu">c</span>(<span class="st">"hp"</span>, <span class="st">"mpg"</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code>                     hp  mpg
+Mazda RX4           110 21.0
+Mazda RX4 Wag       110 21.0
+Datsun 710           93 22.8
+Hornet 4 Drive      110 21.4
+Hornet Sportabout   175 18.7
+Valiant             105 18.1
+Duster 360          245 14.3
+Merc 240D            62 24.4
+Merc 230             95 22.8
+Merc 280            123 19.2
+Merc 280C           123 17.8
+Merc 450SE          180 16.4
+Merc 450SL          180 17.3
+Merc 450SLC         180 15.2
+Cadillac Fleetwood  205 10.4
+Lincoln Continental 215 10.4
+Chrysler Imperial   230 14.7
+Fiat 128             66 32.4
+Honda Civic          52 30.4
+Toyota Corolla       65 33.9
+Toyota Corona        97 21.5
+Dodge Challenger    150 15.5
+AMC Javelin         150 15.2
+Camaro Z28          245 13.3
+Pontiac Firebird    175 19.2
+Fiat X1-9            66 27.3
+Porsche 914-2        91 26.0
+Lotus Europa        113 30.4
+Ford Pantera L      264 15.8
+Ferrari Dino        175 19.7
+Maserati Bora       335 15.0
+Volvo 142E          109 21.4</code></pre>
+</div>
+</div></div>
+</div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="co"># first 10 items in hp</span></span>
+<span id="cb5-2"><a></a>hp <span class="ot">&lt;-</span> mtcars<span class="sc">$</span>hp</span>
+<span id="cb5-3"><a></a>hp[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 110 110  93 110 175 105 245  62  95 123</code></pre>
+</div>
+</div></div>
+</div>
+</section>
+<section class="slide level2">
+
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="co"># 2 ways to get the 10th value</span></span>
+<span id="cb7-2"><a></a>hp[<span class="dv">10</span>]</span>
+<span id="cb7-3"><a></a>hp[[<span class="dv">10</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+
+</div></div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="co"># this is an error</span></span>
+<span id="cb8-2"><a></a>hp[[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-error">
+<pre><code>Error in `hp[[1:10]]`:
+! attempt to select more than one element in vectorIndex</code></pre>
+</div>
+</div></div>
+</div>
+<div class="fragment">
+<p><code>[</code> can return a range, <code>[[</code> returns a single value.</p>
+</div>
+</section>
+<section id="vector-selection-with-logic" class="slide level2 smaller">
+<h2>vector selection with logic</h2>
+<p>one-step filtering.</p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>hp[hp <span class="sc">&gt;</span> <span class="dv">100</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 110 110 110 175 105 245 123 123 180 180 180 205 215 230
+[15] 150 150 245 175 113 264 175 335 109</code></pre>
+</div>
+</div></div>
+<div class="fragment">
+<p>two-step filtering. same result.</p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="co"># get a vector of T/F values</span></span>
+<span id="cb12-2"><a></a>x <span class="ot">&lt;-</span> hp <span class="sc">&gt;</span> <span class="dv">100</span></span>
+<span id="cb12-3"><a></a>x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE FALSE FALSE
+[10]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE
+[19] FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE FALSE
+[28]  TRUE  TRUE  TRUE  TRUE  TRUE</code></pre>
+</div>
+</div></div>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a><span class="co"># use that vector to index the original</span></span>
+<span id="cb14-2"><a></a>hp[x]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 110 110 110 175 105 245 123 123 180 180 180 205 215 230
+[15] 150 150 245 175 113 264 175 335 109</code></pre>
+</div>
+</div></div>
+</div>
+<div class="fragment">
+<p>also can use with <code>is.na()</code> to identify / exclude <code>NA</code> values in a vector.</p>
+</div>
+</section>
+<section class="slide level2">
+
+<p>Use <code>sum()</code> to figure out how many are <code>TRUE</code>.</p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a>x <span class="ot">&lt;-</span> hp <span class="sc">&gt;</span> <span class="dv">100</span></span>
+<span id="cb16-2"><a></a></span>
+<span id="cb16-3"><a></a><span class="co"># how many are TRUE?</span></span>
+<span id="cb16-4"><a></a><span class="fu">sum</span>(x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 23</code></pre>
+</div>
+</div></div>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">length</span>(hp[x])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 23</code></pre>
+</div>
+</div></div>
+</section></section>
+<section>
+<section id="other-tidyverse-libraries" class="title-slide slide level1 center">
+<h1>other tidyverse libraries</h1>
+
+</section>
+<section id="string-operations-with-stringr" class="slide level2 smaller">
+<h2>string operations with stringr</h2>
+<p>stringr provides several useful functions for operating on strings.</p>
+<p>See the <a href="https://github.com/rstudio/cheatsheets/blob/main/strings.pdf">stringr cheatsheet</a></p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="fu">str_c</span>(<span class="st">"letter: "</span>, letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "letter: a" "letter: b" "letter: c" "letter: d"
 [5] "letter: e"</code></pre>
 </div>
-</div>
-</section>
-<section class="slide level2">
-
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>penguins <span class="sc">|&gt;</span></span>
-<span id="cb4-2"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb4-3"><a></a>    <span class="at">id =</span> <span class="fu">str_c</span>(species, island, <span class="at">sep =</span> <span class="st">"_"</span>),</span>
-<span id="cb4-4"><a></a>    <span class="at">label =</span> <span class="fu">str_c</span>(species, <span class="st">" ("</span>, year, <span class="st">")"</span>)</span>
-<span id="cb4-5"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb4-6"><a></a>  <span class="fu">select</span>(species, island, year, id, label)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 344 × 5
-   species island     year id               label        
-   &lt;fct&gt;   &lt;fct&gt;     &lt;int&gt; &lt;chr&gt;            &lt;chr&gt;        
- 1 Adelie  Torgersen  2007 Adelie_Torgersen Adelie (2007)
- 2 Adelie  Torgersen  2007 Adelie_Torgersen Adelie (2007)
- 3 Adelie  Torgersen  2007 Adelie_Torgersen Adelie (2007)
- 4 Adelie  Torgersen  2007 Adelie_Torgersen Adelie (2007)
- 5 Adelie  Torgersen  2007 Adelie_Torgersen Adelie (2007)
- 6 Adelie  Torgersen  2007 Adelie_Torgersen Adelie (2007)
- 7 Adelie  Torgersen  2007 Adelie_Torgersen Adelie (2007)
- 8 Adelie  Torgersen  2007 Adelie_Torgersen Adelie (2007)
- 9 Adelie  Torgersen  2007 Adelie_Torgersen Adelie (2007)
-10 Adelie  Torgersen  2007 Adelie_Torgersen Adelie (2007)
-# ℹ 334 more rows</code></pre>
-</div>
-</div>
-<aside class="notes">
-<p><code>str_c()</code> is similar to <code>paste</code> and <code>paste0</code> but the behavior is more consistent.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="detecting-patterns-with-str_detect" class="slide level2">
-<h2>Detecting patterns with <code>str_detect()</code></h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a><span class="fu">str_detect</span>(<span class="st">"A"</span>, LETTERS[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code> [1]  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
-[10] FALSE</code></pre>
-</div>
-</div>
-</section>
-<section class="slide level2">
-
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a>mtcars_tbl <span class="ot">&lt;-</span></span>
-<span id="cb8-2"><a></a>  <span class="fu">rownames_to_column</span>(mtcars, <span class="st">"name"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb8-3"><a></a>  <span class="fu">as_tibble</span>()</span>
-<span id="cb8-4"><a></a></span>
-<span id="cb8-5"><a></a><span class="co"># find the Mercedes Benz's</span></span>
-<span id="cb8-6"><a></a><span class="fu">filter</span>(</span>
-<span id="cb8-7"><a></a>  mtcars_tbl,</span>
-<span id="cb8-8"><a></a>  <span class="fu">str_detect</span>(name, <span class="st">"Merc"</span>)</span>
-<span id="cb8-9"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 7 × 12
-  name         mpg   cyl  disp    hp  drat    wt  qsec    vs
-  &lt;chr&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 Merc 240D   24.4     4  147.    62  3.69  3.19  20       1
-2 Merc 230    22.8     4  141.    95  3.92  3.15  22.9     1
-3 Merc 280    19.2     6  168.   123  3.92  3.44  18.3     1
-4 Merc 280C   17.8     6  168.   123  3.92  3.44  18.9     1
-5 Merc 450SE  16.4     8  276.   180  3.07  4.07  17.4     0
-6 Merc 450SL  17.3     8  276.   180  3.07  3.73  17.6     0
-7 Merc 450S…  15.2     8  276.   180  3.07  3.78  18       0
-# ℹ 3 more variables: am &lt;dbl&gt;, gear &lt;dbl&gt;, carb &lt;dbl&gt;</code></pre>
-</div>
-</div>
-</section>
-<section id="splitting-strings-with-str_split" class="slide level2 smaller">
-<h2>Splitting strings with <code>str_split()</code></h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>ids <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x-1"</span>, <span class="st">"x-2"</span>, <span class="st">"y-1"</span>, <span class="st">"y-2"</span>)</span>
-<span id="cb10-2"><a></a><span class="fu">str_split</span>(ids, <span class="st">"-"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell fragment">
+</div></div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>ids <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x-1"</span>, <span class="st">"x-2"</span>, <span class="st">"y-1"</span>, <span class="st">"y-2"</span>)</span>
+<span id="cb22-2"><a></a><span class="fu">str_split</span>(ids, <span class="st">"-"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code>[[1]]
 [1] "x" "1"
@@ -370,69 +433,91 @@ Matthew Taliaferro
 [[4]]
 [1] "y" "2"</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="co"># just the first parts</span></span>
-<span id="cb12-2"><a></a><span class="fu">str_split_i</span>(ids, <span class="st">'-'</span>, <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a><span class="co"># just the first parts</span></span>
+<span id="cb24-2"><a></a><span class="co"># str_split_i(ids, '-', 1)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div></div>
+</div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">str_detect</span>(<span class="st">"A"</span>, LETTERS[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "x" "x" "y" "y"</code></pre>
+<pre><code>[1]  TRUE FALSE FALSE FALSE FALSE</code></pre>
 </div>
+</div></div>
 </div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">str_pad</span>(</span>
+<span id="cb27-2"><a></a>  <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,</span>
+<span id="cb27-3"><a></a>  <span class="at">width =</span> <span class="dv">2</span>,</span>
+<span id="cb27-4"><a></a>  <span class="at">side =</span> <span class="st">"left"</span>,</span>
+<span id="cb27-5"><a></a>  <span class="at">pad =</span> <span class="dv">0</span></span>
+<span id="cb27-6"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "01" "02" "03" "04" "05" "06" "07" "08" "09" "10"</code></pre>
+</div>
+</div></div>
+<aside class="notes">
+<p><code>str_c()</code> is similar to <code>paste</code> and <code>paste0</code> but the behavior is more consistent.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</div>
+</section>
+<section id="forcats-operations-for-factors" class="slide level2 smaller">
+<h2>forcats operations for factors</h2>
+<p>forcats provides several utilities for working with factors.</p>
+<p>See the <a href="https://github.com/rstudio/cheatsheets/blob/main/factors.pdf">forcats cheatsheet</a></p>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">library</span>(palmerpenguins)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'palmerpenguins'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:datasets':
+
+    penguins, penguins_raw</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a>penguins[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 344 × 3
+   species island    bill_length_mm
+   &lt;fct&gt;   &lt;fct&gt;              &lt;dbl&gt;
+ 1 Adelie  Torgersen           39.1
+ 2 Adelie  Torgersen           39.5
+ 3 Adelie  Torgersen           40.3
+ 4 Adelie  Torgersen           NA  
+ 5 Adelie  Torgersen           36.7
+ 6 Adelie  Torgersen           39.3
+ 7 Adelie  Torgersen           38.9
+ 8 Adelie  Torgersen           39.2
+ 9 Adelie  Torgersen           34.1
+10 Adelie  Torgersen           42  
+# ℹ 334 more rows</code></pre>
+</div>
+</div></div>
 </section>
 <section class="slide level2">
 
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a><span class="co"># create some sample data</span></span>
-<span id="cb14-2"><a></a>df <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
-<span id="cb14-3"><a></a>  <span class="sc">~</span> sample_ids,</span>
-<span id="cb14-4"><a></a>  <span class="st">"gene_1_treatment"</span>,</span>
-<span id="cb14-5"><a></a>  <span class="st">"gene_2_control"</span>,</span>
-<span id="cb14-6"><a></a>  <span class="st">"gene_3_treatment"</span></span>
-<span id="cb14-7"><a></a>)</span>
-<span id="cb14-8"><a></a></span>
-<span id="cb14-9"><a></a><span class="fu">mutate</span>(</span>
-<span id="cb14-10"><a></a>  df,</span>
-<span id="cb14-11"><a></a>  <span class="at">split_parts =</span> <span class="fu">str_split</span>(sample_ids, <span class="st">"_"</span>),</span>
-<span id="cb14-12"><a></a>  <span class="at">gene_part =</span> <span class="fu">map_chr</span>(split_parts, <span class="sc">~</span> .x[<span class="dv">1</span>]),</span>
-<span id="cb14-13"><a></a>  <span class="at">number_part =</span> <span class="fu">map_chr</span>(split_parts, <span class="sc">~</span> .x[<span class="dv">2</span>]),</span>
-<span id="cb14-14"><a></a>  <span class="at">condition =</span> <span class="fu">map_chr</span>(split_parts, <span class="sc">~</span> .x[<span class="dv">3</span>])</span>
-<span id="cb14-15"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 3 × 5
-  sample_ids     split_parts gene_part number_part condition
-  &lt;chr&gt;          &lt;list&gt;      &lt;chr&gt;     &lt;chr&gt;       &lt;chr&gt;    
-1 gene_1_treatm… &lt;chr [3]&gt;   gene      1           treatment
-2 gene_2_control &lt;chr [3]&gt;   gene      2           control  
-3 gene_3_treatm… &lt;chr [3]&gt;   gene      3           treatment</code></pre>
-</div>
-</div>
-</section></section>
-<section>
-<section id="factor-operations" class="title-slide slide level1 center">
-<h1>Factor operations</h1>
-
-</section>
-<section id="counting-factor-levels-with-fct_count" class="slide level2">
-<h2>Counting factor levels with <code>fct_count()</code></h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a><span class="co"># equivalent with dplyr</span></span>
-<span id="cb16-2"><a></a>penguins <span class="sc">|&gt;</span></span>
-<span id="cb16-3"><a></a>  <span class="fu">count</span>(species)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 3 × 2
-  species       n
-  &lt;fct&gt;     &lt;int&gt;
-1 Adelie      152
-2 Chinstrap    68
-3 Gentoo      124</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">fct_count</span>(penguins<span class="sc">$</span>species)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a><span class="fu">fct_count</span>(penguins<span class="sc">$</span>species)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 3 × 2
   f             n
@@ -441,952 +526,334 @@ Matthew Taliaferro
 2 Chinstrap    68
 3 Gentoo      124</code></pre>
 </div>
-</div>
-</section>
-<section id="reordering-factors-with-fct_reorder" class="slide level2">
-<h2>Reordering factors with <code>fct_reorder()</code></h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="fu">ggplot</span>(</span>
-<span id="cb20-2"><a></a>  penguins,</span>
-<span id="cb20-3"><a></a>  <span class="fu">aes</span>(</span>
-<span id="cb20-4"><a></a>    <span class="at">x =</span> species,</span>
-<span id="cb20-5"><a></a>    <span class="at">y =</span> body_mass</span>
-<span id="cb20-6"><a></a>  )</span>
-<span id="cb20-7"><a></a>) <span class="sc">+</span></span>
-<span id="cb20-8"><a></a>  <span class="fu">geom_boxplot</span>(</span>
-<span id="cb20-9"><a></a>    <span class="at">fill =</span> <span class="st">"grey50"</span></span>
-<span id="cb20-10"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-
-</section>
-<section id="reordering-factors-with-fct_reorder-output" class="slide level2 output-location-slide"><h2>Reordering factors with <code>fct_reorder()</code></h2><div class="cell output-location-slide">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-10-1.png" alt="Bar plot showing penguin species counts, ordered by frequency from lowest to highest" width="960"></p>
-</figure>
-</div>
-</div>
-</div></section><section class="slide level2">
-
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="fu">ggplot</span>(</span>
-<span id="cb21-2"><a></a>  penguins,</span>
-<span id="cb21-3"><a></a>  <span class="fu">aes</span>(</span>
-<span id="cb21-4"><a></a>    <span class="at">x =</span> <span class="fu">fct_reorder</span>(</span>
-<span id="cb21-5"><a></a>      species,</span>
-<span id="cb21-6"><a></a>      body_mass,</span>
-<span id="cb21-7"><a></a>      <span class="at">.fun =</span> sd,</span>
-<span id="cb21-8"><a></a>      <span class="at">na.rm =</span> <span class="cn">TRUE</span></span>
-<span id="cb21-9"><a></a>    ),</span>
-<span id="cb21-10"><a></a>    <span class="at">y =</span> body_mass</span>
-<span id="cb21-11"><a></a>  )</span>
-<span id="cb21-12"><a></a>) <span class="sc">+</span></span>
-<span id="cb21-13"><a></a>  <span class="fu">geom_boxplot</span>(</span>
-<span id="cb21-14"><a></a>    <span class="at">fill =</span> <span class="st">"grey50"</span></span>
-<span id="cb21-15"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-
-</section>
-<section id="" class="slide level2 output-location-slide"><div class="cell output-location-slide">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-11-1.png" alt="Bar plot showing penguin species counts, ordered by frequency from lowest to highest" width="960"></p>
-</figure>
-</div>
-</div>
-</div></section><section id="lumping-infrequent-levels-with-fct_lump" class="slide level2">
-<h2>Lumping infrequent levels with <code>fct_lump()</code></h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a><span class="co"># create some sample data with many levels.</span></span>
-<span id="cb22-2"><a></a><span class="co"># how many rows / cols are in this tibble?</span></span>
-<span id="cb22-3"><a></a>sample_data <span class="ot">&lt;-</span></span>
-<span id="cb22-4"><a></a>  <span class="fu">tibble</span>(</span>
-<span id="cb22-5"><a></a>    <span class="at">category =</span> <span class="fu">factor</span>(</span>
-<span id="cb22-6"><a></a>      <span class="fu">sample</span>(</span>
-<span id="cb22-7"><a></a>        letters[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>],</span>
-<span id="cb22-8"><a></a>        <span class="dv">100</span>,</span>
-<span id="cb22-9"><a></a>        <span class="at">replace =</span> <span class="cn">TRUE</span></span>
-<span id="cb22-10"><a></a>      )</span>
-<span id="cb22-11"><a></a>    )</span>
-<span id="cb22-12"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell fragment">
-
-</div>
-</section>
-<section class="slide level2">
-
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="fu">mutate</span>(</span>
-<span id="cb23-2"><a></a>  sample_data,</span>
-<span id="cb23-3"><a></a>  <span class="at">lumped =</span> <span class="fu">fct_lump_n</span>(</span>
-<span id="cb23-4"><a></a>    category,</span>
-<span id="cb23-5"><a></a>    <span class="at">n =</span> <span class="dv">3</span></span>
-<span id="cb23-6"><a></a>  )</span>
-<span id="cb23-7"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 100 × 2
-   category lumped
-   &lt;fct&gt;    &lt;fct&gt; 
- 1 c        Other 
- 2 g        Other 
- 3 b        Other 
- 4 h        Other 
- 5 e        e     
- 6 e        e     
- 7 i        Other 
- 8 i        Other 
- 9 c        Other 
-10 d        d     
-# ℹ 90 more rows</code></pre>
-</div>
 </div></div>
-</section>
-<section class="slide level2">
-
+<div class="fragment">
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">mutate</span>(</span>
-<span id="cb25-2"><a></a>  sample_data,</span>
-<span id="cb25-3"><a></a>  <span class="at">lumped =</span> <span class="fu">fct_lump_n</span>(</span>
-<span id="cb25-4"><a></a>    category,</span>
-<span id="cb25-5"><a></a>    <span class="at">n =</span> <span class="dv">3</span></span>
-<span id="cb25-6"><a></a>  )</span>
-<span id="cb25-7"><a></a>) <span class="sc">|&gt;</span></span>
-<span id="cb25-8"><a></a>  <span class="fu">count</span>(lumped)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a><span class="fu">fct_lump_min</span>(</span>
+<span id="cb36-2"><a></a>  penguins<span class="sc">$</span>species,</span>
+<span id="cb36-3"><a></a>  <span class="at">min =</span> <span class="dv">150</span></span>
+<span id="cb36-4"><a></a>) <span class="sc">|&gt;</span></span>
+<span id="cb36-5"><a></a>  <span class="fu">fct_count</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 × 2
-  lumped     n
+<pre><code># A tibble: 2 × 2
+  f          n
   &lt;fct&gt;  &lt;int&gt;
-1 d         12
-2 e         14
-3 f         17
-4 Other     57</code></pre>
+1 Adelie   152
+2 Other    192</code></pre>
 </div>
 </div></div>
 
+</div>
 <aside><div>
-<p>Do your numbers look different? <code>sample()</code> is not reproducible by default.</p>
+<p><code>dplyr::count()</code> is a more flexible alternative to <code>forcats::fct_count()</code></p>
 </div></aside></section>
-<section id="aside-on-sample-and-reproducibility" class="slide level2 smaller">
-<h2>Aside on <code>sample()</code> and reproducibility</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="co"># run this several times</span></span>
-<span id="cb27-2"><a></a><span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">100</span>, <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="use-forcats-to-reorder-data-in-plots" class="slide level2 smaller">
+<h2>Use forcats to reorder data in plots</h2>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb38-2"><a></a>  mpg,</span>
+<span id="cb38-3"><a></a>  <span class="fu">aes</span>(</span>
+<span id="cb38-4"><a></a>    <span class="at">x =</span> class,</span>
+<span id="cb38-5"><a></a>    <span class="at">y =</span> hwy</span>
+<span id="cb38-6"><a></a>  )</span>
+<span id="cb38-7"><a></a>) <span class="sc">+</span></span>
+<span id="cb38-8"><a></a>  <span class="fu">geom_boxplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-07_files/figure-html/unnamed-chunk-19-1.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
+</figure>
 </div>
-<div class="cell fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code> [1]  6 27 28 55  8 60  1 29 83 61</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">100</span>, <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] 51 90 17 14 81 98 89  4 62 75</code></pre>
+</div></div>
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb39-2"><a></a>  mpg,</span>
+<span id="cb39-3"><a></a>  <span class="fu">aes</span>(</span>
+<span id="cb39-4"><a></a>    <span class="at">x =</span> <span class="fu">fct_reorder</span>(</span>
+<span id="cb39-5"><a></a>      class,</span>
+<span id="cb39-6"><a></a>      hwy,</span>
+<span id="cb39-7"><a></a>      <span class="at">.fun =</span> median</span>
+<span id="cb39-8"><a></a>    ),</span>
+<span id="cb39-9"><a></a>    <span class="at">y =</span> hwy</span>
+<span id="cb39-10"><a></a>  )</span>
+<span id="cb39-11"><a></a>) <span class="sc">+</span></span>
+<span id="cb39-12"><a></a>  <span class="fu">geom_boxplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-07_files/figure-html/unnamed-chunk-20-1.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
+</figure>
 </div>
 </div>
-</section>
-<section class="slide level2">
+</div></div>
 
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a></a><span class="co"># now make `sample()` reproducible.</span></span>
-<span id="cb31-2"><a></a><span class="co"># you have the set the seed each time.</span></span>
-<span id="cb31-3"><a></a></span>
-<span id="cb31-4"><a></a><span class="fu">set.seed</span>(<span class="dv">42</span>) <span class="co"># set the seed for reproducibility</span></span>
-<span id="cb31-5"><a></a><span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">100</span>, <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="cell fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code> [1]  48  64  24  73  17 100  46  23  70  88</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb33-2"><a></a><span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">100</span>, <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1]  48  64  24  73  17 100  46  23  70  88</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a></a><span class="fu">sample</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">100</span>, <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] 36 19 25  2 40 88 26 35  4 83</code></pre>
-</div>
-</div>
-
 <aside><div>
-<p>this also applies to <code>rnorm()</code>, <code>runif()</code>, and other random number generation functions.</p>
+<p><a href="https://ggplot2.tidyverse.org/articles/faq-reordering.html">FAQ on rordering in ggplot2</a></p>
 </div></aside></section></section>
 <section>
-<section id="join-operations" class="title-slide slide level1 center">
-<h1>Join operations</h1>
+<section id="dplyr" class="title-slide slide level1 center">
+<h1>dplyr</h1>
 
 </section>
-<section id="setup-1" class="slide level2">
-<h2>Setup</h2>
-<p>Open up the <a href="https://www.garrickadenbuie.com/project/tidyexplain/">tidyexplain</a> page.</p>
-</section>
-<section id="understanding-joins" class="slide level2">
-<h2>Understanding joins</h2>
-<p>Joins combine data from two tables based on matching keys.</p>
+<section id="advanced-summarizing-with-across" class="slide level2">
+<h2>Advanced summarizing with <code>across()</code></h2>
+<p>Apply functions to multiple columns at once.</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a></a>band_members</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a><span class="fu">library</span>(palmerpenguins)</span>
+<span id="cb40-2"><a></a>penguins <span class="sc">|&gt;</span></span>
+<span id="cb40-3"><a></a>  <span class="fu">group_by</span>(species) <span class="sc">|&gt;</span></span>
+<span id="cb40-4"><a></a>  <span class="fu">summarise</span>(</span>
+<span id="cb40-5"><a></a>    <span class="fu">across</span>(</span>
+<span id="cb40-6"><a></a>      <span class="fu">c</span>(bill_length_mm, bill_depth_mm, flipper_length_mm),</span>
+<span id="cb40-7"><a></a>      <span class="fu">list</span>(<span class="at">mean =</span> <span class="sc">~</span> <span class="fu">mean</span>(.x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">sd =</span> <span class="sc">~</span> <span class="fu">sd</span>(.x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb40-8"><a></a>    ),</span>
+<span id="cb40-9"><a></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb40-10"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 3 × 2
-  name  band   
-  &lt;chr&gt; &lt;chr&gt;  
-1 Mick  Stones 
-2 John  Beatles
-3 Paul  Beatles</code></pre>
-</div>
-</div></div>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a>band_instruments</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 3 × 2
-  name  plays 
-  &lt;chr&gt; &lt;chr&gt; 
-1 John  guitar
-2 Paul  bass  
-3 Keith guitar</code></pre>
+<pre><code># A tibble: 3 × 7
+  species   bill_length_mm_mean bill_length_mm_sd
+  &lt;fct&gt;                   &lt;dbl&gt;             &lt;dbl&gt;
+1 Adelie                   38.8              2.66
+2 Chinstrap                48.8              3.34
+3 Gentoo                   47.5              3.08
+# ℹ 4 more variables: bill_depth_mm_mean &lt;dbl&gt;,
+#   bill_depth_mm_sd &lt;dbl&gt;, flipper_length_mm_mean &lt;dbl&gt;,
+#   flipper_length_mm_sd &lt;dbl&gt;</code></pre>
 </div>
 </div></div>
 </section>
-<section id="left_join---keep-all-rows-from-left-table" class="slide level2">
-<h2><code>left_join()</code> - keep all rows from left table</h2>
-<p>Most common join - keeps all observations from the “primary” table.</p>
+<section id="multiple-grouping-variables" class="slide level2">
+<h2>Multiple grouping variables</h2>
+<p>Complex grouping for detailed analysis.</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a></a>band_members <span class="sc">|&gt;</span></span>
-<span id="cb41-2"><a></a>  <span class="fu">left_join</span>(</span>
-<span id="cb41-3"><a></a>    band_instruments,</span>
-<span id="cb41-4"><a></a>    <span class="at">by =</span> <span class="st">"name"</span></span>
-<span id="cb41-5"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a></a>penguins <span class="sc">|&gt;</span></span>
+<span id="cb42-2"><a></a>  <span class="fu">group_by</span>(species, island, year) <span class="sc">|&gt;</span></span>
+<span id="cb42-3"><a></a>  <span class="fu">summarise</span>(</span>
+<span id="cb42-4"><a></a>    <span class="at">n_penguins =</span> <span class="fu">n</span>(),</span>
+<span id="cb42-5"><a></a>    <span class="at">avg_mass =</span> <span class="fu">mean</span>(body_mass_g, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-6"><a></a>    <span class="at">mass_range =</span> <span class="fu">max</span>(body_mass_g, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">-</span></span>
+<span id="cb42-7"><a></a>      <span class="fu">min</span>(body_mass_g, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-8"><a></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb42-9"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb42-10"><a></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(avg_mass))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 3 × 3
-  name  band    plays 
-  &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt; 
-1 Mick  Stones  &lt;NA&gt;  
-2 John  Beatles guitar
-3 Paul  Beatles bass  </code></pre>
+<pre><code># A tibble: 15 × 6
+   species   island     year n_penguins avg_mass mass_range
+   &lt;fct&gt;     &lt;fct&gt;     &lt;int&gt;      &lt;int&gt;    &lt;dbl&gt;      &lt;int&gt;
+ 1 Gentoo    Biscoe     2009         44    5141.       1625
+ 2 Gentoo    Biscoe     2007         34    5071.       2200
+ 3 Gentoo    Biscoe     2008         46    5020.       2050
+ 4 Adelie    Biscoe     2009         16    3858.       1850
+ 5 Adelie    Torgersen  2008         16    3856.       1650
+ 6 Chinstrap Dream      2008         18    3800        2100
+ 7 Adelie    Torgersen  2007         20    3763.       1475
+ 8 Adelie    Dream      2008         16    3756.       1550
+ 9 Chinstrap Dream      2009         24    3725        1200
+10 Chinstrap Dream      2007         26    3694.       1500
+11 Adelie    Dream      2007         20    3671.       1675
+12 Adelie    Dream      2009         20    3651.       1475
+13 Adelie    Biscoe     2008         18    3628.       1550
+14 Adelie    Biscoe     2007         10    3620         800
+15 Adelie    Torgersen  2009         16    3489.       1400</code></pre>
 </div>
 </div></div>
-</section>
-<section id="inner_join---keep-only-matching-rows" class="slide level2">
-<h2><code>inner_join()</code> - keep only matching rows</h2>
-<p>Only keeps rows that exist in both tables.</p>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a>band_members <span class="sc">|&gt;</span></span>
-<span id="cb43-2"><a></a>  <span class="fu">inner_join</span>(</span>
-<span id="cb43-3"><a></a>    band_instruments,</span>
-<span id="cb43-4"><a></a>    <span class="at">by =</span> <span class="st">"name"</span></span>
-<span id="cb43-5"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2 × 3
-  name  band    plays 
-  &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt; 
-1 John  Beatles guitar
-2 Paul  Beatles bass  </code></pre>
-</div>
-</div></div>
-</section>
-<section id="full_join---keep-all-rows-from-both-tables" class="slide level2">
-<h2><code>full_join()</code> - keep all rows from both tables</h2>
-<div class="cell columns column-output-location">
-<div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a>band_members <span class="sc">|&gt;</span></span>
-<span id="cb45-2"><a></a>  <span class="fu">full_join</span>(</span>
-<span id="cb45-3"><a></a>    band_instruments,</span>
-<span id="cb45-4"><a></a>    <span class="at">by =</span> <span class="st">"name"</span></span>
-<span id="cb45-5"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div><div class="column fragment">
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 × 3
-  name  band    plays 
-  &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt; 
-1 Mick  Stones  &lt;NA&gt;  
-2 John  Beatles guitar
-3 Paul  Beatles bass  
-4 Keith &lt;NA&gt;    guitar</code></pre>
-</div>
-</div></div>
-<p>Keeps everything, filling missing values with <code>NA</code>.</p>
 </section></section>
 <section>
-<section id="advanced-plotting" class="title-slide slide level1 center">
-<h1>Advanced plotting</h1>
+<section id="ggplot2" class="title-slide slide level1 center">
+<h1>ggplot2</h1>
 
 </section>
-<section id="setup-2" class="slide level2">
-<h2>Setup</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a><span class="fu">library</span>(patchwork)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="scale-functions-in-ggplot2" class="slide level2 smaller">
+<section id="scale-functions-in-ggplot2" class="slide level2">
 <h2>scale functions in ggplot2</h2>
 <ul>
 <li><code>scale_color_brewer()</code> and <code>scale_fill_brewer()</code> control <code>color</code> and <code>fill</code> aesthetics.</li>
 <li>See available <a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html#palettes">ggplot2 brewer palettes</a></li>
 </ul>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
-<span id="cb48-2"><a></a>  mtcars_tbl,</span>
-<span id="cb48-3"><a></a>  <span class="fu">aes</span>(</span>
-<span id="cb48-4"><a></a>    <span class="at">x =</span> mpg,</span>
-<span id="cb48-5"><a></a>    <span class="at">y =</span> hp,</span>
-<span id="cb48-6"><a></a>    <span class="co"># why do we `factor` here?</span></span>
-<span id="cb48-7"><a></a>    <span class="at">color =</span> <span class="fu">factor</span>(cyl)</span>
-<span id="cb48-8"><a></a>  )</span>
-<span id="cb48-9"><a></a>) <span class="sc">+</span></span>
-<span id="cb48-10"><a></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">5</span>)</span>
-<span id="cb48-11"><a></a></span>
-<span id="cb48-12"><a></a>p1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-
-</section>
-<section id="scale-functions-in-ggplot2-output" class="slide level2 smaller output-location-slide"><h2>scale functions in ggplot2</h2><div class="cell output-location-slide">
+<div class="fragment">
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
+<span id="cb44-2"><a></a>  mtcars,</span>
+<span id="cb44-3"><a></a>  <span class="fu">aes</span>(</span>
+<span id="cb44-4"><a></a>    <span class="at">x =</span> mpg,</span>
+<span id="cb44-5"><a></a>    <span class="at">y =</span> hp,</span>
+<span id="cb44-6"><a></a>    <span class="at">color =</span> <span class="fu">factor</span>(cyl)</span>
+<span id="cb44-7"><a></a>  )</span>
+<span id="cb44-8"><a></a>) <span class="sc">+</span></span>
+<span id="cb44-9"><a></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb44-10"><a></a>  <span class="fu">theme_cowplot</span>()</span>
+<span id="cb44-11"><a></a></span>
+<span id="cb44-12"><a></a>p</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-23-1.png" alt="Example of a ggplot2 scatter plot with points colored by number of cylinders, using the cowplot theme" width="960"></p>
+<p><img data-src="slides-07_files/figure-html/unnamed-chunk-23-1.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
 </figure>
 </div>
 </div>
-</div></section><section class="slide level2">
-
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a>p1 <span class="sc">+</span> <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div></div>
 </div>
-<div class="cell fragment">
+</section>
+<section id="scale-functions-in-ggplot2-1" class="slide level2 smaller">
+<h2>scale functions in ggplot2</h2>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a>p <span class="sc">+</span> <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-24-1.png" width="960"></p>
+<p><img data-src="slides-07_files/figure-html/unnamed-chunk-24-1.png" width="672"></p>
 </figure>
 </div>
 </div>
-</div>
-</section>
-<section class="slide level2">
-
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a></a>p1 <span class="sc">+</span> <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell fragment">
+</div></div>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a></a>p <span class="sc">+</span> <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-25-1.png" width="960"></p>
+<p><img data-src="slides-07_files/figure-html/unnamed-chunk-25-1.png" width="672"></p>
 </figure>
 </div>
 </div>
-</div>
+</div></div>
 </section>
-<section id="combining-multiple-plots-into-a-figure" class="slide level2 smaller">
-<h2>Combining multiple plots into a figure?</h2>
-<p>Use the <a href="https://patchwork.data-imaginist.com/"><code>{patchwork}</code> package</a>.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a>(p1 <span class="sc">+</span> p1) <span class="sc">/</span></span>
-<span id="cb51-2"><a></a>  (p1 <span class="sc">+</span> p1) <span class="sc">+</span></span>
-<span id="cb51-3"><a></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">'A'</span>) <span class="sc">+</span></span>
-<span id="cb51-4"><a></a>  <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">'collect'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-
-</section>
-<section id="combining-multiple-plots-into-a-figure-output" class="slide level2 smaller output-location-slide"><h2>Combining multiple plots into a figure?</h2><div class="cell output-location-slide">
+<section id="set-up-a-points-plot" class="slide level2 smaller">
+<h2>Set up a points plot</h2>
+<div class="cell columns column-output-location">
+<div class="column">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a>diamonds_subset <span class="ot">&lt;-</span> <span class="fu">sample_n</span>(diamonds, <span class="dv">1000</span>)</span>
+<span id="cb47-2"><a></a></span>
+<span id="cb47-3"><a></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(</span>
+<span id="cb47-4"><a></a>  diamonds_subset,</span>
+<span id="cb47-5"><a></a>  <span class="fu">aes</span>(</span>
+<span id="cb47-6"><a></a>    <span class="at">x =</span> carat,</span>
+<span id="cb47-7"><a></a>    <span class="at">y =</span> price,</span>
+<span id="cb47-8"><a></a>    <span class="at">color =</span> cut</span>
+<span id="cb47-9"><a></a>  )</span>
+<span id="cb47-10"><a></a>) <span class="sc">+</span></span>
+<span id="cb47-11"><a></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb47-12"><a></a>  <span class="fu">theme_cowplot</span>()</span>
+<span id="cb47-13"><a></a></span>
+<span id="cb47-14"><a></a>p <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div><div class="column fragment">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-07_files/figure-revealjs/unnamed-chunk-26-1.png" alt="Example of combining multiple ggplot2 plots into a single figure using the patchwork package" width="960"></p>
+<p><img data-src="slides-07_files/figure-html/unnamed-chunk-26-1.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
 </figure>
 </div>
 </div>
-</div></section><section id="saving-plots" class="slide level2">
-<h2>Saving plots</h2>
+</div></div>
+</section>
+<section id="how-to-combine-multiple-plots-into-a-figure" class="slide level2 smaller">
+<h2>How to combine multiple plots into a figure?</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a></a><span class="co"># `plot_grid()` is from `cowplot`</span></span>
+<span id="cb48-2"><a></a><span class="fu">plot_grid</span>(</span>
+<span id="cb48-3"><a></a>  p,</span>
+<span id="cb48-4"><a></a>  p,</span>
+<span id="cb48-5"><a></a>  p,</span>
+<span id="cb48-6"><a></a>  p,</span>
+<span id="cb48-7"><a></a>  <span class="at">labels =</span> <span class="fu">c</span>(</span>
+<span id="cb48-8"><a></a>    <span class="st">"A"</span>,</span>
+<span id="cb48-9"><a></a>    <span class="st">"B"</span>,</span>
+<span id="cb48-10"><a></a>    <span class="st">"C"</span>,</span>
+<span id="cb48-11"><a></a>    <span class="st">"D"</span></span>
+<span id="cb48-12"><a></a>  ),</span>
+<span id="cb48-13"><a></a>  <span class="at">nrow =</span> <span class="dv">2</span></span>
+<span id="cb48-14"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+
+<aside><div>
+<p><a href="https://github.com/thomasp85/patchwork">patchwork</a> is a related library that uses arithmetic syntax (<code>a + b | c</code>)</p>
+</div></aside></section>
+<section id="how-to-combine-multiple-plots-into-a-figure-output" class="slide level2 smaller output-location-slide"><h2>How to combine multiple plots into a figure?</h2><div class="cell output-location-slide">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-07_files/figure-html/unnamed-chunk-27-1.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
+</figure>
+</div>
+</div>
+</div></section><section id="we-have-4-legends---can-they-be-condensed" class="slide level2 smaller">
+<h2>We have 4 legends - can they be condensed?</h2>
+<p>Yes, but it is not exactly straightforward.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a><span class="co"># fetch the legend for `p1`</span></span>
+<span id="cb49-2"><a></a>legend <span class="ot">&lt;-</span> <span class="fu">get_legend</span>(</span>
+<span id="cb49-3"><a></a>  p <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb49-4"><a></a>)</span>
+<span id="cb49-5"><a></a></span>
+<span id="cb49-6"><a></a>p <span class="ot">&lt;-</span> p <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span>
+<span id="cb49-7"><a></a></span>
+<span id="cb49-8"><a></a><span class="co"># first `plot_grid` builds the panels</span></span>
+<span id="cb49-9"><a></a>panels <span class="ot">&lt;-</span> <span class="fu">plot_grid</span>(</span>
+<span id="cb49-10"><a></a>  p,</span>
+<span id="cb49-11"><a></a>  p,</span>
+<span id="cb49-12"><a></a>  p,</span>
+<span id="cb49-13"><a></a>  p,</span>
+<span id="cb49-14"><a></a>  <span class="at">labels =</span> <span class="fu">c</span>(</span>
+<span id="cb49-15"><a></a>    <span class="st">"A"</span>,</span>
+<span id="cb49-16"><a></a>    <span class="st">"B"</span>,</span>
+<span id="cb49-17"><a></a>    <span class="st">"C"</span>,</span>
+<span id="cb49-18"><a></a>    <span class="st">"D"</span></span>
+<span id="cb49-19"><a></a>  ),</span>
+<span id="cb49-20"><a></a>  <span class="at">nrow =</span> <span class="dv">2</span></span>
+<span id="cb49-21"><a></a>)</span>
+<span id="cb49-22"><a></a></span>
+<span id="cb49-23"><a></a><span class="co"># second `plot_grid` adds the legend to the panels</span></span>
+<span id="cb49-24"><a></a><span class="fu">plot_grid</span>(</span>
+<span id="cb49-25"><a></a>  panels,</span>
+<span id="cb49-26"><a></a>  legend,</span>
+<span id="cb49-27"><a></a>  <span class="at">ncol =</span> <span class="dv">1</span>,</span>
+<span id="cb49-28"><a></a>  <span class="at">rel_heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, .<span class="dv">1</span>)</span>
+<span id="cb49-29"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+</section>
+<section id="we-have-4-legends---can-they-be-condensed-output" class="slide level2 smaller output-location-slide"><h2>We have 4 legends - can they be condensed?</h2><div class="cell output-location-slide">
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-07_files/figure-html/unnamed-chunk-28-1.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
+</figure>
+</div>
+</div>
+</div></section><section id="saving-plots-exercise-18" class="slide level2">
+<h2>Saving plots (Exercise 18)</h2>
 <p>Saves last plot as 5’ x 5’ file named <code>plot_final.png</code> in working directory.</p>
-<p>Matches file type to file extension (<code>*.png</code>, <code>*.jpeg</code>, <code>*.pdf</code>).</p>
+<p>Matches file type to file extension.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a></a><span class="co"># default is to save last plot in the buffer</span></span>
-<span id="cb52-2"><a></a><span class="co"># can also specify with the `plot` argument</span></span>
-<span id="cb52-3"><a></a><span class="fu">ggsave</span>(</span>
-<span id="cb52-4"><a></a>  <span class="at">filename =</span> <span class="fu">here</span>(<span class="st">"img/plot_final.png"</span>),</span>
-<span id="cb52-5"><a></a>  <span class="at">plot =</span> <span class="fu">last_plot</span>(),</span>
-<span id="cb52-6"><a></a>  <span class="at">width =</span> <span class="dv">5</span>,</span>
-<span id="cb52-7"><a></a>  <span class="at">height =</span> <span class="dv">5</span></span>
-<span id="cb52-8"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a></a><span class="co"># default is to save last plot in the buffer</span></span>
+<span id="cb50-2"><a></a><span class="co"># can also specify with the `plot` argument</span></span>
+<span id="cb50-3"><a></a><span class="fu">ggsave</span>(</span>
+<span id="cb50-4"><a></a>  <span class="fu">here</span>(<span class="st">"img/plot_final.png"</span>),</span>
+<span id="cb50-5"><a></a>  <span class="at">width =</span> <span class="dv">5</span>,</span>
+<span id="cb50-6"><a></a>  <span class="at">height =</span> <span class="dv">5</span></span>
+<span id="cb50-7"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+
+
 </section></section>
-<section>
-<section id="displaying-data-in-tables" class="title-slide slide level1 center">
-<h1>Displaying data in tables</h1>
-<p>We’ll use a couple of approaches to display data in tables instead of graphs, which can be useful for reports or presentations.</p>
-</section>
-<section id="using-knitrkable" class="slide level2">
-<h2>Using <code>knitr::kable()</code></h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a></a><span class="fu">library</span>(knitr) <span class="co"># also loaded with library(tidyverse)</span></span>
-<span id="cb53-2"><a></a></span>
-<span id="cb53-3"><a></a><span class="fu">kable</span>(</span>
-<span id="cb53-4"><a></a>  penguins <span class="sc">|&gt;</span></span>
-<span id="cb53-5"><a></a>    <span class="fu">select</span>(species, island, body_mass) <span class="sc">|&gt;</span></span>
-<span id="cb53-6"><a></a>    <span class="fu">head</span>(<span class="dv">10</span>),</span>
-<span id="cb53-7"><a></a>  <span class="at">caption =</span> <span class="st">"First 10 rows of the penguins dataset"</span></span>
-<span id="cb53-8"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-
-</section>
-<section id="using-knitrkable-output" class="slide level2 output-location-slide"><h2>Using <code>knitr::kable()</code></h2><div class="cell output-location-slide">
-<div class="cell-output-display">
-<table class="caption-top">
-<caption>First 10 rows of the penguins dataset</caption>
-<thead>
-<tr class="header">
-<th style="text-align: left;">species</th>
-<th style="text-align: left;">island</th>
-<th style="text-align: right;">body_mass</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Adelie</td>
-<td style="text-align: left;">Torgersen</td>
-<td style="text-align: right;">3750</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Adelie</td>
-<td style="text-align: left;">Torgersen</td>
-<td style="text-align: right;">3800</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Adelie</td>
-<td style="text-align: left;">Torgersen</td>
-<td style="text-align: right;">3250</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Adelie</td>
-<td style="text-align: left;">Torgersen</td>
-<td style="text-align: right;">NA</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Adelie</td>
-<td style="text-align: left;">Torgersen</td>
-<td style="text-align: right;">3450</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Adelie</td>
-<td style="text-align: left;">Torgersen</td>
-<td style="text-align: right;">3650</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Adelie</td>
-<td style="text-align: left;">Torgersen</td>
-<td style="text-align: right;">3625</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Adelie</td>
-<td style="text-align: left;">Torgersen</td>
-<td style="text-align: right;">4675</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Adelie</td>
-<td style="text-align: left;">Torgersen</td>
-<td style="text-align: right;">3475</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Adelie</td>
-<td style="text-align: left;">Torgersen</td>
-<td style="text-align: right;">4250</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div></section><section id="using-gt" class="slide level2">
-<h2>Using <code>gt</code></h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a></a><span class="fu">library</span>(gt)</span>
-<span id="cb54-2"><a></a></span>
-<span id="cb54-3"><a></a><span class="fu">gt</span>(</span>
-<span id="cb54-4"><a></a>  penguins <span class="sc">|&gt;</span></span>
-<span id="cb54-5"><a></a>    <span class="fu">select</span>(species, island, body_mass)</span>
-<span id="cb54-6"><a></a>) <span class="sc">|&gt;</span></span>
-<span id="cb54-7"><a></a>  <span class="fu">tab_header</span>(</span>
-<span id="cb54-8"><a></a>    <span class="at">title =</span> <span class="st">"The {penguins} dataset"</span></span>
-<span id="cb54-9"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb54-10"><a></a>  <span class="fu">opt_interactive</span>(</span>
-<span id="cb54-11"><a></a>    <span class="at">use_pagination =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb54-12"><a></a>    <span class="at">use_filters =</span> <span class="cn">TRUE</span></span>
-<span id="cb54-13"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-
-
-
-</section><section id="using-gt-output" class="slide level2 output-location-slide"><h2>Using <code>gt</code></h2><div class="cell output-location-slide">
-<div class="cell-output-display">
-<div id="bhczajxkov" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#bhczajxkov table {
-  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-#bhczajxkov thead, #bhczajxkov tbody, #bhczajxkov tfoot, #bhczajxkov tr, #bhczajxkov td, #bhczajxkov th {
-  border-style: none;
-}
-
-#bhczajxkov p {
-  margin: 0;
-  padding: 0;
-}
-
-#bhczajxkov .gt_table {
-  display: table;
-  border-collapse: collapse;
-  line-height: normal;
-  margin-left: auto;
-  margin-right: auto;
-  color: #333333;
-  font-size: 16px;
-  font-weight: normal;
-  font-style: normal;
-  background-color: #FFFFFF;
-  width: auto;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #A8A8A8;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #A8A8A8;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-}
-
-#bhczajxkov .gt_caption {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-#bhczajxkov .gt_title {
-  color: #333333;
-  font-size: 125%;
-  font-weight: initial;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-color: #FFFFFF;
-  border-bottom-width: 0;
-}
-
-#bhczajxkov .gt_subtitle {
-  color: #333333;
-  font-size: 85%;
-  font-weight: initial;
-  padding-top: 3px;
-  padding-bottom: 5px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-color: #FFFFFF;
-  border-top-width: 0;
-}
-
-#bhczajxkov .gt_heading {
-  background-color: #FFFFFF;
-  text-align: center;
-  border-bottom-color: #FFFFFF;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
-
-#bhczajxkov .gt_bottom_border {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#bhczajxkov .gt_col_headings {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
-
-#bhczajxkov .gt_col_heading {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 6px;
-  padding-left: 5px;
-  padding-right: 5px;
-  overflow-x: hidden;
-}
-
-#bhczajxkov .gt_column_spanner_outer {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: 4px;
-  padding-right: 4px;
-}
-
-#bhczajxkov .gt_column_spanner_outer:first-child {
-  padding-left: 0;
-}
-
-#bhczajxkov .gt_column_spanner_outer:last-child {
-  padding-right: 0;
-}
-
-#bhczajxkov .gt_column_spanner {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  overflow-x: hidden;
-  display: inline-block;
-  width: 100%;
-}
-
-#bhczajxkov .gt_spanner_row {
-  border-bottom-style: hidden;
-}
-
-#bhczajxkov .gt_group_heading {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  text-align: left;
-}
-
-#bhczajxkov .gt_empty_group_heading {
-  padding: 0.5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: middle;
-}
-
-#bhczajxkov .gt_from_md > :first-child {
-  margin-top: 0;
-}
-
-#bhczajxkov .gt_from_md > :last-child {
-  margin-bottom: 0;
-}
-
-#bhczajxkov .gt_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  margin: 10px;
-  border-top-style: solid;
-  border-top-width: 1px;
-  border-top-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  overflow-x: hidden;
-}
-
-#bhczajxkov .gt_stub {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#bhczajxkov .gt_stub_row_group {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-  vertical-align: top;
-}
-
-#bhczajxkov .gt_row_group_first td {
-  border-top-width: 2px;
-}
-
-#bhczajxkov .gt_row_group_first th {
-  border-top-width: 2px;
-}
-
-#bhczajxkov .gt_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#bhczajxkov .gt_first_summary_row {
-  border-top-style: solid;
-  border-top-color: #D3D3D3;
-}
-
-#bhczajxkov .gt_first_summary_row.thick {
-  border-top-width: 2px;
-}
-
-#bhczajxkov .gt_last_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#bhczajxkov .gt_grand_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#bhczajxkov .gt_first_grand_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-style: double;
-  border-top-width: 6px;
-  border-top-color: #D3D3D3;
-}
-
-#bhczajxkov .gt_last_grand_summary_row_top {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-style: double;
-  border-bottom-width: 6px;
-  border-bottom-color: #D3D3D3;
-}
-
-#bhczajxkov .gt_striped {
-  background-color: rgba(128, 128, 128, 0.05);
-}
-
-#bhczajxkov .gt_table_body {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#bhczajxkov .gt_footnotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#bhczajxkov .gt_footnote {
-  margin: 0px;
-  font-size: 90%;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#bhczajxkov .gt_sourcenotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#bhczajxkov .gt_sourcenote {
-  font-size: 90%;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#bhczajxkov .gt_left {
-  text-align: left;
-}
-
-#bhczajxkov .gt_center {
-  text-align: center;
-}
-
-#bhczajxkov .gt_right {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-#bhczajxkov .gt_font_normal {
-  font-weight: normal;
-}
-
-#bhczajxkov .gt_font_bold {
-  font-weight: bold;
-}
-
-#bhczajxkov .gt_font_italic {
-  font-style: italic;
-}
-
-#bhczajxkov .gt_super {
-  font-size: 65%;
-}
-
-#bhczajxkov .gt_footnote_marks {
-  font-size: 75%;
-  vertical-align: 0.4em;
-  position: initial;
-}
-
-#bhczajxkov .gt_asterisk {
-  font-size: 100%;
-  vertical-align: 0;
-}
-
-#bhczajxkov .gt_indent_1 {
-  text-indent: 5px;
-}
-
-#bhczajxkov .gt_indent_2 {
-  text-indent: 10px;
-}
-
-#bhczajxkov .gt_indent_3 {
-  text-indent: 15px;
-}
-
-#bhczajxkov .gt_indent_4 {
-  text-indent: 20px;
-}
-
-#bhczajxkov .gt_indent_5 {
-  text-indent: 25px;
-}
-
-#bhczajxkov .katex-display {
-  display: inline-flex !important;
-  margin-bottom: 0.75em !important;
-}
-
-#bhczajxkov div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
-  height: 0px !important;
-}
-</style>
-<div style="font-family:system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;border-top-style:solid;border-top-width:2px;border-top-color:#D3D3D3;">
-<div class="gt_heading gt_title gt_font_normal" style="text-size:bigger;">The {penguins} dataset</div>
-<div class="gt_heading gt_subtitle "></div>
-</div>
-<div id="bhczajxkov" class="reactable html-widget" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="bhczajxkov">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"species":["Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Adelie","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Gentoo","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap","Chinstrap"],"island":["Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Torgersen","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Biscoe","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream","Dream"],"body_mass":[3750,3800,3250,"NA",3450,3650,3625,4675,3475,4250,3300,3700,3200,3800,4400,3700,3450,4500,3325,4200,3400,3600,3800,3950,3800,3800,3550,3200,3150,3950,3250,3900,3300,3900,3325,4150,3950,3550,3300,4650,3150,3900,3100,4400,3000,4600,3425,2975,3450,4150,3500,4300,3450,4050,2900,3700,3550,3800,2850,3750,3150,4400,3600,4050,2850,3950,3350,4100,3050,4450,3600,3900,3550,4150,3700,4250,3700,3900,3550,4000,3200,4700,3800,4200,3350,3550,3800,3500,3950,3600,3550,4300,3400,4450,3300,4300,3700,4350,2900,4100,3725,4725,3075,4250,2925,3550,3750,3900,3175,4775,3825,4600,3200,4275,3900,4075,2900,3775,3350,3325,3150,3500,3450,3875,3050,4000,3275,4300,3050,4000,3325,3500,3500,4475,3425,3900,3175,3975,3400,4250,3400,3475,3050,3725,3000,3650,4250,3475,3450,3750,3700,4000,4500,5700,4450,5700,5400,4550,4800,5200,4400,5150,4650,5550,4650,5850,4200,5850,4150,6300,4800,5350,5700,5000,4400,5050,5000,5100,4100,5650,4600,5550,5250,4700,5050,6050,5150,5400,4950,5250,4350,5350,3950,5700,4300,4750,5550,4900,4200,5400,5100,5300,4850,5300,4400,5000,4900,5050,4300,5000,4450,5550,4200,5300,4400,5650,4700,5700,4650,5800,4700,5550,4750,5000,5100,5200,4700,5800,4600,6000,4750,5950,4625,5450,4725,5350,4750,5600,4600,5300,4875,5550,4950,5400,4750,5650,4850,5200,4925,4875,4625,5250,4850,5600,4975,5500,4725,5500,4700,5500,4575,5500,5000,5950,4650,5500,4375,5850,4875,6000,4925,"NA",4850,5750,5200,5400,3500,3900,3650,3525,3725,3950,3250,3750,4150,3700,3800,3775,3700,4050,3575,4050,3300,3700,3450,4400,3600,3400,2900,3800,3300,4150,3400,3800,3700,4550,3200,4300,3350,4100,3600,3900,3850,4800,2700,4500,3950,3650,3550,3500,3675,4450,3400,4300,3250,3675,3325,3950,3600,4050,3350,3450,3250,4050,3800,3525,3950,3650,3650,4000,3400,3775,4100,3775]},"columns":[{"id":"species","name":"species","type":"factor","na":"NA","minWidth":125,"style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","html":true,"align":"center"},{"id":"island","name":"island","type":"factor","na":"NA","minWidth":125,"style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","html":true,"align":"center"},{"id":"body_mass","name":"body_mass","type":"numeric","na":"NA","minWidth":125,"style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","html":true,"align":"right"}],"filterable":true,"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"font-family":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif","fontSize":"16px"},"tableStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3"},"headerStyle":{"fontWeight":"normal","backgroundColor":"transparent","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"},"groupHeaderStyle":{"fontWeight":"normal","backgroundColor":"transparent","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"},"cellStyle":{"fontWeight":"normal"}},"elementId":"bhczajxkov","dataKey":"727162813ec467ca664430a68bbfb2cf"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
-</div>
-</div>
-</div></section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
@@ -1604,44 +1071,6 @@ Matthew Taliaferro
         ]
       });
     </script>
-    
-    <script>
-      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
-      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
-      // slide changes (different for each slide format).
-      (function () {
-        // dispatch for htmlwidgets
-        function fireSlideEnter() {
-          const event = window.document.createEvent("Event");
-          event.initEvent("slideenter", true, true);
-          window.document.dispatchEvent(event);
-        }
-
-        function fireSlideChanged(previousSlide, currentSlide) {
-          fireSlideEnter();
-
-          // dispatch for shiny
-          if (window.jQuery) {
-            if (previousSlide) {
-              window.jQuery(previousSlide).trigger("hidden");
-            }
-            if (currentSlide) {
-              window.jQuery(currentSlide).trigger("shown");
-            }
-          }
-        }
-
-        // hookup for slidy
-        if (window.w3c_slidy) {
-          window.w3c_slidy.add_observer(function (slide_num) {
-            // slide_num starts at position 1
-            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
-          });
-        }
-
-      })();
-    </script>
-
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")

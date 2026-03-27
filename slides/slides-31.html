@@ -9,8 +9,9 @@
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-de8274a4d1ecc1e6aaeaf6e5564b5074.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.8.27">
 
-  <meta name="dcterms.date" content="2026-03-26">
-  <title>MOLB 7950 – Data Sharing, Version Control &amp; HPC</title>
+  <meta name="author" content="Kristen Wells">
+  <meta name="dcterms.date" content="2026-03-27">
+  <title>MOLB 7950 – Single cell RNA-Seq</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -189,9 +190,14 @@
       margin-right: 0; 
     }
   </style>
-<meta property="og:title" content="Data Sharing, Version Control &amp; HPC – MOLB 7950">
+  <script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
+  <script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
+  <link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+<meta property="og:title" content="Single cell RNA-Seq – MOLB 7950">
+<meta property="og:description" content="Introduction and Quality Control">
 <meta property="og:site_name" content="MOLB 7950">
-<meta name="twitter:title" content="Data Sharing, Version Control &amp; HPC – MOLB 7950">
+<meta name="twitter:title" content="Single cell RNA-Seq – MOLB 7950">
+<meta name="twitter:description" content="Introduction and Quality Control">
 <meta name="twitter:image" content="https://rnabioco.github.io/molb-7950/slides/images/twitter-card.png">
 <meta name="twitter:creator" content="@rnabioco">
 <meta name="twitter:card" content="summary_large_image">
@@ -201,806 +207,1577 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Data Sharing, Version Control &amp; HPC</h1>
+  <h1 class="title">Single cell RNA-Seq</h1>
+  <p class="subtitle">Introduction and Quality Control</p>
 
 <div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Kristen Wells 
+</div>
+        <p class="quarto-title-affiliation">
+            RNA Bioscience Initiative | CU Anschutz
+          </p>
+    </div>
 </div>
 
-  <p class="date">2026-03-26</p>
+  <p class="date">2026-03-27</p>
 </section>
-<section id="todays-topics" class="slide level2 smaller">
-<h2>Today’s Topics</h2>
-<ol type="1">
-<li><p>Uploading Raw Data to Repositories</p>
+<section id="contact-info" class="slide level2">
+<h2>Contact Info</h2>
+<p>Greetings experimentalist humans 👋</p>
+<p><i class="fa fa-envelope"></i> &nbsp; <a href="mailto:kristen.wells-wrasman@cuanschutz.edu">kristen.wells-wrasman@cuanschutz.edu</a> <br></p>
+<p>RBI Informatics Fellows <a href="https://medschool.cuanschutz.edu/rbi/training-and-education/rbi-office-hours">Office hours</a></p>
+<p><i class="fa fa-envelope"></i> &nbsp; <a href="mailto:rbi.fellows@cuanschutz.edu">rbi.fellows@cuanschutz.edu</a> <br></p>
+</section>
+<section id="learning-key" class="slide level2">
+<h2>Learning key</h2>
 <ul>
-<li>NCBI GEO</li>
-<li>Zenodo</li>
+<li>We will switch between lecture and your exercise <code>qmd</code>.</li>
+<li>To denote a slide that corresponds to your exercise, I will include ⌨️ in the slide title</li>
+</ul>
+</section>
+<section id="learning-objectives" class="slide level2">
+<h2>Learning Objectives</h2>
+<div class="columns">
+<div class="column" style="width:49%;">
+<h3 id="lecture-1">Lecture 1</h3>
+<ul>
+<li>Identify key quality control issues with single cell RNA-seq data and perform filtering to exclude poor quality cells</li>
+<li>Interact with single cell data using Bioconductor tools</li>
+</ul>
+</div><div class="column" style="width:2%;">
+
+</div><div class="column" style="width:49%;">
+<h3 id="lecture-2">Lecture 2</h3>
+<ul>
+<li>Perform analysis to identify cell types in single cell data by using unsupervised clustering methods and comparing to public datasets</li>
+<li>Describe the importance and reasoning for conducting each step of the analysis</li>
+</ul>
+</div></div>
+</section>
+<section id="single-cell-or-bulk" class="slide level2 smaller">
+<h2>Single cell or bulk?</h2>
+<div class="columns">
+<div class="column" style="width:49%;">
+<h3 id="single-cell">Single cell</h3>
+<ul>
+<li class="fragment">High level overview of general transcriptomic landscape of genes that are expressed highly at the single cell level
+<ul>
+<li class="fragment">Sequencing depth is low per cell so we only have confident detection of highly expressed genes</li>
+<li class="fragment">Differential expression is less well developed to compare different conditions</li>
 </ul></li>
-<li><p>Git &amp; GitHub: Why Version Control Matters</p></li>
-<li><p>High-Performance Computing with Slurm</p></li>
-<li><p>Starting an Informatics Analysis</p></li>
-<li><p>Building Interactive Shiny Dashboards</p></li>
-</ol>
-</section>
-<section class="slide level2">
+<li class="fragment">Most techniques only capture the 5’ or 3’ end</li>
+<li class="fragment">Good for identifying subpopulation of cells that change between conditions
+<ul>
+<li class="fragment">Doesn’t require prior knowledge of surface proteins to sort out a population</li>
+<li class="fragment">Doesn’t average across all cells in the experiment</li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:2%;">
 
+</div><div class="column" style="width:49%;">
+<h3 id="bulk">Bulk</h3>
+<ul>
+<li class="fragment">Global overview of transcriptomic landscape of an entire sample using high to low expressed genes.
+<ul>
+<li class="fragment">Sequencing depth is much deeper so there is higher confidence to detect mid to low range expression</li>
+<li class="fragment">Good for novel transcript identification and assessing how global transcriptome changes between conditions</li>
+</ul></li>
+<li class="fragment">Captures full RNA molecule so can be used for RNA-splicing analysis</li>
+<li class="fragment">Doesn’t work for subpopulation analysis
+<ul>
+<li class="fragment">All cells are averaged so determining what is happening to one cell type is challenging</li>
+<li class="fragment">Are your results because of a transcriptomic change or a change in cell type frequencies?</li>
+</ul></li>
+</ul>
+</div></div>
 </section>
-<section>
-<section id="part-1-data-repositories" class="title-slide slide level1 center" data-background-color="#43464B">
-<h1>Part 1: Data Repositories</h1>
+<section id="single-cell-sequencing" class="slide level2 smaller">
+<h2>Single cell sequencing</h2>
+<div class="columns">
+<div class="column">
+<p><img data-src="../img/block-rna/10x_bead_example.jpg"></p>
+<p><img data-src="../img/block-rna/cb-umi-scheme.jpg"></p>
+</div><div class="column">
+<p><img data-src="../img/block-rna/drop-generation.png"></p>
+</div></div>
+</section>
+<section id="where-is-the-barcode-and-umi" class="slide level2">
+<h2>Where is the barcode and UMI?</h2>
+<ul>
+<li><p>Below is the design for the 3’ 10x genomics assay <img data-src="../img/block-rna/cb-umi-scheme.jpg"></p></li>
+<li><p>Other assays may have different locations of there cell barcode and UMI.</p></li>
+<li><p>These may also be different lengths.</p></li>
+<li><p>Or even on read 2 (ex Parse bioscience).</p></li>
+<li><p>Be sure to check what kit was used to prep your data and always perform sanity checks throughout the analysis!</p></li>
+</ul>
+</section>
+<section id="library-prep" class="slide level2">
+<h2>Library prep</h2>
 
+<img data-src="../img/block-rna/10x-library-scheme.jpg" class="r-stretch"></section>
+<section id="other-single-cell-methods" class="slide level2">
+<h2>Other single cell methods</h2>
+<p>droplet-based scRNA-seq: e.g.&nbsp;10x Genomics or Drop-Seq</p>
+<p>Smart-seq based scRNA-seq: (bulk-RNA-seq on single cells in individual wells/tubes)</p>
+<p><a href="http://cite-seq.com/">CITE-Seq</a>: gene expression + cell surface protein abundance</p>
+<p><a href="https://www.10xgenomics.com/products/single-cell-immune-profiling">VDJ-Seq</a>: Gene expression + targeted sequencing of T-Cell and B-Cell receptors</p>
+<p>Many others: ATAC, spatial transcriptomics, DNA sequencing, etc. (see <a href="https://www.nature.com/articles/s41576-019-0093-7">Integrative Single cell analysis</a>)</p>
 </section>
-<section id="why-share-raw-data" class="slide level2 smaller">
-<h2>Why Share Raw Data?</h2>
-<p><strong>Reproducibility &amp; Transparency</strong></p>
-<ul>
-<li>Enables others to validate your findings</li>
-<li>Required by many journals and funding agencies</li>
-<li>Facilitates meta-analyses and reuse</li>
-<li>Builds trust in scientific research</li>
-</ul>
-<p><strong>Long-term Preservation</strong></p>
-<ul>
-<li>Institutional storage may not persist</li>
-<li>Specialized repositories ensure data longevity</li>
-<li>Structured metadata improves discoverability</li>
-</ul>
-</section>
-<section id="ncbi-geo-gene-expression-omnibus" class="slide level2 smaller">
-<h2>NCBI GEO (Gene Expression Omnibus)</h2>
-<p><strong>Best for:</strong> Genomics data (RNA-seq, ChIP-seq, microarrays, etc.)</p>
-<p><strong>Key Features:</strong></p>
-<ul>
-<li>Domain-specific repository for high-throughput genomics</li>
-<li>Assigns stable accession numbers (GSE, GSM)</li>
-<li>Integrated with NCBI databases</li>
-<li>Free and widely recognized</li>
-</ul>
-<p><strong>What to Upload:</strong></p>
-<ul>
-<li>Raw sequencing files (FASTQ)</li>
-<li>Processed data (count matrices, normalized data)</li>
-<li>Sample metadata and experimental protocols</li>
-</ul>
-</section>
-<section id="geo-submission-process" class="slide level2 smaller">
-<h2>GEO Submission Process</h2>
-<ol type="1">
-<li><strong>Prepare metadata:</strong> Sample information, protocols, experimental design</li>
-<li><strong>Upload data:</strong> Use FTP for large files</li>
-<li><strong>Complete forms:</strong> Through GEO submission portal</li>
-<li><strong>Review:</strong> GEO curators check your submission</li>
-<li><strong>Get accession:</strong> Receives GSE number (e.g., GSE123456)</li>
-</ol>
-<p><strong>Resources:</strong></p>
-<ul>
-<li><a href="https://www.ncbi.nlm.nih.gov/geo/info/submission.html">GEO Submission Guide</a></li>
-<li><a href="https://www.ncbi.nlm.nih.gov/geo/info/faq.html">GEO FAQ</a></li>
-</ul>
-</section>
-<section id="zenodo" class="slide level2 smaller">
-<h2>Zenodo</h2>
-<p><strong>Best for:</strong> General research data, code, manuscripts, protocols</p>
-<p><strong>Key Features:</strong></p>
-<ul>
-<li>General-purpose repository (any file type)</li>
-<li>DOI assignment for easy citation</li>
-<li>GitHub integration for automatic releases</li>
-<li>Free up to 50 GB per dataset</li>
-<li>Long-term preservation (CERN-backed)</li>
-</ul>
-<p><strong>What to Upload:</strong></p>
-<ul>
-<li>Supplementary data files</li>
-<li>Analysis code and scripts</li>
-<li>Protocols and documentation</li>
-<li>Non-genomics datasets</li>
-</ul>
-</section>
-<section id="zenodo-upload-process" class="slide level2 smaller">
-<h2>Zenodo Upload Process</h2>
-<ol type="1">
-<li><strong>Create account:</strong> Link with ORCID or GitHub</li>
-<li><strong>Create upload:</strong> Click “New upload”</li>
-<li><strong>Add files:</strong> Drag and drop or select</li>
-<li><strong>Add metadata:</strong> Title, authors, description, keywords</li>
-<li><strong>Choose license:</strong> CC-BY, MIT, etc.</li>
-<li><strong>Publish:</strong> Receives permanent DOI</li>
-</ol>
-<p><strong>Pro tip:</strong> Connect GitHub repo to auto-create Zenodo releases</p>
-<p><strong>Resources:</strong></p>
-<ul>
-<li><a href="https://help.zenodo.org/">Zenodo Documentation</a></li>
-<li><a href="https://docs.github.com/en/repositories/archiving-a-github-repository/referencing-and-citing-content">Zenodo + GitHub Guide</a></li>
-</ul>
-</section>
-<section id="choosing-geo-vs-zenodo" class="slide level2 smaller">
-<h2>Choosing: GEO vs Zenodo</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 32%">
-<col style="width: 35%">
-<col style="width: 32%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Feature</th>
-<th>NCBI GEO</th>
-<th>Zenodo</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Best for</strong></td>
-<td>Genomics data</td>
-<td>General data/code</td>
-</tr>
-<tr class="even">
-<td><strong>File types</strong></td>
-<td>FASTQ, BAM, etc.</td>
-<td>Any</td>
-</tr>
-<tr class="odd">
-<td><strong>Metadata</strong></td>
-<td>Structured, genomics-focused</td>
-<td>Flexible</td>
-</tr>
-<tr class="even">
-<td><strong>DOI</strong></td>
-<td>No (uses accession)</td>
-<td>Yes</td>
-</tr>
-<tr class="odd">
-<td><strong>Size limit</strong></td>
-<td>Large files OK</td>
-<td>50 GB per dataset</td>
-</tr>
-<tr class="even">
-<td><strong>Journal preference</strong></td>
-<td>Required for genomics</td>
-<td>Accepted for supplements</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Strategy:</strong> Use GEO for raw genomics data, Zenodo for everything else</p>
-</section>
-<section class="slide level2">
+<section id="overview-of-analysis-steps" class="slide level2">
+<h2>Overview of analysis steps</h2>
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb1-1"><a></a>flowchart TB</span>
+<span id="cb1-2"><a></a>    %% Green nodes</span>
+<span id="cb1-3"><a></a>    cr["Process FASTQ to UMI count matrix&lt;br/&gt;(Cellranger, Alevin, or STARsolo)"]</span>
+<span id="cb1-4"><a></a></span>
+<span id="cb1-5"><a></a>    %% Blue nodes</span>
+<span id="cb1-6"><a></a>    cell_qc["QC cells&lt;br/&gt;(% mitochondrial UMIs,&lt;br/&gt;# of UMIs/Genes,&lt;br/&gt;remove empty droplets)"]</span>
+<span id="cb1-7"><a></a>    norm["Normalize UMI counts&lt;br/&gt;(Normalize by deconvolution)"]</span>
+<span id="cb1-8"><a></a>    markers["Discover cell type markers"]</span>
+<span id="cb1-9"><a></a>    annot["Annotate cell types"]</span>
+<span id="cb1-10"><a></a></span>
+<span id="cb1-11"><a></a>    %% Yellow nodes</span>
+<span id="cb1-12"><a></a>    feature["Identify variable genes&lt;br/&gt;(a.k.a Feature selection)"]</span>
+<span id="cb1-13"><a></a>    dim_red["Dimensionality reduction (PCA)"]</span>
+<span id="cb1-14"><a></a>    cluster["Clustering&lt;br/&gt;(using Shared Nearest Neighbors)"]</span>
+<span id="cb1-15"><a></a>    viz["Make 2D-Visualization&lt;br/&gt;(PCA, UMAP, tSNE&lt;br/&gt;Force-directed graph)"]</span>
+<span id="cb1-16"><a></a>    traj["Trajectory Inference&lt;br/&gt;(Slingshot,&lt;br/&gt;PAGA, scVelo)"]</span>
+<span id="cb1-17"><a></a></span>
+<span id="cb1-18"><a></a>    %% Orange nodes</span>
+<span id="cb1-19"><a></a>    downstream["Downstream analysis&lt;br/&gt;(Differential expression,&lt;br/&gt;Shifts in cell type composition,&lt;br/&gt;Find new cell-types/states)"]</span>
+<span id="cb1-20"><a></a></span>
+<span id="cb1-21"><a></a>    %% Main workflow connections</span>
+<span id="cb1-22"><a></a>    cr --&gt; cell_qc</span>
+<span id="cb1-23"><a></a>    cell_qc --&gt; norm</span>
+<span id="cb1-24"><a></a>    norm --&gt; feature</span>
+<span id="cb1-25"><a></a>    norm --&gt; markers</span>
+<span id="cb1-26"><a></a>    feature --&gt; dim_red</span>
+<span id="cb1-27"><a></a>    dim_red --&gt; cluster</span>
+<span id="cb1-28"><a></a>    dim_red --&gt; traj</span>
+<span id="cb1-29"><a></a>    dim_red --&gt; viz</span>
+<span id="cb1-30"><a></a>    cluster --&gt; markers</span>
+<span id="cb1-31"><a></a>    markers --&gt; annot</span>
+<span id="cb1-32"><a></a></span>
+<span id="cb1-33"><a></a>    %% Feedback loops (dashed grey)</span>
+<span id="cb1-34"><a></a>    annot -.-&gt; cell_qc</span>
+<span id="cb1-35"><a></a>    annot -.-&gt; feature</span>
+<span id="cb1-36"><a></a>    annot -.-&gt; dim_red</span>
+<span id="cb1-37"><a></a>    annot -.-&gt; cluster</span>
+<span id="cb1-38"><a></a>    annot --&gt; downstream</span>
+<span id="cb1-39"><a></a></span>
+<span id="cb1-40"><a></a>    %% Edge labels</span>
+<span id="cb1-41"><a></a>    cr -.-|"Load into&lt;br/&gt;SingleCellExperiment"| cell_qc</span>
+<span id="cb1-42"><a></a>    annot -.-|"Repeat&lt;br/&gt;as needed"| cell_qc</span>
+<span id="cb1-43"><a></a></span>
+<span id="cb1-44"><a></a>    %% Color styling</span>
+<span id="cb1-45"><a></a>    classDef green fill:#009E73,stroke:#000,stroke-width:2px,color:#000</span>
+<span id="cb1-46"><a></a>    classDef blue fill:#56B4E9,stroke:#000,stroke-width:2px,color:#000</span>
+<span id="cb1-47"><a></a>    classDef yellow fill:#F0E442,stroke:#000,stroke-width:2px,color:#000</span>
+<span id="cb1-48"><a></a>    classDef orange fill:#E69F00,stroke:#000,stroke-width:2px,color:#000</span>
+<span id="cb1-49"><a></a></span>
+<span id="cb1-50"><a></a>    class cr green</span>
+<span id="cb1-51"><a></a>    class cell_qc,norm,markers,annot blue</span>
+<span id="cb1-52"><a></a>    class feature,dim_red,cluster,viz,traj yellow</span>
+<span id="cb1-53"><a></a>    class downstream orange</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart TB
+    %% Green nodes
+    cr["Process FASTQ to UMI count matrix&lt;br/&gt;(Cellranger, Alevin, or STARsolo)"]
 
-</section></section>
-<section>
-<section id="part-2-git-github" class="title-slide slide level1 center" data-background-color="#43464B">
-<h1>Part 2: Git &amp; GitHub</h1>
+    %% Blue nodes
+    cell_qc["QC cells&lt;br/&gt;(% mitochondrial UMIs,&lt;br/&gt;# of UMIs/Genes,&lt;br/&gt;remove empty droplets)"]
+    norm["Normalize UMI counts&lt;br/&gt;(Normalize by deconvolution)"]
+    markers["Discover cell type markers"]
+    annot["Annotate cell types"]
 
+    %% Yellow nodes
+    feature["Identify variable genes&lt;br/&gt;(a.k.a Feature selection)"]
+    dim_red["Dimensionality reduction (PCA)"]
+    cluster["Clustering&lt;br/&gt;(using Shared Nearest Neighbors)"]
+    viz["Make 2D-Visualization&lt;br/&gt;(PCA, UMAP, tSNE&lt;br/&gt;Force-directed graph)"]
+    traj["Trajectory Inference&lt;br/&gt;(Slingshot,&lt;br/&gt;PAGA, scVelo)"]
+
+    %% Orange nodes
+    downstream["Downstream analysis&lt;br/&gt;(Differential expression,&lt;br/&gt;Shifts in cell type composition,&lt;br/&gt;Find new cell-types/states)"]
+
+    %% Main workflow connections
+    cr --&gt; cell_qc
+    cell_qc --&gt; norm
+    norm --&gt; feature
+    norm --&gt; markers
+    feature --&gt; dim_red
+    dim_red --&gt; cluster
+    dim_red --&gt; traj
+    dim_red --&gt; viz
+    cluster --&gt; markers
+    markers --&gt; annot
+
+    %% Feedback loops (dashed grey)
+    annot -.-&gt; cell_qc
+    annot -.-&gt; feature
+    annot -.-&gt; dim_red
+    annot -.-&gt; cluster
+    annot --&gt; downstream
+
+    %% Edge labels
+    cr -.-|"Load into&lt;br/&gt;SingleCellExperiment"| cell_qc
+    annot -.-|"Repeat&lt;br/&gt;as needed"| cell_qc
+
+    %% Color styling
+    classDef green fill:#009E73,stroke:#000,stroke-width:2px,color:#000
+    classDef blue fill:#56B4E9,stroke:#000,stroke-width:2px,color:#000
+    classDef yellow fill:#F0E442,stroke:#000,stroke-width:2px,color:#000
+    classDef orange fill:#E69F00,stroke:#000,stroke-width:2px,color:#000
+
+    class cr green
+    class cell_qc,norm,markers,annot blue
+    class feature,dim_red,cluster,viz,traj yellow
+    class downstream orange
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
 </section>
-<section id="why-use-version-control" class="slide level2 smaller">
-<h2>Why Use Version Control?</h2>
-<p><strong>The Problem Without Git:</strong></p>
-<pre><code>analysis_final.R
-analysis_final_v2.R
-analysis_final_v2_actually_final.R
-analysis_final_v2_actually_final_USE_THIS.R</code></pre>
-<p><strong>Collaboration nightmares:</strong></p>
+<section id="from-raw-reads-to-a-umi-count-matrix" class="slide level2">
+<h2>From raw reads to a UMI count matrix</h2>
+<div class="columns">
+<div class="column">
+<p><img data-src="../img/block-rna/count-matrix.png"></p>
+</div><div class="column">
 <ul>
-<li>“Which version did you edit?”</li>
-<li>“I accidentally deleted the working code”</li>
-<li>“What changed between yesterday and today?”</li>
+<li><a href="https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger"><code>cellranger</code></a> from 10x Genomics (STAR)</li>
+<li><a href="https://salmon.readthedocs.io/en/latest/alevin.html"><code>alevin</code></a> (Salmon)</li>
+<li><a href="https://github.com/alexdobin/STAR/blob/master/docs/STARsolo.md"><code>STAR-solo</code></a> (From the STAR developers)</li>
 </ul>
+</div></div>
 </section>
-<section id="git-time-machine-for-code" class="slide level2 smaller">
-<h2>Git: Time Machine for Code</h2>
-<p><strong>What Git Does:</strong></p>
-<ul>
-<li>Tracks every change to your files</li>
-<li>Lets you revert to any previous version</li>
-<li>Shows who changed what and when</li>
-<li>Enables parallel development (branches)</li>
-<li>Merges changes from multiple people</li>
-</ul>
-<p><strong>GitHub: Social Network for Git</strong></p>
-<ul>
-<li>Hosts your Git repositories online</li>
-<li>Enables collaboration</li>
-<li>Provides issue tracking and project management</li>
-<li>Makes your work discoverable and citable</li>
-</ul>
-</section>
-<section id="why-bioinformaticians-need-git" class="slide level2 smaller">
-<h2>Why Bioinformaticians Need Git</h2>
-<p><strong>Reproducibility:</strong></p>
-<ul>
-<li>Exact version of analysis code tied to publication</li>
-<li>Document what changed and why (commit messages)</li>
-</ul>
-<p><strong>Collaboration:</strong></p>
-<ul>
-<li>Multiple people working on same analysis</li>
-<li>Advisor reviews and suggests changes</li>
-</ul>
-<p><strong>Experimentation:</strong></p>
-<ul>
-<li>Try new approaches without breaking working code</li>
-<li>Switch between different analysis strategies</li>
-</ul>
-<p><strong>Backup:</strong></p>
-<ul>
-<li>Code is safe even if laptop dies</li>
-<li>Accessible from any computer</li>
-</ul>
-</section>
-<section id="git-basics-key-concepts" class="slide level2 smaller">
-<h2>Git Basics: Key Concepts</h2>
-<p><strong>Repository (repo):</strong> Project folder tracked by Git</p>
-<p><strong>Commit:</strong> Snapshot of your project at a point in time</p>
-<p><strong>Branch:</strong> Parallel version of your code</p>
-<p><strong>Remote:</strong> Online copy (GitHub, GitLab)</p>
-<p><strong>Common Workflow:</strong></p>
-<ol type="1">
-<li>Make changes to files</li>
-<li>Stage changes (<code>git add</code>)</li>
-<li>Commit with descriptive message (<code>git commit</code>)</li>
-<li>Push to GitHub (<code>git push</code>)</li>
-</ol>
-</section>
-<section id="learning-git-github" class="slide level2 smaller">
-<h2>Learning Git &amp; GitHub</h2>
-<p><strong>Essential Resources:</strong></p>
-<ul>
-<li><a href="https://happygitwithr.com/">Happy Git and GitHub for the useR</a> - Excellent beginner guide</li>
-<li><a href="https://skills.github.com/">GitHub Skills</a> - Interactive tutorials</li>
-<li><a href="https://swcarpentry.github.io/git-novice/">Software Carpentry: Git</a> - Comprehensive workshop materials</li>
-<li><a href="https://ohshitgit.com/">Oh Sh*t, Git!?!</a> - Fixing common mistakes</li>
-</ul>
-<p><strong>Practice:</strong></p>
-<ul>
-<li>Start with your own project (private repo OK)</li>
-<li>Make small, frequent commits</li>
-<li>Write clear commit messages</li>
-<li>Don’t be afraid to make mistakes - everything is reversible!</li>
-</ul>
-</section>
-<section id="git-best-practices" class="slide level2 smaller">
-<h2>Git Best Practices</h2>
-<p><strong>Commit Messages:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="co"># Good</span></span>
-<span id="cb2-2"><a></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"Add quality filtering step for low-count genes"</span></span>
+<section id="alevin" class="slide level2">
+<h2>Alevin</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="ex">$</span> salmon <span class="at">-h</span></span>
+<span id="cb2-2"><a></a><span class="ex">salmon</span> v1.3.0</span>
 <span id="cb2-3"><a></a></span>
-<span id="cb2-4"><a></a><span class="co"># Bad</span></span>
-<span id="cb2-5"><a></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"updated code"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>What to Track:</strong></p>
-<ul>
-<li>✅ Code (.R, .py, .qmd)</li>
-<li>✅ Documentation (README.md)</li>
-<li>✅ Small data files (&lt;100 MB)</li>
-<li>❌ Large raw data files (use data repositories)</li>
-<li>❌ Temporary files (.Rhistory, .DS_Store)</li>
-</ul>
-<p><strong>Use .gitignore</strong> to exclude unwanted files</p>
+<span id="cb2-4"><a></a><span class="ex">Usage:</span>  salmon <span class="at">-h</span><span class="kw">|</span><span class="ex">--help</span> or</span>
+<span id="cb2-5"><a></a>        <span class="ex">salmon</span> <span class="at">-v</span><span class="kw">|</span><span class="ex">--version</span> or</span>
+<span id="cb2-6"><a></a>        <span class="ex">salmon</span> <span class="at">-c</span><span class="kw">|</span><span class="ex">--cite</span> or</span>
+<span id="cb2-7"><a></a>        <span class="ex">salmon</span> <span class="pp">[--</span><span class="ss">no</span><span class="pp">-</span><span class="ss">version</span><span class="pp">-</span><span class="ss">check</span><span class="pp">]</span> <span class="op">&lt;</span>COMMAND<span class="op">&gt;</span> [-h <span class="kw">|</span> <span class="ex">options]</span></span>
+<span id="cb2-8"><a></a></span>
+<span id="cb2-9"><a></a><span class="ex">Commands:</span></span>
+<span id="cb2-10"><a></a>     <span class="ex">index</span>      : create a salmon index</span>
+<span id="cb2-11"><a></a>     <span class="ex">quant</span>      : quantify a sample</span>
+<span id="cb2-12"><a></a>     <span class="ex">alevin</span>     : single cell analysis <span class="co"># &lt;------</span></span>
+<span id="cb2-13"><a></a>     <span class="ex">swim</span>       : perform super-secret operation</span>
+<span id="cb2-14"><a></a>     <span class="ex">quantmerge</span> : merge multiple quantifications into a single file</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section class="slide level2">
+<section id="alevin-1" class="slide level2">
+<h2>Alevin</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="ex">$</span> salmon index ...</span>
+<span id="cb3-2"><a></a><span class="ex">$</span> salmon alevin</span>
+<span id="cb3-3"><a></a>   <span class="ex">-l</span> ISR                    <span class="co"># library type</span></span>
+<span id="cb3-4"><a></a>   <span class="ex">-1</span> read1.fastq.gz         <span class="co"># reads</span></span>
+<span id="cb3-5"><a></a>   <span class="ex">-2</span> read2.fastq.gz         <span class="co"># reads</span></span>
+<span id="cb3-6"><a></a>   <span class="ex">--chromiumv3</span>              <span class="co"># chemistry</span></span>
+<span id="cb3-7"><a></a>   <span class="ex">-i</span> /path/to/salmon/index  <span class="co"># index path</span></span>
+<span id="cb3-8"><a></a>   <span class="ex">-o</span> /path/to/output        <span class="co"># output</span></span>
+<span id="cb3-9"><a></a>   <span class="ex">--tgMap</span> transcript_to_gene.tsv</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="alevin-output-files" class="slide level2">
+<h2>Alevin output files</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="va">$ls</span> alevin/</span>
+<span id="cb4-2"><a></a><span class="ex">alevin.log</span>          <span class="co"># run info</span></span>
+<span id="cb4-3"><a></a><span class="ex">featureDump.txt</span>     <span class="co"># info on each cell barcode</span></span>
+<span id="cb4-4"><a></a><span class="ex">quants_mat.gz</span>       <span class="co"># binary file with UMI counts</span></span>
+<span id="cb4-5"><a></a><span class="ex">quants_mat_cols.txt</span> <span class="co"># genes in count matrix</span></span>
+<span id="cb4-6"><a></a><span class="ex">quants_mat_rows.txt</span> <span class="co"># cell barcodes in count matrix</span></span>
+<span id="cb4-7"><a></a><span class="ex">quants_tier_mat.gz</span>  <span class="co"># info about mapping for each gene</span></span>
+<span id="cb4-8"><a></a><span class="ex">whitelist.txt</span>       <span class="co"># valid barcodes discovered by alevin</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="alevinqc" class="slide level2">
+<h2>AlevinQC</h2>
+<p>Can generate interactive QC reports using <a href="https://csoneson.github.io/alevinQC/">alevinQC</a></p>
+<p><a href="../data/block-rna/scrna/qc/pbmc/alevinReport.html">PBMC QC report</a></p>
+</section>
+<section id="qc-cell-or-empty-droplet" class="slide level2 smaller">
+<h2>QC: cell or empty droplet?</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li><p>In a typical droplet scRNA-seq experiment 100k - 1M cell barcodes are detected, but only 1-10k cells are loaded</p></li>
+<li><p>Most of these droplets are “empty” and contain very few reads.</p></li>
+<li><p>What is the source of these reads in the “empty” droplets?</p></li>
+<li><p>How do we determine if the data from a particular cell barcode is derived from a single cell?</p></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="fu">library</span>(alevinQC)</span>
+<span id="cb5-2"><a></a></span>
+<span id="cb5-3"><a></a>alevin <span class="ot">&lt;-</span> <span class="fu">readAlevinQC</span>(</span>
+<span id="cb5-4"><a></a>  <span class="at">baseDir =</span> <span class="fu">here</span>(<span class="st">"data/block-rna/scrna/pbmc"</span>)</span>
+<span id="cb5-5"><a></a>)</span>
+<span id="cb5-6"><a></a></span>
+<span id="cb5-7"><a></a>cell_counts <span class="ot">&lt;-</span> alevin<span class="sc">$</span>cbTable</span>
+<span id="cb5-8"><a></a></span>
+<span id="cb5-9"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb5-10"><a></a>  cell_counts,</span>
+<span id="cb5-11"><a></a>  <span class="fu">aes</span>(ranking, originalFreq)</span>
+<span id="cb5-12"><a></a>) <span class="sc">+</span></span>
+<span id="cb5-13"><a></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb5-14"><a></a>  <span class="fu">scale_x_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span>comma, <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">1000</span>, <span class="dv">10000</span>, <span class="dv">100000</span>)) <span class="sc">+</span></span>
+<span id="cb5-15"><a></a>  <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
+<span id="cb5-16"><a></a>  <span class="fu">labs</span>(</span>
+<span id="cb5-17"><a></a>    <span class="at">x =</span> <span class="st">"Barcode rank"</span>,</span>
+<span id="cb5-18"><a></a>    <span class="at">y =</span> <span class="st">"Barcode frequency"</span></span>
+<span id="cb5-19"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-31_files/figure-revealjs/cb-umi-plot-1.png" alt="Description of the plot - PLEASE FILL IN" width="864"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="qc-cell-or-empty-droplet-1" class="slide level2 smaller">
+<h2>QC: cell or empty droplet?</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>frst_dev <span class="ot">&lt;-</span> <span class="fu">max</span>(cell_counts<span class="sc">$</span>ranking[cell_counts<span class="sc">$</span>inFirstWhiteList])</span>
+<span id="cb6-2"><a></a></span>
+<span id="cb6-3"><a></a><span class="fu">ggplot</span>(cell_counts, <span class="fu">aes</span>(ranking, originalFreq)) <span class="sc">+</span></span>
+<span id="cb6-4"><a></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb6-5"><a></a>  <span class="fu">scale_x_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span>comma, <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">1000</span>, <span class="dv">10000</span>, <span class="dv">100000</span>)) <span class="sc">+</span></span>
+<span id="cb6-6"><a></a>  <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
+<span id="cb6-7"><a></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> frst_dev) <span class="sc">+</span></span>
+<span id="cb6-8"><a></a>  <span class="fu">labs</span>(</span>
+<span id="cb6-9"><a></a>    <span class="at">x =</span> <span class="st">"Barcode rank"</span>,</span>
+<span id="cb6-10"><a></a>    <span class="at">y =</span> <span class="st">"Barcode frequency"</span></span>
+<span id="cb6-11"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-31_files/figure-revealjs/unnamed-chunk-2-1.png" alt="Description of the plot - PLEASE FILL IN" width="864"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<ul>
+<li><p>Fit a curve to the observed data and identify point where first derivative is minimized.</p></li>
+<li><p>Any barcodes less than the “knee”, test sequences for off-by-one errors against the barcodes above the knee.</p></li>
+<li><p>Take top half of cells above the knee and train a classifier using multiple criteria (% mapping, % mitochondrial and rRNA reads, duplicate rate, …)</p></li>
+<li><p>Classify ambiguous cells in lower half into likely cells or not.</p></li>
+</ul>
+</div></div>
+</section>
+<section id="qc-cell-or-empty-droplet-2" class="slide level2">
+<h2>QC: Cell or empty droplet?</h2>
+<div class="columns">
+<div class="column">
+<h4 id="good-data">Good data</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="fu">ggplot</span>(cell_counts, <span class="fu">aes</span>(ranking, originalFreq)) <span class="sc">+</span></span>
+<span id="cb7-2"><a></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> inFinalWhiteList), <span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb7-3"><a></a>  <span class="fu">scale_x_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span>comma, <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">1000</span>, <span class="dv">10000</span>, <span class="dv">100000</span>)) <span class="sc">+</span></span>
+<span id="cb7-4"><a></a>  <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
+<span id="cb7-5"><a></a>  <span class="fu">labs</span>(</span>
+<span id="cb7-6"><a></a>    <span class="at">x =</span> <span class="st">"Barcode rank"</span>,</span>
+<span id="cb7-7"><a></a>    <span class="at">y =</span> <span class="st">"Barcode frequency"</span>,</span>
+<span id="cb7-8"><a></a>    <span class="at">color =</span> <span class="st">"Cell"</span></span>
+<span id="cb7-9"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-31_files/figure-revealjs/plot-label-1.png" alt="Description of the plot - PLEASE FILL IN" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column">
+<h4 id="bad-data">Bad data</h4>
+<p><img data-src="../img/block-rna/bad_data.png"></p>
+</div></div>
+</section>
+<section id="cell-calling-sanity-check" class="slide level2 incremental">
+<h2>Cell calling sanity check</h2>
+<ul>
+<li>It’s always a good think to sanity check your data</li>
+<li>After calling cells, how can we perform a sanity check?</li>
+<li>I once reanalyzed data from a <em>published</em> paper and found that they had treated two separate sequencing runs as two separate captures. If this happens to you, what is a quick and easy way to make sure you treated your data correctly at the cell calling step?</li>
+</ul>
+</section>
+<section id="doublets-and-multiplets" class="slide level2 smaller">
+<h2>Doublets and Multiplets</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img data-src="../img/block-rna/10x-barnyard.png"></p>
+</div><div class="column" style="width:50%;">
+<ul>
+<li><p>Doublets are not clearly identifiable using simple QC metrics, so cannot be reliably removed with filtering with # of UMIs or genes detected.</p></li>
+<li><p><code>scran::doublet_cluster</code> : Compare each cluster to an in silico mix of two other clusters. Get per cluster score of likelihood of being a doublet.</p></li>
+<li><p><code>scran::doublet_cell</code> : Compare each cell to a mix of two other randomly selected cells. Get per cell score of likelihood of being a doublet.</p></li>
+<li><p>Doublets can also arise due to sample prep, e.g.&nbsp;incomplete generations of a single cell suspension. These doublets are difficult to exclude from the data</p></li>
+</ul>
+</div></div>
+</section>
+<section id="turning-to-our-exercise" class="slide level2">
+<h2>Turning to our exercise ⌨️</h2>
+<p>Before jumping into the analysis, let’s step back and start running through the exercise for today</p>
+<p>Start by loading in the packages</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="fu">library</span>(here)</span>
+<span id="cb8-2"><a></a><span class="fu">library</span>(scran)</span>
+<span id="cb8-3"><a></a><span class="fu">library</span>(scater)</span>
+<span id="cb8-4"><a></a><span class="fu">library</span>(SingleCellExperiment)</span>
+<span id="cb8-5"><a></a><span class="fu">library</span>(DropletUtils)</span>
+<span id="cb8-6"><a></a><span class="fu">library</span>(tximport)</span>
+<span id="cb8-7"><a></a><span class="fu">library</span>(Matrix)</span>
+<span id="cb8-8"><a></a><span class="fu">library</span>(AnnotationHub)</span>
+<span id="cb8-9"><a></a><span class="fu">library</span>(eds)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="raw-data-the-umi-count-matrix" class="slide level2">
+<h2>Raw data: the UMI count matrix ⌨️</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li><p>scRNA-seq libraries produce reads from 100,000 - 1,000,000 cell barcodes</p></li>
+<li><p>A matrix of 20,000 genes x 1,000,000 barcodes is 20 billion values (!).</p></li>
+<li><p>&gt;95% are zeros due to empty droplets and the low efficiency of the library prep (&lt; 10-20% of RNA captured).</p></li>
+</ul>
+</div><div class="column">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>vals <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb9-2"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-3"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-4"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-5"><a></a>  <span class="dv">2</span>,</span>
+<span id="cb9-6"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-7"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-8"><a></a>  <span class="dv">1</span>,</span>
+<span id="cb9-9"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-10"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-11"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-12"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-13"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-14"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-15"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-16"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-17"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-18"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-19"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-20"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-21"><a></a>  <span class="dv">1</span>,</span>
+<span id="cb9-22"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-23"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-24"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-25"><a></a>  <span class="dv">0</span>,</span>
+<span id="cb9-26"><a></a>  <span class="dv">0</span></span>
+<span id="cb9-27"><a></a>)</span>
+<span id="cb9-28"><a></a>m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(vals, <span class="at">ncol =</span> <span class="dv">5</span>)</span>
+<span id="cb9-29"><a></a>m</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4] [,5]
+[1,]    0    0    0    0    0
+[2,]    0    1    0    0    0
+[3,]    0    0    0    0    0
+[4,]    2    0    0    0    0
+[5,]    0    0    0    1    0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="fu">summary</span>(m)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       V1            V2            V3          V4     
+ Min.   :0.0   Min.   :0.0   Min.   :0   Min.   :0.0  
+ 1st Qu.:0.0   1st Qu.:0.0   1st Qu.:0   1st Qu.:0.0  
+ Median :0.0   Median :0.0   Median :0   Median :0.0  
+ Mean   :0.4   Mean   :0.2   Mean   :0   Mean   :0.2  
+ 3rd Qu.:0.0   3rd Qu.:0.0   3rd Qu.:0   3rd Qu.:0.0  
+ Max.   :2.0   Max.   :1.0   Max.   :0   Max.   :1.0  
+       V5   
+ Min.   :0  
+ 1st Qu.:0  
+ Median :0  
+ Mean   :0  
+ 3rd Qu.:0  
+ Max.   :0  </code></pre>
+</div>
+</div>
+</div></div>
+</section>
+<section id="sparse-matricies" class="slide level2 nonincremental smaller">
+<h2>Sparse matricies ⌨️</h2>
+<ul>
+<li>Use the <code>as</code> function to convert to a sparse matrix</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>sm <span class="ot">&lt;-</span> <span class="fu">as</span>(m, <span class="st">"sparseMatrix"</span>)</span>
+<span id="cb13-2"><a></a><span class="co"># alternatively</span></span>
+<span id="cb13-3"><a></a><span class="co"># Matrix(vals, nrow = 5)</span></span>
+<span id="cb13-4"><a></a>sm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>5 x 5 sparse Matrix of class "dtCMatrix"
+              
+[1,] . . . . .
+[2,] . 1 . . .
+[3,] . . . . .
+[4,] 2 . . . .
+[5,] . . . 1 .</code></pre>
+</div>
+</div>
+<ul>
+<li>This only stores non-zero values</li>
+<li>Internally, values are stored as a row column value triplet</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a><span class="fu">summary</span>(sm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>5 x 5 sparse Matrix of class "dtCMatrix", with 3 entries
+  i j x
+1 4 1 2
+2 2 2 1
+3 5 4 1</code></pre>
+</div>
+</div>
+</section>
+<section id="sparse-matricies-1" class="slide level2">
+<h2>Sparse matricies ⌨️</h2>
+<ul>
+<li><p>Functions at manipulate matricies (<code>rowMeans</code>, <code>colSums</code>, <code>apply</code>, <code>[</code>) can be used on sparseMatricies as long as the <code>Matrix</code> package is loaded.</p></li>
+<li><p>How can we extract the first 2 rows and first 3 columns of the sparse matrix <code>sm</code> that we generated above?</p></li>
+</ul>
+</section>
+<section id="sparse-matricies-2" class="slide level2 nonincremental">
+<h2>Sparse matricies ⌨️</h2>
+<ul>
+<li><p>Functions at manipulate matricies (<code>rowMeans</code>, <code>colSums</code>, <code>apply</code>, <code>[</code>) can be used on sparseMatricies as long as the <code>Matrix</code> package is loaded.</p></li>
+<li><p>How can we extract the first 2 rows and first 3 columns of the sparse matrix <code>sm</code> that we generated above?</p></li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a><span class="co"># print subset of sm</span></span>
+<span id="cb17-2"><a></a>sm[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2 x 3 sparse Matrix of class "dgCMatrix"
+          
+[1,] . . .
+[2,] . 1 .</code></pre>
+</div>
+</div>
+</section>
+<section id="sparse-matricies-3" class="slide level2">
+<h2>Sparse matricies ⌨️</h2>
+<p>How can we calculate the sum of the columns of <code>sm</code>?</p>
+</section>
+<section id="sparse-matricies-4" class="slide level2">
+<h2>Sparse matricies ⌨️</h2>
+<p>How can we calculate the sum of the columns of <code>sm</code>?</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a><span class="co"># find column sums of sparse</span></span>
+<span id="cb19-2"><a></a><span class="fu">colSums</span>(sm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2 1 0 1 0</code></pre>
+</div>
+</div>
+</section>
+<section id="base-r-subsetting" class="slide level2 nonincremental">
+<h2>Base R subsetting ⌨️</h2>
+<ul>
+<li>Basic R concepts for subsetting and referencing columns are important in single cell analysis</li>
+<li>Vectors can be subset by index (position), logical vector (<code>c(TRUE, FALSE)</code>) or name (if vector is named)</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a>letters</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n"
+[15] "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="co"># extract 2nd, 4th, and 6th entry</span></span>
+<span id="cb23-2"><a></a>letters[<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "b" "d" "f"</code></pre>
+</div>
+</div>
+</section>
+<section id="base-r-subsetting-1" class="slide level2">
+<h2>Base R subsetting ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="co"># subset by creating logical vector</span></span>
+<span id="cb25-2"><a></a>vowels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"a"</span>, <span class="st">"e"</span>, <span class="st">"i"</span>, <span class="st">"o"</span>, <span class="st">"u"</span>)</span>
+<span id="cb25-3"><a></a>is_a_vowel <span class="ot">&lt;-</span> letters <span class="sc">%in%</span> vowels</span>
+<span id="cb25-4"><a></a></span>
+<span id="cb25-5"><a></a>letters[is_a_vowel]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "a" "e" "i" "o" "u"</code></pre>
+</div>
+</div>
+</section>
+<section id="base-r-subsetting-2" class="slide level2">
+<h2>Base R subsetting ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="co"># name the letters vector with uppercase LETTERS</span></span>
+<span id="cb27-2"><a></a><span class="fu">names</span>(letters) <span class="ot">&lt;-</span> LETTERS</span>
+<span id="cb27-3"><a></a></span>
+<span id="cb27-4"><a></a><span class="co"># subset by name</span></span>
+<span id="cb27-5"><a></a>letters[<span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"Z"</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  A   Z 
+"a" "z" </code></pre>
+</div>
+</div>
+</section>
+<section id="base-r-subsetting-3" class="slide level2">
+<h2>Base R subsetting ⌨️</h2>
+<ul>
+<li>Matrices are 2 dimensional vectors and have similar subsetting rules except there are two dimensions, rows and columns.</li>
+</ul>
+<p><code>matrix[rows_to_subset, columns_to_subset]</code></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a>m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">24</span>, <span class="at">nrow =</span> <span class="dv">6</span>)</span>
+<span id="cb29-2"><a></a></span>
+<span id="cb29-3"><a></a><span class="co"># extract 2nd, 4th, and 6th row</span></span>
+<span id="cb29-4"><a></a>m[<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>), ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4]
+[1,]    2    8   14   20
+[2,]    4   10   16   22
+[3,]    6   12   18   24</code></pre>
+</div>
+</div>
+</section>
+<section id="base-r-subsetting-4" class="slide level2">
+<h2>Base R subsetting ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a></a><span class="co"># extract 2nd and 4th column</span></span>
+<span id="cb31-2"><a></a>m[, <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2]
+[1,]    7   19
+[2,]    8   20
+[3,]    9   21
+[4,]   10   22
+[5,]   11   23
+[6,]   12   24</code></pre>
+</div>
+</div>
+</section>
+<section id="base-r-subsetting-5" class="slide level2">
+<h2>Base R subsetting ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a></a><span class="co"># first 3 rows and 2nd and 4th column</span></span>
+<span id="cb33-2"><a></a>m[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2]
+[1,]    7   19
+[2,]    8   20
+[3,]    9   21</code></pre>
+</div>
+</div>
+</section>
+<section id="base-r-subsetting-6" class="slide level2">
+<h2>Base R subsetting ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a></a><span class="co"># extract rows with totals &gt; 50</span></span>
+<span id="cb35-2"><a></a>m[<span class="fu">rowSums</span>(m) <span class="sc">&gt;</span> <span class="dv">50</span>, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4]
+[1,]    4   10   16   22
+[2,]    5   11   17   23
+[3,]    6   12   18   24</code></pre>
+</div>
+</div>
+</section>
+<section id="base-r-subsetting-7" class="slide level2">
+<h2>Base R subsetting ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a></a><span class="co"># extract columns with minimum values &lt; 8</span></span>
+<span id="cb37-2"><a></a>m[, <span class="fu">colMins</span>(m) <span class="sc">&lt;</span> <span class="dv">8</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2]
+[1,]    1    7
+[2,]    2    8
+[3,]    3    9
+[4,]    4   10
+[5,]    5   11
+[6,]    6   12</code></pre>
+</div>
+</div>
+</section>
+<section id="base-r-subsetting-8" class="slide level2">
+<h2>Base R subsetting ⌨️</h2>
+<p>The base R <code>data.frame</code> and Bioconductor <code>DataFrame</code> can also be subset with the <code>[</code> and we can reference individual vectors in a data.frame using <code>$</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a><span class="co"># first 3 rows and columns of mtcars data.frame</span></span>
+<span id="cb39-2"><a></a>mtcars[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               mpg cyl disp
+Mazda RX4     21.0   6  160
+Mazda RX4 Wag 21.0   6  160
+Datsun 710    22.8   4  108</code></pre>
+</div>
+</div>
+</section>
+<section id="base-r-subsetting-9" class="slide level2">
+<h2>Base R subsetting ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a></a><span class="co"># columns can be referenced using $, which extracts a vector</span></span>
+<span id="cb41-2"><a></a>mtcars<span class="sc">$</span>mpg</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 21.0 21.0 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8
+[12] 16.4 17.3 15.2 10.4 10.4 14.7 32.4 30.4 33.9 21.5 15.5
+[23] 15.2 13.3 19.2 27.3 26.0 30.4 15.8 19.7 15.0 21.4</code></pre>
+</div>
+</div>
+</section>
+<section id="base-r-subsetting-10" class="slide level2">
+<h2>Base R subsetting ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a><span class="co"># columns can be generated or overwritten using $ with assignment</span></span>
+<span id="cb43-2"><a></a>mtcars<span class="sc">$</span>new_column_name <span class="ot">&lt;-</span> <span class="st">"Hello!"</span></span>
+<span id="cb43-3"><a></a>mtcars<span class="sc">$</span>wt <span class="ot">&lt;-</span> mtcars<span class="sc">$</span>wt <span class="sc">*</span> <span class="dv">1000</span></span>
+<span id="cb43-4"><a></a></span>
+<span id="cb43-5"><a></a><span class="co"># We can subset using logical vectors</span></span>
+<span id="cb43-6"><a></a><span class="co"># E.g. filter for rows (cars) with mpg &gt; 20</span></span>
+<span id="cb43-7"><a></a>mtcars[mtcars<span class="sc">$</span>mpg <span class="sc">&gt;</span> <span class="dv">20</span>, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                mpg cyl  disp  hp drat   wt  qsec vs am
+Mazda RX4      21.0   6 160.0 110 3.90 2620 16.46  0  1
+Mazda RX4 Wag  21.0   6 160.0 110 3.90 2875 17.02  0  1
+Datsun 710     22.8   4 108.0  93 3.85 2320 18.61  1  1
+Hornet 4 Drive 21.4   6 258.0 110 3.08 3215 19.44  1  0
+Merc 240D      24.4   4 146.7  62 3.69 3190 20.00  1  0
+Merc 230       22.8   4 140.8  95 3.92 3150 22.90  1  0
+Fiat 128       32.4   4  78.7  66 4.08 2200 19.47  1  1
+Honda Civic    30.4   4  75.7  52 4.93 1615 18.52  1  1
+Toyota Corolla 33.9   4  71.1  65 4.22 1835 19.90  1  1
+Toyota Corona  21.5   4 120.1  97 3.70 2465 20.01  1  0
+Fiat X1-9      27.3   4  79.0  66 4.08 1935 18.90  1  1
+Porsche 914-2  26.0   4 120.3  91 4.43 2140 16.70  0  1
+Lotus Europa   30.4   4  95.1 113 3.77 1513 16.90  1  1
+Volvo 142E     21.4   4 121.0 109 4.11 2780 18.60  1  1
+               gear carb new_column_name
+Mazda RX4         4    4          Hello!
+Mazda RX4 Wag     4    4          Hello!
+Datsun 710        4    1          Hello!
+Hornet 4 Drive    3    1          Hello!
+Merc 240D         4    2          Hello!
+Merc 230          4    2          Hello!
+Fiat 128          4    1          Hello!
+Honda Civic       4    2          Hello!
+Toyota Corolla    4    1          Hello!
+Toyota Corona     3    1          Hello!
+Fiat X1-9         4    1          Hello!
+Porsche 914-2     5    2          Hello!
+Lotus Europa      5    2          Hello!
+Volvo 142E        4    2          Hello!</code></pre>
+</div>
+</div>
+</section>
+<section id="read-in-alevin-output-with-tximport" class="slide level2 smaller">
+<h2>Read in Alevin output with tximport</h2>
+<ul>
+<li>Now that we know how to work with a sparse matrix, let’s read in our data</li>
+<li><code>tximport</code> has methods for importing the binary data from alevin</li>
+<li>We need to supply a path to the <code>quants_mat.gz</code> file.</li>
+<li>If you want to load multiple samples use iteration approaches (e.g.&nbsp;<code>lapply</code>, <code>purrr::map</code>, a <code>for</code> loop).</li>
+<li>Also note that the <a href="https://bioconductor.org/packages/release/bioc/html/eds.html"><code>eds</code></a> package was installed which greatly speeds up the loading of the matrix.</li>
+</ul>
+<p>We will load in data from a 10x Genomics scRNA-seq library generated from human periperhal blood mononuclear cells (PMBCS).</p>
+</section>
+<section id="read-in-alevin-output-with-tximport-1" class="slide level2">
+<h2>Read in Alevin output with tximport ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a><span class="fu">library</span>(tximport)</span>
+<span id="cb45-2"><a></a>tx <span class="ot">&lt;-</span> <span class="fu">tximport</span>(</span>
+<span id="cb45-3"><a></a>  <span class="fu">here</span>(<span class="st">"data/block-rna/scrna/pbmc/alevin/quants_mat.gz"</span>),</span>
+<span id="cb45-4"><a></a>  <span class="at">type =</span> <span class="st">"alevin"</span></span>
+<span id="cb45-5"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>importing alevin data is much faster after installing 'eds'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>reading in alevin gene-level counts across cells </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a></a><span class="fu">names</span>(tx)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "abundance"           "counts"             
+[3] "countsFromAbundance"</code></pre>
+</div>
+</div>
+<p><code>tx</code> is a list with 3 elements, <code>abundance</code>, <code>counts</code>, and <code>countsFromAbundance</code>. Let’s look at the counts element</p>
+</section>
+<section id="read-in-alevin-output-with-tximport-2" class="slide level2">
+<h2>Read in Alevin output with tximport ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a></a>mat <span class="ot">&lt;-</span> tx<span class="sc">$</span>counts</span>
+<span id="cb50-2"><a></a>mat[<span class="dv">5</span><span class="sc">:</span><span class="dv">10</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>6 x 3 sparse Matrix of class "dgTMatrix"
+                GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG
+ENSG00000243485                .                .
+ENSG00000284332                .                .
+ENSG00000237613                .                .
+ENSG00000268020                .                .
+ENSG00000290826                .                .
+ENSG00000240361                .                .
+                ATTTCTGTCTCTATGT
+ENSG00000243485                .
+ENSG00000284332                .
+ENSG00000237613                .
+ENSG00000268020                .
+ENSG00000290826                .
+ENSG00000240361                .</code></pre>
+</div>
+</div>
+<p>Here you can see that <code>tx$counts</code> is a sparse matrix that is genes (rows) by cells (columns).</p>
+<p>How many barcodes are in <code>tx$counts</code>? How many genes?</p>
+</section>
+<section id="read-in-alevin-output-with-tximport-3" class="slide level2">
+<h2>Read in Alevin output with tximport ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a></a><span class="co"># </span><span class="al">TODO</span><span class="co"> Find number of barcodes and genes in tx$counts</span></span>
+<span id="cb52-2"><a></a><span class="fu">dim</span>(mat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 62266  6075</code></pre>
+</div>
+</div>
+<p>What fraction of the matrix is non-zero? We can use the <code>nnzero</code> function from the <code>Matrix</code> package check</p>
+</section>
+<section id="read-in-alevin-output-with-tximport-4" class="slide level2">
+<h2>Read in Alevin output with tximport ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a></a><span class="fu">nnzero</span>(mat) <span class="sc">/</span> <span class="fu">length</span>(mat) <span class="co"># (length = # of rows X # of columns)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.03282941</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a></a><span class="co"># similarily</span></span>
+<span id="cb56-2"><a></a><span class="fu">sum</span>(mat <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">/</span> <span class="fu">length</span>(mat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.03282941</code></pre>
+</div>
+</div>
+</section>
+<section id="single-cell-analysis-packages" class="slide level2">
+<h2>Single cell analysis packages</h2>
+<p>Key resource for single cell analysis in Bioconductor: <a href="https://bioconductor.org/books/release/OSCA/">Orchestrating Single Cell Analysis</a></p>
+<p><a href="https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html"><code>SingleCellExperiment</code></a> is the core datastructure for storing single cell data.</p>
+<p><a href="https://bioconductor.org/packages/release/bioc/html/scran.html"><code>scran</code></a> provides algorithms for low-level processing of single cell data.</p>
+<p><a href="https://bioconductor.org/packages/release/bioc/html/scater.html"><code>scater</code></a> provides plotting, data transformation, and quality control functionality</p>
+</section>
+<section id="singlecellexperiment" class="slide level2">
+<h2>SingleCellExperiment</h2>
 
-</section></section>
-<section>
-<section id="part-3-high-performance-computing" class="title-slide slide level1 center" data-background-color="#43464B">
-<h1>Part 3: High-Performance Computing</h1>
+<img data-src="../img/block-rna/sce.png" class="r-stretch"></section>
+<section id="create-a-singlecellexperiment-object" class="slide level2 smaller">
+<h2>Create a SingleCellExperiment object ⌨️</h2>
+<p>A <code>SingleCellExperiment</code> object can be created from our sparse matrix using the <code>SingleCellExperiment()</code> function.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">SingleCellExperiment</span>(<span class="fu">list</span>(<span class="at">counts =</span> mat))</span>
+<span id="cb58-2"><a></a>sce</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class: SingleCellExperiment 
+dim: 62266 6075 
+metadata(0):
+assays(1): counts
+rownames(62266): ENSG00000290825 ENSG00000223972 ...
+  ENSG00000210195 ENSG00000210196
+rowData names(0):
+colnames(6075): GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG ...
+  ACGTAGGGTGACAGCA TCTCAGCTCGCCGAAC
+colData names(0):
+reducedDimNames(0):
+mainExpName: NULL
+altExpNames(0):</code></pre>
+</div>
+</div>
+</section>
+<section id="exploring-the-singlecellexperiment-object" class="slide level2 smaller">
+<h2>Exploring the SingleCellExperiment object ⌨️</h2>
+<p>The <code>SingleCellExperiment</code> object stores the gene x cell count matrix within <code>assays()</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a></a><span class="co"># get list of assays</span></span>
+<span id="cb60-2"><a></a><span class="fu">assays</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of length 1
+names(1): counts</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a></a><span class="co"># extract single assay</span></span>
+<span id="cb62-2"><a></a><span class="fu">assay</span>(sce, <span class="st">"counts"</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4 x 4 sparse Matrix of class "dgTMatrix"
+                GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG
+ENSG00000290825                .                .
+ENSG00000223972                .                .
+ENSG00000227232                .                .
+ENSG00000278267                .                .
+                ATTTCTGTCTCTATGT TATCTGTAGGTGATAT
+ENSG00000290825                .                .
+ENSG00000223972                .                .
+ENSG00000227232                .                .
+ENSG00000278267                .                .</code></pre>
+</div>
+</div>
+</section>
+<section id="exploring-the-singlecellexperiment-object-1" class="slide level2">
+<h2>Exploring the SingleCellExperiment object ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a></a><span class="fu">assays</span>(sce)<span class="sc">$</span>counts[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4 x 4 sparse Matrix of class "dgTMatrix"
+                GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG
+ENSG00000290825                .                .
+ENSG00000223972                .                .
+ENSG00000227232                .                .
+ENSG00000278267                .                .
+                ATTTCTGTCTCTATGT TATCTGTAGGTGATAT
+ENSG00000290825                .                .
+ENSG00000223972                .                .
+ENSG00000227232                .                .
+ENSG00000278267                .                .</code></pre>
+</div>
+</div>
+</section>
+<section id="exploring-the-singlecellexperiment-object-2" class="slide level2">
+<h2>Exploring the SingleCellExperiment object ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a></a><span class="co"># convenience function for counts assay</span></span>
+<span id="cb66-2"><a></a><span class="fu">counts</span>(sce)[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>4 x 4 sparse Matrix of class "dgTMatrix"
+                GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG
+ENSG00000290825                .                .
+ENSG00000223972                .                .
+ENSG00000227232                .                .
+ENSG00000278267                .                .
+                ATTTCTGTCTCTATGT TATCTGTAGGTGATAT
+ENSG00000290825                .                .
+ENSG00000223972                .                .
+ENSG00000227232                .                .
+ENSG00000278267                .                .</code></pre>
+</div>
+</div>
+</section>
+<section id="accessing-cell-metadata" class="slide level2">
+<h2>Accessing cell metadata ⌨️</h2>
+<ul>
+<li>We generate cell-level information</li>
+<li>such as quality control metrics, clustering results, and celltype assignments.</li>
+<li>This data is stored within a data frame called <code>colData</code></li>
+<li>access using <code>colData()</code></li>
+<li>Specialized Bioconductor specific data.frame class (<code>DataFrame</code>) which has similar semantics and functionality to a base R data.frame.</li>
+</ul>
+</section>
+<section id="accessing-cell-metadata-1" class="slide level2 smaller">
+<h2>Accessing cell metadata ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a></a><span class="co"># empty right now.</span></span>
+<span id="cb68-2"><a></a><span class="fu">colData</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DataFrame with 6075 rows and 0 columns</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a></a><span class="co"># add a sample annotation</span></span>
+<span id="cb70-2"><a></a><span class="fu">colData</span>(sce)<span class="sc">$</span>cell_source <span class="ot">&lt;-</span> <span class="st">"PBMC"</span></span>
+<span id="cb70-3"><a></a></span>
+<span id="cb70-4"><a></a><span class="co"># equivalent approach using $</span></span>
+<span id="cb70-5"><a></a>sce<span class="sc">$</span>cell_source <span class="ot">&lt;-</span> <span class="st">"PBMC"</span></span>
+<span id="cb70-6"><a></a></span>
+<span id="cb70-7"><a></a><span class="fu">colData</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DataFrame with 6075 rows and 1 column
+                 cell_source
+                 &lt;character&gt;
+GCTGCAGTCCGATCTC        PBMC
+ACTATGGAGGTCCCTG        PBMC
+ATTTCTGTCTCTATGT        PBMC
+TATCTGTAGGTGATAT        PBMC
+AGCCAGCCAAAGCACG        PBMC
+...                      ...
+CATCCCAAGTACTCGT        PBMC
+CTCCTCCCATGAAGCG        PBMC
+AGTTCCCCATGTCAGT        PBMC
+ACGTAGGGTGACAGCA        PBMC
+TCTCAGCTCGCCGAAC        PBMC</code></pre>
+</div>
+</div>
+</section>
+<section id="accessing-gene-metadata" class="slide level2">
+<h2>Accessing gene metadata ⌨️</h2>
+<ul>
+<li>Gene-level metadata is stored in a data.frame called <code>rowData()</code>.</li>
+<li>Use the rowData to store gene ids, symbols, and other information about genes.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a></a><span class="co"># empty right now</span></span>
+<span id="cb72-2"><a></a><span class="fu">rowData</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DataFrame with 62266 rows and 0 columns</code></pre>
+</div>
+</div>
+</section>
+<section id="manipulating-a-singlecellexperiment" class="slide level2">
+<h2>Manipulating a SingleCellExperiment ⌨️</h2>
+<ul>
+<li>Calculate the total number of counts in each cell and store these counts in the `colData().*</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a></a>sce<span class="sc">$</span>total_counts <span class="ot">&lt;-</span> <span class="fu">colSums</span>(<span class="fu">counts</span>(sce))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="manipulating-a-singlecellexperiment-1" class="slide level2 smaller">
+<h2>Manipulating a SingleCellExperiment ⌨️</h2>
+<ul>
+<li>Calculate the total number of counts for each gene, summed across cells</li>
+<li>Calculate the number of cells with &gt; 0 counts per gene</li>
+<li>store both of these values in the rowData().</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>total_gene_counts <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">counts</span>(sce))</span>
+<span id="cb75-2"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>n_cells_expr <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">counts</span>(sce) <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb75-3"><a></a><span class="fu">rowData</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DataFrame with 62266 rows and 2 columns
+                total_gene_counts n_cells_expr
+                        &lt;numeric&gt;    &lt;integer&gt;
+ENSG00000290825         65.594607           43
+ENSG00000223972          0.000000            0
+ENSG00000227232          5.506349           24
+ENSG00000278267          0.000000            0
+ENSG00000243485          0.333333            1
+...                           ...          ...
+ENSG00000198695              2054         1509
+ENSG00000210194                 0            0
+ENSG00000198727            274421         5704
+ENSG00000210195                 0            0
+ENSG00000210196                 0            0</code></pre>
+</div>
+</div>
+</section>
+<section id="manipulating-a-singlecellexperiment-2" class="slide level2">
+<h2>Manipulating a SingleCellExperiment ⌨️</h2>
+<ul>
+<li>We can subset the SingleCellExperiment using the same techniques as base R data.</li>
+<li>Note that <code>dplyr</code> verbs do not work with <code>SingleCellExperiment</code></li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb77"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a></a>data.frame[rows, columns]</span>
+<span id="cb77-2"><a></a></span>
+<span id="cb77-3"><a></a>sce[genes, cells]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="manipulating-a-singlecellexperiment-3" class="slide level2 smaller">
+<h2>Manipulating a SingleCellExperiment ⌨️</h2>
+<ul>
+<li>We can subset the SingleCellExperiment using the same techniques as base R data.</li>
+<li>Note that <code>dplyr</code> verbs do not work with <code>SingleCellExperiment</code></li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb78"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a></a><span class="co"># subset to data from first 4 genes and cells</span></span>
+<span id="cb78-2"><a></a>sce[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span>
+<span id="cb78-3"><a></a></span>
+<span id="cb78-4"><a></a><span class="co"># subset to cells from PBMC cells</span></span>
+<span id="cb78-5"><a></a>sce[, sce<span class="sc">$</span>cell_source <span class="sc">==</span> <span class="st">"PBMC"</span>]</span>
+<span id="cb78-6"><a></a></span>
+<span id="cb78-7"><a></a></span>
+<span id="cb78-8"><a></a>genes_to_keep <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"ENSG00000223972"</span>, <span class="st">"ENSG00000210195"</span>, <span class="st">"ENSG00000210196"</span>)</span>
+<span id="cb78-9"><a></a>sce[genes_to_keep, ]</span>
+<span id="cb78-10"><a></a></span>
+<span id="cb78-11"><a></a>cells_to_keep <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"ACTATGGAGGTCCCTG"</span>, <span class="st">"GCTGCAGTCCGATCTC"</span>, <span class="st">"TCTCAGCTCGCCGAAC"</span>)</span>
+<span id="cb78-12"><a></a>sce[, cells_to_keep]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="manipulating-a-singlecellexperiment-4" class="slide level2">
+<h2>Manipulating a SingleCellExperiment</h2>
+<p><code>ncol()</code>: # of cells <code>nrow()</code>: # of gene <code>dims()</code>: # of genes and cells <code>rownames()</code>: rownames in matrices (e.g.&nbsp;genes) <code>colnames()</code>: colnames in matrices (e.g.&nbsp;cells) <code>cbind()</code>: combine multiple SingleCellExperiments by column <code>rbind()</code>: combine multiple SingleCellExperiments by row</p>
+</section>
+<section id="storing-gene-identifiers" class="slide level2">
+<h2>Storing gene identifiers</h2>
+<ul>
+<li>Ensembl gene ids are the rownames of our matrix (e.g.&nbsp;ENSG00000289576, ENSG00000221539).</li>
+<li>These identifiers are guaranteed to be unique and are more stable and reliable than gene symbols (e.g.&nbsp;ACTB, GAPDH).</li>
+<li>This becomes important if you want to compare to external datasets or ensure that your data can be easily used by others in the future.</li>
+<li>But they aren’t easy to interpret</li>
+</ul>
+</section>
+<section id="storing-gene-identifiers-1" class="slide level2 smaller">
+<h2>Storing gene identifiers ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb79"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a></a>ah <span class="ot">&lt;-</span> <span class="fu">AnnotationHub</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb80"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a></a><span class="co"># download ensembl database</span></span>
+<span id="cb80-2"><a></a>ens_db <span class="ot">&lt;-</span> ah[[<span class="st">"AH113665"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>downloading 1 resources</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>retrieving 1 resource</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>loading from cache</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>require("ensembldb")</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb85"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a></a>gene_names <span class="ot">&lt;-</span> <span class="fu">mapIds</span>(</span>
+<span id="cb85-2"><a></a>  ens_db,</span>
+<span id="cb85-3"><a></a>  <span class="at">keys =</span> <span class="fu">rownames</span>(sce),</span>
+<span id="cb85-4"><a></a>  <span class="at">keytype =</span> <span class="st">"GENEID"</span>,</span>
+<span id="cb85-5"><a></a>  <span class="at">column =</span> <span class="st">"SYMBOL"</span></span>
+<span id="cb85-6"><a></a>)</span>
+<span id="cb85-7"><a></a></span>
+<span id="cb85-8"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>gene <span class="ot">&lt;-</span> gene_names</span>
+<span id="cb85-9"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>gene_id <span class="ot">&lt;-</span> <span class="fu">rownames</span>(sce)</span>
+<span id="cb85-10"><a></a><span class="fu">rowData</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DataFrame with 62266 rows and 4 columns
+                total_gene_counts n_cells_expr        gene
+                        &lt;numeric&gt;    &lt;integer&gt; &lt;character&gt;
+ENSG00000290825         65.594607           43     DDX11L2
+ENSG00000223972          0.000000            0     DDX11L1
+ENSG00000227232          5.506349           24      WASH7P
+ENSG00000278267          0.000000            0   MIR6859-1
+ENSG00000243485          0.333333            1 MIR1302-2HG
+...                           ...          ...         ...
+ENSG00000198695              2054         1509      MT-ND6
+ENSG00000210194                 0            0       MT-TE
+ENSG00000198727            274421         5704      MT-CYB
+ENSG00000210195                 0            0       MT-TT
+ENSG00000210196                 0            0       MT-TP
+                        gene_id
+                    &lt;character&gt;
+ENSG00000290825 ENSG00000290825
+ENSG00000223972 ENSG00000223972
+ENSG00000227232 ENSG00000227232
+ENSG00000278267 ENSG00000278267
+ENSG00000243485 ENSG00000243485
+...                         ...
+ENSG00000198695 ENSG00000198695
+ENSG00000210194 ENSG00000210194
+ENSG00000198727 ENSG00000198727
+ENSG00000210195 ENSG00000210195
+ENSG00000210196 ENSG00000210196</code></pre>
+</div>
+</div>
+</section>
+<section id="updating-our-rownames" class="slide level2 smaller">
+<h2>Updating our rownames ⌨️</h2>
+<ul>
+<li>Goal rename rownames to symbols</li>
+<li>Problem, some are <code></code>, <code>NA</code>, or duplicated</li>
+<li><code>uniquifyFeatureNames()</code> is a convenience function that will rename gene symbols that are <code>NA</code> or duplicated values to the ensembl ID or a combination of gene symbol and ensembl ID</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb87"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a></a><span class="fu">rownames</span>(sce) <span class="ot">&lt;-</span> <span class="fu">uniquifyFeatureNames</span>(</span>
+<span id="cb87-2"><a></a>  <span class="fu">rowData</span>(sce)<span class="sc">$</span>gene_id,</span>
+<span id="cb87-3"><a></a>  <span class="fu">rowData</span>(sce)<span class="sc">$</span>gene</span>
+<span id="cb87-4"><a></a>)</span>
+<span id="cb87-5"><a></a><span class="fu">head</span>(<span class="fu">rownames</span>(sce))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "DDX11L2_ENSG00000290825" "DDX11L1"                
+[3] "WASH7P"                  "MIR6859-1"              
+[5] "MIR1302-2HG"             "MIR1302-2"              </code></pre>
+</div>
+</div>
+</section>
+<section id="filtering-low-quality-cells" class="slide level2 smaller">
+<h2>Filtering low quality cells ⌨️</h2>
+<p>Next we perform some filtering and quality control to remove low expression genes and poor quality cells.</p>
+<p>Our SingleCellExperiment has 62266 genes in the matrix. Most of these are not expressed. We want to exclude these genes as they won’t provide any useful data for the analysis.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb89"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a></a><span class="co"># exclude genes expressed in fewer than 10 cells (~ 1% of cells)</span></span>
+<span id="cb89-2"><a></a><span class="fu">rowData</span>(sce)<span class="sc">$</span>n_cells <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">counts</span>(sce) <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb89-3"><a></a>sce <span class="ot">&lt;-</span> sce[<span class="fu">rowData</span>(sce)<span class="sc">$</span>n_cells <span class="sc">&gt;=</span> <span class="dv">10</span>, ]</span>
+<span id="cb89-4"><a></a>sce</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class: SingleCellExperiment 
+dim: 20858 6075 
+metadata(0):
+assays(1): counts
+rownames(20858): DDX11L2_ENSG00000290825 WASH7P ...
+  MT-ND6 MT-CYB
+rowData names(5): total_gene_counts n_cells_expr gene
+  gene_id n_cells
+colnames(6075): GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG ...
+  ACGTAGGGTGACAGCA TCTCAGCTCGCCGAAC
+colData names(2): cell_source total_counts
+reducedDimNames(0):
+mainExpName: NULL
+altExpNames(0):</code></pre>
+</div>
+</div>
+</section>
+<section id="filtering-low-quality-cells-1" class="slide level2">
+<h2>Filtering low quality cells</h2>
+<p>To exclude low-quality cells we will use the following metrics:</p>
+<ul>
+<li>Number of counts per cell barcode</li>
+<li>Number of genes detected per barcode</li>
+<li>The percentage of counts from mitochondrial genes per barcode</li>
+</ul>
+<p>A low number of counts, a low number of detected genes, and a high percentage of mitochondrial counts suggests that the cell had a broken membrane and the cytoplasmic mRNA leaked out.</p>
+</section>
+<section id="filtering-low-quality-cells-2" class="slide level2 smaller">
+<h2>Filtering low quality cells ⌨️</h2>
+<p>To calculate these metrics we can use <code>addPerCellQCMetrics</code> from scater. Mitochondrial genes are named with a common “MT-” prefix (e.g.&nbsp;MT-CO2, MT-ATP6, MR-RNR2), which we can use to identify them.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb91"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a></a><span class="co"># identify subset of genes that are from mitochondrial genome</span></span>
+<span id="cb91-2"><a></a>is_mito <span class="ot">&lt;-</span> <span class="fu">startsWith</span>(<span class="fu">rowData</span>(sce)<span class="sc">$</span>gene, <span class="st">"MT-"</span>)</span>
+<span id="cb91-3"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">addPerCellQCMetrics</span>(sce, <span class="at">subsets =</span> <span class="fu">list</span>(<span class="at">Mito =</span> is_mito))</span>
+<span id="cb91-4"><a></a><span class="fu">colData</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DataFrame with 6075 rows and 8 columns
+                 cell_source total_counts       sum
+                 &lt;character&gt;    &lt;numeric&gt; &lt;numeric&gt;
+GCTGCAGTCCGATCTC        PBMC        31924   31908.0
+ACTATGGAGGTCCCTG        PBMC        35845   35801.5
+ATTTCTGTCTCTATGT        PBMC        31788   31758.3
+TATCTGTAGGTGATAT        PBMC        32025   31998.0
+AGCCAGCCAAAGCACG        PBMC        29882   29856.0
+...                      ...          ...       ...
+CATCCCAAGTACTCGT        PBMC          151   151.000
+CTCCTCCCATGAAGCG        PBMC          133   132.500
+AGTTCCCCATGTCAGT        PBMC          173   172.667
+ACGTAGGGTGACAGCA        PBMC          255   253.000
+TCTCAGCTCGCCGAAC        PBMC          144   144.000
+                  detected subsets_Mito_sum
+                 &lt;integer&gt;        &lt;numeric&gt;
+GCTGCAGTCCGATCTC      5718          2668.49
+ACTATGGAGGTCCCTG      6073          3963.23
+ATTTCTGTCTCTATGT      6377          2496.33
+TATCTGTAGGTGATAT      6260          2961.15
+AGCCAGCCAAAGCACG      5746          2660.44
+...                    ...              ...
+CATCCCAAGTACTCGT       132               12
+CTCCTCCCATGAAGCG       131                6
+AGTTCCCCATGTCAGT       166                8
+ACGTAGGGTGACAGCA       217               13
+TCTCAGCTCGCCGAAC       149                4
+                 subsets_Mito_detected subsets_Mito_percent
+                             &lt;integer&gt;            &lt;numeric&gt;
+GCTGCAGTCCGATCTC                    13              8.36307
+ACTATGGAGGTCCCTG                    15             11.07002
+ATTTCTGTCTCTATGT                    15              7.86038
+TATCTGTAGGTGATAT                    15              9.25417
+AGCCAGCCAAAGCACG                    15              8.91092
+...                                ...                  ...
+CATCCCAAGTACTCGT                     5              7.94702
+CTCCTCCCATGAAGCG                     5              4.52830
+AGTTCCCCATGTCAGT                     6              4.63320
+ACGTAGGGTGACAGCA                     6              5.13834
+TCTCAGCTCGCCGAAC                     2              2.77778
+                     total
+                 &lt;numeric&gt;
+GCTGCAGTCCGATCTC   31908.0
+ACTATGGAGGTCCCTG   35801.5
+ATTTCTGTCTCTATGT   31758.3
+TATCTGTAGGTGATAT   31998.0
+AGCCAGCCAAAGCACG   29856.0
+...                    ...
+CATCCCAAGTACTCGT   151.000
+CTCCTCCCATGAAGCG   132.500
+AGTTCCCCATGTCAGT   172.667
+ACGTAGGGTGACAGCA   253.000
+TCTCAGCTCGCCGAAC   144.000</code></pre>
+</div>
+</div>
+</section>
+<section id="filtering-low-quality-cells-3" class="slide level2">
+<h2>Filtering low quality cells ⌨️</h2>
+<p>We can use the <code>plotColData()</code> function from scater to plot various metrics (as a ggplot2 object).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb93"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a></a><span class="fu">plotColData</span>(sce, <span class="at">y =</span> <span class="st">"sum"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-35-1.png" width="864" class="r-stretch"></section>
+<section id="filtering-low-quality-cells-4" class="slide level2">
+<h2>Filtering low quality cells ⌨️</h2>
+<p>We can use the <code>plotColData()</code> function from scater to plot various metrics (as a ggplot2 object).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb94"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a></a><span class="fu">plotColData</span>(sce, <span class="at">y =</span> <span class="st">"detected"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-36-1.png" width="864" class="r-stretch"></section>
+<section id="filtering-low-quality-cells-5" class="slide level2">
+<h2>Filtering low quality cells ⌨️</h2>
+<p>We can use the <code>plotColData()</code> function from scater to plot various metrics (as a ggplot2 object).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb95"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a></a><span class="fu">plotColData</span>(sce, <span class="at">y =</span> <span class="st">"detected"</span>, <span class="at">x =</span> <span class="st">"sum"</span>, <span class="at">colour_by =</span> <span class="st">"subsets_Mito_percent"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-37-1.png" width="864" class="r-stretch"></section>
+<section id="filtering-low-quality-cells-6" class="slide level2">
+<h2>Filtering low quality cells ⌨️</h2>
+<p>We can use the <code>plotColData()</code> function from scater to plot various metrics (as a ggplot2 object).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb96"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a></a><span class="fu">plotColData</span>(sce, <span class="at">y =</span> <span class="st">"subsets_Mito_percent"</span>, <span class="at">x =</span> <span class="st">"sum"</span>) <span class="sc">+</span></span>
+<span id="cb96-2"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"# of counts"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-38-1.png" width="864" class="r-stretch"></section>
+<section id="filtering-low-quality-cells-7" class="slide level2">
+<h2>Filtering low quality cells ⌨️</h2>
+<p>We can also extract <code>colData</code> as a dataframe to make custom <code>ggplot2</code> plots</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb97"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a></a>cell_info <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">colData</span>(sce))</span>
+<span id="cb97-2"><a></a><span class="fu">ggplot</span>(cell_info, <span class="fu">aes</span>(sum, subsets_Mito_percent)) <span class="sc">+</span></span>
+<span id="cb97-3"><a></a>  <span class="fu">geom_point</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-39-1.png" alt="Description of the plot - PLEASE FILL IN" width="864" class="r-stretch"></section>
+<section id="filtering-low-quality-cells-8" class="slide level2">
+<h2>Filtering low quality cells ⌨️</h2>
+<ul>
+<li>Selecting an appropriate cutoff can be somewhat arbitrary</li>
+<li>Risk of excluding meaningful cell populations.</li>
+<li>Start with lenient cutoffs, then later increasing the stringency after examining the clustering and cell types.</li>
+</ul>
+<p><em>How many cells pass these criteria?</em></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb98"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a></a>pass_qc <span class="ot">&lt;-</span> sce<span class="sc">$</span>subsets_Mito_percent <span class="sc">&lt;</span> <span class="dv">20</span> <span class="sc">&amp;</span></span>
+<span id="cb98-2"><a></a>  sce<span class="sc">$</span>detected <span class="sc">&gt;</span> <span class="dv">500</span> <span class="sc">&amp;</span></span>
+<span id="cb98-3"><a></a>  sce<span class="sc">$</span>sum <span class="sc">&gt;</span> <span class="dv">1000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><em>How many cells pass these criteria?</em></p>
+</section>
+<section id="filtering-low-quality-cells-9" class="slide level2">
+<h2>Filtering low quality cells ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb99"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a></a><span class="fu">sum</span>(pass_qc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4565</code></pre>
+</div>
+</div>
+</section>
+<section id="visualizing-qc-failed-cells" class="slide level2">
+<h2>Visualizing qc failed cells ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb101"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a></a>sce<span class="sc">$</span>pass_qc <span class="ot">&lt;-</span> sce<span class="sc">$</span>subsets_Mito_percent <span class="sc">&lt;</span> <span class="dv">20</span> <span class="sc">&amp;</span></span>
+<span id="cb101-2"><a></a>  sce<span class="sc">$</span>detected <span class="sc">&gt;</span> <span class="dv">500</span> <span class="sc">&amp;</span></span>
+<span id="cb101-3"><a></a>  sce<span class="sc">$</span>sum <span class="sc">&gt;</span> <span class="dv">1000</span></span>
+<span id="cb101-4"><a></a></span>
+<span id="cb101-5"><a></a><span class="fu">plotColData</span>(sce, <span class="at">y =</span> <span class="st">"subsets_Mito_percent"</span>, <span class="at">x =</span> <span class="st">"sum"</span>, <span class="at">colour_by =</span> <span class="st">"pass_qc"</span>) <span class="sc">+</span></span>
+<span id="cb101-6"><a></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"# of counts"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-42-1.png" width="864" class="r-stretch"></section>
+<section id="remove-low-quality-cells" class="slide level2">
+<h2>Remove low quality cells ⌨️</h2>
+<p>Lastly we can subset the <code>SingleCellExperiment</code> to exclude the low-quality cells.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb102"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a></a>sce <span class="ot">&lt;-</span> sce[, sce<span class="sc">$</span>pass_qc]</span>
+<span id="cb102-2"><a></a>sce</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class: SingleCellExperiment 
+dim: 20858 4565 
+metadata(0):
+assays(1): counts
+rownames(20858): DDX11L2_ENSG00000290825 WASH7P ...
+  MT-ND6 MT-CYB
+rowData names(6): total_gene_counts n_cells_expr ...
+  n_cells subsets_Mito
+colnames(4565): GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG ...
+  CTGGATCCACCGTACG TACAACGGTCTCGCGC
+colData names(9): cell_source total_counts ... total
+  pass_qc
+reducedDimNames(0):
+mainExpName: NULL
+altExpNames(0):</code></pre>
+</div>
+</div>
+</section>
+<section id="analysis-workflow" class="slide level2">
+<h2>Analysis workflow</h2>
+<div class="cell" data-reveal="true" data-layout-align="default">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb104"><pre class="sourceCode numberSource default number-lines code-with-copy"><code class="sourceCode default"><span id="cb104-1"><a></a>flowchart LR</span>
+<span id="cb104-2"><a></a>    %% Green nodes</span>
+<span id="cb104-3"><a></a>    load["Import data&lt;br/&gt;tximport::tximport()&lt;br/&gt;SingleCellExperiment()&lt;br/&gt;counts()"]</span>
+<span id="cb104-4"><a></a></span>
+<span id="cb104-5"><a></a>    %% Blue nodes</span>
+<span id="cb104-6"><a></a>    cell_qc["QC cells&lt;br/&gt;addPerCellQCMetrics()&lt;br/&gt;plotColData()"]</span>
+<span id="cb104-7"><a></a>    norm["Normalize UMI counts&lt;br/&gt;quickCluster()&lt;br/&gt;computeSumFactors()&lt;br/&gt;logNormCounts()"]</span>
+<span id="cb104-8"><a></a>    markers["Discover cell type markers&lt;br/&gt;scoreMarkers()"]</span>
+<span id="cb104-9"><a></a>    annot["Annotate cell types&lt;br/&gt;clustifyr and SingleR"]</span>
+<span id="cb104-10"><a></a></span>
+<span id="cb104-11"><a></a>    %% Yellow nodes</span>
+<span id="cb104-12"><a></a>    feature["Identify variable genes&lt;br/&gt;modelGeneVarByPoisson()&lt;br/&gt;getTopHVGs()"]</span>
+<span id="cb104-13"><a></a>    dim_red["Dimensionality reduction via PCA&lt;br/&gt;runPCA()"]</span>
+<span id="cb104-14"><a></a>    cluster["Clustering&lt;br/&gt;clusterCells()"]</span>
+<span id="cb104-15"><a></a>    viz["Make 2D-Visualization&lt;br/&gt;runUMAP()"]</span>
+<span id="cb104-16"><a></a></span>
+<span id="cb104-17"><a></a>    %% Main workflow connections</span>
+<span id="cb104-18"><a></a>    load --&gt; cell_qc</span>
+<span id="cb104-19"><a></a>    cell_qc --&gt; norm</span>
+<span id="cb104-20"><a></a>    norm --&gt; feature</span>
+<span id="cb104-21"><a></a>    norm --&gt; markers</span>
+<span id="cb104-22"><a></a>    feature --&gt; dim_red</span>
+<span id="cb104-23"><a></a>    dim_red --&gt; cluster</span>
+<span id="cb104-24"><a></a>    dim_red --&gt; viz</span>
+<span id="cb104-25"><a></a>    cluster --&gt; markers</span>
+<span id="cb104-26"><a></a>    markers --&gt; annot</span>
+<span id="cb104-27"><a></a></span>
+<span id="cb104-28"><a></a>    %% Feedback loops (dashed grey)</span>
+<span id="cb104-29"><a></a>    annot -.-&gt; cell_qc</span>
+<span id="cb104-30"><a></a>    annot -.-&gt; feature</span>
+<span id="cb104-31"><a></a>    annot -.-&gt; dim_red</span>
+<span id="cb104-32"><a></a>    annot -.-&gt; cluster</span>
+<span id="cb104-33"><a></a></span>
+<span id="cb104-34"><a></a>    %% Styling</span>
+<span id="cb104-35"><a></a>    classDef green fill:#009E73,stroke:#000,stroke-width:1px,color:#000</span>
+<span id="cb104-36"><a></a>    classDef blue fill:#56B4E9,stroke:#000,stroke-width:1px,color:#000</span>
+<span id="cb104-37"><a></a>    classDef yellow fill:#F0E442,stroke:#000,stroke-width:1px,color:#000</span>
+<span id="cb104-38"><a></a></span>
+<span id="cb104-39"><a></a>    class load green</span>
+<span id="cb104-40"><a></a>    class cell_qc,norm,markers,annot blue</span>
+<span id="cb104-41"><a></a>    class feature,dim_red,cluster,viz yellow</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+    %% Green nodes
+    load["Import data&lt;br/&gt;tximport::tximport()&lt;br/&gt;SingleCellExperiment()&lt;br/&gt;counts()"]
+
+    %% Blue nodes
+    cell_qc["QC cells&lt;br/&gt;addPerCellQCMetrics()&lt;br/&gt;plotColData()"]
+    norm["Normalize UMI counts&lt;br/&gt;quickCluster()&lt;br/&gt;computeSumFactors()&lt;br/&gt;logNormCounts()"]
+    markers["Discover cell type markers&lt;br/&gt;scoreMarkers()"]
+    annot["Annotate cell types&lt;br/&gt;clustifyr and SingleR"]
+
+    %% Yellow nodes
+    feature["Identify variable genes&lt;br/&gt;modelGeneVarByPoisson()&lt;br/&gt;getTopHVGs()"]
+    dim_red["Dimensionality reduction via PCA&lt;br/&gt;runPCA()"]
+    cluster["Clustering&lt;br/&gt;clusterCells()"]
+    viz["Make 2D-Visualization&lt;br/&gt;runUMAP()"]
+
+    %% Main workflow connections
+    load --&gt; cell_qc
+    cell_qc --&gt; norm
+    norm --&gt; feature
+    norm --&gt; markers
+    feature --&gt; dim_red
+    dim_red --&gt; cluster
+    dim_red --&gt; viz
+    cluster --&gt; markers
+    markers --&gt; annot
+
+    %% Feedback loops (dashed grey)
+    annot -.-&gt; cell_qc
+    annot -.-&gt; feature
+    annot -.-&gt; dim_red
+    annot -.-&gt; cluster
+
+    %% Styling
+    classDef green fill:#009E73,stroke:#000,stroke-width:1px,color:#000
+    classDef blue fill:#56B4E9,stroke:#000,stroke-width:1px,color:#000
+    classDef yellow fill:#F0E442,stroke:#000,stroke-width:1px,color:#000
+
+    class load green
+    class cell_qc,norm,markers,annot blue
+    class feature,dim_red,cluster,viz yellow
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="normalization" class="slide level2">
+<h2>Normalization ⌨️</h2>
+<ul>
+<li>Normalization attempts to correct for technical biases that will distort biological signal in the data.</li>
+<li>A large source of variation arises due to differences in sequencing depth between cells.</li>
+<li>This can be seen by performing PCA on the unnormalized counts.</li>
+<li>We will use <code>runPCA</code> from scater to perform PCA.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb105"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a></a><span class="co"># set seed for functions with a randomized component</span></span>
+<span id="cb105-2"><a></a><span class="co"># to obtain the same result each execution</span></span>
+<span id="cb105-3"><a></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb105-4"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runPCA</span>(sce, <span class="at">exprs_values =</span> <span class="st">"counts"</span>, <span class="at">name =</span> <span class="st">"count_PCA"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="normalization-1" class="slide level2 smaller">
+<h2>Normalization ⌨️</h2>
+<div class="columns">
+<div class="column" style="width:70%;">
+<ul>
+<li>We can now visualize this PCA</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb106"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a></a><span class="fu">plotReducedDim</span>(sce, <span class="st">"count_PCA"</span>, <span class="at">colour_by =</span> <span class="st">"sum"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-31_files/figure-revealjs/unnamed-chunk-46-1.png" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:3%;">
+
+</div><div class="column" style="width:27%;">
+<p>Note that PC1 is correlated with the total UMI counts (<code>sum</code>), meaning that the largest source of variation is related to differences in sequencing depth rather than biological differences between cells.</p>
+</div></div>
+</section>
+<section id="normalization-2" class="slide level2">
+<h2>Normalization ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb107"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb107-1"><a></a>plot_df <span class="ot">&lt;-</span> <span class="fu">makePerCellDF</span>(sce, <span class="fu">c</span>(<span class="st">"count_PCA"</span>, <span class="st">"sum"</span>))</span>
+<span id="cb107-2"><a></a></span>
+<span id="cb107-3"><a></a><span class="fu">ggplot</span>(plot_df, <span class="fu">aes</span>(count_PCA<span class="fl">.1</span>, sum)) <span class="sc">+</span></span>
+<span id="cb107-4"><a></a>  <span class="fu">geom_point</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-47-1.png" alt="Description of the plot - PLEASE FILL IN" width="960" class="r-stretch"></section>
+<section id="normalization-3" class="slide level2">
+<h2>Normalization ⌨️</h2>
+<ul>
+<li>Normalize with <code>scran</code></li>
+</ul>
+<ol type="1">
+<li>Crude clustering to group related cells</li>
+<li>Identifying a cell-specific normalization factor (size factor)</li>
+<li>Scaling the counts by this factor</li>
+<li>log transforming the data (base 2 with a pseudocount).</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb108"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb108-2"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">quickCluster</span>(sce)</span>
+<span id="cb108-3"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">computeSumFactors</span>(sce, <span class="at">clusters =</span> clusters)</span>
+<span id="cb108-4"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">logNormCounts</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="footer">
+<p>Description of algorithim: Lun AT, Bach K, Marioni JC. Pooling across cells to normalize single-cell RNA sequencing data with many zero counts. Genome Biol. 2016 Apr 27;17:75. doi: 10.1186/s13059-016-0947-7. PMID: 27122128; PMCID: PMC4848819.</p>
+</div>
+</section>
+<section id="normalization-4" class="slide level2">
+<h2>Normalization ⌨️</h2>
+<p>Plot the PCA with normalization</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb109"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb109-1"><a></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb109-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runPCA</span>(sce, <span class="at">exprs_values =</span> <span class="st">"logcounts"</span>, <span class="at">name =</span> <span class="st">"PCA"</span>)</span>
+<span id="cb109-3"><a></a><span class="fu">plotReducedDim</span>(sce, <span class="st">"PCA"</span>, <span class="at">colour_by =</span> <span class="st">"sum"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-49-1.png" width="960" class="r-stretch"></section>
+<section id="normalization-5" class="slide level2">
+<h2>Normalization ⌨️</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb110"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb110-1"><a></a>plot_df <span class="ot">&lt;-</span> <span class="fu">makePerCellDF</span>(sce, <span class="fu">c</span>(<span class="st">"PCA"</span>, <span class="st">"sum"</span>))</span>
+<span id="cb110-2"><a></a><span class="fu">ggplot</span>(plot_df, <span class="fu">aes</span>(PCA<span class="fl">.1</span>, sum)) <span class="sc">+</span></span>
+<span id="cb110-3"><a></a>  <span class="fu">geom_point</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+
+</div>
+<img data-src="slides-31_files/figure-revealjs/unnamed-chunk-50-1.png" alt="Description of the plot - PLEASE FILL IN" width="960" class="r-stretch"><p>PC1 no longer correlates with UMI counts.</p>
+</section>
+<section id="further-reading" class="slide level2">
+<h2>Further Reading</h2>
+<p>eBook: Orchestrating single cell analyses with Bioconductor <a href="https://osca.bioconductor.org/">eBook</a> <a href="https://doi.org/10.1038/s41592-019-0654-x">Publication</a></p>
+<p>Review: <a href="https://www.embopress.org/doi/full/10.15252/msb.20188746">Current best practices for analysis</a></p>
+<p>Blog: <a href="https://ltla.github.io/SingleCellThoughts/">Single Cell Thoughts</a></p>
+<p>Blog: <a href="http://www.nxn.se/">What do you mean “heterogeneity”</a></p>
+
 
 </section>
-<section id="why-use-compute-clusters" class="slide level2 smaller">
-<h2>Why Use Compute Clusters?</h2>
-<p><strong>Your laptop is great, but…</strong></p>
-<ul>
-<li>Limited CPU cores (4-16 typically)</li>
-<li>Limited RAM (8-64 GB typically)</li>
-<li>Takes days/weeks for large analyses</li>
-<li>Can’t use laptop for anything else</li>
-</ul>
-<p><strong>HPC Clusters provide:</strong></p>
-<ul>
-<li>Hundreds of CPU cores</li>
-<li>Terabytes of RAM</li>
-<li>Parallel processing</li>
-<li>Dedicated resources for your job</li>
-</ul>
-</section>
-<section id="cu-boulder-alpine-cluster" class="slide level2 smaller">
-<h2>CU Boulder Alpine Cluster</h2>
-<p><strong>Access:</strong> Available to CU Boulder researchers</p>
-<p><strong>Resources:</strong></p>
-<ul>
-<li>380+ compute nodes</li>
-<li>10,000+ CPU cores</li>
-<li>40+ TB total RAM</li>
-<li>GPU nodes for deep learning</li>
-</ul>
-<p><strong>Getting Started:</strong></p>
-<ol type="1">
-<li><a href="https://www.colorado.edu/rc/getting-started">Request access</a></li>
-<li>Complete training requirements</li>
-<li>Connect via SSH</li>
-</ol>
-<p><strong>Documentation:</strong> <a href="https://curc.readthedocs.io/">https://curc.readthedocs.io/</a></p>
-</section>
-<section id="slurm-job-scheduler" class="slide level2 smaller">
-<h2>Slurm: Job Scheduler</h2>
-<p><strong>What is Slurm?</strong></p>
-<ul>
-<li>Manages compute resources on clusters</li>
-<li>Queues your jobs</li>
-<li>Allocates CPUs, memory, time</li>
-<li>Runs jobs when resources available</li>
-</ul>
-<p><strong>Why not just run directly?</strong></p>
-<ul>
-<li>Prevents resource conflicts</li>
-<li>Fair sharing among users</li>
-<li>Optimizes cluster efficiency</li>
-<li>Tracks usage and billing</li>
-</ul>
-</section>
-<section id="basic-slurm-commands" class="slide level2 smaller">
-<h2>Basic Slurm Commands</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="co"># Submit a job</span></span>
-<span id="cb3-2"><a></a><span class="ex">sbatch</span> my_job.sh</span>
-<span id="cb3-3"><a></a></span>
-<span id="cb3-4"><a></a><span class="co"># Check job status</span></span>
-<span id="cb3-5"><a></a><span class="ex">squeue</span> <span class="at">-u</span> <span class="va">$USER</span></span>
-<span id="cb3-6"><a></a></span>
-<span id="cb3-7"><a></a><span class="co"># Cancel a job</span></span>
-<span id="cb3-8"><a></a><span class="ex">scancel</span> <span class="op">&lt;</span>job_id<span class="op">&gt;</span></span>
-<span id="cb3-9"><a></a></span>
-<span id="cb3-10"><a></a><span class="co"># View job details</span></span>
-<span id="cb3-11"><a></a><span class="ex">scontrol</span> show job <span class="op">&lt;</span>job_id<span class="op">&gt;</span></span>
-<span id="cb3-12"><a></a></span>
-<span id="cb3-13"><a></a><span class="co"># Check completed jobs</span></span>
-<span id="cb3-14"><a></a><span class="ex">sacct</span> <span class="at">-u</span> <span class="va">$USER</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="slurm-job-script-example" class="slide level2 smaller">
-<h2>Slurm Job Script Example</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="co">#!/bin/bash</span></span>
-<span id="cb4-2"><a></a><span class="co">#SBATCH --job-name=rnaseq_align</span></span>
-<span id="cb4-3"><a></a><span class="co">#SBATCH --nodes=1</span></span>
-<span id="cb4-4"><a></a><span class="co">#SBATCH --ntasks=8           # 8 CPU cores</span></span>
-<span id="cb4-5"><a></a><span class="co">#SBATCH --mem=32G            # 32 GB RAM</span></span>
-<span id="cb4-6"><a></a><span class="co">#SBATCH --time=04:00:00      # 4 hours max</span></span>
-<span id="cb4-7"><a></a><span class="co">#SBATCH --output=align_%j.out</span></span>
-<span id="cb4-8"><a></a><span class="co">#SBATCH --error=align_%j.err</span></span>
-<span id="cb4-9"><a></a></span>
-<span id="cb4-10"><a></a><span class="co"># Load required modules</span></span>
-<span id="cb4-11"><a></a><span class="ex">module</span> load star/2.7.10</span>
-<span id="cb4-12"><a></a></span>
-<span id="cb4-13"><a></a><span class="co"># Run analysis</span></span>
-<span id="cb4-14"><a></a><span class="ex">STAR</span> <span class="at">--genomeDir</span> /path/to/genome <span class="dt">\</span></span>
-<span id="cb4-15"><a></a>     <span class="at">--readFilesIn</span> sample.fastq.gz <span class="dt">\</span></span>
-<span id="cb4-16"><a></a>     <span class="at">--runThreadN</span> 8 <span class="dt">\</span></span>
-<span id="cb4-17"><a></a>     <span class="at">--outFileNamePrefix</span> output_</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="alpine-specific-resources" class="slide level2 smaller">
-<h2>Alpine-Specific Resources</h2>
-<p><strong>Documentation:</strong></p>
-<ul>
-<li><a href="https://curc.readthedocs.io/en/latest/clusters/alpine/quick-start.html">Alpine Quick Start</a></li>
-<li><a href="https://curc.readthedocs.io/en/latest/running-jobs/batch-jobs.html">Running Jobs</a></li>
-<li><a href="https://curc.readthedocs.io/en/latest/compute/modules.html">Software Modules</a></li>
-</ul>
-<p><strong>Getting Help:</strong></p>
-<ul>
-<li>Email: rc-help@colorado.edu</li>
-<li>Office Hours: Check RC website</li>
-<li>Slack: CU Research Computing workspace</li>
-</ul>
-<p><strong>Best Practices:</strong></p>
-<ul>
-<li>Test with small jobs first</li>
-<li>Request appropriate resources (don’t waste)</li>
-<li>Use <code>/scratch</code> for temporary files</li>
-</ul>
-</section>
-<section class="slide level2">
-
-</section></section>
-<section>
-<section id="part-5-shiny-dashboards" class="title-slide slide level1 center" data-background-color="#43464B">
-<h1>Part 5: Shiny Dashboards</h1>
-
-</section>
-<section id="why-build-shiny-dashboards" class="slide level2 smaller">
-<h2>Why Build Shiny Dashboards?</h2>
-<p><strong>Make Your Data Interactive:</strong></p>
-<ul>
-<li>Explore data without writing code</li>
-<li>Share results with non-programmers</li>
-<li>Quick prototyping and visualization</li>
-<li>Engage stakeholders and collaborators</li>
-</ul>
-<p><strong>Use Cases:</strong></p>
-<ul>
-<li>Quality control reports</li>
-<li>Exploratory data analysis</li>
-<li>Result dissemination</li>
-<li>Teaching and demonstrations</li>
-<li>Interactive figures for publications</li>
-</ul>
-</section>
-<section id="shiny-basics" class="slide level2 smaller">
-<h2>Shiny Basics</h2>
-<p><strong>What is Shiny?</strong></p>
-<ul>
-<li>R package for building interactive web applications</li>
-<li>No web development experience needed</li>
-<li>Works with R (shiny) and Python (shiny for python)</li>
-</ul>
-<p><strong>Two Main Components:</strong></p>
-<ol type="1">
-<li><strong>UI (User Interface):</strong> What users see and interact with</li>
-<li><strong>Server:</strong> The logic that processes inputs and generates outputs</li>
-</ol>
-<p><strong>Reactivity:</strong> Outputs automatically update when inputs change</p>
-</section>
-<section id="shiny-with-penguins-dataset" class="slide level2 smaller">
-<h2>Shiny with Penguins Dataset</h2>
-<p><strong>Palmer Penguins:</strong> Perfect dataset for learning Shiny</p>
-<ul>
-<li>344 penguins, 3 species</li>
-<li>Measurements: bill length/depth, flipper length, body mass</li>
-<li>Categorical: species, island, sex</li>
-</ul>
-<p><strong>We’ll Build:</strong></p>
-<ul>
-<li>Interactive scatter plots</li>
-<li>Species filtering</li>
-<li>Summary statistics</li>
-<li>Downloadable plots</li>
-</ul>
-</section>
-<section id="basic-shiny-app-structure" class="slide level2 smaller">
-<h2>Basic Shiny App Structure</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a></a><span class="fu">library</span>(shiny)</span>
-<span id="cb5-2"><a></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb5-3"><a></a><span class="fu">library</span>(palmerpenguins)</span>
-<span id="cb5-4"><a></a></span>
-<span id="cb5-5"><a></a>ui <span class="ot">&lt;-</span> <span class="fu">fluidPage</span>(</span>
-<span id="cb5-6"><a></a>  <span class="fu">titlePanel</span>(<span class="st">"Palmer Penguins Explorer"</span>),</span>
-<span id="cb5-7"><a></a></span>
-<span id="cb5-8"><a></a>  <span class="fu">sidebarLayout</span>(</span>
-<span id="cb5-9"><a></a>    <span class="fu">sidebarPanel</span>(</span>
-<span id="cb5-10"><a></a>      <span class="co"># Inputs go here</span></span>
-<span id="cb5-11"><a></a>    ),</span>
-<span id="cb5-12"><a></a>    <span class="fu">mainPanel</span>(</span>
-<span id="cb5-13"><a></a>      <span class="co"># Outputs go here</span></span>
-<span id="cb5-14"><a></a>    )</span>
-<span id="cb5-15"><a></a>  )</span>
-<span id="cb5-16"><a></a>)</span>
-<span id="cb5-17"><a></a></span>
-<span id="cb5-18"><a></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output, session) {</span>
-<span id="cb5-19"><a></a>  <span class="co"># Reactive logic goes here</span></span>
-<span id="cb5-20"><a></a>}</span>
-<span id="cb5-21"><a></a></span>
-<span id="cb5-22"><a></a><span class="fu">shinyApp</span>(<span class="at">ui =</span> ui, <span class="at">server =</span> server)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="penguins-dashboard-ui" class="slide level2 smaller">
-<h2>Penguins Dashboard: UI</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>ui <span class="ot">&lt;-</span> <span class="fu">fluidPage</span>(</span>
-<span id="cb6-2"><a></a>  <span class="fu">titlePanel</span>(<span class="st">"Palmer Penguins Explorer"</span>),</span>
-<span id="cb6-3"><a></a></span>
-<span id="cb6-4"><a></a>  <span class="fu">sidebarLayout</span>(</span>
-<span id="cb6-5"><a></a>    <span class="fu">sidebarPanel</span>(</span>
-<span id="cb6-6"><a></a>      <span class="fu">selectInput</span>(<span class="st">"x_var"</span>, <span class="st">"X-axis variable:"</span>,</span>
-<span id="cb6-7"><a></a>                  <span class="at">choices =</span> <span class="fu">c</span>(<span class="st">"bill_length_mm"</span>, <span class="st">"bill_depth_mm"</span>,</span>
-<span id="cb6-8"><a></a>                             <span class="st">"flipper_length_mm"</span>, <span class="st">"body_mass_g"</span>)),</span>
-<span id="cb6-9"><a></a></span>
-<span id="cb6-10"><a></a>      <span class="fu">selectInput</span>(<span class="st">"y_var"</span>, <span class="st">"Y-axis variable:"</span>,</span>
-<span id="cb6-11"><a></a>                  <span class="at">choices =</span> <span class="fu">c</span>(<span class="st">"bill_length_mm"</span>, <span class="st">"bill_depth_mm"</span>,</span>
-<span id="cb6-12"><a></a>                             <span class="st">"flipper_length_mm"</span>, <span class="st">"body_mass_g"</span>),</span>
-<span id="cb6-13"><a></a>                  <span class="at">selected =</span> <span class="st">"bill_depth_mm"</span>),</span>
-<span id="cb6-14"><a></a></span>
-<span id="cb6-15"><a></a>      <span class="fu">checkboxGroupInput</span>(<span class="st">"species"</span>, <span class="st">"Select species:"</span>,</span>
-<span id="cb6-16"><a></a>                        <span class="at">choices =</span> <span class="fu">c</span>(<span class="st">"Adelie"</span>, <span class="st">"Chinstrap"</span>, <span class="st">"Gentoo"</span>),</span>
-<span id="cb6-17"><a></a>                        <span class="at">selected =</span> <span class="fu">c</span>(<span class="st">"Adelie"</span>, <span class="st">"Chinstrap"</span>, <span class="st">"Gentoo"</span>))</span>
-<span id="cb6-18"><a></a>    ),</span>
-<span id="cb6-19"><a></a></span>
-<span id="cb6-20"><a></a>    <span class="fu">mainPanel</span>(</span>
-<span id="cb6-21"><a></a>      <span class="fu">plotOutput</span>(<span class="st">"scatter_plot"</span>),</span>
-<span id="cb6-22"><a></a>      <span class="fu">tableOutput</span>(<span class="st">"summary_table"</span>)</span>
-<span id="cb6-23"><a></a>    )</span>
-<span id="cb6-24"><a></a>  )</span>
-<span id="cb6-25"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="penguins-dashboard-server" class="slide level2 smaller">
-<h2>Penguins Dashboard: Server</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output, session) {</span>
-<span id="cb7-2"><a></a></span>
-<span id="cb7-3"><a></a>  <span class="co"># Reactive filtered data</span></span>
-<span id="cb7-4"><a></a>  filtered_data <span class="ot">&lt;-</span> <span class="fu">reactive</span>({</span>
-<span id="cb7-5"><a></a>    penguins <span class="sc">|&gt;</span></span>
-<span id="cb7-6"><a></a>      <span class="fu">filter</span>(species <span class="sc">%in%</span> input<span class="sc">$</span>species) <span class="sc">|&gt;</span></span>
-<span id="cb7-7"><a></a>      <span class="fu">drop_na</span>()</span>
-<span id="cb7-8"><a></a>  })</span>
-<span id="cb7-9"><a></a></span>
-<span id="cb7-10"><a></a>  <span class="co"># Scatter plot</span></span>
-<span id="cb7-11"><a></a>  output<span class="sc">$</span>scatter_plot <span class="ot">&lt;-</span> <span class="fu">renderPlot</span>({</span>
-<span id="cb7-12"><a></a>    <span class="fu">ggplot</span>(<span class="fu">filtered_data</span>(),</span>
-<span id="cb7-13"><a></a>           <span class="fu">aes</span>(<span class="at">x =</span> .data[[input<span class="sc">$</span>x_var]],</span>
-<span id="cb7-14"><a></a>               <span class="at">y =</span> .data[[input<span class="sc">$</span>y_var]],</span>
-<span id="cb7-15"><a></a>               <span class="at">color =</span> species)) <span class="sc">+</span></span>
-<span id="cb7-16"><a></a>      <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb7-17"><a></a>      <span class="fu">labs</span>(<span class="at">x =</span> input<span class="sc">$</span>x_var, <span class="at">y =</span> input<span class="sc">$</span>y_var) <span class="sc">+</span></span>
-<span id="cb7-18"><a></a>      <span class="fu">theme_minimal</span>()</span>
-<span id="cb7-19"><a></a>  })</span>
-<span id="cb7-20"><a></a></span>
-<span id="cb7-21"><a></a>  <span class="co"># Summary table</span></span>
-<span id="cb7-22"><a></a>  output<span class="sc">$</span>summary_table <span class="ot">&lt;-</span> <span class="fu">renderTable</span>({</span>
-<span id="cb7-23"><a></a>    <span class="fu">filtered_data</span>() <span class="sc">|&gt;</span></span>
-<span id="cb7-24"><a></a>      <span class="fu">group_by</span>(species) <span class="sc">|&gt;</span></span>
-<span id="cb7-25"><a></a>      <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb7-26"><a></a>  })</span>
-<span id="cb7-27"><a></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="enhanced-features" class="slide level2 smaller">
-<h2>Enhanced Features</h2>
-<p><strong>Add More Interactivity:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="co"># In UI sidebarPanel:</span></span>
-<span id="cb8-2"><a></a><span class="fu">sliderInput</span>(<span class="st">"point_size"</span>, <span class="st">"Point size:"</span>,</span>
-<span id="cb8-3"><a></a>            <span class="at">min =</span> <span class="dv">1</span>, <span class="at">max =</span> <span class="dv">5</span>, <span class="at">value =</span> <span class="dv">3</span>),</span>
-<span id="cb8-4"><a></a></span>
-<span id="cb8-5"><a></a><span class="fu">checkboxInput</span>(<span class="st">"show_smooth"</span>, <span class="st">"Show trend line"</span>, <span class="cn">FALSE</span>),</span>
-<span id="cb8-6"><a></a></span>
-<span id="cb8-7"><a></a><span class="fu">downloadButton</span>(<span class="st">"download_plot"</span>, <span class="st">"Download Plot"</span>)</span>
-<span id="cb8-8"><a></a></span>
-<span id="cb8-9"><a></a><span class="co"># In server:</span></span>
-<span id="cb8-10"><a></a>output<span class="sc">$</span>download_plot <span class="ot">&lt;-</span> <span class="fu">downloadHandler</span>(</span>
-<span id="cb8-11"><a></a>  <span class="at">filename =</span> <span class="cf">function</span>() {</span>
-<span id="cb8-12"><a></a>    <span class="fu">paste0</span>(<span class="st">"penguins_plot_"</span>, <span class="fu">Sys.Date</span>(), <span class="st">".png"</span>)</span>
-<span id="cb8-13"><a></a>  },</span>
-<span id="cb8-14"><a></a>  <span class="at">content =</span> <span class="cf">function</span>(file) {</span>
-<span id="cb8-15"><a></a>    <span class="fu">ggsave</span>(file, <span class="at">plot =</span> <span class="fu">current_plot</span>(),</span>
-<span id="cb8-16"><a></a>           <span class="at">width =</span> <span class="dv">8</span>, <span class="at">height =</span> <span class="dv">6</span>)</span>
-<span id="cb8-17"><a></a>  }</span>
-<span id="cb8-18"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="testing-your-shiny-app" class="slide level2 smaller">
-<h2>Testing Your Shiny App</h2>
-<p><strong>Development Workflow:</strong></p>
-<ol type="1">
-<li><strong>Run locally:</strong> Click “Run App” in RStudio/Positron</li>
-<li><strong>Test interactivity:</strong> Try all inputs and edge cases</li>
-<li><strong>Check performance:</strong> Does it respond quickly?</li>
-<li><strong>Iterate:</strong> Refine based on user feedback</li>
-</ol>
-<p><strong>Debugging Tips:</strong></p>
-<ul>
-<li>Use <code>print()</code> or <code>browser()</code> in server function</li>
-<li>Check R console for error messages</li>
-<li>Use reactive log: <code>options(shiny.reactlog = TRUE)</code></li>
-</ul>
-</section>
-<section id="deploying-shiny-apps" class="slide level2 smaller">
-<h2>Deploying Shiny Apps</h2>
-<p><strong>Options:</strong></p>
-<ol type="1">
-<li><strong>shinyapps.io:</strong> Free tier available, easy deployment</li>
-<li><strong>Posit Connect:</strong> For organizations (CU may have this)</li>
-<li><strong>Shiny Server:</strong> Self-hosted option</li>
-<li><strong>Docker containers:</strong> For reproducible deployment</li>
-</ol>
-<p><strong>Quick Deploy to shinyapps.io:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a><span class="fu">library</span>(rsconnect)</span>
-<span id="cb9-2"><a></a></span>
-<span id="cb9-3"><a></a><span class="co"># First time setup</span></span>
-<span id="cb9-4"><a></a>rsconnect<span class="sc">::</span><span class="fu">setAccountInfo</span>(<span class="at">name =</span> <span class="st">'your_account'</span>,</span>
-<span id="cb9-5"><a></a>                          <span class="at">token =</span> <span class="st">'your_token'</span>,</span>
-<span id="cb9-6"><a></a>                          <span class="at">secret =</span> <span class="st">'your_secret'</span>)</span>
-<span id="cb9-7"><a></a></span>
-<span id="cb9-8"><a></a><span class="co"># Deploy</span></span>
-<span id="cb9-9"><a></a>rsconnect<span class="sc">::</span><span class="fu">deployApp</span>(<span class="at">appDir =</span> <span class="st">"path/to/app"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="shiny-learning-resources" class="slide level2 smaller">
-<h2>Shiny Learning Resources</h2>
-<p><strong>Getting Started:</strong></p>
-<ul>
-<li><a href="https://mastering-shiny.org/">Mastering Shiny</a> - Free online book by Hadley Wickham</li>
-<li><a href="https://shiny.posit.co/">Shiny Posit</a> - Official documentation and gallery</li>
-<li><a href="https://shiny.posit.co/blog/posts/shiny-contest-2024/">Shiny Contest Gallery</a> - Inspiration from community</li>
-</ul>
-<p><strong>For Bioinformatics:</strong></p>
-<ul>
-<li><a href="https://www.genomenexus.org/">Genome Nexus</a> - Example genomics dashboard</li>
-<li>Many Bioconductor packages have built-in Shiny apps</li>
-</ul>
-<p><strong>Practice:</strong> Start simple, add features incrementally</p>
-</section>
-<section id="using-positron-assistant-.smaller-for-shiny" class="slide level2 smaller">
-<h2>Using Positron Assistant {.smaller} for Shiny</h2>
-<p><strong>I can help you:</strong></p>
-<ul>
-<li>Generate app templates</li>
-<li>Add new UI components</li>
-<li>Write reactive logic</li>
-<li>Debug reactivity issues</li>
-<li>Suggest layout improvements</li>
-<li>Optimize performance</li>
-</ul>
-<p><strong>Example prompts:</strong></p>
-<blockquote>
-<p>“Create a Shiny app to visualize my RNA-seq results with a volcano plot”</p>
-</blockquote>
-<blockquote>
-<p>“Add a download button for the filtered data table”</p>
-</blockquote>
-<blockquote>
-<p>“Why isn’t my plot updating when I change the input?”</p>
-</blockquote>
-<p><strong>Note:</strong> For running apps, use the Shiny Assistant (<code>@shiny</code>)</p>
-</section>
-<section class="slide level2">
-
-</section></section>
-<section>
-<section id="part-4-starting-an-analysis" class="title-slide slide level1 center" data-background-color="#43464B">
-<h1>Part 4: Starting an Analysis</h1>
-
-</section>
-<section id="analysis-workflow-structure" class="slide level2 smaller">
-<h2>Analysis Workflow Structure</h2>
-<p><strong>Recommended Project Organization:</strong></p>
-<pre><code>my_project/
-├── README.md                 # Project overview
-├── data/
-│   ├── raw/                 # Original, untouched data
-│   └── processed/           # Cleaned, filtered data
-├── scripts/
-│   ├── 01_download_data.sh
-│   ├── 02_quality_control.R
-│   └── 03_analysis.R
-├── results/
-│   ├── figures/
-│   └── tables/
-├── docs/                     # Documentation, notes
-└── environment/             # pixi/Conda files</code></pre>
-</section>
-<section id="starting-with-raw-data-checklist" class="slide level2 smaller">
-<h2>Starting with Raw Data: Checklist</h2>
-<p><strong>Before You Begin:</strong></p>
-<ol type="1">
-<li>✅ Understand your data type and format</li>
-<li>✅ Set up project directory structure</li>
-<li>✅ Initialize Git repository</li>
-<li>✅ Create README with project description</li>
-<li>✅ Document data sources and accession numbers</li>
-<li>✅ Set up computational environment (pixi, conda)</li>
-</ol>
-<p><strong>First Analysis Steps:</strong></p>
-<ol type="1">
-<li>Download/access raw data</li>
-<li>Quality control and assessment</li>
-<li>Document decisions and parameters</li>
-<li>Commit code regularly</li>
-</ol>
-</section>
-<section id="using-positron-assistant" class="slide level2">
-<h2>Using Positron Assistant</h2>
-<p><strong>What is Positron?</strong></p>
-<ul>
-<li>Next-generation IDE for data science</li>
-<li>Built for R and Python</li>
-<li>Integrated AI assistant (that’s me!)</li>
-</ul>
-<p><strong>How I Can Help You Start:</strong></p>
-<ol type="1">
-<li><strong>Project setup:</strong> Create directory structure</li>
-<li><strong>Code scaffolding:</strong> Generate template scripts</li>
-<li><strong>Quality control:</strong> Write QC code for your data type</li>
-<li><strong>Troubleshooting:</strong> Debug errors and issues</li>
-<li><strong>Best practices:</strong> Suggest improvements</li>
-</ol>
-</section>
-<section id="example-starting-rna-seq-analysis" class="slide level2 smaller">
-<h2>Example: Starting RNA-seq Analysis</h2>
-<p><strong>Ask Positron Assistant:</strong></p>
-<blockquote>
-<p>“I have raw RNA-seq FASTQ files. Help me set up a project and write a quality control script using FastQC”</p>
-</blockquote>
-<p><strong>I can help with:</strong></p>
-<ul>
-<li>Creating organized project structure</li>
-<li>Writing Slurm submission scripts</li>
-<li>Generating QC and alignment code</li>
-<li>Setting up conda environments</li>
-<li>Creating README templates</li>
-<li>Explaining parameters and options</li>
-</ul>
-<p><strong>Remember:</strong> I can see your files, variables, and session info - share context!</p>
-</section>
-<section id="working-with-positron-assistant" class="slide level2 smaller">
-<h2>Working with Positron Assistant</h2>
-<p><strong>Tips for Better Assistance:</strong></p>
-<ol type="1">
-<li><strong>Be specific:</strong> “Write a script to align FASTQ files using STAR” vs.&nbsp;“help with alignment”</li>
-<li><strong>Provide context:</strong> Share error messages, file formats, data types</li>
-<li><strong>Iterate:</strong> Start simple, then refine</li>
-<li><strong>Ask for explanations:</strong> “Why did you use this parameter?”</li>
-<li><strong>Request documentation:</strong> “Add comments explaining this code”</li>
-</ol>
-<p><strong>I can help with:</strong></p>
-<ul>
-<li>R (tidyverse, Bioconductor)</li>
-<li>Python (polars, numpy, pandas)</li>
-<li>Bash scripting</li>
-<li>Git commands</li>
-<li>Documentation</li>
-</ul>
-</section>
-<section id="example-interaction" class="slide level2 smaller">
-<h2>Example Interaction</h2>
-<p><strong>You:</strong> “I need to set up a new RNA-seq project with data from GEO accession GSE123456”</p>
-<p><strong>I provide:</strong></p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="co"># Project structure</span></span>
-<span id="cb11-2"><a></a><span class="fu">mkdir</span> <span class="at">-p</span> rnaseq_project/<span class="dt">{data/raw</span><span class="op">,</span><span class="dt">scripts</span><span class="op">,</span><span class="dt">results</span><span class="op">,</span><span class="dt">docs}</span></span>
-<span id="cb11-3"><a></a><span class="bu">cd</span> rnaseq_project</span>
-<span id="cb11-4"><a></a><span class="fu">git</span> init</span>
-<span id="cb11-5"><a></a></span>
-<span id="cb11-6"><a></a><span class="co"># Download script</span></span>
-<span id="cb11-7"><a></a><span class="co"># scripts/01_download_geo.sh with SRA toolkit commands</span></span>
-<span id="cb11-8"><a></a></span>
-<span id="cb11-9"><a></a><span class="co"># README template with project details</span></span>
-<span id="cb11-10"><a></a></span>
-<span id="cb11-11"><a></a><span class="co"># Next steps and QC recommendations</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>You can then ask:</strong> “Now write a FastQC script for these files”</p>
-</section>
-<section id="putting-it-all-together" class="slide level2 smaller">
-<h2>Putting It All Together</h2>
-<p><strong>Complete Workflow:</strong></p>
-<ol type="1">
-<li><strong>Set up project</strong> → Use Positron Assistant</li>
-<li><strong>Initialize Git</strong> → Track changes from day 1</li>
-<li><strong>Download data</strong> → Document source (GEO accession)</li>
-<li><strong>Write analysis scripts</strong> → Get help from Assistant</li>
-<li><strong>Run on HPC</strong> → Use Slurm on Alpine</li>
-<li><strong>Analyze and visualize</strong> → Iterate with version control</li>
-<li><strong>Upload results</strong> → Share data (Zenodo) and code (GitHub)</li>
-</ol>
-<p><strong>Every step is reproducible and documented!</strong></p>
-</section>
-<section id="resources-summary" class="slide level2 smaller">
-<h2>Resources Summary</h2>
-<p><strong>Data Repositories:</strong></p>
-<ul>
-<li>NCBI GEO: https://www.ncbi.nlm.nih.gov/geo/</li>
-<li>Zenodo: https://zenodo.org/</li>
-</ul>
-<p><strong>Git &amp; GitHub:</strong></p>
-<ul>
-<li>Happy Git with R: https://happygitwithr.com/</li>
-<li>GitHub Skills: https://skills.github.com/</li>
-</ul>
-<p><strong>CU Alpine:</strong></p>
-<ul>
-<li>Documentation: https://curc.readthedocs.io/</li>
-<li>Support: rc-help@colorado.edu</li>
-</ul>
-<p><strong>Positron:</strong></p>
-<ul>
-<li>User Guide: https://positron.posit.co/</li>
-</ul>
-</section>
-<section id="questions" class="slide level2 smaller">
-<h2>Questions?</h2>
-<p><strong>Key Takeaways:</strong></p>
-<ol type="1">
-<li>Share your data in appropriate repositories</li>
-<li>Use Git from the start - your future self will thank you</li>
-<li>Leverage HPC for large-scale analyses</li>
-<li>Start organized - structure matters</li>
-<li>Use Positron Assistant as your coding partner</li>
-<li>Build Shiny apps to share your results interactively</li>
-</ol>
-<p><strong>Next Steps:</strong></p>
-<ul>
-<li>Practice Git basics with a small project</li>
-<li>Request Alpine access if you haven’t</li>
-<li>Try setting up your next analysis with Positron Assistant</li>
-</ul>
-
-
-</section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
@@ -1218,6 +1995,44 @@ analysis_final_v2_actually_final_USE_THIS.R</code></pre>
         ]
       });
     </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
