@@ -1,9 +1,11 @@
 # Install R packages not available on conda-forge/bioconda.
 # Run with: pixi run install-pak-deps
 
-options(repos = c(
-  CRAN = "https://cran.rstudio.com"
-))
+options(
+  repos = c(
+    CRAN = "https://cran.rstudio.com"
+  )
+)
 
 if (!requireNamespace("BiocManager", quietly = TRUE)) {
   install.packages("BiocManager")
@@ -44,5 +46,8 @@ install_if_missing(c(
   "org.Hs.eg.db",
   "BSgenome.Hsapiens.UCSC.hg19",
   "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene",
-  "BSgenome.Scerevisiae.UCSC.sacCer3"
+  "BSgenome.Scerevisiae.UCSC.sacCer3",
+  "clustifyrdatahub",
+  "rGADEM",
+  "seqLogo"
 ))
