@@ -1,7 +1,10 @@
 ---
 title: "R Bootcamp Problem Set 4"
 author: "Your name here"
-date: last-modified 
+date: last-modified
+format:
+  html:
+    embed-resources: true
 ---
 
 ## Problem Set
@@ -21,50 +24,96 @@ allowed to post correct answers in slack.
 
 ## Question 1 **5 points**
 
-1. Load the tidyverse and here packages.  
-2. Import datasets: `data/data_rna_protein.csv.gz`.
+1. Load the tidyverse and here packages using `library()`.
+2. Import datasets: `data/data_rna_protein.csv.gz` using `read_csv()` and `here()`.
 
 `data_rna_protein.csv.gz`: This is a combined dataset from an RNAseq and SILAC
 proteomics experiment, where a transcription factor (TF) was differentially
 expressed and the fold change in RNA and protein calculated between
 TF-expressing and non-expressing cells.
-   
+
 ```{r}
 #| label: q1
+#| echo: true
 library(tidyverse)
 library(here)
 
 exp_tbl <- read_csv(
-  here("problem-sets/data/data_rna_protein.csv.gz")
+  here("data/bootcamp/data_rna_protein.csv.gz")
 )
 ```
 
 ## Question 2 **5 points**
 
-Using the imported data set, carry out the following:  
+Let's build a data processing workflow step by step. This teaches you how to build complex pipelines gradually - a key skill in data analysis.
 
-1. Inspect the data so you know what you are dealing with (`summary()` etc). 
-
-2. Select only the following columns: `geneid`, `iDUX4_logFC`, `iDUX4_fdr`,
-   `hl.ratio`, and `pval`.
-
-3. Rename them as follows: rna_FC = iDUX4_logFC, rna_pval = iDUX4_fdr,
-   protein_FC = hl.ratio, protein_pval = pval (hint: use `dplyr::rename()`)
-
-4. Drop all rows with `NA` values in them (hint: use a function from `tidyr`)
-
-6. Remove duplicate rows (hint: use `dplyr::distinct()`).
-
-7. Arrange the table by descending `rna_FC` and ascending 
-   `protein_FC`.
-   
-8. Conduct steps 2-7 by piping the output of one step to another (i.e, a single
-   workflow & remember to comment).
-   
-9. Save the output of this workflow into a new object.
+**Step 1**: First, explore the data so you know what you're working with. Use `glimpse()` to see column types and `summary()` to see distributions:
 
 ```{r}
-#| label: q2
+#| label: q2-explore
+#| echo: true
+# Always explore your data first!
+exp_tbl |> glimpse()
+
+exp_tbl |> summary()
+```
+
+**Step 2**: Select only the columns we need:
+
+- `geneid`      (gene identifier)
+- `iDUX4_logFC` (RNA fold change)
+- `iDUX4_fdr`   (RNA pvalue)
+- `hl.ratio`    (protein fold change)
+- `pval`        (protein pvalue)
+
+Use `select()` and list the columns you want to keep:
+
+```{r}
+#| label: q2-select
+#| echo: true
+exp_tbl |>
+  select(geneid, iDUX4_logFC, iDUX4_fdr, hl.ratio, pval)
+```
+
+**Step 3**: Rename columns for clarity (this makes your code more readable).
+
+Use `dplyr::rename()` with the pattern `new_name = old_name, ...`:
+
+```{r}
+#| label: q2-rename
+#| echo: true
+exp_tbl |>
+  select(geneid, iDUX4_logFC, iDUX4_fdr, hl.ratio, pval) |>
+  rename(
+    rna_FC = iDUX4_logFC,
+    rna_pval = iDUX4_fdr,
+    protein_FC = hl.ratio,
+    protein_pval = pval
+  )
+```
+
+**Step 4**: Clean the data by removing rows with missing values. Use `drop_na()` to remove rows with any missing values, and `distinct()` to remove duplicate rows:
+
+```{r}
+#| label: q2-clean
+#| echo: true
+exp_tbl |>
+  select(geneid, iDUX4_logFC, iDUX4_fdr, hl.ratio, pval) |>
+  rename(
+    rna_FC = iDUX4_logFC,
+    rna_pval = iDUX4_fdr,
+    protein_FC = hl.ratio,
+    protein_pval = pval
+  ) |>
+  drop_na() |> # Remove rows with any missing values
+  distinct() # Remove duplicate rows
+```
+
+**Step 5**: Finally, arrange the data and save it. Use `arrange()` to sort by RNA fold change (high to low), then protein fold change (low to high):
+
+```{r}
+#| label: q2-final
+#| echo: true
 exp_tbl_subset <- exp_tbl |>
   select(geneid, iDUX4_logFC, iDUX4_fdr, hl.ratio, pval) |>
   rename(
@@ -75,49 +124,152 @@ exp_tbl_subset <- exp_tbl |>
   ) |>
   drop_na() |>
   distinct() |>
-  arrange(desc(rna_FC), protein_FC)
+  arrange(desc(rna_FC), protein_FC) # Sort by RNA fold change (high to low), then protein fold change (low to high)
+
+exp_tbl_subset
 ```
 
-## Question 3  **5 points**
+## Question 3 **5 points**
 
-How well do the overall `rna_FC` and `protein_FC` values correlate in this
-experiment?
+Let's practice good data analysis habits by checking for potential issues. Quality control is essential in real data analysis.
 
-Using the output from the above question, do the following:  
+**Check for duplicates and missing values**:
 
-1. Create a scatter plot of `rna_FC` vs `protein_FC`. observe how the points scatter.
-
-2. Add a line to the plot that would indicate perfect 1:1 correlation.
-   Hint: use `geom_abline()` with its `slope` argument.
-   
-3. Add a linear model fit using `geom_smooth()` (`method = 'lm'`).
-   Observe how the x=y line deviates from your geom_smooth line.
-
-4. Calculate the Spearman correlation coefficient. (Hint: This uses a base R math
-   function called `cor` - Use help() or Google to learn more and how to specify
-   method as `spearman`)
-
-5. Using all of the information from above, comment on the correlation between
-   `rna_FC` and `protein_FC` below.
+1. Use `count()` to check for duplicate genes
+1. Use `summarize()` with `across()` to count missing values in all columns
+1. Use summary statistics to understand data distributions
 
 ```{r}
-#| label: q4
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-ggplot(exp_tbl_subset, aes(rna_FC, protein_FC)) +
-  geom_point() +
-  geom_abline(linewidth = 1, color = "green") +
-  geom_smooth(method = "lm", se = FALSE, linewidth = 1)
+#| label: q4-quality-check
+#| echo: true
+# Check for duplicate genes (there shouldn't be any after distinct())
+dup_tbl <-
+  exp_tbl_subset |>
+  count(geneid) |>
+  filter(n > 1) # Any genes appearing more than once?
+```
 
+There are `r nrow(dup_tbl)` duplicate genes in the dataset.
+
+```{r}
+#| label: q4-quality-check-2
+#| echo: true
+# Summary of missing values by column
+exp_tbl_subset |>
+  summarize(
+    across(everything(), ~ sum(is.na(.)))
+  )
+```
+
+```{r}
+#| label: q4-quality-check-3
+#| echo: true
+# Look at the distribution of our main variables
+exp_tbl_subset |>
+  summarize(
+    across(
+      c(rna_FC, protein_FC),
+      list(
+        mean = ~ mean(., na.rm = TRUE),
+        median = ~ median(., na.rm = TRUE),
+        sd = ~ sd(., na.rm = TRUE)
+      )
+    ),
+    .groups = "drop"
+  )
+```
+
+For your reference, here are three different ways to write the same function inside `across()`. They all compute the mean while ignoring `NA` values.
+
+```{r}
+#| label: across-alternatives
+#| eval: false
+
+exp_tbl_subset |>
+  summarize(
+    across(
+      c(rna_FC, protein_FC),
+      list(
+        # Three different ways to write the same function
+        mean1 = ~ mean(., na.rm = TRUE),
+        mean2 = function(x) mean(, na.rm = TRUE),
+        mean3 = \(x) mean(x, na.rm = TRUE),
+      )
+    )
+  )
+
+```
+## Question 4 **5 points**
+
+How well do the overall `rna_FC` and `protein_FC` values correlate in this experiment? We'll explore this with visualization and statistics.
+
+**Step 1**: Create a scatter plot of `rna_FC` vs `protein_FC` using `ggplot()`. Use:
+
+- `aes()` to map x and y variables
+- `geom_point()` to create the scatter plot
+- `labs()` to add informative axis labels and title
+
+```{r}
+#| label: q3-plot
+#| echo: true
+ggplot(
+  exp_tbl_subset,
+  aes(
+    x = rna_FC,
+    y = protein_FC
+  )
+) +
+  geom_point() +
+  labs(
+    x = "RNA Fold Change (log2)",
+    y = "Protein Fold Change (log2)",
+    title = "RNA vs Protein Expression Changes"
+  )
+```
+
+**Step 2**: Add reference lines to help interpret the correlation. Use:
+
+- `geom_abline(slope = 1, intercept = 0)` for perfect correlation line
+- `geom_smooth(method = "lm", se = FALSE)` for the computed trend line
+- adjust the `geom_point()` aesthetic to `alpha = 0.6`, making points slightly transparent for better visualization
+
+```{r}
+#| label: q3-plot-lines
+#| echo: true
+ggplot(
+  exp_tbl_subset,
+  aes(
+    x = rna_FC,
+    y = protein_FC
+  )
+) +
+  geom_point(alpha = 0.6) + # Make points a bit transparent
+  geom_abline(slope = 1, intercept = 0, color = "red", linewidth = 1) + # Perfect correlation line
+  geom_smooth(method = "lm", se = FALSE, color = "blue", linewidth = 1) + # Actual relationship
+  labs(
+    x = "RNA Fold Change (log2)",
+    y = "Protein Fold Change (log2)",
+    title = "RNA vs Protein Expression Changes"
+  )
+```
+
+**Step 3**: Calculate the correlation coefficient using `cor()`. Use Spearman correlation since it's robust to outliers. Use `?cor` to see the function documentation. You will need to specify two vectors for the calculation, and it's easiest to provide them using the `$` operator to extract columns from the data frame.
+
+```{r}
+#| label: q3-correlation
+#| echo: true
 rna_prot_cor <- cor(
   exp_tbl_subset$rna_FC,
   exp_tbl_subset$protein_FC,
   method = "spearman"
 )
+
+rna_prot_cor
 ```
 
 ### Answer
 
-The green line indicates a perfect correlation, and the blue line is the linear model fit of the data. The Spearman correlation is `r round(rna_prot_cor, 3)`, indicating a strong positive correlation. One way to think about this is that there are `r round(rna_prot_cor, 3)` proteins made per mRNA.
+The green line shows perfect correlation (y = x), and the blue line shows the actual relationship in our data. The Spearman correlation is `r round(rna_prot_cor, 3)`, indicating a strong positive correlation between RNA and protein changes, but not perfect correlation.
 
 ## Submit
 

@@ -1,19 +1,114 @@
 ---
-title: "Factor-centric chromatin analysis"
-author: "Jay Hesselberth"
+title: "Where do proteins bind in the genome?"
+author: "{{< var instructor.block.dna >}}"
+date: last-modified
 ---
 
-# Where do transcription factors bind in the genome?
+## What to map and how to map it?
+
+::: columns
+::: {.column width="50%"}
+**Targets**
+
+-   Transcription factors
+-   Histone modifications
+-   Chromatin remodelers
+-   RNA polymerases
+-   Other factors that bind chromatin
+:::
+
+::: {.column width="50%"}
+**Methods**
+
+-   ChIP-seq
+-   MNase-ChIP-seq
+-   CUT&RUN
+-   CUT&TAG
+:::
+:::
+
+##
+
+![](../img/block-dna/ChIPseq_2.png){fig-align="center"}
+
+##
+
+![](../img/block-dna/ChIP_Data.png){fig-align="center"}
+
+##
+
+![](../img/block-dna/cut-and-run.png){fig-align="center"}
+
+##
+
+![](../img/block-dna/chip-resolution-comparison.png) {fig-align="center"}
+
+## Comparison of factor-centric methods {.smaller}
+
+::: columns
+::: {.column width="50%"}
+![](../img/block-dna/chip-comparison-overview.png)
+:::
+
+::: {.column width="50%"}
+|     Method     | Resolution | Sequencing cost |
+|:--------------:|:----------:|:---------------:|
+|    ChIP-seq    |    Low     |      High       |
+| MNase-ChIP-seq |    High    |      High       |
+|    CUT&RUN     |    High    |       Low       |
+:::
+:::
+
+# Workflow
+
+### FASTQ files
+
+-   Adapter trimming
+
+-   Aligning to the genome
+
+### Bed files
+
+-   Generate read density genome-wide
+
+### Read density (wig/bedgraph)
+
+-   Call peaks
+
+-   Meta analysis
+
+-   Identify motifs
+
+-   Compare perturbations to control, compare to other datasets
+
+## Example data: CTCF CUT&RUN in K562 cells
+
+![](../img/block-dna/ctcf_cut_run_track.png){fig-align="center" width="800"}
+
+## Example data: CTCF CUT&RUN in K562 cells
+
+![](../img/block-dna/ctcf_cut_run_meta.png){fig-align="center" width="106"}
+
+(from Skene and Henikoff, eLIFE 2017)
+
+## Where do transcription factors bind in the genome?
 
 Today we'll look at where two yeast transcription factors bind in the genome using CUT&RUN.
 
+## Where do transcription factors bind in the genome? {.smaller}
+
 Techniques like CUT&RUN require an affinity reagent (e.g., an antibody) that uniquely recognizes a transcription factor in the cell.
 
-This antibody is added to permeabilized cells, and the antibody associates with the epitope. A separate reagent, a fusion of Protein A (which binds IgG) and micrococcal nuclease (MNase) then associates with the antibody. Addition of calcium activates MNase, and nearby DNA is digested. These DNA fragments are then isolated and sequenced to identify sites of TF association in the genome.
+1. Antibody is added to permeabilized cells, and the antibody associates with the epitope.
+1. A separate reagent, a fusion of Protein A (which binds IgG) and micrococcal nuclease (MNase) then associates with the antibody.
+1. Addition of calcium activates MNase, and nearby DNA is digested.
+1. These DNA fragments are then isolated and sequenced to identify sites of TF association in the genome.
+
+## Where do transcription factors bind in the genome?
 
 ![Fig 1a, Skene et al.](../img/block-dna/skene-fig-1a.png)
 
-## Data download and pre-processing
+## Data download and pre-processing {.smaller}
 
 CUT&RUN data were downloaded from the [NCBI GEO page](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE84474) for Skene et al.
 
@@ -33,117 +128,59 @@ bedGraphToBigWig Abf1.bg sacCer3.chrom.sizes Abf1.bw
 
 The bigWig files are available here in the `data/` directory.
 
-### Questions
+## Questions
 
 1.  How do you ensure your antibody recognizes what you think it recognizes? What are important controls for ensuring it recognizes a specific epitope?
 
-2.  What are important controls for CUT&RUN experiments?
+2.  What are some good controls for CUT&RUN experiments?
 
 # CUT&RUN analysis
 
+## Set up libraries
+
 ```{r}
 #| label: load-libs
+#| echo: true
 #| message: false
-library(tidyverse)
-library(here)
-library(valr)
 
-# genome viz
-library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
-library(Gviz)
-library(rtracklayer)
-
-# motif discovery and viz
-library(BSgenome.Scerevisiae.UCSC.sacCer3)
-# library(rGADEM)
-library(seqLogo)
 ```
 
 ## Examine genome coverage
 
 ```{r}
 #| label: make-tracks
-track_start <- 90000
-track_end <- 150000
+#| echo: true
 
-# genes track
-sgd_genes_trk <-
-  GeneRegionTrack(
-    TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,
-    chromosome = "chrII",
-    start = track_start,
-    end = track_end,
-    fill = "#009E73",
-    background.title = "white",
-    col.title = "black",
-    fontsize = 14
-  )
-
-# signal tracks
-track_info <-
-  tibble(
-    file_name = c(
-      "CutRun_Reb1_lt120.bw",
-      "CutRun_Abf1_lt120.bw",
-      "CutRun_Reb1_gt150.bw",
-      "CutRun_Abf1_gt150.bw"
-    ),
-    sample_type = c(
-      "Reb1_Short",
-      "Abf1_Short",
-      "Reb1_Long",
-      "Abf1_Long"
-    )
-  ) |>
-  mutate(
-    file_path = here("data/block-dna", file_name),
-    big_wig = purrr::map(
-      file_path,
-      ~ import.bw(.x, as = "GRanges")
-    ),
-    data_track = purrr::map2(
-      big_wig,
-      sample_type,
-      ~ DataTrack(
-        .x,
-        name = .y,
-        background.title = "white",
-        col.title = "black",
-        col.axis = "black",
-        fontsize = 12
-      )
-    )
-  ) |>
-  dplyr::select(sample_type, big_wig, data_track)
-
-# x-axis track
-x_axis_trk <- GenomeAxisTrack(
-  col = "black",
-  col.axis = "black",
-  fontsize = 16
-)
 ```
 
+
+## Examine genome coverage {.smaller}
+
+```{r}
+#| label: make-tracks-2
+#| echo: true
+
+```
+
+## Examine genome coverage
+
+```{r}
+#| label: make-tracks-3
+#| echo: true
+
+```
+
+## Examine genome coverage
 Now that we have tracks loaded, we can make a plot.
 
 ```{r}
 #| label: plot-tracks
-plotTracks(
-  c(
-    sgd_genes_trk,
-    track_info$data_track,
-    x_axis_trk
-  ),
-  from = track_start,
-  to = track_end,
-  chromosome = "chrII",
-  transcriptAnnotation = "gene",
-  shape = "arrow",
-  type = "histogram"
-)
+#| echo: true
+#| output-location: slide
+
 ```
 
-### Questions
+## Questions
 
 1.  What features stand out in the above tracks? What is different between Reb1 and Abf1? Between the short and long fragments?
 
@@ -153,7 +190,7 @@ plotTracks(
 
 A conceptually simple approach to identification of regions containing "peaks" where a transcription factor was bound is available in the MACS software ([paper](), [github]()). There's also a nice [blog post](https://hbctraining.github.io/Intro-to-ChIPseq/lessons/05_peak_calling_macs.html) covering the main ideas.
 
-### Theory
+## Theory
 
 The Poisson distribution is a discrete probability distribution of the form:
 
@@ -161,159 +198,84 @@ $$ P_\lambda (X=k) = \frac{ \lambda^k }{ k! * e^{-\lambda} } $$
 
 where $\lambda$ captures both the mean and variance of the distribution.
 
-The R functions `dpois()`, `ppois()`, and `rpois()` provide access to the density, distribution, and random generation for the Poisson distribution. See `?dpois` for details.
+The R functions `dpois()`, `ppois()`, and `rpois()` provide access to the density, distribution, and random generation for the Poisson distribution.
+
+Look over the `?dpois` documentation.
+
+## Theory
 
 ```{r}
 #| label: plot-poisson
 #| echo: false
 #| message: false
-#| warning: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-library(cowplot)
-library(ggtext)
+#| fig.alt: "Poisson distributions with different lambda values"
 
-crossing(
-  k = 0:20,
-  lambda = c(1, 4, 10)
-) |>
-  mutate(p = dpois(k, lambda)) |>
-  ggplot(
-    aes(factor(k), p, color = factor(lambda), group = lambda)
-  ) +
-  geom_point(size = 3, alpha = 0.6) +
-  geom_line() +
-  theme_cowplot() +
-  scale_color_brewer(palette = "Set1") +
-  labs(x = "k", y = "Density of P(X=k)", color = "&lambda;") +
-  theme(
-    legend.position = "top",
-    legend.title = element_markdown()
-  )
 ```
 
-### Practice
+## Practice
 
-Here, we model read coverage using the Poisson distribution. Given a genome size $G$ and and a number of reads collected $N$, we can approximate $\lambda$ from $N/G$, scaled by the size of the sequence read (about 100 bp).
+Here, we model read coverage using the Poisson distribution. Given some genome size $G$ and and a number of reads collected $N$, we can approximate $\lambda$ from $N/G$.
 
-The intuition here is: where are $N$ reads placed randomly on a genome of size $G$?
+MACS uses this value (the "genomewide" lambda) and also calculates several "local" lambda values to account for variation among genomic regions. We'll just use the genomewide lambda, which provides a conservative threshold for peak calling.
 
-MACS uses this value (the "genomic" lambda) and also calculates several "local" lambda values to account for variation among genomic regions. We'll just using the genomic lambda, which provides a conservative threshold for peak calling.
+Using the genomewide lambda, we can use the Poisson distribution to address the question: **How surprised should I be to see** $k$ reads at position X?
 
-Using genomic lambda, we can use the Poisson distribution to address the question: **How surprised should I be to see** $k$ reads at position X?
+---
 
 ```{r}
 #| label: peak-calling
-#| eval: false
-abf1_tbl <- read_bigwig(here("data/block-dna/CutRun_Abf1_lt120.bw"))
+#| echo: true
 
-# number of reads in the original Abf1 BED file
-total_reads <- 16e6
-
-genome <- read_genome(here("data/block-dna/sacCer3.chrom.sizes"))
-# how can we calculate genome size?
-genome_size <- ___
-
-genome_lambda <- total_reads / genome_size
-
-peak_calls <-
-  abf1_tbl |>
-  # define single-base sites
-  mutate(
-    midpoint = start + round((end - start) / 2),
-    start = midpoint,
-    end = start + 1,
-    # use the poisson to calculate a p-value with the genome-wide lambda
-    pval = ___(score, genome_lambda),
-    # convert p-values to FDR
-    fdr = p.adjust(pval, method = "fdr")
-  )
 ```
+
+## P-values
 
 Let's take a look at a plot of the p-value across a chromosome. What do you notice about this plot, when compared to the coverage of the CUT&RUN coverage above?
 
 ```{r}
-#| label: plot-peak-sig
-#| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-ggplot(
-  filter(peak_calls, chrom == "chrII"),
-  # convert p-values to positive values for plotting
-  aes(start, ___)
-) +
-  geom_line() +
-  xlim(track_start, track_end) +
-  theme_cowplot()
+#| label: plot-p-vals
+#| echo: true
+#| output-location: slide
+#| fig.alt: "Peak calls based on Poisson p-values"
+
 ```
+
+## Peaks
 
 How many peaks are called in this region?
 
 ```{r}
 #| label: n-peaks
-#| eval: false
-# most stringent cut-off
-peak_calls_sig <-
-  filter(
-    peak_calls,
-    fdr == 0
-  ) |>
-  # collapse neighboring, significant sites
-  bed_merge(max_dist = 20)
+#| echo: true
+#| output-location: slide
 
-filter(
-  peak_calls_sig,
-  chrom == "chrII" &
-    start >= track_start &
-    end <= track_end
-)
 ```
+
+## Visualize
 
 Let's visualize these peaks in the context of genomic CUT&RUN signal. We need to define an `AnnotationTrack` with the peak intervals, which we can plot against the CUT&RUN coverage we defined above.
 
+Let us load the data:
+
 ```{r}
 #| label: plot-peaks
-#| eval: false
-# need a GRanges object to convert to an AnnotationTrack
-peak_calls_gr <-
-  GRanges(
-    seqnames = peak_calls_sig$chrom,
-    ranges = IRanges(peak_calls_sig$start, peak_calls_sig$end)
-  )
+#| echo: true
+#| output-location: slide
 
-peak_calls_trk <-
-  AnnotationTrack(
-    peak_calls_gr,
-    name = "Peak calls",
-    fill = "red",
-    background.title = "white",
-    col.title = "red",
-    fontsize = 16,
-    rotation.title = 0
-  )
-
-abf1_short_trk <-
-  filter(
-    track_info,
-    sample_type == "Abf1_Short"
-  ) |>
-  pull(data_track)
-
-plotTracks(
-  c(
-    sgd_genes_trk,
-    abf1_short_trk,
-    peak_calls_trk,
-    x_axis_trk
-  ),
-  from = track_start,
-  to = track_end,
-  chromosome = "chrII",
-  transcriptAnnotation = "gene",
-  shape = "arrow",
-  type = "histogram"
-)
 ```
 
-### Questions
+## Visualize
+
+And plot:
+
+```{r}
+#| label: plot-peaks-2
+#| echo: true
+#| output-location: slide
+
+```
+
+## Questions
 
 1.  How many peaks were called throughout the genome? How wide are the called peaks, on average?
 

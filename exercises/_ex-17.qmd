@@ -1,7 +1,7 @@
 ---
 title: "Chromatin accessibility I"
 subtitle: "Chromatin-centric measurement of genomic features"
-author: "Jay Hesselberth"
+ate: last-modified
 ---
 
 ## Chromatin accessbility patterns and genome function
@@ -10,32 +10,26 @@ This class we'll examine chromatin accessibility patterns and begin to get a sen
 
 ## Load the libraries
 
-These are libraries we've used before. patchwork is a library for composing groups of plots.
+These are libraries we've used before.
 
 ```{r}
 #| label: load-libs
 #| message: false
-library(tidyverse)
-library(cowplot)
-library(here)
-library(patchwork)
 ```
+
+---
 
 These are new libraries specifically for genome analysis. You learned about valr and Gviz for your homework.
 
-rtracklayer provides a few utility functions we'll use today, and TxDb.Scerevisiae.UCSC.sacCer3.sgdGene provides gene annotations for the S. cerevisiae genome.
+- `TxDb.Scerevisiae.UCSC.sacCer3.sgdGene` provides gene annotations for the *S. cerevisiae* genome.
 
 ```{r}
 #| label: genome-libs
 #| message: false
-library(valr)
-library(Gviz)
-
-library(rtracklayer)
-library(TxDb.Scerevisiae.UCSC.sacCer3.sgdGene)
+#| warning: false
 ```
 
-## Load the data
+## Load the data {.smaller}
 
 In this and the next class we will analyze ATAC-seq and MNase-seq data sets from budding yeast. Here are the references for the two data set:
 
@@ -47,7 +41,7 @@ In this and the next class we will analyze ATAC-seq and MNase-seq data sets from
 
 > Zentner GE, Henikoff S. Mot1 redistributes TBP from TATA-containing to TATA-less promoters. Mol Cell Biol. 2013 PMID: 24144978; PMCID: PMC3889552. [\[Link\]](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3889552/) [\[Data\]](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE44200)
 
-### Experimental consideration
+## Experimental consideration
 
 In a standard MNase-seq experiment, DNA around \~150 bp is extracted to look closely at nucleosome occupancy & positioning. However, the above study *did not* perform size selection. This is important as now we can look at both transcription factor binding sites and nucleosome positions.
 
@@ -57,26 +51,18 @@ First, we will determine the fragment size distributions obtained from the two e
 
 I have performed the alignment of paired-end reads and converted all reads into a bed file where each line of the bed file denotes a single fragment from start to end.
 
-First, load the ATAC-seq reads:
+## First, load the ATAC-seq reads:
 
 ```{r}
+#| label: load-atac
 #| echo: true
-#| output-location: column
-atac_tbl <- read_bed(
-  here("data/block-dna/yeast_atac_chrII.bed.gz"),
-)
-atac_tbl
 ```
 
-Next, load the MNase reads.
+## Next, load the MNase reads.
 
 ```{r}
+#| label: load-mnase
 #| echo: true
-#| output-location: column
-mnase_tbl <- read_bed(
-  here("data/block-dna/yeast_mnase_chrII.bed.gz")
-)
-mnase_tbl
 ```
 
 Working with a small genome is a huge advantage -- we can study the whole chromosome in this class.
@@ -85,59 +71,45 @@ Working with a small genome is a huge advantage -- we can study the whole chromo
 
 Let's remind ourselves of the expectations for chromatin fragment lengths from MNase-seq and ATAC-seq experiments.
 
-### MNase-seq
+## MNase-seq
 
 ![](../img/block-dna/mnase-overview.png)
 
-### ATAC-seq
+## ATAC-seq
 
 ![](../img/block-dna/atac-explain.png)
 
 ## Length distributions of chromatin-derived DNA fragments
 
-For the MNase-seq BED file, you see that there are only three columns: `chrom`, `start`, and `end`. Calculating fragment length is simple:
+For the MNase-seq BED file, you see that there are only three columns: `chrom`, `start`, and `end`.
+
+Calculating fragment length is simple:
 
 ```{r}
+#| label: calc-frag-len
 #| echo: true
-#| eval: false
-mutate(mnase_tbl, frag_len = ??)
 ```
 
-Let's use this approach to examine the fragment length distribution.
+## Let's use this approach to examine the fragment length distribution.
+
+First, we will combine the two data sets into a single tibble, adding a new column to indicate the type of experiment.
 
 ```{r}
 #| echo: true
-#| eval: false
 #| warning: false
-#| output-location: column
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-acc_tbl <-
-  bind_rows(
-    mutate(mnase_tbl, type = "mnase"),
-    mutate(atac_tbl, type = "atac")
-  )
-
-ggplot(
-  acc_tbl,
-  aes(x = ??)
-) +
-  geom_histogram(
-    # single base-pair resolution
-    binwidth = 1
-  ) +
-  facet_grid(
-    rows = vars(type),
-    scales = "free_y"
-  ) +
-  xlim(30, 500) +
-  labs(
-    x = "fragment length (bp)",
-    title = "Histogram of fragment lengths from\naccessibility measurements"
-  ) +
-  theme_cowplot()
+#| fig.alt: "Plot showing fragment length distributions for ATAC-seq and MNase-seq data."
 ```
 
-### Interpretations
+---
+
+```{r}
+#| label: plot-frag-len
+#| echo: true
+#| warning: false
+#| output-location: slide
+```
+
+## Interpretations
 
 1.  How would you describe the two fragment length distributions? Are they similar?
 
@@ -149,102 +121,63 @@ The ATAC data seems to be periodic. How can we test that hypothesis? We can calc
 
 We'll use the base `hist` function to calculate the densities of the above histogram. Let's write a function we can use to analyze fragment lengths.
 
+---
+
 ```{r}
 #| label: fun-fragment-len
 #| echo: true
-#| eval: false
-fragment_len_hist <- function(tbl) {
-  frag_lens <-
-    mutate(
-      tbl,
-      frag_len = ??
-    ) |>
-    filter(
-      frag_len >= 30 &
-        frag_len <= 500
-    ) |>
-    pull(frag_len)
-
-  hist(
-    frag_lens,
-    breaks = seq(30, 500, 1),
-    plot = FALSE
-  )
-}
 ```
+
+---
 
 ```{r}
-#| eval: false
-atac_frag_lens <- fragment_len_hist(atac_tbl)
+#| label: inspect-frag-lens
+#| echo: true
 ```
+
+## Autocorrelation
 
 The `density` slot contains a vector of densities at base-pair resolution. We will use `acf()` to calculate the autocorrelation of these values, and will store the tidied result.
 
 ```{r}
+#| label: calc-atac-acf
 #| echo: true
-#| eval: false
-atac_acf_tbl <-
-  acf(
-    atac_frag_lens$??,
-    lag.max = 40,
-    plot = FALSE
-  ) |>
-  broom::tidy()
-
-atac_acf_tbl
+#| output-location: column
 ```
 
-Now let's plot the autocorrelation.
+## Autocorrelation
+
+Now let's plot the autocorrelation. First, we define a function.
 
 ```{r}
-#| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-plot_acf <- function(tbl, title) {
-  ggplot(
-    tbl,
-    aes(??, ??)
-  ) +
-    geom_point(size = 2) +
-    geom_line() +
-    theme_minimal_grid() +
-    geom_vline(xintercept = c(10, 21), color = "red") +
-    labs(title = title)
-}
+#| label: fun-plot-acf-atac
+#| echo: true
+#| fig.alt: "Plot showing autocorrelation function (ACF) for ATAC-seq data."
 ```
 
+And then we make the plot.
+
 ```{r}
-#| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-plot_atac_acf <- plot_acf(atac_acf_tbl, title = "ATAC ACF")
-plot_atac_acf
+#| label: plot-acf-atac
+#| echo: true
+#| output-location: slide
+#| fig.alt: "Plot showing autocorrelation function (ACF) for ATAC-seq data."
 ```
+
+## Autocorrelation {.smaller}
 
 So, it looks like there significant bumps in autocorrelation at 10 and 21 bp positions, indicating that ATAC length distribution is periodic.
 
 How do we confirm these bumps are interesting? Let's calculate the acf of a negative control -- the length distribution of the MNase data.
 
 ```{r}
-#| label: plot-acfs
+#| label: plot-combined-acfs
 #| echo: true
-#| output-location: default
-#| eval: false
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-mnase_frag_lens <-
-  fragment_len_hist(??)
-
-mnase_acf_tbl <-
-  acf(
-    mnase_frag_lens$??,
-    lag.max = 40,
-    plot = FALSE
-  ) |>
-  broom::tidy()
-
-plot_mnase_acf <- plot_acf(??, title = "MNase ACF")
-
-# patchwork plot
-plot_atac_acf / plot_mnase_acf
+#| output-location: slide
+#| fig.alt: "Plot showing autocorrelation function (ACF) for MNase-seq data."
 ```
+
+## Interpretation
 
 We can see a monotonic decrease in the MNase-seq data, which confirms that the bumps we see are distinctive features of ATAC-seq data.
 
@@ -252,147 +185,113 @@ We can see a monotonic decrease in the MNase-seq data, which confirms that the b
 
 **So what then, exactly is the \~10-11 bp periodicity?** And why is this not present in MNase data?
 
+## Molecular Picture of DNA accessibility
+
 ![](../img/block-dna/dna-protein-structures.jpg)
 
 ## Visualize read density in genomic region {.smaller}
 
 We will use [Gviz](https://bioconductor.org/packages/release/bioc/vignettes/Gviz/inst/doc/Gviz.html#2_Basic_Features) to visualize read densities relative to a reference.
 
-### Load tracks
+## Load tracks
 
 First, we load the gene annotations from the [Saccharomyces Genome Databases](https://yeastgenome.org) (SGD).
 
 ```{r}
+#| label: load-sgd-genes
 #| echo: true
-#| output-location: column
-
-sgd_genes <-
-  GeneRegionTrack(
-    TxDb.Scerevisiae.UCSC.sacCer3.sgdGene,
-    chromosome = "chrII",
-    start = 530811,
-    end = 540885,
-  )
-
-sgd_genes
 ```
 
-Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using `rtracklayer::import.bw()`.
+## Import bigWig {.smaller}
 
-Inspect the object. What is "GRanges"?
+Next, import the bigwig file containing yeast nucleosome-sized fragments (via MNase-seq) using `valr::read_bigwig()`.
+
+Inspect the object.
+
+(What is "GRanges"?)
 
 ```{r}
+#| label: load-mnase-gr
 #| echo: true
-mnase_nuc_gr <- import.bw(
-  here("data/block-dna/yeast_mnase_134_160.bw"),
-  as = "GRanges"
-)
-mnase_nuc_gr
 ```
+
+## Load track
 
 Next, load the GRanges object as a track for Gviz to plot:
 
 ```{r}
-mnase_nuc_trk <- DataTrack(
-  mnase_nuc_gr,
-  name = "MNase_nuc"
-)
-mnase_nuc_trk
+#| label: gen-mnase-track
+#| echo: true
 ```
+
+## Vizualize a genomic region {.smaller}
 
 Now, we can make a plot for this particular region of chrII:
 
 ```{r}
+#| label: gen-track-plot
 #| echo: true
-#| output-location: column
-
-# special track for the x-axis
-x_axis <- GenomeAxisTrack()
-
-plotTracks(
-  c(
-    sgd_genes,
-    mnase_nuc_trk,
-    x_axis
-  ),
-  from = 530811,
-  to = 540885,
-  chromosome = "chrII",
-  transcriptAnnotation = "gene",
-  shape = "arrow",
-  type = "histogram"
-)
+#| output-location: slide
+#| fig.alt: "Genome browser-style plot showing gene annotations and MNase-seq read density over a region of chromosome II in Saccharomyces cerevisiae."
 ```
 
 ## Load the remaining data
 
 That looks great! Let's load all the other data sets.
 
-1.  Load each bigWig as a GRanges object with `rtracklayer::import.bw()`
+1.  Load each bigWig as a GRanges object with `valr::read_bigwig()`
 2.  Convert each to a `Gviz::DataTrack()` for plotting
 
-We can do this one of two ways. We can do it one-by-one:
+## Load the remaining data
+
+We can do this one of two ways. We could do it one-by-one:
 
 ```{r}
+#| label: single-import-data
 #| eval: false
 #| echo: true
-# complete the following steps for each of the four tracks
-file_name <- "yeast_mnase_lt50.bw"
-track_name <- "MNase_Short"
-big_wig <- import.bw(here("data/block-dna", file_name))
-data_track <- DataTrack(big_wig, track_name)
 ```
 
-Or we can create a tibble with file and track names, and use purrr to load and convert each one:
+---
+
+Or we can create a tibble with file and track names, and use [purrr](https://purrr.tidyverse.org/) to load and convert each one.
+
+First, we define a tibble of files and metadata.
 
 ```{r}
+#| label: prep-import-data
 #| echo: true
-track_info <-
-  tibble(
-    file_name = c(
-      "yeast_mnase_lt50.bw",
-      "yeast_mnase_134_160.bw",
-      "yeast_atac_lt120.bw",
-      "yeast_atac_gt120.bw"
-    ),
-    file_path = here("data/block-dna", file_name),
-    track_name = c(
-      "MNase_Short", "MNase_Long",
-      "ATAC_Short", "ATAC_Long"
-    )
-  )
 ```
 
+---
+
 ```{r}
-track_info <-
-  mutate(
-    track_info,
-    big_wig = purrr::map(
-      file_path, ~ import.bw(.x, as = "GRanges")
-    ),
-    data_track = purrr::map2(
-      big_wig, track_name, ~ DataTrack(.x, name = .y)
-    )
-  )
+#| label: inspect-track-info
+#| echo: true
 ```
+
+## Load the remaining data
+
+```{r}
+#| label: local-track-data
+#| echo: true
+```
+
+---
+
+```{r}
+#| label: inspect-track-info-2
+#| echo: true
+```
+
+## Load the remaining data
 
 Now, we just have to make a list of tracks to plot and Gviz takes care of the rest.
 
 ```{r}
+#| label: plot-rest-track-data
 #| echo: true
-#| output-location: column-fragment
-plotTracks(
-  c(
-    sgd_genes,
-    track_info$data_track
-  ),
-  from = 530811,
-  to = 540885,
-  chromosome = "chrII",
-  transcriptAnnotation = "gene",
-  shape = "arrow",
-  type = "histogram"
-)
+#| output-location: slide
 ```
 
 ## Interpretations
