@@ -19,6 +19,9 @@ This sets up R, Quarto, bioinformatics CLI tools, and all R packages. Packages
 not available on conda-forge/bioconda are installed via `pak` (see
 `scripts/install-pak-deps.R`).
 
+Run `pixi run check-pak-deps` to report which of those packages are already
+installed without installing anything.
+
 To add a new package, either add it to `pixi.toml` (if on conda-forge/bioconda)
 or to `scripts/install-pak-deps.R` (if not), then commit `pixi.lock`.
 
