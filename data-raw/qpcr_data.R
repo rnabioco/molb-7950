@@ -29,14 +29,17 @@ t48 <- filter(plus_rts, time == 48) %>%
 plus_rts <- bind_rows(t0, t12, t24, t48)
 
 # add multiplier for genes
-ifns_wt <- filter(plus_rts, gene == "IFN" & sample == "wt") %>% mutate(exp = exp * 1.5)
-ifns_mut <- filter(plus_rts, gene == "IFN" & sample == "mut") %>% mutate(exp = exp * 02)
+ifns_wt <- filter(plus_rts, gene == "IFN" & sample == "wt") %>%
+  mutate(exp = exp * 1.5)
+ifns_mut <- filter(plus_rts, gene == "IFN" & sample == "mut") %>%
+  mutate(exp = exp * 02)
 actins <- filter(plus_rts, gene == "ACTIN") %>% mutate(exp = exp * 0.2)
 plus_rts <- bind_rows(ifns_wt, ifns_mut, actins)
 
 minus_rts <- filter(sample_data, rt == "-") %>% mutate(exp = 0)
 
-sample_data <- bind_rows(plus_rts, minus_rts) %>% arrange(sample, time, gene, rep)
+sample_data <- bind_rows(plus_rts, minus_rts) %>%
+  arrange(sample, time, gene, rep)
 
 qpcr_names <- sample_data %>%
   unite(name, sample, time, gene, rt, rep, sep = "_") %>%

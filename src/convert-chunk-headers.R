@@ -10,5 +10,5 @@ files <- dir_ls(here(), recurse = TRUE, glob = "*.qmd")
 purrr::map(
   files,
   convert_chunk_header,
-  output = identity 
+  output = identity
 )

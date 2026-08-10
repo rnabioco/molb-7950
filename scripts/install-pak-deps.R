@@ -54,7 +54,9 @@ groups <- list(
     name = "GitHub",
     pkgs = c(emo = "hadley/emo"),
     install = function(pkgs) {
-      for (repo in pkgs) remotes::install_github(repo, upgrade = "never")
+      for (repo in pkgs) {
+        remotes::install_github(repo, upgrade = "never")
+      }
     }
   ),
   # Bioconductor packages missing osx-arm64 builds (linux-64 gets them from
