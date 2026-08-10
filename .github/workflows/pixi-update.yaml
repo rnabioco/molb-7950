@@ -1,0 +1,91 @@
+# Refresh pixi.lock on a schedule and open a PR, but only after proving the whole
+# site still renders with the new solve. Dependabot has no pixi/conda ecosystem, so
+# this covers the R/Bioconductor half of the dependency tree.
+#
+# The render happens here rather than on the resulting PR because a PR opened with
+# GITHUB_TOKEN does not trigger other workflows -- quarto.yaml would never run on it.
+on:
+  schedule:
+    - cron: "0 12 1 * *" # 12:00 UTC on the 1st of each month
+  workflow_dispatch:
+
+name: update pixi lockfile
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: pixi-update
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_LIBS_USER: ${{ github.workspace }}/.r-lib
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.10.1
+        with:
+          run-install: false
+          # The whole point is to resolve fresh; a cache keyed on the old lock is
+          # useless here and would just write a stale entry back.
+          cache: false
+
+      - name: Update lockfile
+        id: update
+        run: |
+          # Written outside the workspace so it can't dirty the tree the PR is cut from.
+          log="$RUNNER_TEMP/pixi-update.log"
+          pixi update --no-progress --color never 2>&1 | tee "$log"
+          {
+            echo 'diff<<PIXI_EOF'
+            cat "$log"
+            echo 'PIXI_EOF'
+          } >> "$GITHUB_OUTPUT"
+          cat "$log" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install environment
+        run: pixi install --locked
+
+      - name: Install Quarto extensions
+        shell: pixi run bash -e {0}
+        run: |
+          quarto add --no-prompt quarto-ext/fontawesome@v1.3.0
+          quarto add --no-prompt sellorm/quarto-social-embeds@v0.0.2
+          quarto add --no-prompt r-wasm/quarto-live@v0.2.0
+          quarto add --no-prompt https://github.com/r-wasm/quarto-drop/archive/d3b3cb320bdd894639409889bf18792f90e3a6d6.zip
+          quarto add --no-prompt https://github.com/quarto-ext/pointer/archive/61e8b1ada19acc9c6bc598f0a50cf534a23a3906.zip
+
+      - name: Install pak fallback packages
+        shell: pixi run bash -e {0}
+        run: |
+          mkdir -p "$R_LIBS_USER"
+          Rscript scripts/install-pak-deps.R
+
+      # If this fails the job fails and no PR is opened, which is the point.
+      - name: Render Quarto Project
+        shell: pixi run bash -e {0}
+        run: quarto render
+
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ci/pixi-update
+          delete-branch: true
+          add-paths: pixi.lock
+          commit-message: "ci: update pixi.lock"
+          title: "ci: update pixi.lock"
+          body: |
+            Automated `pixi update`. The full site rendered successfully against this
+            lockfile before this PR was opened.
+
+            ```
+            ${{ steps.update.outputs.diff }}
+            ```
