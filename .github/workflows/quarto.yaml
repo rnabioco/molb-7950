@@ -6,49 +6,71 @@ on:
 
 name: quarto build and deploy
 
-permissions: write-all
+permissions:
+  contents: write # gh-pages deploy
+  pull-requests: write # netlify preview-link comment
+  statuses: write # netlify commit status
+
+concurrency:
+  group: quarto-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_LIBS_USER: ${{ github.workspace }}/.r-lib
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.9.4
+        uses: prefix-dev/setup-pixi@v0.10.1
         with:
           cache: true
+          locked: true
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
 
+      - name: Cache R packages built from source
+        uses: actions/cache@v6
+        with:
+          path: .r-lib
+          key: r-lib-${{ runner.os }}-${{ hashFiles('scripts/install-pak-deps.R', 'pixi.lock') }}
+          restore-keys: r-lib-${{ runner.os }}-
+
+      # Pinned because _extensions/ is gitignored, so these are re-fetched on every
+      # run. quarto-drop and pointer have no upstream tags, so they pin by SHA.
+      # Nothing bumps these automatically -- check them once a year.
       - name: Install Quarto extensions
-        shell: pixi run bash {0}
+        shell: pixi run bash -e {0}
         run: |
-          quarto add --no-prompt quarto-ext/fontawesome
-          quarto add --no-prompt sellorm/quarto-social-embeds
-          quarto add --no-prompt r-wasm/quarto-drop
-          quarto add --no-prompt quarto-ext/pointer
-          quarto add --no-prompt r-wasm/quarto-live
+          quarto add --no-prompt quarto-ext/fontawesome@v1.3.0
+          quarto add --no-prompt sellorm/quarto-social-embeds@v0.0.2
+          quarto add --no-prompt r-wasm/quarto-live@v0.2.0
+          quarto add --no-prompt https://github.com/r-wasm/quarto-drop/archive/d3b3cb320bdd894639409889bf18792f90e3a6d6.zip
+          quarto add --no-prompt https://github.com/quarto-ext/pointer/archive/61e8b1ada19acc9c6bc598f0a50cf534a23a3906.zip
 
       - name: Install pak fallback packages
-        shell: pixi run bash {0}
-        run: Rscript scripts/install-pak-deps.R
+        shell: pixi run bash -e {0}
+        run: |
+          mkdir -p "$R_LIBS_USER"
+          Rscript scripts/install-pak-deps.R
 
       - name: Render Quarto Project
-        shell: pixi run bash {0}
+        shell: pixi run bash -e {0}
         run: quarto render
 
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
 
       - name: Deploy to Netlify
         if: github.event_name == 'pull_request'
-        uses: nwtgck/actions-netlify@v3.0
+        uses: nwtgck/actions-netlify@v4.0.0
         with:
           publish-dir: './_site'
           production-branch: main

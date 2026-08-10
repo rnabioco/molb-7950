@@ -32,7 +32,8 @@ if (!requireNamespace("emo", quietly = TRUE)) {
 #}
 
 # CRAN packages where conda-forge version is too old
-install_if_missing(c("valr", "Seurat"))
+# (Seurat now comes from conda-forge; its 5.5.1 build matches CRAN.)
+install_if_missing("valr")
 
 # Bioconductor packages missing osx-arm64 builds (linux-64 gets them from conda)
 install_if_missing(c(
