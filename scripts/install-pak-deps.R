@@ -27,9 +27,9 @@ install_if_missing <- function(pkgs, ...) {
 if (!requireNamespace("emo", quietly = TRUE)) {
   remotes::install_github("hadley/emo", upgrade = "never")
 }
-if (!requireNamespace("cpp11bigwig", quietly = TRUE)) {
-  remotes::install_github("rnabioco/cpp11bigwig", upgrade = "never")
-}
+#if (!requireNamespace("cpp11bigwig", quietly = TRUE)) {
+#  remotes::install_github("rnabioco/cpp11bigwig", upgrade = "never")
+#}
 
 # CRAN packages where conda-forge version is too old
 install_if_missing(c("valr", "Seurat"))
@@ -48,6 +48,7 @@ install_if_missing(c(
   "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene",
   "BSgenome.Scerevisiae.UCSC.sacCer3",
   "clustifyrdatahub",
-  "rGADEM",
-  "seqLogo"
+#  "rGADEM",
+  "seqLogo",
+  "valr"
 ))
