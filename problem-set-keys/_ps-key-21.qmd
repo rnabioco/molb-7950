@@ -29,8 +29,8 @@ library(rtracklayer)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
-#library(rGADEM)
-library(seqLogo)
+library(memes)
+library(universalmotif)
 ```
 
 Next, load the coverage tracks for CUT&RUN data.
@@ -177,7 +177,7 @@ peak_calls <-
     start = midpoint,
     end = start + 1,
     # use the poisson to calculate a p-value with the genome-wide lambda
-    pval = dpois(score, genome_lambda),
+    pval = dpois(value, genome_lambda),
     # convert p-values to FDR
     fdr = p.adjust(pval, method = "fdr")
   )
@@ -232,7 +232,10 @@ peak_calls_sig <-
     -log10(pval) >= 20,
   ) |>
   # collapse neighboring, significant sites
-  bed_merge(max_dist = 20)
+  bed_merge(max_dist = 20) |>
+  # drop narrow "spike" intervals that are too short for motif discovery
+  # (and likely aren't real binding sites)
+  filter(end - start >= 10)
 
 filter(
   peak_calls_sig,
@@ -292,6 +295,10 @@ plotTracks(
 Use the peak calls you defined to identify a putative sequence motif bound by Reb1. You can
 assume that the most abundant motif identified is the most likely candidate.
 
+Note: MEME (the underlying motif discovery software) was run ahead of time on the peak
+sequences below, since it isn't installed in this environment. The output is provided for
+you to import with `memes`.
+
 Use Google and Pubmed to identify a study that defines a Reb1 motif using a
 genomewide analysis. How well does your motif match the previously defined one?
 
@@ -299,46 +306,62 @@ genomewide analysis. How well does your motif match the previously defined one?
 
 ```{r}
 #| label: motif-discovery
-#| eval: false
 peak_seqs <- BSgenome::getSeq(
   # provided by BSgenome.Scerevisiae.UCSC.sacCer3
   Scerevisiae,
   peak_calls_gr
 )
 
-# takes ~2 minutes to run
-gadem <- rGADEM::GADEM(
-  peak_seqs,
-  genome = Scerevisiae,
-  verbose = 1
+
+names(peak_seqs) <- as.character(peak_calls_gr)
+Biostrings::writeXStringSet(peak_seqs, here("data/block-dna/reb1_peaks.fasta"))
+
+# MEME Suite is not installed in this environment, so this step was run
+# ahead of time on a server where it is installed. This is the command
+# that was used to generate the motifs (not run here):
+#
+# meme_results <- memes::runMeme(
+#   peak_seqs,
+#   outdir = "meme_out",
+#   nmotifs = 5,
+#   minw = 6,
+#   maxw = 20
+# )
+
+# import the pre-computed MEME output provided for this problem set
+#
+
+meme_motifs <- universalmotif::read_meme(
+  here("data/block-dna/reb1_meme_out/meme.txt")
 )
+
+
+# read_meme() returns a single motif object (not a list) when there's only
+# one motif -- normalize to a list either way
+if (!is.list(meme_motifs)) meme_motifs <- list(meme_motifs)
+
+# convert to a data frame for easy inspection (sorted by significance)
+meme_df <- universalmotif::to_df(meme_motifs)
+
+# to look at the consensus motifs
+#meme_df$consensus
+
+# how many sites support each motif?
+#meme_df$nsites
 ```
 
 
-```{r}
-#| eval: false
-# look at the consensus motifs
-consensus(gadem)
-```
-
-`[1] "nmGGGTAAy"                "nTTTTTTTTTTTn"            "nCGGGrnCCssvmAsGrGn"      "mmmmmmmmmmCCACACCCACACmC" "nTwwwTwwTwAhTwwTTATw"     "nAmwAAwAhTAmATmAAAAn"     "yTywCymTACAACwnTTyn"`
-
-```{r}
-#| eval: false
-# how many consensus motifs are there?
-nOccurrences(gadem)
-```
-
-`[1] 1438  541  290  315  234  201  240`
 
 Now let's look at the sequence logo for the top hit.
 
 ```{r}
 #| label: plot-logo
-#| eval: false
-pwm <- gadem@motifList[[1]]@pwm
+# meme_results is sorted by significance, so the first row is the top hit
+top_motif <- meme_df$motif[[1]]
 
-seqLogo::seqLogo(pwm)
+universalmotif::view_motifs(top_motif)
 ```
 
-![](../img/block-dna/reb1-seq-logo.png)
+
+
+

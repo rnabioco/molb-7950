@@ -31,8 +31,8 @@ library(rtracklayer)
 
 # motif discovery and viz
 library(BSgenome.Scerevisiae.UCSC.sacCer3)
-library(rGADEM)
-library(seqLogo)
+library(memes)
+library(universalmotif)
 ```
 
 Next, load the coverage tracks for CUT&RUN data.
@@ -286,8 +286,14 @@ plotTracks(
 Use the peak calls you defined to identify a putative sequence motif bound by Reb1. You can
 assume that the most abundant motif identified is the most likely candidate.
 
-Use Google and Pubmed to identify a study that defines a Reb1 motif using a genomewide analysis. How well does your 
-motify match the previously defined one?
+Note: MEME (the underlying motif discovery software) was run ahead of time on the peak
+sequences below, since it isn't installed in this environment. The output is provided for
+you to import with `memes`.
+
+Use Google and Pubmed to identify a study that defines a Reb1 motif using a genomewide analysis. a) How well does your 
+motify match the previously defined one? b) Provide citation/link for the published motif(s) that you found.
+
+> Answer.
 
 ```{r}
 #| label: motif-discovery
@@ -298,18 +304,36 @@ peak_seqs <- BSgenome::getSeq(
   peak_calls_gr
 )
 
-# takes ~2 minutes to run
-gadem <- rGADEM::GADEM(
-  peak_seqs,
-  genome = Scerevisiae,
-  verbose = 1
+# MEME Suite is not installed in this environment, so this step was run
+# ahead of time on a server where it is installed. This is the command
+# that was used to generate the motifs (not run here):
+#
+# meme_results <- memes::runMeme(
+#   peak_seqs,
+#   outdir = "meme_out",
+#   nmotifs = 5,
+#   minw = 6,
+#   maxw = 20
+# )
+
+# import the pre-computed MEME output provided for this problem set
+meme_motifs <- universalmotif::read_meme(
+  here("data/block-dna/reb1_meme_out/meme.txt")
 )
 
-# look at the consensus motifs
-consensus(gadem)
 
-# how many consensus motifs are there?
-nOccurrences(gadem)
+# read_meme() returns a single motif object (not a list) when there's only
+# one motif -- normalize to a list either way
+if (!is.list(meme_motifs)) meme_motifs <- list(meme_motifs)
+
+# convert to a data frame for easy inspection (sorted by significance)
+meme_df <- universalmotif::to_df(meme_motifs)
+
+# to look at the consensus motifs
+#meme_df$consensus
+
+# how many sites support each motif?
+#meme_df$nsites
 ```
 
 Now let's look at the sequence logo for the top hit.
@@ -317,7 +341,8 @@ Now let's look at the sequence logo for the top hit.
 ```{r}
 #| label: plot-logo
 #| eval: false
-pwm <- gadem@motifList[[1]]@pwm
+# meme_results is sorted by significance, so the first row is the top hit
+top_motif <- meme_df$motif[[1]]
 
-seqLogo::seqLogo(pwm)
+universalmotif::view_motifs(top_motif)
 ```
