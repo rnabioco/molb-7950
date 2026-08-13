@@ -220,6 +220,15 @@ load_shared("packages.R")
 cat("\nPandoc\n")
 if (Sys.info()[["sysname"]] == "Linux") {
   pandoc_ok <- install_pandoc(PANDOC_VERSION)
+  if (pandoc_ok) {
+    # pak decides a system package is present by asking dpkg, so it will keep
+    # reporting pandoc as a missing system requirement no matter what lands in
+    # ~/.local/bin. Only `sudo apt install pandoc` would satisfy it, which this
+    # platform doesn't allow. Harmless: rmarkdown::find_pandoc() searches
+    # RSTUDIO_PANDOC, then PATH, and takes the *highest* version it finds.
+    cat("  note: pak may still list pandoc as a missing system package.\n")
+    cat("  It checks dpkg, not PATH -- expected here, and safe to ignore.\n")
+  }
 } else {
   pandoc_ok <- TRUE
   cat("  not Linux -- skipping\n")
@@ -315,6 +324,10 @@ if (length(failed) > 0 || !pandoc_ok) {
 }
 
 cat(
-  "\nDone. Save this project as the class base project so assignments",
+  "\nDone. Restart R (Session > Restart R) so the PATH set in ~/.Renviron",
+  "\ntakes effect, then confirm pandoc with:",
+  "\n  Sys.which(\"pandoc\")",
+  "\n  rmarkdown::find_pandoc()",
+  "\n\nThen save this project as the class base project so assignments",
   "\ninherit the library.\n"
 )

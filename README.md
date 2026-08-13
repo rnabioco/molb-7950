@@ -53,6 +53,15 @@ sudo, so a real system install into `/usr/bin` isn't possible; RStudio and Quart
 do each bundle a pandoc, but neither is on `PATH` for terminal or `Rscript` use
 and the version is whatever the image happens to ship.
 
+**Restart R afterwards** — `~/.Renviron` is only read at startup, so the `PATH`
+entry doesn't apply to the session that ran the script. Then check with
+`Sys.which("pandoc")` and `rmarkdown::find_pandoc()`.
+
+`pak` will still report pandoc as a missing system package. It asks dpkg what's
+installed, so it can't see `~/.local/bin`, and only `sudo apt install pandoc`
+would satisfy it. Ignore it — `rmarkdown::find_pandoc()` searches
+`RSTUDIO_PANDOC` and then `PATH`, taking the highest version it finds.
+
 When it finishes, save the project as the class base project so assignments
 inherit the library.
 
