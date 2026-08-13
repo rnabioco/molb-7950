@@ -1,6 +1,11 @@
-# Install R packages not available on conda-forge/bioconda.
+# Install any manifest package the conda environment didn't supply.
 # Run with: pixi run install-pak-deps
 # Report status without installing: pixi run check-pak-deps
+#
+# On linux-64 conda covers nearly everything, so this is usually a no-op. On
+# osx-arm64 it fills in the Bioconductor packages that have no arm build, and
+# on a bare machine it installs the whole manifest. The package list lives in
+# scripts/packages.R.
 
 options(
   repos = c(
@@ -11,27 +16,8 @@ options(
 args <- commandArgs(trailingOnly = TRUE)
 check_only <- any(args %in% c("--check", "--dry-run"))
 
-# Status helpers ---------------------------------------------------------
-
-# some packages print on load, so swallow their output to keep the report clean
-is_installed <- function(pkg) {
-  ok <- FALSE
-  suppressMessages(suppressWarnings(
-    utils::capture.output(ok <- requireNamespace(pkg, quietly = TRUE))
-  ))
-  ok
-}
-
-pkg_version <- function(pkg) {
-  tryCatch(
-    as.character(utils::packageVersion(pkg)),
-    error = function(e) NA_character_
-  )
-}
-
-status_line <- function(mark, pkg, note = "") {
-  cat(sprintf("  %-9s %-42s %s\n", mark, pkg, note))
-}
+source("scripts/pkg-utils.R")
+source("scripts/packages.R")
 
 # Bootstrap installers ---------------------------------------------------
 
@@ -45,43 +31,28 @@ if (!is_installed("remotes")) {
   install.packages("remotes")
 }
 
-# Package manifest -------------------------------------------------------
+# Install groups ---------------------------------------------------------
 
 groups <- list(
-  # GitHub-only packages
-  # cpp11bigwig arrives as a valr dependency, so it is not listed here.
+  list(
+    name = "CRAN",
+    pkgs = cran_pkgs,
+    install = function(pkgs) install.packages(pkgs)
+  ),
+  list(
+    name = "Bioconductor",
+    pkgs = bioc_pkgs,
+    install = function(pkgs) {
+      BiocManager::install(pkgs, update = FALSE, ask = FALSE)
+    }
+  ),
   list(
     name = "GitHub",
-    pkgs = c(emo = "hadley/emo"),
+    pkgs = github_pkgs,
     install = function(pkgs) {
       for (repo in pkgs) {
         remotes::install_github(repo, upgrade = "never")
       }
-    }
-  ),
-  # Bioconductor packages missing osx-arm64 builds (linux-64 gets them from
-  # conda), plus CRAN packages where the conda-forge version is too old.
-  list(
-    name = "Bioconductor / CRAN",
-    pkgs = c(
-      "alevinQC",
-      "memes",
-      "scran",
-      "universalmotif",
-      "DropletUtils",
-      "GO.db",
-      "TxDb.Hsapiens.UCSC.hg19.knownGene",
-      "org.Hs.eg.db",
-      "BSgenome.Hsapiens.UCSC.hg19",
-      "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene",
-      "BSgenome.Scerevisiae.UCSC.sacCer3",
-      "clustifyrdatahub",
-      #  "rGADEM",
-      "seqLogo",
-      "valr"
-    ),
-    install = function(pkgs) {
-      BiocManager::install(pkgs, update = FALSE, ask = FALSE)
     }
   )
 )
@@ -105,14 +76,7 @@ for (group in groups) {
 
   cat(sprintf("\n%s\n", group$name))
 
-  present <- vapply(names, is_installed, logical(1))
-  for (i in seq_along(names)) {
-    if (present[i]) {
-      status_line("ok", names[i], pkg_version(names[i]))
-    } else {
-      status_line("missing", names[i])
-    }
-  }
+  present <- report_status(names)
   n_present <- n_present + sum(present)
 
   missing_names <- names[!present]

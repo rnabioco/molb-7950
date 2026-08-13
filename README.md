@@ -22,17 +22,36 @@ not available on conda-forge/bioconda are installed via `pak` (see
 Run `pixi run check-pak-deps` to report which of those packages are already
 installed without installing anything.
 
-To add a new package, either add it to `pixi.toml` (if on conda-forge/bioconda)
-or to `scripts/install-pak-deps.R` (if not), then commit `pixi.lock`.
+### Adding a package
+
+`scripts/packages.R` is the single source of truth for R packages, and every
+install/verify script reads from it. To add a package:
+
+1. Add the R name to `scripts/packages.R` (`cran_pkgs`, `bioc_pkgs`, or `github_pkgs`).
+2. Add the conda name to `pixi.toml` if it's on conda-forge/bioconda, then commit `pixi.lock`.
+
+Run `pixi run check-manifest` to confirm the two lists agree — CI fails if they
+drift.
 
 ### Posit Cloud
 
-Create a new template project and manually install packages with `pak`:
+Set up once a year. In a **blank** Posit Cloud project, run this in the console:
 
 ```r
-install.packages("pak")
-pak::pak("tidyverse")
+source("https://raw.githubusercontent.com/rnabioco/molb-7950/main/scripts/setup-posit-cloud.R")
 ```
+
+This pins CRAN to a dated Posit Package Manager snapshot so package versions stay
+frozen for the semester, then installs the whole manifest. Expect a long first run
+and several GB — `BSgenome.Hsapiens.UCSC.hg19` alone is ~700 MB, so check the
+project's disk quota. The script prints the final library size and exits non-zero
+if anything failed to install.
+
+When it finishes, save the project as the class base project so assignments
+inherit the library.
+
+Bump `P3M_SNAPSHOT` at the top of `scripts/setup-posit-cloud.R` each year to pick
+up newer package versions.
 
 ## Previewing content
 
