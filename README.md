@@ -47,11 +47,17 @@ and several GB — `BSgenome.Hsapiens.UCSC.hg19` alone is ~700 MB, so check the
 project's disk quota. The script prints the final library size and exits non-zero
 if anything failed to install.
 
+It also installs a pinned pandoc (~156 MB) into `~/.local/bin` and puts that
+directory on `PATH` via `~/.bashrc` and `~/.Renviron`. Posit Cloud grants no
+sudo, so a real system install into `/usr/bin` isn't possible; RStudio and Quarto
+do each bundle a pandoc, but neither is on `PATH` for terminal or `Rscript` use
+and the version is whatever the image happens to ship.
+
 When it finishes, save the project as the class base project so assignments
 inherit the library.
 
-Bump `P3M_SNAPSHOT` at the top of `scripts/setup-posit-cloud.R` each year to pick
-up newer package versions.
+Bump `P3M_SNAPSHOT` and `PANDOC_VERSION` at the top of
+`scripts/setup-posit-cloud.R` each year to pick up newer versions.
 
 ## Previewing content
 

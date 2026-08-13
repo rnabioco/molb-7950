@@ -12,6 +12,10 @@
 # the R version on the instance.
 P3M_SNAPSHOT <- "2026-08-01"
 
+# Bump alongside P3M_SNAPSHOT. Posit Cloud grants no sudo, so this installs to
+# ~/.local/bin rather than /usr/bin -- see install_pandoc() below.
+PANDOC_VERSION <- "3.10.2"
+
 P3M <- "https://packagemanager.posit.co"
 REPO_RAW <- "https://raw.githubusercontent.com/rnabioco/molb-7950/main"
 
@@ -76,6 +80,126 @@ if (!requireNamespace("BiocManager", quietly = TRUE)) {
 
 cat(sprintf("Bioconductor: %s\n", as.character(BiocManager::version())))
 
+# Pandoc -----------------------------------------------------------------
+
+# RStudio and Quarto each bundle a pandoc, but neither is on PATH for terminal
+# or Rscript use, and both are whatever version the image happens to ship. This
+# installs a pinned pandoc the same way P3M_SNAPSHOT pins the packages.
+#
+# Posit Cloud grants no sudo (installing system dependencies "via sudo or
+# otherwise" is unsupported), so /usr/bin is out of reach. ~/.local/bin lives in
+# the persisted home directory, so it survives into projects made from this one.
+
+append_once <- function(file, line) {
+  existing <- if (file.exists(file)) {
+    readLines(file, warn = FALSE)
+  } else {
+    character(0)
+  }
+  if (line %in% existing) {
+    return(invisible(FALSE))
+  }
+  writeLines(c(existing, line), file)
+  invisible(TRUE)
+}
+
+install_pandoc <- function(version) {
+  bin_dir <- path.expand("~/.local/bin")
+
+  # report whatever pandoc is already reachable, so a version surprise is visible
+  for (src in c(
+    PATH = unname(Sys.which("pandoc")),
+    RStudio = Sys.getenv("RSTUDIO_PANDOC")
+  )) {
+    if (nzchar(src)) {
+      status_line("found", basename(src), src)
+    }
+  }
+
+  arch <- switch(
+    system("uname -m", intern = TRUE)[1],
+    "x86_64" = "amd64",
+    "aarch64" = "arm64",
+    NA_character_
+  )
+  if (is.na(arch)) {
+    cat("  unrecognized architecture -- skipping pandoc\n")
+    return(invisible(FALSE))
+  }
+
+  target <- file.path(bin_dir, "pandoc")
+  if (file.exists(target)) {
+    current <- tryCatch(
+      system2(target, "--version", stdout = TRUE)[1],
+      error = function(e) ""
+    )
+    if (grepl(version, current, fixed = TRUE)) {
+      status_line("ok", "pandoc", sprintf("%s (%s)", version, target))
+      return(invisible(TRUE))
+    }
+  }
+
+  url <- sprintf(
+    "https://github.com/jgm/pandoc/releases/download/%s/pandoc-%s-linux-%s.tar.gz",
+    version,
+    version,
+    arch
+  )
+  cat(sprintf("  installing pandoc %s (%s)\n", version, arch))
+
+  tmp <- tempfile(fileext = ".tar.gz")
+  ok <- tryCatch(
+    {
+      utils::download.file(url, tmp, mode = "wb", quiet = TRUE)
+      TRUE
+    },
+    error = function(e) {
+      cat(sprintf("  download failed: %s\n", conditionMessage(e)))
+      FALSE
+    }
+  )
+  if (!ok) {
+    return(invisible(FALSE))
+  }
+
+  ex <- tempfile()
+  dir.create(ex, recursive = TRUE, showWarnings = FALSE)
+  utils::untar(tmp, exdir = ex)
+
+  dir.create(bin_dir, recursive = TRUE, showWarnings = FALSE)
+  # the tarball also ships pandoc-server and pandoc-lua, ~156 MB each and unused
+  # by the course -- copying only pandoc keeps 312 MB off the project's quota
+  file.copy(
+    file.path(ex, sprintf("pandoc-%s", version), "bin", "pandoc"),
+    target,
+    overwrite = TRUE
+  )
+  Sys.chmod(target, "0755")
+
+  # put it on PATH for the terminal, for future R sessions, and for this one
+  append_once("~/.bashrc", 'export PATH="$HOME/.local/bin:$PATH"')
+  append_once("~/.Renviron", "PATH=${PATH}:${HOME}/.local/bin")
+  Sys.setenv(PATH = paste(Sys.getenv("PATH"), bin_dir, sep = ":"))
+
+  # confirm the binary actually runs and is the version asked for -- a failed
+  # exec returns NA here, which would otherwise read as success
+  installed <- tryCatch(
+    suppressWarnings(system2(target, "--version", stdout = TRUE)[1]),
+    error = function(e) NA_character_
+  )
+  if (!is.na(installed) && grepl(version, installed, fixed = TRUE)) {
+    status_line("installed", "pandoc", sprintf("%s -- %s", installed, target))
+    invisible(TRUE)
+  } else {
+    status_line(
+      "FAILED",
+      "pandoc",
+      if (is.na(installed)) "binary would not run" else installed
+    )
+    invisible(FALSE)
+  }
+}
+
 # Manifest ---------------------------------------------------------------
 
 # Works both from a clone and from a blank project where this file was sourced
@@ -91,6 +215,15 @@ load_shared <- function(file) {
 
 load_shared("pkg-utils.R")
 load_shared("packages.R")
+
+# defined above, but called here because it reports via pkg-utils.R helpers
+cat("\nPandoc\n")
+if (Sys.info()[["sysname"]] == "Linux") {
+  pandoc_ok <- install_pandoc(PANDOC_VERSION)
+} else {
+  pandoc_ok <- TRUE
+  cat("  not Linux -- skipping\n")
+}
 
 # Install ----------------------------------------------------------------
 
@@ -170,8 +303,14 @@ cat(sprintf(
   lib_bytes / 1024^3
 ))
 
-if (length(failed) > 0) {
-  cat(paste(" -", failed, collapse = "\n"), "\n")
+if (!pandoc_ok) {
+  cat(" - pandoc\n")
+}
+
+if (length(failed) > 0 || !pandoc_ok) {
+  if (length(failed) > 0) {
+    cat(paste(" -", failed, collapse = "\n"), "\n")
+  }
   quit(status = 1)
 }
 
