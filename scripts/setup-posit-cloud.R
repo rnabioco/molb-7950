@@ -45,24 +45,70 @@ ubuntu_codename <- function() {
 
 codename <- ubuntu_codename()
 
+# Compiling a package like universalmotif takes well over 1 GB, and a Posit
+# Cloud project can be provisioned with as little as 1 GB, where the OOM killer
+# takes out cc1plus mid-build. Binaries avoid compiling at all, but keep the job
+# count in step with memory rather than cores for anything that does build.
+total_ram_gb <- function() {
+  if (!file.exists("/proc/meminfo")) {
+    return(NA_real_)
+  }
+  line <- grep(
+    "^MemTotal:",
+    readLines("/proc/meminfo", warn = FALSE),
+    value = TRUE
+  )
+  if (length(line) != 1) {
+    return(NA_real_)
+  }
+  as.numeric(gsub("\\D", "", line)) / 1024^2
+}
+
+ram_gb <- total_ram_gb()
+ncpus <- if (is.na(ram_gb)) {
+  1L
+} else {
+  max(1L, min(parallel::detectCores(), floor(ram_gb / 2)))
+}
+
 options(
-  # the __linux__/<codename> segment is what serves precompiled binaries; the
-  # trailing date freezes versions. Bioconductor takes no such segment -- it is
-  # pinned by release instead, which BiocManager derives from the R version.
+  # The __linux__/<codename> segment is what makes P3M serve precompiled
+  # binaries, and Bioconductor needs it just as much as CRAN -- without it the
+  # repo returns sources and every compiled package is built on the instance.
+  # CRAN additionally takes the snapshot date; Bioconductor is pinned by
+  # release, which BiocManager appends to the mirror as /packages/<version>.
   repos = c(
     CRAN = sprintf("%s/cran/__linux__/%s/%s", P3M, codename, P3M_SNAPSHOT)
   ),
-  BioC_mirror = sprintf("%s/bioconductor", P3M),
-  Ncpus = max(1L, parallel::detectCores())
+  BioC_mirror = sprintf("%s/bioconductor/__linux__/%s", P3M, codename),
+  # P3M decides whether to hand back a binary by looking at the User-Agent, so
+  # it has to identify this R build or the request falls back to source.
+  HTTPUserAgent = sprintf(
+    "R/%s R (%s)",
+    getRversion(),
+    paste(getRversion(), R.version$platform, R.version$arch, R.version$os)
+  ),
+  Ncpus = ncpus
 )
 
 cat(sprintf(
-  "\n%s\nUbuntu:  %s\nCRAN:    %s\nLibrary: %s\n",
+  "\n%s\nUbuntu:  %s\nRAM:     %s GB (%d parallel job%s)\nCRAN:    %s\nBioC:    %s\nLibrary: %s\n",
   R.version.string,
   codename,
+  if (is.na(ram_gb)) "?" else sprintf("%.1f", ram_gb),
+  ncpus,
+  if (ncpus == 1) "" else "s",
   getOption("repos")[["CRAN"]],
+  getOption("BioC_mirror"),
   .libPaths()[1]
 ))
+
+if (!is.na(ram_gb) && ram_gb < 4) {
+  cat(sprintf(
+    "\nNote: %.1f GB of RAM is tight. Everything below should arrive as a\nbinary, but any package that does compile may be killed mid-build --\nraise the project's RAM in Posit Cloud if that happens.\n",
+    ram_gb
+  ))
+}
 
 # Bootstrap --------------------------------------------------------------
 

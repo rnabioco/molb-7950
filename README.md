@@ -53,6 +53,12 @@ sudo, so a real system install into `/usr/bin` isn't possible; RStudio and Quart
 do each bundle a pandoc, but neither is on `PATH` for terminal or `Rscript` use
 and the version is whatever the image happens to ship.
 
+**Give the project enough RAM.** Everything should arrive precompiled, but if a
+package does build from source, compiling it can take more than 1 GB and the OOM
+killer will stop it with `Killed signal terminated program cc1plus`. The script
+prints the detected RAM and scales parallel jobs to match; raise the project's
+RAM in Posit Cloud if you hit this.
+
 **Restart R afterwards** — `~/.Renviron` is only read at startup, so the `PATH`
 entry doesn't apply to the session that ran the script. Then check with
 `Sys.which("pandoc")` and `rmarkdown::find_pandoc()`.
