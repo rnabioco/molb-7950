@@ -44,8 +44,8 @@ These data are in two TSV files:
 Load these data sets and inspect.
 
 ```{r}
-qpcr_names <- read_tsv(here("data/qpcr_names.tsv.gz"))
-qpcr_data <- read_tsv(here("data/qpcr_data.tsv.gz"))
+qpcr_names <- read_tsv(here("data/bootcamp/qpcr_names.tsv.gz"))
+qpcr_data <- read_tsv(here("data/bootcamp/qpcr_data.tsv.gz"))
 ```
 
 Note the shape of the data and the names of the rows and columns. Do they remind you of anything?
@@ -102,7 +102,6 @@ qpcr_summary <-
     gene
   ) |>
   summarize(
-    qpcr_tidy,
     exp_mean = mean(value),
     exp_sd = sd(value)
   ) |>
@@ -149,8 +148,8 @@ In addition, two tibbles contain related information:
 Load each of the above files and inspect.
 
 ```{r}
-brauer_gene_exp_wide <- read_tsv(here("data/brauer_gene_exp_wide.tsv.gz"))
-yeast_go_terms <- read_tsv(here("data/yeast_go_terms.tsv.gz"))
+brauer_gene_exp_wide <- read_tsv(here("data/bootcamp/brauer_gene_exp_wide.tsv.gz"))
+yeast_go_terms <- read_tsv(here("data/bootcamp/yeast_go_terms.tsv.gz"))
 ```
 
 ### Tidy the data
@@ -181,7 +180,7 @@ We'll use the [ComplexHeatmap](https://jokergoo.github.io/ComplexHeatmap-referen
 ```{r}
 library(magick)
 brauer_mat_dat <-
-  brauer_gene_exp |>
+  brauer_gene_exp_tidy |>
   arrange(systematic_name) |>
   unite("sample", nutrient:rate) |>
   pivot_wider(
@@ -207,8 +206,8 @@ ComplexHeatmap::Heatmap(
 Examine genes (`common_name`) that start with LEU, URA, PHO, and SUL.
 
 ```{r}
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
-left_join(brauer_gene_exp, yeast_go_terms) |>
+#| fig.alt: "Scatter plots of expression versus growth rate for LEU genes, faceted by gene, with points colored by limiting nutrient and a linear fit per nutrient."
+left_join(brauer_gene_exp_tidy, yeast_go_terms) |>
   filter(str_detect(common_name, "LEU")) |>
   ggplot(
     aes(
@@ -221,5 +220,7 @@ left_join(brauer_gene_exp, yeast_go_terms) |>
   geom_smooth(method = "lm", se = FALSE) +
   facet_wrap(~common_name) +
   theme_cowplot() +
-  scale_color_OkabeIto()
+  scale_color_manual(
+    values = unname(palette.colors(palette = "Okabe-Ito"))
+  )
 ```
