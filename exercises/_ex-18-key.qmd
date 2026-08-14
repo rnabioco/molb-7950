@@ -41,7 +41,6 @@ First, we need to load relevant files:
 
 ```{r}
 #| label: load-data
-#| eval: false
 yeast_tss <- read_bed(
   here("data/block-dna/yeast_tss_chrII.bed.gz")
 )
@@ -59,7 +58,6 @@ Recall that the information encoded in short and long fragments should be reflec
 
 ```{r}
 #| label: load-bigwigs
-#| eval: false
 acc_tbl <-
   tibble(
     file_name = c(
@@ -123,7 +121,6 @@ of a set of reference points.
 
 ```{r}
 #| label: create-tss-coords
-#| eval: false
 region_size_total <- 1500
 region_size_half <- region_size_total / 2
 win_size <- 10
@@ -142,7 +139,6 @@ point (`bed_slop()`) and then break those windows into evenly spaced intervals
 
 ```{r}
 #| label: tss-slop-mw
-#| eval: false
 yeast_tss |>
   bed_slop(genome, both = region_size_half) |>
   bed_makewindows(win_size = win_size)
@@ -179,7 +175,7 @@ acc_tbl <-
       ~ bed_map(
         tss_win_tbl,
         .x,
-        win_signal = sum(score)
+        win_signal = sum(value, na.rm = TRUE)
       )
     )
   )
@@ -210,7 +206,7 @@ Finally, let's plot the data relative to TSS for each of the windows.
 
 ```{r}
 #| label: plot-meta-signals
-#| fig.alt: "Description of the plot - PLEASE FILL IN"
+#| fig.alt: "Line plots of mean chromatin accessibility signal against position relative to transcription start sites, faceted by sample type, for features on S. cerevisiae chromosome II."
 n_tss <- length(unique(yeast_tss$name))
 
 ggplot(
