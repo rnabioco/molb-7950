@@ -381,7 +381,7 @@ Matthew Taliaferro
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-08_files/figure-html/aesthetic_mapping-1.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
+<p><img data-src="slides-08_files/figure-revealjs/aesthetic_mapping-1.png" alt="Four scatter plots of diamond price against carat contrasting where the color aesthetic is declared: in the top-level mapping versus inside a geom, and how that changes whether the smooth line is split by cut." width="960"></p>
 </figure>
 </div>
 </div>
@@ -394,7 +394,7 @@ Matthew Taliaferro
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-08_files/figure-html/aesthetic_mapping-2.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
+<p><img data-src="slides-08_files/figure-revealjs/aesthetic_mapping-2.png" alt="Four scatter plots of diamond price against carat contrasting where the color aesthetic is declared: in the top-level mapping versus inside a geom, and how that changes whether the smooth line is split by cut." width="960"></p>
 </figure>
 </div>
 </div>
@@ -412,7 +412,7 @@ x'</code></pre>
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-08_files/figure-html/aesthetic_mapping-3.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
+<p><img data-src="slides-08_files/figure-revealjs/aesthetic_mapping-3.png" alt="Four scatter plots of diamond price against carat contrasting where the color aesthetic is declared: in the top-level mapping versus inside a geom, and how that changes whether the smooth line is split by cut." width="960"></p>
 </figure>
 </div>
 </div>
@@ -427,7 +427,7 @@ s(x, bs = "cs")'</code></pre>
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-08_files/figure-html/aesthetic_mapping-4.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
+<p><img data-src="slides-08_files/figure-revealjs/aesthetic_mapping-4.png" alt="Four scatter plots of diamond price against carat contrasting where the color aesthetic is declared: in the top-level mapping versus inside a geom, and how that changes whether the smooth line is split by cut." width="960"></p>
 </figure>
 </div>
 </div>
@@ -449,7 +449,7 @@ s(x, bs = "cs")'</code></pre>
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-08_files/figure-html/piping_data-1.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
+<p><img data-src="slides-08_files/figure-revealjs/piping_data-1.png" alt="Scatter plot of price against carat with points colored by cut and a single smoothed trend line fitted across all the data." width="960"></p>
 </figure>
 </div>
 </div>
@@ -473,7 +473,7 @@ s(x, bs = "cs")'</code></pre>
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-08_files/figure-html/single-color-1.png" alt="Description of the plot - PLEASE FILL IN" width="672"></p>
+<p><img data-src="slides-08_files/figure-revealjs/single-color-1.png" alt="Scatter plot of price against carat with all points a single red color and one smoothed trend line." width="960"></p>
 </figure>
 </div>
 </div>
@@ -708,6 +708,44 @@ s(x, bs = "cs")'</code></pre>
         ]
       });
     </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")

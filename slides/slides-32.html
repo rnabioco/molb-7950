@@ -445,7 +445,7 @@ Kristen Wells
 <span id="cb4-5"><a></a></span>
 <span id="cb4-6"><a></a><span class="fu">logcounts</span>(sce)[<span class="dv">50</span><span class="sc">:</span><span class="dv">60</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>11 x 4 sparse Matrix of class "dgTMatrix"
+<pre><code>11 x 4 sparse Matrix of class "dgCMatrix"
            GCTGCAGTCCGATCTC ACTATGGAGGTCCCTG
 CPTP              .                0.2645668
 TAS1R3            .                .        
@@ -496,41 +496,9 @@ ATAD3C            .                .        </code></pre>
 <p><code>getTopHVGs()</code>: Filter output from <code>modelGeneVarByPoisson</code> to select top variable genes. Use <code>prop</code> to identify the proportion of genes to call highly variable or <code>n</code> to identify a number. Often starting between 1000-2000 is best.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb7-2"><a></a>dec <span class="ot">&lt;-</span> <span class="fu">modelGeneVarByPoisson</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>top <span class="ot">&lt;-</span> <span class="fu">getTopHVGs</span>(dec, <span class="at">prop =</span> <span class="fl">0.1</span>)</span>
-<span id="cb9-2"><a></a>top[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-2"><a></a>dec <span class="ot">&lt;-</span> <span class="fu">modelGeneVarByPoisson</span>(sce)</span>
+<span id="cb7-3"><a></a>top <span class="ot">&lt;-</span> <span class="fu">getTopHVGs</span>(dec, <span class="at">prop =</span> <span class="fl">0.1</span>)</span>
+<span id="cb7-4"><a></a>top[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "LYZ"     "S100A9"  "S100A8"  "HLA-DRA"</code></pre>
 </div>
@@ -540,44 +508,44 @@ Warning in .pause_resource(): omp_pause_resource() failed to relinquish resource
 <h2>Variable gene selection ⌨️</h2>
 <p>We can plot mean expression against variance to see the trend and visualize the top variable genes. These are often marker genes of specific cell populations.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>top_genes <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(dec[top[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>], ])</span>
-<span id="cb11-2"><a></a>top_genes<span class="sc">$</span>genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(top_genes)</span>
-<span id="cb11-3"><a></a></span>
-<span id="cb11-4"><a></a><span class="fu">ggplot</span>(<span class="fu">as.data.frame</span>(dec), <span class="fu">aes</span>(mean, total)) <span class="sc">+</span></span>
-<span id="cb11-5"><a></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb11-6"><a></a>  <span class="fu">geom_text</span>(</span>
-<span id="cb11-7"><a></a>    <span class="at">data =</span> top_genes,</span>
-<span id="cb11-8"><a></a>    <span class="fu">aes</span>(<span class="at">label =</span> genes)</span>
-<span id="cb11-9"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb11-10"><a></a>  <span class="fu">stat_function</span>(</span>
-<span id="cb11-11"><a></a>    <span class="at">fun =</span> <span class="cf">function</span>(x) <span class="fu">metadata</span>(dec)<span class="sc">$</span><span class="fu">trend</span>(x),</span>
-<span id="cb11-12"><a></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
-<span id="cb11-13"><a></a>    <span class="at">colour =</span> <span class="st">"blue"</span></span>
-<span id="cb11-14"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>top_genes <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(dec[top[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>], ])</span>
+<span id="cb9-2"><a></a>top_genes<span class="sc">$</span>genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(top_genes)</span>
+<span id="cb9-3"><a></a></span>
+<span id="cb9-4"><a></a><span class="fu">ggplot</span>(<span class="fu">as.data.frame</span>(dec), <span class="fu">aes</span>(mean, total)) <span class="sc">+</span></span>
+<span id="cb9-5"><a></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb9-6"><a></a>  <span class="fu">geom_text</span>(</span>
+<span id="cb9-7"><a></a>    <span class="at">data =</span> top_genes,</span>
+<span id="cb9-8"><a></a>    <span class="fu">aes</span>(<span class="at">label =</span> genes)</span>
+<span id="cb9-9"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb9-10"><a></a>  <span class="fu">stat_function</span>(</span>
+<span id="cb9-11"><a></a>    <span class="at">fun =</span> <span class="cf">function</span>(x) <span class="fu">metadata</span>(dec)<span class="sc">$</span><span class="fu">trend</span>(x),</span>
+<span id="cb9-12"><a></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb9-13"><a></a>    <span class="at">colour =</span> <span class="st">"blue"</span></span>
+<span id="cb9-14"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-5-1.png" alt="Description of the plot - PLEASE FILL IN" width="864" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-5-1.png" alt="Scatter plot of total variance against mean expression for all genes, with the ten most variable genes labelled and the fitted mean-variance trend drawn as a dashed blue line." width="864" class="r-stretch"></section>
 <section id="variable-gene-selection-4" class="slide level2 smaller">
 <h2>Variable gene selection</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a>dec <span class="ot">&lt;-</span> <span class="fu">modelGeneVarByPoisson</span>(sce)</span>
-<span id="cb12-2"><a></a>top <span class="ot">&lt;-</span> <span class="fu">getTopHVGs</span>(dec, <span class="at">prop =</span> <span class="fl">0.1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a>dec <span class="ot">&lt;-</span> <span class="fu">modelGeneVarByPoisson</span>(sce)</span>
+<span id="cb10-2"><a></a>top <span class="ot">&lt;-</span> <span class="fu">getTopHVGs</span>(dec, <span class="at">prop =</span> <span class="fl">0.1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>dec_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(dec)</span>
-<span id="cb13-2"><a></a>dec_df<span class="sc">$</span>genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(dec_df)</span>
-<span id="cb13-3"><a></a>dec_df<span class="sc">$</span>variable_gene <span class="ot">&lt;-</span> dec_df<span class="sc">$</span>genes <span class="sc">%in%</span> top</span>
-<span id="cb13-4"><a></a></span>
-<span id="cb13-5"><a></a><span class="fu">ggplot</span>(dec_df, <span class="fu">aes</span>(mean, total)) <span class="sc">+</span></span>
-<span id="cb13-6"><a></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> variable_gene),</span>
-<span id="cb13-7"><a></a>    <span class="at">size =</span> <span class="fl">0.75</span></span>
-<span id="cb13-8"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb13-9"><a></a>  <span class="fu">stat_function</span>(</span>
-<span id="cb13-10"><a></a>    <span class="at">fun =</span> <span class="cf">function</span>(x) <span class="fu">metadata</span>(dec)<span class="sc">$</span><span class="fu">trend</span>(x),</span>
-<span id="cb13-11"><a></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
-<span id="cb13-12"><a></a>    <span class="at">colour =</span> <span class="st">"blue"</span></span>
-<span id="cb13-13"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a>dec_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(dec)</span>
+<span id="cb11-2"><a></a>dec_df<span class="sc">$</span>genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(dec_df)</span>
+<span id="cb11-3"><a></a>dec_df<span class="sc">$</span>variable_gene <span class="ot">&lt;-</span> dec_df<span class="sc">$</span>genes <span class="sc">%in%</span> top</span>
+<span id="cb11-4"><a></a></span>
+<span id="cb11-5"><a></a><span class="fu">ggplot</span>(dec_df, <span class="fu">aes</span>(mean, total)) <span class="sc">+</span></span>
+<span id="cb11-6"><a></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> variable_gene),</span>
+<span id="cb11-7"><a></a>    <span class="at">size =</span> <span class="fl">0.75</span></span>
+<span id="cb11-8"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb11-9"><a></a>  <span class="fu">stat_function</span>(</span>
+<span id="cb11-10"><a></a>    <span class="at">fun =</span> <span class="cf">function</span>(x) <span class="fu">metadata</span>(dec)<span class="sc">$</span><span class="fu">trend</span>(x),</span>
+<span id="cb11-11"><a></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb11-12"><a></a>    <span class="at">colour =</span> <span class="st">"blue"</span></span>
+<span id="cb11-13"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-6-1.png" alt="Description of the plot - PLEASE FILL IN" width="864" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-6-1.png" alt="Scatter plot of total variance against mean expression with genes colored by whether they were selected as highly variable, and the mean-variance trend as a dashed blue line." width="864" class="r-stretch"></section>
 <section id="dimensionality-reduction" class="slide level2 smaller">
 <h2>Dimensionality reduction</h2>
 <p>Dimensionality reduction is the concept of transforming high dimensional data and representing it with a smaller set of dimensions.</p>
@@ -596,7 +564,7 @@ Warning in .pause_resource(): omp_pause_resource() failed to relinquish resource
 <h2>PCA in 2 dimensions</h2>
 <p>In this two dimensional space, PCA minimizes the distances from a line and every point in the x and y direction (think of a regression line). For a great walk through of how PCA works, see <a href="https://web.stanford.edu/class/bios221/book/07-chap.html#dimension-reduction">section 7.3 in Modern Statistics for Modern Biology</a></p>
 
-<img data-src="slides-32_files/figure-html/pca-intro-1.png" alt="Description of the plot - PLEASE FILL IN" width="672" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/pca-intro-1.png" alt="Side-by-side panels showing two correlated simulated genes before and after PCA; the original scatter is diagonal, and the rotated PCA scatter spreads the variance along PC1, with the same points labelled in each." width="960" class="r-stretch"></section>
 <section id="pca-with-more-dimensions" class="slide level2 smaller">
 <h2>PCA with more dimensions</h2>
 <ul>
@@ -625,7 +593,7 @@ Warning in .pause_resource(): omp_pause_resource() failed to relinquish resource
 </div>
 </div>
 
-<img data-src="slides-32_files/figure-html/unnamed-chunk-8-1.png" width="672" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-8-1.png" width="672" class="r-stretch"></section>
 <section id="pca-as-dimensional-reduction" class="slide level2 smaller">
 <h2>PCA as dimensional reduction</h2>
 <ul>
@@ -634,7 +602,7 @@ Warning in .pause_resource(): omp_pause_resource() failed to relinquish resource
 <li>However adding random noise does not dramatically change PC1 and PC2</li>
 </ul>
 
-<img data-src="slides-32_files/figure-html/unnamed-chunk-9-1.png" alt="Description of the plot - PLEASE FILL IN" width="672" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-9-1.png" alt="Side-by-side PCA plots comparing two correlated dimensions against the same two dimensions plus ten noise dimensions, showing how added noise reduces the variance explained by PC1." width="960" class="r-stretch"></section>
 <section id="computing-pca-with-scater" class="slide level2 smaller">
 <h2>computing PCA with scater ⌨️</h2>
 <p><code>runPCA()</code>: computes an approximate truncated PCA, returning 50 PCs by default.</p>
@@ -642,8 +610,8 @@ Warning in .pause_resource(): omp_pause_resource() failed to relinquish resource
 <p><code>plotPCA()</code>: plot 2 or more PC components</p>
 <p><code>plotReducedDim()</code>: plot 2 or more dimensions or arbitrary <code>reducedDim()</code> matrix</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a><span class="fu">set.seed</span>(<span class="dv">101010011</span>) <span class="co"># runPCA uses a specialize form of PCA that has a random component</span></span>
-<span id="cb15-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runPCA</span>(sce, <span class="at">subset_row =</span> top)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a><span class="fu">set.seed</span>(<span class="dv">101010011</span>) <span class="co"># runPCA uses a specialize form of PCA that has a random component</span></span>
+<span id="cb13-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runPCA</span>(sce, <span class="at">subset_row =</span> top)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
   device 0
@@ -738,14 +706,12 @@ Warning in .pause_resource(): omp_pause_resource() failed to relinquish resource
 Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
   device 0
 Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
   device 0</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a><span class="fu">plotPCA</span>(sce, <span class="at">color_by =</span> <span class="st">"CD3D"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a><span class="fu">plotPCA</span>(sce, <span class="at">color_by =</span> <span class="st">"CD3D"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-10-1.png" width="864" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-10-1.png" width="864" class="r-stretch"></section>
 <section id="computing-pca-with-scater-1" class="slide level2 smaller">
 <h2>computing PCA with scater ⌨️</h2>
 <p><code>runPCA()</code>: computes an approximate truncated PCA, returning 50 PCs by default.</p>
@@ -753,10 +719,10 @@ Warning in .pause_resource(): omp_pause_resource() failed to relinquish resource
 <p><code>plotPCA()</code>: plot 2 or more PC components</p>
 <p><code>plotReducedDim()</code>: plot 2 or more dimensions or arbitrary <code>reducedDim()</code> matrix</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">plotPCA</span>(sce, <span class="at">ncomponents =</span> <span class="dv">4</span>, <span class="at">colour_by =</span> <span class="st">"CD3D"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a><span class="fu">plotPCA</span>(sce, <span class="at">ncomponents =</span> <span class="dv">4</span>, <span class="at">colour_by =</span> <span class="st">"CD3D"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-11-1.png" width="864" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-11-1.png" width="864" class="r-stretch"></section>
 <section id="how-many-pcs-to-retain" class="slide level2 smaller">
 <h2>How many PCs to retain? ⌨️</h2>
 <ul>
@@ -764,15 +730,15 @@ Warning in .pause_resource(): omp_pause_resource() failed to relinquish resource
 <li><p>In practice picking fewer PCs will identify fewer subpopulations, and picking more PCs will find more subpopulations, at the expense of potentially increased noise and longer runtime.</p></li>
 </ul>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a>percent.var <span class="ot">&lt;-</span> <span class="fu">attr</span>(<span class="fu">reducedDim</span>(sce), <span class="st">"percentVar"</span>)</span>
-<span id="cb19-2"><a></a><span class="fu">plot</span>(percent.var, <span class="at">log =</span> <span class="st">"y"</span>, <span class="at">xlab =</span> <span class="st">"PC"</span>, <span class="at">ylab =</span> <span class="st">"Variance explained (%)"</span>, <span class="at">pch =</span> <span class="dv">16</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>percent.var <span class="ot">&lt;-</span> <span class="fu">attr</span>(<span class="fu">reducedDim</span>(sce), <span class="st">"percentVar"</span>)</span>
+<span id="cb17-2"><a></a><span class="fu">plot</span>(percent.var, <span class="at">log =</span> <span class="st">"y"</span>, <span class="at">xlab =</span> <span class="st">"PC"</span>, <span class="at">ylab =</span> <span class="st">"Variance explained (%)"</span>, <span class="at">pch =</span> <span class="dv">16</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-12-1.png" width="864" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-12-1.png" width="864" class="r-stretch"></section>
 <section id="how-is-pca-data-stored" class="slide level2">
 <h2>How is PCA data stored? ⌨️</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="fu">reducedDim</span>(sce, <span class="st">"PCA"</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>] <span class="co"># the PCA is stored in the reducedDim() slot</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="fu">reducedDim</span>(sce, <span class="st">"PCA"</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>] <span class="co"># the PCA is stored in the reducedDim() slot</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                         PC1       PC2       PC3
 GCTGCAGTCCGATCTC -17.7674835 -5.507626 -3.618024
@@ -785,8 +751,8 @@ ACTATGGAGGTCCCTG -0.0009409014
 ATTTCTGTCTCTATGT  0.5574239856
 TATCTGTAGGTGATAT -1.3862063527</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a><span class="co"># we can subset the PCA to fewer dimensions, e.g. 30</span></span>
-<span id="cb22-2"><a></a><span class="fu">reducedDim</span>(sce, <span class="st">"PCA"</span>) <span class="ot">&lt;-</span> <span class="fu">reducedDim</span>(sce, <span class="st">"PCA"</span>)[, <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a><span class="co"># we can subset the PCA to fewer dimensions, e.g. 30</span></span>
+<span id="cb20-2"><a></a><span class="fu">reducedDim</span>(sce, <span class="st">"PCA"</span>) <span class="ot">&lt;-</span> <span class="fu">reducedDim</span>(sce, <span class="st">"PCA"</span>)[, <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="which-dimensional-reduction-to-use" class="slide level2 smaller">
@@ -816,9 +782,9 @@ TATCTGTAGGTGATAT -1.3862063527</code></pre>
 <p>Attempts to balance global and local differences to produce visualization that capture variation in data.</p>
 <p><code>runUMAP()</code> and <code>runTSNE()</code></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="fu">set.seed</span>(<span class="dv">1234323523</span>)</span>
-<span id="cb23-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runUMAP</span>(sce, <span class="at">dimred =</span> <span class="st">"PCA"</span>)</span>
-<span id="cb23-3"><a></a><span class="fu">reducedDims</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="fu">set.seed</span>(<span class="dv">1234323523</span>)</span>
+<span id="cb21-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runUMAP</span>(sce, <span class="at">dimred =</span> <span class="st">"PCA"</span>)</span>
+<span id="cb21-3"><a></a><span class="fu">reducedDims</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>List of length 2
 names(2): PCA UMAP</code></pre>
@@ -828,37 +794,65 @@ names(2): PCA UMAP</code></pre>
 <section id="plotting-the-umap" class="slide level2">
 <h2>Plotting the UMAP ⌨️</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">plotUMAP</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="fu">plotUMAP</span>(sce)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-15-1.png" width="864" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-15-1.png" width="864" class="r-stretch"></section>
 <section id="plotting-the-umap-1" class="slide level2">
 <h2>Plotting the UMAP ⌨️</h2>
 <p>We can also color by any gene expression</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"CD3D"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"CD3D"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-16-1.png" width="864" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-16-1.png" width="864" class="r-stretch"></section>
 <section id="plotting-the-umap-2" class="slide level2">
 <h2>Plotting the UMAP ⌨️</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"CD79A"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"CD79A"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-17-1.png" width="864" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-17-1.png" width="864" class="r-stretch"></section>
 <section id="parameters-affect-the-visualization" class="slide level2 smaller">
 <h2>Parameters affect the visualization</h2>
 <div class="columns">
 <div class="column">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a><span class="fu">set.seed</span>(<span class="dv">101010101</span>)</span>
-<span id="cb28-2"><a></a><span class="fu">plotUMAP</span>(sce) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"spread = 1, min_dist = 0.01"</span>) <span class="sc">+</span></span>
-<span id="cb28-3"><a></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">22</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="fu">set.seed</span>(<span class="dv">101010101</span>)</span>
+<span id="cb26-2"><a></a><span class="fu">plotUMAP</span>(sce) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"spread = 1, min_dist = 0.01"</span>) <span class="sc">+</span></span>
+<span id="cb26-3"><a></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">22</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-32_files/figure-html/unnamed-chunk-18-1.png" width="672"></p>
+<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-18-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">set.seed</span>(<span class="dv">101010101</span>)</span>
+<span id="cb27-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runUMAP</span>(sce, <span class="at">dimred =</span> <span class="st">"PCA"</span>, <span class="at">spread =</span> <span class="dv">2</span>)</span>
+<span id="cb27-3"><a></a><span class="fu">plotUMAP</span>(sce) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"spread = 2, min_dist = 0.01"</span>) <span class="sc">+</span></span>
+<span id="cb27-4"><a></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">22</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-19-1.png" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a><span class="fu">set.seed</span>(<span class="dv">101010101</span>)</span>
+<span id="cb28-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runUMAP</span>(sce, <span class="at">dimred =</span> <span class="st">"PCA"</span>, <span class="at">spread =</span> <span class="dv">1</span>, <span class="at">min_dist =</span> <span class="fl">0.5</span>)</span>
+<span id="cb28-3"><a></a><span class="fu">plotUMAP</span>(sce) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"spread = 1, min_dist = 0.5"</span>) <span class="sc">+</span></span>
+<span id="cb28-4"><a></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">22</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure>
+<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-20-1.png" width="960"></p>
 </figure>
 </div>
 </div>
@@ -866,41 +860,13 @@ names(2): PCA UMAP</code></pre>
 </div><div class="column">
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="fu">set.seed</span>(<span class="dv">101010101</span>)</span>
-<span id="cb29-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runUMAP</span>(sce, <span class="at">dimred =</span> <span class="st">"PCA"</span>, <span class="at">spread =</span> <span class="dv">2</span>)</span>
-<span id="cb29-3"><a></a><span class="fu">plotUMAP</span>(sce) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"spread = 2, min_dist = 0.01"</span>) <span class="sc">+</span></span>
+<span id="cb29-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runUMAP</span>(sce, <span class="at">dimred =</span> <span class="st">"PCA"</span>, <span class="at">spread =</span> <span class="dv">1</span>, <span class="at">min_dist =</span> <span class="fl">0.01</span>, <span class="at">n_neighbors =</span> <span class="dv">3</span>)</span>
+<span id="cb29-3"><a></a><span class="fu">plotUMAP</span>(sce) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"spread = 1, min_dist = 0.5, k =3"</span>) <span class="sc">+</span></span>
 <span id="cb29-4"><a></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">22</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="slides-32_files/figure-html/unnamed-chunk-19-1.png" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="fu">set.seed</span>(<span class="dv">101010101</span>)</span>
-<span id="cb30-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runUMAP</span>(sce, <span class="at">dimred =</span> <span class="st">"PCA"</span>, <span class="at">spread =</span> <span class="dv">1</span>, <span class="at">min_dist =</span> <span class="fl">0.5</span>)</span>
-<span id="cb30-3"><a></a><span class="fu">plotUMAP</span>(sce) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"spread = 1, min_dist = 0.5"</span>) <span class="sc">+</span></span>
-<span id="cb30-4"><a></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">22</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-html/unnamed-chunk-20-1.png" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column">
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a></a><span class="fu">set.seed</span>(<span class="dv">101010101</span>)</span>
-<span id="cb31-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">runUMAP</span>(sce, <span class="at">dimred =</span> <span class="st">"PCA"</span>, <span class="at">spread =</span> <span class="dv">1</span>, <span class="at">min_dist =</span> <span class="fl">0.01</span>, <span class="at">n_neighbors =</span> <span class="dv">3</span>)</span>
-<span id="cb31-3"><a></a><span class="fu">plotUMAP</span>(sce) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">"spread = 1, min_dist = 0.5, k =3"</span>) <span class="sc">+</span></span>
-<span id="cb31-4"><a></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">22</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="slides-32_files/figure-html/unnamed-chunk-21-1.png" width="672"></p>
+<p><img data-src="slides-32_files/figure-revealjs/unnamed-chunk-21-1.png" width="960"></p>
 </figure>
 </div>
 </div>
@@ -926,15 +892,15 @@ names(2): PCA UMAP</code></pre>
 <li><code>clusterCells()</code></li>
 </ul>
 
-<img data-src="slides-32_files/figure-html/clustering-1.png" width="1152" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/clustering-1.png" width="1152" class="r-stretch"></section>
 <section id="clustering-1" class="slide level2 smaller">
 <h2>Clustering ⌨️</h2>
 <p><strong>Note that the clustering is performed on the PCA matrix not the 2D UMAP plot</strong></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a><span class="fu">set.seed</span>(<span class="dv">10101010</span>)</span>
-<span id="cb32-2"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce, <span class="at">use.dimred =</span> <span class="st">"PCA"</span>)</span>
-<span id="cb32-3"><a></a>sce<span class="sc">$</span>clusters <span class="ot">&lt;-</span> clusters</span>
-<span id="cb32-4"><a></a><span class="fu">table</span>(clusters)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="fu">set.seed</span>(<span class="dv">10101010</span>)</span>
+<span id="cb30-2"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce, <span class="at">use.dimred =</span> <span class="st">"PCA"</span>)</span>
+<span id="cb30-3"><a></a>sce<span class="sc">$</span>clusters <span class="ot">&lt;-</span> clusters</span>
+<span id="cb30-4"><a></a><span class="fu">table</span>(clusters)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>clusters
    1    2    3    4    5    6    7    8    9   10   11   12 
@@ -948,17 +914,17 @@ names(2): PCA UMAP</code></pre>
 <h2>Clustering ⌨️</h2>
 <p>The parameters of the clustering can be changed by changing the <code>NNGraphParam</code>. Here are the defaults:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a><span class="fu">library</span>(bluster)</span>
-<span id="cb34-2"><a></a><span class="fu">set.seed</span>(<span class="dv">10101010</span>)</span>
-<span id="cb34-3"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce,</span>
-<span id="cb34-4"><a></a>  <span class="at">use.dimred =</span> <span class="st">"PCA"</span>,</span>
-<span id="cb34-5"><a></a>  <span class="at">BLUSPARAM =</span> <span class="fu">NNGraphParam</span>(</span>
-<span id="cb34-6"><a></a>    <span class="at">k =</span> <span class="dv">10</span>,</span>
-<span id="cb34-7"><a></a>    <span class="at">type =</span> <span class="st">"rank"</span>,</span>
-<span id="cb34-8"><a></a>    <span class="at">cluster.fun =</span> <span class="st">"walktrap"</span></span>
-<span id="cb34-9"><a></a>  )</span>
-<span id="cb34-10"><a></a>)</span>
-<span id="cb34-11"><a></a><span class="fu">table</span>(clusters)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a><span class="fu">library</span>(bluster)</span>
+<span id="cb32-2"><a></a><span class="fu">set.seed</span>(<span class="dv">10101010</span>)</span>
+<span id="cb32-3"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce,</span>
+<span id="cb32-4"><a></a>  <span class="at">use.dimred =</span> <span class="st">"PCA"</span>,</span>
+<span id="cb32-5"><a></a>  <span class="at">BLUSPARAM =</span> <span class="fu">NNGraphParam</span>(</span>
+<span id="cb32-6"><a></a>    <span class="at">k =</span> <span class="dv">10</span>,</span>
+<span id="cb32-7"><a></a>    <span class="at">type =</span> <span class="st">"rank"</span>,</span>
+<span id="cb32-8"><a></a>    <span class="at">cluster.fun =</span> <span class="st">"walktrap"</span></span>
+<span id="cb32-9"><a></a>  )</span>
+<span id="cb32-10"><a></a>)</span>
+<span id="cb32-11"><a></a><span class="fu">table</span>(clusters)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>clusters
    1    2    3    4    5    6    7    8    9   10   11   12 
@@ -971,33 +937,33 @@ names(2): PCA UMAP</code></pre>
 <section id="clustering-3" class="slide level2 smaller">
 <h2>Clustering ⌨️</h2>
 <p>The parameters of the clustering can be changed by changing the <code>NNGraphParam</code>. Here are the defaults:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a><span class="fu">library</span>(bluster)</span>
-<span id="cb36-2"><a></a><span class="fu">set.seed</span>(<span class="dv">10101010</span>)</span>
-<span id="cb36-3"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce,</span>
-<span id="cb36-4"><a></a>  <span class="at">use.dimred =</span> <span class="st">"PCA"</span>,</span>
-<span id="cb36-5"><a></a>  <span class="at">BLUSPARAM =</span> <span class="fu">NNGraphParam</span>(</span>
-<span id="cb36-6"><a></a>    <span class="at">k =</span> <span class="dv">10</span>,</span>
-<span id="cb36-7"><a></a>    <span class="at">type =</span> <span class="st">"rank"</span>,</span>
-<span id="cb36-8"><a></a>    <span class="at">cluster.fun =</span> <span class="st">"walktrap"</span></span>
-<span id="cb36-9"><a></a>  )</span>
-<span id="cb36-10"><a></a>)</span>
-<span id="cb36-11"><a></a><span class="fu">table</span>(clusters)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a><span class="fu">library</span>(bluster)</span>
+<span id="cb34-2"><a></a><span class="fu">set.seed</span>(<span class="dv">10101010</span>)</span>
+<span id="cb34-3"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce,</span>
+<span id="cb34-4"><a></a>  <span class="at">use.dimred =</span> <span class="st">"PCA"</span>,</span>
+<span id="cb34-5"><a></a>  <span class="at">BLUSPARAM =</span> <span class="fu">NNGraphParam</span>(</span>
+<span id="cb34-6"><a></a>    <span class="at">k =</span> <span class="dv">10</span>,</span>
+<span id="cb34-7"><a></a>    <span class="at">type =</span> <span class="st">"rank"</span>,</span>
+<span id="cb34-8"><a></a>    <span class="at">cluster.fun =</span> <span class="st">"walktrap"</span></span>
+<span id="cb34-9"><a></a>  )</span>
+<span id="cb34-10"><a></a>)</span>
+<span id="cb34-11"><a></a><span class="fu">table</span>(clusters)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="clustering-4" class="slide level2 smaller">
 <h2>Clustering ⌨️</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a></a>sce<span class="sc">$</span>clusters <span class="ot">&lt;-</span> clusters</span>
-<span id="cb37-2"><a></a></span>
-<span id="cb37-3"><a></a>color_palette <span class="ot">&lt;-</span> <span class="fu">colorRampPalette</span>(</span>
-<span id="cb37-4"><a></a>  <span class="at">colors =</span> RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="at">n =</span> <span class="dv">9</span>, <span class="at">name =</span> <span class="st">"Set1"</span>)</span>
-<span id="cb37-5"><a></a>)(<span class="fu">length</span>(<span class="fu">unique</span>(clusters)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a></a>sce<span class="sc">$</span>clusters <span class="ot">&lt;-</span> clusters</span>
+<span id="cb35-2"><a></a></span>
+<span id="cb35-3"><a></a>color_palette <span class="ot">&lt;-</span> <span class="fu">colorRampPalette</span>(</span>
+<span id="cb35-4"><a></a>  <span class="at">colors =</span> RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="at">n =</span> <span class="dv">9</span>, <span class="at">name =</span> <span class="st">"Set1"</span>)</span>
+<span id="cb35-5"><a></a>)(<span class="fu">length</span>(<span class="fu">unique</span>(clusters)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="clustering-5" class="slide level2 smaller">
 <h2>Clustering ⌨️</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"clusters"</span>) <span class="sc">+</span></span>
-<span id="cb38-2"><a></a>  ggplot2<span class="sc">::</span><span class="fu">scale_color_manual</span>(<span class="at">values =</span> color_palette)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"clusters"</span>) <span class="sc">+</span></span>
+<span id="cb36-2"><a></a>  ggplot2<span class="sc">::</span><span class="fu">scale_color_manual</span>(<span class="at">values =</span> color_palette)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Scale for colour is already present.
 Adding another scale for colour, which will replace the
@@ -1005,34 +971,34 @@ existing scale.</code></pre>
 </div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-25-1.png" width="672" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-25-1.png" width="960" class="r-stretch"></section>
 <section id="clustering-6" class="slide level2 smaller">
 <h2>Clustering ⌨️</h2>
 <p>Generally increasing the # of neighbors will decrease the number of clusters and vice versa.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a><span class="fu">set.seed</span>(<span class="dv">12121212</span>)</span>
-<span id="cb40-2"><a></a></span>
-<span id="cb40-3"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce,</span>
-<span id="cb40-4"><a></a>  <span class="at">use.dimred =</span> <span class="st">"PCA"</span>,</span>
-<span id="cb40-5"><a></a>  <span class="at">BLUSPARAM =</span> <span class="fu">NNGraphParam</span>(</span>
-<span id="cb40-6"><a></a>    <span class="at">k =</span> <span class="dv">100</span>,</span>
-<span id="cb40-7"><a></a>    <span class="at">type =</span> <span class="st">"rank"</span>,</span>
-<span id="cb40-8"><a></a>    <span class="at">cluster.fun =</span> <span class="st">"walktrap"</span></span>
-<span id="cb40-9"><a></a>  )</span>
-<span id="cb40-10"><a></a>)</span>
-<span id="cb40-11"><a></a></span>
-<span id="cb40-12"><a></a>sce<span class="sc">$</span>coarse_clusters <span class="ot">&lt;-</span> clusters</span>
-<span id="cb40-13"><a></a></span>
-<span id="cb40-14"><a></a>color_palette2 <span class="ot">&lt;-</span> <span class="fu">colorRampPalette</span>(</span>
-<span id="cb40-15"><a></a>  <span class="at">colors =</span> RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="at">n =</span> <span class="dv">9</span>, <span class="at">name =</span> <span class="st">"Set1"</span>)</span>
-<span id="cb40-16"><a></a>)(<span class="fu">length</span>(<span class="fu">unique</span>(clusters)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a><span class="fu">set.seed</span>(<span class="dv">12121212</span>)</span>
+<span id="cb38-2"><a></a></span>
+<span id="cb38-3"><a></a>clusters <span class="ot">&lt;-</span> <span class="fu">clusterCells</span>(sce,</span>
+<span id="cb38-4"><a></a>  <span class="at">use.dimred =</span> <span class="st">"PCA"</span>,</span>
+<span id="cb38-5"><a></a>  <span class="at">BLUSPARAM =</span> <span class="fu">NNGraphParam</span>(</span>
+<span id="cb38-6"><a></a>    <span class="at">k =</span> <span class="dv">100</span>,</span>
+<span id="cb38-7"><a></a>    <span class="at">type =</span> <span class="st">"rank"</span>,</span>
+<span id="cb38-8"><a></a>    <span class="at">cluster.fun =</span> <span class="st">"walktrap"</span></span>
+<span id="cb38-9"><a></a>  )</span>
+<span id="cb38-10"><a></a>)</span>
+<span id="cb38-11"><a></a></span>
+<span id="cb38-12"><a></a>sce<span class="sc">$</span>coarse_clusters <span class="ot">&lt;-</span> clusters</span>
+<span id="cb38-13"><a></a></span>
+<span id="cb38-14"><a></a>color_palette2 <span class="ot">&lt;-</span> <span class="fu">colorRampPalette</span>(</span>
+<span id="cb38-15"><a></a>  <span class="at">colors =</span> RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="at">n =</span> <span class="dv">9</span>, <span class="at">name =</span> <span class="st">"Set1"</span>)</span>
+<span id="cb38-16"><a></a>)(<span class="fu">length</span>(<span class="fu">unique</span>(clusters)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="clustering-7" class="slide level2 smaller">
 <h2>Clustering ⌨️</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"coarse_clusters"</span>) <span class="sc">+</span></span>
-<span id="cb41-2"><a></a>  ggplot2<span class="sc">::</span><span class="fu">scale_color_manual</span>(<span class="at">values =</span> color_palette2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"coarse_clusters"</span>) <span class="sc">+</span></span>
+<span id="cb39-2"><a></a>  ggplot2<span class="sc">::</span><span class="fu">scale_color_manual</span>(<span class="at">values =</span> color_palette2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Scale for colour is already present.
 Adding another scale for colour, which will replace the
@@ -1040,16 +1006,16 @@ existing scale.</code></pre>
 </div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-27-1.png" width="672" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-27-1.png" width="960" class="r-stretch"></section>
 <section id="clustering-8" class="slide level2 smaller">
 <h2>Clustering ⌨️</h2>
 <p>What clusters are the genes S100A8, CD79A and CD3G most highly expressed in? We can use the <code>plotExpression()</code> function to visualize the expression data in each cluster.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a><span class="fu">plotExpression</span>(sce,</span>
-<span id="cb43-2"><a></a>  <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"S100A8"</span>, <span class="st">"CD79A"</span>, <span class="st">"CD3G"</span>), <span class="at">x =</span> <span class="st">"clusters"</span>,</span>
-<span id="cb43-3"><a></a>  <span class="at">color_by =</span> <span class="st">"clusters"</span></span>
-<span id="cb43-4"><a></a>) <span class="sc">+</span></span>
-<span id="cb43-5"><a></a>  ggplot2<span class="sc">::</span><span class="fu">scale_color_manual</span>(<span class="at">values =</span> color_palette)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a></a><span class="fu">plotExpression</span>(sce,</span>
+<span id="cb41-2"><a></a>  <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"S100A8"</span>, <span class="st">"CD79A"</span>, <span class="st">"CD3G"</span>), <span class="at">x =</span> <span class="st">"clusters"</span>,</span>
+<span id="cb41-3"><a></a>  <span class="at">color_by =</span> <span class="st">"clusters"</span></span>
+<span id="cb41-4"><a></a>) <span class="sc">+</span></span>
+<span id="cb41-5"><a></a>  ggplot2<span class="sc">::</span><span class="fu">scale_color_manual</span>(<span class="at">values =</span> color_palette)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Scale for colour is already present.
 Adding another scale for colour, which will replace the
@@ -1057,7 +1023,7 @@ existing scale.</code></pre>
 </div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-28-1.png" width="864" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-28-1.png" width="864" class="r-stretch"></section>
 <section id="how-many-clusters" class="slide level2 smaller">
 <h2>How many clusters?</h2>
 <p>Clustering algorithms produce clusters, even if there isn’t anything meaningfully different between cells. Determining the optimal number of clusters can be tricky and also dependent on the biological question.</p>
@@ -1081,40 +1047,8 @@ existing scale.</code></pre>
 <section id="identifying-marker-genes-using-scoremarkers-1" class="slide level2 smaller">
 <h2>Identifying marker genes using scoreMarkers() ⌨️</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a>mrks <span class="ot">&lt;-</span> <span class="fu">scoreMarkers</span>(sce, sce<span class="sc">$</span>clusters)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0
-Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a>mrks</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a>mrks <span class="ot">&lt;-</span> <span class="fu">scoreMarkers</span>(sce, sce<span class="sc">$</span>clusters)</span>
+<span id="cb43-2"><a></a>mrks</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>List of length 19
 names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
@@ -1125,7 +1059,7 @@ names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
 <h2>How do we identify marker genes? ⌨️</h2>
 <p>To identify marker genes we will need to decide of cutoffs based on effect sizes. There are many reported by scoreMarkers().</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a><span class="fu">colnames</span>(mrks[[<span class="dv">1</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a><span class="fu">colnames</span>(mrks[[<span class="dv">1</span>]])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "self.average"          "other.average"        
  [3] "self.detected"         "other.detected"       
@@ -1162,37 +1096,37 @@ names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
 <h2>Cluster 1 genes ⌨️</h2>
 <p>Plotting top genes ranked by <code>mean.AUC</code> for cluster 1.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a>cluster1_markers <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(mrks[[<span class="dv">1</span>]]) <span class="sc">|&gt;</span> tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"gene"</span>)</span>
-<span id="cb51-2"><a></a></span>
-<span id="cb51-3"><a></a>ordered <span class="ot">&lt;-</span> cluster1_markers <span class="sc">|&gt;</span></span>
-<span id="cb51-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(mean.AUC <span class="sc">&gt;</span> <span class="fl">0.5</span>) <span class="sc">|&gt;</span></span>
-<span id="cb51-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(mean.AUC))</span>
-<span id="cb51-6"><a></a></span>
-<span id="cb51-7"><a></a><span class="fu">plotExpression</span>(sce,</span>
-<span id="cb51-8"><a></a>  <span class="at">features =</span> <span class="fu">head</span>(ordered<span class="sc">$</span>gene),</span>
-<span id="cb51-9"><a></a>  <span class="at">x =</span> <span class="st">"clusters"</span>,</span>
-<span id="cb51-10"><a></a>  <span class="at">colour_by =</span> <span class="st">"clusters"</span>,</span>
-<span id="cb51-11"><a></a>  <span class="at">color =</span> color_palette</span>
-<span id="cb51-12"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a>cluster1_markers <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(mrks[[<span class="dv">1</span>]]) <span class="sc">|&gt;</span> tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"gene"</span>)</span>
+<span id="cb47-2"><a></a></span>
+<span id="cb47-3"><a></a>ordered <span class="ot">&lt;-</span> cluster1_markers <span class="sc">|&gt;</span></span>
+<span id="cb47-4"><a></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(mean.AUC <span class="sc">&gt;</span> <span class="fl">0.5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb47-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(mean.AUC))</span>
+<span id="cb47-6"><a></a></span>
+<span id="cb47-7"><a></a><span class="fu">plotExpression</span>(sce,</span>
+<span id="cb47-8"><a></a>  <span class="at">features =</span> <span class="fu">head</span>(ordered<span class="sc">$</span>gene),</span>
+<span id="cb47-9"><a></a>  <span class="at">x =</span> <span class="st">"clusters"</span>,</span>
+<span id="cb47-10"><a></a>  <span class="at">colour_by =</span> <span class="st">"clusters"</span>,</span>
+<span id="cb47-11"><a></a>  <span class="at">color =</span> color_palette</span>
+<span id="cb47-12"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-31-1.png" width="864" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-31-1.png" width="864" class="r-stretch"></section>
 <section id="top-marker-heatmap" class="slide level2 smaller">
 <h2>Top marker heatmap ⌨️</h2>
 <p>Next we will extract the top N markers from each cluster, ranked on <code>mean.AUC</code>, then plot the average expression of these markers in each cluster as a heatmap.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a></a>n_top_markers <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb52-2"><a></a></span>
-<span id="cb52-3"><a></a>top_markers <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(mrks, <span class="sc">~</span> {</span>
-<span id="cb52-4"><a></a>  .x <span class="sc">|&gt;</span></span>
-<span id="cb52-5"><a></a>    <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb52-6"><a></a>    tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"gene"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb52-7"><a></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(mean.AUC <span class="sc">&gt;</span> <span class="fl">0.5</span>) <span class="sc">|&gt;</span></span>
-<span id="cb52-8"><a></a>    dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(mean.AUC)) <span class="sc">|&gt;</span></span>
-<span id="cb52-9"><a></a>    dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span>n_top_markers)</span>
-<span id="cb52-10"><a></a>}, <span class="at">.id =</span> <span class="st">"cluster"</span>)</span>
-<span id="cb52-11"><a></a></span>
-<span id="cb52-12"><a></a>top_markers[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a></a>n_top_markers <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb48-2"><a></a></span>
+<span id="cb48-3"><a></a>top_markers <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(mrks, <span class="sc">~</span> {</span>
+<span id="cb48-4"><a></a>  .x <span class="sc">|&gt;</span></span>
+<span id="cb48-5"><a></a>    <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb48-6"><a></a>    tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(<span class="st">"gene"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-7"><a></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(mean.AUC <span class="sc">&gt;</span> <span class="fl">0.5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-8"><a></a>    dplyr<span class="sc">::</span><span class="fu">arrange</span>(<span class="fu">desc</span>(mean.AUC)) <span class="sc">|&gt;</span></span>
+<span id="cb48-9"><a></a>    dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span>n_top_markers)</span>
+<span id="cb48-10"><a></a>}, <span class="at">.id =</span> <span class="st">"cluster"</span>)</span>
+<span id="cb48-11"><a></a></span>
+<span id="cb48-12"><a></a>top_markers[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   cluster      gene
 1        1    S100A9
@@ -1212,19 +1146,15 @@ names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
 <h2>Top marker heatmap ⌨️</h2>
 <p>Next we will extract the top N markers from each cluster, ranked on <code>mean.AUC</code>, then plot the average expression of these markers in each cluster as a heatmap.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a></a><span class="fu">plotGroupedHeatmap</span>(sce,</span>
-<span id="cb54-2"><a></a>  <span class="at">features =</span> <span class="fu">unique</span>(top_markers<span class="sc">$</span>gene),</span>
-<span id="cb54-3"><a></a>  <span class="at">group =</span> <span class="st">"clusters"</span>,</span>
-<span id="cb54-4"><a></a>  <span class="at">center =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb54-5"><a></a>  <span class="at">zlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>)</span>
-<span id="cb54-6"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in .pause_resource(): omp_pause_resource() failed to relinquish resources on
-  device 0</code></pre>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a></a><span class="fu">plotGroupedHeatmap</span>(sce,</span>
+<span id="cb50-2"><a></a>  <span class="at">features =</span> <span class="fu">unique</span>(top_markers<span class="sc">$</span>gene),</span>
+<span id="cb50-3"><a></a>  <span class="at">group =</span> <span class="st">"clusters"</span>,</span>
+<span id="cb50-4"><a></a>  <span class="at">center =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb50-5"><a></a>  <span class="at">zlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb50-6"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
-<img data-src="slides-32_files/figure-html/unnamed-chunk-33-1.png" width="864" class="r-stretch"></section>
+<img data-src="slides-32_files/figure-revealjs/unnamed-chunk-33-1.png" width="864" class="r-stretch"></section>
 <section id="some-differnetial-expression-thoughts" class="slide level2 smaller">
 <h2>Some differnetial expression thoughts</h2>
 <ul>
@@ -1278,11 +1208,11 @@ names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
 <section id="annotating-cell-types-2" class="slide level2 smaller">
 <h2>Annotating cell types ⌨️</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a></a><span class="fu">library</span>(clustifyr)</span>
-<span id="cb56-2"><a></a><span class="fu">library</span>(clustifyrdatahub)</span>
-<span id="cb56-3"><a></a></span>
-<span id="cb56-4"><a></a><span class="co"># get reference dataset derived from a microarray experiment of sorted immune cell types</span></span>
-<span id="cb56-5"><a></a><span class="fu">ref_hema_microarray</span>()[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a><span class="fu">library</span>(clustifyr)</span>
+<span id="cb51-2"><a></a><span class="fu">library</span>(clustifyrdatahub)</span>
+<span id="cb51-3"><a></a></span>
+<span id="cb51-4"><a></a><span class="co"># get reference dataset derived from a microarray experiment of sorted immune cell types</span></span>
+<span id="cb51-5"><a></a><span class="fu">ref_hema_microarray</span>()[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       Basophils CD4+ Central Memory CD4+ Effector Memory
 DDR1    6.084244            5.967502             5.933039
@@ -1302,15 +1232,15 @@ GUCA1A            5.227415             5.090882</code></pre>
 <section id="annotating-cell-types-3" class="slide level2 smaller">
 <h2>Annotating cell types ⌨️</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a></a>res <span class="ot">&lt;-</span> <span class="fu">clustify</span>(</span>
-<span id="cb58-2"><a></a>  sce, <span class="co"># SingleCellExperiment object</span></span>
-<span id="cb58-3"><a></a>  <span class="at">ref_mat =</span> <span class="fu">ref_hema_microarray</span>(), <span class="co"># cell type reference data</span></span>
-<span id="cb58-4"><a></a>  <span class="at">cluster_col =</span> <span class="st">"clusters"</span>, <span class="co"># column in metadata with clusters</span></span>
-<span id="cb58-5"><a></a>  <span class="co"># don't add to SingleCellExperiment object, just return results</span></span>
-<span id="cb58-6"><a></a>  <span class="at">obj_out =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb58-7"><a></a>  <span class="co"># use variable genes for comparison</span></span>
-<span id="cb58-8"><a></a>  <span class="at">query_genes =</span> top,</span>
-<span id="cb58-9"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a></a>res <span class="ot">&lt;-</span> <span class="fu">clustify</span>(</span>
+<span id="cb53-2"><a></a>  sce, <span class="co"># SingleCellExperiment object</span></span>
+<span id="cb53-3"><a></a>  <span class="at">ref_mat =</span> <span class="fu">ref_hema_microarray</span>(), <span class="co"># cell type reference data</span></span>
+<span id="cb53-4"><a></a>  <span class="at">cluster_col =</span> <span class="st">"clusters"</span>, <span class="co"># column in metadata with clusters</span></span>
+<span id="cb53-5"><a></a>  <span class="co"># don't add to SingleCellExperiment object, just return results</span></span>
+<span id="cb53-6"><a></a>  <span class="at">obj_out =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb53-7"><a></a>  <span class="co"># use variable genes for comparison</span></span>
+<span id="cb53-8"><a></a>  <span class="at">query_genes =</span> top,</span>
+<span id="cb53-9"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>object data retrieval complete, moving to similarity computation</code></pre>
 </div>
@@ -1326,68 +1256,68 @@ GUCA1A            5.227415             5.090882</code></pre>
 <div class="cell-output cell-output-stderr">
 <pre><code>similarity computation completed, matrix of 19 x 38, preparing output</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a></a>res[<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a></a>res[<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Basophils CD4+ Central Memory CD4+ Effector Memory
-1         NA                  NA                   NA
-10        NA                  NA                   NA
-11        NA                  NA                   NA
-12        NA                  NA                   NA
-13        NA                  NA                   NA
-14        NA                  NA                   NA
-15        NA                  NA                   NA
-16        NA                  NA                   NA
-17        NA                  NA                   NA
-18        NA                  NA                   NA
-19        NA                  NA                   NA
-2         NA                  NA                   NA
+1  0.5391577           0.4109044            0.4175789
+10 0.4864098           0.7611729            0.7508550
+11 0.3934955           0.6543164            0.6524137
+12 0.6334860           0.5397417            0.5286066
+13 0.4403703           0.7167892            0.7130962
+14 0.4698015           0.6124650            0.6353573
+15 0.6276477           0.5491292            0.5376051
+16 0.4898186           0.7684104            0.7564951
+17 0.6290119           0.5585241            0.5465643
+18 0.5663005           0.5268356            0.5238459
+19 0.3401107           0.3162277            0.3187009
+2  0.6224826           0.5750690            0.5685470
    CD8+ Central Memory
-1                   NA
-10                  NA
-11                  NA
-12                  NA
-13                  NA
-14                  NA
-15                  NA
-16                  NA
-17                  NA
-18                  NA
-19                  NA
-2                   NA</code></pre>
+1            0.3937236
+10           0.7242135
+11           0.6326337
+12           0.5156066
+13           0.6813315
+14           0.6520486
+15           0.5281219
+16           0.7361972
+17           0.5350501
+18           0.5022861
+19           0.3016247
+2            0.5525266</code></pre>
 </div>
 </div>
 </section>
 <section id="annotating-cell-types-4" class="slide level2 smaller">
 <h2>Annotating cell types ⌨️</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a></a><span class="co">#| fig.height: 5</span></span>
-<span id="cb66-2"><a></a><span class="co">#| fig.width: 5</span></span>
-<span id="cb66-3"><a></a><span class="fu">library</span>(ComplexHeatmap)</span>
-<span id="cb66-4"><a></a><span class="fu">Heatmap</span>(<span class="fu">t</span>(res))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a></a><span class="co">#| fig.height: 5</span></span>
+<span id="cb61-2"><a></a><span class="co">#| fig.width: 5</span></span>
+<span id="cb61-3"><a></a><span class="fu">library</span>(ComplexHeatmap)</span>
+<span id="cb61-4"><a></a><span class="fu">Heatmap</span>(<span class="fu">t</span>(res))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="annotating-cell-types-5" class="slide level2 smaller">
 <h2>Annotating cell types ⌨️</h2>
 <p>We can use <code>cor_to_call</code> to pull out the highest correlation for each cluster</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a></a><span class="fu">cor_to_call</span>(res) <span class="co"># assign cluster to highest correlation cell type (above a threshold). Cell types lower than a threshold will be assigned as unassigned.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a></a><span class="fu">cor_to_call</span>(res) <span class="co"># assign cluster to highest correlation cell type (above a threshold). Cell types lower than a threshold will be assigned as unassigned.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="annotating-cell-types-6" class="slide level2 smaller">
 <h2>Annotating cell types ⌨️</h2>
 <p>Or we can insert the classification results into the SingleCellExperiment object directly which will be called <code>type</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb68-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">clustify</span>(</span>
-<span id="cb68-3"><a></a>  sce, <span class="co"># seurat object</span></span>
-<span id="cb68-4"><a></a>  <span class="at">ref_mat =</span> <span class="fu">ref_hema_microarray</span>(), <span class="co"># cell type reference data</span></span>
-<span id="cb68-5"><a></a>  <span class="at">cluster_col =</span> <span class="st">"clusters"</span>, <span class="co"># column in metadata with clusters</span></span>
-<span id="cb68-6"><a></a>  <span class="at">obj_out =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb68-7"><a></a>  <span class="co"># use variable genes for comparison</span></span>
-<span id="cb68-8"><a></a>  <span class="at">query_genes =</span> top</span>
-<span id="cb68-9"><a></a>)</span>
-<span id="cb68-10"><a></a></span>
-<span id="cb68-11"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"type"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb63-2"><a></a>sce <span class="ot">&lt;-</span> <span class="fu">clustify</span>(</span>
+<span id="cb63-3"><a></a>  sce, <span class="co"># seurat object</span></span>
+<span id="cb63-4"><a></a>  <span class="at">ref_mat =</span> <span class="fu">ref_hema_microarray</span>(), <span class="co"># cell type reference data</span></span>
+<span id="cb63-5"><a></a>  <span class="at">cluster_col =</span> <span class="st">"clusters"</span>, <span class="co"># column in metadata with clusters</span></span>
+<span id="cb63-6"><a></a>  <span class="at">obj_out =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb63-7"><a></a>  <span class="co"># use variable genes for comparison</span></span>
+<span id="cb63-8"><a></a>  <span class="at">query_genes =</span> top</span>
+<span id="cb63-9"><a></a>)</span>
+<span id="cb63-10"><a></a></span>
+<span id="cb63-11"><a></a><span class="fu">plotUMAP</span>(sce, <span class="at">colour_by =</span> <span class="st">"type"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="saving-and-sharing-objects" class="slide level2">
@@ -1398,17 +1328,17 @@ GUCA1A            5.227415             5.090882</code></pre>
 </ol>
 <p>To save the UMI count matrix use write10xcounts() from the DropletUtils Bioconductor package.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a></a>mat <span class="ot">&lt;-</span> <span class="fu">counts</span>(sce)</span>
-<span id="cb69-2"><a></a><span class="fu">write10xCounts</span>(<span class="st">"path/to/output"</span>, mat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a></a>mat <span class="ot">&lt;-</span> <span class="fu">counts</span>(sce)</span>
+<span id="cb64-2"><a></a><span class="fu">write10xCounts</span>(<span class="st">"path/to/output"</span>, mat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="saving-and-sharing-objects-1" class="slide level2">
 <h2>Saving and sharing objects</h2>
 <p>When saving the <code>colData()</code> it is also a nice gesture to include the UMAP coordinates that you used for the main visualizations in your manuscript. The clustering and UMAP coordinates are very hard to reproduce because of the non-deterministic elements of the algorithms.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a></a><span class="fu">cbind</span>(<span class="fu">colData</span>(sce), <span class="fu">reducedDim</span>(sce, <span class="st">"UMAP"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb70-2"><a></a>  <span class="fu">rownames_to_column</span>(<span class="st">"cell"</span>) <span class="sc">|&gt;</span> ()</span>
-<span id="cb70-3"><a></a>  <span class="fu">write_csv</span>(<span class="st">"cell-level-metadata.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a></a><span class="fu">cbind</span>(<span class="fu">colData</span>(sce), <span class="fu">reducedDim</span>(sce, <span class="st">"UMAP"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb65-2"><a></a>  <span class="fu">rownames_to_column</span>(<span class="st">"cell"</span>) <span class="sc">|&gt;</span> ()</span>
+<span id="cb65-3"><a></a>  <span class="fu">write_csv</span>(<span class="st">"cell-level-metadata.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="saving-and-sharing-objects-2" class="slide level2">
@@ -1662,6 +1592,44 @@ GUCA1A            5.227415             5.090882</code></pre>
         ]
       });
     </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
     <script id="quarto-html-after-body" type="application/javascript">
       window.document.addEventListener("DOMContentLoaded", function (event) {
         const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
