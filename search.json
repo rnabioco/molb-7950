@@ -33,6 +33,76 @@
     ]
   },
   {
+    "objectID": "problem-sets/ps-15.html",
+    "href": "problem-sets/ps-15.html",
+    "title": "Problem Set Stats Bootcamp - class 15",
+    "section": "",
+    "text": "── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.1.4     ✔ readr     2.1.5\n✔ forcats   1.0.0     ✔ stringr   1.5.1\n✔ ggplot2   3.5.2     ✔ tibble    3.3.0\n✔ lubridate 1.9.4     ✔ tidyr     1.3.1\n✔ purrr     1.1.0     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nAttaching package: 'rstatix'\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\n\nAttaching package: 'janitor'\n\n\nThe following object is masked from 'package:rstatix':\n\n    make_clean_names\n\n\nThe following objects are masked from 'package:stats':\n\n    chisq.test, fisher.test\n\n\nhere() starts at /Users/jayhesselberth/devel/rnabioco/molb-7950\n\n\nAttaching package: 'cowplot'\n\n\nThe following object is masked from 'package:lubridate':\n\n    stamp\nang &lt;- read_csv(here(\"data/bootcamp/edger.csv.gz\")) |&gt;\n  clean_names() |&gt;\n  filter(fdr &lt; 0.05) |&gt;\n  select(log_fc_time0_25:log_fc_time8) |&gt;\n  as.matrix()\n\nRows: 17942 Columns: 17\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr  (1): gene\ndbl (16): FDR, maxabsfc, logFC.Time0.25, logFC.Time0.5, logFC.Time0.75, logF...\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.\n\ncolnames(ang) &lt;- gsub(pattern = \"log_fc_\", \"\", colnames(ang))"
+  },
+  {
+    "objectID": "problem-sets/ps-15.html#problem-1",
+    "href": "problem-sets/ps-15.html#problem-1",
+    "title": "Problem Set Stats Bootcamp - class 15",
+    "section": "Problem # 1",
+    "text": "Problem # 1\nMake sure to run the chunk above. The data represent the avg fold change in gene expression for an angiotensin II time course (.25, .5, .75, 1, 1.5, 2, 3, 4, 6, 8, 24 hrs) compared to unstimulated."
+  },
+  {
+    "objectID": "problem-sets/ps-15.html#correlation-7-pts",
+    "href": "problem-sets/ps-15.html#correlation-7-pts",
+    "title": "Problem Set Stats Bootcamp - class 15",
+    "section": "correlation — (7 pts)",
+    "text": "correlation — (7 pts)\nCreate hierarchical clustering heatmap of pairwise pearson correlation coefficients. And provide 1-2 observations.\n\n# scale ang (remember the transpose trick)\n\n# pairwise pearson correlation\n\n# make heatmap\n\nTimepoints close to each other tend to correlate strongly with each other. The 4,6, and 8 hr time points are the most different from all others."
+  },
+  {
+    "objectID": "problem-sets/ps-15.html#pca-7-pts",
+    "href": "problem-sets/ps-15.html#pca-7-pts",
+    "title": "Problem Set Stats Bootcamp - class 15",
+    "section": "PCA — (7 pts)",
+    "text": "PCA — (7 pts)\nPerform PCA and visualize PC1 vs PC2.Provide 1-2 observations.\n\npc_ang &lt;- prcomp(ang)\n\n# gather info from summary\npca_data_info &lt;- \n\npca_data_info &lt;- round(x = pca_data_info, digits = 3)\n\n# we make a dataframe out of the rotations and will use this to plot\npca_plot_data &lt;- \n\n# plot\n\nThere is a a circular patter that seems to correspond to the timepoints. Interestingly, 24 appears to group back with 0.25 indicating the system is resetting w/respect to RNA levels."
+  },
+  {
+    "objectID": "problem-sets/ps-15.html#calculate-the-empirical-p-value-of-the-cluster-most-enriched-for-dux4-targets-by-sampling-6-pts",
+    "href": "problem-sets/ps-15.html#calculate-the-empirical-p-value-of-the-cluster-most-enriched-for-dux4-targets-by-sampling-6-pts",
+    "title": "Problem Set Stats Bootcamp - class 15",
+    "section": "Calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling — (6 pts)",
+    "text": "Calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling — (6 pts)\nstep 1:\n\nidentify which cluster is the most enriched for DUX4 targets using Geneoverlap.\nassign the cluster number as a variable named c to use later.\n\n\n# read in data\ncd &lt;- read_tsv(here(\"data\", \"dux4_clustering_results.csv.gz\"))\n\n# list of genes by dux4 targeting\nduxList &lt;- split(cd$gene_symbol, cd$??)\n\n# list of genes by clustering\nclustList &lt;- split(cd$gene_symbol, as.factor(cd$??))\n\n# calculate all overlaps between dux targets and clusters\ngom.duxclust &lt;- newGOM(??List,\n                       ??List,\n                       genome.size = nrow(cd)\n                       )\n\n# retrieve p-values for each cluster and sort\ngetMatrix(gom.duxclust, \"pval\") |&gt;\n  t() |&gt;\n  as.data.frame() |&gt;\n  rownames_to_column(var = \"clust\") |&gt;\n  as.tibble() |&gt;\n  arrange(target)\n\n# which cluster has the lowest p-value? 1 or 4 or 5...\nc &lt;- ??\n\nstep 2:\n\ndetermine the number of total genes in that cluster. save this as a variable named cN to use later. you will need to know this to figure out how many genes to sample from the whole data set. the size matching will make it so the random samples in your null distribution is better matched to your observation specific to the cluster of interest.\ndetermine the number of DUX4 targets in the cluster. save this as a variable named cNt to use later. this is the number that you are interested in comparing between the null distribution and your observation. remember, the p-value tells you the probability that the null hypothesis could generate an equal or more extreme observation.\n\n\n# how many genes are in cluster 5?\ncN &lt;- cd |&gt;\n  filter(Cluster == c) |&gt;\n  nrow()\n\n# how many dux targets are in cluster 5?\ncNt &lt;- cd |&gt;\n  filter(Cluster == c & target == \"target\") |&gt;\n  nrow()\n\nstep 3:\ngenerate 1000 random sample of the size cN from all genes in the data set, and for each random sample save the number of genes that are DUX4 targets. this is your null distribution.\nvisualize the distribution of the # of DUX4 targets in these 1000 random (your null distribution) and overlay the number of DUX4 targets you observed in the cluster that was most enriched for DUX4 targets, cNt.\n\n# first simplify the problem by figuring out the # of DUX4 targets for 1 random sample\nsample_n(tbl = cd, size = ??) |&gt;\n  filter(target == \"??\") |&gt;\n  nrow()\n  \n\n# create an empty vector for storing the # dux targets for each iteration. call this `sampled_targets`\nsampled_targets &lt;- vector()\n\n# then use a for loop to do it 1000 times and save the results in `sampled_targets`\n\nfor (i in 1:1000) {\n  sampled_targets[i] &lt;- ??? # hint see simplification\n}\n\n# create a density plot using sampled targets and add a vertical line at `cNt`\nggplot(n, aes(x = ??)) +\n  geom_density() +\n  geom_vline(xintercept = ??, color = \"red\") +\n  theme_cowplot()\n\n# how many times did a simulation have more dux4 targets than `cNt`\nsampled_targets[sampled_targets &gt; ??] |&gt;\n  length()\n\nWhat is the p-value?\np &lt; 0.001\nWhat is your interpretation?\nThe null hypothesis that the number of DUX4 targets in cluster 5 IS NOT WELL SUPPORTED.\nThe number of DUX4 targets in c5 is very unlikely to be explained by chance."
+  },
+  {
+    "objectID": "problem-sets/ps-13.html",
+    "href": "problem-sets/ps-13.html",
+    "title": "Problem Set Stats Bootcamp - class 13",
+    "section": "",
+    "text": "── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.2.0     ✔ readr     2.2.0\n✔ forcats   1.0.1     ✔ stringr   1.6.0\n✔ ggplot2   4.0.2     ✔ tibble    3.3.1\n✔ lubridate 1.9.5     ✔ tidyr     1.3.2\n✔ purrr     1.2.1     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nAttaching package: 'rstatix'\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\n\nAttaching package: 'janitor'\n\n\nThe following object is masked from 'package:rstatix':\n\n    make_clean_names\n\n\nThe following objects are masked from 'package:stats':\n\n    chisq.test, fisher.test\n\n\nhere() starts at /Users/mtaliaferro/Documents/GitHub/molb-7950\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]\nbiochem &lt;- biochem[, keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\", \"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename gender to sex\nb &lt;- inner_join(biochem, weight, by = \"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex = gender)"
+  },
+  {
+    "objectID": "problem-sets/ps-13.html#problem-1",
+    "href": "problem-sets/ps-13.html#problem-1",
+    "title": "Problem Set Stats Bootcamp - class 13",
+    "section": "Problem # 1",
+    "text": "Problem # 1\nIs there an association between mouse calcium and sodium levels?\n1. Make a scatterplot to inspect variable\n2. Are they normal (enough)?\nWhich test will you use and why?\n3. Declare null hypothesis \\(\\mathcal{H}_0\\)\n\n\\(\\mathcal{H}_0\\) is that there is no dependency/association between \\(calcium\\) and \\(sodium\\)\n4. Calculate and plot the correlation on a scatterplot"
+  },
+  {
+    "objectID": "problem-sets/ps-13.html#problem-2",
+    "href": "problem-sets/ps-13.html#problem-2",
+    "title": "Problem Set Stats Bootcamp - class 13",
+    "section": "Problem # 2",
+    "text": "Problem # 2"
+  },
+  {
+    "objectID": "problem-sets/ps-13.html#do-mouse-calcium-levels-explain-mouse-sodium-levels-if-so-to-what-extent",
+    "href": "problem-sets/ps-13.html#do-mouse-calcium-levels-explain-mouse-sodium-levels-if-so-to-what-extent",
+    "title": "Problem Set Stats Bootcamp - class 13",
+    "section": "Do mouse calcium levels explain mouse sodium levels? If so, to what extent?",
+    "text": "Do mouse calcium levels explain mouse sodium levels? If so, to what extent?\nUse a linear model to do the following:\n1. Specify the Response and Explanatory variables — (2 pts)\n\nThe response variable y is The explantory variable x is\n\n2. Declare the null hypothesis — (1 pts)\n\nThe null hypothesis is …\n\n3. Use the lm function to create a fit (linear model)\nalso save the slope and intercept for later\n4. Add residuals to the data and create a plot visualizing the residuals\n5. Calculate the \\(R^2\\) and compare to \\(R^2\\) from fit\n\\(R^2 = 1 - \\displaystyle \\frac {SS_{fit}}{SS_{null}}\\)\n\\(SS_{fit} = \\sum_{i=1}^{n} (data - line)^2 = \\sum_{i=1}^{n} (y_{i} - (\\beta_0 \\cdot 1+ \\beta_1 \\cdot x)^2\\)\n\\(SS_{null}\\) — sum of squared errors around the mean of \\(y\\)\n\\(SS_{null} = \\sum_{i=1}^{n} (data - mean)^2 = \\sum_{i=1}^{n} (y_{i} - \\overline{y})^2\\)\n6. Using \\(R^2\\), describe the extent to which calcium explains sodium levels\n7. Report (do not calculate) the \\(p-value\\) and your decision on the null\n\nThe null hypothesis is …\n\nCalcium levels to predict sodium levels."
+  },
+  {
+    "objectID": "problem-sets/ps-13.html#problem-3",
+    "href": "problem-sets/ps-13.html#problem-3",
+    "title": "Problem Set Stats Bootcamp - class 13",
+    "section": "Problem # 3",
+    "text": "Problem # 3\nWhat is the association between mouse weight and age levels for different sexes?\n1. Calculate the pearson correlation coefficient between weight and age for females and males\n2. Describe your observations\n\nThe relationship between weight and age…"
+  },
+  {
     "objectID": "problem-sets/ps-10.html",
     "href": "problem-sets/ps-10.html",
     "title": "Problem Set Stats Bootcamp - class 10",
@@ -352,11 +422,424 @@
     "href": "index.html",
     "title": "MOLB 7950: Informatics and Statistics for Molecular Biology",
     "section": "",
-    "text": "This page contains an outline of the topics, content, and assignments for the semester. Note that this schedule will be updated as the semester progresses, with all changes documented here.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nMOLB 7950 - Fall 2026 Schedule\n\n\nClasses held in-person from 9:00-10:30am in TBD\n\n\n\nDate\nBlock\nTopic\nInstructor\nTitle\n\nLinks\n\n\n\nPrepare\nSlides\nExercises\nHW\nKey\n\n\n\n\nWeek 1\n\n\n01\nMon, Aug 24, 2026\nBootcamp\nR\nTaliaferro\nIntro to R & RStudio\n📖\n📄\n💪\n🧠\n.\n\n\n02\nTue, Aug 25, 2026\nBootcamp\nR\nTaliaferro\nTidy data & tidyr\n📖\n📄\n💪\n🧠\n.\n\n\n03\nWed, Aug 26, 2026\nBootcamp\nR\nTaliaferro\ndplyr\n📖\n📄\n💪\n🧠\n.\n\n\n04\nThu, Aug 27, 2026\nBootcamp\nR\nTaliaferro\nggplot2\n📖\n📄\n💪\n🧠\n.\n\n\n05\nFri, Aug 28, 2026\nBootcamp\nR\nTaliaferro\nggplot2\n.\n📄\n💪\n🧠\n.\n\n\nWeek 2\n\n\n06\nMon, Aug 31, 2026\nBootcamp\nR\nTaliaferro\ntidyverse odds & ends\n📖\n📄\n💪\n🧠\n.\n\n\n07\nTue, Sep 1, 2026\nBootcamp\nR\nTaliaferro\ntidyverse odds & ends\n.\n📄\n.\n🧠\n.\n\n\n08\nWed, Sep 2, 2026\nBootcamp\nR\nTaliaferro\nputting it all together\n📖\n📄\n💪\n🧠\n.\n\n\n09\nThu, Sep 3, 2026\nBootcamp\nStatistics\nRamachandran\nStats intro and history\n.\n📄\n💪\n🧠\n.\n\n\n10\nFri, Sep 4, 2026\nBootcamp\nStatistics\nRamachandran\nProbability and descriptive stats\n.\n📄\n💪\n🧠\n.\n\n\nWeek 3\n\n\n11\nMon, Sep 7, 2026\n-\n-\n-\nNO CLASS - LABOR DAY\n.\n.\n.\n.\n.\n\n\n12\nTue, Sep 8, 2026\nBootcamp\nStatistics\nRamachandran\nHypothesis testing\n.\n.\n.\n.\n.\n\n\n13\nWed, Sep 9, 2026\nBootcamp\nStatistics\nRamachandran\nHypothesis testing\n.\n.\n.\n.\n.\n\n\n14\nThu, Sep 10, 2026\nBootcamp\nStatistics\nRamachandran\nExploratory data analysis\n.\n.\n.\n.\n.\n\n\n15\nFri, Sep 11, 2026\nBootcamp\nStatistics\nRamachandran\nBig data concerns\n.\n.\n.\n.\n.\n\n\nWeek 4\n\n\n16\nMon, Sep 14, 2026\nDNA\nMapping chromatin structure and transactions\nRamachandran\nExperimental overview\n📖\n.\n.\n.\n.\n\n\n17\nWed, Sep 16, 2026\nDNA\nChromatin-centric methods\nRamachandran\nInformation from fragment length distributions\n.\n.\n.\n.\n.\n\n\n18\nFri, Sep 18, 2026\nDNA\nProblem Set Review\n-\n-\n.\n.\n.\n.\n.\n\n\nWeek 5\n\n\n19\nMon, Sep 21, 2026\nDNA\nChromatin-centric methods\nRamachandran\nMeta-plots and heatmaps\n.\n.\n.\n.\n.\n\n\n20\nWed, Sep 23, 2026\nDNA\nFactor-centric methods\nRamachandran\nPeak calling\n📖\n.\n.\n.\n.\n\n\n21\nFri, Sep 25, 2026\nDNA\nFactor-centric methods\nRamachandran\nSequence motif analysis\n.\n.\n.\n.\n.\n\n\nWeek 6\n\n\n22\nMon, Sep 28, 2026\nRNA\nRNA-seq Overview\nTaliaferro\nConcepts and techniques\n.\n.\n.\n.\n.\n\n\n23\nWed, Sep 30, 2026\nRNA\nImport, filtering, QC\nTaliaferro\nmetrics and sample similarity\n.\n.\n.\n.\n.\n\n\n24\nFri, Oct 2, 2026\nRNA\nDifferential Gene Expression\nTaliaferro\nDESeq2\n.\n.\n.\n.\n.\n\n\nWeek 7\n\n\n25\nMon, Oct 5, 2026\nRNA\nAlternative Splicing\nTaliaferro\nrMATS\n.\n.\n.\n.\n.\n\n\n26\nWed, Oct 7, 2026\nRNA\nNO CLASS\n-\nNO CLASS\n.\n.\n.\n.\n.\n\n\n27\nFri, Oct 9, 2026\nRNA\nRBP-RNA 1\nTaliaferro\nData integrations\n.\n.\n.\n.\n.\n\n\nWeek 8\n\n\n28\nMon, Oct 12, 2026\nRNA\nRBP-RNA 2\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n29\nWed, Oct 14, 2026\nRNA\nPositron setup\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n30\nFri, Oct 16, 2026\n-\n-\n-\nNO CLASS: MOLB RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 9\n\n\n31\nMon, Oct 19, 2026\nRNA\nSingle-cell\nHesselberth\n-\n.\n.\n.\n.\n.\n\n\n32\nWed, Oct 21, 2026\nRNA\nSingle-cell\nHesselberth\n-\n.\n📄\n.\n.\n.\n\n\n33\nFri, Oct 23, 2026\n-\n-\n-\nNO CLASS: CSDV RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 10\n\n\n34\nMon, Oct 26, 2026\nFinal\n-\n-\nFinal project presentations\n.\n.\n.\n.\n.\n\n\n35\nWed, Oct 28, 2026\nFinal\n-\n-\nFinal project presentations\n.\n.\n.\n.\n.",
+    "text": "This page contains an outline of the topics, content, and assignments for the semester. Note that this schedule will be updated as the semester progresses, with all changes documented here.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nMOLB 7950 - Fall 2026 Schedule\n\n\nClasses held in-person from 9:00-10:30am in TBD\n\n\n\nDate\nBlock\nTopic\nInstructor\nTitle\n\nLinks\n\n\n\nPrepare\nSlides\nExercises\nHW\nKey\n\n\n\n\nWeek 1\n\n\n01\nMon, Aug 24, 2026\nBootcamp\nR\nTaliaferro\nIntro to R & RStudio\n📖\n📄\n💪\n🧠\n.\n\n\n02\nTue, Aug 25, 2026\nBootcamp\nR\nTaliaferro\nTidy data & tidyr\n📖\n📄\n💪\n🧠\n.\n\n\n03\nWed, Aug 26, 2026\nBootcamp\nR\nTaliaferro\ndplyr\n📖\n📄\n💪\n🧠\n.\n\n\n04\nThu, Aug 27, 2026\nBootcamp\nR\nTaliaferro\nggplot2\n📖\n📄\n💪\n🧠\n.\n\n\n05\nFri, Aug 28, 2026\nBootcamp\nR\nTaliaferro\nggplot2\n.\n📄\n💪\n🧠\n.\n\n\nWeek 2\n\n\n06\nMon, Aug 31, 2026\nBootcamp\nR\nTaliaferro\ntidyverse odds & ends\n📖\n📄\n💪\n🧠\n.\n\n\n07\nTue, Sep 1, 2026\nBootcamp\nR\nRamachandran\ntidyverse odds & ends\n.\n📄\n.\n🧠\n.\n\n\n08\nWed, Sep 2, 2026\nBootcamp\nR\nTaliaferro\nputting it all together\n📖\n📄\n💪\n🧠\n.\n\n\n09\nThu, Sep 3, 2026\nBootcamp\nStatistics\nRamachandran\nStats intro and history\n.\n📄\n💪\n🧠\n.\n\n\n10\nFri, Sep 4, 2026\nBootcamp\nStatistics\nRamachandran\nProbability and descriptive stats\n.\n📄\n💪\n🧠\n.\n\n\nWeek 3\n\n\n11\nMon, Sep 7, 2026\n-\n-\n-\nNO CLASS - LABOR DAY\n.\n.\n.\n.\n.\n\n\n12\nTue, Sep 8, 2026\nBootcamp\nStatistics\nRamachandran\nHypothesis testing\n.\n📄\n💪\n🧠\n.\n\n\n13\nWed, Sep 9, 2026\nBootcamp\nStatistics\nRamachandran\nHypothesis testing\n.\n📄\n💪\n🧠\n.\n\n\n14\nThu, Sep 10, 2026\nBootcamp\nStatistics\nRamachandran\nExploratory data analysis\n.\n📄\n💪\n🧠\n.\n\n\n15\nFri, Sep 11, 2026\nBootcamp\nStatistics\nRamachandran\nBig data concerns\n.\n📄\n💪\n🧠\n.\n\n\nWeek 4\n\n\n16\nMon, Sep 14, 2026\nDNA\nMapping chromatin structure and transactions\nRamachandran\nExperimental overview\n📖\n.\n.\n.\n.\n\n\n17\nWed, Sep 16, 2026\nDNA\nChromatin-centric methods\nRamachandran\nInformation from fragment length distributions\n.\n.\n.\n.\n.\n\n\n18\nFri, Sep 18, 2026\nDNA\nProblem Set Review\n-\n-\n.\n.\n.\n.\n.\n\n\nWeek 5\n\n\n19\nMon, Sep 21, 2026\nDNA\nChromatin-centric methods\nRamachandran\nMeta-plots and heatmaps\n.\n.\n.\n.\n.\n\n\n20\nWed, Sep 23, 2026\nDNA\nFactor-centric methods\nRamachandran\nPeak calling\n📖\n.\n.\n.\n.\n\n\n21\nFri, Sep 25, 2026\nDNA\nFactor-centric methods\nRamachandran\nSequence motif analysis\n.\n.\n.\n.\n.\n\n\nWeek 6\n\n\n22\nMon, Sep 28, 2026\nRNA\nRNA-seq Overview\nTaliaferro\nConcepts and techniques\n.\n.\n.\n.\n.\n\n\n23\nWed, Sep 30, 2026\nRNA\nImport, filtering, QC\nTaliaferro\nmetrics and sample similarity\n.\n.\n.\n.\n.\n\n\n24\nFri, Oct 2, 2026\nRNA\nDifferential Gene Expression\nTaliaferro\nDESeq2\n.\n.\n.\n.\n.\n\n\nWeek 7\n\n\n25\nMon, Oct 5, 2026\nRNA\nAlternative Splicing\nTaliaferro\nrMATS\n.\n.\n.\n.\n.\n\n\n26\nWed, Oct 7, 2026\nRNA\nNO CLASS\n-\nNO CLASS\n.\n.\n.\n.\n.\n\n\n27\nFri, Oct 9, 2026\nRNA\nRBP-RNA 1\nTaliaferro\nData integrations\n.\n.\n.\n.\n.\n\n\nWeek 8\n\n\n28\nMon, Oct 12, 2026\nRNA\nRBP-RNA 2\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n29\nWed, Oct 14, 2026\nRNA\nPositron setup\nTaliaferro\n-\n.\n.\n.\n.\n.\n\n\n30\nFri, Oct 16, 2026\n-\n-\n-\nNO CLASS: MOLB RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 9\n\n\n31\nMon, Oct 19, 2026\nRNA\nSingle-cell\nHesselberth\n-\n.\n.\n.\n.\n.\n\n\n32\nWed, Oct 21, 2026\nRNA\nSingle-cell\nHesselberth\n-\n.\n📄\n.\n.\n.\n\n\n33\nFri, Oct 23, 2026\n-\n-\n-\nNO CLASS: CSDV RETREAT\n.\n.\n.\n.\n.\n\n\nWeek 10\n\n\n34\nMon, Oct 26, 2026\nFinal\n-\n-\nFinal project presentations\n.\n.\n.\n.\n.\n\n\n35\nWed, Oct 28, 2026\nFinal\n-\n-\nFinal project presentations\n.\n.\n.\n.\n.",
     "crumbs": [
       "Course information",
       "Schedule"
     ]
+  },
+  {
+    "objectID": "exercises/ex-14.html",
+    "href": "exercises/ex-14.html",
+    "title": "Stats Bootcamp - class 14",
+    "section": "",
+    "text": "# we are reading the data directly from the internet\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1,6,9,14,15,24:28)]\nbiochem &lt;- biochem[,keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\",\"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename sex to sex\nb &lt;- inner_join(biochem, weight, by=\"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex=gender)"
+  },
+  {
+    "objectID": "exercises/ex-14.html#prepare-mouse-biochem-data",
+    "href": "exercises/ex-14.html#prepare-mouse-biochem-data",
+    "title": "Stats Bootcamp - class 14",
+    "section": "",
+    "text": "# we are reading the data directly from the internet\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1,6,9,14,15,24:28)]\nbiochem &lt;- biochem[,keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\",\"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename sex to sex\nb &lt;- inner_join(biochem, weight, by=\"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex=gender)"
+  },
+  {
+    "objectID": "exercises/ex-14.html#learning-objectives",
+    "href": "exercises/ex-14.html#learning-objectives",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Learning objectives",
+    "text": "Learning objectives\n\n\nFormulate and Execute null hypothesis testing\n\nIdentify and Perform the proper statistical test for data type/comparison\n\nCalculate and Interpret p-values"
+  },
+  {
+    "objectID": "exercises/ex-14.html#random-variables",
+    "href": "exercises/ex-14.html#random-variables",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Random variables",
+    "text": "Random variables\nResponse Variable ( y - aka dependent or outcome variable): this variable is predicted or its variation is explained by the explanatory variable. In an experiment, this is the outcome that is measured following manipulation of the explanatory variable.\nExplanatory Variable ( x - aka independent or predictor variable): explains variations in the response variable. In an experiment, it is manipulated by the researcher."
+  },
+  {
+    "objectID": "exercises/ex-14.html#the-simplicity-underlying-common-tests",
+    "href": "exercises/ex-14.html#the-simplicity-underlying-common-tests",
+    "title": "Stats Bootcamp - class 14",
+    "section": "The simplicity underlying common tests",
+    "text": "The simplicity underlying common tests\nMost of the common statistical models (t-test, correlation, ANOVA; etc.) are special cases of linear models or a very close approximation. This simplicity means that there is less to learn. It all comes down to:\n\n\\(y = a \\cdot x + b\\)\n\nThis needless complexity multiplies when students try to rote learn the parametric assumptions underlying each test separately rather than deducing them from the linear model."
+  },
+  {
+    "objectID": "exercises/ex-14.html#stats-equation-for-a-line",
+    "href": "exercises/ex-14.html#stats-equation-for-a-line",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Stats equation for a line",
+    "text": "Stats equation for a line\nModel:\n\\(y\\) equals the intercept (\\(\\beta_0\\)) pluss a slope (\\(\\beta_1\\)) times \\(x\\).\n\\(y = \\beta_0 + \\beta_1 x \\qquad \\qquad \\mathcal{H}_0: \\beta_1 = 0\\)\n… which is the same as \\(y = b + a \\cdot x\\).\nThe short hand for this in R: y ~ 1 + x\nR interprets this as:\ny = 1*number + x*othernumber\nThe task of t-tests, lm, etc., is simply to find the numbers that best predict \\(y\\)."
+  },
+  {
+    "objectID": "exercises/ex-14.html#appropriate-statistical-test-cheatsheet",
+    "href": "exercises/ex-14.html#appropriate-statistical-test-cheatsheet",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Appropriate statistical test cheatsheet",
+    "text": "Appropriate statistical test cheatsheet"
+  },
+  {
+    "objectID": "exercises/ex-14.html#comparing-means-between-two-groups",
+    "href": "exercises/ex-14.html#comparing-means-between-two-groups",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Comparing means between two groups",
+    "text": "Comparing means between two groups\nWe will compare mouse \\(weight\\) by \\(sex\\).\n\n# plot weight by sex\np_ws &lt;- ggplot(b,\n               aes(x = sex, y = weight)) +\n  geom_jitter(size=1) +\n  geom_hline(yintercept = mean(b$weight),\n             color = \"red\") +\n  theme_cowplot()\n\n\n# plot weight by sex with mean weight and mean weight by sex\np_ws2 &lt;- ggplot(b,\n                aes(x = sex, y = weight)) +\n  geom_jitter(size=1) +\n  geom_hline(yintercept = mean(b$weight),\n             color = \"red\") +\n stat_summary(fun = \"mean\", geom = \"point\",  fill = \"blue\", shape = 23, size=3) +\n  theme_cowplot()\n\nplot_grid(p_ws, p_ws2, ncol = 2, labels = c(\"weight\",\"weight by sex\"), scale = c(1,1))"
+  },
+  {
+    "objectID": "exercises/ex-14.html#step-1-can-mouse-sex-explain-mouse-weight",
+    "href": "exercises/ex-14.html#step-1-can-mouse-sex-explain-mouse-weight",
+    "title": "Stats Bootcamp - class 14",
+    "section": "STEP 1: Can mouse sex explain mouse weight?",
+    "text": "STEP 1: Can mouse sex explain mouse weight?\nModel: \\(y_{i} = \\beta_0 \\cdot 1+ \\beta_1 \\cdot x_{i}\\)\nNull Hypothesis: \\(\\mathcal{H}_0: \\beta_1 = 0\\)\n\\(\\mathcal{H}_0:\\) mouse \\(sex\\) does NOT explain \\(weight\\)\nAlternative Hypothesis: \\(\\mathcal{H}_1: \\beta_1 \\neq 0\\)\n\\(\\mathcal{H}_1:\\) mouse \\(sex\\) does explain \\(weight\\)\nImportant: \\(x_{i}\\) is an indicator (0 or 1) saying whether data point i was sampled from one or the other group (female or male).\nWe will explore this in more detail soon."
+  },
+  {
+    "objectID": "exercises/ex-14.html#step-2-fit-linear-model-and-examine-results",
+    "href": "exercises/ex-14.html#step-2-fit-linear-model-and-examine-results",
+    "title": "Stats Bootcamp - class 14",
+    "section": "STEP 2: Fit linear model and examine results",
+    "text": "STEP 2: Fit linear model and examine results\n\nfit_ws &lt;-\n\nFit summary:\n\n??(fit_ws) |&gt;\n  gt() |&gt;\n  fmt_number(columns = r.squared:statistic, decimals = 3)\n\nCoefficient summary:\n\n??(fit_ws) |&gt;\n  gt() |&gt;\n  fmt_number(columns =estimate:statistic, decimals = 3)"
+  },
+  {
+    "objectID": "exercises/ex-14.html#collecting-residuals-and-other-information",
+    "href": "exercises/ex-14.html#collecting-residuals-and-other-information",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Collecting residuals and other information",
+    "text": "Collecting residuals and other information\nadd residuals and other information\n\n#augment\nb_ws &lt;-\n\n\n# mean weight\navg_w &lt;-\n\n# mean weight female\navg_wf &lt;-\n\n\n# mean weight male\navg_wm &lt;-"
+  },
+  {
+    "objectID": "exercises/ex-14.html#step-3-visualize-the-error-around-fit",
+    "href": "exercises/ex-14.html#step-3-visualize-the-error-around-fit",
+    "title": "Stats Bootcamp - class 14",
+    "section": "STEP 3: Visualize the error around fit",
+    "text": "STEP 3: Visualize the error around fit\n\n# plot of data with mean and colored by residuals\n\np_ws &lt;- ggplot(b_ws,\n               aes(x = sex, y = weight)) +\n  geom_point(position = position_jitter(),\n             aes(color = .resid)) +\n  scale_color_gradient2(low = \"blue\",\n                        mid = \"black\",\n                        high = \"yellow\") +\n    geom_hline(yintercept = ??,\n               color = \"darkgrey\") +\n  geom_segment(aes(x=.5, xend=1.5,\n                   y=??, yend=??),\n               color=\"red\") +\n    geom_segment(aes(x=1.5, xend=2.5,\n                     y=??), yend=??,\n                 color=\"red\") +\n  theme_cowplot()\n\np_ws"
+  },
+  {
+    "objectID": "exercises/ex-14.html#step-3-visualize-the-error-around-the-null-mean-weight",
+    "href": "exercises/ex-14.html#step-3-visualize-the-error-around-the-null-mean-weight",
+    "title": "Stats Bootcamp - class 14",
+    "section": "STEP 3: Visualize the error around the null (mean weight)",
+    "text": "STEP 3: Visualize the error around the null (mean weight)\n\np_w &lt;- ggplot(b_ws,\n               aes(x = sex, y = weight)) +\n  geom_point(position = position_jitter(),\n             aes(color = weight-avg_w)) +\n  scale_color_gradient2(low = \"blue\",\n                        mid = \"black\",\n                        high = \"yellow\") +\n    geom_hline(yintercept = avg_w,\n               color = \"darkgrey\") +\n  theme_cowplot()\n\np_w"
+  },
+  {
+    "objectID": "exercises/ex-14.html#compare-fit-error-to-null-error-graphically",
+    "href": "exercises/ex-14.html#compare-fit-error-to-null-error-graphically",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Compare fit error to null error graphically",
+    "text": "Compare fit error to null error graphically\n\nplot_grid(p_ws, p_w, ncol = 2, labels = c(\"weight by sex\",\"weight by intercept\"))\n\nWe are fitting 2 lines to the data. For the weight by sex model of the fit (left), we fit 2 lines. For the weight by null model (right) we fit 1 line."
+  },
+  {
+    "objectID": "exercises/ex-14.html#exceptions-mice-with-highest-residuals",
+    "href": "exercises/ex-14.html#exceptions-mice-with-highest-residuals",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Exceptions: mice with highest residuals",
+    "text": "Exceptions: mice with highest residuals\n\nb_ws |&gt;\n  arrange(??) |&gt;\n  top_n(15) |&gt;\n  select(subject_name,weight,sex,.resid,.fitted) |&gt;\n  gt() |&gt;\n  fmt_number(decimals = 2)"
+  },
+  {
+    "objectID": "exercises/ex-14.html#matrices-interlude-begin",
+    "href": "exercises/ex-14.html#matrices-interlude-begin",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Matrices Interlude Begin\n",
+    "text": "Matrices Interlude Begin\n\n\nHow do we go from 2 fit lines to 1 equation\n\nSince we don’t want to calculate any of this by hand, the framework needs to be flexible such that a computer can execute for different flavors of comparison (cont y vs cont x, cont y vs 2 or more categorical x, …)."
+  },
+  {
+    "objectID": "exercises/ex-14.html#lets-focus-on-just-a-few-mice",
+    "href": "exercises/ex-14.html#lets-focus-on-just-a-few-mice",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Let’s focus on just a few mice",
+    "text": "Let’s focus on just a few mice\nRemember that:\\(weight\\) is \\(y\\)\\(F_{avg}\\) is the average \\(weight\\) of \\(females\\)\\(M_{avg}\\) is the average \\(weight\\) of \\(males\\)\n. . .\nA048054885, female\\(y_{85}= 1 \\cdot F_{avg} + 0 \\cdot M_{avg} + residual_{85}\\)\nA067109771, female\\(y_{71}= 1 \\cdot F_{avg} + 0 \\cdot M_{avg} + residual_{71}\\)\n. . .\nA066822351, male\\(y_{51}= 0 \\cdot F_{avg} + 1 \\cdot M_{avg} + residual_{51}\\)\nA048274362, male\\(y_{62}= 0 \\cdot F_{avg} + 1 \\cdot M_{avg} + residual_{62}\\)"
+  },
+  {
+    "objectID": "exercises/ex-14.html#lets-focus-on-just-a-few-mice-1",
+    "href": "exercises/ex-14.html#lets-focus-on-just-a-few-mice-1",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Let’s focus on just a few mice",
+    "text": "Let’s focus on just a few mice\n\nb_ws |&gt;\n  filter(subject_name %in% c(\"A048054885\",\"A067109771\",\"A066822351\",\"A048274362\")) |&gt;\n  select(subject_name, weight, sex, .fitted, .resid) |&gt;\n  arrange(sex) |&gt;\n  gt()"
+  },
+  {
+    "objectID": "exercises/ex-14.html#need-a-volunteer",
+    "href": "exercises/ex-14.html#need-a-volunteer",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Need a volunteer",
+    "text": "Need a volunteer\nMe: Ooohh my, imagine how tedious it would be to do this for all mice…Volunteer: Wait a sec…isn’t there a way to formulate this as a matrix algebra problem.Me: You’re right - I’m so glad you asked! Let’s conjur matrix-magic to solve this problem..\n. . .\n\\(f_{avg} = \\beta_0\\) is the average \\(weight\\) of \\(female\\) mice\\(m_{avg} = \\beta_1\\) is the average \\(weight\\) of \\(male\\) mice\n. . .\n\\(\\begin{bmatrix} y_{85} \\\\ y_{71} \\\\ y_{51} \\\\y_{62} \\end{bmatrix} = \\begin{bmatrix} 1 & 0 \\\\ 1 & 0 \\\\ 0 & 1 \\\\ 0 & 1 \\end{bmatrix} \\cdot \\begin{bmatrix} \\beta_0 \\\\ \\beta_1 \\end{bmatrix} + \\begin{bmatrix} e_{85} \\\\ e_{71} \\\\ e_{51} \\\\e_{62} \\end{bmatrix}\\)\n. . .\nSo basically this looks like the same equation for fitting a line we’ve been discussing, just w/a few more dimensions :)\nThis is a conceptual peak into the underbelly of how the \\(\\beta\\) cofficients and least squares is performed using matrix operations (linear algebra). If you are interested in learning more see references at the end of the slides.\nMatrices Interlude FIN"
+  },
+  {
+    "objectID": "exercises/ex-14.html#calculate-r2",
+    "href": "exercises/ex-14.html#calculate-r2",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Calculate \\(R^2\\)\n",
+    "text": "Calculate \\(R^2\\)\n\n\\(SS_{fit}\\) — sum of squared errors around the least-squares fit\n\nss_fit &lt;-\n\n\\(SS_{null}\\) — sum of squared errors around the mean of \\(y\\)\n\nss_null &lt;-\n\n\\(R^2 = 1 - \\displaystyle \\frac {SS_{fit}}{SS_{null}}\\)\n\nrsq &lt;- ??\n\n\nglance(fit_ws) |&gt; select(r.squared)\n\nWoohoo!!"
+  },
+  {
+    "objectID": "exercises/ex-14.html#compare-to-traditional-t-test",
+    "href": "exercises/ex-14.html#compare-to-traditional-t-test",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Compare to traditional t-test",
+    "text": "Compare to traditional t-test\n\nb |&gt;\n  ?? |&gt;\n  select(-c(n1,n2,df)) |&gt;\n  gt()\n\n\ntidy(fit_ws) |&gt;\n  select(term, estimate, statistic, p.value) |&gt;\n  gt()"
+  },
+  {
+    "objectID": "exercises/ex-14.html#prep-data-for-fams",
+    "href": "exercises/ex-14.html#prep-data-for-fams",
+    "title": "Stats Bootcamp - class 14",
+    "section": "prep data for fams",
+    "text": "prep data for fams\n\n# i have pre-selected some families to compare\nmyfams &lt;- c(\"B1.5:E1.4(4) B1.5:A1.4(5)\",\n            \"F1.3:A1.2(3) F1.3:E2.2(3)\",\n            \"A1.3:D1.2(3) A1.3:H1.2(3)\",\n            \"D5.4:G2.3(4) D5.4:C4.3(4)\")\n\n# only keep the familys in myfams\nbfam &lt;- b |&gt;\n  filter(family %in% myfams) |&gt;\n  droplevels()\n\n# simplify family names and make factor\nbfam$family &lt;- gsub(pattern = \"\\\\..*\", replacement = \"\", x = bfam$family) |&gt;\n  as.factor()\n\n\n# make B1 the reference (most similar to overall mean)\nbfam$family &lt;- relevel(x = bfam$family, ref =\"B1\")"
+  },
+  {
+    "objectID": "exercises/ex-14.html#step-1-can-family-explain-weight",
+    "href": "exercises/ex-14.html#step-1-can-family-explain-weight",
+    "title": "Stats Bootcamp - class 14",
+    "section": "STEP 1: Can family explain weight?",
+    "text": "STEP 1: Can family explain weight?\nANOVA -&gt; comparing means of 3 or more groups.\nLet’s compare the \\(weight\\) by \\(family\\), but only for a few selected families.\n\nggplot(data = ??,\n       aes(??)) +\n  geom_jitter(width = .2) +\n  theme_cowplot()"
+  },
+  {
+    "objectID": "exercises/ex-14.html#what-does-the-model-look-like",
+    "href": "exercises/ex-14.html#what-does-the-model-look-like",
+    "title": "Stats Bootcamp - class 14",
+    "section": "What does the model look like?",
+    "text": "What does the model look like?\nModel: \\(y_{i} = \\beta_0 \\cdot 1+ \\beta_1 \\cdot x_{i}\\)\nNull Hypothesis: \\(\\mathcal{H}_0: \\beta_1 = 0\\)\n\\(\\mathcal{H}_0:\\) mouse \\(family\\) does NOT explain \\(weight\\)\nAlternative Hypothesis: \\(\\mathcal{H}_1: \\beta_1 \\neq 0\\)\n\\(\\mathcal{H}_1:\\) mouse \\(family\\) does explain \\(weight\\)\nImportant: \\(x_{i}\\) is an indicator (0 or 1) saying which group point \\(i\\) was sampled from using the matrix encoding of 0s and 1s.\nBelow is an example depicting 6 observations with 2 from each of 3 families:\n\\(\\begin{bmatrix} y_{1} \\\\ y_{2} \\\\ y_{3} \\\\y_{4} \\\\y_{5} \\\\y_{5} \\end{bmatrix} = \\begin{bmatrix} 1 & 0 & 0 \\\\ 1 & 0 & 0 \\\\ 0 & 1 & 0 \\\\ 0 & 1 & 0 \\\\ 0 & 0 & 1 \\\\ 0 & 0 & 1 \\\\ \\end{bmatrix} \\cdot \\begin{bmatrix} \\beta_0 \\\\ \\beta_1 \\end{bmatrix} + \\begin{bmatrix} e_{1} \\\\ e_{2} \\\\ e_{3} \\\\e_{4} \\\\e_{5} \\\\e_{6} \\end{bmatrix}\\)"
+  },
+  {
+    "objectID": "exercises/ex-14.html#step-2-fit-linear-model-and-examine-results-1",
+    "href": "exercises/ex-14.html#step-2-fit-linear-model-and-examine-results-1",
+    "title": "Stats Bootcamp - class 14",
+    "section": "STEP 2: Fit linear model and examine results",
+    "text": "STEP 2: Fit linear model and examine results\n\nfit_wf &lt;- ??\n\nFit summary:\n\nglance(fit_wf) |&gt;\n  gt() |&gt;\n  fmt_number(columns = r.squared:statistic, decimals = 3)\n\nCoefficient summary:\n\ntidy(fit_wf) |&gt;\n  gt() |&gt;\n  fmt_number(columns =estimate:statistic, decimals = 3)"
+  },
+  {
+    "objectID": "exercises/ex-14.html#collecting-residuals-and-other-information-1",
+    "href": "exercises/ex-14.html#collecting-residuals-and-other-information-1",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Collecting residuals and other information",
+    "text": "Collecting residuals and other information\nadd residuals and other information\n\n#augment\nb_wf &lt;-\n\n# mean weight per fam\nmean_B1 &lt;- fit_wf$coefficients[??]\n\nmean_A1 &lt;- mean_B1 +\n  fit_wf$coefficients[??]\n\nmean_D5 &lt;- mean_B1 +\n  fit_wf$coefficients[??]\n\nmean_F1 &lt;- mean_B1 +\n  fit_wf$coefficients[??]"
+  },
+  {
+    "objectID": "exercises/ex-14.html#step-3-visualize-the-error-around-fit-1",
+    "href": "exercises/ex-14.html#step-3-visualize-the-error-around-fit-1",
+    "title": "Stats Bootcamp - class 14",
+    "section": "STEP 3: Visualize the error around fit",
+    "text": "STEP 3: Visualize the error around fit\n\nggplot(b_wf,\n       aes(x = family, y = weight)) +\n  geom_point(position = position_jitter(),\n             aes(color = .resid)) +\n  scale_color_gradient2(low = \"blue\",\n                        mid = \"black\",\n                        high = \"yellow\") +\ngeom_segment(aes(x=.5, xend=1.5, y=mean_B1, yend=mean_B1), color=\"red\") +\n  geom_segment(aes(x=1.5, xend=2.5, y=mean_A1, yend=mean_A1), color=\"red\") +\n  geom_segment(aes(x=2.5, xend=3.5, y=mean_D5, yend=mean_D5), color=\"red\") +\n  geom_segment(aes(x=3.5, xend=4.5, y=mean_F1, yend=mean_F1), color=\"red\") +\n  geom_segment(aes(x=.5, xend=4.5, y=mean(weight), yend=mean(weight)), color=\"black\") +\n  theme_cowplot()"
+  },
+  {
+    "objectID": "exercises/ex-14.html#compare-to-traditional-anova",
+    "href": "exercises/ex-14.html#compare-to-traditional-anova",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Compare to traditional ANOVA",
+    "text": "Compare to traditional ANOVA\n\nbfam |&gt;\n  ?? |&gt;\n  gt()\n\n\ntidy(fit_wf) |&gt;\n  select(term, estimate, statistic, p.value) |&gt;\n  gt()"
+  },
+  {
+    "objectID": "exercises/ex-14.html#comparing-2-groups-of-2-continuous-variables",
+    "href": "exercises/ex-14.html#comparing-2-groups-of-2-continuous-variables",
+    "title": "Stats Bootcamp - class 14",
+    "section": "Comparing 2 groups of 2 continuous variables",
+    "text": "Comparing 2 groups of 2 continuous variables\nANCOVA, Analysis of Covariance. ANOVA with more than one independent variable. What is the impact of mouse age on mouse weight for males vs females.\n\nggplot(data = b, aes(y = weight, x = age, color=sex)) +\n  geom_point(size=.5) +\n  geom_smooth(method=lm) +\n  theme_cowplot()"
+  },
+  {
+    "objectID": "exercises/ex-14.html#step-2-fit-linear-model-and-examine-results-2",
+    "href": "exercises/ex-14.html#step-2-fit-linear-model-and-examine-results-2",
+    "title": "Stats Bootcamp - class 14",
+    "section": "STEP 2: Fit linear model and examine results",
+    "text": "STEP 2: Fit linear model and examine results\n\nfit_wa_sex &lt;- lm(formula = weight ~ 1 + age + sex, data = b)\nb_wa_sex &lt;- augment(fit_ws, data = b)\n\nFit summary:\n\nglance(fit_wa_sex) |&gt;\n  gt() |&gt;\n  fmt_number(columns = r.squared:statistic, decimals = 3)\n\nCompare to traditional:\n\naov(formula = weight ~ 1 + age + sex, data = b) |&gt;\n  glance()"
+  },
+  {
+    "objectID": "exercises/ex-14.html#references",
+    "href": "exercises/ex-14.html#references",
+    "title": "Stats Bootcamp - class 14",
+    "section": "References",
+    "text": "References\nLinear Models Pt.3 - Design Matrices\nA Matrix Formulation of the Multiple Regression Model\nDoing and reporting your first ANOVA and ANCOVA in R40f2ef"
+  },
+  {
+    "objectID": "exercises/ex-12.html",
+    "href": "exercises/ex-12.html",
+    "title": "Stats Bootcamp - class 12",
+    "section": "",
+    "text": "We are going to use ggpubr rather than ggplot2 - Don’t tell Jay ;)\n\n\nIt has great visualization for the stats on the plots.\nDifferent syntax!!\n\nmust use double quotes around “variable names”\n\n\n\n\nDue to reviewer #3, we will pivot to a more “physiologically relevant” data set biochem that consists of mouse measurements.\n\n. . ."
+  },
+  {
+    "objectID": "exercises/ex-12.html#two-changes",
+    "href": "exercises/ex-12.html#two-changes",
+    "title": "Stats Bootcamp - class 12",
+    "section": "",
+    "text": "We are going to use ggpubr rather than ggplot2 - Don’t tell Jay ;)\n\n\nIt has great visualization for the stats on the plots.\nDifferent syntax!!\n\nmust use double quotes around “variable names”\n\n\n\n\nDue to reviewer #3, we will pivot to a more “physiologically relevant” data set biochem that consists of mouse measurements.\n\n. . ."
+  },
+  {
+    "objectID": "exercises/ex-12.html#prepare-mouse-biochem-data",
+    "href": "exercises/ex-12.html#prepare-mouse-biochem-data",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Prepare mouse biochem data",
+    "text": "Prepare mouse biochem data\n\n# we are reading the data directly from the internet\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1,6,9,14,15,24:28)]\nbiochem &lt;- biochem[,keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\",\"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename gender to sex\nb &lt;- inner_join(biochem, weight, by=\"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex=gender)"
+  },
+  {
+    "objectID": "exercises/ex-12.html#compare-mean-of-a-variable-to-a-known-value",
+    "href": "exercises/ex-12.html#compare-mean-of-a-variable-to-a-known-value",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Compare mean of a variable to a known value",
+    "text": "Compare mean of a variable to a known value\n\\(y\\) is independent of \\(x\\)\n\\(y\\) is continuous\n\\(x\\) is constant\nParametric: One-sample t-test\nt_test(y ~ 1, mu = x)\nNonparametric: Wilcoxon signed-rank\nwilcox_test(y ~ 1, mu = x)\n\nExamine and specify the variable(s)\nDeclare null hypothesis \\(\\mathcal{H}_0\\)\n\nCalculate test-statistic, exact p-value\n\nThink did the expression of my gene change…"
+  },
+  {
+    "objectID": "exercises/ex-12.html#examine-and-specify-the-variables",
+    "href": "exercises/ex-12.html#examine-and-specify-the-variables",
+    "title": "Stats Bootcamp - class 12",
+    "section": "1. Examine and specify the variable(s)",
+    "text": "1. Examine and specify the variable(s)\nLet’s explore mouse \\(weight\\)\n\nggdensity(\n  data = b,\n  x = \"??\",\n  add = \"mean\",\n  rug = TRUE\n  )\n\n. . .\nlet’s see some summary stats\n\nb |&gt;\n  get_summary_stats(\n    ??,\n    type = \"common\",\n    show = c(\"mean\",\"median\",\"sd\")\n    )"
+  },
+  {
+    "objectID": "exercises/ex-12.html#is-it-normally-distributed",
+    "href": "exercises/ex-12.html#is-it-normally-distributed",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Is it normally distributed?",
+    "text": "Is it normally distributed?\n\nggqqplot(\n  data = b,\n  x = \"??\"\n  )\n\nLooks reasonable\n. . .\n\nb |&gt;\n  ??_test(weight)\n\nYikes!\nNo easy answers…gotta make a call. We’ll try both."
+  },
+  {
+    "objectID": "exercises/ex-12.html#declare-null-hypothesis-mathcalh_0",
+    "href": "exercises/ex-12.html#declare-null-hypothesis-mathcalh_0",
+    "title": "Stats Bootcamp - class 12",
+    "section": "2. Declare null hypothesis \\(\\mathcal{H}_0\\)\n",
+    "text": "2. Declare null hypothesis \\(\\mathcal{H}_0\\)\n\nSince this is a one-way test, we don’t need to worry if the groups have equal variance (only 1 group). But, we need a standard to compare against. I asked google, how much does a mouse weigh in grams?\nAnswer: 20-35 g, I’m going with \\(27.5 g\\) as our standard.\n\n\\(\\mathcal{H}_0\\) is that the mean of mouse \\(weight\\) can be explained by \\(27.5\\)\n\n\\(weight\\) is the response variable\n\\(27.5\\) is the explanatory variable"
+  },
+  {
+    "objectID": "exercises/ex-12.html#calculate-test-statistic-exact-p-value",
+    "href": "exercises/ex-12.html#calculate-test-statistic-exact-p-value",
+    "title": "Stats Bootcamp - class 12",
+    "section": "3. Calculate test-statistic, exact p-value",
+    "text": "3. Calculate test-statistic, exact p-value\nNonparametric test:\n\nx &lt;- 27.5 # standard from google\n\nb |&gt;\n  ??_test(weight ~ 1, mu = ??) |&gt;\n  gt()\n\n. . .\nParametric test:\n\nx &lt;- 27.5 # standard from google\n\nb |&gt;\n  ??_test(weight ~ 1, mu = ??) |&gt;\n  gt()\n\n. . .\nP values are well below 0.05\n\n\\(\\mathcal{H}_0\\) is that the mean of mouse \\(weight\\) can be explained by \\(27.5\\) is NOT WELL SUPPORTED\n\nSo \\(27.5 g\\) not able to describe weight\nNot surprising since our mean mouse weight is 20.2. Don’t believe everything you read on the internet."
+  },
+  {
+    "objectID": "exercises/ex-12.html#compare-mean-of-two-groups",
+    "href": "exercises/ex-12.html#compare-mean-of-two-groups",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Compare mean of two groups",
+    "text": "Compare mean of two groups\n\\(y\\) is independent of \\(x\\)\n\\(y\\) is continuous\n\\(x\\) is categorical with 2 groups (factor w/2 levels)\nParametric: Student’s t-test\nt_test(y ~ x) more here\nneed to pay attention to: var.equal paired\nNonparametric: Wilcoxon signed-rank\nwilcox_test(y ~ x) more here\nneed to pay attention to: paired\n\nExamine and specify the variable(s)\nDeclare null hypothesis \\(\\mathcal{H}_0\\)\n\nCalculate test-statistic, exact p-value"
+  },
+  {
+    "objectID": "exercises/ex-12.html#tangent-on-students-t-test",
+    "href": "exercises/ex-12.html#tangent-on-students-t-test",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Tangent on Student’s t-test",
+    "text": "Tangent on Student’s t-test\nThe T-Distribution, also known as Student’s t-distribution, gets its name from William Sealy Gosset who first published it in English in 1908 in the scientific journal Biometrika using his pseudonym “Student” because his employer preferred staff to use pen names when publishing scientific papers instead of their real name, so he used the name “Student” to hide his identity."
+  },
+  {
+    "objectID": "exercises/ex-12.html#guinness-brewery-in-dublin",
+    "href": "exercises/ex-12.html#guinness-brewery-in-dublin",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Guinness Brewery in Dublin",
+    "text": "Guinness Brewery in Dublin"
+  },
+  {
+    "objectID": "exercises/ex-12.html#examine-and-specify-the-variables-1",
+    "href": "exercises/ex-12.html#examine-and-specify-the-variables-1",
+    "title": "Stats Bootcamp - class 12",
+    "section": "1. Examine and specify the variable(s)",
+    "text": "1. Examine and specify the variable(s)\nWe will compare mouse \\(weight\\) by \\(sex\\).\n\\(weight\\) is the response variable\n\\(sex\\) is the explanatory variable\n\\(y\\) ~ \\(x\\)\n\\(weight\\) ~ \\(sex\\)\n\nggdensity(\n  data = b,\n  color = \"sex\",\n  x = \"weight\",\n  add = \"mean\",\n  rug = TRUE\n  )\n\n\nI want the response variable on the \\(y\\) axis and the explanatory variable on the \\(x\\) axis.\nViolin plot\n\nggviolin(\n  data = b,\n  y = \"??\",\n  x = \"??\",\n  fill = \"??\",\n  add = \"mean_sd\"\n  )\n\n. . .\n\nb |&gt;\n  group_by(??) |&gt;\n  get_summary_stats(\n    ??,\n    type = \"common\",\n    show = c(\"mean\",\"median\",\"sd\")\n    )"
+  },
+  {
+    "objectID": "exercises/ex-12.html#is-it-normally-distributed-1",
+    "href": "exercises/ex-12.html#is-it-normally-distributed-1",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Is it normally distributed?",
+    "text": "Is it normally distributed?\n\nggqqplot(\n  data = b,\n  x = \"??\",\n  color = \"??\"\n  )\n\n. . .\n\nb |&gt;\n  group_by(sex) |&gt;\n  ??_test(weight) |&gt;\n  gt()\n\nLooks reasonable"
+  },
+  {
+    "objectID": "exercises/ex-12.html#equal-variance",
+    "href": "exercises/ex-12.html#equal-variance",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Equal variance?",
+    "text": "Equal variance?\n\nb |&gt;\n  ??_test(weight~sex) |&gt;\n  gt()\n\nOK - so we can use t-test, but variance is not equal."
+  },
+  {
+    "objectID": "exercises/ex-12.html#declare-null-hypothesis-mathcalh_0-1",
+    "href": "exercises/ex-12.html#declare-null-hypothesis-mathcalh_0-1",
+    "title": "Stats Bootcamp - class 12",
+    "section": "2. Declare null hypothesis \\(\\mathcal{H}_0\\)\n",
+    "text": "2. Declare null hypothesis \\(\\mathcal{H}_0\\)\n\n\n\\(\\mathcal{H}_0\\) is that \\(sex\\) cannot explain \\(weight\\)"
+  },
+  {
+    "objectID": "exercises/ex-12.html#calculate-test-statistic-exact-p-value-1",
+    "href": "exercises/ex-12.html#calculate-test-statistic-exact-p-value-1",
+    "title": "Stats Bootcamp - class 12",
+    "section": "3. Calculate test-statistic, exact p-value",
+    "text": "3. Calculate test-statistic, exact p-value\nNonparametric test:\n\nb |&gt;\n  ??_test(?? ~ ??, ref.group = \"F\") |&gt;\n  gt()\n\n. . .\nParametric test:\n\nx &lt;- 27.5 # standard from google\n\nb |&gt;\n  ??_test(weight ~ sex,\n         var.equal = ??,\n         ref.group = \"F\") |&gt;\n  gt()\n\n. . .\nP values are well below 0.05\n\n\\(\\mathcal{H}_0\\) is that \\(sex\\) cannot explain \\(weight\\) is NOT WELL SUPPORTED\n\n\\(sex\\) can explain \\(weight\\)"
+  },
+  {
+    "objectID": "exercises/ex-12.html#visualize-the-result",
+    "href": "exercises/ex-12.html#visualize-the-result",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Visualize the result",
+    "text": "Visualize the result\n\n# save statistical test result\nstatres &lt;- b |&gt;\n  t_test(weight ~ sex,\n         var.equal = F,\n         ref.group = \"F\")\n\n\nggviolin(\n  data = b,\n  y = \"weight\",\n  x = \"sex\",\n  fill = \"sex\",\n  add = \"mean_sd\"\n  ) +\n  stat_pvalue_manual(\n    ??,\n    label = \"p\",\n    y.position = 34\n    ) +\n  ylim(10,35)"
+  },
+  {
+    "objectID": "exercises/ex-12.html#compare-means-of-three-or-more-groups",
+    "href": "exercises/ex-12.html#compare-means-of-three-or-more-groups",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Compare means of three or more groups",
+    "text": "Compare means of three or more groups\n\\(y\\) is independent of \\(x\\)\n\\(y\\) is continuous\n\\(x\\) is 2 or more groups of categorical data\nParametric: ANOVA\nanova_test(y ~ group) more info\nNonparametric: Kruskal-Wallis test\nkruskal_test(y ~ group) more info\n\nExamine and specify the variable(s)\nDeclare null hypothesis \\(\\mathcal{H}_0\\)\n\nCalculate test-statistic, exact p-value"
+  },
+  {
+    "objectID": "exercises/ex-12.html#examine-and-specify-the-variables-2",
+    "href": "exercises/ex-12.html#examine-and-specify-the-variables-2",
+    "title": "Stats Bootcamp - class 12",
+    "section": "1. Examine and specify the variable(s)",
+    "text": "1. Examine and specify the variable(s)\nWe will compare mouse \\(weight\\) by \\(family\\).\n\\(weight\\) is the response variable\n\\(family\\) is the explanatory variable\n\\(y\\) ~ \\(x\\)\n\\(weight\\) ~ \\(family\\)\n\n# i have pre-selected some families to compare\nmyfams &lt;- c(\"B1.5:E1.4(4) B1.5:A1.4(5)\",\n            \"F1.3:A1.2(3) F1.3:E2.2(3)\",\n            \"A1.3:D1.2(3) A1.3:H1.2(3)\",\n            \"D5.4:G2.3(4) D5.4:C4.3(4)\")\n\n# only keep the familys in myfams\nbfam &lt;- b |&gt;\n  filter(family %in% myfams) |&gt;\n  droplevels()\n\n# simplify family names and make factor\nbfam$family &lt;- gsub(pattern = \"\\\\..*\", replacement = \"\", x = bfam$family) |&gt;\n  as.factor()\n\n\n# make B1 the reference (most similar to overall mean)\nbfam$family &lt;- relevel(x = bfam$family, ref =\"B1\")"
+  },
+  {
+    "objectID": "exercises/ex-12.html#visualize-the-variables",
+    "href": "exercises/ex-12.html#visualize-the-variables",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Visualize the variable(s)",
+    "text": "Visualize the variable(s)\nI want the response variable on the \\(y\\) axis and the explanatory variable on the \\(x\\) axis.\nBoxplot\n\nggboxplot(\n  data = bfam,\n  y = \"??\",\n  x = \"??\",\n  fill = \"??\"\n  )\n\n. . .\n\nbfam |&gt;\n  group_by(??) |&gt;\n  get_summary_stats(\n    ??,\n    type = \"common\",\n    show = c(\"mean\",\"median\",\"sd\")\n    )"
+  },
+  {
+    "objectID": "exercises/ex-12.html#is-it-normally-distributed-2",
+    "href": "exercises/ex-12.html#is-it-normally-distributed-2",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Is it normally distributed?",
+    "text": "Is it normally distributed?\n\nggqqplot(\n  data = bfam,\n  x = \"weight\",\n  color = \"??\"\n  )\n\n. . .\n\nbfam |&gt;\n  group_by(family) |&gt;\n  ??_test(weight) |&gt;\n  gt()\n\nLooks reasonable"
+  },
+  {
+    "objectID": "exercises/ex-12.html#equal-variance-1",
+    "href": "exercises/ex-12.html#equal-variance-1",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Equal variance?",
+    "text": "Equal variance?\n\nbfam |&gt;\n  ??_test(??~??) |&gt;\n  gt()\n\nOK - so we can use anova!"
+  },
+  {
+    "objectID": "exercises/ex-12.html#declare-null-hypothesis-mathcalh_0-2",
+    "href": "exercises/ex-12.html#declare-null-hypothesis-mathcalh_0-2",
+    "title": "Stats Bootcamp - class 12",
+    "section": "2. Declare null hypothesis \\(\\mathcal{H}_0\\)\n",
+    "text": "2. Declare null hypothesis \\(\\mathcal{H}_0\\)\n\n\n\\(\\mathcal{H}_0\\) is that \\(family\\) cannot explain \\(weight\\)"
+  },
+  {
+    "objectID": "exercises/ex-12.html#calculate-test-statistic-exact-p-value-2",
+    "href": "exercises/ex-12.html#calculate-test-statistic-exact-p-value-2",
+    "title": "Stats Bootcamp - class 12",
+    "section": "3. Calculate test-statistic, exact p-value",
+    "text": "3. Calculate test-statistic, exact p-value\nParametric test:\n\nbfam |&gt;\n  ??_test(weight ~ ??) |&gt;\n  gt()\n\n. . .\nNonparametric test:\n\nbfam |&gt;\n  ??_test(weight ~ family) |&gt;\n  gt()\n\n. . .\nP values are well below 0.05\n\n\\(\\mathcal{H}_0\\) is that \\(family\\) cannot explain \\(weight\\) is NOT WELL SUPPORTED\n\n\\(family\\) can explain \\(weight\\)"
+  },
+  {
+    "objectID": "exercises/ex-12.html#visualize-the-result-1",
+    "href": "exercises/ex-12.html#visualize-the-result-1",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Visualize the result",
+    "text": "Visualize the result\n\n# save statistical test result\nstatres &lt;- bfam |&gt;\n  anova_test(weight ~ sex)\n\n\nggboxplot(\n  data = bfam,\n  y = \"weight\",\n  x = \"family\",\n  fill = \"family\"\n  ) +\n  stat_anova_test()"
+  },
+  {
+    "objectID": "exercises/ex-12.html#multiple-pairwise-comparisons",
+    "href": "exercises/ex-12.html#multiple-pairwise-comparisons",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Multiple pairwise comparisons",
+    "text": "Multiple pairwise comparisons\nQuick aside\n\n# save statistical test result\npairwise &lt;- bfam |&gt;\n  t_test(weight ~ family, ref.group = \"??\")\n\n\nggboxplot(bfam,\n          x = \"family\",\n          y = \"weight\",\n          fill = \"weight\",\n          ) +\n  stat_pvalue_manual(\n    pairwise,\n    label = \"p.adj\",\n    y.position = c(30, 32, 34)\n    ) +\n  ylim(10,38)\n\nNotice that not all pairwise differences are significant, yet the ANOVA is significant."
+  },
+  {
+    "objectID": "exercises/ex-12.html#appropriate-statistical-test-cheatsheet",
+    "href": "exercises/ex-12.html#appropriate-statistical-test-cheatsheet",
+    "title": "Stats Bootcamp - class 12",
+    "section": "Appropriate statistical test cheatsheet",
+    "text": "Appropriate statistical test cheatsheet"
+  },
+  {
+    "objectID": "exercises/ex-12.html#references",
+    "href": "exercises/ex-12.html#references",
+    "title": "Stats Bootcamp - class 12",
+    "section": "References",
+    "text": "References\nLegal analogy\nStatQuest: P Values, clearly explained\nStatQuest: How to calculate p-values\nThe Curious Tale of William Sealy Gosset"
   },
   {
     "objectID": "exercises/ex-09.html",
@@ -685,7 +1168,7 @@
     "href": "course-info/team.html",
     "title": "MOLB 7950 — Teaching Team",
     "section": "",
-    "text": "TA office hours will be 1-2:30 PM on Tues and Thurs. Please coordinate with the TAs to determine whether you want to meet in person or virtually. You can also use slack to ask questions outside of office hours.\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\n\n\n\n\nMatthew Taliaferro\n\n\n\nSrinivas Ramachandran\n\n\n\nJay Hesselberth\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\n\n\n\n\nKate Matlin",
+    "text": "TA office hours will be 1-2:30 PM on Tues and Thurs. Please coordinate with the TAs to determine whether you want to meet in person or virtually. You can also use slack to ask questions outside of office hours.\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\n\n\n\n\nMatthew Taliaferro\n\n\n\nSrinivas Ramachandran\n\n\n\nJay Hesselberth\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\n\n\n\n\nKate Matlin\n\n\n\nKiarra Coger",
     "crumbs": [
       "Course information",
       "Teaching team"
@@ -696,7 +1179,7 @@
     "href": "course-info/team.html#teaching-team-and-office-hours",
     "title": "MOLB 7950 — Teaching Team",
     "section": "",
-    "text": "TA office hours will be 1-2:30 PM on Tues and Thurs. Please coordinate with the TAs to determine whether you want to meet in person or virtually. You can also use slack to ask questions outside of office hours.\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\n\n\n\n\nMatthew Taliaferro\n\n\n\nSrinivas Ramachandran\n\n\n\nJay Hesselberth\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\n\n\n\n\nKate Matlin",
+    "text": "TA office hours will be 1-2:30 PM on Tues and Thurs. Please coordinate with the TAs to determine whether you want to meet in person or virtually. You can also use slack to ask questions outside of office hours.\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\n\n\n\n\nMatthew Taliaferro\n\n\n\nSrinivas Ramachandran\n\n\n\nJay Hesselberth\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nInstructor\nE-mail\n\n\n\n\nKate Matlin\n\n\n\nKiarra Coger",
     "crumbs": [
       "Course information",
       "Teaching team"
@@ -1497,6 +1980,489 @@
     "text": "References\n\nThe Normal Distribution, Confidence Intervals, and Their Deceptive Simplicity\nCentral limit theorem\nHistograms, Clearly Explained\nThe Main Ideas behind Probability Distributions\nThe Normal Distribution, Clearly Explained!!!\nProbability vs Likelihood"
   },
   {
+    "objectID": "exercises/ex-13.html",
+    "href": "exercises/ex-13.html",
+    "title": "Stats Bootcamp - class 13",
+    "section": "",
+    "text": "# we are reading the data directly from the internet\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1,6,9,14,15,24:28)]\nbiochem &lt;- biochem[,keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\",\"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename gender to sex\nb &lt;- inner_join(biochem, weight, by=\"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex=gender)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#prepare-mouse-biochem-data",
+    "href": "exercises/ex-13.html#prepare-mouse-biochem-data",
+    "title": "Stats Bootcamp - class 13",
+    "section": "",
+    "text": "# we are reading the data directly from the internet\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1,6,9,14,15,24:28)]\nbiochem &lt;- biochem[,keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\",\"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename gender to sex\nb &lt;- inner_join(biochem, weight, by=\"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex=gender)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#association-between-mouse-weight-and-tot_cholesterol",
+    "href": "exercises/ex-13.html#association-between-mouse-weight-and-tot_cholesterol",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Association between mouse \\(weight\\) and \\(tot\\_cholesterol\\)\n",
+    "text": "Association between mouse \\(weight\\) and \\(tot\\_cholesterol\\)\n\n\nggscatter()\n\nwe previously established these are normal enough &gt; \\(\\mathcal{H}_0\\) is no (linear) relationship between \\(tot\\_cholesterol\\) and \\(weight\\)\n\n\nb |&gt;\n  cor_test(??, ??,\n           method = \"??\"\n           )\n\nP value well below 0.05\n\n\\(\\mathcal{H}_0\\) is no relationship between \\(tot\\_cholesterol\\) and \\(weight\\) NOT WELL SUPPORTED\n\nSo there is a (linear) relationship between \\(tot\\_cholesterol\\) and \\(weight\\)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#visualize-pearson-correlation",
+    "href": "exercises/ex-13.html#visualize-pearson-correlation",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Visualize Pearson correlation",
+    "text": "Visualize Pearson correlation\n\nggscatter(data = b,\n          y = \"weight\",\n          x = \"tot_cholesterol\"\n          ) +\n  stat_cor(method = \"pearson\",\n           label.x = 1,\n           label.y = 30)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#manual-calculation-of-pearson-correlation",
+    "href": "exercises/ex-13.html#manual-calculation-of-pearson-correlation",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Manual calculation of Pearson correlation",
+    "text": "Manual calculation of Pearson correlation\n\\(Corr(x,y) = \\displaystyle \\frac {\\sum_{i=1}^{n} (x_{i} - \\overline{x})(y_{i} - \\overline{y})}{\\sum_{i=1}^{n} \\sqrt(x_{i} - \\overline{x})^2 \\sqrt(y_{i} - \\overline{y})^2}\\)\n\n# mean total cholesterol\nm_chol &lt;-\n\n# average weight\nm_weight &lt;-\n\n# difference from mean total cholesterol\ndiff_chol &lt;-\n\n# difference from mean total weight\ndiff_weight &lt;-\n\n# follow formula above\nmanual_pearson &lt;-\n\nmanual_pearson"
+  },
+  {
+    "objectID": "exercises/ex-13.html#spearman-correlation-nonparametric",
+    "href": "exercises/ex-13.html#spearman-correlation-nonparametric",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Spearman Correlation (nonparametric)",
+    "text": "Spearman Correlation (nonparametric)\nSpearman’s rank correlation coefficientor Spearman’s ρ, named after Charles Spearman is a nonparametric measure of rank correlation (statistical dependence between the rankings of two variables). It assesses how well the relationship between two variables can be described using a monotonic function.\nMore info here.\n\nb |&gt;\n  cor_test(weight, tot_cholesterol,\n           method = \"??\"\n           )\n\nP value well below 0.05\n\n\\(\\mathcal{H}_0\\) is no relationship between \\(tot\\_cholesterol\\) and \\(weight\\) NOT WELL SUPPORTED"
+  },
+  {
+    "objectID": "exercises/ex-13.html#visualize-spearman-correlation",
+    "href": "exercises/ex-13.html#visualize-spearman-correlation",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Visualize Spearman correlation",
+    "text": "Visualize Spearman correlation\n\nggscatter(data = b,\n          y = \"weight\",\n          x = \"tot_cholesterol\"\n          ) +\n  stat_cor(method = \"spearman\",\n           label.x = 1,\n           label.y = 30)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#lets-create-a-hypothetical-example",
+    "href": "exercises/ex-13.html#lets-create-a-hypothetical-example",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Let’s create a hypothetical example",
+    "text": "Let’s create a hypothetical example\ncreate tibble \\(d\\) with variables \\(x\\) and \\(y\\)\n\\(x\\), 1:50\n\\(y\\), which is \\(x^{10}\\)\n\nd &lt;- tibble(\n  x=??,\n  y=??)\n\n. . .\nscatter plot\n\nggscatter(data = d,\n          x = \"x\",\n          y = \"y\")\n\n\nPearson\n\nd |&gt;\n  cor_test(x, y,\n           method = \"pearson\"\n           ) |&gt;\n  select(cor)\n\n. . .\nSpearman\n\nd |&gt;\n  cor_test(x, y,\n           method = \"spearman\"\n           ) |&gt;\n  select(cor)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#additional-examples-with-correlation",
+    "href": "exercises/ex-13.html#additional-examples-with-correlation",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Additional examples with correlation",
+    "text": "Additional examples with correlation\ncompare 1 variable to all other quantitative variables\n\\(weight\\)\n\nb |&gt;\n  cor_test(??) |&gt;\n  gt()\n\nrelationship between \\(weight\\) and \\(tot\\_cholesterol\\) by \\(sex\\)\n\nb |&gt;\n\n  gt()"
+  },
+  {
+    "objectID": "exercises/ex-13.html#appropriate-statistical-test-cheatsheet",
+    "href": "exercises/ex-13.html#appropriate-statistical-test-cheatsheet",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Appropriate statistical test cheatsheet",
+    "text": "Appropriate statistical test cheatsheet"
+  },
+  {
+    "objectID": "exercises/ex-13.html#regression",
+    "href": "exercises/ex-13.html#regression",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Regression",
+    "text": "Regression\nWe are going to change our frame work to learn about regression. The nice thing is that everything we learn for regression is applicable to all the tests we just learned."
+  },
+  {
+    "objectID": "exercises/ex-13.html#the-simplicity-underlying-common-tests",
+    "href": "exercises/ex-13.html#the-simplicity-underlying-common-tests",
+    "title": "Stats Bootcamp - class 13",
+    "section": "The simplicity underlying common tests",
+    "text": "The simplicity underlying common tests\nMost of the common statistical models (t-test, correlation, ANOVA; etc.) are special cases of linear models or a very close approximation. This simplicity means that there is less to learn. It all comes down to:\n\n\\(y = a \\cdot x + b\\)\n\nThis needless complexity multiplies when students try to rote learn the parametric assumptions underlying each test separately rather than deducing them from the linear model."
+  },
+  {
+    "objectID": "exercises/ex-13.html#equation-for-a-line",
+    "href": "exercises/ex-13.html#equation-for-a-line",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Equation for a line",
+    "text": "Equation for a line\nRemember:\\(y = a \\cdot x + b\\)\nOR\\(y = b + a \\cdot x\\)\n\\(a\\) is the SLOPE (2) \\(b\\) is the y-intercept (1)\n\nd &lt;- tibble(x=c(-1,3),\n            y=c(-1,6)\n             )\n\nggplot(data=d, aes(x=x,y=y)) +\n  geom_blank() +\n  geom_abline(intercept = 1,\n              slope = 2,\n              col = \"red\") +\n  theme_linedraw()"
+  },
+  {
+    "objectID": "exercises/ex-13.html#stats-equation-for-a-line",
+    "href": "exercises/ex-13.html#stats-equation-for-a-line",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Stats equation for a line",
+    "text": "Stats equation for a line\nModel:\n\\(y\\) equals the intercept (\\(\\beta_0\\)) pluss a slope (\\(\\beta_1\\)) times \\(x\\).\n\\(y = \\beta_0 + \\beta_1 x \\qquad \\qquad \\mathcal{H}_0: \\beta_1 = 0\\)\n… which is the same as \\(y = b + a \\cdot x\\).\nThe short hand for this in R: y ~ 1 + x\nR interprets this as:\ny = 1*number + x*othernumber\nThe task of t-tests, lm, etc., is simply to find the numbers that best predict \\(y\\)."
+  },
+  {
+    "objectID": "exercises/ex-13.html#stats-equation-for-a-line-1",
+    "href": "exercises/ex-13.html#stats-equation-for-a-line-1",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Stats equation for a line",
+    "text": "Stats equation for a line\nAll you need is an intercept (\\(\\beta_0\\)) and a slope (\\(\\beta_1\\)) to get a line:\n\nggplot(data=d, aes(x=x,y=y)) +\n  geom_blank() +\n  geom_abline(intercept = 1,\n              slope = 2,\n              col = \"red\") +\n  theme_linedraw()\n\n\n\n\n\n\n\n\\(\\beta_0\\) = 1 (the y-intercept), \\(\\beta_1\\) = 2 (the slope)\n\\(y = \\beta_0 \\cdot 1 + \\beta_1 \\cdot x\\)\n\\(y = 1 \\cdot 1 + 2 \\cdot x\\)\n\\(y = 1 + 2x\\)\n\nOur mission: FIND THE BEST \\(\\beta\\) coefficients"
+  },
+  {
+    "objectID": "exercises/ex-13.html#linear-regression",
+    "href": "exercises/ex-13.html#linear-regression",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Linear Regression",
+    "text": "Linear Regression\n\nSTEP 1: Make a scatter plot visualize the linear relationship between x and y.\nSTEP 2: Perform the regression\nSTEP 3: Look at the \\(R^2\\), \\(F\\)-value and \\(p\\)-value\nSTEP 4: Visualize fit and errors\nSTEP 5: Calculate \\(R^2\\), \\(F\\)-value and \\(p\\)-value ourselves"
+  },
+  {
+    "objectID": "exercises/ex-13.html#step-1-can-mouse-cholesterol-levels-explain-mouse-weight",
+    "href": "exercises/ex-13.html#step-1-can-mouse-cholesterol-levels-explain-mouse-weight",
+    "title": "Stats Bootcamp - class 13",
+    "section": "STEP 1: Can mouse cholesterol levels explain mouse weight?",
+    "text": "STEP 1: Can mouse cholesterol levels explain mouse weight?\nPlot \\(weight\\) (y, response variable) and \\(tot_cholesterol\\) (x, explanatory variable)\n\nggplot(data = ??,\n       aes(y = ??,\n           x = ??)) +\n  geom_point(size=.5) +\n  scale_color_manual() +\n  theme_linedraw()"
+  },
+  {
+    "objectID": "exercises/ex-13.html#step-2-do-the-regression",
+    "href": "exercises/ex-13.html#step-2-do-the-regression",
+    "title": "Stats Bootcamp - class 13",
+    "section": "STEP 2: Do the regression",
+    "text": "STEP 2: Do the regression\nKeep calm and fit a line! Remember: \\(y = \\beta_0 \\cdot 1+ \\beta_1 \\cdot x\\)\nlinear model equation: \\(weight = \\beta_0 \\cdot 1 + \\beta_1 \\cdot tot\\_cholesterol\\)\n\n\\(\\mathcal{H}_0:\\) \\(tot\\_cholesterol\\) does NOT explain \\(weight\\) Null Hypothesis: \\(\\mathcal{H}_0: \\beta_1 = 0\\)\n\n\\(weight = \\beta_0 \\cdot 1 + 0 \\cdot tot\\_cholesterol\\) \\(weight = \\beta_0 \\cdot 1\\)\n\n\\(\\mathcal{H}_1:\\) Mouse \\(tot\\_cholesterol\\) does explain \\(weight\\)\n\n\\(weight = \\beta_0 \\cdot 1 + \\beta_1 \\cdot tot\\_cholesterol\\)\nThe cool thing here is that we can assess and compare our null and alternative hypothesis by learning and examining the model coefficients (namely the slope). Ultimately, we are comparing a complex model (with cholesterol) to a simple model (without cholesterol).\nhttps://statisticsbyjim.com/regression/interpret-constant-y-intercept-regression/"
+  },
+  {
+    "objectID": "exercises/ex-13.html#step-4-look-at-the-r2-f-value-and-p-value",
+    "href": "exercises/ex-13.html#step-4-look-at-the-r2-f-value-and-p-value",
+    "title": "Stats Bootcamp - class 13",
+    "section": "STEP 4: Look at the \\(R^2\\), \\(F\\)-value and \\(p\\)-value",
+    "text": "STEP 4: Look at the \\(R^2\\), \\(F\\)-value and \\(p\\)-value\n\n# fitting a line\nfit_WvC &lt;- lm(\n  data = ??,\n  formula = ??)\n\n\n# base R summary of fit\nsummary(fit_WvC)\n\nThat’s a lot of info, but how would I access it? Time to meet your new best friend:\nBroom"
+  },
+  {
+    "objectID": "exercises/ex-13.html#tidying-output",
+    "href": "exercises/ex-13.html#tidying-output",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Tidying output",
+    "text": "Tidying output\ninformation about the model fit\n\n??(fit_WvC) |&gt;\n  gt() |&gt;\n  fmt_number(columns = r.squared:statistic, decimals = 3)\n\ninformation about the intercept and coefficients\n\n??(fit_WvC)|&gt;\n  gt() |&gt;\n  fmt_number(columns =estimate:statistic, decimals = 3)\n\nsave the intercept and slope into variable to use later\n\nchol_intercept &lt;-\n\nchol_slope &lt;-\n\n\n\nfor every 1 unit increase in cholesterol there is a 1.85 unit increase weight\n\n\nggplot(data = b,\n       aes(y = weight,\n           x = tot_cholesterol)) +\n  geom_smooth(method = \"lm\") +\n  geom_point(size=.5) +\n  scale_color_manual() +\n  theme_linedraw()\n\n`geom_smooth()` using formula = 'y ~ x'"
+  },
+  {
+    "objectID": "exercises/ex-13.html#collecting-residuals-and-other-information",
+    "href": "exercises/ex-13.html#collecting-residuals-and-other-information",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Collecting residuals and other information",
+    "text": "Collecting residuals and other information\nadd residuals and other information\n\nb_WvC &lt;- ??(fit_WvC, data = b)\n\nb_WvC"
+  },
+  {
+    "objectID": "exercises/ex-13.html#what-are-residuals",
+    "href": "exercises/ex-13.html#what-are-residuals",
+    "title": "Stats Bootcamp - class 13",
+    "section": "What are Residuals\n",
+    "text": "What are Residuals\n\nResiduals, \\(e\\) — the difference between the observed value of the response variable \\(y\\) and the explanatory value \\(\\widehat{y}\\) is called the residual. Each data point has one residual. Specifically, it is the distance on the y-axis between the observed \\(y_{i}\\) and the fit line.\n\\(e = y_{i} - \\widehat{y}\\)\nResiduals with large absolute values indicate the data point is NOT well explained by the model."
+  },
+  {
+    "objectID": "exercises/ex-13.html#step-5-visualize-fit-and-errors",
+    "href": "exercises/ex-13.html#step-5-visualize-fit-and-errors",
+    "title": "Stats Bootcamp - class 13",
+    "section": "STEP 5: Visualize fit and errors",
+    "text": "STEP 5: Visualize fit and errors\nVisualize the residuals OR the error around the fit\n\nggplot(data = b_WvC,\n       aes(x = tot_cholesterol, y = weight)) +\n  geom_point(size=1, aes(color = .resid)) +\n  geom_abline(intercept = pull(chol_intercept),\n              slope = pull(chol_slope),\n              col = \"red\") +\n  scale_color_gradient2(low = \"blue\",\n                        mid = \"black\",\n                        high = \"yellow\") +\n  geom_segment(aes(xend = tot_cholesterol,\n                   yend = .fitted),\n               alpha = .1) + # plot line representing residuals\n  theme_linedraw()\n\n\nVisualize the total error OR the error around the null. So no cholesterol fit, just the mean of y.\n\navg_weight &lt;- mean(b_WvC$weight)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#step-6-calculate-r2-f-value-p-value-ourselves",
+    "href": "exercises/ex-13.html#step-6-calculate-r2-f-value-p-value-ourselves",
+    "title": "Stats Bootcamp - class 13",
+    "section": "STEP 6: Calculate \\(R^2\\), \\(F\\)-value, \\(p\\)-value ourselves",
+    "text": "STEP 6: Calculate \\(R^2\\), \\(F\\)-value, \\(p\\)-value ourselves"
+  },
+  {
+    "objectID": "exercises/ex-13.html#what-is-r2",
+    "href": "exercises/ex-13.html#what-is-r2",
+    "title": "Stats Bootcamp - class 13",
+    "section": "What is \\(R^2\\)\n",
+    "text": "What is \\(R^2\\)\n\n\\(R^2\\) — the coefficient of determination, which is the proportion of the variance in the response variable that is predictable from the explanatory variable(s).\n\\(R^2 = 1 - \\displaystyle \\frac {SS_{fit}}{SS_{null}}\\)\n\\(SS_{fit}\\) — sum of squared errors around the least-squares fit\n\\(SS_{fit} = \\sum_{i=1}^{n} (data - line)^2 = \\sum_{i=1}^{n} (y_{i} - (\\beta_0 \\cdot 1+ \\beta_1 \\cdot x)^2\\)\n\\(SS_{null}\\) — sum of squared errors around the mean of \\(y\\)\n\\(SS_{null} = \\sum_{i=1}^{n} (data - mean)^2 = \\sum_{i=1}^{n} (y_{i} - \\overline{y})^2\\)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#calculate-r2",
+    "href": "exercises/ex-13.html#calculate-r2",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Calculate \\(R^2\\)\n",
+    "text": "Calculate \\(R^2\\)\n\n\\(SS_{fit}\\) — sum of squared errors around the least-squares fit\n\nss_fit &lt;- ??\nss_fit\n\n\\(SS_{null}\\) — sum of squared errors around the mean of \\(y\\)\n\nss_null &lt;- ??\nss_null\n\n\\(R^2 = 1 - \\displaystyle \\frac {SS_{fit}}{SS_{null}}\\)\n\nrsq &lt;- 1- ??\n\nglance(fit_WvC) |&gt; select(r.squared)\n\n. . .\nBTW this is the same \\(R\\) as from the Pearson correlation, just squared:\n\nb |&gt;\n  cor_test(weight,tot_cholesterol,\n           method = \"pearson\") |&gt;\n  mutate(r2 = cor^2) |&gt;\n  pull(r2) |&gt;\n  round(2)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#interpret-r2",
+    "href": "exercises/ex-13.html#interpret-r2",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Interpret \\(R^2\\)\n",
+    "text": "Interpret \\(R^2\\)\n\nThere is a 13 % reduction in the variance when we take mouse \\(cholesterol\\) into account\nOR\\(cholesterol\\) explains 13% of variation in mouse \\(weight\\)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#what-is-the-f-statistic",
+    "href": "exercises/ex-13.html#what-is-the-f-statistic",
+    "title": "Stats Bootcamp - class 13",
+    "section": "What is the F-statistic\n",
+    "text": "What is the F-statistic\n\nF-statistic — based on the ratio of two variances: the explained variance (due to the model) and the unexplained variance (residuals).\n\\(F = \\displaystyle \\frac{SS_{fit}/(p_{fit}-p_{null})} {SS_{null}/(n-p_{fit})}\\)\n\\(p_{fit}\\) — number of parameters (coefficients) in the fit line\n\\(p_{null}\\) — number of parameters (coefficients) in the mean line\n\\(n\\) — number of data points"
+  },
+  {
+    "objectID": "exercises/ex-13.html#calculate-the-f-statistic",
+    "href": "exercises/ex-13.html#calculate-the-f-statistic",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Calculate the F-statistic\n",
+    "text": "Calculate the F-statistic\n\n\\(F = \\displaystyle \\frac{SS_{null} - SS_{fit}/(p_{fit}-p_{null})} {SS_{fit}/(n-p_{fit})}\\)\n\npfit &lt;- ??\npnull &lt;- ??\nn &lt;- ??\n\nf &lt;- ??\n\n\nf\n\nglance(fit_WvC) |&gt; select(statistic)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#p-values",
+    "href": "exercises/ex-13.html#p-values",
+    "title": "Stats Bootcamp - class 13",
+    "section": "P-values",
+    "text": "P-values\nYou don’t really need to know what the \\(F-statistic\\) is unless you want to calculate the p-value. In this case we need to generate a null distribution of \\(F-statistic\\) values to compare to our observed \\(F-statistic\\).\nTherefore, we will randomize the \\(tot_cholesterol\\) and \\(weight\\) and then calculate the \\(F-statistic\\).\n\n\nWe will do this many many times to generate a null distribution of \\(F-statistic\\)s.\n\nThe p-value will be the probability of obtaining an \\(F-statistic\\) in the null distribution at least as extreme as our observed \\(F-statistic\\)."
+  },
+  {
+    "objectID": "exercises/ex-13.html#lets-get-started",
+    "href": "exercises/ex-13.html#lets-get-started",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Let’s get started",
+    "text": "Let’s get started\n\n# set up an empty tibble to hold our null distribution\nfake_biochem &lt;- tribble()\n\n# we will perform 100 permutations\nmyPerms &lt;- 100\n\nfor (i in 1:myPerms) {\n  tmp &lt;- bind_cols(\n    b_WvC[sample(nrow(b_WvC)), \"weight\"],\n    b_WvC[sample(nrow(b_WvC)),\"tot_cholesterol\"],\n    \"perm\"=factor(rep(i,nrow(b_WvC)))\n    )\n\n  fake_biochem &lt;- bind_rows(fake_biochem,tmp)\n  rm(tmp)\n\n}\n\n\n# let's look at permutations 1 and 2\nggplot(fake_biochem |&gt; filter(perm %in% c(1:2)), aes(x=weight, y=tot_cholesterol, color=perm)) +\n  geom_point(size=.1) +\n  theme_minimal()"
+  },
+  {
+    "objectID": "exercises/ex-13.html#run-100-linear-models",
+    "href": "exercises/ex-13.html#run-100-linear-models",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Run 100 linear models!",
+    "text": "Run 100 linear models!\nNow we will calculate and extract linear model results for each permutation individually using nest, mutate, and map functions\n\nfake_biochem_lms &lt;- fake_biochem |&gt;\n  nest(data = -perm) |&gt;\n  mutate(\n    fit = map(data, ~ lm(weight ~ tot_cholesterol, data = .x)),\n    glanced = map(fit, glance)\n  ) |&gt;\n  unnest(glanced)"
+  },
+  {
+    "objectID": "exercises/ex-13.html#visualize-the-null",
+    "href": "exercises/ex-13.html#visualize-the-null",
+    "title": "Stats Bootcamp - class 13",
+    "section": "Visualize the null",
+    "text": "Visualize the null\nLet’s take a look at the null distribution of F-statistics from the randomized values\n\nggplot(fake_biochem_lms,\n       aes(x = statistic)) +\ngeom_density(color=\"red\") +\ntheme_minimal()\n\n\nremember that the \\(F-statistic\\) we observed was 255!\n\nggplot(fake_biochem_lms, aes(x = statistic)) +\nxlim(0,f*1.1) +\ngeom_density(color=\"red\") +\ngeom_vline(xintercept = f, color = \"blue\") +\n#  scale_x_log10() +\ntheme_minimal()\n\nIn our 100 randoized simulations, we never see an F-statistic as extreme as the one we observed in the actual data. Therefore:\n\nP &lt; 0.01 or 1/100\n\nReminder, our calculate P value was:"
+  },
+  {
+    "objectID": "exercises/ex-13.html#how-to-find-the-best-least-squares-fit",
+    "href": "exercises/ex-13.html#how-to-find-the-best-least-squares-fit",
+    "title": "Stats Bootcamp - class 13",
+    "section": "How to find the best (least squares) fit?",
+    "text": "How to find the best (least squares) fit?\n\nRotate the line of fit\n\nFind the fit that minimizes the Sum of Squared Residuals or \\(SS_{fit}\\)\n\nThis is the derivative (slope of tangent at best point = 0) of the function describing the \\(SS_{fit}\\) and the next rotation is 0."
+  },
+  {
+    "objectID": "exercises/ex-13.html#references",
+    "href": "exercises/ex-13.html#references",
+    "title": "Stats Bootcamp - class 13",
+    "section": "References",
+    "text": "References\nDifferences between correlation and regression\nalso more differences between correlation and regression.\nCommon statistical tests are linear models from Jonas Lindeløv\nStatquest\nStats gobbledygook\nLinear Regression Assumptions and Diagnostics in R: Essentials\nPRINCIPLES OF STATISTICS from GraphPad/SAS.\nStatquest: how to go from F-statistic to p-value\nStatQuest: Fitting a line to data, aka least squares, aka linear regression.\nStatQuest: Gradient Descent, Step-by-Step"
+  },
+  {
+    "objectID": "exercises/ex-15.html",
+    "href": "exercises/ex-15.html",
+    "title": "Stats Bootcamp - class 15",
+    "section": "",
+    "text": "Types of error and multiple test corrections\nExploratory data analysis\nClustering and overlaps"
+  },
+  {
+    "objectID": "exercises/ex-15.html#learning-objectives",
+    "href": "exercises/ex-15.html#learning-objectives",
+    "title": "Stats Bootcamp - class 15",
+    "section": "",
+    "text": "Types of error and multiple test corrections\nExploratory data analysis\nClustering and overlaps"
+  },
+  {
+    "objectID": "exercises/ex-15.html#types-i-and-ii-error",
+    "href": "exercises/ex-15.html#types-i-and-ii-error",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Types I and II error",
+    "text": "Types I and II error\nFalse positives and False negatives\n\n\\(\\alpha\\) - significance level OR evidentiary standard\n\\(\\beta\\) - type II error rate, 1 - \\(\\beta\\) is power"
+  },
+  {
+    "objectID": "exercises/ex-15.html#different-visualization",
+    "href": "exercises/ex-15.html#different-visualization",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Different visualization",
+    "text": "Different visualization\nPower vs Significance"
+  },
+  {
+    "objectID": "exercises/ex-15.html#genomics---lots-of-data---lots-of-hypothesis-tests",
+    "href": "exercises/ex-15.html#genomics---lots-of-data---lots-of-hypothesis-tests",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Genomics -> Lots of Data -> Lots of Hypothesis Tests",
+    "text": "Genomics -&gt; Lots of Data -&gt; Lots of Hypothesis Tests\nIn a typical RNA-seq experiment, we test ~10K different hypotheses. For example, you have 10K genes and for each gene you test whether the mean expression changed in condition A vs condition B. Using a standard p-value cut-off of 0.05, we’d expect 500 genes to be deemed “significant” by chance. Thus, we are very concerned about False Positives or Type I Errors."
+  },
+  {
+    "objectID": "exercises/ex-15.html#multiple-test-corrections",
+    "href": "exercises/ex-15.html#multiple-test-corrections",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Multiple test corrections",
+    "text": "Multiple test corrections\n\nControl overall α (also known as family-wise error rate or FWER), which will affect the α* for each test. That is, we are controlling the overall probability of making at least one false discovery. Bonferroni and Sidak corrections all control FWER.\nControl false discovery rate (FDR). These procedures allow for type 1 errors (false positives) but control the proportion of these false positives in relation to true positives. This is done by adjusting the decision made for the p-value associated with each individual test to decide rejection or not. Because this will result in a higher type 1 error rate, it has higher power. This affords a higher probability of true discoveries. The step procedures control for FDR."
+  },
+  {
+    "objectID": "exercises/ex-15.html#bonferroni-correction",
+    "href": "exercises/ex-15.html#bonferroni-correction",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Bonferroni Correction",
+    "text": "Bonferroni Correction\nThe most conservative of corrections, the Bonferroni correction is also perhaps the most straightforward in its approach. Simply divide α by the number of tests (m).\n\nα = α/m\n\nHowever, with many tests, α will become very small. This reduces power, which means that we are very unlikely to make any true discoveries.\nSidak Correction\n\nα = 1-(1-α)^(1/m)"
+  },
+  {
+    "objectID": "exercises/ex-15.html#holms-step-down-procedure",
+    "href": "exercises/ex-15.html#holms-step-down-procedure",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Holm’s Step-Down Procedure",
+    "text": "Holm’s Step-Down Procedure\nThe Holm-Bonferroni method is also fairly simple to calculate, but it is more powerful than the single-step Bonferroni.\n\\(HB = \\displaystyle \\frac {target \\alpha}{n - rank + 1}\\)\nH1: 0.005\nH2: 0.01\nH3: 0.03\nH4: = 0.04\nStep 1: Order the p-values from smallest to greatest (already done)\nStep 2: Calc HB for the first rank HB = .05 / 4 – 1 + 1 = .05 / 4 = .0125 H1: 0.005 &lt; .0125, so we reject the null\nStep 4: Repeat the HB formula for the second rank and keep going until we find \\(H{_N}\\) &gt; \\(HB{_N}\\). All subsequent hypotheses are non-significant (i.e. not rejected)."
+  },
+  {
+    "objectID": "exercises/ex-15.html#hochbergs-step-up-procedure",
+    "href": "exercises/ex-15.html#hochbergs-step-up-procedure",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Hochberg’s Step-Up Procedure",
+    "text": "Hochberg’s Step-Up Procedure\nMore powerful than Holm’s step-down procedure, Hochberg’s step-up procedure also seeks to control the FDR and follows a similar process, only p-values are ranked from largest to smallest.\nFor each ranked p-value, it is compared to the α calculated for its respective rank (same formula as Holm’s procedure). Testing continues until you reach the first non-rejected hypothesis. You would then fail to reject all following hypotheses."
+  },
+  {
+    "objectID": "exercises/ex-15.html#example",
+    "href": "exercises/ex-15.html#example",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Example",
+    "text": "Example\n\nrna &lt;- read_csv(here(\"data/data_rna_protein.csv.gz\")) |&gt;select(iDUX4_pval)\n\n\nrna$fdr &lt;- p.adjust(p = ??, method = \"fdr\", n = nrow(rna))\n\nrna$BH &lt;- p.adjust(p = rna$iDUX4_pval, method = \"BH\", n = nrow(rna))\n\nrna$bon &lt;- p.adjust(p = rna$iDUX4_pval, method = \"bonferroni\", n = nrow(rna))\n\n\nrna_long &lt;- rna |&gt;pivot_longer(cols = iDUX4_pval:bon, names_to = \"type\")\n\n\n\nggplot(data = rna_long, aes(x=value, fill = type)) +\n  geom_histogram(bins = 50) +\n  facet_wrap(~type) +\n  theme_cowplot()"
+  },
+  {
+    "objectID": "exercises/ex-15.html#exploratory-data-analysis-eda",
+    "href": "exercises/ex-15.html#exploratory-data-analysis-eda",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Exploratory data analysis (EDA)",
+    "text": "Exploratory data analysis (EDA)\nOur goal here is to get an top-down big picture of the similarity/differences between variables in a dataset. For example, let’s say you do RNA-seq in triplicate on 4 treatment/developmental times.\nPCA\nWe will perform PCA on all of the samples and visualize the relationship between samples.\nCorrelation matrix\nWe will perform hierarchical clustering on a matrix representing the pairwise correlation between all these samples."
+  },
+  {
+    "objectID": "exercises/ex-15.html#explore-data",
+    "href": "exercises/ex-15.html#explore-data",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Explore data",
+    "text": "Explore data\nIs it normal-ish?\n\n# get dux targets\ndux_targets &lt;- read_csv(file = here(\"data\",\"target_genes.csv.gz\"))\n\n# get expression data\nd &lt;- read_tsv(here(\"data\",\"data_genelevel.tsv.gz\")) |&gt;\n  mutate(target = case_when(\n    gene_symbol %in% dux_targets$hgnc_symbol ~ \"target\",\n    TRUE ~ \"not_target\")\n         ) |&gt;\n  filter(gene_symbol!=\"ISCA1\") |&gt;\n  drop_na()\n\n\nd |&gt;\n  pivot_longer(cols = hour00_rep1:hour14_rep3) |&gt;\n  ggplot(aes(x=value, color=name)) +\n  ??() +\n  theme_cowplot()\n\n. . .\nDefinitely not normal"
+  },
+  {
+    "objectID": "exercises/ex-15.html#data-transformations",
+    "href": "exercises/ex-15.html#data-transformations",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Data transformations",
+    "text": "Data transformations\nWe often transform data to make it closer to being normally-distributed. This allows us to use more powerful statistical tests on the same data. One approach is to log-transform the data.\n\nd |&gt;\n  pivot_longer(cols = hour00_rep1:hour14_rep3) |&gt;\n  ggplot(aes(x=??(value), color=name)) +\n  geom_density() +\n  theme_cowplot()\n\n. . .\nWhat is this?\n\nWarning message: Removed 1251 rows containing non-finite values (stat_density())."
+  },
+  {
+    "objectID": "exercises/ex-15.html#pseudocounts",
+    "href": "exercises/ex-15.html#pseudocounts",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Pseudocounts",
+    "text": "Pseudocounts\n\\(log_{x}(0)\\) is a common problem. One solution is to add a pseudocount. Since this is read count data, the smallest unit is 1 and so we will add 1 to all the observations before perforing the log transformation. \\(1\\) represents the pseudocount in this case.\n\nd |&gt;\n  pivot_longer(cols = hour00_rep1:hour14_rep3) |&gt;\n  ggplot(aes(x=??(value), color=name)) +\n  geom_density() +\n  theme_cowplot()"
+  },
+  {
+    "objectID": "exercises/ex-15.html#correlation-analysis",
+    "href": "exercises/ex-15.html#correlation-analysis",
+    "title": "Stats Bootcamp - class 15",
+    "section": "correlation analysis",
+    "text": "correlation analysis\nprepare the data for analysis\n\n# pull counts\nx &lt;-  d |&gt;\n  select_if(is.numeric) |&gt;# keep only the numeric columns\n  mutate_all(funs(log2(1 + .))) |&gt;# log2 transform\n  as.matrix() # matrix\n\nrownames(x) &lt;- d$gene_symbol\n\nx &lt;- t(scale(t(x))) # scale\n\n# pairwise pearson correlation\np &lt;- ???\n\n# heatmap\npheatmap(\n  mat = p,\n  clustering_distance_rows = \"??\",\n  clustering_distance_cols = \"??\",\n  clustering_method = \"??\"\n)"
+  },
+  {
+    "objectID": "exercises/ex-15.html#pca-1",
+    "href": "exercises/ex-15.html#pca-1",
+    "title": "Stats Bootcamp - class 15",
+    "section": "PCA",
+    "text": "PCA\nPCA is a common dimensionality reduction method that is used to visualize the similarity and differences in your data.\nLet’s watch this fantastic 5 minute video explaining PCA\n\nFor more detailed explanations go here and here."
+  },
+  {
+    "objectID": "exercises/ex-15.html#pca-2",
+    "href": "exercises/ex-15.html#pca-2",
+    "title": "Stats Bootcamp - class 15",
+    "section": "PCA",
+    "text": "PCA\n\n# pairwise pearson correlation\npc &lt;-\n\nsummary(pc) # summarize the PCs by variance"
+  },
+  {
+    "objectID": "exercises/ex-15.html#pca---prepare-visualization",
+    "href": "exercises/ex-15.html#pca---prepare-visualization",
+    "title": "Stats Bootcamp - class 15",
+    "section": "PCA - prepare visualization",
+    "text": "PCA - prepare visualization\n\n# create a dataframe with the importance/explanation of variation for each PC\npca_data_info &lt;- summary(pc)$importance |&gt; as.data.frame()\n\npca_data_info &lt;- round(x = pca_data_info, digits = 3)\n\n# we make a dataframe out of the rotations and will use this to plot\npca_plot_data &lt;- pc$rotation |&gt;\n  as.data.frame() |&gt;\n  rownames_to_column(var = \"ID\") |&gt;\n  separate(\n    ID,\n    into = c(\"time\",\"rep\"),\n    sep = \"_\"\n  )\n\n# recode \"rep\"\npca_plot_data$rep &lt;- recode(\n  pca_plot_data$rep,\n  rep1 = \"A\",\n  rep2 = \"B\",\n  rep3 = \"C\"\n)\n\n# gsub hour\npca_plot_data$time &lt;- gsub(\n  pattern = \"hour\",\n  replacement = \"\",\n  x = pca_plot_data$time\n)\n\nggplot(\n  pca_plot_data,\n  aes(x=PC1, y = PC2, color=time)\n  ) +\n  geom_point() +\n  xlab(paste(\"PC1, %\",100 * pca_data_info[\"Proportion of Variance\",\"PC1\"])) +\n  ylab(paste(\"PC2, %\",100 * pca_data_info[\"Proportion of Variance\",\"PC2\"])) +\n  ggtitle(\"PCA for DUX4 timecourse\") +\n  theme_cowplot()"
+  },
+  {
+    "objectID": "exercises/ex-15.html#famous-pca-example",
+    "href": "exercises/ex-15.html#famous-pca-example",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Famous PCA example",
+    "text": "Famous PCA example\nUsing gene expression as your measurement, do you think the mouse liver is more similar to a mouse heart or a human liver?\nThe Mouse ENCODE Consortium reported that comparative gene expression data from human and mouse tend to cluster more by species rather than by tissue.\n\nA comparative encyclopedia of DNA elements in the mouse genome\nComparison of the transcriptional landscapes between human and mouse tissues"
+  },
+  {
+    "objectID": "exercises/ex-15.html#some-found-this-hard-to-believe",
+    "href": "exercises/ex-15.html#some-found-this-hard-to-believe",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Some found this hard to believe",
+    "text": "Some found this hard to believe\nYoav Gilad’s lab recapitulated the initial result:\n\nThis observation was surprising, as it contradicted much of the comparative gene regulatory data collected previously, as well as the common notion that major developmental pathways are highly conserved across a wide range of species, in particular across mammals."
+  },
+  {
+    "objectID": "exercises/ex-15.html#careful-with-batch-effects",
+    "href": "exercises/ex-15.html#careful-with-batch-effects",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Careful with batch effects",
+    "text": "Careful with batch effects\nBut noticed something funny about which samples were sequenced on the same lanes."
+  },
+  {
+    "objectID": "exercises/ex-15.html#accounting-for-batch-effects",
+    "href": "exercises/ex-15.html#accounting-for-batch-effects",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Accounting for batch effects",
+    "text": "Accounting for batch effects\n\nHere we show that the Mouse ENCODE gene expression data were collected using a flawed study design, which confounded sequencing batch (namely, the assignment of samples to sequencing flowcells and lanes) with species. When we account for the batch effect, the corrected comparative gene expression data from human and mouse tend to cluster by tissue, not by species."
+  },
+  {
+    "objectID": "exercises/ex-15.html#k-means-clustering-to-look-for-patterns",
+    "href": "exercises/ex-15.html#k-means-clustering-to-look-for-patterns",
+    "title": "Stats Bootcamp - class 15",
+    "section": "K-means clustering to look for patterns",
+    "text": "K-means clustering to look for patterns\nGoal: to partition n observations into k clusters in which each observation belongs to the cluster with the nearest mean, serving as a prototype of the cluster. –Wiki\nK-means"
+  },
+  {
+    "objectID": "exercises/ex-15.html#k-means-data-preparation",
+    "href": "exercises/ex-15.html#k-means-data-preparation",
+    "title": "Stats Bootcamp - class 15",
+    "section": "K-Means data preparation",
+    "text": "K-Means data preparation\n\nRows are observations (individuals) and columns are variables\nAny missing value in the data must be removed or estimated.\nThe data must be standardized (i.e., scaled) to make variables comparable."
+  },
+  {
+    "objectID": "exercises/ex-15.html#scaling-or-z-score",
+    "href": "exercises/ex-15.html#scaling-or-z-score",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Scaling or z-score",
+    "text": "Scaling or z-score\n{%20}\n\\(x\\) = observation\\(\\mu\\) = population mean\\(\\sigma\\) = population sd\nWe will be using this function on each row. This will allow comparison of relative changes across a row, for all rows."
+  },
+  {
+    "objectID": "exercises/ex-15.html#k-means-clustering",
+    "href": "exercises/ex-15.html#k-means-clustering",
+    "title": "Stats Bootcamp - class 15",
+    "section": "K-Means clustering",
+    "text": "K-Means clustering\n\nComputing k-means clustering in R (pheatmap)\nDetermine appropriate cluster number\nAdd new column with cluster number to initial data"
+  },
+  {
+    "objectID": "exercises/ex-15.html#how-do-we-figure-out-the-optimal-clusters",
+    "href": "exercises/ex-15.html#how-do-we-figure-out-the-optimal-clusters",
+    "title": "Stats Bootcamp - class 15",
+    "section": "How do we figure out the optimal # clusters?",
+    "text": "How do we figure out the optimal # clusters?\nThere are many methods, but we will stick with the “elbow” method.\nK-means is minimizing the total within cluster sum of squares (wss).\nWe pick the cluster where that drop in total reaches diminishing returns -&gt; the elbow."
+  },
+  {
+    "objectID": "exercises/ex-15.html#lets-cluster-once-to-see",
+    "href": "exercises/ex-15.html#lets-cluster-once-to-see",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Let’s cluster once to see",
+    "text": "Let’s cluster once to see\n\nset.seed(33)\ntmp &lt;- pheatmap(\n  mat = x,\n  clustering_distance_rows = \"euclidean\",\n  clustering_method = \"ward.D2\",\n  kmeans_k = ??,\n  cluster_cols = FALSE,\n  scale = \"none\"\n)\n\n\ntmp$kmeans$tot.withinss"
+  },
+  {
+    "objectID": "exercises/ex-15.html#functions-in-r",
+    "href": "exercises/ex-15.html#functions-in-r",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Functions in R",
+    "text": "Functions in R"
+  },
+  {
+    "objectID": "exercises/ex-15.html#create-function-to-calculate-wss",
+    "href": "exercises/ex-15.html#create-function-to-calculate-wss",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Create function to calculate wss",
+    "text": "Create function to calculate wss\n\nwss &lt;- function(knum) {\n  ph &lt;- pheatmap(\n    mat = x,\n    kmeans_k = ??,\n    scale = \"none\",\n    cluster_cols = FALSE,\n    clustering_distance_rows = \"euclidean\",\n    clustering_method = \"ward.D2\",\n    silent = TRUE\n  )\n  return(ph$kmeans$tot.withinss)\n}\n\nwss(6)"
+  },
+  {
+    "objectID": "exercises/ex-15.html#find-the-elbow",
+    "href": "exercises/ex-15.html#find-the-elbow",
+    "title": "Stats Bootcamp - class 15",
+    "section": "find the elbow",
+    "text": "find the elbow\n\ntibble(wss=map_vec(2:15,wss),\n       k=2:15) |&gt;\n  ggplot(., aes(x=k, y=wss)) +\n  geom_point() +\n  theme_cowplot()"
+  },
+  {
+    "objectID": "exercises/ex-15.html#final-clustering",
+    "href": "exercises/ex-15.html#final-clustering",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Final clustering",
+    "text": "Final clustering\n\nset.seed(33)\nc &lt;- pheatmap(\n  mat = x,\n  clustering_distance_rows = \"euclidean\",\n  clustering_method = \"ward.D2\",\n  kmeans_k = 7,\n  cluster_cols = F,\n  scale = \"none\"\n)\n\ncg &lt;- tibble(\n  Cluster=c$kmeans$cluster,\n  gene_symbol=names(c$kmeans$cluster)\n)\n\ncd &lt;- left_join(d, cg, by=\"gene_symbol\")"
+  },
+  {
+    "objectID": "exercises/ex-15.html#which-clusters-contains-dux4-targets",
+    "href": "exercises/ex-15.html#which-clusters-contains-dux4-targets",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Which cluster(s) contains DUX4 targets?",
+    "text": "Which cluster(s) contains DUX4 targets?\nFisher’s Exact Test and the Hypergeometric Distribution\n\n# list of genes by dux4 targeting\nduxList &lt;- split(cd$gene_symbol, cd$??)\n\n# list of genes by clustering\nclustList &lt;- split(cd$gene_symbol, as.factor(cd$??))\n\n# calculate all overlaps between lists\ngom.duxclust &lt;- newGOM(??List,\n                       ??List,\n                       genome.size = ??)\n\n\ngetMatrix(gom.duxclust, \"pval\") |&gt;\n  t() |&gt;\n  as.data.frame() |&gt;\n  rownames_to_column(var = \"clust\") |&gt;\n  as.tibble() |&gt;\n  arrange(target)"
+  },
+  {
+    "objectID": "exercises/ex-15.html#lets-calculate-the-empirical-p-value-of-the-cluster-most-enriched-for-dux4-targets-by-sampling",
+    "href": "exercises/ex-15.html#lets-calculate-the-empirical-p-value-of-the-cluster-most-enriched-for-dux4-targets-by-sampling",
+    "title": "Stats Bootcamp - class 15",
+    "section": "Let’s calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling",
+    "text": "Let’s calculate the empirical p-value of the cluster most enriched for DUX4 targets by sampling\nIn order to do this, you will need to:\n\nIdentify which cluster is the most enriched for DUX4 targets.\n\nDetermine how many genes are in the cluster. You will need to know this to figure out how many genes to sample from the whole data set.\nDetermine how many of the genes in the cluster are DUX4 targets. This is the metric that you are interested in comparing between the null distribution and your observation.\n\n\nGenerate 1000 random sample of the proper size from all genes and find out how many of them are DUX4 targets.\nVisualize the distribution of DUX4 targets in these 1000 random (your null distribution) and overlay the number of DUX4 targets you observed in the cluster that was most enriched for DUX4 targets."
+  },
+  {
     "objectID": "prepare/prepare-01.html",
     "href": "prepare/prepare-01.html",
     "title": "R Bootcamp",
@@ -1824,6 +2790,104 @@
     "title": "Problem Set Stats Bootcamp - class 9",
     "section": "Problem # 2",
     "text": "Problem # 2\nWe have seen that scientists played a major role in the eugenics movement, which greatly influenced society through policies. Explore the [eugenics archive](https://www.eugenicsarchive.ca/), pick on event from the timeline or the connections section. Describe what happened in a couple sentences and your thoughts on the matter in another couple sentences. Alternatively, you can identify events in Colorado history to describe and comment on. Obviously, there is no wrong answer here. I may pick some of your responses and anonymously share them with the rest of the class."
+  },
+  {
+    "objectID": "problem-sets/ps-12.html",
+    "href": "problem-sets/ps-12.html",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "",
+    "text": "── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.2.0     ✔ readr     2.2.0\n✔ forcats   1.0.1     ✔ stringr   1.6.0\n✔ ggplot2   4.0.2     ✔ tibble    3.3.1\n✔ lubridate 1.9.5     ✔ tidyr     1.3.2\n✔ purrr     1.2.1     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nAttaching package: 'rstatix'\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\n\nAttaching package: 'janitor'\n\n\nThe following object is masked from 'package:rstatix':\n\n    make_clean_names\n\n\nThe following objects are masked from 'package:stats':\n\n    chisq.test, fisher.test\n\n\nhere() starts at /Users/mtaliaferro/Documents/GitHub/molb-7950\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]\nbiochem &lt;- biochem[, keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\", \"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename gender to sex\nb &lt;- inner_join(biochem, weight, by = \"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex = gender)"
+  },
+  {
+    "objectID": "problem-sets/ps-12.html#problem-1",
+    "href": "problem-sets/ps-12.html#problem-1",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Problem # 1",
+    "text": "Problem # 1\nDoes mouse sex explain mouse total cholesterol levels? Make sure to run chunks above.\n1. Examine and specify the variable(s) (1 pt)\n\nThe response variable y is \\(??\\)\nThe explantory variable x is \\(??\\)\n\nMake a violin plot: (2 pt)\nresponse variable on the y-axis\nexplanatory variable on the x-axis\nGet n, mean, median, sd (1 pt)\nIs it normally distribute? (1 pt)\n\nAnswer here\n\nIs it variance similar between groups? (1 pt)\n\nAnswer here\n\nWhat kind of test are you picking and why? (1 pt)\n\nAnswer here\n\n2. Declare null hypothesis \\(\\mathcal{H}_0\\) (1 pt)\n\\(\\mathcal{H}_0\\) is that \\(??\\) does not explain \\(??\\)\n3. Calculate test-statistic, exact p-value and plot (2 pt)\n\nMy interpretation of the result\n\n\n# i have pre-selected some families to compare\nmyfams &lt;- c(\n  \"B1.5:E1.4(4) B1.5:A1.4(5)\",\n  \"F1.3:A1.2(3) F1.3:E2.2(3)\",\n  \"A1.3:D1.2(3) A1.3:H1.2(3)\",\n  \"D5.4:G2.3(4) D5.4:C4.3(4)\"\n)\n\n# only keep the familys in myfams\nbfam &lt;- b |&gt;\n  filter(family %in% myfams) |&gt;\n  droplevels()\n\n# simplify family names and make factor\nbfam$family &lt;- gsub(pattern = \"\\\\..*\", replacement = \"\", x = bfam$family) |&gt;\n  as.factor()\n\n\n# make B1 the reference (most similar to overall mean)\nbfam$family &lt;- relevel(x = bfam$family, ref = \"B1\")"
+  },
+  {
+    "objectID": "problem-sets/ps-12.html#problem-2",
+    "href": "problem-sets/ps-12.html#problem-2",
+    "title": "Problem Set Stats Bootcamp - class 12",
+    "section": "Problem # 2",
+    "text": "Problem # 2\nDoes mouse family explain mouse total cholesterol levels? Make sure to run chunk above.\n1. Examine and specify the variable(s) (1 pt)\n\nThe response variable y is \\(??\\)\nThe explanatory variable x is \\(??\\)\n\nMake a plot: (2 pt)\nresponse variable on the y-axis\nexplanatory variable on the x-axis\nGet n, mean, median, sd (1 pt)\nIs it normally distribute? (1 pt)\n\nAnswer here\n\nIs it variance similar between groups? (1 pt)\n\nAnswer here\n\nWhat kind of test are you picking and why? (1 pt)\n\nAnswer here ### 2. Declare null hypothesis \\(\\mathcal{H}_0\\)\n\n\n\\(\\mathcal{H}_0\\) is that \\(??\\) does not explain \\(??\\) (1 pt)\n3. Calculate test-statistic, exact p-value and plot (2 pt)\n\nMy interpretation of the result"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html",
+    "href": "problem-sets/ps-14.html",
+    "title": "Problem Set Stats Bootcamp - class 14",
+    "section": "",
+    "text": "── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.2.0     ✔ readr     2.2.0\n✔ forcats   1.0.1     ✔ stringr   1.6.0\n✔ ggplot2   4.0.2     ✔ tibble    3.3.1\n✔ lubridate 1.9.5     ✔ tidyr     1.3.2\n✔ purrr     1.2.1     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nAttaching package: 'rstatix'\n\n\nThe following object is masked from 'package:stats':\n\n    filter\n\n\n\nAttaching package: 'janitor'\n\n\nThe following object is masked from 'package:rstatix':\n\n    make_clean_names\n\n\nThe following objects are masked from 'package:stats':\n\n    chisq.test, fisher.test\n\n\nhere() starts at /Users/mtaliaferro/Documents/GitHub/molb-7950\nbiochem &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/Biochemistry.txt\", show_col_types = FALSE) |&gt;\n  janitor::clean_names()\n\n# simplify names a bit more\ncolnames(biochem) &lt;- gsub(pattern = \"biochem_\", replacement = \"\", colnames(biochem))\n\n# we are going to simplify this a bit and only keep some columns\nkeep &lt;- colnames(biochem)[c(1, 6, 9, 14, 15, 24:28)]\nbiochem &lt;- biochem[, keep]\n\n# get weights for each individual mouse\n# careful: did not come with column names\nweight &lt;- read_tsv(\"http://mtweb.cs.ucl.ac.uk/HSMICE/PHENOTYPES/weight\", col_names = F, show_col_types = FALSE)\n\n# add column names\ncolnames(weight) &lt;- c(\"subject_name\", \"weight\")\n\n# add weight to biochem table and get rid of NAs\n# rename gender to sex\nb &lt;- inner_join(biochem, weight, by = \"subject_name\") |&gt;\n  na.omit() |&gt;\n  rename(sex = gender)"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#problem-1",
+    "href": "problem-sets/ps-14.html#problem-1",
+    "title": "Problem Set Stats Bootcamp - class 14",
+    "section": "Problem # 1",
+    "text": "Problem # 1\nCan mouse sex explain mouse cholesterol? {.smaller}"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#step-1-null-hypothesis-and-variable-specification",
+    "href": "problem-sets/ps-14.html#step-1-null-hypothesis-and-variable-specification",
+    "title": "Problem Set Stats Bootcamp - class 14",
+    "section": "STEP 1: Null hypothesis and variable specification",
+    "text": "STEP 1: Null hypothesis and variable specification\n\\(\\mathcal{H}_0:\\)\n\n?? is the response variable\n\n\n?? is the explanatory variable"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#step-2-fit-linear-model-and-examine-results",
+    "href": "problem-sets/ps-14.html#step-2-fit-linear-model-and-examine-results",
+    "title": "Problem Set Stats Bootcamp - class 14",
+    "section": "STEP 2: Fit linear model and examine results",
+    "text": "STEP 2: Fit linear model and examine results\nFit summary:\nCoefficient summary:"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#collecting-residuals-and-other-information",
+    "href": "problem-sets/ps-14.html#collecting-residuals-and-other-information",
+    "title": "Problem Set Stats Bootcamp - class 14",
+    "section": "Collecting residuals and other information",
+    "text": "Collecting residuals and other information\nadd residuals and other information"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#step-4-visualize-the-error-around-fit",
+    "href": "problem-sets/ps-14.html#step-4-visualize-the-error-around-fit",
+    "title": "Problem Set Stats Bootcamp - class 14",
+    "section": "STEP 4: Visualize the error around fit",
+    "text": "STEP 4: Visualize the error around fit\n\n# plot of data with mean and colored by residuals"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#step-3-visualize-the-error-around-the-null-mean-weight",
+    "href": "problem-sets/ps-14.html#step-3-visualize-the-error-around-the-null-mean-weight",
+    "title": "Problem Set Stats Bootcamp - class 14",
+    "section": "STEP 3: Visualize the error around the null (mean weight)",
+    "text": "STEP 3: Visualize the error around the null (mean weight)"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#plot-the-fit-error-and-the-null-error-as-2-panels",
+    "href": "problem-sets/ps-14.html#plot-the-fit-error-and-the-null-error-as-2-panels",
+    "title": "Problem Set Stats Bootcamp - class 14",
+    "section": "Plot the fit error and the null error as 2 panels",
+    "text": "Plot the fit error and the null error as 2 panels"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#calculate-r2",
+    "href": "problem-sets/ps-14.html#calculate-r2",
+    "title": "Problem Set Stats Bootcamp - class 14",
+    "section": "Calculate \\(R^2\\)\n",
+    "text": "Calculate \\(R^2\\)\n\n\\(R^2 = 1 - \\displaystyle \\frac {SS_{fit}}{SS_{null}}\\)\ncheck agains Rsq in your fit"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#compare-to-traditional-t-test",
+    "href": "problem-sets/ps-14.html#compare-to-traditional-t-test",
+    "title": "Problem Set Stats Bootcamp - class 14",
+    "section": "Compare to traditional t-test",
+    "text": "Compare to traditional t-test"
+  },
+  {
+    "objectID": "problem-sets/ps-14.html#provide-your-interpreation-of-the-result",
+    "href": "problem-sets/ps-14.html#provide-your-interpreation-of-the-result",
+    "title": "Problem Set Stats Bootcamp - class 14",
+    "section": "Provide your interpreation of the result",
+    "text": "Provide your interpreation of the result"
   },
   {
     "objectID": "resources/block-dna-resources.html",
