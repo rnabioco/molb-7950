@@ -10,10 +10,22 @@
 #
 # Adding a package? Add it here AND to pixi.toml (under its conda name).
 #
-# Deliberately excluded: gganimate, gifski, magick, Rtsne, tidyquant, DAAG,
-# gapminder, eds. These appear only in underscore-prefixed files that Quarto
-# does not render (resources/_plot-competition*.qmd, exercises/_ex-31.qmd).
+# Deliberately excluded: gganimate, gifski, Rtsne, tidyquant, DAAG, gapminder.
+# These appear only in the archived plot-competition pages
+# (resources/_plot-competition*.qmd), which Quarto does not render.
 # Add them here if those files are ever un-prefixed.
+#
+# Two more are excluded on purpose, and the course materials no longer load
+# either one, so un-prefixing a file will not drag them back in:
+#
+#   magick -- ComplexHeatmap only *suggests* it, for nicer rasterization of
+#     large heatmaps. Everything renders without it (you just get a one-line
+#     "suggested to install" message). Adding r-magick pulls in 77 conda
+#     packages -- imagemagick, ghostscript, graphviz, gtk3 and full GL/X11
+#     stacks -- which is not worth it for one figure.
+#
+#   eds -- only speeds up tximport's alevin reader, and has no osx-arm64 conda
+#     build. tximport works without it.
 
 cran_pkgs <- c(
   # tidyverse & core
