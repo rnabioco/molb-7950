@@ -430,22 +430,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#identify-high-and-low-expression" id="toc-identify-high-and-low-expression" class="nav-link" data-scroll-target="#identify-high-and-low-expression"><span class="header-section-number">4.2</span> Identify High and Low Expression</a></li>
   </ul>
 </li>
-  <li>
-<a href="#part-3-statistical-modeling-with-broom" id="toc-part-3-statistical-modeling-with-broom" class="nav-link" data-scroll-target="#part-3-statistical-modeling-with-broom"><span class="header-section-number">5</span> Part 3: Statistical Modeling with broom</a>
-  <ul class="collapse">
-<li><a href="#linear-models-for-individual-genes" id="toc-linear-models-for-individual-genes" class="nav-link" data-scroll-target="#linear-models-for-individual-genes"><span class="header-section-number">5.1</span> Linear Models for Individual Genes</a></li>
-  <li><a href="#analyze-slope-coefficients" id="toc-analyze-slope-coefficients" class="nav-link" data-scroll-target="#analyze-slope-coefficients"><span class="header-section-number">5.2</span> Analyze Slope Coefficients</a></li>
-  <li><a href="#analyze-intercept-terms" id="toc-analyze-intercept-terms" class="nav-link" data-scroll-target="#analyze-intercept-terms"><span class="header-section-number">5.3</span> Analyze Intercept Terms</a></li>
-  </ul>
-</li>
-  <li>
-<a href="#your-assignment" id="toc-your-assignment" class="nav-link" data-scroll-target="#your-assignment"><span class="header-section-number">6</span> Your assignment</a>
-  <ul class="collapse">
-<li><a href="#hypothesis" id="toc-hypothesis" class="nav-link" data-scroll-target="#hypothesis"><span class="header-section-number">6.1</span> Hypothesis</a></li>
-  <li><a href="#explore-analyze" id="toc-explore-analyze" class="nav-link" data-scroll-target="#explore-analyze"><span class="header-section-number">6.2</span> Explore / Analyze</a></li>
-  <li><a href="#interpreation" id="toc-interpreation" class="nav-link" data-scroll-target="#interpreation"><span class="header-section-number">6.3</span> Interpreation</a></li>
-  </ul>
-</li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/rnabioco/molb-7950/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li><li><a href="https://github.com/rnabioco/molb-7950/edit/main/problem-sets/ps-07.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
@@ -595,71 +579,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Find genes with extreme expression values</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-</section></section><section id="part-3-statistical-modeling-with-broom" class="level1" data-number="5"><h1 data-number="5">
-<span class="header-section-number">5</span> Part 3: Statistical Modeling with broom</h1>
-<section id="linear-models-for-individual-genes" class="level2" data-number="5.1"><h2 data-number="5.1" class="anchored" data-anchor-id="linear-models-for-individual-genes">
-<span class="header-section-number">5.1</span> Linear Models for Individual Genes</h2>
-<p><strong>Task 8:</strong> Fit linear models to examine how each gene’s expression responds to growth rate within each nutrient condition.</p>
-<p><em>Breadcrumbs:</em></p>
-<ul>
-<li>Use <code>reframe()</code> with <code>broom::tidy(lm(exp_level ~ rate))</code> for each gene-nutrient combination</li>
-<li>Use <code>.by = c(nutrient, systematic_name)</code> to group the modeling</li>
-<li>This creates a tidy data frame of model coefficients</li>
-</ul>
-<div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit linear models for each gene-nutrient combination</span></span>
-<span><span class="va">brauer_models_tbl</span> <span class="op">&lt;-</span></span>
-<span>  <span class="va">brauer_tidy_tbl</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">reframe</span><span class="op">(</span></span>
-<span>    <span class="fu">broom</span><span class="fu">::</span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html">tidy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">exp_level</span> <span class="op">~</span> <span class="va">rate</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>    .by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">nutrient</span>, <span class="va">systematic_name</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-<p>The above should give you a tibble that looks like this:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A tibble: 66,430 × 7</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>   nutrient  systematic_name term        estimate std.error statistic p.value</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>   <span class="sc">&lt;</span>chr<span class="sc">&gt;</span>     <span class="er">&lt;</span>chr<span class="sc">&gt;</span>           <span class="er">&lt;</span>chr<span class="sc">&gt;</span>          <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>     <span class="er">&lt;</span>dbl<span class="sc">&gt;</span>   <span class="er">&lt;</span>dbl<span class="sc">&gt;</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a> <span class="dv">1</span> Glucose   <span class="fu">YNL049C</span>         (Intercept)   <span class="sc">-</span><span class="fl">0.263</span>    <span class="fl">0.0441</span>    <span class="sc">-</span><span class="fl">5.98</span>  <span class="fl">0.00394</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a> <span class="dv">2</span> Glucose   YNL049C         rate           <span class="fl">0.714</span>    <span class="fl">0.226</span>      <span class="fl">3.16</span>  <span class="fl">0.0343</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a> <span class="dv">3</span> Ammonia   <span class="fu">YNL049C</span>         (Intercept)    <span class="fl">0.153</span>    <span class="fl">0.247</span>      <span class="fl">0.619</span> <span class="fl">0.569</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a> <span class="dv">4</span> Ammonia   YNL049C         rate          <span class="sc">-</span><span class="fl">1.09</span>     <span class="fl">1.27</span>      <span class="sc">-</span><span class="fl">0.862</span> <span class="fl">0.437</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a> <span class="dv">5</span> Phosphate <span class="fu">YNL049C</span>         (Intercept)   <span class="sc">-</span><span class="fl">0.465</span>    <span class="fl">0.161</span>     <span class="sc">-</span><span class="fl">2.89</span>  <span class="fl">0.0444</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a> <span class="dv">6</span> Phosphate YNL049C         rate           <span class="fl">2.07</span>     <span class="fl">0.825</span>      <span class="fl">2.51</span>  <span class="fl">0.0657</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a> <span class="dv">7</span> Sulfate   <span class="fu">YNL049C</span>         (Intercept)   <span class="sc">-</span><span class="fl">0.419</span>    <span class="fl">0.157</span>     <span class="sc">-</span><span class="fl">2.67</span>  <span class="fl">0.0558</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a> <span class="dv">8</span> Sulfate   YNL049C         rate           <span class="fl">2.23</span>     <span class="fl">0.807</span>      <span class="fl">2.77</span>  <span class="fl">0.0503</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a> <span class="dv">9</span> Leucine   <span class="fu">YNL049C</span>         (Intercept)    <span class="fl">0.193</span>    <span class="fl">0.0313</span>     <span class="fl">6.16</span>  <span class="fl">0.00352</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> Leucine   YNL049C         rate          <span class="sc">-</span><span class="fl">0.177</span>    <span class="fl">0.161</span>     <span class="sc">-</span><span class="fl">1.10</span>  <span class="fl">0.332</span></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="co"># ℹ 66,420 more rows</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="co"># ℹ Use `print(n = ...)` to see more rows</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section><section id="analyze-slope-coefficients" class="level2" data-number="5.2"><h2 data-number="5.2" class="anchored" data-anchor-id="analyze-slope-coefficients">
-<span class="header-section-number">5.2</span> Analyze Slope Coefficients</h2>
-<p><strong>Task 9:</strong> Examine the slope terms to identify genes that significantly respond to growth rate changes.</p>
-<p><em>Breadcrumbs: Filter for slope terms (not intercepts). Use q-value correction for multiple testing. Create histograms of p-values by nutrient. Which genes show the strongest positive or negative relationships with growth rate?</em></p>
-<div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Analyze slope coefficients</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-</section><section id="analyze-intercept-terms" class="level2" data-number="5.3"><h2 data-number="5.3" class="anchored" data-anchor-id="analyze-intercept-terms">
-<span class="header-section-number">5.3</span> Analyze Intercept Terms</h2>
-<p><strong>Task 10:</strong> Use intercept terms to identify genes with unusual baseline expression under specific nutrient limitations.</p>
-<p><em>Breadcrumbs: Filter for intercept terms. Center intercepts around each gene’s mean across nutrients using <code>group_by()</code> and <code>mutate()</code>. Use <code>top_n()</code> to find genes with extreme centered intercepts.</em></p>
-<div class="cell">
-<details class="code-fold"><summary>Code</summary><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Analyze intercept terms</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</details>
-</div>
-</section></section><section id="your-assignment" class="level1" data-number="6"><h1 data-number="6">
-<span class="header-section-number">6</span> Your assignment</h1>
-<p>Use this above data to try to ask and answer your own biological question.</p>
-<section id="hypothesis" class="level2" data-number="6.1"><h2 data-number="6.1" class="anchored" data-anchor-id="hypothesis">
-<span class="header-section-number">6.1</span> Hypothesis</h2>
-<p>State one or more hypotheses you want to test using this data.</p>
-</section><section id="explore-analyze" class="level2" data-number="6.2"><h2 data-number="6.2" class="anchored" data-anchor-id="explore-analyze">
-<span class="header-section-number">6.2</span> Explore / Analyze</h2>
-<p>Generate some tables or plots to explore your hypothesis.</p>
-</section><section id="interpreation" class="level2" data-number="6.3"><h2 data-number="6.3" class="anchored" data-anchor-id="interpreation">
-<span class="header-section-number">6.3</span> Interpreation</h2>
-<p>Interpret your results. What do they mean in the context of your hypothesis? Were you able to support or refute your hypothesis?</p>
 
 
 </section></section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
