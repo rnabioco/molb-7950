@@ -311,7 +311,7 @@ diff_lfc <-
   # Merge this with a table relating ensembl_gene_id with gene short names
   inner_join(gene_name_map) |>
   # Rename external_gene_name column
-  rename(gene = external_gene_name)
+  dplyr::rename(gene = external_gene_name)
 
 # number of upregulated genes
 nrow(
@@ -419,7 +419,7 @@ tpms <- txi$abundance |>
   rownames_to_column(var = "ensembl_gene_id") |>
   as_tibble() |>
   inner_join(gene_name_map) |>
-  rename(gene = external_gene_name) |>
+  dplyr::rename(gene = external_gene_name) |>
   # Filter for genes we are interested in
   filter(gene %in% c("Klf4", "Sox2", "Bdnf", "Dlg4")) |>
   pivot_longer(-c(ensembl_gene_id, gene)) |>
@@ -513,9 +513,9 @@ We can use `biomaRt` to get all genes that belong to each of these categories. T
 # write_csv(x = pathway, file = here("data","block-rna","pathwaygenes.csv.gz"))
 
 pathwaygenes <- read.table(here('data', 'block-rna', 'pathwaygenes.csv.gz'), header = T, sep = ',')
-pluripotencygenes <- filter(pathwaygenes, path == 'pluri') %>% pull(., ensembl_gene_id)
-cellcyclegenes <- filter(pathwaygenes, path == 'cellcycle') %>% pull(., ensembl_gene_id)
-neurongenes <- filter(pathwaygenes, path == 'neuron') %>% pull(., ensembl_gene_id)
+pluripotencygenes <- filter(pathwaygenes, path == 'pluri')
+cellcyclegenes <- filter(pathwaygenes, path == 'cellcycle')
+neurongenes <- filter(pathwaygenes, path == 'neuron')
 ```
 
 ## Add pathway information to results {.smaller}
