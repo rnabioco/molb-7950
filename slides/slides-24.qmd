@@ -477,26 +477,26 @@ We can use `biomaRt` to get all genes that belong to each of these categories. T
 #| echo: true
 #| eval: true
 #| label: biomart-pathways
-pluripotencygenes <- getBM(
-  attributes = c("ensembl_gene_id"),
-  filters = c("go_parent_term"),
-  values = c("GO:0019827"),
-  mart = mart
-)
+#pluripotencygenes <- getBM(
+#  attributes = c("ensembl_gene_id"),
+#  filters = c("go_parent_term"),
+#  values = c("GO:0019827"),
+#  mart = mart
+#)
 
-cellcyclegenes <- getBM(
-  attributes = c("ensembl_gene_id"),
-  filters = c("go_parent_term"),
-  values = c("GO:0045787"),
-  mart = mart
-)
+#cellcyclegenes <- getBM(
+#  attributes = c("ensembl_gene_id"),
+#  filters = c("go_parent_term"),
+#  values = c("GO:0045787"),
+#  mart = mart
+#)
 
-neurongenes <- getBM(
-  attributes = c("ensembl_gene_id"),
-  filters = c("go_parent_term"),
-  values = c("GO:0030182"),
-  mart = mart
-)
+#neurongenes <- getBM(
+#  attributes = c("ensembl_gene_id"),
+#  filters = c("go_parent_term"),
+#  values = c("GO:0030182"),
+#  mart = mart
+#)
 
 
 # pathway <- bind_rows(pluripotencygenes,
@@ -511,6 +511,11 @@ neurongenes <- getBM(
 #                   )
 #
 # write_csv(x = pathway, file = here("data","block-rna","pathwaygenes.csv.gz"))
+
+pathwaygenes <- read.table(here('data', 'block-rna', 'pathwaygenes.csv.gz'), header = T, sep = ',')
+pluripotencygenes <- filter(pathwaygenes, path == 'pluri') %>% pull(., ensembl_gene_id)
+cellcyclegenes <- filter(pathwaygenes, path == 'cellcycle') %>% pull(., ensembl_gene_id)
+neurongenes <- filter(pathwaygenes, path == 'neuron') %>% pull(., ensembl_gene_id)
 ```
 
 ## Add pathway information to results {.smaller}
