@@ -33,20 +33,23 @@ library(clusterProfiler)
 library(enrichplot)
 library(msigdbr)
 # run the code below to generate t2g file and gene id-symbol mapping file
-mart <- biomaRt::useEnsembl(
-  "ENSEMBL_MART_ENSEMBL",
-  dataset = "mmusculus_gene_ensembl"
-)
+#mart <- biomaRt::useEnsembl(
+#  "ENSEMBL_MART_ENSEMBL",
+#  host = 'https://www.ensembl.org',
+#  dataset = "mmusculus_gene_ensembl"
+#)
 
-t2g <- biomaRt::getBM(
-  attributes = c(
-    "ensembl_transcript_id",
-    "ensembl_gene_id",
-    "external_gene_name"
-  ),
-  mart = mart
-) |>
-  as_tibble()
+#t2g <- biomaRt::getBM(
+#  attributes = c(
+#    "ensembl_transcript_id",
+#    "ensembl_gene_id",
+#    "external_gene_name"
+#  ),
+#  mart = mart
+#) |>
+#  as_tibble()
+
+t2g <- read_tsv(here("data", "block-rna", "t2g.tsv.gz"))
 
 # maps systematic to common gene names
 gene_name_map <- t2g |>

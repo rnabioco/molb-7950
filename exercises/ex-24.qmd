@@ -37,20 +37,22 @@ The first thing we need to do is read in the data again and move from transcript
 #| eval: false
 #| label: t2g
 
-mart <- biomaRt::useEnsembl(
-  "ENSEMBL_MART_ENSEMBL",
-  dataset = "mmusculus_gene_ensembl"
-)
+#mart <- biomaRt::useEnsembl(
+#  "ENSEMBL_MART_ENSEMBL",
+#  dataset = "mmusculus_gene_ensembl"
+#)
 
-t2g <- biomaRt::getBM(
-  attributes = c(
-    "ensembl_transcript_id",
-    "ensembl_gene_id",
-    "external_gene_name"
-  ),
-  mart = mart
-) |>
-  as_tibble()
+#t2g <- biomaRt::getBM(
+#  attributes = c(
+#    "ensembl_transcript_id",
+#    "ensembl_gene_id",
+#    "external_gene_name"
+#  ),
+#  mart = mart
+#) |>
+#  as_tibble()
+
+t2g <- read_tsv(here("data", "block-rna", "t2g.tsv.gz"))
 
 # maps systematic to common gene names
 gene_name_map <- t2g |>

@@ -46,19 +46,21 @@ The first thing we need to do is read in the data again and move from transcript
 
 mart <- biomaRt::useEnsembl(
   "ENSEMBL_MART_ENSEMBL",
-  host = 'https://useast.ensembl.org',
+  host = 'https://www.ensembl.org',
   dataset = "mmusculus_gene_ensembl"
 )
 
-t2g <- biomaRt::getBM(
-  attributes = c(
-    "ensembl_transcript_id",
-    "ensembl_gene_id",
-    "external_gene_name"
-  ),
-  mart = mart
-) |>
-  as_tibble()
+#t2g <- biomaRt::getBM(
+#  attributes = c(
+#    "ensembl_transcript_id",
+#    "ensembl_gene_id",
+#    "external_gene_name"
+#  ),
+#  mart = mart
+#) |>
+#  as_tibble()
+
+t2g <- read_tsv(here("data", "block-rna", "t2g.tsv.gz"))
 
 # maps systematic to common gene names
 gene_name_map <- t2g |>
@@ -66,7 +68,7 @@ gene_name_map <- t2g |>
   unique()
 ```
 
-## Prepare `metdata` and import {.smaller}
+## Prepare `metadata` and import {.smaller}
 
 Now we can read in the transcript-level data and collapse to gene-level data with `tximport`
 
