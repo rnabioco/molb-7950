@@ -864,10 +864,17 @@ sce[, cells_to_keep]
 
 ```{r}
 #| echo: true
-ah <- AnnotationHub()
-removeCache(ah, ask = FALSE)
+
+#AnnotationHub downloads are not working, so downloading GTF directly from ensembl below
+#ah <- AnnotationHub()
 # download ensembl database
-ens_db <- ah[["AH113665"]]
+#ens_db <- ah[["AH113665"]]
+
+
+DBfile <- ensDbFromGtf(
+  gtf = "http://ftp.ensembl.org/pub/release-110/gtf/homo_sapiens/Homo_sapiens.GRCh38.110.gtf.gz"
+)
+ens_db <- EnsDb(DBfile)
 
 gene_names <- mapIds(
   ens_db,
