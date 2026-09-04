@@ -22,9 +22,9 @@ library(AnnotationHub)
 
 ```{r}
 #| echo: false
-library(DiagrammeR)
 #| out-height: '100%'
 #| out-width: '100%'
+library(DiagrammeR)
 grViz(
   "
 digraph workflow {
@@ -571,7 +571,8 @@ write10xCounts("path/to/output", mat)
 When saving the `colData()` it is also a nice gesture to include the UMAP coordinates that you used for the main visualizations in your manuscript. The clustering and UMAP coordinates are very hard to reproduce because of the non-deterministic elements of the algorithms. 
 
 ``` r
-cbind(colData(sce), reducedDim(sce, "UMAP")) |> 
-  rownames_to_column("cell") |> ()
+cbind(colData(sce), reducedDim(sce, "UMAP")) |>
+  as.data.frame() |>
+  rownames_to_column("cell") |>
   write_csv("cell-level-metadata.csv")
 ```  

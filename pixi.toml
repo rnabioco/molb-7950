@@ -147,3 +147,13 @@ bioconductor-dropletutils = "*"
 bioconductor-memes = "*"
 bioconductor-scran = "*"
 bioconductor-universalmotif = "*"
+
+[activation.env]
+# Keep this environment's R off the user's personal CRAN library. Binaries
+# there are built against a different R build and segfault when loaded by the
+# conda R. Mirrors the R_LIBS_USER the CI workflow sets.
+R_LIBS_USER = "$PIXI_PROJECT_ROOT/.r-lib"
+# Ignore a personal ~/.R/Makevars. Ones that hard-code a Homebrew gfortran path
+# override this environment's own toolchain and break source installs of any
+# package with Fortran (statmod -> edgeR -> scran).
+R_MAKEVARS_USER = "/dev/null"
