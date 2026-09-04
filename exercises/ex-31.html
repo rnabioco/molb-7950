@@ -904,22 +904,13 @@ ENSG00000210196                 0            0</code></pre>
 <p>You’ll notice that our matrix has ensembl gene ids as the rownames (e.g.&nbsp;ENSG00000289576, ENSG00000221539). This is intentional as these identifiers are guaranteed to be unique and are a more stable and reliable identifier than gene symbols (e.g.&nbsp;ACTB, GAPDH). This becomes important if you want to compare to external datasets or ensure that your data can be easily used by others in the future.</p>
 <p>These identifiers are useful but not as easy to interpret as gene symbols. Next we will retrieve gene symbols from an <code>AnnotationHub()</code> ensembldb resource and store the identifiers in the rowData().</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ah</span> <span class="op">&lt;-</span> <span class="fu">AnnotationHub</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb64"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># download ensembl database</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ah</span> <span class="op">&lt;-</span> <span class="fu">AnnotationHub</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># download ensembl database</span></span>
 <span><span class="va">ens_db</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="st">"AH113665"</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>downloading 1 resources</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>retrieving 1 resource</code></pre>
-</div>
 <div class="cell-output cell-output-stderr">
 <pre><code>loading from cache</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code><a href="https://github.com/jorainer/ensembldb">require("ensembldb")</a></code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gene_names</span> <span class="op">&lt;-</span> <span class="fu">mapIds</span><span class="op">(</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb65"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">gene_names</span> <span class="op">&lt;-</span> <span class="fu">mapIds</span><span class="op">(</span></span>
 <span>  <span class="va">ens_db</span>,</span>
 <span>  keys <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>,</span>
 <span>  keytype <span class="op">=</span> <span class="st">"GENEID"</span>,</span>
@@ -948,7 +939,7 @@ ENSG00000210196                 0            0       MT-TP ENSG00000210196</code
 </div>
 <p>We’d like to set the rownames of the object to symbols, but some of these are <code></code>, <code>NA</code> or duplicated which will cause problems. <code>uniquifyFeatureNames()</code> is a convenience function that will rename gene symbols that are <code>NA</code> or duplicated values to the ensembl ID or a combination of gene symbol and ensembl ID.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">uniquifyFeatureNames</span><span class="op">(</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">uniquifyFeatureNames</span><span class="op">(</span></span>
 <span>  <span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">gene_id</span>,</span>
 <span>  <span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">gene</span></span>
 <span><span class="op">)</span></span>
@@ -963,7 +954,7 @@ ENSG00000210196                 0            0       MT-TP ENSG00000210196</code
 <p>Now that we have our data in a SingleCellExperiment we will perform some filtering and quality control to remove low expression genes and poor quality cells.</p>
 <p>Our SingleCellExperiment has 62266 genes in the matrix. Most of these are not expressed. We want to exclude these genes as they won’t provide any useful data for the analysis.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb73"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># exclude genes expressed in fewer than 10 cells (~ 1% of cells)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb69"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># exclude genes expressed in fewer than 10 cells (~ 1% of cells)</span></span>
 <span><span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">n_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="fu">counts</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span><span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">n_cells</span> <span class="op">&gt;=</span> <span class="fl">10</span>, <span class="op">]</span></span>
 <span><span class="va">sce</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -991,10 +982,52 @@ altExpNames(0):</code></pre>
 <p>A low number of counts, a low number of detected genes, and a high percentage of mitochondrial counts suggests that the cell had a broken membrane and the cytoplasmic mRNA leaked out. Conversely, an abnormally high number of counts and detected genes could indicate the presence of a doublet. See publication for more info (<a href="https://doi.org/10.1186/s13059-016-0888-1">Classification of low quality cells from single-cell RNA-seq data</a>)</p>
 <p>To calculate these metrics we can use <code>addPerCellQCMetrics</code> from scater. Mitochondrial genes are named with a common “MT-” prefix (e.g.&nbsp;MT-CO2, MT-ATP6, MR-RNR2), which we can use to identify them.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb75"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># identify subset of genes that are from mitochondrial genome</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb71"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># identify subset of genes that are from mitochondrial genome</span></span>
 <span><span class="va">is_mito</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/startsWith.html">startsWith</a></span><span class="op">(</span><span class="fu">rowData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">gene</span>, <span class="st">"MT-"</span><span class="op">)</span></span>
-<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">addPerCellQCMetrics</span><span class="op">(</span><span class="va">sce</span>, subsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>Mito <span class="op">=</span> <span class="va">is_mito</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">colData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">addPerCellQCMetrics</span><span class="op">(</span><span class="va">sce</span>, subsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>Mito <span class="op">=</span> <span class="va">is_mito</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb73"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">colData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>DataFrame with 6075 rows and 8 columns
                  cell_source total_counts       sum  detected subsets_Mito_sum
@@ -1027,7 +1060,7 @@ TCTCAGCTCGCCGAAC                     2              2.77778   144.000</code></pr
 </div>
 <p>We can use the <code>plotColData()</code> function from scater to plot various metrics (as a ggplot2 object).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotColData</span><span class="op">(</span><span class="va">sce</span>, y <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb75"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotColData</span><span class="op">(</span><span class="va">sce</span>, y <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="ex-31_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
@@ -1036,7 +1069,7 @@ TCTCAGCTCGCCGAAC                     2              2.77778   144.000</code></pr
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotColData</span><span class="op">(</span><span class="va">sce</span>, y <span class="op">=</span> <span class="st">"detected"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb76"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotColData</span><span class="op">(</span><span class="va">sce</span>, y <span class="op">=</span> <span class="st">"detected"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="ex-31_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
@@ -1045,7 +1078,7 @@ TCTCAGCTCGCCGAAC                     2              2.77778   144.000</code></pr
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb79"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotColData</span><span class="op">(</span><span class="va">sce</span>, y <span class="op">=</span> <span class="st">"detected"</span>, x <span class="op">=</span> <span class="st">"sum"</span>, colour_by <span class="op">=</span> <span class="st">"subsets_Mito_percent"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb77"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotColData</span><span class="op">(</span><span class="va">sce</span>, y <span class="op">=</span> <span class="st">"detected"</span>, x <span class="op">=</span> <span class="st">"sum"</span>, colour_by <span class="op">=</span> <span class="st">"subsets_Mito_percent"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="ex-31_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
@@ -1054,7 +1087,7 @@ TCTCAGCTCGCCGAAC                     2              2.77778   144.000</code></pr
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotColData</span><span class="op">(</span><span class="va">sce</span>, y <span class="op">=</span> <span class="st">"subsets_Mito_percent"</span>, x <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span> <span class="op">+</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb78"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotColData</span><span class="op">(</span><span class="va">sce</span>, y <span class="op">=</span> <span class="st">"subsets_Mito_percent"</span>, x <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"# of counts"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
@@ -1065,7 +1098,7 @@ TCTCAGCTCGCCGAAC                     2              2.77778   144.000</code></pr
 </div>
 <p>Also note that you can easily extract the <code>colData()</code> as a data.frame to use with ggplot2 for custom plots. To extract additional features, e.g.&nbsp;per cell gene expression, you can use <code>makePerCellDF()</code> or <code>makePerFeatureDF()</code> from scater.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb81"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cell_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">colData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb79"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cell_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">colData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="va">cell_info</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">sum</span>, <span class="va">subsets_Mito_percent</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
@@ -1078,7 +1111,7 @@ TCTCAGCTCGCCGAAC                     2              2.77778   144.000</code></pr
 <p>Selecting an appropriate cutoff can be somewhat arbitrary, and there is a risk of excluding meaningful cell populations. I suggest starting with lenient cutoffs, then later increasing the stringency after examining the clustering and cell types.</p>
 <p>Let’s define high quality cell as those with less than 20% counts from mitocondrial RNAs, greater than 500 genes detected, and greater than 1000 total counts. <em>How many cells pass these criteria?</em></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pass_qc</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">$</span><span class="va">subsets_Mito_percent</span> <span class="op">&lt;</span> <span class="fl">20</span> <span class="op">&amp;</span> <span class="va">sce</span><span class="op">$</span><span class="va">detected</span> <span class="op">&gt;</span> <span class="fl">500</span> <span class="op">&amp;</span> <span class="va">sce</span><span class="op">$</span><span class="va">sum</span> <span class="op">&gt;</span> <span class="fl">1000</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb80"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pass_qc</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">$</span><span class="va">subsets_Mito_percent</span> <span class="op">&lt;</span> <span class="fl">20</span> <span class="op">&amp;</span> <span class="va">sce</span><span class="op">$</span><span class="va">detected</span> <span class="op">&gt;</span> <span class="fl">500</span> <span class="op">&amp;</span> <span class="va">sce</span><span class="op">$</span><span class="va">sum</span> <span class="op">&gt;</span> <span class="fl">1000</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">pass_qc</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 4565</code></pre>
@@ -1086,7 +1119,7 @@ TCTCAGCTCGCCGAAC                     2              2.77778   144.000</code></pr
 </div>
 <p>Labeling the qc failed cells in plots can be helpful.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb84"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">pass_qc</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">$</span><span class="va">subsets_Mito_percent</span> <span class="op">&lt;</span> <span class="fl">20</span> <span class="op">&amp;</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb82"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">pass_qc</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">$</span><span class="va">subsets_Mito_percent</span> <span class="op">&lt;</span> <span class="fl">20</span> <span class="op">&amp;</span></span>
 <span>  <span class="va">sce</span><span class="op">$</span><span class="va">detected</span> <span class="op">&gt;</span> <span class="fl">500</span> <span class="op">&amp;</span></span>
 <span>  <span class="va">sce</span><span class="op">$</span><span class="va">sum</span> <span class="op">&gt;</span> <span class="fl">1000</span></span>
 <span></span>
@@ -1101,7 +1134,7 @@ TCTCAGCTCGCCGAAC                     2              2.77778   144.000</code></pr
 </div>
 <p>Lastly we can subset the <code>SingleCellExperiment</code> to exclude the low-quality cells.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb85"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span>, <span class="va">sce</span><span class="op">$</span><span class="va">pass_qc</span><span class="op">]</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb83"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">[</span>, <span class="va">sce</span><span class="op">$</span><span class="va">pass_qc</span><span class="op">]</span></span>
 <span><span class="va">sce</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>class: SingleCellExperiment 
@@ -1121,25 +1154,123 @@ altExpNames(0):</code></pre>
 </div>
 <p>It is often a good idea to save the <code>SingleCellExperiment</code> at periodic steps in the analysis. Use <code><a href="https://rdrr.io/r/base/readRDS.html">saveRDS()</a></code> to store the object as a file, which can later be imported back into R using <code>readRDS().</code></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb87"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"path/to/a/file.rds"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb85"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">saveRDS</a></span><span class="op">(</span><span class="va">sce</span>, <span class="st">"path/to/a/file.rds"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="analysis-steps-revisited" class="level2"><h2 class="anchored" data-anchor-id="analysis-steps-revisited">Analysis steps revisited</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div class="grViz html-widget html-fill-item" id="htmlwidget-766cad4a8a0f32b39ae4" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-766cad4a8a0f32b39ae4">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = TD]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  load [label= \"Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n addPerCellQCMetrics()\n plotColData()\"]\n  norm [label = \"Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()\"]\n  dim_red [label = \"Dimensionality reduction via PCA \n runPCA()\"]\n  cluster [label = \"Clustering\n clusterCells()\"]\n  viz [label = \"Make 2D-Visualization\nrunUMAP()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n\n  markers [label = \"Discover cell type markers \nscoreMarkers()\"]\n  annot [label = \"Annotate cell types\nclustifyr and SingleR\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  load -> cell_qc\n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-5f50a2df6c6bb78286ee" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-5f50a2df6c6bb78286ee">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = TD]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  load [label= \"Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n addPerCellQCMetrics()\n plotColData()\"]\n  norm [label = \"Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()\"]\n  dim_red [label = \"Dimensionality reduction via PCA \n runPCA()\"]\n  cluster [label = \"Clustering\n clusterCells()\"]\n  viz [label = \"Make 2D-Visualization\nrunUMAP()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n\n  markers [label = \"Discover cell type markers \nscoreMarkers()\"]\n  annot [label = \"Annotate cell types\nclustifyr and SingleR\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  load -> cell_qc\n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </section><section id="normalization" class="level2"><h2 class="anchored" data-anchor-id="normalization">Normalization</h2>
 <p>Normalization attempts to correct for technical biases that will distort biological signal in the data. A large source of variation arises due to differences in sequencing depth between cells. This can be seen by performing PCA on the unnormalized counts. We will use <code>runPCA</code> from scater to perform PCA.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb88"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># set seed for functions with a randomized component</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb86"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># set seed for functions with a randomized component</span></span>
 <span><span class="co"># to obtain the same result each execution</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">20231023</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">runPCA</span><span class="op">(</span><span class="va">sce</span>, exprs_values <span class="op">=</span> <span class="st">"counts"</span>, name <span class="op">=</span> <span class="st">"count_PCA"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0</code></pre>
+</div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb89"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotReducedDim</span><span class="op">(</span><span class="va">sce</span>, <span class="st">"count_PCA"</span>, colour_by <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb88"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotReducedDim</span><span class="op">(</span><span class="va">sce</span>, <span class="st">"count_PCA"</span>, colour_by <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="ex-31_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="672"></p>
@@ -1149,7 +1280,7 @@ altExpNames(0):</code></pre>
 </div>
 <p>Note that PC1 is correlated with the total UMI counts (<code>sum</code>), meaning that the largest source of variation is related to differences in sequencing depth rather than biological differences between cells.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb90"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">plot_df</span> <span class="op">&lt;-</span> <span class="fu">makePerCellDF</span><span class="op">(</span><span class="va">sce</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"count_PCA"</span>, <span class="st">"sum"</span><span class="op">)</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb89"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">plot_df</span> <span class="op">&lt;-</span> <span class="fu">makePerCellDF</span><span class="op">(</span><span class="va">sce</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"count_PCA"</span>, <span class="st">"sum"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="va">plot_df</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">count_PCA.1</span>, <span class="va">sum</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">geom_point</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1165,14 +1296,112 @@ altExpNames(0):</code></pre>
 <p>Lun AT, Bach K, Marioni JC. Pooling across cells to normalize single-cell RNA sequencing data with many zero counts. Genome Biol. 2016 Apr 27;17:75. doi: 10.1186/s13059-016-0947-7. PMID: 27122128; PMCID: PMC4848819.</p>
 </blockquote>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb91"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">20231023</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb90"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">20231023</span><span class="op">)</span></span>
 <span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu">quickCluster</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">computeSumFactors</span><span class="op">(</span><span class="va">sce</span>, clusters <span class="op">=</span> <span class="va">clusters</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">logNormCounts</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb92"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">20231023</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb91"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">20231023</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">runPCA</span><span class="op">(</span><span class="va">sce</span>, exprs_values <span class="op">=</span> <span class="st">"logcounts"</span>, name <span class="op">=</span> <span class="st">"PCA"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0</code></pre>
+</div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb93"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotReducedDim</span><span class="op">(</span><span class="va">sce</span>, <span class="st">"PCA"</span>, colour_by <span class="op">=</span> <span class="st">"sum"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

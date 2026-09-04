@@ -465,8 +465,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header><section id="analysis-steps-continued" class="level2"><h2 class="anchored" data-anchor-id="analysis-steps-continued">Analysis steps continued</h2>
 <div class="cell">
 <div class="cell-output-display">
-<div class="grViz html-widget html-fill-item" id="htmlwidget-b3d9689268d7e96e1d73" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-b3d9689268d7e96e1d73">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = TD]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  load [label= \"Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n addPerCellQCMetrics()\n plotColData()\"]\n  norm [label = \"Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()\"]\n  dim_red [label = \"Dimensionality reduction via PCA \n runPCA()\"]\n  cluster [label = \"Clustering\n clusterCells()\"]\n  viz [label = \"Make 2D-Visualization\nrunUMAP()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n\n  markers [label = \"Discover cell type markers \nscoreMarkers()\"]\n  annot [label = \"Annotate cell types\nclustifyr and SingleR\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  load -> cell_qc\n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-a7244451e5cd38b9359d" style="width:100%;height:100%;"></div>
+<script type="application/json" data-for="htmlwidget-a7244451e5cd38b9359d">{"x":{"diagram":"\ndigraph workflow {\n  graph [layout = dot,\n         rankdir = TD]\n\n  node [shape = cicle,\n        style = filled,\n        fontcolor = black,\n        fontname = \"Helvetica\"]\n\n  # green\n  node [fillcolor = \"#009E73\"]\n  load [label= \"Import data\ntximport::tximport()\nSingleCellExperiment()\ncounts()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n  cell_qc [label = \"QC cells\n addPerCellQCMetrics()\n plotColData()\"]\n  norm [label = \"Normalize UMI counts\nquickCluster()\n computeSumFactors()\n logNormCounts()\"]\n\n  # yellow\n  node [fillcolor = \"#F0E442\"]\n  feature [label = \"Identify variable genes\nmodelGeneVarByPoisson()\n getTopHVGs()\"]\n  dim_red [label = \"Dimensionality reduction via PCA \n runPCA()\"]\n  cluster [label = \"Clustering\n clusterCells()\"]\n  viz [label = \"Make 2D-Visualization\nrunUMAP()\"]\n\n  # blue\n  node [fillcolor = \"#56B4E9\"]\n\n  markers [label = \"Discover cell type markers \nscoreMarkers()\"]\n  annot [label = \"Annotate cell types\nclustifyr and SingleR\"]\n\n  edge [color = black\n        fontname = \"Helvetica\"]\n\n  load -> cell_qc\n  cell_qc -> norm\n  norm -> feature\n  norm -> markers\n  feature -> dim_red\n  dim_red -> cluster\n  dim_red -> viz\n  cluster -> markers\n  markers -> annot\n\n  edge [color = \"grey\"\n        style = \"dashed\"]\n  annot -> cell_qc [label = \"Repeat\n as needed\"]\n  annot -> feature\n  annot -> dim_red\n  annot -> cluster\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 </section><section id="simplified-steps" class="level1"><h1>Simplified steps</h1>
@@ -581,9 +581,40 @@ ATAD3C            .                .                .                .        </
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">00010101</span><span class="op">)</span> <span class="co"># set seed to obtain the same result on each execution of modelGeneVarByPoisson</span></span>
 <span></span>
-<span><span class="va">dec</span> <span class="op">&lt;-</span> <span class="fu">modelGeneVarByPoisson</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="co"># returns data.frame of statistics</span></span>
-<span></span>
-<span><span class="va">top</span> <span class="op">&lt;-</span> <span class="fu">getTopHVGs</span><span class="op">(</span><span class="va">dec</span>, prop <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="co"># return vector of top 10% most variable genes</span></span>
+<span><span class="va">dec</span> <span class="op">&lt;-</span> <span class="fu">modelGeneVarByPoisson</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> <span class="co"># returns data.frame of statistics</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">top</span> <span class="op">&lt;-</span> <span class="fu">getTopHVGs</span><span class="op">(</span><span class="va">dec</span>, prop <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span> <span class="co"># return vector of top 10% most variable genes</span></span>
 <span><span class="va">top</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "LYZ"     "S100A9"  "S100A8"  "HLA-DRA"</code></pre>
@@ -591,7 +622,7 @@ ATAD3C            .                .                .                .        </
 </div>
 <p>We can plot the mean expression against variance to see the trend, and visualize the top variable genes. These genes are often marker genes that are uniquely expressed in specifi cell populations.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">top_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">dec</span><span class="op">[</span><span class="va">top</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="op">]</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">top_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">dec</span><span class="op">[</span><span class="va">top</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>, <span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">top_genes</span><span class="op">$</span><span class="va">genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html">rownames</a></span><span class="op">(</span><span class="va">top_genes</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">dec</span><span class="op">)</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">mean</span>, <span class="va">total</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -612,12 +643,110 @@ ATAD3C            .                .                .                .        </
 </section><section id="pca" class="level2"><h2 class="anchored" data-anchor-id="pca">PCA</h2>
 <p>We next perform PCA, but only on the normalized data from the <code>top</code> variable genes. By default <code>runPCA</code> will return the top 50 PCs, this can be changed with the <code>ncomponents</code> argument.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">101010011</span><span class="op">)</span> <span class="co"># runPCA uses a specialize form of PCA that has a random component</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">101010011</span><span class="op">)</span> <span class="co"># runPCA uses a specialize form of PCA that has a random component</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">runPCA</span><span class="op">(</span><span class="va">sce</span>, subset_row <span class="op">=</span> <span class="va">top</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0</code></pre>
+</div>
 </div>
 <p>We can plot the PCA using <code>plotPCA()</code>. Here I’ve colored the PCA by the expression of the <code>CD3D</code> gene, a general marker of T-cells</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotPCA</span><span class="op">(</span><span class="va">sce</span>, color_by <span class="op">=</span> <span class="st">"CD3D"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotPCA</span><span class="op">(</span><span class="va">sce</span>, color_by <span class="op">=</span> <span class="st">"CD3D"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="ex-32_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
@@ -627,7 +756,7 @@ ATAD3C            .                .                .                .        </
 </div>
 <p>PCs beyond 1 and 2 show additional patterns in the data.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotPCA</span><span class="op">(</span><span class="va">sce</span>, ncomponents <span class="op">=</span> <span class="fl">4</span>, colour_by <span class="op">=</span> <span class="st">"CD3D"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotPCA</span><span class="op">(</span><span class="va">sce</span>, ncomponents <span class="op">=</span> <span class="fl">4</span>, colour_by <span class="op">=</span> <span class="st">"CD3D"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="ex-32_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
@@ -637,7 +766,7 @@ ATAD3C            .                .                .                .        </
 </div>
 <p>The amount of variation captured in each PC is a useful metric to examine.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">percent.var</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="st">"percentVar"</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">percent.var</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html">attr</a></span><span class="op">(</span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="st">"percentVar"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span></span>
 <span>  <span class="va">percent.var</span>,</span>
 <span>  log <span class="op">=</span> <span class="st">"y"</span>,</span>
@@ -655,7 +784,7 @@ ATAD3C            .                .                .                .        </
 <p>In general the # of PCs to use for downstream steps depends on the complexity and heterogeneity in the data, as well as the biological question. For this analysis we will retain the top 30, but you should explore how the downstream steps are affected by including fewer or more PCs.</p>
 <p>In practice picking fewer PCs will identify fewer subpopulations, and picking more PCs will find more subpopulations, at the expense of potentially increased noise and longer runtime.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">sce</span>, <span class="st">"PCA"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="co"># the PCA is stored in the reducedDim() slot</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">sce</span>, <span class="st">"PCA"</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="co"># the PCA is stored in the reducedDim() slot</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                         PC1       PC2       PC3        PC4
 GCTGCAGTCCGATCTC -17.7865879 -5.494428 -3.609731 -2.2119402
@@ -663,7 +792,7 @@ ACTATGGAGGTCCCTG  -0.0933944  7.195291  2.840164  0.0138008
 ATTTCTGTCTCTATGT -17.8824692 -1.533912 -3.546737  0.5637093
 TATCTGTAGGTGATAT -16.7533963 -2.843034 -5.289824 -1.3747961</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># we can subset the PCA to fewer dimensions, e.g. 30</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># we can subset the PCA to fewer dimensions, e.g. 30</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">sce</span>, <span class="st">"PCA"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">reducedDim</span><span class="op">(</span><span class="va">sce</span>, <span class="st">"PCA"</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">30</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="dimensionality-reduction-for-visualization" class="level2"><h2 class="anchored" data-anchor-id="dimensionality-reduction-for-visualization">Dimensionality reduction for visualization</h2>
@@ -673,7 +802,7 @@ TATCTGTAGGTGATAT -16.7533963 -2.843034 -5.289824 -1.3747961</code></pre>
 <p>The UMAP algorithm is popular, as it does a good job of preserving local differences between cells (e.g.&nbsp;differences in T-cell subtypes), while balancing global differences (e.g.&nbsp;a Neuron will be far away from a T-cell).</p>
 <p>I usually don’t make too many changes to the parameters for UMAP, but these can be customized. The <code>n_neighbors</code> and <code>min_dist</code> arguments can have a large impact of the density and spread of the visualization.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1234323523</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1234323523</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">runUMAP</span><span class="op">(</span><span class="va">sce</span>, dimred <span class="op">=</span> <span class="st">"PCA"</span><span class="op">)</span> <span class="co"># adds another reducedDim()</span></span>
 <span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -683,14 +812,14 @@ names(2): PCA UMAP</code></pre>
 </div>
 <p><code>plotUMAP</code> is the plotting function for UMAPs.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"CD3D"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"CD3D"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="ex-32_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"CD79A"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"CD79A"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="ex-32_files/figure-html/unnamed-chunk-13-2.png" class="img-fluid figure-img" width="672"></p>
@@ -699,7 +828,7 @@ names(2): PCA UMAP</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1234323523</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">1234323523</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">runUMAP</span><span class="op">(</span><span class="va">sce</span>, dimred <span class="op">=</span> <span class="st">"PCA"</span>, n_neighbors <span class="op">=</span> <span class="fl">100</span>, min_dist <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"CD3D"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
@@ -708,7 +837,7 @@ names(2): PCA UMAP</code></pre>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"CD79A"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"CD79A"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="ex-32_files/figure-html/unnamed-chunk-14-2.png" class="img-fluid figure-img" width="672"></p>
@@ -723,7 +852,7 @@ names(2): PCA UMAP</code></pre>
 <p>Graph based clustering methods are commonly used for single cell data, because they can scale to millions of cells, produce reasonable assignments, and have tuneable parameters. We can cluster the data using … <code>clusterCells()</code> from scran.</p>
 <p><strong>Note that the clustering is performed on the PCA matrix not the 2D UMAP plot</strong></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">10101010</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">10101010</span><span class="op">)</span></span>
 <span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu">clusterCells</span><span class="op">(</span><span class="va">sce</span>, use.dimred <span class="op">=</span> <span class="st">"PCA"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">clusters</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -735,11 +864,11 @@ names(2): PCA UMAP</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="va">clusters</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="va">clusters</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The parameters of the clustering can be changed by changing the <code>NNGraphParam</code>. Here are the defaults:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">bluster</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">bluster</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">10101010</span><span class="op">)</span></span>
 <span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu">clusterCells</span><span class="op">(</span></span>
 <span>  <span class="va">sce</span>,</span>
@@ -760,7 +889,7 @@ names(2): PCA UMAP</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="va">clusters</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">sce</span><span class="op">$</span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="va">clusters</span></span>
 <span></span>
 <span><span class="fu">plotUMAP</span><span class="op">(</span><span class="va">sce</span>, colour_by <span class="op">=</span> <span class="st">"clusters"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
@@ -772,7 +901,7 @@ names(2): PCA UMAP</code></pre>
 </div>
 <p>Generally increasing the # of neighbors will decrease the number of clusters and vice versa.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">12121212</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">12121212</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu">clusterCells</span><span class="op">(</span></span>
 <span>  <span class="va">sce</span>,</span>
@@ -796,7 +925,7 @@ names(2): PCA UMAP</code></pre>
 </div>
 <p>What clusters are the genes S100A8, CD79A and CD3G most highly expressed in? We can use the <code>plotExpression()</code> function to visualize the expression data in each cluster.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotExpression</span><span class="op">(</span><span class="va">sce</span>, features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"S100A8"</span>, <span class="st">"CD79A"</span>, <span class="st">"CD3G"</span><span class="op">)</span>, x <span class="op">=</span> <span class="st">"clusters"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotExpression</span><span class="op">(</span><span class="va">sce</span>, features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"S100A8"</span>, <span class="st">"CD79A"</span>, <span class="st">"CD3G"</span><span class="op">)</span>, x <span class="op">=</span> <span class="st">"clusters"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="ex-32_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
@@ -821,8 +950,40 @@ names(2): PCA UMAP</code></pre>
 <p>The approach implemented by scoreMarkers() does <strong>not</strong> return any p-values for reasons described <a href="https://bioconductor.org/books/3.17/OSCA.advanced/marker-detection-redux.html#p-value-invalidity">here</a>. Statistical testing is invalidated because we clustered the data into groups based on the data itself, rather than by using an a priori group assignment. When we perform statistical testing on this group we are essentially testing the data again, which greatly inflates the significance of the pvalues.</p>
 <p><code>scoreMarkers()</code> will return a list of DataFrames, one for each cluster tested.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mrks</span> <span class="op">&lt;-</span> <span class="fu">scoreMarkers</span><span class="op">(</span><span class="va">sce</span>, <span class="va">sce</span><span class="op">$</span><span class="va">clusters</span><span class="op">)</span></span>
-<span><span class="va">mrks</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mrks</span> <span class="op">&lt;-</span> <span class="fu">scoreMarkers</span><span class="op">(</span><span class="va">sce</span>, <span class="va">sce</span><span class="op">$</span><span class="va">clusters</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0
+Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mrks</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>List of length 19
 names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
@@ -830,7 +991,7 @@ names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
 </div>
 <p>To identify marker genes we will need to decide of cutoffs based on effect sizes. There are many reported by scoreMarkers().</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">mrks</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html">colnames</a></span><span class="op">(</span><span class="va">mrks</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "self.average"          "other.average"         "self.detected"        
  [4] "other.detected"        "mean.logFC.cohen"      "min.logFC.cohen"      
@@ -858,7 +1019,7 @@ names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
 </ul>
 <p>Here we will plot top genes ranked by <code>mean.AUC</code> for cluster 1.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cluster1_markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">mrks</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">cluster1_markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">mrks</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/rownames.html">rownames_to_column</a></span><span class="op">(</span><span class="st">"gene"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ordered</span> <span class="op">&lt;-</span> <span class="va">cluster1_markers</span> <span class="op">|&gt;</span></span>
@@ -880,7 +1041,7 @@ names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
 </div>
 <p>Next we will extract the top N markers from each cluster, ranked on <code>mean.AUC</code>, then plot the average expression of these markers in each cluster as a heatmap.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">n_top_markers</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">n_top_markers</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
 <span></span>
 <span><span class="va">top_markers</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html">map_dfr</a></span><span class="op">(</span></span>
 <span>  <span class="va">mrks</span>,</span>
@@ -911,13 +1072,17 @@ names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotGroupedHeatmap</span><span class="op">(</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">plotGroupedHeatmap</span><span class="op">(</span></span>
 <span>  <span class="va">sce</span>,</span>
 <span>  features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="va">top_markers</span><span class="op">$</span><span class="va">gene</span><span class="op">)</span>,</span>
 <span>  group <span class="op">=</span> <span class="st">"clusters"</span>,</span>
 <span>  center <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  zlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">3</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in .pause_resource(): omp_pause_resource() failed to relinquish
+resources on device 0</code></pre>
+</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure"><p><img src="ex-32_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="864"></p>
@@ -931,21 +1096,15 @@ names(19): 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19</code></pre>
 <p><code>clustifyr</code> works by comparing the average gene expression in each cluster to a reference matrix that contains average gene signatures of reference cell types. The reference can be built from other single cell data, bulk-rna-seq, or other sources. Ranked spearman correlation is used to compare the reference to the clusters. Only the variable genes are used for the correlation.</p>
 <p>In order to compare our dataset we need to use a publicly available reference dataset. Thankfully many datasets have been organized into a separate package: <a href="https://github.com/rnabioco/clustifyrdatahub">clustifyrdatahub</a>. This is an extension of the <code>ExperimentHub</code> package on bioconductor that allows you to easily download and cache external datasets.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rnabioco/clustifyr">clustifyr</a></span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rnabioco/clustifyr">clustifyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rnabioco.github.io/clustifyrdatahub/">clustifyrdatahub</a></span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Loading required package: ExperimentHub</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># get reference dataset derived from a microarray experiment of sorted immune cell types</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># get reference dataset derived from a microarray experiment of sorted immune cell types</span></span>
 <span><span class="fu"><a href="https://rnabioco.github.io/clustifyrdatahub/reference/ref_hema_microarray.html">ref_hema_microarray</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>see ?clustifyrdatahub and browseVignettes('clustifyrdatahub') for documentation</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>downloading 1 resources</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>retrieving 1 resource</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>loading from cache</code></pre>
@@ -967,7 +1126,7 @@ GUCA1A             5.090882</code></pre>
 </div>
 <p>But you can download any dataset that characterizes cell populations that interest you.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://rnabioco.github.io/clustifyr/reference/clustify.html">clustify</a></span><span class="op">(</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://rnabioco.github.io/clustifyr/reference/clustify.html">clustify</a></span><span class="op">(</span></span>
 <span>  <span class="va">sce</span>, <span class="co"># SingleCellExperiment object</span></span>
 <span>  ref_mat <span class="op">=</span> <span class="fu"><a href="https://rnabioco.github.io/clustifyrdatahub/reference/ref_hema_microarray.html">ref_hema_microarray</a></span><span class="op">(</span><span class="op">)</span>, <span class="co"># cell type reference data</span></span>
 <span>  cluster_col <span class="op">=</span> <span class="st">"clusters"</span>, <span class="co"># column in metadata with clusters</span></span>
@@ -991,7 +1150,7 @@ GUCA1A             5.090882</code></pre>
 <div class="cell-output cell-output-stderr">
 <pre><code>similarity computation completed, matrix of 19 x 38, preparing output</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">res</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">12</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">res</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">12</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   Basophils CD4+ Central Memory CD4+ Effector Memory CD8+ Central Memory
 1         NA                  NA                   NA                  NA
@@ -1009,15 +1168,15 @@ GUCA1A             5.090882</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/ComplexHeatmap">ComplexHeatmap</a></span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jokergoo/ComplexHeatmap">ComplexHeatmap</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/ComplexHeatmap/man/Heatmap.html">Heatmap</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="http://rnabioco.github.io/clustifyr/reference/cor_to_call.html">cor_to_call</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="co"># assign cluster to highest correlation cell type (above a threshold). Cell types lower than a threshold will be assigned as unassigned.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="http://rnabioco.github.io/clustifyr/reference/cor_to_call.html">cor_to_call</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="co"># assign cluster to highest correlation cell type (above a threshold). Cell types lower than a threshold will be assigned as unassigned.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can insert the classification results into the SingleCellExperiment object directly which will be called <code>type</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="http://rnabioco.github.io/clustifyr/reference/clustify.html">clustify</a></span><span class="op">(</span></span>
 <span>  <span class="va">sce</span>, <span class="co"># seurat object</span></span>
 <span>  ref_mat <span class="op">=</span> <span class="fu"><a href="https://rnabioco.github.io/clustifyrdatahub/reference/ref_hema_microarray.html">ref_hema_microarray</a></span><span class="op">(</span><span class="op">)</span>, <span class="co"># cell type reference data</span></span>
@@ -1035,12 +1194,13 @@ GUCA1A             5.090882</code></pre>
 <li><p>If you plan on publishing the data, then the best practices are to upload the UMI count matrix and your colData() data.frame containing the cell type annotations.</p></li>
 </ol>
 <p>To save the UMI count matrix use write10xcounts() from the DropletUtils Bioconductor package.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat</span> <span class="op">&lt;-</span> <span class="fu">counts</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mat</span> <span class="op">&lt;-</span> <span class="fu">counts</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span> </span>
 <span><span class="fu">write10xCounts</span><span class="op">(</span><span class="st">"path/to/output"</span>, <span class="va">mat</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>When saving the <code>colData()</code> it is also a nice gesture to include the UMAP coordinates that you used for the main visualizations in your manuscript. The clustering and UMAP coordinates are very hard to reproduce because of the non-deterministic elements of the algorithms.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(<span class="fu">colData</span>(sce), <span class="fu">reducedDim</span>(sce, <span class="st">"UMAP"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"cell"</span>) <span class="sc">|&gt;</span> ()</span>
-<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_csv</span>(<span class="st">"cell-level-metadata.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="fu">colData</span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>, <span class="fu">reducedDim</span><span class="op">(</span><span class="va">sce</span>, <span class="st">"UMAP"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">rownames_to_column</span><span class="op">(</span><span class="st">"cell"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">write_csv</span><span class="op">(</span><span class="st">"cell-level-metadata.csv"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 </section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">

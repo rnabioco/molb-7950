@@ -229,87 +229,83 @@ Matthew Taliaferro
 <h2>Prepare <code>t2g</code></h2>
 <p>The first thing we need to do is read in the data again and move from transcript-level expression values to gene-level expression values with <code>tximport</code>. Let’s use <code>biomaRt</code> to get a table that relates gene and transcript IDs.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a>mart <span class="ot">&lt;-</span> biomaRt<span class="sc">::</span><span class="fu">useEnsembl</span>(</span>
-<span id="cb1-2"><a></a>  <span class="st">"ENSEMBL_MART_ENSEMBL"</span>,</span>
-<span id="cb1-3"><a></a>  <span class="at">host =</span> <span class="st">'https://www.ensembl.org'</span>,</span>
-<span id="cb1-4"><a></a>  <span class="at">dataset =</span> <span class="st">"mmusculus_gene_ensembl"</span></span>
-<span id="cb1-5"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a></a><span class="co"># the t2g table below is provided directly, so the live biomaRt query is not</span></span>
+<span id="cb1-2"><a></a><span class="co"># run at render time -- it is shown here for reference only</span></span>
+<span id="cb1-3"><a></a><span class="co">#mart &lt;- biomaRt::useEnsembl(</span></span>
+<span id="cb1-4"><a></a><span class="co">#  "ENSEMBL_MART_ENSEMBL",</span></span>
+<span id="cb1-5"><a></a><span class="co">#  host = 'https://www.ensembl.org',</span></span>
+<span id="cb1-6"><a></a><span class="co">#  dataset = "mmusculus_gene_ensembl"</span></span>
+<span id="cb1-7"><a></a><span class="co">#)</span></span>
+<span id="cb1-8"><a></a></span>
+<span id="cb1-9"><a></a><span class="co">#t2g &lt;- biomaRt::getBM(</span></span>
+<span id="cb1-10"><a></a><span class="co">#  attributes = c(</span></span>
+<span id="cb1-11"><a></a><span class="co">#    "ensembl_transcript_id",</span></span>
+<span id="cb1-12"><a></a><span class="co">#    "ensembl_gene_id",</span></span>
+<span id="cb1-13"><a></a><span class="co">#    "external_gene_name"</span></span>
+<span id="cb1-14"><a></a><span class="co">#  ),</span></span>
+<span id="cb1-15"><a></a><span class="co">#  mart = mart</span></span>
+<span id="cb1-16"><a></a><span class="co">#) |&gt;</span></span>
+<span id="cb1-17"><a></a><span class="co">#  as_tibble()</span></span>
+<span id="cb1-18"><a></a></span>
+<span id="cb1-19"><a></a>t2g <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"block-rna"</span>, <span class="st">"t2g.tsv.gz"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Possible SSL connectivity problems detected.
-Please report this issue at https://github.com/grimbough/biomaRt/issues
-Error in req_perform(useast) : HTTP 502 Bad Gateway.</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="co">#t2g &lt;- biomaRt::getBM(</span></span>
-<span id="cb3-2"><a></a><span class="co">#  attributes = c(</span></span>
-<span id="cb3-3"><a></a><span class="co">#    "ensembl_transcript_id",</span></span>
-<span id="cb3-4"><a></a><span class="co">#    "ensembl_gene_id",</span></span>
-<span id="cb3-5"><a></a><span class="co">#    "external_gene_name"</span></span>
-<span id="cb3-6"><a></a><span class="co">#  ),</span></span>
-<span id="cb3-7"><a></a><span class="co">#  mart = mart</span></span>
-<span id="cb3-8"><a></a><span class="co">#) |&gt;</span></span>
-<span id="cb3-9"><a></a><span class="co">#  as_tibble()</span></span>
-<span id="cb3-10"><a></a></span>
-<span id="cb3-11"><a></a>t2g <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"block-rna"</span>, <span class="st">"t2g.tsv.gz"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 149547 Columns: 3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Column specification ────────────────────────────────────
+<pre><code>Rows: 149547 Columns: 3
+── Column specification ────────────────────────────────────
 Delimiter: "\t"
 chr (3): ensembl_transcript_id, ensembl_gene_id, externa...
 
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a><span class="co"># maps systematic to common gene names</span></span>
-<span id="cb6-2"><a></a>gene_name_map <span class="ot">&lt;-</span> t2g <span class="sc">|&gt;</span></span>
-<span id="cb6-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>ensembl_transcript_id) <span class="sc">|&gt;</span></span>
-<span id="cb6-4"><a></a>  <span class="fu">unique</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a></a><span class="co"># maps systematic to common gene names</span></span>
+<span id="cb3-2"><a></a>gene_name_map <span class="ot">&lt;-</span> t2g <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>ensembl_transcript_id) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a></a>  <span class="fu">unique</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="prepare-metadata-and-import" class="slide level2 smaller">
 <h2>Prepare <code>metadata</code> and import</h2>
 <p>Now we can read in the transcript-level data and collapse to gene-level data with <code>tximport</code></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a>metadata <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb7-2"><a></a>  <span class="at">salmon_dirs =</span> fs<span class="sc">::</span><span class="fu">dir_ls</span>(</span>
-<span id="cb7-3"><a></a>    <span class="fu">here</span>(<span class="st">"data/block-rna/differentiation_salmonouts"</span>),</span>
-<span id="cb7-4"><a></a>    <span class="at">recurse =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb7-5"><a></a>    <span class="at">glob =</span> <span class="st">"*quant.sf"</span></span>
-<span id="cb7-6"><a></a>  )</span>
-<span id="cb7-7"><a></a>) <span class="sc">|&gt;</span></span>
-<span id="cb7-8"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb7-9"><a></a>    <span class="at">sample_id =</span> fs<span class="sc">::</span><span class="fu">path_file</span>(fs<span class="sc">::</span><span class="fu">path_dir</span>(salmon_dirs))</span>
-<span id="cb7-10"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb7-11"><a></a>  <span class="fu">filter</span>(<span class="fu">str_starts</span>(sample_id, <span class="st">"DIV"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb7-12"><a></a>  <span class="fu">separate_wider_delim</span>(</span>
-<span id="cb7-13"><a></a>    <span class="at">col =</span> sample_id,</span>
-<span id="cb7-14"><a></a>    <span class="at">delim =</span> <span class="st">"."</span>,</span>
-<span id="cb7-15"><a></a>    <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"timepoint"</span>, <span class="st">"rep"</span>),</span>
-<span id="cb7-16"><a></a>    <span class="at">too_few =</span> <span class="st">"align_start"</span>,</span>
-<span id="cb7-17"><a></a>    <span class="at">cols_remove =</span> <span class="cn">FALSE</span></span>
-<span id="cb7-18"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb7-19"><a></a>  <span class="fu">mutate</span>(<span class="at">rep =</span> <span class="fu">str_remove</span>(rep, <span class="st">"Rep"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb7-20"><a></a>  <span class="fu">column_to_rownames</span>(<span class="st">"sample_id"</span>)</span>
-<span id="cb7-21"><a></a></span>
-<span id="cb7-22"><a></a><span class="co"># Add the sample_id column back from rownames</span></span>
-<span id="cb7-23"><a></a>metadata<span class="sc">$</span>sample_id <span class="ot">&lt;-</span> <span class="fu">rownames</span>(metadata)</span>
-<span id="cb7-24"><a></a></span>
-<span id="cb7-25"><a></a>metadata <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span></span>
-<span id="cb7-26"><a></a>  <span class="fu">filter</span>(</span>
-<span id="cb7-27"><a></a>    timepoint <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DIV0"</span>, <span class="st">"DIV7"</span>)</span>
-<span id="cb7-28"><a></a>  )</span>
-<span id="cb7-29"><a></a></span>
-<span id="cb7-30"><a></a>salmdir <span class="ot">&lt;-</span> metadata<span class="sc">$</span>salmon_dirs</span>
-<span id="cb7-31"><a></a><span class="fu">names</span>(salmdir) <span class="ot">&lt;-</span> metadata<span class="sc">$</span>sample_id</span>
-<span id="cb7-32"><a></a></span>
-<span id="cb7-33"><a></a>txi <span class="ot">&lt;-</span> <span class="fu">tximport</span>(</span>
-<span id="cb7-34"><a></a>  <span class="at">files =</span> salmdir,</span>
-<span id="cb7-35"><a></a>  <span class="at">type =</span> <span class="st">"salmon"</span>,</span>
-<span id="cb7-36"><a></a>  <span class="at">tx2gene =</span> t2g,</span>
-<span id="cb7-37"><a></a>  <span class="at">dropInfReps =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb7-38"><a></a>  <span class="at">countsFromAbundance =</span> <span class="st">"lengthScaledTPM"</span></span>
-<span id="cb7-39"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a></a>metadata <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb4-2"><a></a>  <span class="at">salmon_dirs =</span> fs<span class="sc">::</span><span class="fu">dir_ls</span>(</span>
+<span id="cb4-3"><a></a>    <span class="fu">here</span>(<span class="st">"data/block-rna/differentiation_salmonouts"</span>),</span>
+<span id="cb4-4"><a></a>    <span class="at">recurse =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb4-5"><a></a>    <span class="at">glob =</span> <span class="st">"*quant.sf"</span></span>
+<span id="cb4-6"><a></a>  )</span>
+<span id="cb4-7"><a></a>) <span class="sc">|&gt;</span></span>
+<span id="cb4-8"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-9"><a></a>    <span class="at">sample_id =</span> fs<span class="sc">::</span><span class="fu">path_file</span>(fs<span class="sc">::</span><span class="fu">path_dir</span>(salmon_dirs))</span>
+<span id="cb4-10"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-11"><a></a>  <span class="fu">filter</span>(<span class="fu">str_starts</span>(sample_id, <span class="st">"DIV"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb4-12"><a></a>  <span class="fu">separate_wider_delim</span>(</span>
+<span id="cb4-13"><a></a>    <span class="at">col =</span> sample_id,</span>
+<span id="cb4-14"><a></a>    <span class="at">delim =</span> <span class="st">"."</span>,</span>
+<span id="cb4-15"><a></a>    <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"timepoint"</span>, <span class="st">"rep"</span>),</span>
+<span id="cb4-16"><a></a>    <span class="at">too_few =</span> <span class="st">"align_start"</span>,</span>
+<span id="cb4-17"><a></a>    <span class="at">cols_remove =</span> <span class="cn">FALSE</span></span>
+<span id="cb4-18"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-19"><a></a>  <span class="fu">mutate</span>(<span class="at">rep =</span> <span class="fu">str_remove</span>(rep, <span class="st">"Rep"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb4-20"><a></a>  <span class="fu">column_to_rownames</span>(<span class="st">"sample_id"</span>)</span>
+<span id="cb4-21"><a></a></span>
+<span id="cb4-22"><a></a><span class="co"># Add the sample_id column back from rownames</span></span>
+<span id="cb4-23"><a></a>metadata<span class="sc">$</span>sample_id <span class="ot">&lt;-</span> <span class="fu">rownames</span>(metadata)</span>
+<span id="cb4-24"><a></a></span>
+<span id="cb4-25"><a></a>metadata <span class="ot">&lt;-</span> metadata <span class="sc">|&gt;</span></span>
+<span id="cb4-26"><a></a>  <span class="fu">filter</span>(</span>
+<span id="cb4-27"><a></a>    timepoint <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DIV0"</span>, <span class="st">"DIV7"</span>)</span>
+<span id="cb4-28"><a></a>  )</span>
+<span id="cb4-29"><a></a></span>
+<span id="cb4-30"><a></a>salmdir <span class="ot">&lt;-</span> metadata<span class="sc">$</span>salmon_dirs</span>
+<span id="cb4-31"><a></a><span class="fu">names</span>(salmdir) <span class="ot">&lt;-</span> metadata<span class="sc">$</span>sample_id</span>
+<span id="cb4-32"><a></a></span>
+<span id="cb4-33"><a></a>txi <span class="ot">&lt;-</span> <span class="fu">tximport</span>(</span>
+<span id="cb4-34"><a></a>  <span class="at">files =</span> salmdir,</span>
+<span id="cb4-35"><a></a>  <span class="at">type =</span> <span class="st">"salmon"</span>,</span>
+<span id="cb4-36"><a></a>  <span class="at">tx2gene =</span> t2g,</span>
+<span id="cb4-37"><a></a>  <span class="at">dropInfReps =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb4-38"><a></a>  <span class="at">countsFromAbundance =</span> <span class="st">"lengthScaledTPM"</span></span>
+<span id="cb4-39"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>reading in files with read_tsv</code></pre>
 </div>
@@ -325,23 +321,23 @@ summarizing length</code></pre>
 <section id="filter-lowly-expressed-genes" class="slide level2">
 <h2>Filter lowly expressed genes</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="co"># examine distribution of TPMs</span></span>
-<span id="cb10-2"><a></a><span class="fu">hist</span>(<span class="fu">log2</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">rowSums</span>(txi<span class="sc">$</span>abundance)), <span class="at">breaks =</span> <span class="dv">40</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="co"># examine distribution of TPMs</span></span>
+<span id="cb7-2"><a></a><span class="fu">hist</span>(<span class="fu">log2</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">rowSums</span>(txi<span class="sc">$</span>abundance)), <span class="at">breaks =</span> <span class="dv">40</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="co"># decide a cutoff</span></span>
-<span id="cb11-2"><a></a>keepG <span class="ot">&lt;-</span> txi<span class="sc">$</span>abundance[<span class="fu">log2</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">rowSums</span>(txi<span class="sc">$</span>abundance)) <span class="sc">&gt;</span> <span class="fl">4.5</span>, ] <span class="sc">|&gt;</span></span>
-<span id="cb11-3"><a></a>  <span class="fu">rownames</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="co"># decide a cutoff</span></span>
+<span id="cb8-2"><a></a>keepG <span class="ot">&lt;-</span> txi<span class="sc">$</span>abundance[<span class="fu">log2</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">rowSums</span>(txi<span class="sc">$</span>abundance)) <span class="sc">&gt;</span> <span class="fl">4.5</span>, ] <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a></a>  <span class="fu">rownames</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <img data-src="slides-24_files/figure-revealjs/remove-low-genes-1.png" width="960" class="r-stretch"></section>
 <section id="create-deseq-object" class="slide level2 smaller">
 <h2>Create DESeq object</h2>
 <p>There are essentially two steps to using <code>DESeq2</code>. The first involves creating a <code>DESeqDataSet</code> from your data. Luckily, if you have a <code>tximport</code> object, which we do in the form of <code>txi</code>, then this becomes easy.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a>ddsTxi <span class="ot">&lt;-</span> <span class="fu">DESeqDataSetFromTximport</span>(</span>
-<span id="cb12-2"><a></a>  txi,</span>
-<span id="cb12-3"><a></a>  <span class="at">colData =</span> metadata,</span>
-<span id="cb12-4"><a></a>  <span class="at">design =</span> <span class="sc">~</span>timepoint</span>
-<span id="cb12-5"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a>ddsTxi <span class="ot">&lt;-</span> <span class="fu">DESeqDataSetFromTximport</span>(</span>
+<span id="cb9-2"><a></a>  txi,</span>
+<span id="cb9-3"><a></a>  <span class="at">colData =</span> metadata,</span>
+<span id="cb9-4"><a></a>  <span class="at">design =</span> <span class="sc">~</span>timepoint</span>
+<span id="cb9-5"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in DESeqDataSet(se, design = design, ignoreRank):
 some variables in design formula are characters, converting
@@ -350,24 +346,24 @@ to factors</code></pre>
 <div class="cell-output cell-output-stderr">
 <pre><code>using just counts from tximport</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a><span class="co"># keep genes with sufficient expession</span></span>
-<span id="cb15-2"><a></a>ddsTxi <span class="ot">&lt;-</span> ddsTxi[keepG, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="co"># keep genes with sufficient expession</span></span>
+<span id="cb12-2"><a></a>ddsTxi <span class="ot">&lt;-</span> ddsTxi[keepG, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="design-formula" class="slide level2 smaller">
 <h2>Design formula</h2>
 <p>You can see that <code>DESeqDataSetFromTximport</code> wants three things. The first is our <code>tximport</code> object. The second is the dataframe we made that relates samples and conditions (or in this case timepoints). The last is something called a <strong>design formula</strong>. A design formula contains all of the variables that will go into <code>DESeq2</code>’s model. The formula starts with a tilde and then has variables separated by a plus sign think <code>lm()</code>. It is common practice, and in fact basically required with <code>DESeq2</code>, to put the variable of interest last. In our case, that’s trivial because we only have one: timepoint. So our design formula is very simple:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a>design <span class="ot">=</span> <span class="er">~</span> timepoint</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a>design <span class="ot">=</span> <span class="er">~</span> timepoint</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Your design formula should ideally include <strong>all of the sources of variation in your data</strong>. For example, let’s say that here we thought there was a batch effect with the replicates. Maybe all of the Rep1 samples were prepped and sequenced on a different day than the Rep2 samples and so on. We could potentially account for this in <code>DESeq2</code>’s model with the following forumula:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>design <span class="ot">=</span> <span class="er">~</span> rep <span class="sc">+</span> timepoint</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a>design <span class="ot">=</span> <span class="er">~</span> rep <span class="sc">+</span> timepoint</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Here, timepoint is still the variable of interest, but we are controlling for differences that arise due to differences in replicates.</p>
 </section>
 <section id="run-deseq2" class="slide level2 smaller">
 <h2>Run <code>DESeq2</code></h2>
 <p>We can see here that <code>DESeq2</code> is taking the counts produced by <code>tximport</code> for gene quantifications. There are 52346 genes (rows) here and 7 samples (columns). Now using this ddsTxi object, we can run <code>DESeq2</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="co"># create DESeq object</span></span>
-<span id="cb18-2"><a></a>dds <span class="ot">&lt;-</span> <span class="fu">DESeq</span>(ddsTxi)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a><span class="co"># create DESeq object</span></span>
+<span id="cb15-2"><a></a>dds <span class="ot">&lt;-</span> <span class="fu">DESeq</span>(ddsTxi)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>estimating size factors</code></pre>
 </div>
@@ -396,38 +392,38 @@ to factors</code></pre>
 <section id="contrasts-to-get-results" class="slide level2 smaller">
 <h2>Contrasts to get results</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a></a><span class="co"># For contrast, we give three strings: the factor we are interested in, the numerator, and the denominator</span></span>
-<span id="cb26-2"><a></a><span class="fu">results</span>(dds, <span class="at">contrast =</span> <span class="fu">c</span>(<span class="st">"timepoint"</span>, <span class="st">"DIV7"</span>, <span class="st">"DIV0"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="co"># For contrast, we give three strings: the factor we are interested in, the numerator, and the denominator</span></span>
+<span id="cb23-2"><a></a><span class="fu">results</span>(dds, <span class="at">contrast =</span> <span class="fu">c</span>(<span class="st">"timepoint"</span>, <span class="st">"DIV7"</span>, <span class="st">"DIV0"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>log2 fold change (MLE): timepoint DIV7 vs DIV0 
 Wald test p-value: timepoint DIV7 vs DIV0 
 DataFrame with 13211 rows and 6 columns
                      baseMean log2FoldChange     lfcSE
                     &lt;numeric&gt;      &lt;numeric&gt; &lt;numeric&gt;
-ENSMUSG00000000001   5616.933      -0.951431 0.0532718
-ENSMUSG00000000028    723.248      -2.551794 0.1073992
+ENSMUSG00000000001   5616.933      -0.951430 0.0532749
+ENSMUSG00000000028    723.248      -2.551794 0.1074018
 ENSMUSG00000000031   3651.758       4.121821 0.2929827
-ENSMUSG00000000037    244.281      -1.273199 0.2045431
-ENSMUSG00000000056   2391.002       0.788852 0.1469530
+ENSMUSG00000000037    244.281      -1.273199 0.2045382
+ENSMUSG00000000056   2391.002       0.788852 0.1469433
 ...                       ...            ...       ...
-ENSMUSG00000121504  662.57656      -0.917131 0.0801445
-ENSMUSG00000121583 1650.63790       0.367053 0.0494672
-ENSMUSG00000121584  590.50603       1.531478 0.0864644
-ENSMUSG00002076020    2.70252       1.186067 1.1740531
-ENSMUSG00002076083 1281.79977       0.892433 0.0599871
+ENSMUSG00000121504  662.57656      -0.917132 0.0801520
+ENSMUSG00000121583 1650.63790       0.367053 0.0494750
+ENSMUSG00000121584  590.50603       1.531477 0.0864729
+ENSMUSG00002076020    2.70252       1.186071 1.1741428
+ENSMUSG00002076083 1281.79977       0.892433 0.0599944
                         stat       pvalue         padj
                    &lt;numeric&gt;    &lt;numeric&gt;    &lt;numeric&gt;
-ENSMUSG00000000001 -17.85994  2.41879e-71  1.14360e-70
-ENSMUSG00000000028 -23.75990 8.68157e-125 7.28612e-124
+ENSMUSG00000000001 -17.85889  2.46482e-71  1.16495e-70
+ENSMUSG00000000028 -23.75931 8.80343e-125 7.38839e-124
 ENSMUSG00000000031  14.06848  5.93327e-45  1.96339e-44
-ENSMUSG00000000037  -6.22460  4.82789e-10  7.93733e-10
-ENSMUSG00000000056   5.36806  7.95901e-08  1.21970e-07
+ENSMUSG00000000037  -6.22475  4.82337e-10  7.93088e-10
+ENSMUSG00000000056   5.36841  7.94330e-08  1.21730e-07
 ...                      ...          ...          ...
-ENSMUSG00000121504 -11.44348  2.53507e-30  6.58700e-30
-ENSMUSG00000121583   7.42013  1.17002e-13  2.12834e-13
-ENSMUSG00000121584  17.71224  3.37385e-70  1.57542e-69
-ENSMUSG00002076020   1.01023  3.12384e-01  3.39441e-01
-ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
+ENSMUSG00000121504 -11.44241  2.56650e-30  6.66866e-30
+ENSMUSG00000121583   7.41896  1.18048e-13  2.14735e-13
+ENSMUSG00000121584  17.71048  3.48064e-70  1.62528e-69
+ENSMUSG00002076020   1.01016  3.12419e-01  3.39480e-01
+ENSMUSG00002076083  14.87527  4.77058e-50  1.69134e-49</code></pre>
 </div>
 </div>
 <p>The columns we are most interested in are <strong>log2FoldChange</strong> and <strong>padj</strong>.</p>
@@ -437,22 +433,22 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <h2>Cleanup results</h2>
 <p>Let’s do a little work on this data frame to make it slightly cleaner and more informative.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a></a>diff <span class="ot">&lt;-</span></span>
-<span id="cb28-2"><a></a>  <span class="fu">results</span>(</span>
-<span id="cb28-3"><a></a>    dds,</span>
-<span id="cb28-4"><a></a>    <span class="at">contrast =</span> <span class="fu">c</span>(<span class="st">"timepoint"</span>, <span class="st">"DIV7"</span>, <span class="st">"DIV0"</span>)</span>
-<span id="cb28-5"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb28-6"><a></a>  <span class="co"># Change this into a dataframe</span></span>
-<span id="cb28-7"><a></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb28-8"><a></a>  <span class="co"># Move ensembl gene IDs into their own column</span></span>
-<span id="cb28-9"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_gene_id"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb28-10"><a></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
-<span id="cb28-11"><a></a>  <span class="co"># drop unused columns</span></span>
-<span id="cb28-12"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(baseMean, lfcSE, stat, pvalue)) <span class="sc">|&gt;</span></span>
-<span id="cb28-13"><a></a>  <span class="co"># Merge this with a table relating ensembl_gene_id with gene short names</span></span>
-<span id="cb28-14"><a></a>  <span class="fu">inner_join</span>(gene_name_map) <span class="sc">|&gt;</span></span>
-<span id="cb28-15"><a></a>  <span class="co"># Rename external_gene_name column</span></span>
-<span id="cb28-16"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gene =</span> external_gene_name)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a>diff <span class="ot">&lt;-</span></span>
+<span id="cb25-2"><a></a>  <span class="fu">results</span>(</span>
+<span id="cb25-3"><a></a>    dds,</span>
+<span id="cb25-4"><a></a>    <span class="at">contrast =</span> <span class="fu">c</span>(<span class="st">"timepoint"</span>, <span class="st">"DIV7"</span>, <span class="st">"DIV0"</span>)</span>
+<span id="cb25-5"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb25-6"><a></a>  <span class="co"># Change this into a dataframe</span></span>
+<span id="cb25-7"><a></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb25-8"><a></a>  <span class="co"># Move ensembl gene IDs into their own column</span></span>
+<span id="cb25-9"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_gene_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb25-10"><a></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb25-11"><a></a>  <span class="co"># drop unused columns</span></span>
+<span id="cb25-12"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(baseMean, lfcSE, stat, pvalue)) <span class="sc">|&gt;</span></span>
+<span id="cb25-13"><a></a>  <span class="co"># Merge this with a table relating ensembl_gene_id with gene short names</span></span>
+<span id="cb25-14"><a></a>  <span class="fu">inner_join</span>(gene_name_map) <span class="sc">|&gt;</span></span>
+<span id="cb25-15"><a></a>  <span class="co"># Rename external_gene_name column</span></span>
+<span id="cb25-16"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gene =</span> external_gene_name)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Joining with `by = join_by(ensembl_gene_id)`</code></pre>
 </div>
@@ -462,13 +458,13 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <h2>How many are significant</h2>
 <p>OK now we have a table of gene expression results. How many genes are significantly up/down regulated between these two timepoints? We will use 0.01 as an FDR (p.adj) cutoff.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="co"># number of upregulated genes</span></span>
-<span id="cb30-2"><a></a><span class="fu">nrow</span>(<span class="fu">filter</span>(diff, padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">&amp;</span> log2FoldChange <span class="sc">&gt;</span> <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="co"># number of upregulated genes</span></span>
+<span id="cb27-2"><a></a><span class="fu">nrow</span>(<span class="fu">filter</span>(diff, padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">&amp;</span> log2FoldChange <span class="sc">&gt;</span> <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 5301</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a><span class="co"># number of downregulated genes</span></span>
-<span id="cb32-2"><a></a><span class="fu">nrow</span>(<span class="fu">filter</span>(diff, padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">&amp;</span> log2FoldChange <span class="sc">&lt;</span> <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="co"># number of downregulated genes</span></span>
+<span id="cb29-2"><a></a><span class="fu">nrow</span>(<span class="fu">filter</span>(diff, padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">&amp;</span> log2FoldChange <span class="sc">&lt;</span> <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 5333</code></pre>
 </div>
@@ -478,37 +474,37 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <h2>Volcano plot of differential expression results</h2>
 <p>Let’s make a volcano plot of these results.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a><span class="co"># meets the FDR cutoff</span></span>
-<span id="cb34-2"><a></a>diff_sig <span class="ot">&lt;-</span></span>
-<span id="cb34-3"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb34-4"><a></a>    diff,</span>
-<span id="cb34-5"><a></a>    <span class="at">sig =</span> <span class="fu">case_when</span>(</span>
-<span id="cb34-6"><a></a>      padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">~</span> <span class="st">"yes"</span>,</span>
-<span id="cb34-7"><a></a>      <span class="at">.default =</span> <span class="st">"no"</span></span>
-<span id="cb34-8"><a></a>    )</span>
-<span id="cb34-9"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb34-10"><a></a>  <span class="co"># if a gene did not meet expression cutoffs that DESeq2 automatically does, it gets a pvalue of NA</span></span>
-<span id="cb34-11"><a></a>  <span class="fu">drop_na</span>()</span>
-<span id="cb34-12"><a></a></span>
-<span id="cb34-13"><a></a><span class="fu">ggplot</span>(</span>
-<span id="cb34-14"><a></a>  diff_sig,</span>
-<span id="cb34-15"><a></a>  <span class="fu">aes</span>(</span>
-<span id="cb34-16"><a></a>    <span class="at">x =</span> log2FoldChange,</span>
-<span id="cb34-17"><a></a>    <span class="at">y =</span> <span class="sc">-</span><span class="fu">log10</span>(padj),</span>
-<span id="cb34-18"><a></a>    <span class="at">color =</span> sig</span>
-<span id="cb34-19"><a></a>  )</span>
-<span id="cb34-20"><a></a>) <span class="sc">+</span></span>
-<span id="cb34-21"><a></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb34-22"><a></a>  <span class="fu">labs</span>(</span>
-<span id="cb34-23"><a></a>    <span class="at">x =</span> <span class="st">"DIV7 expression / DIV0 expression, log2"</span>,</span>
-<span id="cb34-24"><a></a>    <span class="at">y =</span> <span class="st">"-log10(FDR)"</span></span>
-<span id="cb34-25"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb34-26"><a></a>  <span class="fu">scale_color_manual</span>(</span>
-<span id="cb34-27"><a></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"red"</span>),</span>
-<span id="cb34-28"><a></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"NS"</span>, <span class="st">"FDR &lt; 0.01"</span>),</span>
-<span id="cb34-29"><a></a>    <span class="at">name =</span> <span class="st">""</span></span>
-<span id="cb34-30"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb34-31"><a></a>  <span class="fu">theme_cowplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a></a><span class="co"># meets the FDR cutoff</span></span>
+<span id="cb31-2"><a></a>diff_sig <span class="ot">&lt;-</span></span>
+<span id="cb31-3"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb31-4"><a></a>    diff,</span>
+<span id="cb31-5"><a></a>    <span class="at">sig =</span> <span class="fu">case_when</span>(</span>
+<span id="cb31-6"><a></a>      padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">~</span> <span class="st">"yes"</span>,</span>
+<span id="cb31-7"><a></a>      <span class="at">.default =</span> <span class="st">"no"</span></span>
+<span id="cb31-8"><a></a>    )</span>
+<span id="cb31-9"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb31-10"><a></a>  <span class="co"># if a gene did not meet expression cutoffs that DESeq2 automatically does, it gets a pvalue of NA</span></span>
+<span id="cb31-11"><a></a>  <span class="fu">drop_na</span>()</span>
+<span id="cb31-12"><a></a></span>
+<span id="cb31-13"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb31-14"><a></a>  diff_sig,</span>
+<span id="cb31-15"><a></a>  <span class="fu">aes</span>(</span>
+<span id="cb31-16"><a></a>    <span class="at">x =</span> log2FoldChange,</span>
+<span id="cb31-17"><a></a>    <span class="at">y =</span> <span class="sc">-</span><span class="fu">log10</span>(padj),</span>
+<span id="cb31-18"><a></a>    <span class="at">color =</span> sig</span>
+<span id="cb31-19"><a></a>  )</span>
+<span id="cb31-20"><a></a>) <span class="sc">+</span></span>
+<span id="cb31-21"><a></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb31-22"><a></a>  <span class="fu">labs</span>(</span>
+<span id="cb31-23"><a></a>    <span class="at">x =</span> <span class="st">"DIV7 expression / DIV0 expression, log2"</span>,</span>
+<span id="cb31-24"><a></a>    <span class="at">y =</span> <span class="st">"-log10(FDR)"</span></span>
+<span id="cb31-25"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb31-26"><a></a>  <span class="fu">scale_color_manual</span>(</span>
+<span id="cb31-27"><a></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"red"</span>),</span>
+<span id="cb31-28"><a></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"NS"</span>, <span class="st">"FDR &lt; 0.01"</span>),</span>
+<span id="cb31-29"><a></a>    <span class="at">name =</span> <span class="st">""</span></span>
+<span id="cb31-30"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb31-31"><a></a>  <span class="fu">theme_cowplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -525,45 +521,45 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <p>In addition to an FDR cutoff, let’s also apply a log2FoldChange cutoff. This will of course be more conservative, but will probably give you a more confident set of genes.</p>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a></a><span class="co"># Is the expression of the gene at least 3-fold different?</span></span>
-<span id="cb35-2"><a></a>diff_lfc <span class="ot">&lt;-</span></span>
-<span id="cb35-3"><a></a>  <span class="fu">results</span>(</span>
-<span id="cb35-4"><a></a>    dds,</span>
-<span id="cb35-5"><a></a>    <span class="at">contrast =</span> <span class="fu">c</span>(<span class="st">"timepoint"</span>, <span class="st">"DIV7"</span>, <span class="st">"DIV0"</span>),</span>
-<span id="cb35-6"><a></a>    <span class="at">lfcThreshold =</span> <span class="fu">log</span>(<span class="dv">3</span>, <span class="dv">2</span>)</span>
-<span id="cb35-7"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb35-8"><a></a>  <span class="co"># Change this into a dataframe</span></span>
-<span id="cb35-9"><a></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb35-10"><a></a>  <span class="co"># Move ensembl gene IDs into their own column</span></span>
-<span id="cb35-11"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_gene_id"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb35-12"><a></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
-<span id="cb35-13"><a></a>  <span class="co"># drop unused columns</span></span>
-<span id="cb35-14"><a></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(baseMean, lfcSE, stat, pvalue)) <span class="sc">|&gt;</span></span>
-<span id="cb35-15"><a></a>  <span class="co"># Merge this with a table relating ensembl_gene_id with gene short names</span></span>
-<span id="cb35-16"><a></a>  <span class="fu">inner_join</span>(gene_name_map) <span class="sc">|&gt;</span></span>
-<span id="cb35-17"><a></a>  <span class="co"># Rename external_gene_name column</span></span>
-<span id="cb35-18"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gene =</span> external_gene_name)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a><span class="co"># Is the expression of the gene at least 3-fold different?</span></span>
+<span id="cb32-2"><a></a>diff_lfc <span class="ot">&lt;-</span></span>
+<span id="cb32-3"><a></a>  <span class="fu">results</span>(</span>
+<span id="cb32-4"><a></a>    dds,</span>
+<span id="cb32-5"><a></a>    <span class="at">contrast =</span> <span class="fu">c</span>(<span class="st">"timepoint"</span>, <span class="st">"DIV7"</span>, <span class="st">"DIV0"</span>),</span>
+<span id="cb32-6"><a></a>    <span class="at">lfcThreshold =</span> <span class="fu">log</span>(<span class="dv">3</span>, <span class="dv">2</span>)</span>
+<span id="cb32-7"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb32-8"><a></a>  <span class="co"># Change this into a dataframe</span></span>
+<span id="cb32-9"><a></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb32-10"><a></a>  <span class="co"># Move ensembl gene IDs into their own column</span></span>
+<span id="cb32-11"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_gene_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-12"><a></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb32-13"><a></a>  <span class="co"># drop unused columns</span></span>
+<span id="cb32-14"><a></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(baseMean, lfcSE, stat, pvalue)) <span class="sc">|&gt;</span></span>
+<span id="cb32-15"><a></a>  <span class="co"># Merge this with a table relating ensembl_gene_id with gene short names</span></span>
+<span id="cb32-16"><a></a>  <span class="fu">inner_join</span>(gene_name_map) <span class="sc">|&gt;</span></span>
+<span id="cb32-17"><a></a>  <span class="co"># Rename external_gene_name column</span></span>
+<span id="cb32-18"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gene =</span> external_gene_name)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output cell-output-stderr">
 <pre><code>Joining with `by = join_by(ensembl_gene_id)`</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a></a><span class="co"># number of upregulated genes</span></span>
-<span id="cb37-2"><a></a><span class="fu">nrow</span>(</span>
-<span id="cb37-3"><a></a>  <span class="fu">filter</span>(</span>
-<span id="cb37-4"><a></a>    diff_lfc,</span>
-<span id="cb37-5"><a></a>    padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">&amp;</span> log2FoldChange <span class="sc">&gt;</span> <span class="dv">0</span></span>
-<span id="cb37-6"><a></a>  )</span>
-<span id="cb37-7"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a></a><span class="co"># number of upregulated genes</span></span>
+<span id="cb34-2"><a></a><span class="fu">nrow</span>(</span>
+<span id="cb34-3"><a></a>  <span class="fu">filter</span>(</span>
+<span id="cb34-4"><a></a>    diff_lfc,</span>
+<span id="cb34-5"><a></a>    padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">&amp;</span> log2FoldChange <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb34-6"><a></a>  )</span>
+<span id="cb34-7"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1511</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a><span class="co"># number of downregulated genes</span></span>
-<span id="cb39-2"><a></a><span class="fu">nrow</span>(</span>
-<span id="cb39-3"><a></a>  <span class="fu">filter</span>(</span>
-<span id="cb39-4"><a></a>    diff_lfc,</span>
-<span id="cb39-5"><a></a>    padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">&amp;</span> log2FoldChange <span class="sc">&lt;</span> <span class="dv">0</span></span>
-<span id="cb39-6"><a></a>  )</span>
-<span id="cb39-7"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a></a><span class="co"># number of downregulated genes</span></span>
+<span id="cb36-2"><a></a><span class="fu">nrow</span>(</span>
+<span id="cb36-3"><a></a>  <span class="fu">filter</span>(</span>
+<span id="cb36-4"><a></a>    diff_lfc,</span>
+<span id="cb36-5"><a></a>    padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">&amp;</span> log2FoldChange <span class="sc">&lt;</span> <span class="dv">0</span></span>
+<span id="cb36-6"><a></a>  )</span>
+<span id="cb36-7"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 990</code></pre>
 </div>
@@ -573,44 +569,44 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <h2>Change the LFC threshold</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a></a>diff_lfc_sig <span class="ot">&lt;-</span></span>
-<span id="cb41-2"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb41-3"><a></a>    diff_lfc,</span>
-<span id="cb41-4"><a></a>    <span class="at">sig =</span> <span class="fu">case_when</span>(</span>
-<span id="cb41-5"><a></a>      padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">~</span> <span class="st">"yes"</span>,</span>
-<span id="cb41-6"><a></a>      <span class="at">.default =</span> <span class="st">"no"</span></span>
-<span id="cb41-7"><a></a>    )</span>
-<span id="cb41-8"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb41-9"><a></a>  <span class="fu">drop_na</span>()</span>
-<span id="cb41-10"><a></a></span>
-<span id="cb41-11"><a></a></span>
-<span id="cb41-12"><a></a><span class="co"># look at some specific genes</span></span>
-<span id="cb41-13"><a></a></span>
-<span id="cb41-14"><a></a>diff_lfc_sig <span class="sc">|&gt;</span></span>
-<span id="cb41-15"><a></a>  <span class="fu">filter</span>(</span>
-<span id="cb41-16"><a></a>    gene <span class="sc">%in%</span></span>
-<span id="cb41-17"><a></a>      <span class="fu">c</span>(<span class="st">"Bdnf"</span>, <span class="st">"Dlg4"</span>, <span class="st">"Klf4"</span>, <span class="st">"Sox2"</span>)</span>
-<span id="cb41-18"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb41-19"><a></a>  <span class="fu">gt</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a>diff_lfc_sig <span class="ot">&lt;-</span></span>
+<span id="cb38-2"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb38-3"><a></a>    diff_lfc,</span>
+<span id="cb38-4"><a></a>    <span class="at">sig =</span> <span class="fu">case_when</span>(</span>
+<span id="cb38-5"><a></a>      padj <span class="sc">&lt;</span> <span class="fl">0.01</span> <span class="sc">~</span> <span class="st">"yes"</span>,</span>
+<span id="cb38-6"><a></a>      <span class="at">.default =</span> <span class="st">"no"</span></span>
+<span id="cb38-7"><a></a>    )</span>
+<span id="cb38-8"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb38-9"><a></a>  <span class="fu">drop_na</span>()</span>
+<span id="cb38-10"><a></a></span>
+<span id="cb38-11"><a></a></span>
+<span id="cb38-12"><a></a><span class="co"># look at some specific genes</span></span>
+<span id="cb38-13"><a></a></span>
+<span id="cb38-14"><a></a>diff_lfc_sig <span class="sc">|&gt;</span></span>
+<span id="cb38-15"><a></a>  <span class="fu">filter</span>(</span>
+<span id="cb38-16"><a></a>    gene <span class="sc">%in%</span></span>
+<span id="cb38-17"><a></a>      <span class="fu">c</span>(<span class="st">"Bdnf"</span>, <span class="st">"Dlg4"</span>, <span class="st">"Klf4"</span>, <span class="st">"Sox2"</span>)</span>
+<span id="cb38-18"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb38-19"><a></a>  <span class="fu">gt</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
-<div id="qnqgirxdds" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#qnqgirxdds table {
+<div id="alphqjslag" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#alphqjslag table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#qnqgirxdds thead, #qnqgirxdds tbody, #qnqgirxdds tfoot, #qnqgirxdds tr, #qnqgirxdds td, #qnqgirxdds th {
+#alphqjslag thead, #alphqjslag tbody, #alphqjslag tfoot, #alphqjslag tr, #alphqjslag td, #alphqjslag th {
   border-style: none;
 }
 
-#qnqgirxdds p {
+#alphqjslag p {
   margin: 0;
   padding: 0;
 }
 
-#qnqgirxdds .gt_table {
+#alphqjslag .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -636,12 +632,12 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-left-color: #D3D3D3;
 }
 
-#qnqgirxdds .gt_caption {
+#alphqjslag .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#qnqgirxdds .gt_title {
+#alphqjslag .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -653,7 +649,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-bottom-width: 0;
 }
 
-#qnqgirxdds .gt_subtitle {
+#alphqjslag .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -665,7 +661,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-top-width: 0;
 }
 
-#qnqgirxdds .gt_heading {
+#alphqjslag .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -677,13 +673,13 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#qnqgirxdds .gt_bottom_border {
+#alphqjslag .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#qnqgirxdds .gt_col_headings {
+#alphqjslag .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -698,7 +694,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#qnqgirxdds .gt_col_heading {
+#alphqjslag .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -718,7 +714,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   overflow-x: hidden;
 }
 
-#qnqgirxdds .gt_column_spanner_outer {
+#alphqjslag .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -730,15 +726,15 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 4px;
 }
 
-#qnqgirxdds .gt_column_spanner_outer:first-child {
+#alphqjslag .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#qnqgirxdds .gt_column_spanner_outer:last-child {
+#alphqjslag .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#qnqgirxdds .gt_column_spanner {
+#alphqjslag .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -750,11 +746,11 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   width: 100%;
 }
 
-#qnqgirxdds .gt_spanner_row {
+#alphqjslag .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#qnqgirxdds .gt_group_heading {
+#alphqjslag .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -780,7 +776,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   text-align: left;
 }
 
-#qnqgirxdds .gt_empty_group_heading {
+#alphqjslag .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -795,15 +791,15 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   vertical-align: middle;
 }
 
-#qnqgirxdds .gt_from_md > :first-child {
+#alphqjslag .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#qnqgirxdds .gt_from_md > :last-child {
+#alphqjslag .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#qnqgirxdds .gt_row {
+#alphqjslag .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -822,7 +818,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   overflow-x: hidden;
 }
 
-#qnqgirxdds .gt_stub {
+#alphqjslag .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -835,7 +831,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 5px;
 }
 
-#qnqgirxdds .gt_stub_row_group {
+#alphqjslag .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -849,15 +845,15 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   vertical-align: top;
 }
 
-#qnqgirxdds .gt_row_group_first td {
+#alphqjslag .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#qnqgirxdds .gt_row_group_first th {
+#alphqjslag .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#qnqgirxdds .gt_summary_row {
+#alphqjslag .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -867,16 +863,16 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 5px;
 }
 
-#qnqgirxdds .gt_first_summary_row {
+#alphqjslag .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#qnqgirxdds .gt_first_summary_row.thick {
+#alphqjslag .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#qnqgirxdds .gt_last_summary_row {
+#alphqjslag .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -886,7 +882,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#qnqgirxdds .gt_grand_summary_row {
+#alphqjslag .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -896,7 +892,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 5px;
 }
 
-#qnqgirxdds .gt_first_grand_summary_row {
+#alphqjslag .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -906,7 +902,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-top-color: #D3D3D3;
 }
 
-#qnqgirxdds .gt_last_grand_summary_row_top {
+#alphqjslag .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -916,11 +912,11 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#qnqgirxdds .gt_striped {
+#alphqjslag .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#qnqgirxdds .gt_table_body {
+#alphqjslag .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -929,7 +925,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#qnqgirxdds .gt_footnotes {
+#alphqjslag .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -943,7 +939,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#qnqgirxdds .gt_footnote {
+#alphqjslag .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -952,7 +948,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 5px;
 }
 
-#qnqgirxdds .gt_sourcenotes {
+#alphqjslag .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -966,7 +962,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#qnqgirxdds .gt_sourcenote {
+#alphqjslag .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -974,72 +970,72 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 5px;
 }
 
-#qnqgirxdds .gt_left {
+#alphqjslag .gt_left {
   text-align: left;
 }
 
-#qnqgirxdds .gt_center {
+#alphqjslag .gt_center {
   text-align: center;
 }
 
-#qnqgirxdds .gt_right {
+#alphqjslag .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#qnqgirxdds .gt_font_normal {
+#alphqjslag .gt_font_normal {
   font-weight: normal;
 }
 
-#qnqgirxdds .gt_font_bold {
+#alphqjslag .gt_font_bold {
   font-weight: bold;
 }
 
-#qnqgirxdds .gt_font_italic {
+#alphqjslag .gt_font_italic {
   font-style: italic;
 }
 
-#qnqgirxdds .gt_super {
+#alphqjslag .gt_super {
   font-size: 65%;
 }
 
-#qnqgirxdds .gt_footnote_marks {
+#alphqjslag .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#qnqgirxdds .gt_asterisk {
+#alphqjslag .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#qnqgirxdds .gt_indent_1 {
+#alphqjslag .gt_indent_1 {
   text-indent: 5px;
 }
 
-#qnqgirxdds .gt_indent_2 {
+#alphqjslag .gt_indent_2 {
   text-indent: 10px;
 }
 
-#qnqgirxdds .gt_indent_3 {
+#alphqjslag .gt_indent_3 {
   text-indent: 15px;
 }
 
-#qnqgirxdds .gt_indent_4 {
+#alphqjslag .gt_indent_4 {
   text-indent: 20px;
 }
 
-#qnqgirxdds .gt_indent_5 {
+#alphqjslag .gt_indent_5 {
   text-indent: 25px;
 }
 
-#qnqgirxdds .katex-display {
+#alphqjslag .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#qnqgirxdds div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#alphqjslag div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1058,28 +1054,28 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <tr class="odd">
 <td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000003032</td>
 <td class="gt_row gt_right" headers="log2FoldChange">-2.344594</td>
-<td class="gt_row gt_right" headers="padj">3.984536e-09</td>
+<td class="gt_row gt_right" headers="padj">3.979794e-09</td>
 <td class="gt_row gt_left" headers="gene">Klf4</td>
 <td class="gt_row gt_left" headers="sig">yes</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000020886</td>
 <td class="gt_row gt_right" headers="log2FoldChange">3.338654</td>
-<td class="gt_row gt_right" headers="padj">1.391036e-45</td>
+<td class="gt_row gt_right" headers="padj">1.373741e-45</td>
 <td class="gt_row gt_left" headers="gene">Dlg4</td>
 <td class="gt_row gt_left" headers="sig">yes</td>
 </tr>
 <tr class="odd">
 <td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000048482</td>
 <td class="gt_row gt_right" headers="log2FoldChange">1.709765</td>
-<td class="gt_row gt_right" headers="padj">4.929354e-01</td>
+<td class="gt_row gt_right" headers="padj">4.930439e-01</td>
 <td class="gt_row gt_left" headers="gene">Bdnf</td>
 <td class="gt_row gt_left" headers="sig">no</td>
 </tr>
 <tr class="even">
 <td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000074637</td>
 <td class="gt_row gt_right" headers="log2FoldChange">-2.169991</td>
-<td class="gt_row gt_right" headers="padj">4.331519e-13</td>
+<td class="gt_row gt_right" headers="padj">4.335036e-13</td>
 <td class="gt_row gt_left" headers="gene">Sox2</td>
 <td class="gt_row gt_left" headers="sig">yes</td>
 </tr>
@@ -1093,25 +1089,25 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <section id="filtered-volcano" class="slide level2 smaller">
 <h2>Filtered Volcano</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a></a><span class="fu">ggplot</span>(</span>
-<span id="cb42-2"><a></a>  diff_lfc_sig,</span>
-<span id="cb42-3"><a></a>  <span class="fu">aes</span>(</span>
-<span id="cb42-4"><a></a>    <span class="at">x =</span> log2FoldChange,</span>
-<span id="cb42-5"><a></a>    <span class="at">y =</span> <span class="sc">-</span><span class="fu">log10</span>(padj),</span>
-<span id="cb42-6"><a></a>    <span class="at">color =</span> sig</span>
-<span id="cb42-7"><a></a>  )</span>
-<span id="cb42-8"><a></a>) <span class="sc">+</span></span>
-<span id="cb42-9"><a></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb42-10"><a></a>  <span class="fu">labs</span>(</span>
-<span id="cb42-11"><a></a>    <span class="at">x =</span> <span class="st">"DIV7 expression / DIV0 expression, log2"</span>,</span>
-<span id="cb42-12"><a></a>    <span class="at">y =</span> <span class="st">"-log10(FDR)"</span></span>
-<span id="cb42-13"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb42-14"><a></a>  <span class="fu">scale_color_manual</span>(</span>
-<span id="cb42-15"><a></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"red"</span>),</span>
-<span id="cb42-16"><a></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"NS"</span>, <span class="st">"FDR &lt; 0.01"</span>),</span>
-<span id="cb42-17"><a></a>    <span class="at">name =</span> <span class="st">""</span></span>
-<span id="cb42-18"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb42-19"><a></a>  <span class="fu">theme_cowplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb39-2"><a></a>  diff_lfc_sig,</span>
+<span id="cb39-3"><a></a>  <span class="fu">aes</span>(</span>
+<span id="cb39-4"><a></a>    <span class="at">x =</span> log2FoldChange,</span>
+<span id="cb39-5"><a></a>    <span class="at">y =</span> <span class="sc">-</span><span class="fu">log10</span>(padj),</span>
+<span id="cb39-6"><a></a>    <span class="at">color =</span> sig</span>
+<span id="cb39-7"><a></a>  )</span>
+<span id="cb39-8"><a></a>) <span class="sc">+</span></span>
+<span id="cb39-9"><a></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb39-10"><a></a>  <span class="fu">labs</span>(</span>
+<span id="cb39-11"><a></a>    <span class="at">x =</span> <span class="st">"DIV7 expression / DIV0 expression, log2"</span>,</span>
+<span id="cb39-12"><a></a>    <span class="at">y =</span> <span class="st">"-log10(FDR)"</span></span>
+<span id="cb39-13"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb39-14"><a></a>  <span class="fu">scale_color_manual</span>(</span>
+<span id="cb39-15"><a></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"red"</span>),</span>
+<span id="cb39-16"><a></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"NS"</span>, <span class="st">"FDR &lt; 0.01"</span>),</span>
+<span id="cb39-17"><a></a>    <span class="at">name =</span> <span class="st">""</span></span>
+<span id="cb39-18"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb39-19"><a></a>  <span class="fu">theme_cowplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -1133,20 +1129,20 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <h2>Get TPMs</h2>
 <p>Let’s plot the expression of Klf4, Sox2, Bdnf, and Dlg4 in our samples.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a>tpms <span class="ot">&lt;-</span> txi<span class="sc">$</span>abundance <span class="sc">|&gt;</span></span>
-<span id="cb43-2"><a></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb43-3"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_gene_id"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb43-4"><a></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
-<span id="cb43-5"><a></a>  <span class="fu">inner_join</span>(gene_name_map) <span class="sc">|&gt;</span></span>
-<span id="cb43-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gene =</span> external_gene_name) <span class="sc">|&gt;</span></span>
-<span id="cb43-7"><a></a>  <span class="co"># Filter for genes we are interested in</span></span>
-<span id="cb43-8"><a></a>  <span class="fu">filter</span>(gene <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Klf4"</span>, <span class="st">"Sox2"</span>, <span class="st">"Bdnf"</span>, <span class="st">"Dlg4"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb43-9"><a></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span><span class="fu">c</span>(ensembl_gene_id, gene)) <span class="sc">|&gt;</span></span>
-<span id="cb43-10"><a></a>  <span class="fu">separate_wider_delim</span>(</span>
-<span id="cb43-11"><a></a>    <span class="at">col =</span> name,</span>
-<span id="cb43-12"><a></a>    <span class="at">delim =</span> <span class="st">"."</span>,</span>
-<span id="cb43-13"><a></a>    <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"condition"</span>, <span class="st">"rep"</span>)</span>
-<span id="cb43-14"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a>tpms <span class="ot">&lt;-</span> txi<span class="sc">$</span>abundance <span class="sc">|&gt;</span></span>
+<span id="cb40-2"><a></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb40-3"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_gene_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb40-4"><a></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb40-5"><a></a>  <span class="fu">inner_join</span>(gene_name_map) <span class="sc">|&gt;</span></span>
+<span id="cb40-6"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">gene =</span> external_gene_name) <span class="sc">|&gt;</span></span>
+<span id="cb40-7"><a></a>  <span class="co"># Filter for genes we are interested in</span></span>
+<span id="cb40-8"><a></a>  <span class="fu">filter</span>(gene <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Klf4"</span>, <span class="st">"Sox2"</span>, <span class="st">"Bdnf"</span>, <span class="st">"Dlg4"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb40-9"><a></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span><span class="fu">c</span>(ensembl_gene_id, gene)) <span class="sc">|&gt;</span></span>
+<span id="cb40-10"><a></a>  <span class="fu">separate_wider_delim</span>(</span>
+<span id="cb40-11"><a></a>    <span class="at">col =</span> name,</span>
+<span id="cb40-12"><a></a>    <span class="at">delim =</span> <span class="st">"."</span>,</span>
+<span id="cb40-13"><a></a>    <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"condition"</span>, <span class="st">"rep"</span>)</span>
+<span id="cb40-14"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -1154,25 +1150,25 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <div class="cell-output cell-output-stderr">
 <pre><code>Joining with `by = join_by(ensembl_gene_id)`</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a><span class="fu">gt</span>(tpms)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a></a><span class="fu">gt</span>(tpms)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div id="rcvcsjqdmi" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#rcvcsjqdmi table {
+<div id="lzpglwmnkr" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#lzpglwmnkr table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#rcvcsjqdmi thead, #rcvcsjqdmi tbody, #rcvcsjqdmi tfoot, #rcvcsjqdmi tr, #rcvcsjqdmi td, #rcvcsjqdmi th {
+#lzpglwmnkr thead, #lzpglwmnkr tbody, #lzpglwmnkr tfoot, #lzpglwmnkr tr, #lzpglwmnkr td, #lzpglwmnkr th {
   border-style: none;
 }
 
-#rcvcsjqdmi p {
+#lzpglwmnkr p {
   margin: 0;
   padding: 0;
 }
 
-#rcvcsjqdmi .gt_table {
+#lzpglwmnkr .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1198,12 +1194,12 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-left-color: #D3D3D3;
 }
 
-#rcvcsjqdmi .gt_caption {
+#lzpglwmnkr .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#rcvcsjqdmi .gt_title {
+#lzpglwmnkr .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1215,7 +1211,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-bottom-width: 0;
 }
 
-#rcvcsjqdmi .gt_subtitle {
+#lzpglwmnkr .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1227,7 +1223,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-top-width: 0;
 }
 
-#rcvcsjqdmi .gt_heading {
+#lzpglwmnkr .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1239,13 +1235,13 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#rcvcsjqdmi .gt_bottom_border {
+#lzpglwmnkr .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#rcvcsjqdmi .gt_col_headings {
+#lzpglwmnkr .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1260,7 +1256,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#rcvcsjqdmi .gt_col_heading {
+#lzpglwmnkr .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1280,7 +1276,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   overflow-x: hidden;
 }
 
-#rcvcsjqdmi .gt_column_spanner_outer {
+#lzpglwmnkr .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1292,15 +1288,15 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 4px;
 }
 
-#rcvcsjqdmi .gt_column_spanner_outer:first-child {
+#lzpglwmnkr .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#rcvcsjqdmi .gt_column_spanner_outer:last-child {
+#lzpglwmnkr .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#rcvcsjqdmi .gt_column_spanner {
+#lzpglwmnkr .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1312,11 +1308,11 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   width: 100%;
 }
 
-#rcvcsjqdmi .gt_spanner_row {
+#lzpglwmnkr .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#rcvcsjqdmi .gt_group_heading {
+#lzpglwmnkr .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1342,7 +1338,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   text-align: left;
 }
 
-#rcvcsjqdmi .gt_empty_group_heading {
+#lzpglwmnkr .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1357,15 +1353,15 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   vertical-align: middle;
 }
 
-#rcvcsjqdmi .gt_from_md > :first-child {
+#lzpglwmnkr .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#rcvcsjqdmi .gt_from_md > :last-child {
+#lzpglwmnkr .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#rcvcsjqdmi .gt_row {
+#lzpglwmnkr .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1384,7 +1380,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   overflow-x: hidden;
 }
 
-#rcvcsjqdmi .gt_stub {
+#lzpglwmnkr .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1397,7 +1393,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 5px;
 }
 
-#rcvcsjqdmi .gt_stub_row_group {
+#lzpglwmnkr .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1411,15 +1407,15 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   vertical-align: top;
 }
 
-#rcvcsjqdmi .gt_row_group_first td {
+#lzpglwmnkr .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#rcvcsjqdmi .gt_row_group_first th {
+#lzpglwmnkr .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#rcvcsjqdmi .gt_summary_row {
+#lzpglwmnkr .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1429,16 +1425,16 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 5px;
 }
 
-#rcvcsjqdmi .gt_first_summary_row {
+#lzpglwmnkr .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#rcvcsjqdmi .gt_first_summary_row.thick {
+#lzpglwmnkr .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#rcvcsjqdmi .gt_last_summary_row {
+#lzpglwmnkr .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1448,7 +1444,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#rcvcsjqdmi .gt_grand_summary_row {
+#lzpglwmnkr .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1458,7 +1454,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 5px;
 }
 
-#rcvcsjqdmi .gt_first_grand_summary_row {
+#lzpglwmnkr .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1468,7 +1464,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-top-color: #D3D3D3;
 }
 
-#rcvcsjqdmi .gt_last_grand_summary_row_top {
+#lzpglwmnkr .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1478,11 +1474,11 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#rcvcsjqdmi .gt_striped {
+#lzpglwmnkr .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#rcvcsjqdmi .gt_table_body {
+#lzpglwmnkr .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1491,7 +1487,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#rcvcsjqdmi .gt_footnotes {
+#lzpglwmnkr .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1505,7 +1501,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#rcvcsjqdmi .gt_footnote {
+#lzpglwmnkr .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1514,7 +1510,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 5px;
 }
 
-#rcvcsjqdmi .gt_sourcenotes {
+#lzpglwmnkr .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1528,7 +1524,7 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#rcvcsjqdmi .gt_sourcenote {
+#lzpglwmnkr .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1536,72 +1532,72 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
   padding-right: 5px;
 }
 
-#rcvcsjqdmi .gt_left {
+#lzpglwmnkr .gt_left {
   text-align: left;
 }
 
-#rcvcsjqdmi .gt_center {
+#lzpglwmnkr .gt_center {
   text-align: center;
 }
 
-#rcvcsjqdmi .gt_right {
+#lzpglwmnkr .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#rcvcsjqdmi .gt_font_normal {
+#lzpglwmnkr .gt_font_normal {
   font-weight: normal;
 }
 
-#rcvcsjqdmi .gt_font_bold {
+#lzpglwmnkr .gt_font_bold {
   font-weight: bold;
 }
 
-#rcvcsjqdmi .gt_font_italic {
+#lzpglwmnkr .gt_font_italic {
   font-style: italic;
 }
 
-#rcvcsjqdmi .gt_super {
+#lzpglwmnkr .gt_super {
   font-size: 65%;
 }
 
-#rcvcsjqdmi .gt_footnote_marks {
+#lzpglwmnkr .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#rcvcsjqdmi .gt_asterisk {
+#lzpglwmnkr .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#rcvcsjqdmi .gt_indent_1 {
+#lzpglwmnkr .gt_indent_1 {
   text-indent: 5px;
 }
 
-#rcvcsjqdmi .gt_indent_2 {
+#lzpglwmnkr .gt_indent_2 {
   text-indent: 10px;
 }
 
-#rcvcsjqdmi .gt_indent_3 {
+#lzpglwmnkr .gt_indent_3 {
   text-indent: 15px;
 }
 
-#rcvcsjqdmi .gt_indent_4 {
+#lzpglwmnkr .gt_indent_4 {
   text-indent: 20px;
 }
 
-#rcvcsjqdmi .gt_indent_5 {
+#lzpglwmnkr .gt_indent_5 {
   text-indent: 25px;
 }
 
-#rcvcsjqdmi .katex-display {
+#lzpglwmnkr .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#rcvcsjqdmi div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#lzpglwmnkr div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1822,22 +1818,22 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <h2>Now plot</h2>
 <div class="cell columns column-output-location">
 <div class="column">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a></a><span class="fu">ggplot</span>(</span>
-<span id="cb46-2"><a></a>  tpms,</span>
-<span id="cb46-3"><a></a>  <span class="fu">aes</span>(</span>
-<span id="cb46-4"><a></a>    <span class="at">x =</span> condition,</span>
-<span id="cb46-5"><a></a>    <span class="at">y =</span> value,</span>
-<span id="cb46-6"><a></a>    <span class="at">color =</span> condition</span>
-<span id="cb46-7"><a></a>  )</span>
-<span id="cb46-8"><a></a>) <span class="sc">+</span></span>
-<span id="cb46-9"><a></a>  <span class="fu">geom_jitter</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">width =</span> .<span class="dv">25</span>) <span class="sc">+</span></span>
-<span id="cb46-10"><a></a>  <span class="fu">labs</span>(</span>
-<span id="cb46-11"><a></a>    <span class="at">x =</span> <span class="st">""</span>,</span>
-<span id="cb46-12"><a></a>    <span class="at">y =</span> <span class="st">"TPM"</span></span>
-<span id="cb46-13"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb46-14"><a></a>  <span class="fu">theme_cowplot</span>() <span class="sc">+</span></span>
-<span id="cb46-15"><a></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"blue"</span>, <span class="st">"red"</span>)) <span class="sc">+</span></span>
-<span id="cb46-16"><a></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>gene, <span class="at">scales =</span> <span class="st">"free_y"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb43-2"><a></a>  tpms,</span>
+<span id="cb43-3"><a></a>  <span class="fu">aes</span>(</span>
+<span id="cb43-4"><a></a>    <span class="at">x =</span> condition,</span>
+<span id="cb43-5"><a></a>    <span class="at">y =</span> value,</span>
+<span id="cb43-6"><a></a>    <span class="at">color =</span> condition</span>
+<span id="cb43-7"><a></a>  )</span>
+<span id="cb43-8"><a></a>) <span class="sc">+</span></span>
+<span id="cb43-9"><a></a>  <span class="fu">geom_jitter</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">width =</span> .<span class="dv">25</span>) <span class="sc">+</span></span>
+<span id="cb43-10"><a></a>  <span class="fu">labs</span>(</span>
+<span id="cb43-11"><a></a>    <span class="at">x =</span> <span class="st">""</span>,</span>
+<span id="cb43-12"><a></a>    <span class="at">y =</span> <span class="st">"TPM"</span></span>
+<span id="cb43-13"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb43-14"><a></a>  <span class="fu">theme_cowplot</span>() <span class="sc">+</span></span>
+<span id="cb43-15"><a></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"blue"</span>, <span class="st">"red"</span>)) <span class="sc">+</span></span>
+<span id="cb43-16"><a></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>gene, <span class="at">scales =</span> <span class="st">"free_y"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column fragment">
 <div class="cell-output-display">
 <div>
@@ -1862,134 +1858,134 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <h2>Retrieve pathway information</h2>
 <p>We can use <code>biomaRt</code> to get all genes that belong to each of these categories. Think of it like doing a gene ontology enrichment analysis in reverse.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a><span class="co">#pluripotencygenes &lt;- getBM(</span></span>
-<span id="cb47-2"><a></a><span class="co">#  attributes = c("ensembl_gene_id"),</span></span>
-<span id="cb47-3"><a></a><span class="co">#  filters = c("go_parent_term"),</span></span>
-<span id="cb47-4"><a></a><span class="co">#  values = c("GO:0019827"),</span></span>
-<span id="cb47-5"><a></a><span class="co">#  mart = mart</span></span>
-<span id="cb47-6"><a></a><span class="co">#)</span></span>
-<span id="cb47-7"><a></a></span>
-<span id="cb47-8"><a></a><span class="co">#cellcyclegenes &lt;- getBM(</span></span>
-<span id="cb47-9"><a></a><span class="co">#  attributes = c("ensembl_gene_id"),</span></span>
-<span id="cb47-10"><a></a><span class="co">#  filters = c("go_parent_term"),</span></span>
-<span id="cb47-11"><a></a><span class="co">#  values = c("GO:0045787"),</span></span>
-<span id="cb47-12"><a></a><span class="co">#  mart = mart</span></span>
-<span id="cb47-13"><a></a><span class="co">#)</span></span>
-<span id="cb47-14"><a></a></span>
-<span id="cb47-15"><a></a><span class="co">#neurongenes &lt;- getBM(</span></span>
-<span id="cb47-16"><a></a><span class="co">#  attributes = c("ensembl_gene_id"),</span></span>
-<span id="cb47-17"><a></a><span class="co">#  filters = c("go_parent_term"),</span></span>
-<span id="cb47-18"><a></a><span class="co">#  values = c("GO:0030182"),</span></span>
-<span id="cb47-19"><a></a><span class="co">#  mart = mart</span></span>
-<span id="cb47-20"><a></a><span class="co">#)</span></span>
-<span id="cb47-21"><a></a></span>
-<span id="cb47-22"><a></a></span>
-<span id="cb47-23"><a></a><span class="co"># pathway &lt;- bind_rows(pluripotencygenes,</span></span>
-<span id="cb47-24"><a></a><span class="co">#           cellcyclegenes,</span></span>
-<span id="cb47-25"><a></a><span class="co">#           neurongenes</span></span>
-<span id="cb47-26"><a></a><span class="co">#           )</span></span>
-<span id="cb47-27"><a></a><span class="co">#</span></span>
-<span id="cb47-28"><a></a><span class="co"># pathway$path &lt;- c(</span></span>
-<span id="cb47-29"><a></a><span class="co">#   rep("pluri",nrow(pluripotencygenes)),</span></span>
-<span id="cb47-30"><a></a><span class="co">#   rep("cellcycle",nrow(cellcyclegenes)),</span></span>
-<span id="cb47-31"><a></a><span class="co">#   rep("neuron",nrow(neurongenes))</span></span>
-<span id="cb47-32"><a></a><span class="co">#                   )</span></span>
-<span id="cb47-33"><a></a><span class="co">#</span></span>
-<span id="cb47-34"><a></a><span class="co"># write_csv(x = pathway, file = here("data","block-rna","pathwaygenes.csv.gz"))</span></span>
-<span id="cb47-35"><a></a></span>
-<span id="cb47-36"><a></a>pathwaygenes <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="fu">here</span>(<span class="st">'data'</span>, <span class="st">'block-rna'</span>, <span class="st">'pathwaygenes.csv.gz'</span>), <span class="at">header =</span> T, <span class="at">sep =</span> <span class="st">','</span>)</span>
-<span id="cb47-37"><a></a>pluripotencygenes <span class="ot">&lt;-</span> <span class="fu">filter</span>(pathwaygenes, path <span class="sc">==</span> <span class="st">'pluri'</span>)</span>
-<span id="cb47-38"><a></a>cellcyclegenes <span class="ot">&lt;-</span> <span class="fu">filter</span>(pathwaygenes, path <span class="sc">==</span> <span class="st">'cellcycle'</span>)</span>
-<span id="cb47-39"><a></a>neurongenes <span class="ot">&lt;-</span> <span class="fu">filter</span>(pathwaygenes, path <span class="sc">==</span> <span class="st">'neuron'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a></a><span class="co">#pluripotencygenes &lt;- getBM(</span></span>
+<span id="cb44-2"><a></a><span class="co">#  attributes = c("ensembl_gene_id"),</span></span>
+<span id="cb44-3"><a></a><span class="co">#  filters = c("go_parent_term"),</span></span>
+<span id="cb44-4"><a></a><span class="co">#  values = c("GO:0019827"),</span></span>
+<span id="cb44-5"><a></a><span class="co">#  mart = mart</span></span>
+<span id="cb44-6"><a></a><span class="co">#)</span></span>
+<span id="cb44-7"><a></a></span>
+<span id="cb44-8"><a></a><span class="co">#cellcyclegenes &lt;- getBM(</span></span>
+<span id="cb44-9"><a></a><span class="co">#  attributes = c("ensembl_gene_id"),</span></span>
+<span id="cb44-10"><a></a><span class="co">#  filters = c("go_parent_term"),</span></span>
+<span id="cb44-11"><a></a><span class="co">#  values = c("GO:0045787"),</span></span>
+<span id="cb44-12"><a></a><span class="co">#  mart = mart</span></span>
+<span id="cb44-13"><a></a><span class="co">#)</span></span>
+<span id="cb44-14"><a></a></span>
+<span id="cb44-15"><a></a><span class="co">#neurongenes &lt;- getBM(</span></span>
+<span id="cb44-16"><a></a><span class="co">#  attributes = c("ensembl_gene_id"),</span></span>
+<span id="cb44-17"><a></a><span class="co">#  filters = c("go_parent_term"),</span></span>
+<span id="cb44-18"><a></a><span class="co">#  values = c("GO:0030182"),</span></span>
+<span id="cb44-19"><a></a><span class="co">#  mart = mart</span></span>
+<span id="cb44-20"><a></a><span class="co">#)</span></span>
+<span id="cb44-21"><a></a></span>
+<span id="cb44-22"><a></a></span>
+<span id="cb44-23"><a></a><span class="co"># pathway &lt;- bind_rows(pluripotencygenes,</span></span>
+<span id="cb44-24"><a></a><span class="co">#           cellcyclegenes,</span></span>
+<span id="cb44-25"><a></a><span class="co">#           neurongenes</span></span>
+<span id="cb44-26"><a></a><span class="co">#           )</span></span>
+<span id="cb44-27"><a></a><span class="co">#</span></span>
+<span id="cb44-28"><a></a><span class="co"># pathway$path &lt;- c(</span></span>
+<span id="cb44-29"><a></a><span class="co">#   rep("pluri",nrow(pluripotencygenes)),</span></span>
+<span id="cb44-30"><a></a><span class="co">#   rep("cellcycle",nrow(cellcyclegenes)),</span></span>
+<span id="cb44-31"><a></a><span class="co">#   rep("neuron",nrow(neurongenes))</span></span>
+<span id="cb44-32"><a></a><span class="co">#                   )</span></span>
+<span id="cb44-33"><a></a><span class="co">#</span></span>
+<span id="cb44-34"><a></a><span class="co"># write_csv(x = pathway, file = here("data","block-rna","pathwaygenes.csv.gz"))</span></span>
+<span id="cb44-35"><a></a></span>
+<span id="cb44-36"><a></a>pathwaygenes <span class="ot">&lt;-</span> <span class="fu">read.table</span>(<span class="fu">here</span>(<span class="st">'data'</span>, <span class="st">'block-rna'</span>, <span class="st">'pathwaygenes.csv.gz'</span>), <span class="at">header =</span> T, <span class="at">sep =</span> <span class="st">','</span>)</span>
+<span id="cb44-37"><a></a>pluripotencygenes <span class="ot">&lt;-</span> <span class="fu">filter</span>(pathwaygenes, path <span class="sc">==</span> <span class="st">'pluri'</span>)</span>
+<span id="cb44-38"><a></a>cellcyclegenes <span class="ot">&lt;-</span> <span class="fu">filter</span>(pathwaygenes, path <span class="sc">==</span> <span class="st">'cellcycle'</span>)</span>
+<span id="cb44-39"><a></a>neurongenes <span class="ot">&lt;-</span> <span class="fu">filter</span>(pathwaygenes, path <span class="sc">==</span> <span class="st">'neuron'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="add-pathway-information-to-results" class="slide level2 smaller">
 <h2>Add pathway information to results</h2>
 <p>You can see that these items are one-column dataframes that have the column name ‘ensembl_gene_id’. We can now go through our results dataframe and add an annotation column that marks whether the gene is in any of these categories.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a></a>diff_paths <span class="ot">&lt;-</span></span>
-<span id="cb48-2"><a></a>  diff_lfc <span class="sc">|&gt;</span></span>
-<span id="cb48-3"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb48-4"><a></a>    <span class="at">annot =</span> <span class="fu">case_when</span>(</span>
-<span id="cb48-5"><a></a>      ensembl_gene_id <span class="sc">%in%</span> pluripotencygenes<span class="sc">$</span>ensembl_gene_id <span class="sc">~</span> <span class="st">"pluripotency"</span>,</span>
-<span id="cb48-6"><a></a>      ensembl_gene_id <span class="sc">%in%</span> cellcyclegenes<span class="sc">$</span>ensembl_gene_id <span class="sc">~</span> <span class="st">"cellcycle"</span>,</span>
-<span id="cb48-7"><a></a>      ensembl_gene_id <span class="sc">%in%</span> neurongenes<span class="sc">$</span>ensembl_gene_id <span class="sc">~</span> <span class="st">"neurondiff"</span>,</span>
-<span id="cb48-8"><a></a>      <span class="at">.default =</span> <span class="st">"none"</span></span>
-<span id="cb48-9"><a></a>    ),</span>
-<span id="cb48-10"><a></a>    <span class="co"># Reorder these for plotting purposes</span></span>
-<span id="cb48-11"><a></a>    <span class="at">annot =</span> <span class="fu">factor</span>(</span>
-<span id="cb48-12"><a></a>      annot,</span>
-<span id="cb48-13"><a></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"none"</span>, <span class="st">"cellcycle"</span>, <span class="st">"pluripotency"</span>, <span class="st">"neurondiff"</span>)</span>
-<span id="cb48-14"><a></a>    )</span>
-<span id="cb48-15"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb48-16"><a></a>  <span class="fu">drop_na</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a>diff_paths <span class="ot">&lt;-</span></span>
+<span id="cb45-2"><a></a>  diff_lfc <span class="sc">|&gt;</span></span>
+<span id="cb45-3"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb45-4"><a></a>    <span class="at">annot =</span> <span class="fu">case_when</span>(</span>
+<span id="cb45-5"><a></a>      ensembl_gene_id <span class="sc">%in%</span> pluripotencygenes<span class="sc">$</span>ensembl_gene_id <span class="sc">~</span> <span class="st">"pluripotency"</span>,</span>
+<span id="cb45-6"><a></a>      ensembl_gene_id <span class="sc">%in%</span> cellcyclegenes<span class="sc">$</span>ensembl_gene_id <span class="sc">~</span> <span class="st">"cellcycle"</span>,</span>
+<span id="cb45-7"><a></a>      ensembl_gene_id <span class="sc">%in%</span> neurongenes<span class="sc">$</span>ensembl_gene_id <span class="sc">~</span> <span class="st">"neurondiff"</span>,</span>
+<span id="cb45-8"><a></a>      <span class="at">.default =</span> <span class="st">"none"</span></span>
+<span id="cb45-9"><a></a>    ),</span>
+<span id="cb45-10"><a></a>    <span class="co"># Reorder these for plotting purposes</span></span>
+<span id="cb45-11"><a></a>    <span class="at">annot =</span> <span class="fu">factor</span>(</span>
+<span id="cb45-12"><a></a>      annot,</span>
+<span id="cb45-13"><a></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"none"</span>, <span class="st">"cellcycle"</span>, <span class="st">"pluripotency"</span>, <span class="st">"neurondiff"</span>)</span>
+<span id="cb45-14"><a></a>    )</span>
+<span id="cb45-15"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb45-16"><a></a>  <span class="fu">drop_na</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="are-there-significant-differences" class="slide level2 smaller">
 <h2>Are there significant differences?</h2>
 <p>OK we’ve got our table, now we are going to ask if the log2FoldChange values for the genes in each of these classes are different that what we would expect. So what is the expected value? Well, we have a distribution of log2 fold changes for all the genes that are <strong>not</strong> in any of these categories. So we will ask if the distribution of log2 fold changes for each gene category is different than that null distribution.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a>pvals <span class="ot">&lt;-</span> rstatix<span class="sc">::</span><span class="fu">wilcox_test</span>(</span>
-<span id="cb49-2"><a></a>  <span class="at">data =</span> diff_paths,</span>
-<span id="cb49-3"><a></a>  log2FoldChange <span class="sc">~</span> annot,</span>
-<span id="cb49-4"><a></a>  <span class="at">ref.group =</span> <span class="st">"none"</span></span>
-<span id="cb49-5"><a></a>)</span>
-<span id="cb49-6"><a></a></span>
-<span id="cb49-7"><a></a>p.pluripotency <span class="ot">&lt;-</span> pvals <span class="sc">|&gt;</span></span>
-<span id="cb49-8"><a></a>  <span class="fu">filter</span>(group2 <span class="sc">==</span> <span class="st">"pluripotency"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb49-9"><a></a>  <span class="fu">pull</span>(p.adj)</span>
-<span id="cb49-10"><a></a></span>
-<span id="cb49-11"><a></a>p.cellcycle <span class="ot">&lt;-</span> pvals <span class="sc">|&gt;</span></span>
-<span id="cb49-12"><a></a>  <span class="fu">filter</span>(group2 <span class="sc">==</span> <span class="st">"cellcycle"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb49-13"><a></a>  <span class="fu">pull</span>(p.adj)</span>
-<span id="cb49-14"><a></a></span>
-<span id="cb49-15"><a></a>p.neurondiff <span class="ot">&lt;-</span> pvals <span class="sc">|&gt;</span></span>
-<span id="cb49-16"><a></a>  <span class="fu">filter</span>(group2 <span class="sc">==</span> <span class="st">"neurondiff"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb49-17"><a></a>  <span class="fu">pull</span>(p.adj)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a></a>pvals <span class="ot">&lt;-</span> rstatix<span class="sc">::</span><span class="fu">wilcox_test</span>(</span>
+<span id="cb46-2"><a></a>  <span class="at">data =</span> diff_paths,</span>
+<span id="cb46-3"><a></a>  log2FoldChange <span class="sc">~</span> annot,</span>
+<span id="cb46-4"><a></a>  <span class="at">ref.group =</span> <span class="st">"none"</span></span>
+<span id="cb46-5"><a></a>)</span>
+<span id="cb46-6"><a></a></span>
+<span id="cb46-7"><a></a>p.pluripotency <span class="ot">&lt;-</span> pvals <span class="sc">|&gt;</span></span>
+<span id="cb46-8"><a></a>  <span class="fu">filter</span>(group2 <span class="sc">==</span> <span class="st">"pluripotency"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-9"><a></a>  <span class="fu">pull</span>(p.adj)</span>
+<span id="cb46-10"><a></a></span>
+<span id="cb46-11"><a></a>p.cellcycle <span class="ot">&lt;-</span> pvals <span class="sc">|&gt;</span></span>
+<span id="cb46-12"><a></a>  <span class="fu">filter</span>(group2 <span class="sc">==</span> <span class="st">"cellcycle"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-13"><a></a>  <span class="fu">pull</span>(p.adj)</span>
+<span id="cb46-14"><a></a></span>
+<span id="cb46-15"><a></a>p.neurondiff <span class="ot">&lt;-</span> pvals <span class="sc">|&gt;</span></span>
+<span id="cb46-16"><a></a>  <span class="fu">filter</span>(group2 <span class="sc">==</span> <span class="st">"neurondiff"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb46-17"><a></a>  <span class="fu">pull</span>(p.adj)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="plot-pathway-differences" class="slide level2 smaller">
 <h2>plot pathway differences</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a></a><span class="fu">ggplot</span>(</span>
-<span id="cb50-2"><a></a>  diff_paths,</span>
-<span id="cb50-3"><a></a>  <span class="fu">aes</span>(</span>
-<span id="cb50-4"><a></a>    <span class="at">x =</span> annot,</span>
-<span id="cb50-5"><a></a>    <span class="at">y =</span> log2FoldChange,</span>
-<span id="cb50-6"><a></a>    <span class="at">fill =</span> annot</span>
-<span id="cb50-7"><a></a>  )</span>
-<span id="cb50-8"><a></a>) <span class="sc">+</span></span>
-<span id="cb50-9"><a></a>  <span class="fu">labs</span>(</span>
-<span id="cb50-10"><a></a>    <span class="at">x =</span> <span class="st">"Gene class"</span>,</span>
-<span id="cb50-11"><a></a>    <span class="at">y =</span> <span class="st">"DIV7/DIV0, log2"</span></span>
-<span id="cb50-12"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb50-13"><a></a>  <span class="fu">geom_hline</span>(</span>
-<span id="cb50-14"><a></a>    <span class="at">yintercept =</span> <span class="dv">0</span>,</span>
-<span id="cb50-15"><a></a>    <span class="at">color =</span> <span class="st">"gray"</span>,</span>
-<span id="cb50-16"><a></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span></span>
-<span id="cb50-17"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb50-18"><a></a>  <span class="fu">geom_boxplot</span>(</span>
-<span id="cb50-19"><a></a>    <span class="at">notch =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb50-20"><a></a>    <span class="at">outlier.shape =</span> <span class="cn">NA</span></span>
-<span id="cb50-21"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb50-22"><a></a>  <span class="fu">theme_cowplot</span>() <span class="sc">+</span></span>
-<span id="cb50-23"><a></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"gray"</span>, <span class="st">"red"</span>, <span class="st">"blue"</span>, <span class="st">"purple"</span>), <span class="at">guide =</span> F) <span class="sc">+</span></span>
-<span id="cb50-24"><a></a>  <span class="fu">scale_x_discrete</span>(</span>
-<span id="cb50-25"><a></a>    <span class="at">labels =</span> <span class="fu">c</span>(</span>
-<span id="cb50-26"><a></a>      <span class="st">"none"</span>,</span>
-<span id="cb50-27"><a></a>      <span class="st">"Cell cycle"</span>,</span>
-<span id="cb50-28"><a></a>      <span class="st">"Pluripotency"</span>,</span>
-<span id="cb50-29"><a></a>      <span class="st">"Neuron</span><span class="sc">\n</span><span class="st">differentiation"</span></span>
-<span id="cb50-30"><a></a>    )</span>
-<span id="cb50-31"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb50-32"><a></a>  <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">7</span>) <span class="sc">+</span></span>
-<span id="cb50-33"><a></a>  <span class="co"># hacky significance bars</span></span>
-<span id="cb50-34"><a></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">xend =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="dv">4</span>, <span class="at">yend =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
-<span id="cb50-35"><a></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">xend =</span> <span class="dv">3</span>, <span class="at">y =</span> <span class="dv">5</span>, <span class="at">yend =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb50-36"><a></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">xend =</span> <span class="dv">4</span>, <span class="at">y =</span> <span class="dv">6</span>, <span class="at">yend =</span> <span class="dv">6</span>) <span class="sc">+</span></span>
-<span id="cb50-37"><a></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fl">1.5</span>, <span class="at">y =</span> <span class="fl">4.4</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"p = "</span>, p.cellcycle)) <span class="sc">+</span></span>
-<span id="cb50-38"><a></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="fl">5.4</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"p = "</span>, p.pluripotency)) <span class="sc">+</span></span>
-<span id="cb50-39"><a></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fl">2.5</span>, <span class="at">y =</span> <span class="fl">6.4</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"p = "</span>, p.neurondiff))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb47-2"><a></a>  diff_paths,</span>
+<span id="cb47-3"><a></a>  <span class="fu">aes</span>(</span>
+<span id="cb47-4"><a></a>    <span class="at">x =</span> annot,</span>
+<span id="cb47-5"><a></a>    <span class="at">y =</span> log2FoldChange,</span>
+<span id="cb47-6"><a></a>    <span class="at">fill =</span> annot</span>
+<span id="cb47-7"><a></a>  )</span>
+<span id="cb47-8"><a></a>) <span class="sc">+</span></span>
+<span id="cb47-9"><a></a>  <span class="fu">labs</span>(</span>
+<span id="cb47-10"><a></a>    <span class="at">x =</span> <span class="st">"Gene class"</span>,</span>
+<span id="cb47-11"><a></a>    <span class="at">y =</span> <span class="st">"DIV7/DIV0, log2"</span></span>
+<span id="cb47-12"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb47-13"><a></a>  <span class="fu">geom_hline</span>(</span>
+<span id="cb47-14"><a></a>    <span class="at">yintercept =</span> <span class="dv">0</span>,</span>
+<span id="cb47-15"><a></a>    <span class="at">color =</span> <span class="st">"gray"</span>,</span>
+<span id="cb47-16"><a></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span></span>
+<span id="cb47-17"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb47-18"><a></a>  <span class="fu">geom_boxplot</span>(</span>
+<span id="cb47-19"><a></a>    <span class="at">notch =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb47-20"><a></a>    <span class="at">outlier.shape =</span> <span class="cn">NA</span></span>
+<span id="cb47-21"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb47-22"><a></a>  <span class="fu">theme_cowplot</span>() <span class="sc">+</span></span>
+<span id="cb47-23"><a></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"gray"</span>, <span class="st">"red"</span>, <span class="st">"blue"</span>, <span class="st">"purple"</span>), <span class="at">guide =</span> F) <span class="sc">+</span></span>
+<span id="cb47-24"><a></a>  <span class="fu">scale_x_discrete</span>(</span>
+<span id="cb47-25"><a></a>    <span class="at">labels =</span> <span class="fu">c</span>(</span>
+<span id="cb47-26"><a></a>      <span class="st">"none"</span>,</span>
+<span id="cb47-27"><a></a>      <span class="st">"Cell cycle"</span>,</span>
+<span id="cb47-28"><a></a>      <span class="st">"Pluripotency"</span>,</span>
+<span id="cb47-29"><a></a>      <span class="st">"Neuron</span><span class="sc">\n</span><span class="st">differentiation"</span></span>
+<span id="cb47-30"><a></a>    )</span>
+<span id="cb47-31"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb47-32"><a></a>  <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">7</span>) <span class="sc">+</span></span>
+<span id="cb47-33"><a></a>  <span class="co"># hacky significance bars</span></span>
+<span id="cb47-34"><a></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">xend =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="dv">4</span>, <span class="at">yend =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb47-35"><a></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">xend =</span> <span class="dv">3</span>, <span class="at">y =</span> <span class="dv">5</span>, <span class="at">yend =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb47-36"><a></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">xend =</span> <span class="dv">4</span>, <span class="at">y =</span> <span class="dv">6</span>, <span class="at">yend =</span> <span class="dv">6</span>) <span class="sc">+</span></span>
+<span id="cb47-37"><a></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fl">1.5</span>, <span class="at">y =</span> <span class="fl">4.4</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"p = "</span>, p.cellcycle)) <span class="sc">+</span></span>
+<span id="cb47-38"><a></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="fl">5.4</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"p = "</span>, p.pluripotency)) <span class="sc">+</span></span>
+<span id="cb47-39"><a></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="fl">2.5</span>, <span class="at">y =</span> <span class="fl">6.4</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"p = "</span>, p.neurondiff))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -2021,10 +2017,10 @@ ENSMUSG00002076083  14.87710  4.64181e-50  1.64569e-49</code></pre>
 <li><p>Run GSEA</p></li>
 </ol>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a><span class="co"># retrieve hallmark gene sets from msigdb</span></span>
-<span id="cb51-2"><a></a>mouse_hallmark <span class="ot">&lt;-</span> <span class="fu">msigdbr</span>(<span class="at">species =</span> <span class="st">"Mus musculus"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb51-3"><a></a>  <span class="fu">filter</span>(gs_collection <span class="sc">==</span> <span class="st">"H"</span>) <span class="sc">|&gt;</span> <span class="co"># "H" is hallmark</span></span>
-<span id="cb51-4"><a></a>  <span class="fu">select</span>(gs_name, gene_symbol)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a></a><span class="co"># retrieve hallmark gene sets from msigdb</span></span>
+<span id="cb48-2"><a></a>mouse_hallmark <span class="ot">&lt;-</span> <span class="fu">msigdbr</span>(<span class="at">species =</span> <span class="st">"Mus musculus"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-3"><a></a>  <span class="fu">filter</span>(gs_collection <span class="sc">==</span> <span class="st">"H"</span>) <span class="sc">|&gt;</span> <span class="co"># "H" is hallmark</span></span>
+<span id="cb48-4"><a></a>  <span class="fu">select</span>(gs_name, gene_symbol)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -2035,36 +2031,36 @@ Downloading gene sets (first use only, may take a few minutes)...
 
 This message is displayed once per session.</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a></a><span class="co"># create a list of gene LFCs</span></span>
-<span id="cb53-2"><a></a>rankedgenes <span class="ot">&lt;-</span> diff_lfc <span class="sc">|&gt;</span> <span class="fu">pull</span>(log2FoldChange)</span>
-<span id="cb53-3"><a></a></span>
-<span id="cb53-4"><a></a><span class="co"># add symbols as names of the list</span></span>
-<span id="cb53-5"><a></a><span class="fu">names</span>(rankedgenes) <span class="ot">&lt;-</span> diff<span class="sc">$</span>gene</span>
-<span id="cb53-6"><a></a></span>
-<span id="cb53-7"><a></a><span class="co"># sort by LFC</span></span>
-<span id="cb53-8"><a></a>rankedgenes <span class="ot">&lt;-</span> <span class="fu">sort</span>(rankedgenes, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb53-9"><a></a></span>
-<span id="cb53-10"><a></a><span class="co"># deduplicate</span></span>
-<span id="cb53-11"><a></a>rankedgenes <span class="ot">&lt;-</span> rankedgenes[<span class="sc">!</span><span class="fu">duplicated</span>(<span class="fu">names</span>(rankedgenes))]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a></a><span class="co"># create a list of gene LFCs</span></span>
+<span id="cb50-2"><a></a>rankedgenes <span class="ot">&lt;-</span> diff_lfc <span class="sc">|&gt;</span> <span class="fu">pull</span>(log2FoldChange)</span>
+<span id="cb50-3"><a></a></span>
+<span id="cb50-4"><a></a><span class="co"># add symbols as names of the list</span></span>
+<span id="cb50-5"><a></a><span class="fu">names</span>(rankedgenes) <span class="ot">&lt;-</span> diff<span class="sc">$</span>gene</span>
+<span id="cb50-6"><a></a></span>
+<span id="cb50-7"><a></a><span class="co"># sort by LFC</span></span>
+<span id="cb50-8"><a></a>rankedgenes <span class="ot">&lt;-</span> <span class="fu">sort</span>(rankedgenes, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb50-9"><a></a></span>
+<span id="cb50-10"><a></a><span class="co"># deduplicate</span></span>
+<span id="cb50-11"><a></a>rankedgenes <span class="ot">&lt;-</span> rankedgenes[<span class="sc">!</span><span class="fu">duplicated</span>(<span class="fu">names</span>(rankedgenes))]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div></section><section id="run-gsea" class="slide level2 smaller">
 <h2>Run GSEA</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a></a><span class="co"># rankedgenes[!names(rankedgenes) == ""]</span></span>
-<span id="cb54-2"><a></a></span>
-<span id="cb54-3"><a></a><span class="co"># run gsea</span></span>
-<span id="cb54-4"><a></a>div7vs0 <span class="ot">&lt;-</span> <span class="fu">GSEA</span>(</span>
-<span id="cb54-5"><a></a>  <span class="at">geneList =</span> rankedgenes,</span>
-<span id="cb54-6"><a></a>  <span class="at">eps =</span> <span class="dv">0</span>,</span>
-<span id="cb54-7"><a></a>  <span class="at">pAdjustMethod =</span> <span class="st">"fdr"</span>,</span>
-<span id="cb54-8"><a></a>  <span class="at">pvalueCutoff =</span> .<span class="dv">05</span>,</span>
-<span id="cb54-9"><a></a>  <span class="at">minGSSize =</span> <span class="dv">20</span>,</span>
-<span id="cb54-10"><a></a>  <span class="at">maxGSSize =</span> <span class="dv">1000</span>,</span>
-<span id="cb54-11"><a></a>  <span class="at">TERM2GENE =</span> mouse_hallmark</span>
-<span id="cb54-12"><a></a>)</span>
-<span id="cb54-13"><a></a></span>
-<span id="cb54-14"><a></a>div7vs0<span class="sc">@</span>result <span class="sc">|&gt;</span></span>
-<span id="cb54-15"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(ID, NES, p.adjust) <span class="sc">|&gt;</span></span>
-<span id="cb54-16"><a></a>  <span class="fu">gt</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a><span class="co"># rankedgenes[!names(rankedgenes) == ""]</span></span>
+<span id="cb51-2"><a></a></span>
+<span id="cb51-3"><a></a><span class="co"># run gsea</span></span>
+<span id="cb51-4"><a></a>div7vs0 <span class="ot">&lt;-</span> <span class="fu">GSEA</span>(</span>
+<span id="cb51-5"><a></a>  <span class="at">geneList =</span> rankedgenes,</span>
+<span id="cb51-6"><a></a>  <span class="at">eps =</span> <span class="dv">0</span>,</span>
+<span id="cb51-7"><a></a>  <span class="at">pAdjustMethod =</span> <span class="st">"fdr"</span>,</span>
+<span id="cb51-8"><a></a>  <span class="at">pvalueCutoff =</span> .<span class="dv">05</span>,</span>
+<span id="cb51-9"><a></a>  <span class="at">minGSSize =</span> <span class="dv">20</span>,</span>
+<span id="cb51-10"><a></a>  <span class="at">maxGSSize =</span> <span class="dv">1000</span>,</span>
+<span id="cb51-11"><a></a>  <span class="at">TERM2GENE =</span> mouse_hallmark</span>
+<span id="cb51-12"><a></a>)</span>
+<span id="cb51-13"><a></a></span>
+<span id="cb51-14"><a></a>div7vs0<span class="sc">@</span>result <span class="sc">|&gt;</span></span>
+<span id="cb51-15"><a></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(ID, NES, p.adjust) <span class="sc">|&gt;</span></span>
+<span id="cb51-16"><a></a>  <span class="fu">gt</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -2073,8 +2069,8 @@ This message is displayed once per session.</code></pre>
 </div></section><section id="plot-gsea" class="slide level2 smaller">
 <h2>Plot GSEA</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a></a><span class="co"># plot "HALLMARK_G2M_CHECKPOINT"</span></span>
-<span id="cb55-2"><a></a><span class="fu">gseaplot</span>(<span class="at">x =</span> div7vs0, <span class="at">geneSetID =</span> <span class="st">"HALLMARK_G2M_CHECKPOINT"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a></a><span class="co"># plot "HALLMARK_G2M_CHECKPOINT"</span></span>
+<span id="cb52-2"><a></a><span class="fu">gseaplot</span>(<span class="at">x =</span> div7vs0, <span class="at">geneSetID =</span> <span class="st">"HALLMARK_G2M_CHECKPOINT"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 
