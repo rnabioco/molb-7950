@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.9.38">
 
   <meta name="author" content="Matthew Taliaferro">
-  <meta name="dcterms.date" content="2026-09-11">
+  <meta name="dcterms.date" content="2026-09-14">
   <title>MOLB 7950 – RNAseq QC</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -218,7 +218,7 @@ Matthew Taliaferro
     </div>
 </div>
 
-  <p class="date">2026-09-11</p>
+  <p class="date">2026-09-14</p>
 </section>
 <section id="learning-objectives" class="slide level2 smaller">
 <h2>Learning Objectives</h2>
@@ -290,655 +290,196 @@ Matthew Taliaferro
 <img data-src="../img/block-rna/txtogene.png" class="r-stretch"></section>
 <section id="relating-genes-and-transcripts" class="slide level2 smaller">
 <h2>Relating genes and transcripts</h2>
-<p>We can get this relationships between <em>transcripts</em> and <em>genes</em> through <code>biomaRt</code>.</p>
-<p><code>biomaRt</code> has many tables that relate genes, transcripts, and other useful data include gene biotypes and gene ontology categories, even across species. Let’s use it here to get a table of genes and transcripts for the mouse genome.</p>
+<p>We can get this relationships between <em>transcripts</em> and <em>genes</em> through <code>AnnotationHub</code>.</p>
+<p><code>AnnotationHub</code> has many tables that relate genes, transcripts, and other useful data including gene biotypes and gene ontology categories, even across species. Let’s use it here to get a table of genes and transcripts for the mouse genome.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a><span class="co"># First we need to define a 'mart' to use.</span></span>
-<span id="cb6-2"><a></a><span class="co"># There are a handful of them that</span></span>
-<span id="cb6-3"><a></a><span class="co"># you can see here:</span></span>
-<span id="cb6-4"><a></a><span class="co">#listMarts(</span></span>
-<span id="cb6-5"><a></a><span class="co">#  mart = NULL,</span></span>
-<span id="cb6-6"><a></a><span class="co">#  host = "www.ensembl.org"</span></span>
-<span id="cb6-7"><a></a><span class="co">#)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a></a>ah <span class="ot">&lt;-</span> <span class="fu">AnnotationHub</span>(<span class="at">ask =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="co"># Helper: pull AnnotationHub metadata into a tibble and grab the</span></span>
+<span id="cb7-2"><a></a><span class="co"># most recent EnsDb hit for a given species</span></span>
+<span id="cb7-3"><a></a>get_latest_ensdb <span class="ot">&lt;-</span> <span class="cf">function</span>(ah, species) {</span>
+<span id="cb7-4"><a></a>  <span class="fu">query</span>(ah, <span class="fu">c</span>(<span class="st">"EnsDb"</span>, species)) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a></a>    <span class="fu">mcols</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-6"><a></a>    <span class="fu">as_tibble</span>(<span class="at">rownames =</span> <span class="st">"ah_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-7"><a></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(rdatadateadded)) <span class="sc">|&gt;</span></span>
+<span id="cb7-8"><a></a>    dplyr<span class="sc">::</span><span class="fu">slice</span>(<span class="dv">1</span>)</span>
+<span id="cb7-9"><a></a>}</span>
+<span id="cb7-10"><a></a></span>
+<span id="cb7-11"><a></a>mouse_hit <span class="ot">&lt;-</span> <span class="fu">get_latest_ensdb</span>(ah, <span class="st">"Mus musculus"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-12"><a></a>  <span class="fu">select</span>(ah_id, title, genome, rdatadateadded)</span>
+<span id="cb7-13"><a></a></span>
+<span id="cb7-14"><a></a>edb_mouse <span class="ot">&lt;-</span> ah[[mouse_hit<span class="sc">$</span>ah_id]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>downloading 1 resources</code></pre>
 </div>
-<p>I encourage you to see what is in each mart, but for now we are only going to use ENSEMBL_MART_ENSEMBL.</p>
+<div class="cell-output cell-output-stderr">
+<pre><code>retrieving 1 resource</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>loading from cache</code></pre>
+</div>
+</div>
+<p>I encourage you to see what is in this database, but for now we are only going to look for transcript IDs and gene IDs.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a></a><span class="co">#mart &lt;- biomaRt::useEnsembl(</span></span>
-<span id="cb7-2"><a></a><span class="co">#  "ENSEMBL_MART_ENSEMBL",</span></span>
-<span id="cb7-3"><a></a><span class="co">#  host = 'https://useast.ensembl.org'</span></span>
-<span id="cb7-4"><a></a><span class="co">#)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="fu">head</span>(<span class="fu">mcols</span>(ah))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>DataFrame with 6 rows and 15 columns
+                 title dataprovider      species taxonomyid
+           &lt;character&gt;  &lt;character&gt;  &lt;character&gt;  &lt;integer&gt;
+AH5012 Chromosome Band         UCSC Homo sapiens       9606
+AH5013     STS Markers         UCSC Homo sapiens       9606
+AH5014     FISH Clones         UCSC Homo sapiens       9606
+AH5015     Recomb Rate         UCSC Homo sapiens       9606
+AH5016    ENCODE Pilot         UCSC Homo sapiens       9606
+AH5017     Map Contigs         UCSC Homo sapiens       9606
+            genome            description
+       &lt;character&gt;            &lt;character&gt;
+AH5012        hg19 GRanges object from ..
+AH5013        hg19 GRanges object from ..
+AH5014        hg19 GRanges object from ..
+AH5015        hg19 GRanges object from ..
+AH5016        hg19 GRanges object from ..
+AH5017        hg19 GRanges object from ..
+       coordinate_1_based             maintainer
+                &lt;integer&gt;            &lt;character&gt;
+AH5012                  1 Marc Carlson &lt;mcarls..
+AH5013                  1 Marc Carlson &lt;mcarls..
+AH5014                  1 Marc Carlson &lt;mcarls..
+AH5015                  1 Marc Carlson &lt;mcarls..
+AH5016                  1 Marc Carlson &lt;mcarls..
+AH5017                  1 Marc Carlson &lt;mcarls..
+       rdatadateadded          preparerclass
+          &lt;character&gt;            &lt;character&gt;
+AH5012     2013-03-26 UCSCFullTrackImportP..
+AH5013     2013-03-26 UCSCFullTrackImportP..
+AH5014     2013-03-26 UCSCFullTrackImportP..
+AH5015     2013-03-26 UCSCFullTrackImportP..
+AH5016     2013-03-26 UCSCFullTrackImportP..
+AH5017     2013-03-26 UCSCFullTrackImportP..
+                               tags  rdataclass
+                             &lt;AsIs&gt; &lt;character&gt;
+AH5012      cytoBand,UCSC,track,...     GRanges
+AH5013        stsMap,UCSC,track,...     GRanges
+AH5014    fishClones,UCSC,track,...     GRanges
+AH5015    recombRate,UCSC,track,...     GRanges
+AH5016 encodeRegions,UCSC,track,...     GRanges
+AH5017        ctgPos,UCSC,track,...     GRanges
+                    rdatapath              sourceurl
+                  &lt;character&gt;            &lt;character&gt;
+AH5012 goldenpath/hg19/data.. rtracklayer://hgdown..
+AH5013 goldenpath/hg19/data.. rtracklayer://hgdown..
+AH5014 goldenpath/hg19/data.. rtracklayer://hgdown..
+AH5015 goldenpath/hg19/data.. rtracklayer://hgdown..
+AH5016 goldenpath/hg19/data.. rtracklayer://hgdown..
+AH5017 goldenpath/hg19/data.. rtracklayer://hgdown..
+        sourcetype
+       &lt;character&gt;
+AH5012  UCSC track
+AH5013  UCSC track
+AH5014  UCSC track
+AH5015  UCSC track
+AH5016  UCSC track
+AH5017  UCSC track</code></pre>
+</div>
 </div>
 </section>
-<section id="using-biomart" class="slide level2 smaller">
-<h2>Using biomaRt</h2>
-<p>Alright, we’ve chosen our mart. What data sets are available in this mart?</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a></a><span class="co">#datasets &lt;- listDatasets(mart)</span></span>
-<span id="cb8-2"><a></a><span class="co">#gt(datasets)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
+<section id="using-annotationhub" class="slide level2 smaller">
+<h2>Using AnnotationHub</h2>
 <p>A lot of stuff for a lot of species! Perhaps we want to limit it to see which ones are relevant to mouse.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a></a><span class="co">#mousedatasets &lt;- filter(datasets, grepl("mmusculus", dataset))</span></span>
-<span id="cb9-2"><a></a><span class="co">#gt(mousedatasets)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="using-biomart-1" class="slide level2 smaller">
-<h2>Using biomaRt</h2>
-<p>Ah so we probably want the dataset called ‘mmusculus_gene_ensembl’!</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a></a><span class="co">#mart &lt;- biomaRt::useEnsembl(</span></span>
-<span id="cb10-2"><a></a><span class="co">#  "ENSEMBL_MART_ENSEMBL",</span></span>
-<span id="cb10-3"><a></a><span class="co">#  dataset = "mmusculus_gene_ensembl",</span></span>
-<span id="cb10-4"><a></a><span class="co">#  host = "www.ensembl.org"</span></span>
-<span id="cb10-5"><a></a><span class="co">#)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="using-biomart-2" class="slide level2 smaller">
-<h2>Using biomaRt</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a></a><span class="co">#goodies &lt;- listAttributes(mart)</span></span>
-<span id="cb11-2"><a></a><span class="co">#gt(goodies[1:20, ])</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="using-biomart-3" class="slide level2 smaller">
-<h2>Using biomaRt</h2>
-<p>So there are 2885 rows of goodies about the mouse genome and its relationship to <em>many</em> other genomes. However, you can probably see that the ones that are most useful to us right now are right at the top: ‘ensembl_transcript_id’ and ‘ensembl_gene_id’. We can use those attributes in our mart to make a table relating genes and transcripts.</p>
-<p>I’m going to through one more attribute in: external_gene_name. Those are usually more informative than ensembl IDs.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a></a><span class="co">#t2g &lt;- biomaRt::getBM(</span></span>
-<span id="cb12-2"><a></a><span class="co">#  attributes = c(</span></span>
-<span id="cb12-3"><a></a><span class="co">#    "ensembl_transcript_id",</span></span>
-<span id="cb12-4"><a></a><span class="co">#    "ensembl_gene_id",</span></span>
-<span id="cb12-5"><a></a><span class="co">#    "external_gene_name"</span></span>
-<span id="cb12-6"><a></a><span class="co">#  ),</span></span>
-<span id="cb12-7"><a></a><span class="co">#  mart = mart</span></span>
-<span id="cb12-8"><a></a><span class="co">#)</span></span>
-<span id="cb12-9"><a></a></span>
-<span id="cb12-10"><a></a><span class="co"># write_tsv(x = t2g, file = here("data","block-rna","t2g.tsv.gz"))</span></span>
-<span id="cb12-11"><a></a>t2g <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"block-rna"</span>, <span class="st">"t2g.tsv.gz"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 149547 Columns: 3
-── Column specification ────────────────────────────────────
-Delimiter: "\t"
-chr (3): ensembl_transcript_id, ensembl_gene_id, externa...
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a></a><span class="fu">gt</span>(t2g[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, ])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div id="mmmkjnpgpv" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#mmmkjnpgpv table {
-  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-#mmmkjnpgpv thead, #mmmkjnpgpv tbody, #mmmkjnpgpv tfoot, #mmmkjnpgpv tr, #mmmkjnpgpv td, #mmmkjnpgpv th {
-  border-style: none;
-}
-
-#mmmkjnpgpv p {
-  margin: 0;
-  padding: 0;
-}
-
-#mmmkjnpgpv .gt_table {
-  display: table;
-  border-collapse: collapse;
-  line-height: normal;
-  margin-left: auto;
-  margin-right: auto;
-  color: #333333;
-  font-size: 16px;
-  font-weight: normal;
-  font-style: normal;
-  background-color: #FFFFFF;
-  width: auto;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #A8A8A8;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #A8A8A8;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-}
-
-#mmmkjnpgpv .gt_caption {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-#mmmkjnpgpv .gt_title {
-  color: #333333;
-  font-size: 125%;
-  font-weight: initial;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-color: #FFFFFF;
-  border-bottom-width: 0;
-}
-
-#mmmkjnpgpv .gt_subtitle {
-  color: #333333;
-  font-size: 85%;
-  font-weight: initial;
-  padding-top: 3px;
-  padding-bottom: 5px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-color: #FFFFFF;
-  border-top-width: 0;
-}
-
-#mmmkjnpgpv .gt_heading {
-  background-color: #FFFFFF;
-  text-align: center;
-  border-bottom-color: #FFFFFF;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
-
-#mmmkjnpgpv .gt_bottom_border {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#mmmkjnpgpv .gt_col_headings {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
-
-#mmmkjnpgpv .gt_col_heading {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 6px;
-  padding-left: 5px;
-  padding-right: 5px;
-  overflow-x: hidden;
-}
-
-#mmmkjnpgpv .gt_column_spanner_outer {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: 4px;
-  padding-right: 4px;
-}
-
-#mmmkjnpgpv .gt_column_spanner_outer:first-child {
-  padding-left: 0;
-}
-
-#mmmkjnpgpv .gt_column_spanner_outer:last-child {
-  padding-right: 0;
-}
-
-#mmmkjnpgpv .gt_column_spanner {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  overflow-x: hidden;
-  display: inline-block;
-  width: 100%;
-}
-
-#mmmkjnpgpv .gt_spanner_row {
-  border-bottom-style: hidden;
-}
-
-#mmmkjnpgpv .gt_group_heading {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  text-align: left;
-}
-
-#mmmkjnpgpv .gt_empty_group_heading {
-  padding: 0.5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: middle;
-}
-
-#mmmkjnpgpv .gt_from_md > :first-child {
-  margin-top: 0;
-}
-
-#mmmkjnpgpv .gt_from_md > :last-child {
-  margin-bottom: 0;
-}
-
-#mmmkjnpgpv .gt_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  margin: 10px;
-  border-top-style: solid;
-  border-top-width: 1px;
-  border-top-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  overflow-x: hidden;
-}
-
-#mmmkjnpgpv .gt_stub {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#mmmkjnpgpv .gt_stub_row_group {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-  vertical-align: top;
-}
-
-#mmmkjnpgpv .gt_row_group_first td {
-  border-top-width: 2px;
-}
-
-#mmmkjnpgpv .gt_row_group_first th {
-  border-top-width: 2px;
-}
-
-#mmmkjnpgpv .gt_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#mmmkjnpgpv .gt_first_summary_row {
-  border-top-style: solid;
-  border-top-color: #D3D3D3;
-}
-
-#mmmkjnpgpv .gt_first_summary_row.thick {
-  border-top-width: 2px;
-}
-
-#mmmkjnpgpv .gt_last_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#mmmkjnpgpv .gt_grand_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#mmmkjnpgpv .gt_first_grand_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-style: double;
-  border-top-width: 6px;
-  border-top-color: #D3D3D3;
-}
-
-#mmmkjnpgpv .gt_last_grand_summary_row_top {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-style: double;
-  border-bottom-width: 6px;
-  border-bottom-color: #D3D3D3;
-}
-
-#mmmkjnpgpv .gt_striped {
-  background-color: rgba(128, 128, 128, 0.05);
-}
-
-#mmmkjnpgpv .gt_table_body {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#mmmkjnpgpv .gt_footnotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#mmmkjnpgpv .gt_footnote {
-  margin: 0px;
-  font-size: 90%;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#mmmkjnpgpv .gt_sourcenotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#mmmkjnpgpv .gt_sourcenote {
-  font-size: 90%;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#mmmkjnpgpv .gt_left {
-  text-align: left;
-}
-
-#mmmkjnpgpv .gt_center {
-  text-align: center;
-}
-
-#mmmkjnpgpv .gt_right {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-#mmmkjnpgpv .gt_font_normal {
-  font-weight: normal;
-}
-
-#mmmkjnpgpv .gt_font_bold {
-  font-weight: bold;
-}
-
-#mmmkjnpgpv .gt_font_italic {
-  font-style: italic;
-}
-
-#mmmkjnpgpv .gt_super {
-  font-size: 65%;
-}
-
-#mmmkjnpgpv .gt_footnote_marks {
-  font-size: 75%;
-  vertical-align: 0.4em;
-  position: initial;
-}
-
-#mmmkjnpgpv .gt_asterisk {
-  font-size: 100%;
-  vertical-align: 0;
-}
-
-#mmmkjnpgpv .gt_indent_1 {
-  text-indent: 5px;
-}
-
-#mmmkjnpgpv .gt_indent_2 {
-  text-indent: 10px;
-}
-
-#mmmkjnpgpv .gt_indent_3 {
-  text-indent: 15px;
-}
-
-#mmmkjnpgpv .gt_indent_4 {
-  text-indent: 20px;
-}
-
-#mmmkjnpgpv .gt_indent_5 {
-  text-indent: 25px;
-}
-
-#mmmkjnpgpv .katex-display {
-  display: inline-flex !important;
-  margin-bottom: 0.75em !important;
-}
-
-#mmmkjnpgpv div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
-  height: 0px !important;
-}
-</style>
-
-<table class="gt_table caption-top" data-quarto-bootstrap="false">
-<thead>
-<tr class="gt_col_headings header">
-<th id="ensembl_transcript_id" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">ensembl_transcript_id</th>
-<th id="ensembl_gene_id" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">ensembl_gene_id</th>
-<th id="external_gene_name" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">external_gene_name</th>
-</tr>
-</thead>
-<tbody class="gt_table_body">
-<tr class="odd">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082387</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064336</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Tf</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082388</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064337</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Rnr1</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082389</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064338</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Tv</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082390</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064339</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Rnr2</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082391</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064340</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Tl1</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082392</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064341</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Nd1</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082393</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064342</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Ti</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082394</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064343</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Tq</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082395</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064344</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Tm</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082396</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064345</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Nd2</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082397</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064346</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Tw</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082398</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064347</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Ta</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082399</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064348</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Tn</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082400</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064349</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Tc</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082401</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064350</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Ty</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082402</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064351</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Co1</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082403</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064352</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Ts1</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082404</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064353</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Td</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082405</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064354</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Co2</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="ensembl_transcript_id">ENSMUST00000082406</td>
-<td class="gt_row gt_left" headers="ensembl_gene_id">ENSMUSG00000064355</td>
-<td class="gt_row gt_left" headers="external_gene_name">mt-Tk</td>
-</tr>
-</tbody>
-</table>
-
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a></a><span class="fu">mcols</span>(ah) <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a></a>  <span class="fu">filter</span>(species <span class="sc">==</span> <span class="st">'Mus musculus'</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a></a>  <span class="fu">head</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              title dataprovider      species taxonomyid
+AH6057      Contigs         UCSC Mus musculus      10090
+AH6058     Assembly         UCSC Mus musculus      10090
+AH6059          Gap         UCSC Mus musculus      10090
+AH6060 GRC Incident         UCSC Mus musculus      10090
+AH6061   UCSC Genes         UCSC Mus musculus      10090
+AH6062   Alt Events         UCSC Mus musculus      10090
+       genome                                   description
+AH6057   mm10      GRanges object from UCSC track 'Contigs'
+AH6058   mm10     GRanges object from UCSC track 'Assembly'
+AH6059   mm10          GRanges object from UCSC track 'Gap'
+AH6060   mm10 GRanges object from UCSC track 'GRC Incident'
+AH6061   mm10   GRanges object from UCSC track 'UCSC Genes'
+AH6062   mm10   GRanges object from UCSC track 'Alt Events'
+       coordinate_1_based                        maintainer
+AH6057                  1 Marc Carlson &lt;mcarlson@fhcrc.org&gt;
+AH6058                  1 Marc Carlson &lt;mcarlson@fhcrc.org&gt;
+AH6059                  1 Marc Carlson &lt;mcarlson@fhcrc.org&gt;
+AH6060                  1 Marc Carlson &lt;mcarlson@fhcrc.org&gt;
+AH6061                  1 Marc Carlson &lt;mcarlson@fhcrc.org&gt;
+AH6062                  1 Marc Carlson &lt;mcarlson@fhcrc.org&gt;
+       rdatadateadded               preparerclass
+AH6057     2013-03-26 UCSCFullTrackImportPreparer
+AH6058     2013-03-26 UCSCFullTrackImportPreparer
+AH6059     2013-03-26 UCSCFullTrackImportPreparer
+AH6060     2013-03-26 UCSCFullTrackImportPreparer
+AH6061     2013-03-26 UCSCFullTrackImportPreparer
+AH6062     2013-03-26 UCSCFullTrackImportPreparer
+               tags rdataclass
+AH6057 assembly....    GRanges
+AH6058 gold, UC....    GRanges
+AH6059 gap, UCS....    GRanges
+AH6060 grcIncid....    GRanges
+AH6061 knownGen....    GRanges
+AH6062 knownAlt....    GRanges
+                                                rdatapath
+AH6057 goldenpath/mm10/database/assemblyFrags_0.0.1.RData
+AH6058          goldenpath/mm10/database/gold_0.0.1.RData
+AH6059           goldenpath/mm10/database/gap_0.0.1.RData
+AH6060 goldenpath/mm10/database/grcIncidentDb_0.0.1.RData
+AH6061     goldenpath/mm10/database/knownGene_0.0.1.RData
+AH6062      goldenpath/mm10/database/knownAlt_0.0.1.RData
+                                                                          sourceurl
+AH6057 rtracklayer://hgdownload.cse.ucsc.edu/goldenpath/mm10/database/assemblyFrags
+AH6058          rtracklayer://hgdownload.cse.ucsc.edu/goldenpath/mm10/database/gold
+AH6059           rtracklayer://hgdownload.cse.ucsc.edu/goldenpath/mm10/database/gap
+AH6060 rtracklayer://hgdownload.cse.ucsc.edu/goldenpath/mm10/database/grcIncidentDb
+AH6061     rtracklayer://hgdownload.cse.ucsc.edu/goldenpath/mm10/database/knownGene
+AH6062      rtracklayer://hgdownload.cse.ucsc.edu/goldenpath/mm10/database/knownAlt
+       sourcetype
+AH6057 UCSC track
+AH6058 UCSC track
+AH6059 UCSC track
+AH6060 UCSC track
+AH6061 UCSC track
+AH6062 UCSC track</code></pre>
 </div>
 </div>
 </section>
-<section id="using-biomart-4" class="slide level2 smaller">
-<h2>Using biomaRt</h2>
-<p>Alright this looks good! We are going to split this into two tables. One that contains transcript ID and gene ID, and the other that contains gene ID and gene name.</p>
+<section id="using-annotationhub-1" class="slide level2 smaller">
+<h2>Using AnnotationHub</h2>
+<p>OK lets get data about mouse transcripts. I’m going to also add the gene_name attribute.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>t2g <span class="ot">&lt;-</span> t2g <span class="sc">|&gt;</span></span>
-<span id="cb15-2"><a></a>  <span class="fu">select</span>(ensembl_transcript_id, ensembl_gene_id)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a></a>t2g <span class="ot">&lt;-</span> <span class="fu">transcripts</span>(edb_mouse,</span>
+<span id="cb15-2"><a></a>                              <span class="at">columns =</span> <span class="fu">c</span>(<span class="st">"tx_id"</span>, <span class="st">"gene_id"</span>, <span class="st">"gene_name"</span>),</span>
+<span id="cb15-3"><a></a>                              <span class="at">return.type =</span> <span class="st">"DataFrame"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(<span class="at">ensembl_transcript_id =</span> tx_id, <span class="at">ensembl_gene_id =</span> gene_id)</span>
+<span id="cb15-6"><a></a></span>
+<span id="cb15-7"><a></a><span class="fu">head</span>(t2g)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 3
+  ensembl_transcript_id ensembl_gene_id    gene_name
+  &lt;chr&gt;                 &lt;chr&gt;              &lt;chr&gt;    
+1 ENSMUST00000000001    ENSMUSG00000000001 Gnai3    
+2 ENSMUST00000000003    ENSMUSG00000000003 Pbsn     
+3 ENSMUST00000000010    ENSMUSG00000020875 Hoxb9    
+4 ENSMUST00000000028    ENSMUSG00000000028 Cdc45    
+5 ENSMUST00000000033    ENSMUSG00000048583 Igf2     
+6 ENSMUST00000000049    ENSMUSG00000000049 Apoh     </code></pre>
+</div>
+</div>
+</section>
+<section id="using-annotationhub-2" class="slide level2 smaller">
+<h2>Using AnnotationHub</h2>
+<p>Alright this looks good! Although the gene_name field could be useful, for our purposes today, we don’t really need it, and the tools we are using don’t expect it.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>t2g <span class="ot">&lt;-</span> t2g <span class="sc">|&gt;</span></span>
+<span id="cb17-2"><a></a>  <span class="fu">select</span>(ensembl_transcript_id, ensembl_gene_id)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="getting-gene-level-expression-data-with-tximport" class="slide level2 smaller">
@@ -950,31 +491,31 @@ chr (3): ensembl_transcript_id, ensembl_gene_id, externa...
 <section id="gene-expression-data-with-tximport" class="slide level2 smaller">
 <h2>Gene expression data with <code>tximport</code></h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a></a><span class="co"># The directory where all of the sample-specific salmon subdirectories live</span></span>
-<span id="cb16-2"><a></a></span>
-<span id="cb16-3"><a></a>metadata <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb16-4"><a></a>  <span class="at">salmon_dirs =</span> fs<span class="sc">::</span><span class="fu">dir_ls</span>(</span>
-<span id="cb16-5"><a></a>    <span class="fu">here</span>(<span class="st">"data/block-rna/differentiation_salmonouts"</span>),</span>
-<span id="cb16-6"><a></a>    <span class="at">recurse =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb16-7"><a></a>    <span class="at">glob =</span> <span class="st">"*quant.sf"</span></span>
-<span id="cb16-8"><a></a>  )</span>
-<span id="cb16-9"><a></a>) <span class="sc">|&gt;</span></span>
-<span id="cb16-10"><a></a>  <span class="fu">mutate</span>(</span>
-<span id="cb16-11"><a></a>    <span class="at">sample_id =</span> fs<span class="sc">::</span><span class="fu">path_file</span>(fs<span class="sc">::</span><span class="fu">path_dir</span>(salmon_dirs))</span>
-<span id="cb16-12"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb16-13"><a></a>  <span class="fu">filter</span>(<span class="fu">str_starts</span>(sample_id, <span class="st">"DIV"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb16-14"><a></a>  <span class="fu">separate_wider_delim</span>(</span>
-<span id="cb16-15"><a></a>    <span class="at">col =</span> sample_id,</span>
-<span id="cb16-16"><a></a>    <span class="at">delim =</span> <span class="st">"."</span>,</span>
-<span id="cb16-17"><a></a>    <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"samp"</span>, <span class="st">"rep"</span>),</span>
-<span id="cb16-18"><a></a>    <span class="at">too_few =</span> <span class="st">"align_start"</span>,</span>
-<span id="cb16-19"><a></a>    <span class="at">cols_remove =</span> <span class="cn">FALSE</span></span>
-<span id="cb16-20"><a></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb16-21"><a></a>  <span class="fu">mutate</span>(<span class="at">rep =</span> <span class="fu">str_remove</span>(rep, <span class="st">"Rep"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb16-22"><a></a>  <span class="fu">column_to_rownames</span>(<span class="st">"sample_id"</span>)</span>
-<span id="cb16-23"><a></a></span>
-<span id="cb16-24"><a></a><span class="co"># Add the sample_id column back from rownames</span></span>
-<span id="cb16-25"><a></a>metadata<span class="sc">$</span>sample_id <span class="ot">&lt;-</span> <span class="fu">rownames</span>(metadata)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a></a><span class="co"># The directory where all of the sample-specific salmon subdirectories live</span></span>
+<span id="cb18-2"><a></a></span>
+<span id="cb18-3"><a></a>metadata <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb18-4"><a></a>  <span class="at">salmon_dirs =</span> fs<span class="sc">::</span><span class="fu">dir_ls</span>(</span>
+<span id="cb18-5"><a></a>    <span class="fu">here</span>(<span class="st">"data/block-rna/differentiation_salmonouts"</span>),</span>
+<span id="cb18-6"><a></a>    <span class="at">recurse =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb18-7"><a></a>    <span class="at">glob =</span> <span class="st">"*quant.sf"</span></span>
+<span id="cb18-8"><a></a>  )</span>
+<span id="cb18-9"><a></a>) <span class="sc">|&gt;</span></span>
+<span id="cb18-10"><a></a>  <span class="fu">mutate</span>(</span>
+<span id="cb18-11"><a></a>    <span class="at">sample_id =</span> fs<span class="sc">::</span><span class="fu">path_file</span>(fs<span class="sc">::</span><span class="fu">path_dir</span>(salmon_dirs))</span>
+<span id="cb18-12"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb18-13"><a></a>  <span class="fu">filter</span>(<span class="fu">str_starts</span>(sample_id, <span class="st">"DIV"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb18-14"><a></a>  <span class="fu">separate_wider_delim</span>(</span>
+<span id="cb18-15"><a></a>    <span class="at">col =</span> sample_id,</span>
+<span id="cb18-16"><a></a>    <span class="at">delim =</span> <span class="st">"."</span>,</span>
+<span id="cb18-17"><a></a>    <span class="at">names =</span> <span class="fu">c</span>(<span class="st">"samp"</span>, <span class="st">"rep"</span>),</span>
+<span id="cb18-18"><a></a>    <span class="at">too_few =</span> <span class="st">"align_start"</span>,</span>
+<span id="cb18-19"><a></a>    <span class="at">cols_remove =</span> <span class="cn">FALSE</span></span>
+<span id="cb18-20"><a></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb18-21"><a></a>  <span class="fu">mutate</span>(<span class="at">rep =</span> <span class="fu">str_remove</span>(rep, <span class="st">"Rep"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb18-22"><a></a>  <span class="fu">column_to_rownames</span>(<span class="st">"sample_id"</span>)</span>
+<span id="cb18-23"><a></a></span>
+<span id="cb18-24"><a></a><span class="co"># Add the sample_id column back from rownames</span></span>
+<span id="cb18-25"><a></a>metadata<span class="sc">$</span>sample_id <span class="ot">&lt;-</span> <span class="fu">rownames</span>(metadata)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="gene-expression-data-with-tximport-1" class="slide level2 smaller">
@@ -983,23 +524,23 @@ chr (3): ensembl_transcript_id, ensembl_gene_id, externa...
 <p>Now we are ready to run <code>tximport</code></p>
 <p><code>tximport</code> is going to want paths to all the quantification files (salm_dirs) and a table that relates transcripts to genes (t2g). Luckily, we happen to have those exact two things.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a></a>salmdir <span class="ot">&lt;-</span> metadata<span class="sc">$</span>salmon_dirs</span>
-<span id="cb17-2"><a></a><span class="fu">names</span>(salmdir) <span class="ot">&lt;-</span> metadata<span class="sc">$</span>sample_id</span>
-<span id="cb17-3"><a></a></span>
-<span id="cb17-4"><a></a></span>
-<span id="cb17-5"><a></a>txi <span class="ot">&lt;-</span> <span class="fu">tximport</span>(</span>
-<span id="cb17-6"><a></a>  <span class="at">files =</span> salmdir,</span>
-<span id="cb17-7"><a></a>  <span class="at">type =</span> <span class="st">"salmon"</span>,</span>
-<span id="cb17-8"><a></a>  <span class="at">tx2gene =</span> t2g,</span>
-<span id="cb17-9"><a></a>  <span class="at">dropInfReps =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb17-10"><a></a>  <span class="at">countsFromAbundance =</span> <span class="st">"lengthScaledTPM"</span></span>
-<span id="cb17-11"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a></a>salmdir <span class="ot">&lt;-</span> metadata<span class="sc">$</span>salmon_dirs</span>
+<span id="cb19-2"><a></a><span class="fu">names</span>(salmdir) <span class="ot">&lt;-</span> metadata<span class="sc">$</span>sample_id</span>
+<span id="cb19-3"><a></a></span>
+<span id="cb19-4"><a></a></span>
+<span id="cb19-5"><a></a>txi <span class="ot">&lt;-</span> <span class="fu">tximport</span>(</span>
+<span id="cb19-6"><a></a>  <span class="at">files =</span> salmdir,</span>
+<span id="cb19-7"><a></a>  <span class="at">type =</span> <span class="st">"salmon"</span>,</span>
+<span id="cb19-8"><a></a>  <span class="at">tx2gene =</span> t2g,</span>
+<span id="cb19-9"><a></a>  <span class="at">dropInfReps =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb19-10"><a></a>  <span class="at">countsFromAbundance =</span> <span class="st">"lengthScaledTPM"</span></span>
+<span id="cb19-11"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>reading in files with read_tsv</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 
-transcripts missing from tx2gene: 3733
+transcripts missing from tx2gene: 4374
 summarizing abundance
 summarizing counts
 summarizing length</code></pre>
@@ -1010,29 +551,29 @@ summarizing length</code></pre>
 <h2>Gene expression data with <code>tximport</code></h2>
 <p>Notice how we chose <em>lengthscaledTPM</em> for our abundance measurement. This is going to give us TPM values (transcripts per million) for expression in the $abundance slot. Let’s check out what we have now.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a></a>tpms <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(txi<span class="sc">$</span>abundance) <span class="sc">|&gt;</span></span>
-<span id="cb20-2"><a></a>  <span class="fu">set_names</span>(<span class="fu">rownames</span>(metadata)) <span class="sc">|&gt;</span></span>
-<span id="cb20-3"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_gene_id"</span>)</span>
-<span id="cb20-4"><a></a></span>
-<span id="cb20-5"><a></a><span class="fu">gt</span>(tpms[<span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>, ])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a></a>tpms <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(txi<span class="sc">$</span>abundance) <span class="sc">|&gt;</span></span>
+<span id="cb22-2"><a></a>  <span class="fu">set_names</span>(<span class="fu">rownames</span>(metadata)) <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_gene_id"</span>)</span>
+<span id="cb22-4"><a></a></span>
+<span id="cb22-5"><a></a><span class="fu">gt</span>(tpms[<span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>, ])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div id="lihpoaeazu" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#lihpoaeazu table {
+<div id="edkrihkije" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#edkrihkije table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#lihpoaeazu thead, #lihpoaeazu tbody, #lihpoaeazu tfoot, #lihpoaeazu tr, #lihpoaeazu td, #lihpoaeazu th {
+#edkrihkije thead, #edkrihkije tbody, #edkrihkije tfoot, #edkrihkije tr, #edkrihkije td, #edkrihkije th {
   border-style: none;
 }
 
-#lihpoaeazu p {
+#edkrihkije p {
   margin: 0;
   padding: 0;
 }
 
-#lihpoaeazu .gt_table {
+#edkrihkije .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1058,12 +599,12 @@ summarizing length</code></pre>
   border-left-color: #D3D3D3;
 }
 
-#lihpoaeazu .gt_caption {
+#edkrihkije .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#lihpoaeazu .gt_title {
+#edkrihkije .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1075,7 +616,7 @@ summarizing length</code></pre>
   border-bottom-width: 0;
 }
 
-#lihpoaeazu .gt_subtitle {
+#edkrihkije .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1087,7 +628,7 @@ summarizing length</code></pre>
   border-top-width: 0;
 }
 
-#lihpoaeazu .gt_heading {
+#edkrihkije .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1099,13 +640,13 @@ summarizing length</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#lihpoaeazu .gt_bottom_border {
+#edkrihkije .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#lihpoaeazu .gt_col_headings {
+#edkrihkije .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1120,7 +661,7 @@ summarizing length</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#lihpoaeazu .gt_col_heading {
+#edkrihkije .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1140,7 +681,7 @@ summarizing length</code></pre>
   overflow-x: hidden;
 }
 
-#lihpoaeazu .gt_column_spanner_outer {
+#edkrihkije .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1152,15 +693,15 @@ summarizing length</code></pre>
   padding-right: 4px;
 }
 
-#lihpoaeazu .gt_column_spanner_outer:first-child {
+#edkrihkije .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#lihpoaeazu .gt_column_spanner_outer:last-child {
+#edkrihkije .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#lihpoaeazu .gt_column_spanner {
+#edkrihkije .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1172,11 +713,11 @@ summarizing length</code></pre>
   width: 100%;
 }
 
-#lihpoaeazu .gt_spanner_row {
+#edkrihkije .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#lihpoaeazu .gt_group_heading {
+#edkrihkije .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1202,7 +743,7 @@ summarizing length</code></pre>
   text-align: left;
 }
 
-#lihpoaeazu .gt_empty_group_heading {
+#edkrihkije .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1217,15 +758,15 @@ summarizing length</code></pre>
   vertical-align: middle;
 }
 
-#lihpoaeazu .gt_from_md > :first-child {
+#edkrihkije .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#lihpoaeazu .gt_from_md > :last-child {
+#edkrihkije .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#lihpoaeazu .gt_row {
+#edkrihkije .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1244,7 +785,7 @@ summarizing length</code></pre>
   overflow-x: hidden;
 }
 
-#lihpoaeazu .gt_stub {
+#edkrihkije .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1257,7 +798,7 @@ summarizing length</code></pre>
   padding-right: 5px;
 }
 
-#lihpoaeazu .gt_stub_row_group {
+#edkrihkije .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1271,15 +812,15 @@ summarizing length</code></pre>
   vertical-align: top;
 }
 
-#lihpoaeazu .gt_row_group_first td {
+#edkrihkije .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#lihpoaeazu .gt_row_group_first th {
+#edkrihkije .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#lihpoaeazu .gt_summary_row {
+#edkrihkije .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1289,16 +830,16 @@ summarizing length</code></pre>
   padding-right: 5px;
 }
 
-#lihpoaeazu .gt_first_summary_row {
+#edkrihkije .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#lihpoaeazu .gt_first_summary_row.thick {
+#edkrihkije .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#lihpoaeazu .gt_last_summary_row {
+#edkrihkije .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1308,7 +849,7 @@ summarizing length</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#lihpoaeazu .gt_grand_summary_row {
+#edkrihkije .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1318,7 +859,7 @@ summarizing length</code></pre>
   padding-right: 5px;
 }
 
-#lihpoaeazu .gt_first_grand_summary_row {
+#edkrihkije .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1328,7 +869,7 @@ summarizing length</code></pre>
   border-top-color: #D3D3D3;
 }
 
-#lihpoaeazu .gt_last_grand_summary_row_top {
+#edkrihkije .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1338,11 +879,11 @@ summarizing length</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#lihpoaeazu .gt_striped {
+#edkrihkije .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#lihpoaeazu .gt_table_body {
+#edkrihkije .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1351,7 +892,7 @@ summarizing length</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#lihpoaeazu .gt_footnotes {
+#edkrihkije .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1365,7 +906,7 @@ summarizing length</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#lihpoaeazu .gt_footnote {
+#edkrihkije .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1374,7 +915,7 @@ summarizing length</code></pre>
   padding-right: 5px;
 }
 
-#lihpoaeazu .gt_sourcenotes {
+#edkrihkije .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1388,7 +929,7 @@ summarizing length</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#lihpoaeazu .gt_sourcenote {
+#edkrihkije .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1396,72 +937,72 @@ summarizing length</code></pre>
   padding-right: 5px;
 }
 
-#lihpoaeazu .gt_left {
+#edkrihkije .gt_left {
   text-align: left;
 }
 
-#lihpoaeazu .gt_center {
+#edkrihkije .gt_center {
   text-align: center;
 }
 
-#lihpoaeazu .gt_right {
+#edkrihkije .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#lihpoaeazu .gt_font_normal {
+#edkrihkije .gt_font_normal {
   font-weight: normal;
 }
 
-#lihpoaeazu .gt_font_bold {
+#edkrihkije .gt_font_bold {
   font-weight: bold;
 }
 
-#lihpoaeazu .gt_font_italic {
+#edkrihkije .gt_font_italic {
   font-style: italic;
 }
 
-#lihpoaeazu .gt_super {
+#edkrihkije .gt_super {
   font-size: 65%;
 }
 
-#lihpoaeazu .gt_footnote_marks {
+#edkrihkije .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#lihpoaeazu .gt_asterisk {
+#edkrihkije .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#lihpoaeazu .gt_indent_1 {
+#edkrihkije .gt_indent_1 {
   text-indent: 5px;
 }
 
-#lihpoaeazu .gt_indent_2 {
+#edkrihkije .gt_indent_2 {
   text-indent: 10px;
 }
 
-#lihpoaeazu .gt_indent_3 {
+#edkrihkije .gt_indent_3 {
   text-indent: 15px;
 }
 
-#lihpoaeazu .gt_indent_4 {
+#edkrihkije .gt_indent_4 {
   text-indent: 20px;
 }
 
-#lihpoaeazu .gt_indent_5 {
+#edkrihkije .gt_indent_5 {
   text-indent: 25px;
 }
 
-#lihpoaeazu .katex-display {
+#edkrihkije .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#lihpoaeazu div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#edkrihkije div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -3171,17 +2712,17 @@ summarizing length</code></pre>
 <section id="tpm-as-an-expression-metric-1" class="slide level2 smaller">
 <h2>TPM as an expression metric</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a></a><span class="fu">sum</span>(tpms<span class="sc">$</span>DIVminus8.Rep1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="fu">sum</span>(tpms<span class="sc">$</span>DIVminus8.Rep1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 989007</code></pre>
+<pre><code>[1] 985331.8</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a></a><span class="fu">sum</span>(tpms<span class="sc">$</span>DIVminus8.Rep2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">sum</span>(tpms<span class="sc">$</span>DIVminus8.Rep2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 988591.2</code></pre>
+<pre><code>[1] 984957.6</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a></a><span class="fu">sum</span>(tpms<span class="sc">$</span>DIVminus8.Rep3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="fu">sum</span>(tpms<span class="sc">$</span>DIVminus8.Rep3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 988471</code></pre>
+<pre><code>[1] 984765.1</code></pre>
 </div>
 </div>
 <p>OK, not quite one million, but pretty darn close.</p>
@@ -3190,51 +2731,51 @@ summarizing length</code></pre>
 <section id="tpm-as-an-expression-metric-2" class="slide level2 smaller">
 <h2>TPM as an expression metric</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a></a><span class="co"># Redefine for clarity in comparisons</span></span>
-<span id="cb27-2"><a></a>tpms.genes <span class="ot">&lt;-</span> tpms</span>
-<span id="cb27-3"><a></a></span>
-<span id="cb27-4"><a></a><span class="co"># Make a new tximport object, but this time instead</span></span>
-<span id="cb27-5"><a></a><span class="co"># of giving gene expression values, give transcript expression values</span></span>
-<span id="cb27-6"><a></a><span class="co"># This is controlled by the `txOut` argument</span></span>
-<span id="cb27-7"><a></a>txi.transcripts <span class="ot">&lt;-</span> <span class="fu">tximport</span>(</span>
-<span id="cb27-8"><a></a>  salmdir,</span>
-<span id="cb27-9"><a></a>  <span class="at">type =</span> <span class="st">"salmon"</span>,</span>
-<span id="cb27-10"><a></a>  <span class="at">tx2gene =</span> t2g,</span>
-<span id="cb27-11"><a></a>  <span class="at">dropInfReps =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb27-12"><a></a>  <span class="at">countsFromAbundance =</span> <span class="st">"lengthScaledTPM"</span>,</span>
-<span id="cb27-13"><a></a>  <span class="at">txOut =</span> <span class="cn">TRUE</span></span>
-<span id="cb27-14"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a></a><span class="co"># Redefine for clarity in comparisons</span></span>
+<span id="cb29-2"><a></a>tpms.genes <span class="ot">&lt;-</span> tpms</span>
+<span id="cb29-3"><a></a></span>
+<span id="cb29-4"><a></a><span class="co"># Make a new tximport object, but this time instead</span></span>
+<span id="cb29-5"><a></a><span class="co"># of giving gene expression values, give transcript expression values</span></span>
+<span id="cb29-6"><a></a><span class="co"># This is controlled by the `txOut` argument</span></span>
+<span id="cb29-7"><a></a>txi.transcripts <span class="ot">&lt;-</span> <span class="fu">tximport</span>(</span>
+<span id="cb29-8"><a></a>  salmdir,</span>
+<span id="cb29-9"><a></a>  <span class="at">type =</span> <span class="st">"salmon"</span>,</span>
+<span id="cb29-10"><a></a>  <span class="at">tx2gene =</span> t2g,</span>
+<span id="cb29-11"><a></a>  <span class="at">dropInfReps =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb29-12"><a></a>  <span class="at">countsFromAbundance =</span> <span class="st">"lengthScaledTPM"</span>,</span>
+<span id="cb29-13"><a></a>  <span class="at">txOut =</span> <span class="cn">TRUE</span></span>
+<span id="cb29-14"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>reading in files with read_tsv</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a></a><span class="co"># Make a table of tpm values for every transcript</span></span>
-<span id="cb30-2"><a></a>tpms.txs <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(txi.transcripts<span class="sc">$</span>abundance) <span class="sc">|&gt;</span></span>
-<span id="cb30-3"><a></a>  <span class="fu">set_names</span>(<span class="fu">rownames</span>(metadata)) <span class="sc">|&gt;</span></span>
-<span id="cb30-4"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_transcript_id"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb30-5"><a></a>  <span class="fu">inner_join</span>(t2g, ., <span class="at">by =</span> <span class="st">"ensembl_transcript_id"</span>)</span>
-<span id="cb30-6"><a></a></span>
-<span id="cb30-7"><a></a><span class="fu">gt</span>(tpms.txs[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, ])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a></a><span class="co"># Make a table of tpm values for every transcript</span></span>
+<span id="cb32-2"><a></a>tpms.txs <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(txi.transcripts<span class="sc">$</span>abundance) <span class="sc">|&gt;</span></span>
+<span id="cb32-3"><a></a>  <span class="fu">set_names</span>(<span class="fu">rownames</span>(metadata)) <span class="sc">|&gt;</span></span>
+<span id="cb32-4"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_transcript_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-5"><a></a>  <span class="fu">inner_join</span>(t2g, ., <span class="at">by =</span> <span class="st">"ensembl_transcript_id"</span>)</span>
+<span id="cb32-6"><a></a></span>
+<span id="cb32-7"><a></a><span class="fu">gt</span>(tpms.txs[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, ])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
-<div id="hobztjwbzr" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#hobztjwbzr table {
+<div id="necvdbokgk" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#necvdbokgk table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#hobztjwbzr thead, #hobztjwbzr tbody, #hobztjwbzr tfoot, #hobztjwbzr tr, #hobztjwbzr td, #hobztjwbzr th {
+#necvdbokgk thead, #necvdbokgk tbody, #necvdbokgk tfoot, #necvdbokgk tr, #necvdbokgk td, #necvdbokgk th {
   border-style: none;
 }
 
-#hobztjwbzr p {
+#necvdbokgk p {
   margin: 0;
   padding: 0;
 }
 
-#hobztjwbzr .gt_table {
+#necvdbokgk .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -3260,12 +2801,12 @@ summarizing length</code></pre>
   border-left-color: #D3D3D3;
 }
 
-#hobztjwbzr .gt_caption {
+#necvdbokgk .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#hobztjwbzr .gt_title {
+#necvdbokgk .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -3277,7 +2818,7 @@ summarizing length</code></pre>
   border-bottom-width: 0;
 }
 
-#hobztjwbzr .gt_subtitle {
+#necvdbokgk .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -3289,7 +2830,7 @@ summarizing length</code></pre>
   border-top-width: 0;
 }
 
-#hobztjwbzr .gt_heading {
+#necvdbokgk .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -3301,13 +2842,13 @@ summarizing length</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hobztjwbzr .gt_bottom_border {
+#necvdbokgk .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#hobztjwbzr .gt_col_headings {
+#necvdbokgk .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -3322,7 +2863,7 @@ summarizing length</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hobztjwbzr .gt_col_heading {
+#necvdbokgk .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3342,7 +2883,7 @@ summarizing length</code></pre>
   overflow-x: hidden;
 }
 
-#hobztjwbzr .gt_column_spanner_outer {
+#necvdbokgk .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3354,15 +2895,15 @@ summarizing length</code></pre>
   padding-right: 4px;
 }
 
-#hobztjwbzr .gt_column_spanner_outer:first-child {
+#necvdbokgk .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#hobztjwbzr .gt_column_spanner_outer:last-child {
+#necvdbokgk .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#hobztjwbzr .gt_column_spanner {
+#necvdbokgk .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -3374,11 +2915,11 @@ summarizing length</code></pre>
   width: 100%;
 }
 
-#hobztjwbzr .gt_spanner_row {
+#necvdbokgk .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#hobztjwbzr .gt_group_heading {
+#necvdbokgk .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3404,7 +2945,7 @@ summarizing length</code></pre>
   text-align: left;
 }
 
-#hobztjwbzr .gt_empty_group_heading {
+#necvdbokgk .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -3419,15 +2960,15 @@ summarizing length</code></pre>
   vertical-align: middle;
 }
 
-#hobztjwbzr .gt_from_md > :first-child {
+#necvdbokgk .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#hobztjwbzr .gt_from_md > :last-child {
+#necvdbokgk .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#hobztjwbzr .gt_row {
+#necvdbokgk .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3446,7 +2987,7 @@ summarizing length</code></pre>
   overflow-x: hidden;
 }
 
-#hobztjwbzr .gt_stub {
+#necvdbokgk .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3459,7 +3000,7 @@ summarizing length</code></pre>
   padding-right: 5px;
 }
 
-#hobztjwbzr .gt_stub_row_group {
+#necvdbokgk .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3473,15 +3014,15 @@ summarizing length</code></pre>
   vertical-align: top;
 }
 
-#hobztjwbzr .gt_row_group_first td {
+#necvdbokgk .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#hobztjwbzr .gt_row_group_first th {
+#necvdbokgk .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#hobztjwbzr .gt_summary_row {
+#necvdbokgk .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -3491,16 +3032,16 @@ summarizing length</code></pre>
   padding-right: 5px;
 }
 
-#hobztjwbzr .gt_first_summary_row {
+#necvdbokgk .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#hobztjwbzr .gt_first_summary_row.thick {
+#necvdbokgk .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#hobztjwbzr .gt_last_summary_row {
+#necvdbokgk .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3510,7 +3051,7 @@ summarizing length</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#hobztjwbzr .gt_grand_summary_row {
+#necvdbokgk .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -3520,7 +3061,7 @@ summarizing length</code></pre>
   padding-right: 5px;
 }
 
-#hobztjwbzr .gt_first_grand_summary_row {
+#necvdbokgk .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3530,7 +3071,7 @@ summarizing length</code></pre>
   border-top-color: #D3D3D3;
 }
 
-#hobztjwbzr .gt_last_grand_summary_row_top {
+#necvdbokgk .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3540,11 +3081,11 @@ summarizing length</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#hobztjwbzr .gt_striped {
+#necvdbokgk .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#hobztjwbzr .gt_table_body {
+#necvdbokgk .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -3553,7 +3094,7 @@ summarizing length</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#hobztjwbzr .gt_footnotes {
+#necvdbokgk .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -3567,7 +3108,7 @@ summarizing length</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hobztjwbzr .gt_footnote {
+#necvdbokgk .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -3576,7 +3117,7 @@ summarizing length</code></pre>
   padding-right: 5px;
 }
 
-#hobztjwbzr .gt_sourcenotes {
+#necvdbokgk .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -3590,7 +3131,7 @@ summarizing length</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#hobztjwbzr .gt_sourcenote {
+#necvdbokgk .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -3598,72 +3139,72 @@ summarizing length</code></pre>
   padding-right: 5px;
 }
 
-#hobztjwbzr .gt_left {
+#necvdbokgk .gt_left {
   text-align: left;
 }
 
-#hobztjwbzr .gt_center {
+#necvdbokgk .gt_center {
   text-align: center;
 }
 
-#hobztjwbzr .gt_right {
+#necvdbokgk .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#hobztjwbzr .gt_font_normal {
+#necvdbokgk .gt_font_normal {
   font-weight: normal;
 }
 
-#hobztjwbzr .gt_font_bold {
+#necvdbokgk .gt_font_bold {
   font-weight: bold;
 }
 
-#hobztjwbzr .gt_font_italic {
+#necvdbokgk .gt_font_italic {
   font-style: italic;
 }
 
-#hobztjwbzr .gt_super {
+#necvdbokgk .gt_super {
   font-size: 65%;
 }
 
-#hobztjwbzr .gt_footnote_marks {
+#necvdbokgk .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#hobztjwbzr .gt_asterisk {
+#necvdbokgk .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#hobztjwbzr .gt_indent_1 {
+#necvdbokgk .gt_indent_1 {
   text-indent: 5px;
 }
 
-#hobztjwbzr .gt_indent_2 {
+#necvdbokgk .gt_indent_2 {
   text-indent: 10px;
 }
 
-#hobztjwbzr .gt_indent_3 {
+#necvdbokgk .gt_indent_3 {
   text-indent: 15px;
 }
 
-#hobztjwbzr .gt_indent_4 {
+#necvdbokgk .gt_indent_4 {
   text-indent: 20px;
 }
 
-#hobztjwbzr .gt_indent_5 {
+#necvdbokgk .gt_indent_5 {
   text-indent: 25px;
 }
 
-#hobztjwbzr .katex-display {
+#necvdbokgk .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#hobztjwbzr div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#necvdbokgk div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -4397,27 +3938,27 @@ summarizing length</code></pre>
 <section id="tpm-as-an-expression-metric-3" class="slide level2 smaller">
 <h2>TPM as an expression metric</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a></a><span class="co"># Get sum of tpm values for transcripts that belong to ENSMUSG00000020634</span></span>
-<span id="cb31-2"><a></a>tpms.tx.ENSMUSG00000020634 <span class="ot">&lt;-</span> <span class="fu">filter</span>(</span>
-<span id="cb31-3"><a></a>  tpms.txs,</span>
-<span id="cb31-4"><a></a>  ensembl_gene_id <span class="sc">==</span> <span class="st">"ENSMUSG00000020634"</span></span>
-<span id="cb31-5"><a></a>)</span>
-<span id="cb31-6"><a></a></span>
-<span id="cb31-7"><a></a>sumoftxtpm <span class="ot">&lt;-</span> <span class="fu">sum</span>(tpms.tx.ENSMUSG00000020634<span class="sc">$</span>DIVminus8.Rep1)</span>
-<span id="cb31-8"><a></a></span>
-<span id="cb31-9"><a></a><span class="co"># Get gene level tpm value of ENSMUSG00000020634</span></span>
-<span id="cb31-10"><a></a>genetpm <span class="ot">&lt;-</span> <span class="fu">filter</span>(</span>
-<span id="cb31-11"><a></a>  tpms.genes,</span>
-<span id="cb31-12"><a></a>  ensembl_gene_id <span class="sc">==</span> <span class="st">"ENSMUSG00000020634"</span></span>
-<span id="cb31-13"><a></a>) <span class="sc">|&gt;</span></span>
-<span id="cb31-14"><a></a>  <span class="fu">pull</span>(DIVminus8.Rep1)</span>
-<span id="cb31-15"><a></a></span>
-<span id="cb31-16"><a></a><span class="co"># Are they the same?</span></span>
-<span id="cb31-17"><a></a>sumoftxtpm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a></a><span class="co"># Get sum of tpm values for transcripts that belong to ENSMUSG00000020634</span></span>
+<span id="cb33-2"><a></a>tpms.tx.ENSMUSG00000020634 <span class="ot">&lt;-</span> <span class="fu">filter</span>(</span>
+<span id="cb33-3"><a></a>  tpms.txs,</span>
+<span id="cb33-4"><a></a>  ensembl_gene_id <span class="sc">==</span> <span class="st">"ENSMUSG00000020634"</span></span>
+<span id="cb33-5"><a></a>)</span>
+<span id="cb33-6"><a></a></span>
+<span id="cb33-7"><a></a>sumoftxtpm <span class="ot">&lt;-</span> <span class="fu">sum</span>(tpms.tx.ENSMUSG00000020634<span class="sc">$</span>DIVminus8.Rep1)</span>
+<span id="cb33-8"><a></a></span>
+<span id="cb33-9"><a></a><span class="co"># Get gene level tpm value of ENSMUSG00000020634</span></span>
+<span id="cb33-10"><a></a>genetpm <span class="ot">&lt;-</span> <span class="fu">filter</span>(</span>
+<span id="cb33-11"><a></a>  tpms.genes,</span>
+<span id="cb33-12"><a></a>  ensembl_gene_id <span class="sc">==</span> <span class="st">"ENSMUSG00000020634"</span></span>
+<span id="cb33-13"><a></a>) <span class="sc">|&gt;</span></span>
+<span id="cb33-14"><a></a>  <span class="fu">pull</span>(DIVminus8.Rep1)</span>
+<span id="cb33-15"><a></a></span>
+<span id="cb33-16"><a></a><span class="co"># Are they the same?</span></span>
+<span id="cb33-17"><a></a>sumoftxtpm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 46.71414</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a></a>genetpm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a></a>genetpm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 46.71414</code></pre>
 </div>
@@ -4437,19 +3978,19 @@ summarizing length</code></pre>
 <h2>Hierarchical clustering</h2>
 <p>A simple way to think about this is to simply correlate TPM values for genes between samples. For plotting purposes here, let’s plot the log(TPM) of two samples against each other. However, for the actual correlation coefficient we are going to be using the <em>Spearman</em> correlation method, which uses ranks, not absolute values. This means that whether or not you take the log will have no effect on the Spearman correlation coefficient.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a></a><span class="co"># DIVminus8.Rep1 vs DIVminus8.Rep2</span></span>
-<span id="cb35-2"><a></a></span>
-<span id="cb35-3"><a></a><span class="co"># Since we are plotting log TPM values, we need to add a pseudocount to all samples.</span></span>
-<span id="cb35-4"><a></a><span class="co"># log(0) is a problem.</span></span>
-<span id="cb35-5"><a></a></span>
-<span id="cb35-6"><a></a><span class="co"># Add pseudocounts and take log within ggplot function call</span></span>
-<span id="cb35-7"><a></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">cor.test</span>(</span>
-<span id="cb35-8"><a></a>  tpms<span class="sc">$</span>DIVminus8.Rep1,</span>
-<span id="cb35-9"><a></a>  tpms<span class="sc">$</span>DIVminus8.Rep2,</span>
-<span id="cb35-10"><a></a>  <span class="at">method =</span> <span class="st">"spearman"</span></span>
-<span id="cb35-11"><a></a>) <span class="sc">|&gt;</span></span>
-<span id="cb35-12"><a></a>  broom<span class="sc">::</span><span class="fu">tidy</span>() <span class="sc">|&gt;</span></span>
-<span id="cb35-13"><a></a>  <span class="fu">pull</span>(estimate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a></a><span class="co"># DIVminus8.Rep1 vs DIVminus8.Rep2</span></span>
+<span id="cb37-2"><a></a></span>
+<span id="cb37-3"><a></a><span class="co"># Since we are plotting log TPM values, we need to add a pseudocount to all samples.</span></span>
+<span id="cb37-4"><a></a><span class="co"># log(0) is a problem.</span></span>
+<span id="cb37-5"><a></a></span>
+<span id="cb37-6"><a></a><span class="co"># Add pseudocounts and take log within ggplot function call</span></span>
+<span id="cb37-7"><a></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">cor.test</span>(</span>
+<span id="cb37-8"><a></a>  tpms<span class="sc">$</span>DIVminus8.Rep1,</span>
+<span id="cb37-9"><a></a>  tpms<span class="sc">$</span>DIVminus8.Rep2,</span>
+<span id="cb37-10"><a></a>  <span class="at">method =</span> <span class="st">"spearman"</span></span>
+<span id="cb37-11"><a></a>) <span class="sc">|&gt;</span></span>
+<span id="cb37-12"><a></a>  broom<span class="sc">::</span><span class="fu">tidy</span>() <span class="sc">|&gt;</span></span>
+<span id="cb37-13"><a></a>  <span class="fu">pull</span>(estimate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -4459,15 +4000,15 @@ summarizing length</code></pre>
 tpms$DIVminus8.Rep2, method = "spearman"): Cannot compute
 exact p-value with ties</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">signif</span>(r.spearman, <span class="dv">2</span>)</span>
-<span id="cb37-2"><a></a></span>
-<span id="cb37-3"><a></a><span class="fu">ggplot</span>(</span>
-<span id="cb37-4"><a></a>  tpms,</span>
-<span id="cb37-5"><a></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log10</span>(DIVminus8.Rep1 <span class="sc">+</span> <span class="fl">1e-3</span>), <span class="at">y =</span> <span class="fu">log10</span>(DIVminus8.Rep2 <span class="sc">+</span> <span class="fl">1e-3</span>))</span>
-<span id="cb37-6"><a></a>) <span class="sc">+</span></span>
-<span id="cb37-7"><a></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb37-8"><a></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb37-9"><a></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"R = "</span>, r.spearman))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">signif</span>(r.spearman, <span class="dv">2</span>)</span>
+<span id="cb39-2"><a></a></span>
+<span id="cb39-3"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb39-4"><a></a>  tpms,</span>
+<span id="cb39-5"><a></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log10</span>(DIVminus8.Rep1 <span class="sc">+</span> <span class="fl">1e-3</span>), <span class="at">y =</span> <span class="fu">log10</span>(DIVminus8.Rep2 <span class="sc">+</span> <span class="fl">1e-3</span>))</span>
+<span id="cb39-6"><a></a>) <span class="sc">+</span></span>
+<span id="cb39-7"><a></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb39-8"><a></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb39-9"><a></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"R = "</span>, r.spearman))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure>
@@ -4484,21 +4025,21 @@ exact p-value with ties</code></pre>
 <section id="hierarchical-clustering-2" class="slide level2 smaller">
 <h2>Hierarchical clustering</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a></a><span class="co"># DIVminus8.Rep1 vs DIVminus8.Rep2</span></span>
-<span id="cb38-2"><a></a></span>
-<span id="cb38-3"><a></a><span class="co"># Since we are plotting log TPM values we will only keep for genes that have expression of at least 1 TPM in both samples</span></span>
-<span id="cb38-4"><a></a>tpms<span class="fl">.2</span>samplecor <span class="ot">&lt;-</span></span>
-<span id="cb38-5"><a></a>  <span class="fu">select</span>(tpms, <span class="fu">c</span>(ensembl_gene_id, DIVminus8.Rep1, DIVminus8.Rep2)) <span class="sc">|&gt;</span></span>
-<span id="cb38-6"><a></a>  <span class="fu">filter</span>(DIVminus8.Rep1 <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> DIVminus8.Rep2 <span class="sc">&gt;=</span> <span class="dv">1</span>)</span>
-<span id="cb38-7"><a></a></span>
-<span id="cb38-8"><a></a><span class="co"># pull the correlation coefficient</span></span>
-<span id="cb38-9"><a></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">cor.test</span>(</span>
-<span id="cb38-10"><a></a>  tpms<span class="fl">.2</span>samplecor<span class="sc">$</span>DIVminus8.Rep1,</span>
-<span id="cb38-11"><a></a>  tpms<span class="fl">.2</span>samplecor<span class="sc">$</span>DIVminus8.Rep2,</span>
-<span id="cb38-12"><a></a>  <span class="at">method =</span> <span class="st">"spearman"</span></span>
-<span id="cb38-13"><a></a>) <span class="sc">|&gt;</span></span>
-<span id="cb38-14"><a></a>  broom<span class="sc">::</span><span class="fu">tidy</span>() <span class="sc">|&gt;</span></span>
-<span id="cb38-15"><a></a>  <span class="fu">pull</span>(estimate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a><span class="co"># DIVminus8.Rep1 vs DIVminus8.Rep2</span></span>
+<span id="cb40-2"><a></a></span>
+<span id="cb40-3"><a></a><span class="co"># Since we are plotting log TPM values we will only keep for genes that have expression of at least 1 TPM in both samples</span></span>
+<span id="cb40-4"><a></a>tpms<span class="fl">.2</span>samplecor <span class="ot">&lt;-</span></span>
+<span id="cb40-5"><a></a>  <span class="fu">select</span>(tpms, <span class="fu">c</span>(ensembl_gene_id, DIVminus8.Rep1, DIVminus8.Rep2)) <span class="sc">|&gt;</span></span>
+<span id="cb40-6"><a></a>  <span class="fu">filter</span>(DIVminus8.Rep1 <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> DIVminus8.Rep2 <span class="sc">&gt;=</span> <span class="dv">1</span>)</span>
+<span id="cb40-7"><a></a></span>
+<span id="cb40-8"><a></a><span class="co"># pull the correlation coefficient</span></span>
+<span id="cb40-9"><a></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">cor.test</span>(</span>
+<span id="cb40-10"><a></a>  tpms<span class="fl">.2</span>samplecor<span class="sc">$</span>DIVminus8.Rep1,</span>
+<span id="cb40-11"><a></a>  tpms<span class="fl">.2</span>samplecor<span class="sc">$</span>DIVminus8.Rep2,</span>
+<span id="cb40-12"><a></a>  <span class="at">method =</span> <span class="st">"spearman"</span></span>
+<span id="cb40-13"><a></a>) <span class="sc">|&gt;</span></span>
+<span id="cb40-14"><a></a>  broom<span class="sc">::</span><span class="fu">tidy</span>() <span class="sc">|&gt;</span></span>
+<span id="cb40-15"><a></a>  <span class="fu">pull</span>(estimate)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 </section>
@@ -4508,22 +4049,22 @@ exact p-value with ties</code></pre>
 tpms.2samplecor$DIVminus8.Rep2, : Cannot compute exact
 p-value with ties</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a></a><span class="co"># round/set sig digits</span></span>
-<span id="cb40-2"><a></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">signif</span>(r.spearman, <span class="dv">2</span>)</span>
-<span id="cb40-3"><a></a></span>
-<span id="cb40-4"><a></a><span class="co"># plot</span></span>
-<span id="cb40-5"><a></a><span class="fu">ggplot</span>(</span>
-<span id="cb40-6"><a></a>  tpms<span class="fl">.2</span>samplecor,</span>
-<span id="cb40-7"><a></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log10</span>(DIVminus8.Rep1 <span class="sc">+</span> <span class="fl">1e-3</span>), <span class="at">y =</span> <span class="fu">log10</span>(DIVminus8.Rep2 <span class="sc">+</span> <span class="fl">1e-3</span>))</span>
-<span id="cb40-8"><a></a>) <span class="sc">+</span></span>
-<span id="cb40-9"><a></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb40-10"><a></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb40-11"><a></a>  <span class="fu">annotate</span>(</span>
-<span id="cb40-12"><a></a>    <span class="st">"text"</span>,</span>
-<span id="cb40-13"><a></a>    <span class="at">x =</span> <span class="dv">2</span>,</span>
-<span id="cb40-14"><a></a>    <span class="at">y =</span> <span class="dv">1</span>,</span>
-<span id="cb40-15"><a></a>    <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"R = "</span>, r.spearman)</span>
-<span id="cb40-16"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a></a><span class="co"># round/set sig digits</span></span>
+<span id="cb42-2"><a></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">signif</span>(r.spearman, <span class="dv">2</span>)</span>
+<span id="cb42-3"><a></a></span>
+<span id="cb42-4"><a></a><span class="co"># plot</span></span>
+<span id="cb42-5"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb42-6"><a></a>  tpms<span class="fl">.2</span>samplecor,</span>
+<span id="cb42-7"><a></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log10</span>(DIVminus8.Rep1 <span class="sc">+</span> <span class="fl">1e-3</span>), <span class="at">y =</span> <span class="fu">log10</span>(DIVminus8.Rep2 <span class="sc">+</span> <span class="fl">1e-3</span>))</span>
+<span id="cb42-8"><a></a>) <span class="sc">+</span></span>
+<span id="cb42-9"><a></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb42-10"><a></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb42-11"><a></a>  <span class="fu">annotate</span>(</span>
+<span id="cb42-12"><a></a>    <span class="st">"text"</span>,</span>
+<span id="cb42-13"><a></a>    <span class="at">x =</span> <span class="dv">2</span>,</span>
+<span id="cb42-14"><a></a>    <span class="at">y =</span> <span class="dv">1</span>,</span>
+<span id="cb42-15"><a></a>    <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"R = "</span>, r.spearman)</span>
+<span id="cb42-16"><a></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure>
@@ -4535,22 +4076,22 @@ p-value with ties</code></pre>
 <h2>Filtering lowly expressed genes</h2>
 <p>OK that’s two samples compared to each other, but now we want to see how <strong>all</strong> samples compare to <strong>all</strong> other samples. Before we do this we need to decide how to apply our expression cutoff across many samples. Should a gene have to meet the cutoff in only one sample? In all samples? Let’s start by saying it has to meet the cutoff in at least half of the 30 samples.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a></a><span class="co"># Make a new column in tpms that is the number of samples in which the value is at least 1</span></span>
-<span id="cb41-2"><a></a>tpms.cutoff <span class="ot">&lt;-</span></span>
-<span id="cb41-3"><a></a>  <span class="fu">mutate</span>(tpms, <span class="at">nSamples =</span> <span class="fu">rowSums</span>(tpms[, <span class="dv">2</span><span class="sc">:</span><span class="dv">31</span>] <span class="sc">&gt;</span> <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb41-4"><a></a>  <span class="co"># Now filter for rows where nSamples is at least 15</span></span>
-<span id="cb41-5"><a></a>  <span class="co"># Meaning that at least 15 samples passed the threshold</span></span>
-<span id="cb41-6"><a></a>  <span class="fu">filter</span>(nSamples <span class="sc">&gt;=</span> <span class="dv">15</span>) <span class="sc">|&gt;</span></span>
-<span id="cb41-7"><a></a>  <span class="co"># Get rid of the nSamples column</span></span>
-<span id="cb41-8"><a></a>  <span class="fu">select</span>(<span class="sc">-</span>nSamples)</span>
-<span id="cb41-9"><a></a></span>
-<span id="cb41-10"><a></a><span class="fu">nrow</span>(tpms)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a><span class="co"># Make a new column in tpms that is the number of samples in which the value is at least 1</span></span>
+<span id="cb43-2"><a></a>tpms.cutoff <span class="ot">&lt;-</span></span>
+<span id="cb43-3"><a></a>  <span class="fu">mutate</span>(tpms, <span class="at">nSamples =</span> <span class="fu">rowSums</span>(tpms[, <span class="dv">2</span><span class="sc">:</span><span class="dv">31</span>] <span class="sc">&gt;</span> <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb43-4"><a></a>  <span class="co"># Now filter for rows where nSamples is at least 15</span></span>
+<span id="cb43-5"><a></a>  <span class="co"># Meaning that at least 15 samples passed the threshold</span></span>
+<span id="cb43-6"><a></a>  <span class="fu">filter</span>(nSamples <span class="sc">&gt;=</span> <span class="dv">15</span>) <span class="sc">|&gt;</span></span>
+<span id="cb43-7"><a></a>  <span class="co"># Get rid of the nSamples column</span></span>
+<span id="cb43-8"><a></a>  <span class="fu">select</span>(<span class="sc">-</span>nSamples)</span>
+<span id="cb43-9"><a></a></span>
+<span id="cb43-10"><a></a><span class="fu">nrow</span>(tpms)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 49972</code></pre>
+<pre><code>[1] 49781</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a></a><span class="fu">nrow</span>(tpms.cutoff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a><span class="fu">nrow</span>(tpms.cutoff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 14861</code></pre>
+<pre><code>[1] 14836</code></pre>
 </div>
 </div>
 </section>
@@ -4558,69 +4099,69 @@ p-value with ties</code></pre>
 <h2>Correlating gene expression values</h2>
 <p>Now we can use the <code>cor</code> function to calculate pairwise correlations in a .red[<em>matrix</em>] of TPM values.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a></a>tpms.cutoff.matrix <span class="ot">&lt;-</span></span>
-<span id="cb45-2"><a></a>  <span class="fu">select</span>(tpms.cutoff, <span class="sc">-</span>ensembl_gene_id) <span class="sc">|&gt;</span></span>
-<span id="cb45-3"><a></a>  <span class="fu">as.matrix</span>()</span>
-<span id="cb45-4"><a></a></span>
-<span id="cb45-5"><a></a>tpms.cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(tpms.cutoff.matrix, <span class="at">method =</span> <span class="st">"spearman"</span>)</span>
-<span id="cb45-6"><a></a><span class="fu">head</span>(tpms.cor)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a>tpms.cutoff.matrix <span class="ot">&lt;-</span></span>
+<span id="cb47-2"><a></a>  <span class="fu">select</span>(tpms.cutoff, <span class="sc">-</span>ensembl_gene_id) <span class="sc">|&gt;</span></span>
+<span id="cb47-3"><a></a>  <span class="fu">as.matrix</span>()</span>
+<span id="cb47-4"><a></a></span>
+<span id="cb47-5"><a></a>tpms.cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(tpms.cutoff.matrix, <span class="at">method =</span> <span class="st">"spearman"</span>)</span>
+<span id="cb47-6"><a></a><span class="fu">head</span>(tpms.cor)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          DIV0.Rep1 DIV0.Rep2 DIV0.Rep3 DIV1.Rep1 DIV1.Rep2
-DIV0.Rep1 1.0000000 0.9922453 0.9857834 0.9348484 0.9324194
-DIV0.Rep2 0.9922453 1.0000000 0.9895779 0.9294218 0.9273449
-DIV0.Rep3 0.9857834 0.9895779 1.0000000 0.9175882 0.9153932
-DIV1.Rep1 0.9348484 0.9294218 0.9175882 1.0000000 0.9933149
-DIV1.Rep2 0.9324194 0.9273449 0.9153932 0.9933149 1.0000000
-DIV1.Rep3 0.9321014 0.9273853 0.9164250 0.9915135 0.9913159
+DIV0.Rep1 1.0000000 0.9921977 0.9856995 0.9344186 0.9319214
+DIV0.Rep2 0.9921977 1.0000000 0.9895483 0.9289543 0.9268475
+DIV0.Rep3 0.9856995 0.9895483 1.0000000 0.9171840 0.9148961
+DIV1.Rep1 0.9344186 0.9289543 0.9171840 1.0000000 0.9933024
+DIV1.Rep2 0.9319214 0.9268475 0.9148961 0.9933024 1.0000000
+DIV1.Rep3 0.9317373 0.9269880 0.9160581 0.9913271 0.9911436
           DIV1.Rep3 DIV1.Rep4 DIV16.Rep1 DIV16.Rep2
-DIV0.Rep1 0.9321014 0.9344590  0.6680186  0.6549872
-DIV0.Rep2 0.9273853 0.9304106  0.6614933  0.6465640
-DIV0.Rep3 0.9164250 0.9177944  0.6380326  0.6218017
-DIV1.Rep1 0.9915135 0.9858579  0.7550841  0.7423875
-DIV1.Rep2 0.9913159 0.9853574  0.7571130  0.7443644
-DIV1.Rep3 1.0000000 0.9865138  0.7564301  0.7425891
+DIV0.Rep1 0.9317373 0.9340858  0.6671896  0.6541035
+DIV0.Rep2 0.9269880 0.9300994  0.6606971  0.6458159
+DIV0.Rep3 0.9160581 0.9174434  0.6372218  0.6209717
+DIV1.Rep1 0.9913271 0.9857919  0.7546652  0.7418435
+DIV1.Rep2 0.9911436 0.9851766  0.7565788  0.7436876
+DIV1.Rep3 1.0000000 0.9863776  0.7559111  0.7418927
           DIV16.Rep3 DIV16.Rep4 DIV21.Rep1 DIV21.Rep2
-DIV0.Rep1  0.6555308  0.6562956  0.6434782  0.6441234
-DIV0.Rep2  0.6480255  0.6483917  0.6369659  0.6371799
-DIV0.Rep3  0.6229298  0.6233139  0.6126546  0.6136543
-DIV1.Rep1  0.7434990  0.7440758  0.7237427  0.7238040
-DIV1.Rep2  0.7460841  0.7461203  0.7255483  0.7256123
-DIV1.Rep3  0.7448212  0.7445382  0.7244319  0.7242751
+DIV0.Rep1  0.6547713  0.6555622  0.6428668  0.6436133
+DIV0.Rep2  0.6474671  0.6477460  0.6363783  0.6367204
+DIV0.Rep3  0.6221840  0.6225424  0.6120404  0.6132091
+DIV1.Rep1  0.7431686  0.7435523  0.7233850  0.7234503
+DIV1.Rep2  0.7455848  0.7455058  0.7251078  0.7252111
+DIV1.Rep3  0.7443106  0.7440814  0.7240321  0.7238090
           DIV21.Rep3 DIV21.Rep4 DIV28.Rep1 DIV28.Rep2
-DIV0.Rep1  0.6461267  0.6426477  0.6390216  0.6421053
-DIV0.Rep2  0.6391854  0.6342137  0.6316861  0.6352214
-DIV0.Rep3  0.6143880  0.6096429  0.6085960  0.6117384
-DIV1.Rep1  0.7263283  0.7222009  0.7164272  0.7143724
-DIV1.Rep2  0.7282509  0.7249480  0.7185337  0.7169766
-DIV1.Rep3  0.7263667  0.7224427  0.7167805  0.7144093
+DIV0.Rep1  0.6454079  0.6420882  0.6383834  0.6415068
+DIV0.Rep2  0.6385565  0.6338002  0.6310968  0.6346436
+DIV0.Rep3  0.6137075  0.6090538  0.6079274  0.6111133
+DIV1.Rep1  0.7258146  0.7219970  0.7161735  0.7138980
+DIV1.Rep2  0.7276872  0.7245541  0.7181366  0.7164069
+DIV1.Rep3  0.7259111  0.7221164  0.7164469  0.7139429
           DIV28.Rep3 DIV28.Rep4 DIV7.Rep1 DIV7.Rep2
-DIV0.Rep1  0.6344281  0.6355676 0.7742758 0.7792020
-DIV0.Rep2  0.6266482  0.6285669 0.7671712 0.7722675
-DIV0.Rep3  0.6034204  0.6050626 0.7436562 0.7494654
-DIV1.Rep1  0.7108448  0.7130572 0.8503631 0.8519662
-DIV1.Rep2  0.7134794  0.7153368 0.8521781 0.8532264
-DIV1.Rep3  0.7115690  0.7131355 0.8506309 0.8521874
+DIV0.Rep1  0.6334989  0.6350530 0.7736803 0.7786601
+DIV0.Rep2  0.6257407  0.6281032 0.7665588 0.7717310
+DIV0.Rep3  0.6024965  0.6045994 0.7429511 0.7488361
+DIV1.Rep1  0.7102763  0.7128705 0.8500321 0.8517566
+DIV1.Rep2  0.7129282  0.7150473 0.8518114 0.8529265
+DIV1.Rep3  0.7109473  0.7128181 0.8502310 0.8518734
           DIV7.Rep3 DIV7.Rep4 DIVminus4.Rep1 DIVminus4.Rep2
-DIV0.Rep1 0.7772718 0.7758796      0.8317332      0.8289624
-DIV0.Rep2 0.7701116 0.7693336      0.8360947      0.8336978
-DIV0.Rep3 0.7468141 0.7458387      0.8518416      0.8504546
-DIV1.Rep1 0.8521139 0.8515258      0.7370960      0.7355276
-DIV1.Rep2 0.8537124 0.8523451      0.7335145      0.7310733
-DIV1.Rep3 0.8526356 0.8523464      0.7344799      0.7318674
+DIV0.Rep1 0.7765741 0.7751908      0.8312509      0.8284210
+DIV0.Rep2 0.7693845 0.7687242      0.8355661      0.8330637
+DIV0.Rep3 0.7460371 0.7450699      0.8513941      0.8499737
+DIV1.Rep1 0.8518416 0.8512450      0.7364004      0.7346787
+DIV1.Rep2 0.8533955 0.8520150      0.7327968      0.7301669
+DIV1.Rep3 0.8522113 0.8518847      0.7339962      0.7312978
           DIVminus4.Rep3 DIVminus8.Rep1 DIVminus8.Rep2
-DIV0.Rep1      0.8301511      0.7957126      0.7965574
-DIV0.Rep2      0.8346960      0.8022918      0.8031270
-DIV0.Rep3      0.8519312      0.8186949      0.8190062
-DIV1.Rep1      0.7360888      0.6994479      0.7000579
-DIV1.Rep2      0.7326038      0.6962439      0.6965824
-DIV1.Rep3      0.7343008      0.6973234      0.6975552
+DIV0.Rep1      0.8297235      0.7951697      0.7960214
+DIV0.Rep2      0.8341773      0.8016991      0.8025049
+DIV0.Rep3      0.8515894      0.8181586      0.8185187
+DIV1.Rep1      0.7352999      0.6985884      0.6992813
+DIV1.Rep2      0.7318231      0.6953795      0.6958153
+DIV1.Rep3      0.7337089      0.6966838      0.6970009
           DIVminus8.Rep3 DIVminus8.Rep4
-DIV0.Rep1      0.7963088      0.7849475
-DIV0.Rep2      0.8015284      0.7899987
-DIV0.Rep3      0.8192264      0.8069155
-DIV1.Rep1      0.7003414      0.6908235
-DIV1.Rep2      0.6959884      0.6867789
-DIV1.Rep3      0.6974818      0.6878911</code></pre>
+DIV0.Rep1      0.7958163      0.7849284
+DIV0.Rep2      0.8009424      0.7898661
+DIV0.Rep3      0.8187167      0.8067762
+DIV1.Rep1      0.6995943      0.6906624
+DIV1.Rep2      0.6952947      0.6866216
+DIV1.Rep3      0.6969669      0.6879696</code></pre>
 </div>
 </div>
 </section>
@@ -4628,13 +4169,13 @@ DIV1.Rep3      0.6974818      0.6878911</code></pre>
 <h2>Hierarchical clustering</h2>
 <p>Now we need to plot these and have similar samples (i.e.&nbsp;those that are highly correlated with each other) be clustered near to each other. We will use <code>pheatmap</code> to do this.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a></a><span class="co"># let's pull information that we want to add as categories</span></span>
-<span id="cb47-2"><a></a><span class="fu">pheatmap</span>(</span>
-<span id="cb47-3"><a></a>  tpms.cor,</span>
-<span id="cb47-4"><a></a>  <span class="at">annotation_col =</span> metadata[, <span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>],</span>
-<span id="cb47-5"><a></a>  <span class="at">fontsize =</span> <span class="dv">7</span>,</span>
-<span id="cb47-6"><a></a>  <span class="at">show_colnames =</span> <span class="cn">FALSE</span></span>
-<span id="cb47-7"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a><span class="co"># let's pull information that we want to add as categories</span></span>
+<span id="cb49-2"><a></a><span class="fu">pheatmap</span>(</span>
+<span id="cb49-3"><a></a>  tpms.cor,</span>
+<span id="cb49-4"><a></a>  <span class="at">annotation_col =</span> metadata[, <span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>],</span>
+<span id="cb49-5"><a></a>  <span class="at">fontsize =</span> <span class="dv">7</span>,</span>
+<span id="cb49-6"><a></a>  <span class="at">show_colnames =</span> <span class="cn">FALSE</span></span>
+<span id="cb49-7"><a></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 
 <p>This looks pretty good! There are two main points to takeaway here. First, all replicates for a given timepoint are clustering with each other. Second, you can kind of derive the order of the timepoints from the clustering. The biggest separation is between early (DIVminus8 to DIV1) and late (DIV7 to DIV28). After that you can then see finer-grained structure.</p>
@@ -4657,80 +4198,80 @@ DIV1.Rep3      0.6974818      0.6878911</code></pre>
 <p>PCA works best when values are approximately normally distributed, so we will first take the log of our expression values.</p>
 <p>With our cutoff as it is now (genes have to have expression of at least 1 TPM in half the samples), it is possible that we will have some 0 values. Taking the log of 0 might cause a problem, so we will add a pseudocount.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a></a>tpms.cutoff.matrix <span class="ot">&lt;-</span></span>
-<span id="cb48-2"><a></a>  <span class="fu">select</span>(tpms.cutoff, <span class="sc">-</span>ensembl_gene_id) <span class="sc">|&gt;</span></span>
-<span id="cb48-3"><a></a>  <span class="fu">as.matrix</span>()</span>
-<span id="cb48-4"><a></a></span>
-<span id="cb48-5"><a></a><span class="co"># Add pseudocount and take log2</span></span>
-<span id="cb48-6"><a></a>tpms.cutoff.matrix <span class="ot">&lt;-</span> <span class="fu">log2</span>(tpms.cutoff.matrix <span class="sc">+</span> <span class="fl">1e-3</span>)</span>
-<span id="cb48-7"><a></a></span>
-<span id="cb48-8"><a></a><span class="co"># scale - annoying double transpose</span></span>
-<span id="cb48-9"><a></a>tpms.cutoff.matrix <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">scale</span>(<span class="fu">t</span>(tpms.cutoff.matrix)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a></a>tpms.cutoff.matrix <span class="ot">&lt;-</span></span>
+<span id="cb50-2"><a></a>  <span class="fu">select</span>(tpms.cutoff, <span class="sc">-</span>ensembl_gene_id) <span class="sc">|&gt;</span></span>
+<span id="cb50-3"><a></a>  <span class="fu">as.matrix</span>()</span>
+<span id="cb50-4"><a></a></span>
+<span id="cb50-5"><a></a><span class="co"># Add pseudocount and take log2</span></span>
+<span id="cb50-6"><a></a>tpms.cutoff.matrix <span class="ot">&lt;-</span> <span class="fu">log2</span>(tpms.cutoff.matrix <span class="sc">+</span> <span class="fl">1e-3</span>)</span>
+<span id="cb50-7"><a></a></span>
+<span id="cb50-8"><a></a><span class="co"># scale - annoying double transpose</span></span>
+<span id="cb50-9"><a></a>tpms.cutoff.matrix <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">scale</span>(<span class="fu">t</span>(tpms.cutoff.matrix)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="pca-analysis-2" class="slide level2 smaller">
 <h2>PCA analysis</h2>
 <p>Very similar interpretation as before (heatmap of correlation).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a></a><span class="co"># prcomp expects samples to be rownames, right now they are columns</span></span>
-<span id="cb49-2"><a></a><span class="co"># so we need to transpose the matrix using `t`</span></span>
-<span id="cb49-3"><a></a>tpms.pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(<span class="fu">t</span>(tpms.cutoff.matrix))</span>
-<span id="cb49-4"><a></a></span>
-<span id="cb49-5"><a></a><span class="co"># The coordinates of samples on the principle components are stored in the $x slot</span></span>
-<span id="cb49-6"><a></a><span class="co"># These are what we are going to use to plot</span></span>
-<span id="cb49-7"><a></a><span class="co"># We can also also some data about the samples here so that our plot is a little more interesting</span></span>
-<span id="cb49-8"><a></a></span>
-<span id="cb49-9"><a></a><span class="do">### Tricky piping!!</span></span>
-<span id="cb49-10"><a></a>tpms.pca.pc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(tpms.pca<span class="sc">$</span>x) <span class="sc">|&gt;</span></span>
-<span id="cb49-11"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample_id"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb49-12"><a></a>  <span class="fu">left_join</span>(metadata[, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">by =</span> <span class="st">"sample_id"</span>)</span>
-<span id="cb49-13"><a></a></span>
-<span id="cb49-14"><a></a></span>
-<span id="cb49-15"><a></a><span class="co"># We can see how much of the total variance is explained by each PC using the summary function</span></span>
-<span id="cb49-16"><a></a>tpms.pca.summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(tpms.pca)<span class="sc">$</span>importance</span>
-<span id="cb49-17"><a></a></span>
-<span id="cb49-18"><a></a><span class="co"># The amount of variance explained by PC1 is the second row, first column of this table</span></span>
-<span id="cb49-19"><a></a><span class="co"># It's given as a fraction of 1, so we multiply it by 100 to get a percentage</span></span>
-<span id="cb49-20"><a></a>pc1var <span class="ot">&lt;-</span> <span class="fu">round</span>(tpms.pca.summary[<span class="dv">2</span>, <span class="dv">1</span>] <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>)</span>
-<span id="cb49-21"><a></a></span>
-<span id="cb49-22"><a></a><span class="co"># The amount of variance explained by PC2 is the second row, second column of this table</span></span>
-<span id="cb49-23"><a></a>pc2var <span class="ot">&lt;-</span> <span class="fu">round</span>(tpms.pca.summary[<span class="dv">2</span>, <span class="dv">2</span>] <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>)</span>
-<span id="cb49-24"><a></a></span>
-<span id="cb49-25"><a></a><span class="co"># Reorder timepoints explicitly for plotting purposes</span></span>
-<span id="cb49-26"><a></a></span>
-<span id="cb49-27"><a></a>tpms.pca.pc<span class="sc">$</span>samp <span class="ot">&lt;-</span></span>
-<span id="cb49-28"><a></a>  <span class="fu">factor</span>(</span>
-<span id="cb49-29"><a></a>    tpms.pca.pc<span class="sc">$</span>samp,</span>
-<span id="cb49-30"><a></a>    <span class="at">levels =</span> <span class="fu">c</span>(</span>
-<span id="cb49-31"><a></a>      <span class="st">"DIVminus8"</span>,</span>
-<span id="cb49-32"><a></a>      <span class="st">"DIVminus4"</span>,</span>
-<span id="cb49-33"><a></a>      <span class="st">"DIV0"</span>,</span>
-<span id="cb49-34"><a></a>      <span class="st">"DIV1"</span>,</span>
-<span id="cb49-35"><a></a>      <span class="st">"DIV7"</span>,</span>
-<span id="cb49-36"><a></a>      <span class="st">"DIV16"</span>,</span>
-<span id="cb49-37"><a></a>      <span class="st">"DIV21"</span>,</span>
-<span id="cb49-38"><a></a>      <span class="st">"DIV28"</span></span>
-<span id="cb49-39"><a></a>    )</span>
-<span id="cb49-40"><a></a>  )</span>
-<span id="cb49-41"><a></a></span>
-<span id="cb49-42"><a></a><span class="co"># Plot results</span></span>
-<span id="cb49-43"><a></a><span class="fu">ggplot</span>(</span>
-<span id="cb49-44"><a></a>  <span class="at">data =</span> tpms.pca.pc,</span>
-<span id="cb49-45"><a></a>  <span class="fu">aes</span>(</span>
-<span id="cb49-46"><a></a>    <span class="at">x =</span> PC1,</span>
-<span id="cb49-47"><a></a>    <span class="at">y =</span> PC2,</span>
-<span id="cb49-48"><a></a>    <span class="at">color =</span> samp,</span>
-<span id="cb49-49"><a></a>    <span class="at">label =</span> sample_id</span>
-<span id="cb49-50"><a></a>  )</span>
-<span id="cb49-51"><a></a>) <span class="sc">+</span></span>
-<span id="cb49-52"><a></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
-<span id="cb49-53"><a></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>) <span class="sc">+</span></span>
-<span id="cb49-54"><a></a>  <span class="fu">theme_cowplot</span>(<span class="dv">16</span>) <span class="sc">+</span></span>
-<span id="cb49-55"><a></a>  <span class="fu">labs</span>(</span>
-<span id="cb49-56"><a></a>    <span class="at">x =</span> <span class="fu">paste</span>(<span class="st">"PC1,"</span>, pc1var, <span class="st">"% explained var."</span>),</span>
-<span id="cb49-57"><a></a>    <span class="at">y =</span> <span class="fu">paste</span>(<span class="st">"PC2,"</span>, pc2var, <span class="st">"% explained var."</span>)</span>
-<span id="cb49-58"><a></a>  ) <span class="sc">+</span></span>
-<span id="cb49-59"><a></a>  <span class="fu">geom_text_repel</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a></a><span class="co"># prcomp expects samples to be rownames, right now they are columns</span></span>
+<span id="cb51-2"><a></a><span class="co"># so we need to transpose the matrix using `t`</span></span>
+<span id="cb51-3"><a></a>tpms.pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(<span class="fu">t</span>(tpms.cutoff.matrix))</span>
+<span id="cb51-4"><a></a></span>
+<span id="cb51-5"><a></a><span class="co"># The coordinates of samples on the principle components are stored in the $x slot</span></span>
+<span id="cb51-6"><a></a><span class="co"># These are what we are going to use to plot</span></span>
+<span id="cb51-7"><a></a><span class="co"># We can also also some data about the samples here so that our plot is a little more interesting</span></span>
+<span id="cb51-8"><a></a></span>
+<span id="cb51-9"><a></a><span class="do">### Tricky piping!!</span></span>
+<span id="cb51-10"><a></a>tpms.pca.pc <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(tpms.pca<span class="sc">$</span>x) <span class="sc">|&gt;</span></span>
+<span id="cb51-11"><a></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sample_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb51-12"><a></a>  <span class="fu">left_join</span>(metadata[, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">by =</span> <span class="st">"sample_id"</span>)</span>
+<span id="cb51-13"><a></a></span>
+<span id="cb51-14"><a></a></span>
+<span id="cb51-15"><a></a><span class="co"># We can see how much of the total variance is explained by each PC using the summary function</span></span>
+<span id="cb51-16"><a></a>tpms.pca.summary <span class="ot">&lt;-</span> <span class="fu">summary</span>(tpms.pca)<span class="sc">$</span>importance</span>
+<span id="cb51-17"><a></a></span>
+<span id="cb51-18"><a></a><span class="co"># The amount of variance explained by PC1 is the second row, first column of this table</span></span>
+<span id="cb51-19"><a></a><span class="co"># It's given as a fraction of 1, so we multiply it by 100 to get a percentage</span></span>
+<span id="cb51-20"><a></a>pc1var <span class="ot">&lt;-</span> <span class="fu">round</span>(tpms.pca.summary[<span class="dv">2</span>, <span class="dv">1</span>] <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb51-21"><a></a></span>
+<span id="cb51-22"><a></a><span class="co"># The amount of variance explained by PC2 is the second row, second column of this table</span></span>
+<span id="cb51-23"><a></a>pc2var <span class="ot">&lt;-</span> <span class="fu">round</span>(tpms.pca.summary[<span class="dv">2</span>, <span class="dv">2</span>] <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb51-24"><a></a></span>
+<span id="cb51-25"><a></a><span class="co"># Reorder timepoints explicitly for plotting purposes</span></span>
+<span id="cb51-26"><a></a></span>
+<span id="cb51-27"><a></a>tpms.pca.pc<span class="sc">$</span>samp <span class="ot">&lt;-</span></span>
+<span id="cb51-28"><a></a>  <span class="fu">factor</span>(</span>
+<span id="cb51-29"><a></a>    tpms.pca.pc<span class="sc">$</span>samp,</span>
+<span id="cb51-30"><a></a>    <span class="at">levels =</span> <span class="fu">c</span>(</span>
+<span id="cb51-31"><a></a>      <span class="st">"DIVminus8"</span>,</span>
+<span id="cb51-32"><a></a>      <span class="st">"DIVminus4"</span>,</span>
+<span id="cb51-33"><a></a>      <span class="st">"DIV0"</span>,</span>
+<span id="cb51-34"><a></a>      <span class="st">"DIV1"</span>,</span>
+<span id="cb51-35"><a></a>      <span class="st">"DIV7"</span>,</span>
+<span id="cb51-36"><a></a>      <span class="st">"DIV16"</span>,</span>
+<span id="cb51-37"><a></a>      <span class="st">"DIV21"</span>,</span>
+<span id="cb51-38"><a></a>      <span class="st">"DIV28"</span></span>
+<span id="cb51-39"><a></a>    )</span>
+<span id="cb51-40"><a></a>  )</span>
+<span id="cb51-41"><a></a></span>
+<span id="cb51-42"><a></a><span class="co"># Plot results</span></span>
+<span id="cb51-43"><a></a><span class="fu">ggplot</span>(</span>
+<span id="cb51-44"><a></a>  <span class="at">data =</span> tpms.pca.pc,</span>
+<span id="cb51-45"><a></a>  <span class="fu">aes</span>(</span>
+<span id="cb51-46"><a></a>    <span class="at">x =</span> PC1,</span>
+<span id="cb51-47"><a></a>    <span class="at">y =</span> PC2,</span>
+<span id="cb51-48"><a></a>    <span class="at">color =</span> samp,</span>
+<span id="cb51-49"><a></a>    <span class="at">label =</span> sample_id</span>
+<span id="cb51-50"><a></a>  )</span>
+<span id="cb51-51"><a></a>) <span class="sc">+</span></span>
+<span id="cb51-52"><a></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb51-53"><a></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>) <span class="sc">+</span></span>
+<span id="cb51-54"><a></a>  <span class="fu">theme_cowplot</span>(<span class="dv">16</span>) <span class="sc">+</span></span>
+<span id="cb51-55"><a></a>  <span class="fu">labs</span>(</span>
+<span id="cb51-56"><a></a>    <span class="at">x =</span> <span class="fu">paste</span>(<span class="st">"PC1,"</span>, pc1var, <span class="st">"% explained var."</span>),</span>
+<span id="cb51-57"><a></a>    <span class="at">y =</span> <span class="fu">paste</span>(<span class="st">"PC2,"</span>, pc2var, <span class="st">"% explained var."</span>)</span>
+<span id="cb51-58"><a></a>  ) <span class="sc">+</span></span>
+<span id="cb51-59"><a></a>  <span class="fu">geom_text_repel</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 </div>
 

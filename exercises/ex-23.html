@@ -4,7 +4,7 @@
 <meta name="generator" content="quarto-1.9.38">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Matthew Taliaferro">
-<meta name="dcterms.date" content="2026-09-11">
+<meta name="dcterms.date" content="2026-09-14">
 <title>RNAseq QC – MOLB 7950</title>
 <style>
 /* Default styles provided by pandoc.
@@ -408,11 +408,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
 <li><a href="#relating-genes-and-transcripts" id="toc-relating-genes-and-transcripts" class="nav-link active" data-scroll-target="#relating-genes-and-transcripts">Relating genes and transcripts</a></li>
-  <li><a href="#using-biomart" id="toc-using-biomart" class="nav-link" data-scroll-target="#using-biomart">Using biomaRt</a></li>
-  <li><a href="#using-biomart-1" id="toc-using-biomart-1" class="nav-link" data-scroll-target="#using-biomart-1">Using biomaRt</a></li>
-  <li><a href="#using-biomart-2" id="toc-using-biomart-2" class="nav-link" data-scroll-target="#using-biomart-2">Using biomaRt</a></li>
-  <li><a href="#using-biomart-3" id="toc-using-biomart-3" class="nav-link" data-scroll-target="#using-biomart-3">Using biomaRt</a></li>
-  <li><a href="#using-biomart-4" id="toc-using-biomart-4" class="nav-link" data-scroll-target="#using-biomart-4">Using biomaRt</a></li>
+  <li><a href="#using-annotationhub" id="toc-using-annotationhub" class="nav-link" data-scroll-target="#using-annotationhub">Using AnnotationHub</a></li>
+  <li><a href="#using-annotationhub-1" id="toc-using-annotationhub-1" class="nav-link" data-scroll-target="#using-annotationhub-1">Using AnnotationHub</a></li>
   <li><a href="#getting-gene-level-expression-data-with-tximport" id="toc-getting-gene-level-expression-data-with-tximport" class="nav-link" data-scroll-target="#getting-gene-level-expression-data-with-tximport">Getting gene level expression data with <code>tximport</code></a></li>
   <li><a href="#gene-expression-data-with-tximport" id="toc-gene-expression-data-with-tximport" class="nav-link" data-scroll-target="#gene-expression-data-with-tximport">Gene expression data with <code>tximport</code></a></li>
   <li><a href="#gene-expression-data-with-tximport-1" id="toc-gene-expression-data-with-tximport-1" class="nav-link" data-scroll-target="#gene-expression-data-with-tximport-1">Gene expression data with <code>tximport</code></a></li>
@@ -452,7 +449,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 11, 2026</p>
+      <p class="date">September 14, 2026</p>
     </div>
   </div>
   
@@ -462,62 +459,53 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 </header><section id="relating-genes-and-transcripts" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="relating-genes-and-transcripts">Relating genes and transcripts</h2>
-<p>We can get this relationships between <em>transcripts</em> and <em>genes</em> through <code>biomaRt</code>.</p>
-<p><code>biomaRt</code> has many tables that relate genes, transcripts, and other useful data include gene biotypes and gene ontology categories, even across species. Let’s use it here to get a table of genes and transcripts for the mouse genome.</p>
+<p>We can get this relationships between <em>transcripts</em> and <em>genes</em> through <code>AnnotationHub</code>.</p>
+<p><code>AnnotationHub</code> has many tables that relate genes, transcripts, and other useful data including gene biotypes and gene ontology categories, even across species. Let’s use it here to get a table of genes and transcripts for the mouse genome.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># First we need to define a 'mart' to use.</span></span>
-<span><span class="co"># There are a handful of them that</span></span>
-<span><span class="co"># you can see here:</span></span>
-<span><span class="fu">listMarts</span><span class="op">(</span></span>
-<span>  mart <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  host <span class="op">=</span> <span class="st">"www.ensembl.org"</span></span>
-<span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">ah</span> <span class="op">&lt;-</span> <span class="fu">AnnotationHub</span><span class="op">(</span>ask <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Helper: pull AnnotationHub metadata into a tibble and grab the</span></span>
+<span><span class="co"># most recent EnsDb hit for a given species</span></span>
+<span><span class="va">get_latest_ensdb</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">ah</span>, <span class="va">species</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">query</span><span class="op">(</span><span class="va">ah</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"EnsDb"</span>, <span class="va">species</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">mcols</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">as_tibble</span><span class="op">(</span>rownames <span class="op">=</span> <span class="st">"ah_id"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">rdatadateadded</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html">slice</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">mouse_hit</span> <span class="op">&lt;-</span> <span class="fu">get_latest_ensdb</span><span class="op">(</span><span class="va">ah</span>, <span class="st">"Mus musculus"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">ah_id</span>, <span class="va">title</span>, <span class="va">genome</span>, <span class="va">rdatadateadded</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">edb_mouse</span> <span class="op">&lt;-</span> <span class="va">ah</span><span class="op">[[</span><span class="va">mouse_hit</span><span class="op">$</span><span class="va">ah_id</span><span class="op">]</span><span class="op">]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>I encourage you to see what is in each mart, but for now we are only going to use ENSEMBL_MART_ENSEMBL.</p>
+<p>I encourage you to see what is in this database, but for now we are only going to look for transcript IDs and gene IDs.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mart</span> <span class="op">&lt;-</span> <span class="fu">biomaRt</span><span class="fu">::</span><span class="fu"><a href="https://huber-group-embl.github.io/biomaRt/reference/useEnsembl.html">useEnsembl</a></span><span class="op">(</span><span class="st">"??"</span>, host <span class="op">=</span> <span class="st">"https://www.ensembl.org"</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu">mcols</span><span class="op">(</span><span class="va">ah</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section><section id="using-biomart" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="using-biomart">Using biomaRt</h2>
-<p>Alright, we’ve chosen our mart. What data sets are available in this mart?</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">datasets</span> <span class="op">&lt;-</span> <span class="fu">listDatasets</span><span class="op">(</span><span class="va">mart</span><span class="op">)</span></span>
-<span><span class="fu">gt</span><span class="op">(</span><span class="va">datasets</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
+</section><section id="using-annotationhub" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="using-annotationhub">Using AnnotationHub</h2>
 <p>A lot of stuff for a lot of species! Perhaps we want to limit it to see which ones are relevant to mouse.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mousedatasets</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">datasets</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"??"</span>, <span class="va">dataset</span><span class="op">)</span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">mcols</span><span class="op">(</span><span class="va">ah</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">species</span> <span class="op">==</span> <span class="st">'Mus musculus'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>OK lets get data about mouse transcripts. I’m going to also add the gene_name attribute.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">t2g</span> <span class="op">&lt;-</span> <span class="fu">transcripts</span><span class="op">(</span><span class="va">edb_mouse</span>,</span>
+<span>                              columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"tx_id"</span>, <span class="st">"gene_id"</span>, <span class="st">"gene_name"</span><span class="op">)</span>,</span>
+<span>                              return.type <span class="op">=</span> <span class="st">"DataFrame"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>ensembl_transcript_id <span class="op">=</span> <span class="va">tx_id</span>, ensembl_gene_id <span class="op">=</span> <span class="va">gene_id</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">gt</span><span class="op">(</span><span class="va">mousedatasets</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">t2g</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</section><section id="using-biomart-1" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="using-biomart-1">Using biomaRt</h2>
-<p>Ah so we probably want the dataset called ‘mmusculus_gene_ensembl’!</p>
+</section><section id="using-annotationhub-1" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="using-annotationhub-1">Using AnnotationHub</h2>
+<p>Alright this looks good! Although the gene_name field could be useful, for our purposes today, we don’t really need it, and the tools we are using don’t expect it.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mart</span> <span class="op">&lt;-</span> <span class="fu">biomaRt</span><span class="fu">::</span><span class="fu"><a href="https://huber-group-embl.github.io/biomaRt/reference/useEnsembl.html">useEnsembl</a></span><span class="op">(</span></span>
-<span>  <span class="st">"ENSEMBL_MART_ENSEMBL"</span>,</span>
-<span>  dataset <span class="op">=</span> <span class="st">"??"</span>,</span>
-<span>  host <span class="op">=</span> <span class="st">"https://www.ensembl.org"</span></span>
-<span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section><section id="using-biomart-2" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="using-biomart-2">Using biomaRt</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">goodies</span> <span class="op">&lt;-</span> <span class="fu">listAttributes</span><span class="op">(</span><span class="va">mart</span><span class="op">)</span></span>
-<span><span class="fu">gt</span><span class="op">(</span><span class="va">goodies</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,<span class="op">]</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section><section id="using-biomart-3" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="using-biomart-3">Using biomaRt</h2>
-<p>So there are 2885 rows of goodies about the mouse genome and its relationship to <em>many</em> other genomes. However, you can probably see that the ones that are most useful to us right now are right at the top: ‘ensembl_transcript_id’ and ‘ensembl_gene_id’. We can use those attributes in our mart to make a table relating genes and transcripts.</p>
-<p>I’m going to through one more attribute in: external_gene_name. Those are usually more informative than ensembl IDs.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">#t2g &lt;- biomaRt::getBM(attributes = c("??", "??", "??"), mart = mart)</span></span>
-<span></span>
-<span><span class="co"># write_tsv(x = t2g, file = here("data","block-rna","t2g.tsv.gz"))</span></span>
-<span><span class="va">t2g</span> <span class="op">&lt;-</span> <span class="fu">read_tsv</span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">"data"</span>,<span class="st">"block-rna"</span>,<span class="st">"t2g.tsv.gz"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">gt</span><span class="op">(</span><span class="va">t2g</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>, <span class="op">]</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section><section id="using-biomart-4" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="using-biomart-4">Using biomaRt</h2>
-<p>Alright this looks good! We are going to split this into two tables. One that contains transcript ID and gene ID, and the other that contains gene ID and gene name.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>t2g <span class="ot">&lt;-</span> t2g <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(??, ??)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">t2g</span> <span class="op">&lt;-</span> <span class="va">t2g</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">ensembl_transcript_id</span>, <span class="va">ensembl_gene_id</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="getting-gene-level-expression-data-with-tximport" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="getting-gene-level-expression-data-with-tximport">Getting gene level expression data with <code>tximport</code>
 </h2>
@@ -527,21 +515,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section><section id="gene-expression-data-with-tximport" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="gene-expression-data-with-tximport">Gene expression data with <code>tximport</code>
 </h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The directory where all of the sample-specific salmon subdirectories live</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># list.files(here("data/block-rna/differentiation_salmonouts"), pattern = "quant.sf")</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">sample_id =</span> ??, <span class="co"># sample id</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                   <span class="at">salmon_dirs =</span> ?? <span class="co"># path to files</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                   ) <span class="sc">|&gt;</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(<span class="at">col =</span> sample_id, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"samp"</span>,<span class="st">"rep"</span>), <span class="at">sep =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">."</span>, <span class="at">remove =</span> F)</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>metadata<span class="sc">$</span>rep <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">"Rep"</span>, <span class="at">replacement =</span> <span class="st">""</span>, metadata<span class="sc">$</span>rep)</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="do">## add sample id to rownames</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(metadata) <span class="ot">&lt;-</span> metadata<span class="sc">$</span>sample_id</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The directory where all of the sample-specific salmon subdirectories live</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># list.files(here("data/block-rna/differentiation_salmonouts"), pattern = "quant.sf")</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>metadata <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">sample_id =</span> ??, <span class="co"># sample id</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                   <span class="at">salmon_dirs =</span> ?? <span class="co"># path to files</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                   ) <span class="sc">|&gt;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(<span class="at">col =</span> sample_id, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"samp"</span>,<span class="st">"rep"</span>), <span class="at">sep =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">."</span>, <span class="at">remove =</span> F)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>metadata<span class="sc">$</span>rep <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="at">pattern =</span> <span class="st">"Rep"</span>, <span class="at">replacement =</span> <span class="st">""</span>, metadata<span class="sc">$</span>rep)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="do">## add sample id to rownames</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(metadata) <span class="ot">&lt;-</span> metadata<span class="sc">$</span>sample_id</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="gene-expression-data-with-tximport-1" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="gene-expression-data-with-tximport-1">Gene expression data with <code>tximport</code>
 </h2>
@@ -549,7 +537,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Now we are ready to run <code>tximport</code></p>
 <p><code>tximport</code> is going to want paths to all the quantification files (salm_dirs) and a table that relates transcripts to genes (t2g). Luckily, we happen to have those exact two things.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># create a list containg paths</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># create a list containg paths</span></span>
 <span><span class="va">salmdir</span> <span class="op">&lt;-</span> <span class="op">?</span><span class="op">?</span></span>
 <span></span>
 <span><span class="co"># add names</span></span>
@@ -567,7 +555,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </h2>
 <p>Notice how we chose <em>lengthscaledTPM</em> for our abundance measurement. This is going to give us TPM values (transcripts per million) for expression in the $abundance slot. Let’s check out what we have now.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tpms</span> <span class="op">&lt;-</span> <span class="va">txi</span><span class="op">$</span><span class="va">abundance</span> <span class="op">|&gt;</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tpms</span> <span class="op">&lt;-</span> <span class="va">txi</span><span class="op">$</span><span class="va">abundance</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">rownames_to_column</span><span class="op">(</span>var <span class="op">=</span> <span class="st">"ensembl_gene_id"</span><span class="op">)</span></span>
 <span></span>
@@ -581,43 +569,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Let’s check and see if that’s true.</p>
 </section><section id="tpm-as-an-expression-metric-1" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="tpm-as-an-expression-metric-1">TPM as an expression metric</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(tpms[,<span class="sc">-</span><span class="dv">1</span>])</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(tpms<span class="sc">$</span>??)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(tpms<span class="sc">$</span>??)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(tpms<span class="sc">$</span>??)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(tpms[,<span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(tpms<span class="sc">$</span>??)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(tpms<span class="sc">$</span>??)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(tpms<span class="sc">$</span>??)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>OK, not quite one million, but pretty darn close.</p>
 <p>This notion that TPMs represent proportions of a whole also leads to another interesting insight into what <code>tximport</code> is doing here. If all transcripts belong to genes, then the TPM for a gene must be the sum of the TPMs of its transcripts. Can we verify that that is true?</p>
 </section><section id="tpm-as-an-expression-metric-2" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="tpm-as-an-expression-metric-2">TPM as an expression metric</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Redefine for clarity in comparisons</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>tpms.genes <span class="ot">&lt;-</span> tpms</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a new tximport object, but this time instead</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># of giving gene expression values, give transcript expression values</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># This is controlled by the `txOut` argument</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>txi.transcripts <span class="ot">&lt;-</span> <span class="fu">tximport</span>(</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  salmdir,</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"salmon"</span>,</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">tx2gene =</span> t2g,</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dropInfReps =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">countsFromAbundance =</span> <span class="st">"lengthScaledTPM"</span>,</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">txOut =</span> <span class="cn">TRUE</span></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a table of tpm values for every transcript</span></span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>tpms.txs <span class="ot">&lt;-</span> ?? <span class="sc">|&gt;</span></span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_transcript_id"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(t2g, ., <span class="at">by =</span> <span class="st">"ensembl_transcript_id"</span>)</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="fu">gt</span>(tpms.txs[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, ])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Redefine for clarity in comparisons</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>tpms.genes <span class="ot">&lt;-</span> tpms</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a new tximport object, but this time instead</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># of giving gene expression values, give transcript expression values</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># This is controlled by the `txOut` argument</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>txi.transcripts <span class="ot">&lt;-</span> <span class="fu">tximport</span>(</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  salmdir,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"salmon"</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">tx2gene =</span> t2g,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dropInfReps =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">countsFromAbundance =</span> <span class="st">"lengthScaledTPM"</span>,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">txOut =</span> <span class="cn">TRUE</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a table of tpm values for every transcript</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>tpms.txs <span class="ot">&lt;-</span> ?? <span class="sc">|&gt;</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"ensembl_transcript_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(t2g, ., <span class="at">by =</span> <span class="st">"ensembl_transcript_id"</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="fu">gt</span>(tpms.txs[<span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, ])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>OK so lets look at the expression of ENSMUSG00000020634 in the first sample (DIVminus8.Rep1).</p>
 </section><section id="tpm-as-an-expression-metric-3" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="tpm-as-an-expression-metric-3">TPM as an expression metric</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Get sum of tpm values for transcripts that belong to ENSMUSG00000020634</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Get sum of tpm values for transcripts that belong to ENSMUSG00000020634</span></span>
 <span><span class="va">tpms.tx.ENSMUSG00000020634</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">tpms.txs</span>, <span class="va">ensembl_gene_id</span> <span class="op">==</span> <span class="st">"ENSMUSG00000020634"</span><span class="op">)</span></span>
 <span><span class="va">sumoftxtpm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">tpms.tx.ENSMUSG00000020634</span><span class="op">$</span><span class="va">DIVminus8.Rep1</span><span class="op">)</span></span>
 <span></span>
@@ -639,18 +627,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section><section id="hierarchical-clustering" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="hierarchical-clustering">Hierarchical clustering</h2>
 <p>A simple way to think about this is to simply correlate TPM values for genes between samples. For plotting purposes here, let’s plot the log(TPM) of two samples against each other. However, for the actual correlation coefficient we are going to be using the <em>Spearman</em> correlation method, which uses ranks, not absolute values. This means that whether or not you take the log will have no effect on the Spearman correlation coefficient.</p>
 <div class="cell" data-output-location="slide">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># DIVminus8.Rep1 vs DIVminus8.Rep2</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">cor</span>(tpms<span class="sc">$</span>DIVminus8.Rep1, tpms<span class="sc">$</span>DIVminus8.Rep2,</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"spearman"</span>)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">signif</span>(r.spearman, <span class="dv">2</span>)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># plot adding pseudocount + log</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tpms, <span class="fu">aes</span>(<span class="at">x =</span> log??(DIVminus8.Rep1 <span class="sc">+</span> ??), <span class="at">y =</span> log??(DIVminus8.Rep2 <span class="sc">+</span> ??))) <span class="sc">+</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"R = "</span>, r.spearman))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># DIVminus8.Rep1 vs DIVminus8.Rep2</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">cor</span>(tpms<span class="sc">$</span>DIVminus8.Rep1, tpms<span class="sc">$</span>DIVminus8.Rep2,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"spearman"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">signif</span>(r.spearman, <span class="dv">2</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co"># plot adding pseudocount + log</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tpms, <span class="fu">aes</span>(<span class="at">x =</span> log??(DIVminus8.Rep1 <span class="sc">+</span> ??), <span class="at">y =</span> log??(DIVminus8.Rep2 <span class="sc">+</span> ??))) <span class="sc">+</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"R = "</span>, r.spearman))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="hierarchical-clustering-1" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="hierarchical-clustering-1">Hierarchical clustering</h2>
 <p>With RNAseq data, the variance of a gene’s expression increases as the expression increases. However, using a pseudocount and taking the log of the expression value actually reverses this trend. Now, genes with the lowest expression have the most variance. Why is this a problem? Well, the genes with the most variance are going to be the ones that contribute the most to intersample differences. Ideally, we would like to therefore remove the relationship between expression and variance.</p>
@@ -658,65 +646,65 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>So, for now, we will take another approach of simply using an expression threshold. Any gene that does not meet our threshold will be excluded from the analysis. Obviously where to set this threshold is a bit subjective. For now, we will set this cutoff at 1 TPM.</p>
 </section><section id="hierarchical-clustering-2" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="hierarchical-clustering-2">Hierarchical clustering</h2>
 <div class="cell" data-output-location="slide">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># DIVminus8.Rep1 vs DIVminus8.Rep2</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Since we are plotting log TPM values we will only keep for genes that have expression of at least 1 TPM in both samples</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>tpms_filt <span class="ot">&lt;-</span> tpms <span class="sc">|&gt;</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(ensembl_gene_id, DIVminus8.Rep1, DIVminus8.Rep2) <span class="sc">|&gt;</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(?? <span class="sc">&gt;=</span> ?? <span class="sc">&amp;</span> ?? <span class="sc">&gt;=</span> ??)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co"># pull the correlation coefficient</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">cor</span>(</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  tpms_filt<span class="sc">$</span>DIVminus8.Rep1,</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  tpms_filt<span class="sc">$</span>DIVminus8.Rep2,</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"spearman"</span></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="co"># round/set sig digits</span></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">signif</span>(r.spearman, <span class="dv">2</span>)</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="co"># plot adding pseudocount + log</span></span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tpms_filt, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log10</span>(DIVminus8.Rep1 <span class="sc">+</span> <span class="fl">1e-3</span>), <span class="at">y =</span> <span class="fu">log10</span>(DIVminus8.Rep2 <span class="sc">+</span> <span class="fl">1e-3</span>))) <span class="sc">+</span></span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="dv">1</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"R = "</span>, r.spearman))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># DIVminus8.Rep1 vs DIVminus8.Rep2</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Since we are plotting log TPM values we will only keep for genes that have expression of at least 1 TPM in both samples</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>tpms_filt <span class="ot">&lt;-</span> tpms <span class="sc">|&gt;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(ensembl_gene_id, DIVminus8.Rep1, DIVminus8.Rep2) <span class="sc">|&gt;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(?? <span class="sc">&gt;=</span> ?? <span class="sc">&amp;</span> ?? <span class="sc">&gt;=</span> ??)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># pull the correlation coefficient</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">cor</span>(</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  tpms_filt<span class="sc">$</span>DIVminus8.Rep1,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  tpms_filt<span class="sc">$</span>DIVminus8.Rep2,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"spearman"</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co"># round/set sig digits</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>r.spearman <span class="ot">&lt;-</span> <span class="fu">signif</span>(r.spearman, <span class="dv">2</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co"># plot adding pseudocount + log</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tpms_filt, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">log10</span>(DIVminus8.Rep1 <span class="sc">+</span> <span class="fl">1e-3</span>), <span class="at">y =</span> <span class="fu">log10</span>(DIVminus8.Rep2 <span class="sc">+</span> <span class="fl">1e-3</span>))) <span class="sc">+</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="dv">1</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"R = "</span>, r.spearman))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="filtering-lowly-expressed-genes" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="filtering-lowly-expressed-genes">Filtering lowly expressed genes</h2>
 <p>OK that’s two samples compared to each other, but now we want to see how <strong>all</strong> samples compare to <strong>all</strong> other samples. Before we do this we need to decide how to apply our expression cutoff across many samples. Should a gene have to meet the cutoff in only one sample? In all samples? Let’s start by saying it has to meet the cutoff in at least half of the 30 samples.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a new column in tpms that is the number of samples in which the value is at least 1</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>tpms.cutoff <span class="ot">&lt;-</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(tpms, <span class="at">nSamples =</span> <span class="fu">rowSums</span>(tpms[, ??] <span class="sc">&gt;</span> <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Now filter for rows where nSamples is at least 15</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Meaning that at least 15 samples passed the threshold</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(nSamples <span class="sc">&gt;=</span> ??) <span class="sc">|&gt;</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Get rid of the nSamples column</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>nSamples)</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(tpms)</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(tpms.cutoff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Make a new column in tpms that is the number of samples in which the value is at least 1</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>tpms.cutoff <span class="ot">&lt;-</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(tpms, <span class="at">nSamples =</span> <span class="fu">rowSums</span>(tpms[, ??] <span class="sc">&gt;</span> <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Now filter for rows where nSamples is at least 15</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Meaning that at least 15 samples passed the threshold</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(nSamples <span class="sc">&gt;=</span> ??) <span class="sc">|&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Get rid of the nSamples column</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>nSamples)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(tpms)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(tpms.cutoff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="correlating-gene-expression-values" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="correlating-gene-expression-values">Correlating gene expression values</h2>
 <p>Now we can use the <code>cor</code> function to calculate pairwise correlations in a .red[<em>matrix</em>] of TPM values.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>tpms.cutoff.matrix <span class="ot">&lt;-</span> tpms.cutoff <span class="sc">|&gt;</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>ensembl_gene_id) <span class="sc">|&gt;</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>() <span class="co"># some functions just take matrices</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>tpms.cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(??, <span class="at">method =</span> <span class="st">"spearman"</span>)</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tpms.cor)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>tpms.cutoff.matrix <span class="ot">&lt;-</span> tpms.cutoff <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>ensembl_gene_id) <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>() <span class="co"># some functions just take matrices</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>tpms.cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(??, <span class="at">method =</span> <span class="st">"spearman"</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tpms.cor)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="hierarchical-clustering-3" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="hierarchical-clustering-3">Hierarchical clustering</h2>
 <p>Now we need to plot these and have similar samples (i.e.&nbsp;those that are highly correlated with each other) be clustered near to each other. We will use <code>pheatmap</code> to do this.</p>
 <div class="cell" data-output-location="slide">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># let's pull information that we want to add as categories</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pheatmap</span>(</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  tpms.cor,</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation_col =</span> ??,</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">fontsize =</span> <span class="dv">7</span>,</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_colnames =</span> <span class="cn">FALSE</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># let's pull information that we want to add as categories</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pheatmap</span>(</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  tpms.cor,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">annotation_col =</span> ??,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">fontsize =</span> <span class="dv">7</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_colnames =</span> <span class="cn">FALSE</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>This looks pretty good! There are two main points to takeaway here. First, all replicates for a given timepoint are clustering with each other. Second, you can kind of derive the order of the timepoints from the clustering. The biggest separation is between early (DIVminus8 to DIV1) and late (DIV7 to DIV28). After that you can then see finer-grained structure.</p>
 </section><section id="pca-analysis" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="pca-analysis">PCA analysis</h2>
@@ -726,7 +714,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>PCA works best when values are approximately normally distributed, so we will first take the log of our expression values.</p>
 <p>With our cutoff as it is now (genes have to have expression of at least 1 TPM in half the samples), it is possible that we will have some 0 values. Taking the log of 0 might cause a problem, so we will add a pseudocount.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tpms.cutoff.matrix</span> <span class="op">&lt;-</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">tpms.cutoff.matrix</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">tpms.cutoff</span>, <span class="op">-</span><span class="va">ensembl_gene_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">as.matrix</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -739,7 +727,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section><section id="pca-analysis-2" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="pca-analysis-2">PCA analysis</h2>
 <p>Very similar interpretation as before (heatmap of correlation).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># prcomp expects samples to be rownames, right now they are columns</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># prcomp expects samples to be rownames, right now they are columns</span></span>
 <span><span class="co"># so we need to transpose the matrix using `t`</span></span>
 <span><span class="va">tpms.pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">tpms.cutoff.matrix</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>

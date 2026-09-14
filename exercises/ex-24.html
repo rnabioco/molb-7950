@@ -4,7 +4,7 @@
 <meta name="generator" content="quarto-1.9.38">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="author" content="Matthew Taliaferro">
-<meta name="dcterms.date" content="2026-09-11">
+<meta name="dcterms.date" content="2026-09-14">
 <title>RNAseq DE – MOLB 7950</title>
 <style>
 /* Default styles provided by pandoc.
@@ -454,7 +454,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">September 11, 2026</p>
+      <p class="date">September 14, 2026</p>
     </div>
   </div>
   
@@ -466,29 +466,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header><section id="prepare-t2g" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="prepare-t2g">Prepare <code>t2g</code>
 </h2>
 <p>We are going to imagine that we have only two conditions: DIV0 and DIV7 with <code>DESeq2</code>.</p>
-<p>The first thing we need to do is read in the data again and move from transcript-level expression values to gene-level expression values with <code>tximport</code>. Let’s use <code>biomaRt</code> to get a table that relates gene and transcript IDs.</p>
+<p>The first thing we need to do is read in the data again and move from transcript-level expression values to gene-level expression values with <code>tximport</code>. To save time and space, read in a pre-computed t2g table. If you need to refresh yourself on how t2g was created, refer to the slides or exercises from the previous class.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#mart &lt;- biomaRt::useEnsembl(</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#  "ENSEMBL_MART_ENSEMBL",</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#  dataset = "mmusculus_gene_ensembl"</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#)</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#t2g &lt;- biomaRt::getBM(</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#  attributes = c(</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#    "ensembl_transcript_id",</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#    "ensembl_gene_id",</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co">#    "external_gene_name"</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">#  ),</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#  mart = mart</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#) |&gt;</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">#  as_tibble()</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>t2g <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"block-rna"</span>, <span class="st">"t2g.tsv.gz"</span>))</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># maps systematic to common gene names</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>gene_name_map <span class="ot">&lt;-</span> t2g <span class="sc">|&gt;</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>ensembl_transcript_id) <span class="sc">|&gt;</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  ??() <span class="co"># kill redundant</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>t2g <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"block-rna"</span>, <span class="st">"t2g.tsv.gz"</span>))</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># maps systematic to common gene names</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>gene_name_map <span class="ot">&lt;-</span> t2g <span class="sc">|&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>ensembl_transcript_id) <span class="sc">|&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  ??() <span class="co"># kill redundant</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="prepare-metdata-and-import" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="prepare-metdata-and-import">Prepare <code>metdata</code> and import</h2>
 <p>Now we can read in the transcript-level data and collapse to gene-level data with <code>tximport</code></p>
@@ -757,44 +742,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul></section><section id="retrieve-pathway-information" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="retrieve-pathway-information">Retrieve pathway information</h2>
 <p>We can use <code>biomaRt</code> to get all genes that belong to each of these categories. Think of it like doing a gene ontology enrichment analysis in reverse.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">pluripotencygenes</span> <span class="op">&lt;-</span> <span class="fu">getBM</span><span class="op">(</span></span>
-<span>  attributes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"ensembl_gene_id"</span><span class="op">)</span>,</span>
-<span>  filters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"go_parent_term"</span><span class="op">)</span>,</span>
-<span>  values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"GO:0019827"</span><span class="op">)</span>,</span>
-<span>  mart <span class="op">=</span> <span class="va">mart</span></span>
-<span><span class="op">)</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">#Use GO terms to pull out genes that belong to them</span></span>
+<span><span class="va">pluripotencygenes</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html">select</a></span><span class="op">(</span><span class="va">org.Mm.eg.db</span>,</span>
+<span>                                           keys <span class="op">=</span> <span class="st">'GO:0019827'</span>,</span>
+<span>                                           keytype <span class="op">=</span> <span class="st">'GOALL'</span>,</span>
+<span>                                           columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'ENSEMBL'</span>, <span class="st">'SYMBOL'</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ENSEMBL</span>, <span class="va">SYMBOL</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>ensembl_gene_id <span class="op">=</span> <span class="va">ENSEMBL</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">cellcyclegenes</span> <span class="op">&lt;-</span> <span class="fu">getBM</span><span class="op">(</span></span>
-<span>  attributes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"ensembl_gene_id"</span><span class="op">)</span>,</span>
-<span>  filters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"go_parent_term"</span><span class="op">)</span>,</span>
-<span>  values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"GO:0045787"</span><span class="op">)</span>,</span>
-<span>  mart <span class="op">=</span> <span class="va">mart</span></span>
-<span><span class="op">)</span></span>
+<span><span class="va">cellcyclegenes</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html">select</a></span><span class="op">(</span><span class="va">org.Mm.eg.db</span>,</span>
+<span>                                           keys <span class="op">=</span> <span class="st">'GO:0045787'</span>,</span>
+<span>                                           keytype <span class="op">=</span> <span class="st">'GOALL'</span>,</span>
+<span>                                           columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'ENSEMBL'</span>, <span class="st">'SYMBOL'</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ENSEMBL</span>, <span class="va">SYMBOL</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>ensembl_gene_id <span class="op">=</span> <span class="va">ENSEMBL</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">neurongenes</span> <span class="op">&lt;-</span> <span class="fu">getBM</span><span class="op">(</span></span>
-<span>  attributes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"ensembl_gene_id"</span><span class="op">)</span>,</span>
-<span>  filters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"go_parent_term"</span><span class="op">)</span>,</span>
-<span>  values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"GO:0030182"</span><span class="op">)</span>,</span>
-<span>  mart <span class="op">=</span> <span class="va">mart</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">pathwaygenes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html">read.table</a></span><span class="op">(</span><span class="fu">here</span><span class="op">(</span><span class="st">'data'</span>, <span class="st">'block-rna'</span>, <span class="st">'pathwaygenes.csv.gz'</span><span class="op">)</span>, header <span class="op">=</span> <span class="cn">T</span>, sep <span class="op">=</span> <span class="st">','</span><span class="op">)</span></span>
-<span><span class="va">pluripotencygenes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pathwaygenes</span>, <span class="va">path</span> <span class="op">==</span> <span class="st">'pluri'</span><span class="op">)</span></span>
-<span><span class="va">cellcyclegenes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pathwaygenes</span>, <span class="va">path</span> <span class="op">==</span> <span class="st">'cellcycle'</span><span class="op">)</span></span>
-<span><span class="va">neurongenes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">pathwaygenes</span>, <span class="va">path</span> <span class="op">==</span> <span class="st">'neuron'</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># pathway &lt;- bind_rows(pluripotencygenes,</span></span>
-<span><span class="co">#           cellcyclegenes,</span></span>
-<span><span class="co">#           neurongenes</span></span>
-<span><span class="co">#           )</span></span>
-<span><span class="co">#</span></span>
-<span><span class="co"># pathway$path &lt;- c(</span></span>
-<span><span class="co">#   rep("pluri",nrow(pluripotencygenes)),</span></span>
-<span><span class="co">#   rep("cellcycle",nrow(cellcyclegenes)),</span></span>
-<span><span class="co">#   rep("neuron",nrow(neurongenes))</span></span>
-<span><span class="co">#                   )</span></span>
-<span><span class="co">#</span></span>
-<span><span class="co"># write_csv(x = pathway, file = here("data","block-rna","pathwaygenes.csv.gz"))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span><span class="va">neurongenes</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html">select</a></span><span class="op">(</span><span class="va">org.Mm.eg.db</span>,</span>
+<span>                                           keys <span class="op">=</span> <span class="st">'GO:0030182'</span>,</span>
+<span>                                           keytype <span class="op">=</span> <span class="st">'GOALL'</span>,</span>
+<span>                                           columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'ENSEMBL'</span>, <span class="st">'SYMBOL'</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">as_tibble</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">ENSEMBL</span>, <span class="va">SYMBOL</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>ensembl_gene_id <span class="op">=</span> <span class="va">ENSEMBL</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section><section id="add-pathway-information-to-results" class="level2 smaller"><h2 class="smaller anchored" data-anchor-id="add-pathway-information-to-results">Add pathway information to results</h2>
 <p>You can see that these items are one-column dataframes that have the column name ‘ensembl_gene_id’. We can now go through our results dataframe and add an annotation column that marks whether the gene is in any of these categories.</p>
