@@ -18,8 +18,11 @@ library(broom)
 library(tximport)
 library(DESeq2)
 library(pheatmap)
-library(biomaRt)
 library(gt)
+library(AnnotationHub)
+library(ensembldb)
+library(org.Mm.eg.db)
+library(AnnotationDbi)
 library(rstatix)
 library(clusterProfiler)
 library(enrichplot)
@@ -31,26 +34,11 @@ library(msigdbr)
 
 We are going to imagine that we have only two conditions: DIV0 and DIV7 with `DESeq2`.
 
-The first thing we need to do is read in the data again and move from transcript-level expression values to gene-level expression values with `tximport`. Let's use `biomaRt` to get a table that relates gene and transcript IDs.
+The first thing we need to do is read in the data again and move from transcript-level expression values to gene-level expression values with `tximport`. To save time and space, read in a pre-computed t2g table. If you need to refresh yourself on how t2g was created, refer to the slides or exercises from the previous class.
 ```{r}
 #| echo: true
 #| eval: false
 #| label: t2g
-
-#mart <- biomaRt::useEnsembl(
-#  "ENSEMBL_MART_ENSEMBL",
-#  dataset = "mmusculus_gene_ensembl"
-#)
-
-#t2g <- biomaRt::getBM(
-#  attributes = c(
-#    "ensembl_transcript_id",
-#    "ensembl_gene_id",
-#    "external_gene_name"
-#  ),
-#  mart = mart
-#) |>
-#  as_tibble()
 
 t2g <- read_tsv(here("data", "block-rna", "t2g.tsv.gz"))
 
@@ -465,46 +453,35 @@ We can use `biomaRt` to get all genes that belong to each of these categories.  
 ```{r}
 #| echo: true
 #| eval: false
-#| label: biomart-pathways
+#| label: GO-pathways
 
-pluripotencygenes <- getBM(
-  attributes = c("ensembl_gene_id"),
-  filters = c("go_parent_term"),
-  values = c("GO:0019827"),
-  mart = mart
-)
+#Use GO terms to pull out genes that belong to them
+pluripotencygenes <- AnnotationDbi::select(org.Mm.eg.db,
+                                           keys = 'GO:0019827',
+                                           keytype = 'GOALL',
+                                           columns = c('ENSEMBL', 'SYMBOL')) |>
+  as_tibble() |>
+  select(c(ENSEMBL, SYMBOL)) |>
+  dplyr::rename(ensembl_gene_id = ENSEMBL) |>
+  unique()
 
-cellcyclegenes <- getBM(
-  attributes = c("ensembl_gene_id"),
-  filters = c("go_parent_term"),
-  values = c("GO:0045787"),
-  mart = mart
-)
+cellcyclegenes <- AnnotationDbi::select(org.Mm.eg.db,
+                                           keys = 'GO:0045787',
+                                           keytype = 'GOALL',
+                                           columns = c('ENSEMBL', 'SYMBOL')) |>
+  as_tibble() |>
+  select(c(ENSEMBL, SYMBOL)) |>
+  dplyr::rename(ensembl_gene_id = ENSEMBL) |>
+  unique()
 
-neurongenes <- getBM(
-  attributes = c("ensembl_gene_id"),
-  filters = c("go_parent_term"),
-  values = c("GO:0030182"),
-  mart = mart
-)
-
-pathwaygenes <- read.table(here('data', 'block-rna', 'pathwaygenes.csv.gz'), header = T, sep = ',')
-pluripotencygenes <- filter(pathwaygenes, path == 'pluri')
-cellcyclegenes <- filter(pathwaygenes, path == 'cellcycle')
-neurongenes <- filter(pathwaygenes, path == 'neuron')
-
-# pathway <- bind_rows(pluripotencygenes,
-#           cellcyclegenes,
-#           neurongenes
-#           )
-#
-# pathway$path <- c(
-#   rep("pluri",nrow(pluripotencygenes)),
-#   rep("cellcycle",nrow(cellcyclegenes)),
-#   rep("neuron",nrow(neurongenes))
-#                   )
-#
-# write_csv(x = pathway, file = here("data","block-rna","pathwaygenes.csv.gz"))
+neurongenes <- AnnotationDbi::select(org.Mm.eg.db,
+                                           keys = 'GO:0030182',
+                                           keytype = 'GOALL',
+                                           columns = c('ENSEMBL', 'SYMBOL')) |>
+  as_tibble() |>
+  select(c(ENSEMBL, SYMBOL)) |>
+  dplyr::rename(ensembl_gene_id = ENSEMBL) |>
+  unique()
 ```
 
 

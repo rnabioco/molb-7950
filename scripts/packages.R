@@ -109,6 +109,7 @@ bioc_pkgs <- c(
   "GenomicFeatures",
   "AnnotationDbi",
   "AnnotationHub",
+  "AnnotationFilter",
   "SummarizedExperiment",
   "VariantAnnotation",
   "DESeq2",

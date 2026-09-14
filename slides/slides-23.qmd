@@ -8,13 +8,14 @@ author: "{{< var instructor.block.rna >}}"
 #| echo: false
 #| include: false
 library(tidyverse)
-library(biomaRt)
 library(here)
 library(tximport)
 library(pheatmap)
 library(gt)
 library(ggrepel)
 library(cowplot)
+library(AnnotationHub)
+library(ensembldb)
 
 library(conflicted)
 conflicts_prefer(dplyr::select)
@@ -119,103 +120,72 @@ As we discussed, salmon quantifies *transcripts*, not *genes*. However, genes ar
 
 ## Relating genes and transcripts {.smaller}
 
-We can get this relationships between *transcripts* and *genes* through `biomaRt`.
+We can get this relationships between *transcripts* and *genes* through `AnnotationHub`.
 
-`biomaRt` has many tables that relate genes, transcripts, and other useful data include gene biotypes and gene ontology categories, even across species. Let's use it here to get a table of genes and transcripts for the mouse genome.
-
-```{r}
-#| label: list-marts
-#| eval: true
-
-# First we need to define a 'mart' to use.
-# There are a handful of them that
-# you can see here:
-#listMarts(
-#  mart = NULL,
-#  host = "www.ensembl.org"
-#)
-```
-
-I encourage you to see what is in each mart, but for now we are only going to use ENSEMBL_MART_ENSEMBL.
+`AnnotationHub` has many tables that relate genes, transcripts, and other useful data including gene biotypes and gene ontology categories, even across species. Let's use it here to get a table of genes and transcripts for the mouse genome.
 
 ```{r}
-#| label: choose-mart
+#| label: get-latest-db
 #| eval: true
 
-#mart <- biomaRt::useEnsembl(
-#  "ENSEMBL_MART_ENSEMBL",
-#  host = 'https://useast.ensembl.org'
-#)
+ah <- AnnotationHub(ask = FALSE)
+
+# Helper: pull AnnotationHub metadata into a tibble and grab the
+# most recent EnsDb hit for a given species
+get_latest_ensdb <- function(ah, species) {
+  query(ah, c("EnsDb", species)) |>
+    mcols() |>
+    as_tibble(rownames = "ah_id") |>
+    arrange(desc(rdatadateadded)) |>
+    dplyr::slice(1)
+}
+
+mouse_hit <- get_latest_ensdb(ah, "Mus musculus") |>
+  select(ah_id, title, genome, rdatadateadded)
+
+edb_mouse <- ah[[mouse_hit$ah_id]]
 ```
 
-## Using biomaRt {.smaller}
-
-Alright, we've chosen our mart. What data sets are available in this mart?
+I encourage you to see what is in this database, but for now we are only going to look for transcript IDs and gene IDs.
 
 ```{r}
-#| label: list-datasets
+#| label: choose-db
 #| eval: true
-#datasets <- listDatasets(mart)
-#gt(datasets)
+
+head(mcols(ah))
 ```
+
+## Using AnnotationHub {.smaller}
 
 A lot of stuff for a lot of species! Perhaps we want to limit it to see which ones are relevant to mouse.
 
 ```{r}
 #| label: mousedatasets
-#mousedatasets <- filter(datasets, grepl("mmusculus", dataset))
-#gt(mousedatasets)
+mcols(ah) |>
+  as.data.frame() |>
+  filter(species == 'Mus musculus') |>
+  head()
 ```
 
-## Using biomaRt {.smaller}
+## Using AnnotationHub {.smaller}
 
-Ah so we probably want the dataset called 'mmusculus_gene_ensembl'!
+OK lets get data about mouse transcripts. I'm going to also add the gene_name attribute.
 
 ```{r}
-#| label: define-mart
-#mart <- biomaRt::useEnsembl(
-#  "ENSEMBL_MART_ENSEMBL",
-#  dataset = "mmusculus_gene_ensembl",
-#  host = "www.ensembl.org"
-#)
+#| label: get t2g
+#| 
+t2g <- transcripts(edb_mouse,
+                              columns = c("tx_id", "gene_id", "gene_name"),
+                              return.type = "DataFrame") |>
+  as_tibble() |>
+  dplyr::rename(ensembl_transcript_id = tx_id, ensembl_gene_id = gene_id)
+
+head(t2g)
 ```
 
-## Using biomaRt {.smaller}
+## Using AnnotationHub {.smaller}
 
-```{r}
-#| label: list-attrs
-#goodies <- listAttributes(mart)
-#gt(goodies[1:20, ])
-```
-
-## Using biomaRt {.smaller}
-
-So there are 2885 rows of goodies about the mouse genome and its relationship to *many* other genomes. However, you can probably see that the ones that are most useful to us right now are right at the top: 'ensembl_transcript_id' and 'ensembl_gene_id'. We can use those attributes in our mart to make a table relating genes and transcripts.
-
-I'm going to through one more attribute in: external_gene_name. Those are usually more informative than ensembl IDs.
-
-```{r}
-#| label: make-t2g
-#| eval: true
-
-#t2g <- biomaRt::getBM(
-#  attributes = c(
-#    "ensembl_transcript_id",
-#    "ensembl_gene_id",
-#    "external_gene_name"
-#  ),
-#  mart = mart
-#)
-
-# write_tsv(x = t2g, file = here("data","block-rna","t2g.tsv.gz"))
-t2g <- read_tsv(here("data", "block-rna", "t2g.tsv.gz"))
-
-gt(t2g[1:20, ])
-```
-
-## Using biomaRt {.smaller}
-
-Alright this looks good! We are going to split this into two tables. One that contains transcript ID and gene ID, and the other that contains gene ID and gene name.
+Alright this looks good! Although the gene_name field could be useful, for our purposes today, we don't really need it, and the tools we are using don't expect it.
 
 ```{r}
 t2g <- t2g |>

@@ -18,14 +18,14 @@ Start by loading libraries you need analysis in the code chunk below.
 
 
 library(tidyverse)
-library(biomaRt)
 library(here)
 library(tximport)
 library(pheatmap)
 library(gt)
 library(ggrepel)
 library(cowplot)
-
+library(AnnotationHub)
+library(ensembldb)
 ```
 
 We have an experiment where we can take neuronal cells and mechanically separate them into soma and neurite fractions. By sequencing RNA from both of these fractions and comparing the relative abundances of RNAs, we can get a sense of how neurite-localized every RNA is. We can also combine this approach with knockouts of specific RBPs. If we have an RBP that we think is involved in this process, we can do this subcellular fractionation in sequencing in both WT and RBP-knockout (KO) cells. Transcripts that depend upon the RBP for transcript to the neurite should be less neurite-enriched in the KO samples than the WT samples.
@@ -42,16 +42,6 @@ The salmon data lives in `data/block-rna/salmon_tdp43`. In that directory, you w
 #| echo: true
 #| eval: false
 #There are some hints to help you get started
-
-#Use biomaRt to get a table of transcript/gene relationships
-#mart <- biomaRt::useEnsembl(
-#  "ENSEMBL_MART_ENSEMBL",
-#  dataset = "??",
-#  host = "https://www.ensembl.org"
-#)
-
-#t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name"), mart = mart) |>
-#  dplyr::select(??, ??)
 
 t2g <- read_tsv(here("data", "block-rna", "t2g.tsv.gz"))
 

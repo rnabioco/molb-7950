@@ -21,10 +21,13 @@ Make sure to run the code chunk below to load required libraries and generate `t
 ```{r}
 #| label: load-libs
 
-library(biomaRt)
 library(tximport)
 library(tidyverse)
 library(DESeq2)
+library(AnnotationHub)
+library(ensembldb)
+library(org.Mm.eg.db)
+library(AnnotationDbi)
 library(ggrepel)
 library(here)
 library(cowplot)
@@ -33,21 +36,6 @@ library(clusterProfiler)
 library(enrichplot)
 library(msigdbr)
 # run the code below to generate t2g file and gene id-symbol mapping file
-#mart <- biomaRt::useEnsembl(
-#  "ENSEMBL_MART_ENSEMBL",
-#  host = 'https://www.ensembl.org',
-#  dataset = "mmusculus_gene_ensembl"
-#)
-
-#t2g <- biomaRt::getBM(
-#  attributes = c(
-#    "ensembl_transcript_id",
-#    "ensembl_gene_id",
-#    "external_gene_name"
-#  ),
-#  mart = mart
-#) |>
-#  as_tibble()
 
 t2g <- read_tsv(here("data", "block-rna", "t2g.tsv.gz"))
 
@@ -150,20 +138,23 @@ diff <-
 #| label: pathway-defined
 #| fig.alt: "boxplot"
 
-cellcyclegenes <- ??(
-  attributes = c("ensembl_gene_id"),
-  filters = c("go_parent_term"),
-  values = c("GO:0045787"),
-  mart = mart
-)
+cellcyclegenes <- ??(org.Mm.eg.db,
+                     keys = 'GO:0045787',
+                     keytype = 'GOALL',
+                     columns = c('ENSEMBL', 'SYMBOL')) |>
+  as_tibble() |>
+  select(c(ENSEMBL, SYMBOL)) |>
+  dplyr::rename(ensembl_gene_id = ENSEMBL) |>
+  unique()
 
-
-axongenes <- ??(
-  attributes = c("ensembl_gene_id"),
-  filters = c("go_parent_term"),
-  values = c("GO:0007409"),
-  mart = mart
-)
+axongenes <- ??(org.Mm.eg.db,
+                keys = 'GO:0007409',
+                keytype = 'GOALL',
+                columns = c('ENSEMBL', 'SYMBOL')) |>
+  as_tibble() |>
+  select(c(ENSEMBL, SYMBOL)) |>
+  dplyr::rename(ensembl_gene_id = ENSEMBL) |>
+  unique()
 
 diff_paths <-
   diff |>
