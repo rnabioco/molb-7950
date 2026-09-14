@@ -141,6 +141,7 @@ bioc_pkgs <- c(
   "TxDb.Hsapiens.UCSC.hg19.knownGene",
   "TxDb.Scerevisiae.UCSC.sacCer3.sgdGene",
   "org.Hs.eg.db",
+  "org.Mm.eg.db",
   "GO.db",
 
   # single-cell
