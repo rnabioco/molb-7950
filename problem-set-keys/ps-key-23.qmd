@@ -13,7 +13,6 @@ Start by loading libraries you need analysis in the code chunk below.
 ```{r}
 #| label: load-libs
 library(tidyverse)
-library(biomaRt)
 library(here)
 library(tximport)
 library(pheatmap)
@@ -38,14 +37,9 @@ The salmon data lives in `data/block-rna/salmon_tdp43`. In that directory, you w
 #| eval: true
 # There are some hints to help you get started
 
-# Use biomaRt to get a table of transcript/gene relationships
-mart <- biomaRt::useMart(
-  "ENSEMBL_MART_ENSEMBL",
-  dataset = "mmusculus_gene_ensembl",
-  host = "https://www.ensembl.org"
-)
-
-t2g <- biomaRt::getBM(attributes = c("ensembl_transcript_id", "ensembl_gene_id", "external_gene_name"), mart = mart) |> dplyr::select(ensembl_transcript_id, ensembl_gene_id)
+# Read the pre-built table of transcript/gene relationships
+t2g <- read_tsv(here("data", "block-rna", "t2g.tsv.gz")) |>
+  dplyr::select(ensembl_transcript_id, ensembl_gene_id)
 
 
 

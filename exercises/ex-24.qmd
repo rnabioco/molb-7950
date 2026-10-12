@@ -61,7 +61,7 @@ metadata <- data.frame(
                          pattern = "quant.sf"),
   salmon_dirs = list.files(here("??"),
                            recursive = T,
-                           pattern = ".gz$",
+                           pattern = "^quant.sf$",
                            full.names = T)
   ) |>
   separate(col = sample_id, into = c("timepoint","rep"), sep = "\\.", remove = F)
@@ -629,8 +629,7 @@ Bottom = downregulated
 #| output-location: slide
 
 # retrieve hallmark gene set from msigdb
-mouse_hallmark <- msigdbr(species = "??") %>%
-  filter(gs_cat == "?") %>% ## halmark
+mouse_hallmark <- msigdbr(species = "??", collection = "??") %>% ## hallmark
   dplyr::select(gs_name, gene_symbol)
 
 # create a list of gene LFCs
@@ -643,7 +642,7 @@ names(rankedgenes) <- diff$??
 rankedgenes <- sort(rankedgenes, decreasing = TRUE)
 
 # deduplicate
-rankedgenes <- rankedgenes[!duplicated(names(rankedgenes))]
+rankedgenes <- rankedgenes[!duplicated(names(rankedgenes)) & !is.na(names(rankedgenes))]
 ```
 
 ## Run GSEA {.smaller}

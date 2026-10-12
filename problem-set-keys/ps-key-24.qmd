@@ -22,7 +22,8 @@ Make sure to run the code chunk below to load required libraries and generate `t
 #| eval: false
 #| label: load-libs
 
-library(biomaRt)
+library(AnnotationDbi)
+library(org.Mm.eg.db)
 library(tximport)
 library(tidyverse)
 library(DESeq2)
@@ -34,20 +35,7 @@ library(clusterProfiler)
 library(enrichplot)
 library(msigdbr)
 # run the code below to generate t2g file and gene id-symbol mapping file
-mart <- biomaRt::useMart(
-  "ENSEMBL_MART_ENSEMBL",
-  dataset = "mmusculus_gene_ensembl"
-)
-
-t2g <- biomaRt::getBM(
-  attributes = c(
-    "ensembl_transcript_id",
-    "ensembl_gene_id",
-    "external_gene_name"
-  ),
-  mart = mart
-) |>
-  as_tibble()
+t2g <- read_tsv(here("data", "block-rna", "t2g.tsv.gz"))
 
 # maps systematic to common gene names
 gene_name_map <- t2g |>
@@ -71,7 +59,7 @@ metadata <- data.frame(
   ),
   salmon_dirs = list.files(here("data/block-rna/differentiation_salmonouts"),
     recursive = T,
-    pattern = ".gz$",
+    pattern = "^quant.sf$",
     full.names = T
   )
 ) |>
@@ -149,20 +137,28 @@ diff <-
 #| label: pathway-defined
 #| fig.alt: "Notched box plots of log2 fold change (DIV28 over DIV0) for genes grouped as none, axonogenesis, or cell cycle, with a dashed reference line at zero."
 
-cellcyclegenes <- getBM(
-  attributes = c("ensembl_gene_id"),
-  filters = c("go_parent_term"),
-  values = c("GO:0045787"),
-  mart = mart
-)
+cellcyclegenes <- AnnotationDbi::select(
+  org.Mm.eg.db,
+  keys = "GO:0045787",
+  keytype = "GOALL",
+  columns = c("ENSEMBL", "SYMBOL")
+) |>
+  as_tibble() |>
+  dplyr::select(ENSEMBL, SYMBOL) |>
+  dplyr::rename(ensembl_gene_id = ENSEMBL) |>
+  unique()
 
 
-axongenes <- getBM(
-  attributes = c("ensembl_gene_id"),
-  filters = c("go_parent_term"),
-  values = c("GO:0007409"),
-  mart = mart
-)
+axongenes <- AnnotationDbi::select(
+  org.Mm.eg.db,
+  keys = "GO:0007409",
+  keytype = "GOALL",
+  columns = c("ENSEMBL", "SYMBOL")
+) |>
+  as_tibble() |>
+  dplyr::select(ENSEMBL, SYMBOL) |>
+  dplyr::rename(ensembl_gene_id = ENSEMBL) |>
+  unique()
 
 diff_paths <-
   diff |>
@@ -226,8 +222,7 @@ ggplot(
 
 
 # retrieve mouse hallmark gene set from msigdb
-mouse_hallmark <- msigdbr(species = "Mus musculus") %>%
-  filter(gs_cat == "H") %>%
+mouse_hallmark <- msigdbr(species = "Mus musculus", collection = "H") %>%
   dplyr::select(gs_name, gene_symbol)
 
 
@@ -240,8 +235,8 @@ names(rankedgenes) <- diff$gene
 # sort by LFC
 rankedgenes <- sort(rankedgenes, decreasing = TRUE)
 
-# deduplicate
-rankedgenes <- rankedgenes[!duplicated(names(rankedgenes))]
+# deduplicate and drop genes without a symbol
+rankedgenes <- rankedgenes[!duplicated(names(rankedgenes)) & !is.na(names(rankedgenes))]
 
 
 # run gsea
